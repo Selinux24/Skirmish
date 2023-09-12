@@ -782,7 +782,7 @@ namespace Engine.Collections.Generic
         /// Gets node at position
         /// </summary>
         /// <param name="position">Position</param>
-        /// <returns>Returns the leaf node wich contains the specified position</returns>
+        /// <returns>Returns the leaf node which contains the specified position</returns>
         public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
             if (!children.Any())

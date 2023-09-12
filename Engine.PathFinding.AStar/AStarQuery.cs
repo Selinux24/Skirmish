@@ -92,28 +92,28 @@ namespace Engine.PathFinding.AStar
                 var currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
-                if (currentNodeData.State != GridNodeStates.Closed)
+                if (currentNodeData.State == GridNodeStates.Closed)
                 {
-                    //Set the node status Closed
-                    currentNodeData.State = GridNodeStates.Closed;
-
-                    //If the current node is the destination node has found the way
-                    if (currentNode == end)
-                    {
-                        currentNodeData.State = GridNodeStates.Closed;
-                        nodeFound = true;
-
-                        break;
-                    }
-                    else
-                    {
-                        //Process neigbors
-                        ProcessNeighbors(
-                            openPathsQueue, nodesData,
-                            currentNode, end,
-                            heuristicMethod, heuristicEstimateValue);
-                    }
+                    continue;
                 }
+
+                //Set the node status Closed
+                currentNodeData.State = GridNodeStates.Closed;
+
+                //If the current node is the destination node has found the way
+                if (currentNode == end)
+                {
+                    currentNodeData.State = GridNodeStates.Closed;
+                    nodeFound = true;
+
+                    break;
+                }
+
+                //Process neigbors
+                ProcessNeighbors(
+                    openPathsQueue, nodesData,
+                    currentNode, end,
+                    heuristicMethod, heuristicEstimateValue);
             }
 
             if (nodeFound)
@@ -148,15 +148,15 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         private static void ProcessNeighbors(PriorityDictionary<GridNode, float> openPathsQueue, Dictionary<GridNode, AStarQueryData> nodesData, GridNode currentNode, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
-            //Search every possible direction from the current node
-            for (int i = 1; i < currentNode.Connections.Length; i++)
+            var nodeConnections = currentNode?.GetNodeConnections();
+            if (nodeConnections?.Any() != true)
             {
-                var nextNode = currentNode[i];
-                if (nextNode == null)
-                {
-                    continue;
-                }
+                return;
+            }
 
+            //Search every possible direction from the current node
+            foreach (var nextNode in nodeConnections)
+            {
                 if (!nodesData.ContainsKey(nextNode))
                 {
                     nodesData.Add(nextNode, new AStarQueryData());
@@ -206,8 +206,8 @@ namespace Engine.PathFinding.AStar
         {
             if (heuristicMethod == HeuristicMethods.Euclidean)
             {
-                float dx = (end.X - start.X);
-                float dz = (end.Z - start.Z);
+                float dx = end.X - start.X;
+                float dz = end.Z - start.Z;
                 float h = (float)Math.Sqrt(dx * dx + dz * dz);
 
                 return h;
@@ -235,7 +235,7 @@ namespace Engine.PathFinding.AStar
             {
                 float dx = Math.Abs(start.X - end.X);
                 float dz = Math.Abs(start.Z - end.Z);
-                float h = (dx + dz) + ChebisevCnt * Math.Min(dx, dz);
+                float h = dx + dz + ChebisevCnt * Math.Min(dx, dz);
 
                 return h;
             }
@@ -250,7 +250,7 @@ namespace Engine.PathFinding.AStar
                 return h;
             }
 
-            throw new ArgumentException($"Calculation method {heuristicMethod} not valid.");
+            throw new ArgumentException($"Calculation method {heuristicMethod} not valid.", nameof(heuristicMethod));
         }
 
         /// <summary>

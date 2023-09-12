@@ -21,11 +21,11 @@ namespace Engine.PathFinding
         /// <returns>Returns the node collection for the agent type</returns>
         IEnumerable<IGraphNode> GetNodes(AgentType agent);
         /// <summary>
-        /// Gets node wich contains specified point
+        /// Gets node which contains specified point
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
+        /// <returns>Returns the node which contains the specified point if exists</returns>
         IGraphNode FindNode(AgentType agent, Vector3 point);
         /// <summary>
         /// Find path from point to point for the specified agent type

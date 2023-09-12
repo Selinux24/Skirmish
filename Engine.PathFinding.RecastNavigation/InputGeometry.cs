@@ -88,17 +88,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override async Task Refresh()
         {
-            ChunkyTriMesh mesh = null;
-
             var triangles = await GetTriangles();
 
-            await Task.Run(() =>
-            {
-                // Recreate the input data
-                mesh = ChunkyTriMesh.Build(triangles);
-            });
-
-            ChunkyMesh = mesh;
+            ChunkyMesh = await Task.Run(() => ChunkyTriMesh.Build(triangles));
         }
 
         /// <inheritdoc/>
@@ -120,7 +112,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Create graph
-            Graph graph = await GraphFile.FromGraphFile(file, this);
+            var graph = await GraphFile.FromGraphFile(file, this);
 
             // Initialize the input data
             ChunkyMesh = ChunkyTriMesh.Build(await GetTriangles());
@@ -130,14 +122,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override async Task Save(string fileName, IGraph graph)
         {
-            if (graph is Graph nmGraph)
+            if (graph is not Graph nmGraph)
             {
-                await GraphFile.Save(fileName, nmGraph);
+                throw new ArgumentException($"Bad navigation mesh graph type: {graph}", nameof(graph));
             }
-            else
-            {
-                throw new EngineException($"Bad navigation mesh graph type: {graph}");
-            }
+
+            await GraphFile.Save(fileName, nmGraph);
         }
     }
 }

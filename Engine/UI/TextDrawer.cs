@@ -246,7 +246,7 @@ namespace Engine.UI
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        /// <remarks>Defines an area outside wich all text is clipped</remarks>
+        /// <remarks>Defines an area outside which all text is clipped</remarks>
         public Rectangle? ClippingRectangle { get; set; } = null;
         /// <summary>
         /// Parent control

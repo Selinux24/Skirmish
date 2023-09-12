@@ -30,7 +30,7 @@ namespace Engine.Content.FmtCollada
         /// <summary>
         /// Gets the loader delegate
         /// </summary>
-        /// <returns>Returns a delegate wich creates a loader</returns>
+        /// <returns>Returns a delegate which creates a loader</returns>
         public Func<ILoader> GetLoaderDelegate()
         {
             return () => { return new LoaderCollada(); };

@@ -112,7 +112,7 @@ namespace Engine.Animation
             Add(clipName, false, 1, timeDelta);
         }
         /// <summary>
-        /// Adds a new animation item to the animation path, wich repeats N times
+        /// Adds a new animation item to the animation path, which repeats N times
         /// </summary>
         /// <param name="clipName">Clip name to play</param>
         /// <param name="repeats">Number of iterations</param>
@@ -122,7 +122,7 @@ namespace Engine.Animation
             Add(clipName, false, repeats, timeDelta);
         }
         /// <summary>
-        /// Adds a new animation item to the animation path, wich loops for ever!!!
+        /// Adds a new animation item to the animation path, which loops for ever!!!
         /// </summary>
         /// <param name="clipName">Clip name to play</param>
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>

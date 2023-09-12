@@ -254,12 +254,12 @@ namespace Engine.Modular
         private static AssetReference FindAssetReference(Level level, IEnumerable<Asset> assets, string levelAssetId, string mapAssetId)
         {
             var res = assets
-                //Search any asset wich contains a reference with the specified level, by asset name or by the level asset map id
+                //Search any asset which contains a reference with the specified level, by asset name or by the level asset map id
                 .Where(a => level.Map.Any(r =>
                     string.Equals(r.AssetName, a.Name, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(r.Id, levelAssetId, StringComparison.OrdinalIgnoreCase)));
             var res2 = res
-                //Then, get the first reference wich matching reference Id with the level asset id
+                //Then, get the first reference which matching reference Id with the level asset id
                 .Select(a => a.References.FirstOrDefault(r => string.Equals(r.Id, mapAssetId, StringComparison.OrdinalIgnoreCase)));
             var res3 = res2
                 .FirstOrDefault();

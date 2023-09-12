@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
@@ -20,72 +21,29 @@ namespace Engine.PathFinding.AStar
         protected List<GridNode> ConnectedNodes = new();
 
         /// <summary>
-        /// Gets the connected node list
+        /// North West point
         /// </summary>
-        public GridNode[] Connections
-        {
-            get
-            {
-                return ConnectedNodes.ToArray();
-            }
-        }
+        public Vector3 NorthWest { get; private set; }
         /// <summary>
-        /// Gets a connected node by index
+        /// North East point
         /// </summary>
-        /// <param name="index">Node index</param>
-        /// <returns>Returns the connected node by index</returns>
-        public GridNode this[int index]
-        {
-            get
-            {
-                return ConnectedNodes[index];
-            }
-        }
+        public Vector3 NorthEast { get; private set; }
+        /// <summary>
+        /// South West point
+        /// </summary>
+        public Vector3 SouthWest { get; private set; }
+        /// <summary>
+        /// South East point
+        /// </summary>
+        public Vector3 SouthEast { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Center { get; private set; }
+        /// <inheritdoc/>
+        public float TotalCost { get; set; }
         /// <summary>
         /// Node state
         /// </summary>
         public GridNodeStates State { get; set; }
-        /// <summary>
-        /// Node passing cost
-        /// </summary>
-        public float TotalCost { get; set; }
-        /// <summary>
-        /// Center position
-        /// </summary>
-        public Vector3 Center { get; protected set; }
-        /// <summary>
-        /// North West point
-        /// </summary>
-        public readonly Vector3 NorthWest;
-        /// <summary>
-        /// North East point
-        /// </summary>
-        public readonly Vector3 NorthEast;
-        /// <summary>
-        /// South West point
-        /// </summary>
-        public readonly Vector3 SouthWest;
-        /// <summary>
-        /// South East point
-        /// </summary>
-        public readonly Vector3 SouthEast;
-        /// <summary>
-        /// Gets connected node of specified heading
-        /// </summary>
-        /// <param name="heading">Heading</param>
-        /// <returns>Returns connected node of specified heading if exists</returns>
-        public GridNode this[Headings heading]
-        {
-            get
-            {
-                if (nodesDictionary.TryGetValue(heading, out int index))
-                {
-                    return ConnectedNodes[index];
-                }
-
-                return null;
-            }
-        }
         /// <summary>
         /// Gets whether the node is connected in all headings
         /// </summary>
@@ -98,35 +56,87 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
-        /// Gets opposite of heading
+        /// Generate grid nodes
         /// </summary>
-        /// <param name="heading">Heading</param>
-        /// <returns>Returns opposite of heading</returns>
-        public static Headings GetOpposite(Headings heading)
+        /// <param name="nodeCount">Node count</param>
+        /// <param name="xSize">Total X size</param>
+        /// <param name="zSize">Total Z size</param>
+        /// <param name="nodeSize">Node size</param>
+        /// <param name="collisionValues">Collision values</param>
+        /// <returns>Generates a grid node list</returns>
+        internal static IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
-            if (heading == Headings.North) return Headings.South;
-            else if (heading == Headings.South) return Headings.North;
-            else if (heading == Headings.East) return Headings.West;
-            else if (heading == Headings.West) return Headings.East;
+            var result = new List<GridNode>();
 
-            else if (heading == Headings.NorthWest) return Headings.SouthEast;
-            else if (heading == Headings.NorthEast) return Headings.SouthWest;
-            else if (heading == Headings.SouthWest) return Headings.NorthEast;
-            else if (heading == Headings.SouthEast) return Headings.NorthWest;
+            //Generate grid nodes
+            for (int n = 0; n < nodeCount; n++)
+            {
+                int x = n / xSize;
+                int z = n - (x * xSize);
 
-            return Headings.None;
+                if (x == zSize - 1) continue;
+                if (z == xSize - 1) continue;
+
+                //Find node corners
+                int i0 = ((x + 0) * zSize) + (z + 0);
+                int i1 = ((x + 0) * zSize) + (z + 1);
+                int i2 = ((x + 1) * zSize) + (z + 0);
+                int i3 = ((x + 1) * zSize) + (z + 1);
+
+                var coor0 = collisionValues[i0];
+                var coor1 = collisionValues[i1];
+                var coor2 = collisionValues[i2];
+                var coor3 = collisionValues[i3];
+
+                int min = Helper.Min(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
+                int max = Helper.Max(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
+
+                if (min == 0)
+                {
+                    //None
+                    continue;
+                }
+
+                if (max == 1 && min == 1)
+                {
+                    //Unique collision node
+                    var resUnique = UniqueCollision(coor0[0], coor1[0], coor2[0], coor3[0]);
+                    result.Add(resUnique);
+
+                    continue;
+                }
+
+                //Process multiple point nodes
+                var resMultiple = MultipleCollision(max, nodeSize, coor0, coor1, coor2, coor3);
+                if (resMultiple.Any())
+                {
+                    result.AddRange(resMultiple);
+                }
+            }
+
+            return result;
         }
-
         /// <summary>
-        /// Constructor
+        /// Generates a node list from unique collision data
         /// </summary>
-        /// <param name="p0">Vertex 0</param>
-        /// <param name="p1">Vertex 1</param>
-        /// <param name="p2">Vertex 2</param>
-        /// <param name="p3">Vertex 3</param>
-        /// <param name="cost">Cost</param>
-        public GridNode(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float cost)
+        /// <param name="c0">Collision info 1</param>
+        /// <param name="c1">Collision info 2</param>
+        /// <param name="c2">Collision info 3</param>
+        /// <param name="c3">Collision info 4</param>
+        /// <returns>Returns a node list from unique collision data</returns>
+        private static GridNode UniqueCollision(GridCollisionInfo c0, GridCollisionInfo c1, GridCollisionInfo c2, GridCollisionInfo c3)
         {
+            Vector3 va = (
+                c0.Triangle.Normal +
+                c1.Triangle.Normal +
+                c2.Triangle.Normal +
+                c3.Triangle.Normal) * 0.25f;
+
+            var p0 = c0.Point;
+            var p1 = c1.Point;
+            var p2 = c2.Point;
+            var p3 = c3.Point;
+
             //Look for X and Z bounds
             float maxX = float.MinValue;
             float maxZ = float.MinValue;
@@ -153,21 +163,49 @@ namespace Engine.PathFinding.AStar
             minZ = Math.Min(minZ, p2.Z);
             minZ = Math.Min(minZ, p3.Z);
 
-            var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3);
-            if (ne.HasValue) NorthEast = ne.Value;
+            var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
+            var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
+            var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
+            var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
 
-            var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3);
-            if (nw.HasValue) NorthWest = nw.Value;
+            var center = (p0 + p1 + p2 + p3) / 4f;
 
-            var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3);
-            if (sw.HasValue) SouthWest = sw.Value;
+            float cost = Helper.Angle(Vector3.Up, va);
 
-            var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3);
-            if (se.HasValue) SouthEast = se.Value;
+            return new GridNode(ne, nw, sw, se, center, cost);
+        }
+        /// <summary>
+        /// Generates a node list from multiple collision data
+        /// </summary>
+        /// <param name="max">Maximum tests</param>
+        /// <param name="nodeSize">Node size</param>
+        /// <param name="coor0">Collision info 1</param>
+        /// <param name="coor1">Collision info 2</param>
+        /// <param name="coor2">Collision info 3</param>
+        /// <param name="coor3">Collision info 4</param>
+        /// <returns>Returns a node list from multiple collision data</returns>
+        private static IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        {
+            var result = new List<GridNode>();
 
-            TotalCost = cost;
-            State = GridNodeStates.Clear;
-            Center = (p0 + p1 + p2 + p3) / 4f;
+            for (int i = 0; i < max; i++)
+            {
+                var c0 = i < coor0.Length ? coor0[i] : coor0[^1];
+                var c1 = i < coor1.Length ? coor1[i] : coor1[^1];
+                var c2 = i < coor2.Length ? coor2[i] : coor2[^1];
+                var c3 = i < coor3.Length ? coor3[i] : coor3[^1];
+
+                float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                float diff = Math.Abs(fmax - fmin);
+
+                if (diff <= nodeSize)
+                {
+                    result.Add(UniqueCollision(c0, c1, c2, c3));
+                }
+            }
+
+            return result;
         }
         /// <summary>
         /// Gets the north east position in the specified points
@@ -245,6 +283,45 @@ namespace Engine.PathFinding.AStar
 
             return null;
         }
+        /// <summary>
+        /// Gets opposite of heading
+        /// </summary>
+        /// <param name="heading">Heading</param>
+        /// <returns>Returns opposite of heading</returns>
+        public static Headings GetOpposite(Headings heading)
+        {
+            if (heading == Headings.North) return Headings.South;
+            else if (heading == Headings.South) return Headings.North;
+            else if (heading == Headings.East) return Headings.West;
+            else if (heading == Headings.West) return Headings.East;
+
+            else if (heading == Headings.NorthWest) return Headings.SouthEast;
+            else if (heading == Headings.NorthEast) return Headings.SouthWest;
+            else if (heading == Headings.SouthWest) return Headings.NorthEast;
+            else if (heading == Headings.SouthEast) return Headings.NorthWest;
+
+            return Headings.None;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="ne">North east point</param>
+        /// <param name="nw">North west point</param>
+        /// <param name="sw">South west point</param>
+        /// <param name="se">South east point</param>
+        /// <param name="center">Center point</param>
+        /// <param name="cost">Cost</param>
+        public GridNode(Vector3 ne, Vector3 nw, Vector3 sw, Vector3 se, Vector3 center, float cost)
+        {
+            NorthEast = ne;
+            NorthWest = nw;
+            SouthEast = sw;
+            SouthWest = se;
+            Center = center;
+            TotalCost = cost;
+            State = GridNodeStates.Clear;
+        }
 
         /// <summary>
         /// Gets if node has connection with specified position
@@ -253,11 +330,11 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if node has connection with specified position</returns>
         public bool IsConnected(Vector3 position)
         {
-            return (
+            return
                 NorthWest == position ||
                 NorthEast == position ||
                 SouthWest == position ||
-                SouthEast == position);
+                SouthEast == position;
         }
         /// <summary>
         /// Gets specified node direction from current node
@@ -320,30 +397,36 @@ namespace Engine.PathFinding.AStar
         /// <param name="gridNode">Grid node to connect</param>
         public void TryConnect(GridNode gridNode)
         {
-            Headings headingThis = GetHeadingTo(gridNode);
+            var headingThis = GetHeadingTo(gridNode);
 
-            if (headingThis != Headings.None)
+            if (headingThis == Headings.None)
             {
-                Headings headingOther = GetOpposite(headingThis);
+                return;
+            }
 
-                if (!nodesDictionary.ContainsKey(headingThis))
-                {
-                    ConnectedNodes.Add(gridNode);
-                    nodesDictionary.Add(headingThis, ConnectedNodes.Count - 1);
-                }
+            var headingOther = GetOpposite(headingThis);
 
-                if (!gridNode.nodesDictionary.ContainsKey(headingOther))
-                {
-                    gridNode.ConnectedNodes.Add(this);
-                    gridNode.nodesDictionary.Add(headingOther, gridNode.ConnectedNodes.Count - 1);
-                }
+            if (!nodesDictionary.ContainsKey(headingThis))
+            {
+                ConnectedNodes.Add(gridNode);
+                nodesDictionary.Add(headingThis, ConnectedNodes.Count - 1);
+            }
+
+            if (!gridNode.nodesDictionary.ContainsKey(headingOther))
+            {
+                gridNode.ConnectedNodes.Add(this);
+                gridNode.nodesDictionary.Add(headingOther, gridNode.ConnectedNodes.Count - 1);
             }
         }
         /// <summary>
-        /// Gets whether this node contains specified point
+        /// Gets the connected node list
         /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns whether this node contains specified point</returns>
+        public IEnumerable<GridNode> GetNodeConnections()
+        {
+            return ConnectedNodes.Where(n => n != null).AsEnumerable();
+        }
+
+        /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
             if (point.X >= SouthWest.X && point.Z >= SouthWest.Z &&
@@ -354,29 +437,7 @@ namespace Engine.PathFinding.AStar
 
             return false;
         }
-        /// <summary>
-        /// Gets whether this node contains specified point
-        /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns whether this node contains specified point</returns>
-        public bool Contains(Vector3 point, out float distance)
-        {
-            distance = float.MaxValue;
-
-            if (point.X >= SouthWest.X && point.Z >= SouthWest.Z &&
-                point.X <= NorthEast.X && point.Z <= NorthEast.Z)
-            {
-                distance = Vector3.DistanceSquared(point, Center);
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Get four node corners
-        /// </summary>
-        /// <returns>Returns four node corners</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()
         {
             return new[]
@@ -387,13 +448,11 @@ namespace Engine.PathFinding.AStar
                 SouthEast,
             };
         }
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation</returns>
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"State {State}; Cost {TotalCost:0.00}; Connections {ConnectedNodes.Count}; Center: {Center}";
+            return $"Center: {Center}; Cost: {TotalCost:0.00}; State: {State}; Connections: {ConnectedNodes.Count}";
         }
     }
 }

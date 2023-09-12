@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace Engine.PathFinding.AStar
     /// </summary>
     public class Grid : IGraph
     {
+        /// <summary>
+        /// Node list
+        /// </summary>
         private readonly List<GridNode> nodes = new();
 
         /// <inheritdoc/>
@@ -35,7 +39,107 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return nodes.ToArray();
+                return nodes.AsReadOnly();
+            }
+        }
+
+        /// <summary>
+        /// Creates a new grid
+        /// </summary>
+        /// <param name="settings">Settings</param>
+        /// <param name="input">Input</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="progressCallback">Optional progress callback</param>
+        /// <returns>Returns the new grid</returns>
+        public static Grid CreateGrid(PathFinderSettings settings, PathFinderInput input, IEnumerable<Triangle> triangles, Action<float> progressCallback)
+        {
+            var grid = new Grid(settings as GridGenerationSettings, input);
+
+            var bbox = GeometryUtil.CreateBoundingBox(triangles);
+
+            var dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
+
+            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.Settings.NodeSize;
+            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.Settings.NodeSize;
+
+            int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
+            int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
+
+            float total = bbox.Size.X * bbox.Size.X / grid.Settings.NodeSize;
+            int curr = 0;
+
+            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
+            {
+                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.Settings.NodeSize)
+                {
+                    GridCollisionInfo[] info;
+
+                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
+
+                    bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
+                    if (intersects)
+                    {
+                        info = new GridCollisionInfo[picks.Count()];
+
+                        for (int i = 0; i < picks.Count(); i++)
+                        {
+                            var pick = picks.ElementAt(i);
+
+                            info[i] = new GridCollisionInfo()
+                            {
+                                Point = pick.Position,
+                                Triangle = pick.Primitive,
+                                Distance = pick.Distance,
+                            };
+                        }
+                    }
+                    else
+                    {
+                        info = Array.Empty<GridCollisionInfo>();
+                    }
+
+                    dictionary.Add(new Vector2(x, z), info);
+
+                    progressCallback?.Invoke(++curr / total);
+                }
+            }
+
+            int gridNodeCount = (xSize - 1) * (zSize - 1);
+
+            GridCollisionInfo[][] collisionValues = new GridCollisionInfo[dictionary.Count][];
+            dictionary.Values.CopyTo(collisionValues, 0);
+
+            //Generate grid nodes
+            var nodes = GridNode.GenerateGridNodes(gridNodeCount, xSize, zSize, grid.Settings.NodeSize, collisionValues);
+            grid.SetNodes(nodes);
+            grid.Initialized = true;
+
+            return grid;
+        }
+        /// <summary>
+        /// Fill node connections
+        /// </summary>
+        /// <param name="nodes">Grid nodes</param>
+        private static void FillConnections(IEnumerable<GridNode> nodes)
+        {
+            for (int i = 0; i < nodes.Count(); i++)
+            {
+                var nodeA = nodes.ElementAt(i);
+                if (nodeA.FullConnected)
+                {
+                    continue;
+                }
+
+                for (int n = i + 1; n < nodes.Count(); n++)
+                {
+                    var nodeB = nodes.ElementAt(n);
+                    if (nodeB.FullConnected)
+                    {
+                        continue;
+                    }
+
+                    nodeA.TryConnect(nodeB);
+                }
             }
         }
 
@@ -79,25 +183,21 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
-        /// Adds a new node
-        /// </summary>
-        /// <param name="node">Node</param>
-        public void Add(GridNode node)
-        {
-            nodes.Add(node);
-        }
-        /// <summary>
         /// Adds a list of nodes
         /// </summary>
-        /// <param name="nodes">Node list</param>
-        public void AddRange(IEnumerable<GridNode> nodes)
+        /// <param name="nodeList">Node list</param>
+        public void SetNodes(IEnumerable<GridNode> nodeList)
         {
-            if (nodes?.Any() != true)
+            nodes.Clear();
+
+            if (nodeList?.Any() != true)
             {
                 return;
             }
 
-            this.nodes.AddRange(nodes);
+            nodes.AddRange(nodeList);
+
+            FillConnections(nodes);
         }
 
         /// <inheritdoc/>
@@ -113,7 +213,14 @@ namespace Engine.PathFinding.AStar
 
             foreach (var node in nodes)
             {
-                if (node.Contains(point, out float distance) && distance < minDistance)
+                if (!node.Contains(point))
+                {
+                    continue;
+                }
+
+                float distance = Vector3.DistanceSquared(point, node.Center);
+
+                if (distance < minDistance)
                 {
                     minDistance = distance;
                     bestNode = node;
@@ -130,14 +237,7 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            IEnumerable<Vector3> result = null;
-
-            await Task.Run(() =>
-            {
-                result = AStarQuery.FindPath(agent, this, from, to);
-            });
-
-            return result ?? Enumerable.Empty<Vector3>();
+            return await Task.Run(() => FindPath(agent, from, to));
         }
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
@@ -153,15 +253,19 @@ namespace Engine.PathFinding.AStar
 
             foreach (var node in nodes)
             {
-                if (node.Contains(position, out float distance))
+                if (!node.Contains(position))
                 {
-                    contains = true;
+                    continue;
+                }
 
-                    if (distance < nearestDistance)
-                    {
-                        nearestDistance = distance;
-                        nearest = node.Center;
-                    }
+                contains = true;
+
+                float distance = Vector3.DistanceSquared(position, node.Center);
+
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearest = node.Center;
                 }
             }
 
@@ -269,7 +373,7 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Nodes {nodes.Count}; Side {Settings.NodeSize:0.00};";
+            return $"Nodes: {nodes.Count}; Size: {Settings.NodeSize:0.00};";
         }
     }
 }
