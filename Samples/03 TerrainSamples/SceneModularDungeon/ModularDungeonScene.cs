@@ -98,10 +98,18 @@ namespace TerrainSamples.SceneModularDungeon
 
         private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
+        enum GameStates
+        {
+            None,
+            Player,
+            Map,
+        }
+
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
         private bool levelInitialized = false;
         private bool gameReady = false;
+        private GameStates gameState = GameStates.None;
 
         private AgentType CurrentAgent
         {
@@ -222,6 +230,78 @@ namespace TerrainSamples.SceneModularDungeon
         {
             base.Update(gameTime);
 
+            if (gameState == GameStates.None)
+            {
+                UpdateSceneInput();
+
+                return;
+            }
+
+            if (!userInterfaceInitialized)
+            {
+                return;
+            }
+
+            if (!gameAssetsInitialized)
+            {
+                return;
+            }
+
+            if (!levelInitialized)
+            {
+                return;
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
+
+            if (gameState == GameStates.Player)
+            {
+                UpdateStatePlayer(gameTime);
+
+                return;
+            }
+
+            if (gameState == GameStates.Map)
+            {
+                UpdateStateMap();
+
+                return;
+            }
+
+            UpdateRatController(gameTime);
+            UpdateEntities();
+            UpdateWind();
+
+            UpdatePlayerState(gameTime);
+            UpdateSelection();
+        }
+        private void UpdateStatePlayer(GameTime gameTime)
+        {
+            UpdateSceneInput();
+
+            if (Game.Input.KeyJustReleased(Keys.M))
+            {
+                ToggleMap();
+            }
+
+            UpdateDebugInput(gameTime);
+            UpdateGraphInput();
+            UpdateRatInput();
+            UpdatePlayerInput();
+            UpdateEntitiesInput();
+        }
+        private void UpdateStateMap()
+        {
+            if (Game.Input.KeyJustReleased(Keys.M) || Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                ToggleMap();
+            }
+        }
+        private void UpdateSceneInput()
+        {
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.StartScene>();
@@ -235,44 +315,6 @@ namespace TerrainSamples.SceneModularDungeon
 
                 InitializePostProcessing();
             }
-
-            if (!userInterfaceInitialized)
-            {
-                return;
-            }
-
-            if (!gameAssetsInitialized)
-            {
-                return;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.M))
-            {
-                ToggleMap();
-            }
-
-            if (!levelInitialized)
-            {
-                return;
-            }
-
-            if (!gameReady)
-            {
-                return;
-            }
-
-            UpdateRatController(gameTime);
-            UpdateEntities();
-            UpdateWind();
-
-            UpdateDebugInput(gameTime);
-            UpdateGraphInput();
-            UpdateRatInput();
-            UpdatePlayerInput();
-            UpdateEntitiesInput();
-
-            UpdatePlayerState(gameTime);
-            UpdateSelection();
         }
         public override void GameGraphicsResized()
         {
@@ -825,26 +867,26 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void UpdatePlayerInput()
         {
-            var prevPos = Camera.Position;
+            var deltaPosition = Vector3.Zero;
 
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
+                deltaPosition += Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
+                deltaPosition += Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
+                deltaPosition += Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
+                deltaPosition += Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
 #if DEBUG
@@ -862,13 +904,13 @@ namespace TerrainSamples.SceneModularDungeon
                 Game.Input.MouseYDelta);
 #endif
 
-            if (Walk(playerAgentType, prevPos, Camera.Position, true, out Vector3 walkerPos))
+            if (Walk(playerAgentType, Camera.Position, Camera.Position + deltaPosition, true, out Vector3 walkerPos))
             {
                 Camera.Goto(walkerPos);
             }
             else
             {
-                Camera.Goto(prevPos);
+                Camera.Goto(Camera.Position);
             }
 
             if (torch.Enabled)
@@ -1352,10 +1394,14 @@ namespace TerrainSamples.SceneModularDungeon
             if (dungeonMap.Visible)
             {
                 uiTweener.Hide(dungeonMap, 1000);
+
+                gameState = GameStates.Player;
             }
             else
             {
                 uiTweener.Show(dungeonMap, 1000);
+
+                gameState = GameStates.Map;
             }
         }
 
@@ -1472,6 +1518,8 @@ namespace TerrainSamples.SceneModularDungeon
                 uiTweener.Hide(pbLevels, 1000);
 
                 gameReady = true;
+
+                gameState = GameStates.Player;
             }
             catch (Exception ex)
             {

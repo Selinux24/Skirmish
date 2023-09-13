@@ -812,54 +812,76 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveForward(GameTime gameTime, bool slow)
+        public Vector3 MoveForward(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Forward, slow);
+            return Move(gameTime, Forward, slow);
         }
         /// <summary>
         /// Move backward
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveBackward(GameTime gameTime, bool slow)
+        public Vector3 MoveBackward(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Backward, slow);
+            return Move(gameTime, Backward, slow);
         }
         /// <summary>
         /// Move left
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveLeft(GameTime gameTime, bool slow)
+        public Vector3 MoveLeft(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Left, slow);
+            return Move(gameTime, Left, slow);
         }
         /// <summary>
         /// Move right
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveRight(GameTime gameTime, bool slow)
+        public Vector3 MoveRight(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Right, slow);
+            return Move(gameTime, Right, slow);
         }
         /// <summary>
         /// Move up
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveUp(GameTime gameTime, bool slow)
+        public Vector3 MoveUp(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Up, slow);
+            return Move(gameTime, Up, slow);
         }
         /// <summary>
         /// Move down
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void MoveDown(GameTime gameTime, bool slow)
+        public Vector3 MoveDown(GameTime gameTime, bool slow)
         {
-            Move(gameTime, Down, slow);
+            return Move(gameTime, Down, slow);
+        }
+        /// <summary>
+        /// Movement
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="vector">Movement vector</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 Move(GameTime gameTime, Vector3 vector, bool slow)
+        {
+            StopTranslations();
+
+            float delta = slow ? SlowMovementDelta : MovementDelta;
+
+            var nextVelocity = vector * delta * gameTime.ElapsedSeconds;
+            if (nextVelocity != Vector3.Zero)
+            {
+                nextPosition += nextVelocity;
+                nextInterest += nextVelocity;
+            }
+            updateNeeded = true;
+
+            return nextVelocity;
         }
 
         /// <summary>
@@ -867,36 +889,36 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void RotateUp(GameTime gameTime, bool slow)
+        public Quaternion RotateUp(GameTime gameTime, bool slow)
         {
-            Rotate(gameTime, Left, slow);
+            return Rotate(gameTime, Left, slow);
         }
         /// <summary>
         /// Rotate down
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void RotateDown(GameTime gameTime, bool slow)
+        public Quaternion RotateDown(GameTime gameTime, bool slow)
         {
-            Rotate(gameTime, Right, slow);
+            return Rotate(gameTime, Right, slow);
         }
         /// <summary>
         /// Rotate left
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void RotateLeft(GameTime gameTime, bool slow)
+        public Quaternion RotateLeft(GameTime gameTime, bool slow)
         {
-            Rotate(gameTime, Down, slow);
+            return Rotate(gameTime, Down, slow);
         }
         /// <summary>
         /// Rotate right
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void RotateRight(GameTime gameTime, bool slow)
+        public Quaternion RotateRight(GameTime gameTime, bool slow)
         {
-            Rotate(gameTime, Up, slow);
+            return Rotate(gameTime, Up, slow);
         }
         /// <summary>
         /// Rotate camera by mouse
@@ -904,18 +926,72 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="deltaX">X mouse delta</param>
         /// <param name="deltaY">Y mouse delta</param>
-        public void RotateMouse(GameTime gameTime, float deltaX, float deltaY)
+        public Quaternion RotateMouse(GameTime gameTime, float deltaX, float deltaY)
         {
+            Quaternion r = Quaternion.Identity;
+
             if (deltaX != 0f)
             {
-                Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
+                r += Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
             }
+
             if (deltaY != 0f)
             {
                 if (InvertY) deltaY = -deltaY;
 
-                Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
+                r += Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
             }
+
+            return r;
+        }
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="axis">Rotation axis</param>
+        /// <param name="slow">Slow movement</param>
+        private Quaternion Rotate(GameTime gameTime, Vector3 axis, bool slow)
+        {
+            float degrees = slow ? SlowRotationDelta : RotationDelta;
+
+            return Rotate(axis, degrees * gameTime.ElapsedSeconds);
+        }
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        /// <param name="axis">Rotation axis</param>
+        /// <param name="degrees">Degrees</param>
+        /// <param name="clampY">Sets if the current roation must be clamped around the Y vector</param>
+        /// <param name="clampFrom">Clamp from angle in degrees</param>
+        /// <param name="clampTo">Clamp to angle in degrees</param>
+        private Quaternion Rotate(Vector3 axis, float degrees, bool clampY = false, float clampFrom = 0, float clampTo = 0)
+        {
+            StopTranslations();
+
+            //Smooth rotation
+            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
+            Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
+
+            Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
+            Vector3 newDir = Vector3.Transform(curDir, r);
+
+            if (clampY)
+            {
+                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
+                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
+                {
+                    nextInterest = nextPosition + newDir;
+                    updateNeeded = true;
+                }
+            }
+            else
+            {
+                nextInterest = nextPosition + newDir;
+                updateNeeded = true;
+            }
+
+            return r;
         }
 
         /// <summary>
@@ -923,18 +999,52 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void ZoomIn(GameTime gameTime, bool slow)
+        public float ZoomIn(GameTime gameTime, bool slow)
         {
-            Zoom(gameTime, true, slow);
+            return Zoom(gameTime, true, slow);
         }
         /// <summary>
         /// Zoom out
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public void ZoomOut(GameTime gameTime, bool slow)
+        public float ZoomOut(GameTime gameTime, bool slow)
         {
-            Zoom(gameTime, false, slow);
+            return Zoom(gameTime, false, slow);
+        }
+        /// <summary>
+        /// Zoom
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="zoomIn">True if camera goes in. False otherwise</param>
+        /// <param name="slow">Slow movement</param>
+        private float Zoom(GameTime gameTime, bool zoomIn, bool slow)
+        {
+            StopTranslations();
+
+            float delta = slow ? SlowZoomDelta : ZoomDelta;
+            float zooming = zoomIn ? +delta : -delta;
+
+            if (zooming == 0f)
+            {
+                return 0;
+            }
+
+            float s = gameTime.ElapsedSeconds;
+
+            var dir = Vector3.Normalize(nextInterest - nextPosition);
+            var newPosition = nextPosition + (dir * zooming * s);
+
+            float distance = Vector3.Distance(newPosition, nextInterest);
+            if (distance < ZoomMax && distance > ZoomMin)
+            {
+                nextPosition = newPosition;
+                updateNeeded = true;
+
+                return distance;
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -1097,7 +1207,7 @@ namespace Engine
         /// <param name="translation">Translation mode</param>
         public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
         {
-            Vector3 diff = newPosition - nextPosition;
+            var diff = newPosition - nextPosition;
 
             if (translation != CameraTranslations.None)
             {
@@ -1149,101 +1259,6 @@ namespace Engine
                 else
                 {
                     nextInterest = newInterest;
-                    updateNeeded = true;
-                }
-            }
-        }
-        /// <summary>
-        /// Movement
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="vector">Movement vector</param>
-        /// <param name="slow">Slow movement</param>
-        public void Move(GameTime gameTime, Vector3 vector, bool slow)
-        {
-            StopTranslations();
-
-            float delta = slow ? SlowMovementDelta : MovementDelta;
-
-            var nextVelocity = vector * delta * gameTime.ElapsedSeconds;
-            if (nextVelocity != Vector3.Zero)
-            {
-                nextPosition += nextVelocity;
-                nextInterest += nextVelocity;
-            }
-            updateNeeded = true;
-        }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="axis">Rotation axis</param>
-        /// <param name="slow">Slow movement</param>
-        private void Rotate(GameTime gameTime, Vector3 axis, bool slow)
-        {
-            float degrees = (slow) ? SlowRotationDelta : RotationDelta;
-
-            Rotate(axis, degrees * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        /// <param name="axis">Rotation axis</param>
-        /// <param name="degrees">Degrees</param>
-        /// <param name="clampY">Sets if the current roation must be clamped around the Y vector</param>
-        /// <param name="clampFrom">Clamp from angle in degrees</param>
-        /// <param name="clampTo">Clamp to angle in degrees</param>
-        private void Rotate(Vector3 axis, float degrees, bool clampY = false, float clampFrom = 0, float clampTo = 0)
-        {
-            StopTranslations();
-
-            //Smooth rotation
-            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
-            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
-            Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
-
-            Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
-            Vector3 newDir = Vector3.Transform(curDir, r);
-
-            if (clampY)
-            {
-                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
-                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
-                {
-                    nextInterest = nextPosition + newDir;
-                    updateNeeded = true;
-                }
-            }
-            else
-            {
-                nextInterest = nextPosition + newDir;
-                updateNeeded = true;
-            }
-        }
-        /// <summary>
-        /// Zoom
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="zoomIn">True if camera goes in. False otherwise</param>
-        /// <param name="slow">Slow movement</param>
-        private void Zoom(GameTime gameTime, bool zoomIn, bool slow)
-        {
-            StopTranslations();
-
-            float delta = slow ? SlowZoomDelta : ZoomDelta;
-            float zooming = zoomIn ? +delta : -delta;
-
-            if (zooming != 0f)
-            {
-                float s = gameTime.ElapsedSeconds;
-
-                var dir = Vector3.Normalize(nextInterest - nextPosition);
-                Vector3 newPosition = nextPosition + (dir * zooming * s);
-
-                float distance = Vector3.Distance(newPosition, nextInterest);
-                if (distance < ZoomMax && distance > ZoomMin)
-                {
-                    nextPosition = newPosition;
                     updateNeeded = true;
                 }
             }
