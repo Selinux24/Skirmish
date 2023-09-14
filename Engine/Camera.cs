@@ -1319,8 +1319,8 @@ namespace Engine
         {
             return detectionMode switch
             {
-                IntersectDetectionMode.Sphere => (IntersectionVolumeSphere)BoundingSphere.FromPoints(Frustum.GetCorners()),
-                IntersectDetectionMode.Box => (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints(Frustum.GetCorners()),
+                IntersectDetectionMode.Sphere => (IntersectionVolumeSphere)new BoundingSphere(position, farPlaneDistance),
+                IntersectDetectionMode.Box => (IntersectionVolumeAxisAlignedBox)new BoundingBox(position - new Vector3(farPlaneDistance * 0.5f), position + new Vector3(farPlaneDistance * 0.5f)),
                 _ => (IntersectionVolumeFrustum)Frustum
             };
         }

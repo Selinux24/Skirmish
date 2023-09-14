@@ -87,6 +87,14 @@ namespace Engine.Animation
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="pathItemName">Path item name</param>
+        public AnimationPath(string pathItemName)
+        {
+            items.Add(new AnimationPathItem(pathItemName, false, 1, 1));
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="pathItems">Path items</param>
         public AnimationPath(IEnumerable<AnimationPathItem> pathItems)
         {

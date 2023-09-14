@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
+    using Engine.Animation;
     using Engine.Content;
     using Engine.Content.Persistence;
 
@@ -90,6 +91,61 @@ namespace Engine.Modular.Persistence
         /// Particle
         /// </summary>
         public ParticleEmitterFile ParticleLight { get; set; }
+
+        /// <summary>
+        /// Gets the animation plan list
+        /// </summary>
+        public IEnumerable<(string Name, AnimationPlan Plan)> GetAnimations()
+        {
+            if ((AnimationPlans?.Any()) != true)
+            {
+                yield break;
+            }
+
+            foreach (var dPlan in AnimationPlans)
+            {
+                AnimationPlan plan = new();
+
+                foreach (var dPath in dPlan.Paths)
+                {
+                    AnimationPath path = new();
+                    path.Add(dPath.Name);
+
+                    plan.AddItem(path);
+                }
+
+                yield return (dPlan.Name, plan);
+            }
+        }
+        /// <summary>
+        /// Gets the default animation plan name
+        /// </summary>
+        public string GetDefaultAnimationPlanName()
+        {
+            return AnimationPlans?.FirstOrDefault(a => a.Default)?.Name ?? "default";
+        }
+        /// <summary>
+        /// Gets the object trigger list
+        /// </summary>
+        public IEnumerable<ItemTrigger> GetTriggers()
+        {
+            if ((Actions?.Any()) != true)
+            {
+                yield break;
+            }
+
+            foreach (var action in Actions)
+            {
+                yield return new()
+                {
+                    Name = action.Name,
+                    StateFrom = action.StateFrom,
+                    StateTo = action.StateTo,
+                    AnimationPlan = action.AnimationPlan,
+                    Actions = action.Items.Select(i => new ItemAction { Id = i.Id, Action = i.Action }),
+                };
+            }
+        }
 
         /// <inheritdoc/>
         public override string ToString()

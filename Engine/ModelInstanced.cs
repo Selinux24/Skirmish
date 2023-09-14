@@ -583,6 +583,40 @@ namespace Engine
             return new ReadOnlyCollection<T>(instancesAll.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
+        /// <summary>
+        /// Gets the instances bounding sphere list
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        public IEnumerable<BoundingSphere> GetBoundingSpheres(bool refresh = false)
+        {
+            foreach (var instance in GetInstances())
+            {
+                yield return instance.GetBoundingSphere(refresh);
+            }
+        }
+        /// <summary>
+        /// Gets the instances bounding box list
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(bool refresh = false)
+        {
+            foreach (var instance in GetInstances())
+            {
+                yield return instance.GetBoundingBox(refresh);
+            }
+        }
+        /// <summary>
+        /// Gets the instances oriented bounding box list
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        public IEnumerable<OrientedBoundingBox> GetOrientedBoundingBoxes(bool refresh = false)
+        {
+            foreach (var instance in GetInstances())
+            {
+                yield return instance.GetOrientedBoundingBox(refresh);
+            }
+        }
+
         /// <inheritdoc/>
         public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {

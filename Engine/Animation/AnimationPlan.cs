@@ -125,6 +125,14 @@ namespace Engine.Animation
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="pathItemName">Animation path item name</param>
+        public AnimationPlan(string pathItemName) : this(new AnimationPath(pathItemName))
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="path">Animation path</param>
         public AnimationPlan(AnimationPath path)
         {

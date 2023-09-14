@@ -26,6 +26,6 @@ namespace Engine.Modular
         /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
-        public List<ItemAction> Actions { get; set; } = new List<ItemAction>();
+        public IEnumerable<ItemAction> Actions { get; set; }
     }
 }
