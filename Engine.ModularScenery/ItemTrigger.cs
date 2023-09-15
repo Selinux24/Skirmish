@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Modular
 {
@@ -26,6 +27,6 @@ namespace Engine.Modular
         /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
-        public IEnumerable<ItemAction> Actions { get; set; }
+        public IEnumerable<ItemAction> Actions { get; set; } = Enumerable.Empty<ItemAction>();
     }
 }

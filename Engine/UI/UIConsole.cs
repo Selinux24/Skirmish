@@ -135,7 +135,11 @@ namespace Engine.UI
             elapsedSinceLastUpdate += context.GameTime.ElapsedSeconds;
             if (elapsedSinceLastUpdate > UpdateInterval.TotalSeconds)
             {
-                textArea.Text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                string text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    textArea.Text = text;
+                }
             }
             elapsedSinceLastUpdate %= (float)UpdateInterval.TotalSeconds;
         }

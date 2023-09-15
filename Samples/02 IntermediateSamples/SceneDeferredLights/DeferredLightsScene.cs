@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.PostProcess;
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
@@ -16,8 +17,6 @@ namespace IntermediateSamples.SceneDeferredLights
 {
     public class DeferredLightsScene : WalkableScene
     {
-        private const int MaxGridDrawer = 10000;
-
         private readonly string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
 
         private const float near = 0.1f;
@@ -46,14 +45,14 @@ namespace IntermediateSamples.SceneDeferredLights
         private SceneLightSpot spotLight = null;
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private bool gameReady = false;
+
+        private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
         public DeferredLightsScene(Game game)
             : base(game)
@@ -71,69 +70,7 @@ namespace IntermediateSamples.SceneDeferredLights
         {
             await base.Initialize();
 
-            Lights.KeyLight.Enabled = false;
-            Lights.BackLight.Enabled = false;
-            Lights.FillLight.Enabled = true;
-
-            Lights.KeyLight.CastShadow = false;
-            Lights.BackLight.CastShadow = false;
-            Lights.FillLight.CastShadow = false;
-
-            await LoadResourcesAsync(
-                new[]
-                {
-                    InitializeCursor(),
-                    InitializeUI()
-                },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    title.Text = "Deferred Ligthning test";
-                    help.Text = "";
-                    statistics.Text = "";
-
-                    UpdateLayout();
-                });
-
-            await LoadResourcesAsync(
-                new[]
-                {
-                    InitializeAndTrace(InitializeSkydom),
-                    InitializeAndTrace(InitializeHelicopters),
-                    InitializeAndTrace(InitializeTerrain),
-                    InitializeAndTrace(InitializeGardener),
-                    InitializeAndTrace(InitializeTrees),
-                    InitializeDebug()
-                },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    AttachToGround(terrain);
-                    AttachToGround(tree);
-                    AttachToGround(trees);
-
-                    StartAnimations();
-
-                    StartTerrain();
-
-                    StartItems(out Vector3 cameraPosition, out int modelCount);
-
-                    cameraPosition /= modelCount;
-                    Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-                    Camera.LookTo(cameraPosition + Vector3.Up);
-                    Camera.NearPlaneDistance = near;
-                    Camera.FarPlaneDistance = far;
-
-                    gameReady = true;
-                });
+            await LoadingTaskUI();
         }
         private static async Task<double> InitializeAndTrace(Func<Task> action)
         {
@@ -143,83 +80,23 @@ namespace IntermediateSamples.SceneDeferredLights
             sw.Stop();
             return sw.Elapsed.TotalSeconds;
         }
+
+        private async Task LoadingTaskUI()
+        {
+            await LoadResourcesAsync(
+                new[]
+                {
+                    InitializeCursor(),
+                    InitializeUIComponents()
+                },
+                LoadingTaskUICompleted);
+        }
         private async Task InitializeCursor()
         {
             var cursorDesc = UICursorDescription.Default("SceneDeferredLights/Resources/target.png", 15, 15, true);
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
-        private async Task InitializeSkydom()
-        {
-            var desc = SkydomDescription.Sphere(@"SceneDeferredLights/Resources/sunset.dds", far);
-
-            await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
-        }
-        private async Task InitializeHelicopters()
-        {
-            var desc1 = new ModelDescription()
-            {
-                CastShadow = ShadowCastingAlgorihtms.All,
-                TextureIndex = 2,
-                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
-            };
-            helicopter = await AddComponent<Model, ModelDescription>("Helicopter", "Helicopter", desc1);
-            Lights.AddRange(helicopter.Lights);
-
-            var desc2 = new ModelInstancedDescription()
-            {
-                CastShadow = ShadowCastingAlgorihtms.All,
-                Instances = 2,
-                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
-            };
-            helicopters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of Helicopters", "Bunch of Helicopters", desc2);
-            for (int i = 0; i < helicopters.InstanceCount; i++)
-            {
-                Lights.AddRange(helicopters[i].Lights);
-            }
-
-            await Task.CompletedTask;
-        }
-        private async Task InitializeTerrain()
-        {
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", GroundDescription.FromFile("SceneDeferredLights/Resources", "terrain.json", 2));
-        }
-        private async Task InitializeGardener()
-        {
-            var desc = new GroundGardenerDescription()
-            {
-                ContentPath = "SceneDeferredLights/Resources/Vegetation",
-                ChannelRed = new GroundGardenerDescription.Channel()
-                {
-                    VegetationTextures = new[] { "grass.png" },
-                    Saturation = 20f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = Vector2.One * 0.20f,
-                    MaxSize = Vector2.One * 0.25f,
-                }
-            };
-            await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Vegetation", "Vegetation", desc);
-        }
-        private async Task InitializeTrees()
-        {
-            var desc1 = new ModelDescription()
-            {
-                CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_a.json"),
-            };
-            tree = await AddComponent<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
-
-            var desc2 = new ModelInstancedDescription()
-            {
-                CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
-                Instances = 10,
-                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_b.json"),
-            };
-            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
-        }
-        private async Task InitializeUI()
+        private async Task InitializeUIComponents()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
             var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
@@ -243,30 +120,157 @@ namespace IntermediateSamples.SceneDeferredLights
             bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
         }
+        private async Task LoadingTaskUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            title.Text = "Deferred Ligthning test";
+            help.Text = "";
+            statistics.Text = "";
+
+            UpdateLayout();
+
+            await LoadingTaskObjects();
+        }
+
+        private async Task LoadingTaskObjects()
+        {
+            await LoadResourcesAsync(
+                new[]
+                {
+                    InitializeAndTrace(InitializeSkydom),
+                    InitializeAndTrace(InitializeHelicopters),
+                    InitializeAndTrace(InitializeTerrain),
+                    InitializeAndTrace(InitializeGardener),
+                    InitializeAndTrace(InitializeTrees),
+                    InitializeDebug()
+                },
+                LoadingTaskObjectsCompleted);
+        }
+        private async Task InitializeSkydom()
+        {
+            var desc = SkydomDescription.Sphere(@"SceneDeferredLights/Resources/sunset.dds", far);
+
+            await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
+        }
+        private async Task InitializeHelicopters()
+        {
+            var desc1 = new ModelDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.All,
+                TextureIndex = 2,
+                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
+                StartsVisible = false,
+            };
+            helicopter = await AddComponent<Model, ModelDescription>("Helicopter", "Helicopter", desc1);
+            Lights.AddRange(helicopter.Lights);
+
+            var desc2 = new ModelInstancedDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.All,
+                Instances = 2,
+                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
+                StartsVisible = false,
+            };
+            helicopters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of Helicopters", "Bunch of Helicopters", desc2);
+            for (int i = 0; i < helicopters.InstanceCount; i++)
+            {
+                Lights.AddRange(helicopters[i].Lights);
+            }
+        }
+        private async Task InitializeTerrain()
+        {
+            var terrainDesc = GroundDescription.FromFile("SceneDeferredLights/Resources", "terrain.json", 2);
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDesc);
+        }
+        private async Task InitializeTrees()
+        {
+            var desc1 = new ModelDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.All,
+                BlendMode = BlendModes.DefaultTransparent,
+                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_a.json"),
+                StartsVisible = false,
+            };
+            tree = await AddComponentGround<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
+
+            var desc2 = new ModelInstancedDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.All,
+                BlendMode = BlendModes.DefaultTransparent,
+                Instances = 12,
+                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_b.json"),
+                StartsVisible = false,
+            };
+            trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
+        }
+        private async Task InitializeGardener()
+        {
+            var desc = new GroundGardenerDescription()
+            {
+                ContentPath = "SceneDeferredLights/Resources/Vegetation",
+                ChannelRed = new GroundGardenerDescription.Channel()
+                {
+                    VegetationTextures = new[] { "grass.png" },
+                    Saturation = 20f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = Vector2.One * 0.20f,
+                    MaxSize = Vector2.One * 0.25f,
+                },
+                StartsVisible = false,
+            };
+            await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Vegetation", "Vegetation", desc);
+        }
         private async Task InitializeDebug()
         {
             var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 1000,
+                StartsVisible = false,
             };
             lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
-            lineDrawer.Visible = false;
-
-            var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = MaxGridDrawer,
-            };
-            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
-            terrainGraphDrawer.Visible = false;
-
-            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = 50000,
-            };
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
-            graphDrawer.Visible = false;
         }
+        private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
+
+            Lights.KeyLight.Enabled = false;
+            Lights.KeyLight.CastShadow = false;
+         
+            Lights.BackLight.Enabled = false;
+            Lights.BackLight.CastShadow = false;
+         
+            Lights.FillLight.Enabled = true;
+            Lights.FillLight.CastShadow = true;
+            Lights.FillLight.DiffuseColor = new Color3(0.8f, 0.9f, 1);
+            Lights.FillLight.SpecularColor = new Color3(0.4f, 0.5f, 1);
+            Lights.FillLight.Brightness = 0.2f;
+
+            StartAnimations();
+
+            StartTerrain();
+
+            StartItems(out Vector3 cameraPosition, out int modelCount);
+
+            cameraPosition /= modelCount;
+            Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+            Camera.LookTo(cameraPosition + Vector3.Up);
+            Camera.NearPlaneDistance = near;
+            Camera.FarPlaneDistance = far;
+
+            gameReady = true;
+        }
         private void StartAnimations()
         {
             var ap = new AnimationPath();
@@ -277,18 +281,22 @@ namespace IntermediateSamples.SceneDeferredLights
         {
             if (FindTopGroundPosition<Triangle>(20, -20, out var treePos))
             {
-                tree.Manipulator.SetPosition(treePos.Position);
-                tree.Manipulator.SetScale(0.5f);
+                tree.Manipulator.SetTransform(treePos.Position, Quaternion.Identity, 0.5f);
             }
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
+                float x = (i * 10) - 55;
+                float z = 17 + (i % 2 == 0 ? i : -i);
+
+                if (FindTopGroundPosition<Triangle>(x, z, out var pos))
                 {
-                    trees[i].Manipulator.SetScale(0.5f, true);
-                    trees[i].Manipulator.SetPosition(pos.Position, true);
+                    trees[i].Manipulator.SetTransform(pos.Position, Quaternion.RotationYawPitchRoll(i, 0, 0), 0.5f);
                 }
             }
+
+            tree.Visible = true;
+            trees.Visible = true;
         }
         private void StartItems(out Vector3 cameraPosition, out int modelCount)
         {
@@ -323,6 +331,9 @@ namespace IntermediateSamples.SceneDeferredLights
                 helicopters[i].AnimationController.Start(animations["default"]);
                 helicopters[i].AnimationController.TimeDelta = 3f;
             }
+
+            helicopter.Visible = true;
+            helicopters.Visible = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -346,14 +357,17 @@ namespace IntermediateSamples.SceneDeferredLights
                 return;
             }
 
+            UpdateInput(gameTime);
+
+            UpdateState(gameTime);
+        }
+        private void UpdateInput(GameTime gameTime)
+        {
             UpdateInputCamera(gameTime);
             UpdayeInputLights();
             UpdateInputObjectsVisibility();
-            UpdateInputHelicopterTexture();
-            UpdateInputDebug();
+            UpdateInputSpotlight(gameTime);
             UpdateInputDeferredMap();
-
-            UpdateLights(gameTime);
         }
         private void UpdateInputCamera(GameTime gameTime)
         {
@@ -394,6 +408,16 @@ namespace IntermediateSamples.SceneDeferredLights
 
             if (Game.Input.KeyPressed(Keys.Space))
             {
+                Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Tab))
+            {
                 lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum)));
                 lineDrawer.Visible = true;
             }
@@ -422,29 +446,6 @@ namespace IntermediateSamples.SceneDeferredLights
             if (Game.Input.KeyJustReleased(Keys.P))
             {
                 animateLights = !animateLights;
-            }
-        }
-        private void UpdateInputHelicopterTexture()
-        {
-            if (Game.Input.KeyJustReleased(Keys.Oemcomma))
-            {
-                textIntex--;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.OemPeriod))
-            {
-                textIntex++;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.T))
-            {
-                helicopter.TextureIndex++;
-
-                if (helicopter.TextureIndex >= helicopter.TextureCount)
-                {
-                    //Loop
-                    helicopter.TextureIndex = 0;
-                }
             }
         }
         private void UpdateInputDeferredMap()
@@ -502,41 +503,19 @@ namespace IntermediateSamples.SceneDeferredLights
                 helicopters.Active = helicopters.Visible = !helicopters.Visible;
             }
         }
-        private void UpdateInputDebug()
+        private void UpdateInputSpotlight(GameTime gameTime)
         {
-            if (Game.Input.KeyJustReleased(Keys.F11))
+            if (spotLight == null)
             {
-                terrainGraphDrawer.Visible = !terrainGraphDrawer.Visible;
-                graphDrawer.Visible = !graphDrawer.Visible;
-            }
-        }
-
-        private void UpdateLights(GameTime gameTime)
-        {
-            if (spotLight != null)
-            {
-                UpdateSpotlight(gameTime);
-
-                lineDrawer.SetPrimitives(Color.White, spotLight.GetVolume(10));
-            }
-            else
-            {
-                lineDrawer.Clear(Color.White);
+                return;
             }
 
-            if (animateLights && Lights.PointLights.Length > 0)
-            {
-                UpdatePointLightsAnimation(gameTime);
-            }
-        }
-        private void UpdateSpotlight(GameTime gameTime)
-        {
             if (Game.Input.KeyPressed(Keys.Left))
             {
                 var v = Camera.Left;
                 v.Y = 0;
                 v.Normalize();
-                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += v * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
@@ -544,7 +523,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 var v = Camera.Right;
                 v.Y = 0;
                 v.Normalize();
-                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += v * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.Up))
@@ -552,7 +531,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 var v = Camera.Forward;
                 v.Y = 0;
                 v.Normalize();
-                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += v * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.Down))
@@ -560,17 +539,17 @@ namespace IntermediateSamples.SceneDeferredLights
                 var v = Camera.Backward;
                 v.Y = 0;
                 v.Normalize();
-                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += v * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.PageUp))
             {
-                spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += Vector3.Up * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.PageDown))
             {
-                spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += Vector3.Down * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.Add))
@@ -585,14 +564,35 @@ namespace IntermediateSamples.SceneDeferredLights
                 spotLight.Intensity = Math.Max(0f, spotLight.Intensity);
             }
         }
+
+        private void UpdateState(GameTime gameTime)
+        {
+            UpdateLights(gameTime);
+        }
+        private void UpdateLights(GameTime gameTime)
+        {
+            if (spotLight != null)
+            {
+                lineDrawer.SetPrimitives(Color.White, spotLight.GetVolume(10));
+            }
+            else
+            {
+                lineDrawer.Clear(Color.White);
+            }
+
+            if (animateLights && Lights.PointLights.Length > 0)
+            {
+                UpdatePointLightsAnimation(gameTime);
+            }
+        }
         private void UpdatePointLightsAnimation(GameTime gameTime)
         {
             for (int i = 1; i < Lights.PointLights.Length; i++)
             {
                 var l = Lights.PointLights[i];
 
-                if ((int?)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
-                if ((int?)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
+                if ((int?)l.State == 1) l.Radius += 0.5f * gameTime.ElapsedSeconds * 50f;
+                if ((int?)l.State == -1) l.Radius -= 2f * gameTime.ElapsedSeconds * 50f;
 
                 if (l.Radius <= 0)
                 {
@@ -845,15 +845,15 @@ namespace IntermediateSamples.SceneDeferredLights
             int sep = 10;
             int f = 12;
             int l = (f - 1) * sep;
-            l -= (l / 2);
+            l -= l / 2;
 
-            for (int i = 0; i < f; i++)
+            for (int y = 0; y < f; y++)
             {
                 for (int x = 0; x < f; x++)
                 {
-                    var lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+                    var lightPosition = new Vector3((y * sep) - l, 1f, (x * sep) - l);
 
-                    if (FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition((y * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
                     {
                         lightPosition = r.Position;
                         lightPosition.Y += 1f;
@@ -862,7 +862,7 @@ namespace IntermediateSamples.SceneDeferredLights
                     var color = new Color3(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1));
 
                     var pointLight = new SceneLightPoint(
-                        string.Format("Point {0}", Lights.PointLights.Length),
+                        $"Point {Lights.PointLights.Length}",
                         castShadows,
                         color,
                         color,
@@ -878,24 +878,23 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private void SetLightsPosition(bool castShadows)
         {
-            if (FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
+            if (!FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
             {
-                var lightPosition = r.Position;
-                lightPosition.Y += 10f;
-
-                spotLight = new SceneLightSpot(
-                    "Spot the dog",
-                    castShadows,
-                    Color.Yellow.RGB(),
-                    Color.Yellow.RGB(),
-                    true,
-                    SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
-
-                Lights.Add(spotLight);
-
-                lineDrawer.Active = true;
-                lineDrawer.Visible = true;
+                return;
             }
+
+            var lightPosition = r.Position;
+            lightPosition.Y += 10f;
+
+            spotLight = new SceneLightSpot(
+                "Spot the dog",
+                castShadows,
+                Color.Yellow.RGB(),
+                Color.Yellow.RGB(),
+                true,
+                SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
+
+            Lights.Add(spotLight);
         }
     }
 }

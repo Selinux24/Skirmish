@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.PostProcess;
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
@@ -42,6 +43,8 @@ namespace TerrainSamples.SceneCrowds
 
         private bool objectsReady = false;
         private bool gameReady = false;
+
+        private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
         public CrowdsScene(Game game)
             : base(game)
@@ -220,6 +223,10 @@ namespace TerrainSamples.SceneCrowds
 
                 return;
             }
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
 
             StartNodes();
             StartAnimations();

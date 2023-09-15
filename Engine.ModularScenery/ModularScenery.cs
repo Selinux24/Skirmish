@@ -43,10 +43,6 @@ namespace Engine.Modular
         /// </summary>
         private ParticleManager particleManager = null;
         /// <summary>
-        /// Asset map culling volume
-        /// </summary>
-        private AssetMapCullingVolume assetMapCullingVolume = null;
-        /// <summary>
         /// Scenery entities
         /// </summary>
         private readonly List<Item> entities = new();
@@ -447,7 +443,6 @@ namespace Engine.Modular
             assets.Clear();
             objects.Clear();
             entities.Clear();
-            assetMapCullingVolume = null;
             particleManager?.Clear();
             particleDescriptors.Clear();
 
@@ -855,8 +850,6 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void ParseAssetsMap(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            assetMapCullingVolume = new AssetMapCullingVolume();
-
             var transforms = new Dictionary<string, List<Matrix>>();
 
             float total = level.Map.Count() + transforms.Keys.Count;
@@ -884,8 +877,6 @@ namespace Engine.Modular
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
-
-            assetMapCullingVolume.Build(assetMap, assets);
         }
         /// <summary>
         /// Parses the specified asset reference
@@ -905,7 +896,6 @@ namespace Engine.Modular
                 Transform = complexAssetTransform,
                 Assets = new Dictionary<string, List<int>>(),
             };
-            assetMapCullingVolume.Add(aMap);
 
             var asset = assetMap.Assets.ElementAt(assetIndex);
             var assetTransforms = GetInstanceTransforms(asset);
@@ -997,23 +987,9 @@ namespace Engine.Modular
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            UpdateAssetMapCulling();
+            base.Update(context);
 
             UpdateTriggers();
-        }
-        /// <summary>
-        /// Updates the asset map culling helper
-        /// </summary>
-        private void UpdateAssetMapCulling()
-        {
-            if (assetMapCullingVolume == null)
-            {
-                return;
-            }
-
-            var camVolume = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
-
-            assetMapCullingVolume.Update(camVolume);
         }
         /// <summary>
         /// Verifies the active triggers states and fires the ending events
@@ -1138,14 +1114,6 @@ namespace Engine.Modular
             return sceneTriangles;
         }
 
-        /// <summary>
-        /// Gets all complex map asset volumes
-        /// </summary>
-        /// <returns>Returns a dictionary of complex asset volumes by asset name</returns>
-        public IDictionary<string, IEnumerable<BoundingBox>> GetMapVolumes()
-        {
-            return assetMapCullingVolume.GetMapVolumes().ToImmutableDictionary(k => k.Name, v => v.Volumes);
-        }
         /// <summary>
         /// Gets all individual map asset volumes
         /// </summary>
@@ -1487,359 +1455,6 @@ namespace Engine.Modular
             }
         }
 
-        /// <inheritdoc/>
-        public override ICullingVolume GetCullingVolume()
-        {
-            return assetMapCullingVolume;
-        }
-
-        /// <summary>
-        /// Asset map culling volume descriptor
-        /// </summary>
-        class AssetMapCullingVolume : ICullingVolume
-        {
-            /// <summary>
-            /// Asset map
-            /// </summary>
-            private readonly List<AssetMapItem> assetMap = new();
-            /// <summary>
-            /// Visibility dictionary
-            /// </summary>
-            private readonly Dictionary<int, IEnumerable<BoundingBox>> visibility = new();
-            /// <summary>
-            /// Current box index
-            /// </summary>
-            private int currentIndex = -1;
-
-            /// <inheritdoc/>
-            public Vector3 Position
-            {
-                get
-                {
-                    return Vector3.Zero;
-                }
-            }
-
-            /// <inheritdoc/>
-            public ContainmentType Contains(BoundingBox bbox)
-            {
-                if (currentIndex < 0)
-                {
-                    return ContainmentType.Disjoint;
-                }
-
-                var visibleBoxes = visibility[currentIndex];
-
-                foreach (var box in visibleBoxes)
-                {
-                    var res = Intersection.BoxContainsBox(box, bbox);
-
-                    if (res != ContainmentType.Disjoint) return res;
-                }
-
-                return ContainmentType.Disjoint;
-            }
-            /// <inheritdoc/>
-            public ContainmentType Contains(BoundingSphere sphere)
-            {
-                if (currentIndex < 0)
-                {
-                    return ContainmentType.Disjoint;
-                }
-
-                var visibleBoxes = visibility[currentIndex];
-
-                foreach (var box in visibleBoxes)
-                {
-                    var res = Intersection.BoxContainsSphere(box, sphere);
-
-                    if (res != ContainmentType.Disjoint) return res;
-                }
-
-                return ContainmentType.Disjoint;
-            }
-            /// <inheritdoc/>
-            public ContainmentType Contains(BoundingFrustum frustum)
-            {
-                if (currentIndex < 0)
-                {
-                    return ContainmentType.Disjoint;
-                }
-
-                var visibleBoxes = visibility[currentIndex];
-
-                foreach (var box in visibleBoxes)
-                {
-                    var res = Intersection.BoxContainsFrustum(box, frustum);
-
-                    if (res != ContainmentType.Disjoint) return res;
-                }
-
-                return ContainmentType.Disjoint;
-            }
-            /// <inheritdoc/>
-            public ContainmentType Contains(IEnumerable<Triangle> mesh)
-            {
-                if (currentIndex < 0)
-                {
-                    return ContainmentType.Disjoint;
-                }
-
-                var visibleBoxes = visibility[currentIndex];
-
-                foreach (var box in visibleBoxes)
-                {
-                    var res = Intersection.BoxContainsMesh(box, mesh);
-
-                    if (res != ContainmentType.Disjoint) return res;
-                }
-
-                return ContainmentType.Disjoint;
-            }
-
-            /// <summary>
-            /// Adds a new item to collection
-            /// </summary>
-            /// <param name="item">Item</param>
-            public void Add(AssetMapItem item)
-            {
-                assetMap.Add(item);
-            }
-            /// <summary>
-            /// Builds the asset map
-            /// </summary>
-            /// <param name="assetConfiguration">Configuration</param>
-            /// <param name="assets">Asset list</param>
-            public void Build(AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
-            {
-                //Fill per complex asset bounding boxes
-                Fill(assets);
-
-                //Find connections
-                for (int s = 0; s < assetMap.Count; s++)
-                {
-                    for (int t = s + 1; t < assetMap.Count; t++)
-                    {
-                        var source = assetMap[s];
-                        var target = assetMap[t];
-
-                        if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
-                        {
-                            //Find if contacted volumes has portals between them
-                            FindPortals(assetConfiguration, source, target, s, t);
-                        }
-                    }
-                }
-            }
-            /// <summary>
-            /// Fills the full bounding volume of the assets in the map
-            /// </summary>
-            /// <param name="assets">Asset list</param>
-            private void Fill(Dictionary<string, ModelInstanced> assets)
-            {
-                for (int i = 0; i < assetMap.Count; i++)
-                {
-                    var item = assetMap[i];
-
-                    BoundingBox bbox = new();
-
-                    foreach (var assetName in item.Assets.Keys)
-                    {
-                        foreach (int assetIndex in item.Assets[assetName])
-                        {
-                            var aBbox = assets[assetName][assetIndex].GetBoundingBox();
-
-                            if (bbox == new BoundingBox())
-                            {
-                                bbox = aBbox;
-                            }
-                            else
-                            {
-                                bbox = BoundingBox.Merge(bbox, aBbox);
-                            }
-                        }
-                    }
-
-                    item.Volume = bbox;
-                }
-            }
-            /// <summary>
-            /// Finds portals between the specified asset items
-            /// </summary>
-            /// <param name="assetConfiguration">Configuration</param>
-            /// <param name="source">Source item</param>
-            /// <param name="target">Target item</param>
-            /// <param name="s">Source index</param>
-            /// <param name="t">Target index</param>
-            private static void FindPortals(AssetMap assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
-            {
-                var sourceConf = assetConfiguration.Assets.FirstOrDefault(a => a.Name == source.Name);
-                if ((sourceConf?.Connections?.Any()) != true)
-                {
-                    return;
-                }
-
-                var targetConf = assetConfiguration.Assets.FirstOrDefault(a => a.Name == target.Name);
-                if ((targetConf?.Connections?.Any()) != true)
-                {
-                    return;
-                }
-
-                //Transform connection positions and directions
-                var sourcePositions = sourceConf.Connections.Select(i => ReadConnection(i, source.Transform));
-                var targetPositions = targetConf.Connections.Select(i => ReadConnection(i, target.Transform));
-
-                if (sourcePositions.Any(p1 => targetPositions.Any(p2 => ConnectorInfo.IsConnected(p1, p2))))
-                {
-                    source.Connections.Add(t);
-                    target.Connections.Add(s);
-                }
-            }
-            /// <summary>
-            /// Reads a connection from an asset, and transfoms it for portal detection
-            /// </summary>
-            /// <param name="connection">Connection</param>
-            /// <param name="transform">Transform to apply</param>
-            /// <returns>Returns the connector information</returns>
-            private static ConnectorInfo ReadConnection(AssetConnection connection, Matrix transform)
-            {
-                return new ConnectorInfo
-                {
-                    OpenConection = connection.Type == AssetConnectionTypes.Open,
-                    Position = Vector3.TransformCoordinate(connection.Position, transform),
-                    Direction = Vector3.TransformNormal(connection.Direction, transform),
-                };
-            }
-
-            /// <summary>
-            /// Gets all complex map asset volumes
-            /// </summary>
-            /// <returns>Returns a list of complex asset volumes by asset name</returns>
-            public IEnumerable<(string Name, IEnumerable<BoundingBox> Volumes)> GetMapVolumes()
-            {
-                if (!assetMap.Any())
-                {
-                    return Enumerable.Empty<(string Name, IEnumerable<BoundingBox> Volumes)>();
-                }
-
-                //Get distinct asset names
-                var assetNames = assetMap
-                    .Select(a => a.Name)
-                    .Distinct();
-
-                //Return bounding boxex per asset name
-                return assetNames
-                    .Select(a => (a, assetMap.Where(am => am.Name == a).Select(am => am.Volume)))
-                    .ToArray();
-            }
-
-            /// <summary>
-            /// Updates internal visible volume collection
-            /// </summary>
-            /// <param name="cullingVolume">Culling volume</param>
-            public void Update(ICullingVolume cullingVolume)
-            {
-                //Find current box
-                var itemIndex = assetMap.FindIndex(b => b.Volume.Contains(cullingVolume.Position) != ContainmentType.Disjoint);
-                if (itemIndex < 0 || currentIndex == itemIndex)
-                {
-                    return;
-                }
-
-                //Set current index
-                currentIndex = itemIndex;
-
-                if (visibility.ContainsKey(itemIndex))
-                {
-                    return;
-                }
-
-                var visibleBoxes = UpdateItem(cullingVolume, itemIndex);
-
-                visibility.Add(itemIndex, visibleBoxes);
-            }
-            /// <summary>
-            /// Updates internal visible volume collection recursive
-            /// </summary>
-            /// <param name="cullingVolume">Camera volume</param>
-            /// <param name="itemIndex">Item index</param>
-            /// <param name="visited">Visited list</param>
-            private IEnumerable<BoundingBox> UpdateItem(ICullingVolume cullingVolume, int itemIndex, List<int> visited = null)
-            {
-                visited ??= new();
-
-                if (visited.Contains(itemIndex))
-                {
-                    //Yet processed
-                    return Enumerable.Empty<BoundingBox>();
-                }
-
-                //Add item to visited list
-                visited.Add(itemIndex);
-
-                var item = assetMap[itemIndex];
-
-                if (cullingVolume.Contains(item.Volume) == ContainmentType.Disjoint)
-                {
-                    //Culled
-                    return Enumerable.Empty<BoundingBox>();
-                }
-
-                //Result list initialized with this volume
-                List<BoundingBox> res = new()
-                {
-                    item.Volume
-                };
-
-                //Process connections
-                foreach (var conIndex in item.Connections)
-                {
-                    res.AddRange(UpdateItem(cullingVolume, conIndex, visited));
-                }
-
-                return res;
-            }
-        }
-        /// <summary>
-        /// Conector information
-        /// </summary>
-        struct ConnectorInfo
-        {
-            /// <summary>
-            /// Gets whether the connectors were connected or not
-            /// </summary>
-            /// <param name="x">Connector x</param>
-            /// <param name="y">Connector y</param>
-            /// <returns>Returns true if the connectors were connected</returns>
-            public static bool IsConnected(ConnectorInfo x, ConnectorInfo y)
-            {
-                var a = x;
-                var b = y;
-
-                if (a.OpenConection)
-                {
-                    // True if oppsite directions
-                    return Vector3.Dot(a.Direction, b.Direction) == -1;
-                }
-                else
-                {
-                    return a.Position == b.Position;
-                }
-            }
-
-            /// <summary>
-            /// Open connection
-            /// </summary>
-            public bool OpenConection { get; set; }
-            /// <summary>
-            /// Position
-            /// </summary>
-            public Vector3 Position { get; set; }
-            /// <summary>
-            /// Direction
-            /// </summary>
-            public Vector3 Direction { get; set; }
-        }
         /// <summary>
         /// Asset map item
         /// </summary>
@@ -1854,10 +1469,6 @@ namespace Engine.Modular
             /// </summary>
             public string Name;
             /// <summary>
-            /// Complex asset volume
-            /// </summary>
-            public BoundingBox Volume;
-            /// <summary>
             /// Complex asset transform
             /// </summary>
             public Matrix Transform;
@@ -1865,15 +1476,11 @@ namespace Engine.Modular
             /// Individual asset indices
             /// </summary>
             public Dictionary<string, List<int>> Assets = new();
-            /// <summary>
-            /// Connections with other complex assets
-            /// </summary>
-            public List<int> Connections = new();
 
             /// <inheritdoc/>
             public override string ToString()
             {
-                return $"{Name}; Index: {Index}; Connections: {Connections.Count};";
+                return $"{Name}; Index: {Index}; Assets: {string.Join("|", Assets?.Select(a => a.Key) ?? Array.Empty<string>())}";
             }
         }
         /// <summary>

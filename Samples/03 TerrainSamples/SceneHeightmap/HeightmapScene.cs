@@ -10,7 +10,6 @@ using Engine.UI.Tween;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -125,10 +124,10 @@ namespace TerrainSamples.SceneHeightmap
             Camera.SetPosition(new Vector3(10000, 10000, 10000));
             Camera.SetInterest(new Vector3(10001, 10000, 10000));
 
-            InitializeUI();
+            LoadingTaskUI();
         }
 
-        private void InitializeUI()
+        private void LoadingTaskUI()
         {
             LoadResourcesAsync(
                 new[]
@@ -136,25 +135,15 @@ namespace TerrainSamples.SceneHeightmap
                     InitializeTweener(),
                     InitializeUIAssets()
                 },
-                InitializeUICompleted);
+                LoadingTaskUICompleted);
         }
-        private async Task<double> InitializeTweener()
+        private async Task InitializeTweener()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
-
             await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
-
             uiTweener = this.AddUIControlTweener();
-
-            sw.Stop();
-            return sw.Elapsed.TotalSeconds;
         }
-        private async Task<double> InitializeUIAssets()
+        private async Task InitializeUIAssets()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
-
             #region Cursor
 
             var cursorDesc = UICursorDescription.Default("SceneHeightmap/Resources/target.png", 20, 20, true, Color.Red);
@@ -197,11 +186,8 @@ namespace TerrainSamples.SceneHeightmap
             bufferDrawer.Visible = false;
 
             #endregion
-
-            sw.Stop();
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeUICompleted(LoadResourcesResult<double> res)
+        private void LoadingTaskUICompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -215,10 +201,10 @@ namespace TerrainSamples.SceneHeightmap
             fadePanel.BaseColor = Color.Black;
             fadePanel.Visible = true;
 
-            InitializeGameAssets();
+            LoadingTaskGameAssets();
         }
 
-        private void InitializeGameAssets()
+        private void LoadingTaskGameAssets()
         {
             var loadTasks = new[]
             {
@@ -243,207 +229,132 @@ namespace TerrainSamples.SceneHeightmap
 
             LoadResourcesAsync(
                 loadTasks,
-                InitializeGameAssetsCompleted);
+                LoadingTaskGameAssetsCompleted);
         }
-        private async Task<double> InitializeRocks()
+        private async Task InitializeRocks()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
             var rDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 250,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Rocks", @"boulder.json"),
+                StartsVisible = false,
             };
-            rocks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
-            rocks.Visible = false;
-            AttachToGround(rocks);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            rocks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
         }
-        private async Task<double> InitializeTrees()
+        private async Task InitializeTrees()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
             var treeDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees", @"tree.json"),
+                StartsVisible = false,
             };
-            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
-            trees.Visible = false;
-            AttachToGround(trees);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
         }
-        private async Task<double> InitializeTrees2()
+        private async Task InitializeTrees2()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
             var tree2Desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees2", @"tree.json"),
+                StartsVisible = false,
             };
-            trees2 = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees2", "Trees2", tree2Desc);
-            trees2.Visible = false;
-            AttachToGround(trees2);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            trees2 = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees2", "Trees2", tree2Desc);
         }
-        private async Task<double> InitializeSoldier()
+        private async Task InitializeSoldier()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var sDesc = new ModelDescription()
             {
                 TextureIndex = 0,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Soldier", @"soldier_anim2.json"),
+                StartsVisible = false,
             };
             soldier = await AddComponentAgent<Model, ModelDescription>("Soldier", "Soldier", sDesc);
-            soldier.Visible = false;
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeTroops()
+        private async Task InitializeTroops()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = 4,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Soldier", @"soldier_anim2.json"),
+                StartsVisible = false,
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
-            troops.Visible = false;
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeM24()
+        private async Task InitializeM24()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 3,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/m24", @"m24.json"),
+                StartsVisible = false,
             };
-            helicopterI = await AddComponent<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
-            helicopterI.Visible = false;
-            AttachToGround(helicopterI);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            helicopterI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
         }
-        private async Task<double> InitializeBradley()
+        private async Task InitializeBradley()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Bradley", @"Bradley.json"),
+                StartsVisible = false,
             };
-            bradleyI = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
-            bradleyI.Visible = false;
-            AttachToGround(bradleyI);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            bradleyI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
         }
-        private async Task<double> InitializeBuildings()
+        private async Task InitializeBuildings()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/buildings", @"Affgan1.json"),
+                StartsVisible = false,
             };
-            buildings = await AddComponent<ModelInstanced, ModelInstancedDescription>("Affgan buildings", "Affgan buildings", mDesc);
-            buildings.Visible = false;
-            AttachToGround(buildings);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            buildings = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Affgan buildings", "Affgan buildings", mDesc);
         }
-        private async Task<double> InitializeWatchTower()
+        private async Task InitializeWatchTower()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var mDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Watch Tower", @"Watch Tower.json"),
+                StartsVisible = false,
             };
-            watchTower = await AddComponent<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
-            watchTower.Visible = false;
-            AttachToGround(watchTower);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            watchTower = await AddComponentGround<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
         }
-        private async Task<double> InitializeContainers()
+        private async Task InitializeContainers()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/container", "Container.json"),
+                StartsVisible = false,
             };
-            containers = await AddComponent<ModelInstanced, ModelInstancedDescription>("Container", "Container", desc);
-            containers.Visible = false;
-            AttachToGround(containers);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            containers = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Container", "Container", desc);
         }
-        private async Task<double> InitializeTorchs()
+        private async Task InitializeTorchs()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var tcDesc = new ModelInstancedDescription()
             {
                 Instances = 50,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Scenery/Objects", @"torch.json"),
+                StartsVisible = false,
             };
-            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
-            torchs.Visible = false;
-            AttachToGround(torchs);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            torchs = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
         }
-        private async Task<double> InitializeParticles()
+        private async Task InitializeParticles()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             pManager = await AddComponent<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
             pFire = ParticleSystemDescription.InitializeFire("SceneHeightmap/Resources/particles", "fire.png", 0.5f);
@@ -457,15 +368,9 @@ namespace TerrainSamples.SceneHeightmap
             pDust.MaxColor = new Color(Color.SandyBrown.ToColor3(), 0.10f);
             pDust.MinEndSize = 2f;
             pDust.MaxEndSize = 20f;
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeTerrain()
+        private async Task InitializeTerrain()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var hDesc = new HeightmapDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/Scenery/Heightmap",
@@ -493,15 +398,9 @@ namespace TerrainSamples.SceneHeightmap
             };
             var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
             terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", gDesc);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeLensFlare()
+        private async Task InitializeLensFlare()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var lfDesc = new LensFlareDescription()
             {
                 ContentPath = @"SceneHeightmap/Resources/Scenery/Flare",
@@ -523,26 +422,14 @@ namespace TerrainSamples.SceneHeightmap
                 }
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeSkydom()
+        private async Task InitializeSkydom()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var skDesc = new SkyScatteringDescription();
             skydom = await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", skDesc);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeClouds()
+        private async Task InitializeClouds()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var scDesc = new SkyPlaneDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/sky",
@@ -552,15 +439,9 @@ namespace TerrainSamples.SceneHeightmap
                 Direction = new Vector2(1, 1),
             };
             await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", scDesc);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task<double> InitializeDebugAssets()
+        private async Task InitializeDebugAssets()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
-
             bboxesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Terrain nodes bounding boxes",
                 "DEBUG++ Terrain nodes bounding boxes",
@@ -568,8 +449,8 @@ namespace TerrainSamples.SceneHeightmap
                 {
                     Dynamic = true,
                     Count = 50000,
+                    StartsVisible = false,
                 });
-            bboxesDrawer.Visible = false;
 
             bboxesTriDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DEBUG++ Terrain nodes bounding boxes faces",
@@ -577,8 +458,8 @@ namespace TerrainSamples.SceneHeightmap
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = 1000,
+                    StartsVisible = false,
                 });
-            bboxesTriDrawer.Visible = false;
 
             linesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Lines drawer",
@@ -586,15 +467,16 @@ namespace TerrainSamples.SceneHeightmap
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = 1000,
+                    StartsVisible = false,
                 });
-            linesDrawer.Visible = false;
 
             lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Light Volumes",
                 "DEBUG++ Light Volumes",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    Count = 10000
+                    Count = 10000,
+                    StartsVisible = false,
                 });
 
             graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
@@ -604,16 +486,14 @@ namespace TerrainSamples.SceneHeightmap
                 {
                     Count = 50000,
                 });
-            graphDrawer.Visible = false;
-
-            sw.Stop();
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeGameAssetsCompleted(LoadResourcesResult<double> res)
+        private void LoadingTaskGameAssetsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                stats.Text = res.GetErrorMessage();
+
+                return;
             }
 
             skydom.RayleighScattering *= 0.8f;
@@ -631,10 +511,10 @@ namespace TerrainSamples.SceneHeightmap
             Camera.MovementDelta = 45f;
             Camera.SlowMovementDelta = 20f;
 
-            InitializeTerrainObjects();
+            LoadingTaskTerrainObjects();
         }
 
-        private void InitializeTerrainObjects()
+        private void LoadingTaskTerrainObjects()
         {
             var loadTasks = new[]
             {
@@ -646,13 +526,10 @@ namespace TerrainSamples.SceneHeightmap
 
             LoadResourcesAsync(
                 loadTasks,
-                InitializeTerrainObjectsCompleted);
+                LoadingTaskTerrainObjectsCompleted);
         }
-        private async Task<double> InitializeGardener()
+        private async Task InitializeGardener()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var vDesc = new GroundGardenerDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
@@ -698,16 +575,10 @@ namespace TerrainSamples.SceneHeightmap
                     Instances = GroundGardenerPatchInstances.Default,
                 },
             };
-            gardener = await AddComponent<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+            gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
         }
-        private async Task<double> InitializeGardener2()
+        private async Task InitializeGardener2()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
             var vDesc2 = new GroundGardenerDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
@@ -748,9 +619,6 @@ namespace TerrainSamples.SceneHeightmap
                 },
             };
             gardener2 = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Flowers", "Flowers", vDesc2);
-            sw.Stop();
-
-            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
         private async Task SetAnimationDictionaries()
         {
@@ -1130,11 +998,13 @@ namespace TerrainSamples.SceneHeightmap
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.ReverseNormal(tris2));
         }
-        private async Task InitializeTerrainObjectsCompleted(LoadResourcesResult res)
+        private async Task LoadingTaskTerrainObjectsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                stats.Text = res.GetErrorMessage();
+
+                return;
             }
 
             var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
@@ -1192,37 +1062,30 @@ namespace TerrainSamples.SceneHeightmap
         {
             base.Update(gameTime);
 
+            if (Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                Game.SetScene<SceneStart.StartScene>();
+            }
+
             if (!uiReady)
             {
                 return;
             }
-
-            stats.Text = Game.RuntimeText;
-
-            help.Text = string.Format(
-                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
-                Renderer,
-                windDirection, windStrength, windNextStrength,
-                GameEnvironment.TimeOfDay,
-                Lights.KeyLight.Brightness,
-                Camera.Position, Camera.Direction);
-
-            var counters = FrameCounters.PickCounters;
-
-            help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}",
-                counters?.PicksPerFrame, counters?.PickingTotalTimePerFrame, counters?.PickingAverageTime,
-                counters?.VolumeFrustumTestPerFrame, counters?.VolumeFrustumTestTotalTimePerFrame, counters?.VolumeFrustumTestAverageTime);
 
             if (!gameReady)
             {
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.Escape))
-            {
-                Game.SetScene<SceneStart.StartScene>();
-            }
+            //Input driven
+            UpdateInput(gameTime);
 
+            //Auto
+            UpdateState(gameTime);
+        }
+
+        private void UpdateInput(GameTime gameTime)
+        {
             if (Game.Input.KeyJustReleased(Keys.R))
             {
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
@@ -1230,19 +1093,11 @@ namespace TerrainSamples.SceneHeightmap
                     SceneModes.ForwardLigthning);
             }
 
-            //Input driven
             UpdateCamera(gameTime);
             UpdatePlayer();
             UpdateInputDebugInfo(gameTime);
             UpdateInputBuffers();
-
-            //Auto
-            UpdateLights();
-            UpdateWind(gameTime);
-            UpdateDust(gameTime);
-            UpdateDrawers();
         }
-
         private void UpdateCamera(GameTime gameTime)
         {
             Vector3 position;
@@ -1528,6 +1383,29 @@ namespace TerrainSamples.SceneHeightmap
             }
         }
 
+        private void UpdateState(GameTime gameTime)
+        {
+            stats.Text = Game.RuntimeText;
+
+            help.Text = string.Format(
+                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
+                Renderer,
+                windDirection, windStrength, windNextStrength,
+                GameEnvironment.TimeOfDay,
+                Lights.KeyLight.Brightness,
+                Camera.Position, Camera.Direction);
+
+            var counters = FrameCounters.PickCounters;
+
+            help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}",
+                counters?.PicksPerFrame, counters?.PickingTotalTimePerFrame, counters?.PickingAverageTime,
+                counters?.VolumeFrustumTestPerFrame, counters?.VolumeFrustumTestTotalTimePerFrame, counters?.VolumeFrustumTestAverageTime);
+
+            UpdateLights();
+            UpdateWind(gameTime);
+            UpdateDust(gameTime);
+            UpdateDrawers();
+        }
         private void UpdateLights()
         {
             float d = 1f;

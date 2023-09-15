@@ -142,6 +142,7 @@ Space: Finds random over navmesh";
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = contentDesc,
+                PathFindingHull = PickingHullTypes.Perfect,
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);

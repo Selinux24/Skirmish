@@ -930,17 +930,11 @@ namespace Engine
         {
             Quaternion r = Quaternion.Identity;
 
-            if (deltaX != 0f)
-            {
-                r += Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
-            }
+            r += Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
 
-            if (deltaY != 0f)
-            {
-                if (InvertY) deltaY = -deltaY;
+            if (InvertY) deltaY = -deltaY;
 
-                r += Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
-            }
+            r += Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
 
             return r;
         }
@@ -1281,6 +1275,21 @@ namespace Engine
         {
             translationMode = CameraTranslations.None;
             translationInterest = Vector3.Zero;
+        }
+
+        /// <summary>
+        /// Gets the next position in the frame
+        /// </summary>
+        public Vector3 GetNextPosition()
+        {
+            return nextPosition;
+        }
+        /// <summary>
+        /// Gets the next interest in the frame
+        /// </summary>
+        public Vector3 GetNextInterest()
+        {
+            return nextInterest;
         }
 
         /// <inheritdoc/>

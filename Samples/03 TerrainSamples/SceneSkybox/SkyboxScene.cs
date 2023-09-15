@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Audio;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -92,6 +93,8 @@ namespace TerrainSamples.SceneSkybox
         private bool loadingReady = false;
         private bool gameReady = false;
 
+        private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
+
         public SkyboxScene(Game game)
             : base(game)
         {
@@ -165,7 +168,7 @@ namespace TerrainSamples.SceneSkybox
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
 
-            title.Text = "Collada Scene with Skybox";
+            title.Text = "Skybox scene";
             help.Text = "Loading...";
             fps.Text = "";
 
@@ -220,7 +223,7 @@ namespace TerrainSamples.SceneSkybox
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
 
-            lakeBottom = await AddComponentGround<Scenery, GroundDescription>("Lake Bottom", "Lake Bottom", groundDesc);
+            lakeBottom = await AddComponentEffect<Scenery, GroundDescription>("Lake Bottom", "Lake Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -230,6 +233,7 @@ namespace TerrainSamples.SceneSkybox
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("SceneSkybox/resources", "torch.json"),
                 StartsVisible = false,
+                PathFindingHull = PickingHullTypes.Default,
             };
 
             torchs = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
@@ -244,7 +248,7 @@ namespace TerrainSamples.SceneSkybox
                 StartsVisible = false,
             };
 
-            obelisks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc);
+            obelisks = await AddComponentEffect<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc);
         }
         private async Task InitializeFountain()
         {
@@ -253,6 +257,7 @@ namespace TerrainSamples.SceneSkybox
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("SceneSkybox/resources/Fountain", "Fountain.json"),
                 StartsVisible = false,
+                PathFindingHull = PickingHullTypes.Perfect,
             };
 
             fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
@@ -287,7 +292,7 @@ namespace TerrainSamples.SceneSkybox
                 StartsVisible = false,
             };
 
-            movingFire = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
+            movingFire = await AddComponentEffect<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
         }
         private async Task InitializeParticles()
         {
@@ -313,14 +318,14 @@ namespace TerrainSamples.SceneSkybox
                 MaxDecalCount = 1000,
                 RotateDecals = true,
             };
-            decalEmitter = await AddComponent<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
+            decalEmitter = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
         private async Task InitializeResourcesCompleted(LoadResourcesResult res)
@@ -334,37 +339,18 @@ namespace TerrainSamples.SceneSkybox
                 return;
             }
 
-            await InitializeNavigationMesh();
+            //Put ground objects in position
+            StartGroundObjects();
+
+            await StartPathFinding();
 
             StartScene();
 
-            StartSound();
+            StartSounds();
 
             gameReady = true;
         }
-        private async Task InitializeNavigationMesh()
-        {
-            //Put ground objects in position
-            PrepareGround();
-
-            //Configure the input geometry
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            //Configure de navigation mesh build settings
-            var nvSettings = BuildSettings.Default;
-            nvSettings.TileSize = 32;
-            nvSettings.CellSize = 0.05f;
-            nvSettings.CellHeight = 0.2f;
-            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = walker;
-
-            //Generate the path finder description
-            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
-
-            await UpdateNavigationGraph((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
-            await Task.Delay(500);
-        }
-        private void PrepareGround()
+        private void StartGroundObjects()
         {
             Parallel.For(0, firePositions.Length, (i, loopState) =>
             {
@@ -412,6 +398,25 @@ namespace TerrainSamples.SceneSkybox
 
             fountain.Manipulator.SetScale(2.3f);
         }
+        private async Task StartPathFinding()
+        {
+            //Configure the input geometry
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            //Configure de navigation mesh build settings
+            var nvSettings = BuildSettings.Default;
+            nvSettings.TileSize = 16;
+            nvSettings.CellSize = 0.05f;
+            nvSettings.CellHeight = 0.02f;
+            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
+            nvSettings.Agents[0] = walker;
+
+            //Generate the path finder description
+            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
+
+            await UpdateNavigationGraph((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
+            await Task.Delay(500);
+        }
         private void StartScene()
         {
             Lights.DirectionalLights[0].Enabled = true;
@@ -443,13 +448,17 @@ namespace TerrainSamples.SceneSkybox
             movingFire.Visible = true;
             pManager.Visible = true;
 
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.SimpleReinhard);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
+
 #if DEBUG
             help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
             help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
         }
-        private void StartSound()
+        private void StartSounds()
         {
             const string sphereSound = "target_balls_single_loop";
             const string sphereEffect = "Sphere";
@@ -523,11 +532,8 @@ namespace TerrainSamples.SceneSkybox
             }
 
             UpdateInputDebug();
-
-            Vector3 previousPosition = Camera.Position;
             UpdateInputCamera();
-            UpdateInputPlayer(previousPosition);
-
+            UpdateInputPlayer();
             UpdateInputLights();
         }
         private void UpdateInputCamera()
@@ -595,15 +601,15 @@ namespace TerrainSamples.SceneSkybox
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateInputPlayer(Vector3 previousPosition)
+        private void UpdateInputPlayer()
         {
-            if (Walk(walker, previousPosition, Camera.Position, true, out Vector3 walkerPosition))
+            if (Walk(walker, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.Goto(walkerPosition);
+                Camera.Goto(walkerPos);
             }
             else
             {
-                Camera.Goto(previousPosition);
+                Camera.Goto(Camera.Position);
             }
         }
         private void UpdateInputLights()
@@ -657,10 +663,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 graphDrawer.Visible = !graphDrawer.Visible;
 
-                if (graphDrawer.Visible)
-                {
-                    DEBUGUpdateGraphDrawer();
-                }
+                DEBUGUpdateGraphDrawer();
             }
         }
         private void UpdateState(GameTime gameTime)
@@ -739,15 +742,22 @@ namespace TerrainSamples.SceneSkybox
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = GetNodes(walker).OfType<GraphNode>();
-            if (nodes.Any())
+            if (!graphDrawer.Visible)
             {
-                graphDrawer.Clear();
+                return;
+            }
 
-                foreach (var node in nodes)
-                {
-                    graphDrawer.AddPrimitives(node.Color, node.Triangles);
-                }
+            var nodes = GetNodes(walker).OfType<GraphNode>();
+            if (!nodes.Any())
+            {
+                return;
+            }
+
+            graphDrawer.Clear();
+
+            foreach (var node in nodes)
+            {
+                graphDrawer.AddPrimitives(node.Color, node.Triangles);
             }
         }
 

@@ -263,26 +263,6 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
-        /// Attach geometry to ground
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object</param>
-        /// <param name="x">X position</param>
-        /// <param name="z">Z position</param>
-        /// <param name="transform">Transform</param>
-        public void AttachToGround(IDrawable obj)
-        {
-            if (obj.Usage == SceneObjectUsages.Ground)
-            {
-                return;
-            }
-
-            BoundingBox = null;
-
-            obj.Usage = SceneObjectUsages.Ground;
-        }
-
-        /// <summary>
         /// Updates the navigation graph
         /// </summary>
         /// <param name="progressCallback">Optional progress callback</param>
@@ -375,7 +355,7 @@ namespace Engine.PathFinding
         /// <returns>Returns a triangle list</returns>
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
-            var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Usage.HasFlag(SceneObjectUsages.Ground));
+            var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Usage == SceneObjectUsages.Ground);
 
             var allTris = navComponents.SelectMany(GetGeometryForNavigationGraph<Triangle>).ToArray();
 

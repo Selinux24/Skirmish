@@ -342,23 +342,27 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private async Task InitializeUI()
         {
-            console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui1", "Console", UIConsoleDescription.Default(), LayerUI + 1);
-            console.Visible = false;
+            var consoleDesc = UIConsoleDescription.Default();
+            consoleDesc.StartsVisible = false;
+            consoleDesc.LogFilterFunc = (l) => l.LogLevel == LogLevel.Debug;
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui1", "Console", consoleDesc, LayerUI + 1);
 
-            pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
-            pbLevels.Visible = false;
+            var pvLevelsDesc = UIProgressBarDescription.Default(Color.Transparent, Color.Green);
+            pvLevelsDesc.StartsVisible = false;
+            pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", pvLevelsDesc);
 
             var messagesFont = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48);
             var messagesDesc = UITextAreaDescription.Default(messagesFont);
+            messagesDesc.StartsVisible = false;
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Messages", messagesDesc, LayerUI + 1);
             messages.Text = null;
             messages.TextForeColor = Color.Red;
             messages.TextShadowColor = Color.DarkRed;
             messages.SetPosition(new Vector2(0, 0));
-            messages.Visible = false;
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
             dialogDesc.DialogButtons = UIDialogButtons.Accept;
+            dialogDesc.StartsVisible = false;
             dialog = await AddComponentUI<UIDialog, UIDialogDescription>("ui4", "Dialog", dialogDesc, LayerUI + 1);
             dialog.OnAcceptHandler += (s, e) =>
             {
@@ -371,15 +375,14 @@ namespace TerrainSamples.SceneModularDungeon
                     Game.SetScene<SceneStart.StartScene>();
                 });
             };
-            dialog.Visible = false;
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
+                StartsVisible = false,
             };
             selectedItemDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
-            selectedItemDrawer.Visible = false;
         }
         private async Task InitializeMapTexture()
         {
@@ -809,19 +812,6 @@ namespace TerrainSamples.SceneModularDungeon
             //Graph
             bboxesDrawer.Clear();
 
-            //Boxes
-            var rndBoxes = Helper.NewGenerator(1);
-
-            var dict = scenery.GetMapVolumes();
-
-            foreach (var item in dict.Values)
-            {
-                var color = rndBoxes.NextColor().ToColor4();
-                color.Alpha = 0.40f;
-
-                bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, item.ToArray())));
-            }
-
             //Objects
             UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance), Color.PaleVioletRed);
             UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance), Color.ForestGreen);
@@ -867,26 +857,24 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void UpdatePlayerInput()
         {
-            var deltaPosition = Vector3.Zero;
-
             if (Game.Input.KeyPressed(Keys.A))
             {
-                deltaPosition += Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                deltaPosition += Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                deltaPosition += Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                deltaPosition += Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
 #if DEBUG
@@ -904,7 +892,7 @@ namespace TerrainSamples.SceneModularDungeon
                 Game.Input.MouseYDelta);
 #endif
 
-            if (Walk(playerAgentType, Camera.Position, Camera.Position + deltaPosition, true, out Vector3 walkerPos))
+            if (Walk(playerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
                 Camera.Goto(walkerPos);
             }
