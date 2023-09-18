@@ -10,6 +10,14 @@ namespace Engine.BuiltIn.Deferred
     public class BuiltInLightDirectional : BuiltInDrawer
     {
         /// <summary>
+        /// Pixel shader
+        /// </summary>
+        private readonly DeferredLightDirectionalPs pixelShader;
+        /// <summary>
+        /// Directional light constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<BuiltInShaders.BufferLightDirectional> cbDirectional;
+        /// <summary>
         /// Point sampler
         /// </summary>
         private readonly EngineSamplerState pointSampler;
@@ -20,7 +28,9 @@ namespace Engine.BuiltIn.Deferred
         public BuiltInLightDirectional() : base()
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
-            SetPixelShader<DeferredLightDirectionalPs>(false);
+            pixelShader = SetPixelShader<DeferredLightDirectionalPs>(false);
+
+            cbDirectional = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightDirectional>(false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }
@@ -31,9 +41,8 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="geometryMap">Geometry map</param>
         public void UpdateGeometryMap(IEnumerable<EngineShaderResourceView> geometryMap)
         {
-            var pixelShader = GetPixelShader<DeferredLightDirectionalPs>();
-            pixelShader?.SetDeferredBuffer(geometryMap);
-            pixelShader?.SetPointSampler(pointSampler);
+            pixelShader.SetDeferredBuffer(geometryMap);
+            pixelShader.SetPointSampler(pointSampler);
         }
         /// <summary>
         /// Updates per light buffer
@@ -42,11 +51,9 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="light">Light constant buffer</param>
         public void UpdatePerLight(IEngineDeviceContext dc, ISceneLightDirectional light)
         {
-            var cbDirectional = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightDirectional>();
             dc.UpdateConstantBuffer(cbDirectional, BuiltInShaders.BufferLightDirectional.Build(light));
 
-            var pixelShader = GetPixelShader<DeferredLightDirectionalPs>();
-            pixelShader?.SetPerLightConstantBuffer(cbDirectional);
+            pixelShader.SetPerLightConstantBuffer(cbDirectional);
         }
     }
 }

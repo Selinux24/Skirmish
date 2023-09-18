@@ -10,6 +10,10 @@ namespace Engine.BuiltIn.Deferred
     public class BuiltInComposer : BuiltInDrawer
     {
         /// <summary>
+        /// Composer pixel shader
+        /// </summary>
+        private readonly DeferredComposerPs pixelShader;
+        /// <summary>
         /// Point sampler
         /// </summary>
         private readonly EngineSamplerState pointSampler;
@@ -20,7 +24,7 @@ namespace Engine.BuiltIn.Deferred
         public BuiltInComposer() : base()
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
-            SetPixelShader<DeferredComposerPs>(false);
+            pixelShader = SetPixelShader<DeferredComposerPs>(false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }
@@ -31,10 +35,9 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="geometryMap">Geometry map</param>
         public void UpdateGeometryMap(IEnumerable<EngineShaderResourceView> geometryMap, EngineShaderResourceView lightMap)
         {
-            var pixelShader = GetPixelShader<DeferredComposerPs>();
-            pixelShader?.SetDeferredBuffer(geometryMap);
-            pixelShader?.SetLightMap(lightMap);
-            pixelShader?.SetPointSampler(pointSampler);
+            pixelShader.SetDeferredBuffer(geometryMap);
+            pixelShader.SetLightMap(lightMap);
+            pixelShader.SetPointSampler(pointSampler);
         }
     }
 }

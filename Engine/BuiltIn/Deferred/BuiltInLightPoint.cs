@@ -39,6 +39,22 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <summary>
+        /// Vertex shader
+        /// </summary>
+        private readonly DeferredLightVs vertexShader;
+        /// <summary>
+        /// Pixel shader
+        /// </summary>
+        private readonly DeferredLightPointPs pixelShader;
+        /// <summary>
+        /// Per light constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerLight> cbLight;
+        /// <summary>
+        /// Point light constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<BuiltInShaders.BufferLightPoint> cbPoint;
+        /// <summary>
         /// Point sampler
         /// </summary>
         private readonly EngineSamplerState pointSampler;
@@ -48,8 +64,11 @@ namespace Engine.BuiltIn.Deferred
         /// </summary>
         public BuiltInLightPoint() : base()
         {
-            SetVertexShader<DeferredLightVs>(false);
-            SetPixelShader<DeferredLightPointPs>(false);
+            vertexShader = SetVertexShader<DeferredLightVs>(false);
+            pixelShader = SetPixelShader<DeferredLightPointPs>(false);
+
+            cbLight = BuiltInShaders.GetConstantBuffer<PerLight>(false);
+            cbPoint = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightPoint>(false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }
@@ -60,9 +79,8 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="geometryMap">Geometry map</param>
         public void UpdateGeometryMap(IEnumerable<EngineShaderResourceView> geometryMap)
         {
-            var pixelShader = GetPixelShader<DeferredLightPointPs>();
-            pixelShader?.SetDeferredBuffer(geometryMap);
-            pixelShader?.SetPointSampler(pointSampler);
+            pixelShader.SetDeferredBuffer(geometryMap);
+            pixelShader.SetPointSampler(pointSampler);
         }
         /// <summary>
         /// Updates per light buffer
@@ -71,17 +89,13 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="light">Light constant buffer</param>
         public void UpdatePerLight(IEngineDeviceContext dc, ISceneLightPoint light)
         {
-            var cbLight = BuiltInShaders.GetConstantBuffer<PerLight>();
             dc.UpdateConstantBuffer(cbLight, PerLight.Build(light.Local));
 
-            var vertexShader = GetVertexShader<DeferredLightVs>();
-            vertexShader?.SetPerLightConstantBuffer(cbLight);
+            vertexShader.SetPerLightConstantBuffer(cbLight);
 
-            var cbPoint = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightPoint>();
             dc.UpdateConstantBuffer(cbPoint, BuiltInShaders.BufferLightPoint.Build(light));
 
-            var pixelShader = GetPixelShader<DeferredLightPointPs>();
-            pixelShader?.SetPerLightConstantBuffer(cbPoint);
+            pixelShader.SetPerLightConstantBuffer(cbPoint);
         }
     }
 }

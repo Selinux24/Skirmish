@@ -392,27 +392,6 @@ namespace Engine
         private EngineBlendState blendDeferredComposerAdditive = null;
 
         /// <summary>
-        /// Geometry map
-        /// </summary>
-        protected IEnumerable<EngineShaderResourceView> GeometryMap
-        {
-            get
-            {
-                return geometryBuffer?.Textures ?? Enumerable.Empty<EngineShaderResourceView>();
-            }
-        }
-        /// <summary>
-        /// Light map
-        /// </summary>
-        protected IEnumerable<EngineShaderResourceView> LightMap
-        {
-            get
-            {
-                return lightBuffer?.Textures ?? Enumerable.Empty<EngineShaderResourceView>();
-            }
-        }
-
-        /// <summary>
         /// View port
         /// </summary>
         public Viewport Viewport { get; set; }
@@ -457,9 +436,9 @@ namespace Engine
         {
             if (disposing)
             {
-                geometryBuffer?.Dispose();
+                geometryBuffer.Dispose();
                 geometryBuffer = null;
-                lightBuffer?.Dispose();
+                lightBuffer.Dispose();
                 lightBuffer = null;
                 lightDrawer?.Dispose();
                 lightDrawer = null;
@@ -484,20 +463,20 @@ namespace Engine
         {
             UpdateRectangleAndView();
 
-            geometryBuffer?.Resize();
+            geometryBuffer.Resize();
 
-            lightBuffer?.Resize();
+            lightBuffer.Resize();
 
             base.Resize();
         }
         /// <inheritdoc/>
         public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResults.LightMap) return LightMap.FirstOrDefault();
+            if (result == SceneRendererResults.LightMap) return lightBuffer.Texture;
 
-            var colorMap = GeometryMap.ElementAtOrDefault(0);
-            var normalMap = GeometryMap.ElementAtOrDefault(1);
-            var depthMap = GeometryMap.ElementAtOrDefault(2);
+            var colorMap = geometryBuffer.Textures.ElementAtOrDefault(0);
+            var normalMap = geometryBuffer.Textures.ElementAtOrDefault(1);
+            var depthMap = geometryBuffer.Textures.ElementAtOrDefault(2);
 
             if (result == SceneRendererResults.ColorMap) return colorMap;
             if (result == SceneRendererResults.NormalMap) return normalMap;
@@ -880,7 +859,7 @@ namespace Engine
             {
                 lightDrawer.BindGlobalLight(dc);
 
-                lightDirectionalDrawer.UpdateGeometryMap(GeometryMap);
+                lightDirectionalDrawer.UpdateGeometryMap(geometryBuffer.Textures);
 
                 foreach (var light in directionalLights)
                 {
@@ -902,7 +881,7 @@ namespace Engine
             {
                 lightDrawer.BindPoint(dc);
 
-                lightPointDrawer.UpdateGeometryMap(GeometryMap);
+                lightPointDrawer.UpdateGeometryMap(geometryBuffer.Textures);
 
                 foreach (var light in pointLights)
                 {
@@ -930,7 +909,7 @@ namespace Engine
             {
                 lightDrawer.BindSpot(dc);
 
-                lightSpotDrawer.UpdateGeometryMap(GeometryMap);
+                lightSpotDrawer.UpdateGeometryMap(geometryBuffer.Textures);
 
                 foreach (var light in spotLights)
                 {
@@ -973,12 +952,12 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            if (GeometryMap != null && LightMap != null)
+            if (geometryBuffer.Textures != null && lightBuffer.Texture != null)
             {
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
 #endif
-                composer.UpdateGeometryMap(GeometryMap, LightMap.ElementAtOrDefault(0));
+                composer.UpdateGeometryMap(geometryBuffer.Textures, lightBuffer.Texture);
 
                 lightDrawer.BindResult(dc);
 
