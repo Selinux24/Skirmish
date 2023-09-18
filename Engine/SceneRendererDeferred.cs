@@ -800,7 +800,7 @@ namespace Engine
 
             //Set g-buffer render targets
             dc.SetRenderTargets(
-                geometryBuffer.Targets, true, Scene.GameEnvironment.Background,
+                geometryBuffer.Targets, true, Color.Transparent,
                 Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
         }
