@@ -8,30 +8,8 @@
     <RootNamespace>BasicSamples</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SonarQubeTestProject>False</SonarQubeTestProject>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="SceneNormalMap\Resources\diffuse.dds" />
-    <None Remove="SceneNormalMap\Resources\normal.bmp" />
-    <None Remove="SceneNormalMap\Resources\Wall.dae" />
-    <None Remove="SceneNormalMap\Resources\Wall.json" />
-    <None Remove="SceneParticles\fire.png" />
-    <None Remove="SceneParticles\floor.png" />
-    <None Remove="SceneParticles\smoke.png" />
-    <None Remove="SceneUI\Resources\background.jpg" />
-    <None Remove="SceneUI\Resources\buttons.png" />
-    <None Remove="SceneUI\Resources\CaviarDreams.ttf" />
-    <None Remove="SceneUI\Resources\Chunk Five Print.otf" />
-    <None Remove="SceneUI\Resources\FFF_Tusj.ttf" />
-    <None Remove="SceneUI\Resources\LeagueSpartan-Bold.otf" />
-    <None Remove="SceneUI\Resources\MaraFont.png" />
-    <None Remove="SceneUI\Resources\MaraFont.txt" />
-    <None Remove="SceneUI\Resources\pan.jpg" />
-    <None Remove="SceneUI\Resources\pan_bw.png" />
-    <None Remove="SceneUI\Resources\seafloor.dds" />
-    <None Remove="SceneUI\Resources\SEASRN__.ttf" />
-    <None Remove="SceneUI\Resources\smiley.png" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Common\buttons.png">

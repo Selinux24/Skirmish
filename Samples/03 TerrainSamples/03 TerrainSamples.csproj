@@ -11,11 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SceneStart\HelveticaNeue Medium.ttf" />
-    <None Remove="SceneStart\HelveticaNeueHv.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="SceneCrowds\Resources\Leopard.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
