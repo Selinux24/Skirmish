@@ -8,6 +8,31 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public class Contour
     {
         /// <summary>
+        /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
+        /// </summary>
+        public Int4[] Vertices { get; set; }
+        /// <summary>
+        /// The number of vertices in the simplified contour. 
+        /// </summary>
+        public int NVertices { get; set; }
+        /// <summary>
+        /// Raw contour vertex and connection data. [Size: 4 * #nrverts]
+        /// </summary>
+        public Int4[] RawVertices { get; set; }
+        /// <summary>
+        /// The number of vertices in the raw contour. 
+        /// </summary>
+        public int NRawVertices { get; set; }
+        /// <summary>
+        /// The region id of the contour.
+        /// </summary>
+        public int RegionId { get; set; }
+        /// <summary>
+        /// The area id of the contour.
+        /// </summary>
+        public AreaTypes Area { get; set; }
+
+        /// <summary>
         /// Merges a contour into another, and clears it
         /// </summary>
         /// <param name="ca">Merged contour</param>
@@ -41,31 +66,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
-        /// </summary>
-        public Int4[] Vertices { get; set; }
-        /// <summary>
-        /// The number of vertices in the simplified contour. 
-        /// </summary>
-        public int NVertices { get; set; }
-        /// <summary>
-        /// Raw contour vertex and connection data. [Size: 4 * #nrverts]
-        /// </summary>
-        public Int4[] RawVertices { get; set; }
-        /// <summary>
-        /// The number of vertices in the raw contour. 
-        /// </summary>
-        public int NRawVertices { get; set; }
-        /// <summary>
-        /// The region id of the contour.
-        /// </summary>
-        public int RegionId { get; set; }
-        /// <summary>
-        /// The area id of the contour.
-        /// </summary>
-        public AreaTypes Area { get; set; }
-
-        /// <summary>
         /// Finds the left most vertex in the contour
         /// </summary>
         /// <param name="minx">Resulting minimum x value</param>
@@ -88,16 +88,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        public int CalcAreaOfPolygon2D()
+        {
+            int area = 0;
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+            for (int i = 0, j = NVertices - 1; i < NVertices; j = i++)
+            {
+                var vi = Vertices[i];
+                var vj = Vertices[j];
+                area += vi.X * vj.Z - vj.X * vi.Z;
+            }
+
+            return (area + 1) / 2;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format(
-                "Region Id: {0}; Area: {1}; Simplified Verts: {2}; Raw Verts: {3};",
-                this.RegionId, this.Area, this.NVertices, this.NRawVertices);
+            return $"Region Id: {RegionId}; Area: {Area}; Simplified Verts: {NVertices}; Raw Verts: {NRawVertices};";
         }
     };
 }

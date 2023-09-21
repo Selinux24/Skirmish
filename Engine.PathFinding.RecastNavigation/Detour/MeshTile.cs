@@ -13,6 +13,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class MeshTile
     {
         /// <summary>
+        /// A value that indicates the entity does not link to anything.
+        /// </summary>
+        public const int DT_NULL_LINK = int.MaxValue;
+
+        /// <summary>
         /// Tile index
         /// </summary>
         public int Index { get; set; }
@@ -133,7 +138,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var va = Verts[p.Verts[0]];
                 var vb = Verts[p.Verts[j - 1]];
                 var vc = Verts[p.Verts[j]];
-                polyArea += DetourUtils.TriArea2D(va, vb, vc);
+                polyArea += Utils.TriArea2D(va, vb, vc);
             }
 
             return polyArea;
@@ -210,6 +215,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return OffMeshCons[index];
         }
 
+        public int AllocLink()
+        {
+            if (LinksFreeList == DT_NULL_LINK)
+            {
+                return DT_NULL_LINK;
+            }
+            int link = LinksFreeList;
+            LinksFreeList = Links[link].Next;
+            return link;
+        }
+
+        public void FreeLink(int link)
+        {
+            Links[link].Next = LinksFreeList;
+            LinksFreeList = link;
+        }
         /// <summary>
         /// Find link that points to neighbour reference.
         /// </summary>
@@ -223,7 +244,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             left = Vector3.Zero;
             right = Vector3.Zero;
 
-            for (int i = fromPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            for (int i = fromPoly.FirstLink; i != DT_NULL_LINK; i = Links[i].Next)
             {
                 if (Links[i].NRef == r)
                 {
@@ -290,7 +311,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int idx1 = 1;
 
             // Find link that points to first vertex.
-            for (int i = poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            for (int i = poly.FirstLink; i != DT_NULL_LINK; i = Links[i].Next)
             {
                 if (Links[i].Edge == 0)
                 {
@@ -394,10 +415,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Index: {Index}; Salt: {Salt}; Links: {LinksFreeList}; Flags: {Flags}; Header: {Header}; Data: {Data}";

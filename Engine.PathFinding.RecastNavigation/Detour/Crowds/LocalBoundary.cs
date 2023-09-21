@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navquery, QueryFilter filter)
         {
-            int MAX_SEGS_PER_POLY = DetourUtils.DT_VERTS_PER_POLYGON * 3;
+            int MAX_SEGS_PER_POLY = NavMeshCreateParams.DT_VERTS_PER_POLYGON * 3;
             float collisionQueryRangeSq = collisionQueryRange * collisionQueryRange;
 
             if (r <= 0)
@@ -46,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 foreach (var seg in segs)
                 {
                     // Skip too distant segments.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(pos, seg.S1, seg.S2, out _);
+                    float distSqr = Utils.DistancePtSegSqr2D(pos, seg.S1, seg.S2, out _);
                     if (distSqr > collisionQueryRangeSq)
                     {
                         continue;

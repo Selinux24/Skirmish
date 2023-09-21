@@ -10,6 +10,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public struct MeshHeader
     {
         /// <summary>
+        /// A magic number used to detect compatibility of navigation tile data.
+        /// </summary>
+        public const int DT_NAVMESH_MAGIC = 'D' << 24 | 'N' << 16 | 'A' << 8 | 'V';
+        /// <summary>
+        /// A version number used to detect compatibility of navigation tile data.
+        /// </summary>
+        public const int DT_NAVMESH_VERSION = 7;
+
+        /// <summary>
         /// Tile magic number. (Used to identify the data format.)
         /// </summary>
         public int Magic { get; set; }
@@ -91,9 +100,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public float BvQuantFactor { get; set; }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Validates the header magic and version
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        public readonly bool IsValid()
+        {
+            if (Magic != DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+            if (Version != DT_NAVMESH_VERSION)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"{X}.{Y}.{Layer}; Id: {UserId}; Bbox: {Bounds}; Polys: {PolyCount}; Vertices: {VertCount}; DMeshes: {DetailMeshCount}; DTriangles: {DetailTriCount}; DVertices: {DetailVertCount}";

@@ -216,7 +216,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res.ToArray();
         }
- 
+
         /// <summary>
         /// Merges a list of polygon mesh details
         /// </summary>
@@ -279,8 +279,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var vi = vpoly.ElementAt(i);
                 var vj = vpoly.ElementAt(j);
-                if (RecastUtils.DistancePtSeg2D(va, vj, vi) < thrSqr &&
-                    RecastUtils.DistancePtSeg2D(vb, vj, vi) < thrSqr)
+                if (Utils.DistancePtSeg2D(va, vj, vi) < thrSqr &&
+                    Utils.DistancePtSeg2D(vb, vj, vi) < thrSqr)
                 {
                     return 1;
                 }

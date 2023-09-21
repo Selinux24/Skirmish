@@ -378,7 +378,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 cir.Dp.Normalize();
                 Vector3 dv = cir.DVel - dvel;
 
-                float a = DetourUtils.TriArea2D(orig, cir.Dp, dv);
+                float a = Utils.TriArea2D(orig, cir.Dp, dv);
                 if (a < 0.01f)
                 {
                     var np = cir.Np;
@@ -402,7 +402,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             foreach (var seg in m_segments)
             {
                 // Precalc if the agent is really close to the segment.
-                seg.Touch = DetourUtils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out _) < 0.0001f;
+                seg.Touch = Utils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out _) < 0.0001f;
             }
         }
         /// <summary>

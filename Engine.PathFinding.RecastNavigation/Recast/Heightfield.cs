@@ -1,34 +1,11 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
     class Heightfield
     {
-        /// <summary>
-        /// Builds a new empty heightfield
-        /// </summary>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="bbox">Bounds</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="cellHeight">Cell height</param>
-        /// <returns>Returns a new heightfield</returns>
-        public static Heightfield Build(int width, int height, BoundingBox bbox, float cellSize, float cellHeight)
-        {
-            return new Heightfield
-            {
-                Width = width,
-                Height = height,
-                BoundingBox = bbox,
-                CellSize = cellSize,
-                CellHeight = cellHeight,
-                Spans = new Span[width * height],
-            };
-        }
-
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
         /// </summary>
@@ -61,6 +38,72 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The next free span.
         /// </summary>
         public Span FreeList;
+
+        /// <summary>
+        /// Builds a new empty heightfield
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="bbox">Bounds</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="cellHeight">Cell height</param>
+        /// <returns>Returns a new heightfield</returns>
+        public static Heightfield Build(int width, int height, BoundingBox bbox, float cellSize, float cellHeight)
+        {
+            return new Heightfield
+            {
+                Width = width,
+                Height = height,
+                BoundingBox = bbox,
+                CellSize = cellSize,
+                CellHeight = cellHeight,
+                Spans = new Span[width * height],
+            };
+        }
+        private static (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
+        {
+            int minh = minHeight;
+            int asmin = minimumAccessibleNeigbor;
+            int asmax = maximumAccessibleNeigbor;
+
+            int bot = span.smax;
+            int top = span.next != null ? span.next.smin : int.MaxValue;
+
+            // From minus infinity to the first span.
+            int nbot = -walkableClimb;
+            int ntop = nSpan != null ? nSpan.smin : int.MaxValue;
+
+            // Skip neightbour if the gap between the spans is too small.
+            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
+            {
+                minh = Math.Min(minh, nbot - bot);
+            }
+
+            var ns = nSpan;
+            while (ns != null)
+            {
+                nbot = ns.smax;
+                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
+
+                // Skip neightbour if the gap between the spans is too small.
+                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
+                {
+                    minh = Math.Min(minh, nbot - bot);
+
+                    // Find min/max accessible neighbour height. 
+                    if (Math.Abs(nbot - bot) <= walkableClimb)
+                    {
+                        if (nbot < asmin) asmin = nbot;
+                        if (nbot > asmax) asmax = nbot;
+                    }
+
+                }
+
+                ns = ns.next;
+            }
+
+            return (minh, asmin, asmax);
+        }
 
         /// <summary>
         /// Gets the span count
@@ -297,8 +340,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int dir = 0; dir < 4; ++dir)
             {
                 // Skip neighbours which are out of bounds.
-                int dx = x + RecastUtils.GetDirOffsetX(dir);
-                int dy = y + RecastUtils.GetDirOffsetY(dir);
+                int dx = x + ContourSet.GetDirOffsetX(dir);
+                int dy = y + ContourSet.GetDirOffsetY(dir);
                 if (dx < 0 || dy < 0 || dx >= width || dy >= height)
                 {
                     minh = Math.Min(minh, -walkableClimb - span.smax);
@@ -322,50 +365,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
                 span.area = AreaTypes.RC_NULL_AREA;
             }
-        }
-        private static (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
-        {
-            int minh = minHeight;
-            int asmin = minimumAccessibleNeigbor;
-            int asmax = maximumAccessibleNeigbor;
-
-            int bot = span.smax;
-            int top = span.next != null ? span.next.smin : int.MaxValue;
-
-            // From minus infinity to the first span.
-            int nbot = -walkableClimb;
-            int ntop = nSpan != null ? nSpan.smin : int.MaxValue;
-
-            // Skip neightbour if the gap between the spans is too small.
-            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-            {
-                minh = Math.Min(minh, nbot - bot);
-            }
-
-            var ns = nSpan;
-            while (ns != null)
-            {
-                nbot = ns.smax;
-                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
-
-                // Skip neightbour if the gap between the spans is too small.
-                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-                {
-                    minh = Math.Min(minh, nbot - bot);
-
-                    // Find min/max accessible neighbour height. 
-                    if (Math.Abs(nbot - bot) <= walkableClimb)
-                    {
-                        if (nbot < asmin) asmin = nbot;
-                        if (nbot > asmax) asmax = nbot;
-                    }
-
-                }
-
-                ns = ns.next;
-            }
-
-            return (minh, asmin, asmax);
         }
         /// <summary>
         /// Filters the low-height spans

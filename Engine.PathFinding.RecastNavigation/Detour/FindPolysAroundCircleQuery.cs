@@ -25,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public bool Contains(Vector3 va, Vector3 vb)
         {
             // If the circle is not touching the next polygon, skip it.
-            float distSqr = DetourUtils.DistancePtSegSqr2D(Center, va, vb, out _);
+            float distSqr = Utils.DistancePtSegSqr2D(Center, va, vb, out _);
             if (distSqr > (Radius * Radius))
             {
                 return false;

@@ -18,6 +18,67 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         const int SPAN_MAX_HEIGHT = 0xff;
 
         /// <summary>
+        /// The width of the heightfield. (Along the x-axis in cell units.)
+        /// </summary>
+        public int Width { get; set; }
+        /// <summary>
+        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// </summary>
+        public int Height { get; set; }
+        /// <summary>
+        /// The number of spans in the heightfield.
+        /// </summary>
+        public int SpanCount { get; set; }
+        /// <summary>
+        /// The walkable height used during the build of the field.  (See: rcConfig::walkableHeight)
+        /// </summary>
+        public int WalkableHeight { get; set; }
+        /// <summary>
+        /// The walkable climb used during the build of the field. (See: rcConfig::walkableClimb)
+        /// </summary>
+        public int WalkableClimb { get; set; }
+        /// <summary>
+        /// The AABB border size used during the build of the field. (See: rcConfig::borderSize)
+        /// </summary>
+        public int BorderSize { get; set; }
+        /// <summary>
+        /// The maximum distance value of any span within the field.         
+        /// </summary>
+        public int MaxDistance { get; set; }
+        /// <summary>
+        /// The maximum region id of any span within the field. 
+        /// </summary>
+        public int MaxRegions { get; set; }
+        /// <summary>
+        /// The minimum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public BoundingBox BoundingBox { get; set; }
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; set; }
+        /// <summary>
+        /// Array of cells. [Size: width*height] 
+        /// </summary>
+        public CompactCell[] Cells { get; set; }
+        /// <summary>
+        /// Array of spans. [Size: spanCount]
+        /// </summary>
+        public CompactSpan[] Spans { get; set; }
+        /// <summary>
+        /// Array containing border distance data. [Size: spanCount]      
+        /// </summary>
+        public IEnumerable<int> BorderDistances { get; set; }
+        /// <summary>
+        /// Array containing area id data. [Size: spanCount] 
+        /// </summary>
+        public AreaTypes[] Areas { get; set; }
+
+        /// <summary>
         /// Builds a new compact heightfield
         /// </summary>
         /// <param name="hf">Heightfield</param>
@@ -232,67 +293,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// The width of the heightfield. (Along the x-axis in cell units.)
-        /// </summary>
-        public int Width { get; set; }
-        /// <summary>
-        /// The height of the heightfield. (Along the z-axis in cell units.)
-        /// </summary>
-        public int Height { get; set; }
-        /// <summary>
-        /// The number of spans in the heightfield.
-        /// </summary>
-        public int SpanCount { get; set; }
-        /// <summary>
-        /// The walkable height used during the build of the field.  (See: rcConfig::walkableHeight)
-        /// </summary>
-        public int WalkableHeight { get; set; }
-        /// <summary>
-        /// The walkable climb used during the build of the field. (See: rcConfig::walkableClimb)
-        /// </summary>
-        public int WalkableClimb { get; set; }
-        /// <summary>
-        /// The AABB border size used during the build of the field. (See: rcConfig::borderSize)
-        /// </summary>
-        public int BorderSize { get; set; }
-        /// <summary>
-        /// The maximum distance value of any span within the field.         
-        /// </summary>
-        public int MaxDistance { get; set; }
-        /// <summary>
-        /// The maximum region id of any span within the field. 
-        /// </summary>
-        public int MaxRegions { get; set; }
-        /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public BoundingBox BoundingBox { get; set; }
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CellSize { get; set; }
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CellHeight { get; set; }
-        /// <summary>
-        /// Array of cells. [Size: width*height] 
-        /// </summary>
-        public CompactCell[] Cells { get; set; }
-        /// <summary>
-        /// Array of spans. [Size: spanCount]
-        /// </summary>
-        public CompactSpan[] Spans { get; set; }
-        /// <summary>
-        /// Array containing border distance data. [Size: spanCount]      
-        /// </summary>
-        public IEnumerable<int> BorderDistances { get; set; }
-        /// <summary>
-        /// Array containing area id data. [Size: spanCount] 
-        /// </summary>
-        public AreaTypes[] Areas { get; set; }
-
-        /// <summary>
         /// Fill in cells and spans.
         /// </summary>
         /// <param name="spans">Heightfield span list</param>
@@ -368,8 +368,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int dir = 0; dir < 4; dir++)
             {
                 s.SetCon(dir, ContourSet.RC_NOT_CONNECTED);
-                int nx = x + RecastUtils.GetDirOffsetX(dir);
-                int ny = y + RecastUtils.GetDirOffsetY(dir);
+                int nx = x + ContourSet.GetDirOffsetX(dir);
+                int ny = y + ContourSet.GetDirOffsetY(dir);
 
                 // First check that the neighbour cell is in bounds.
                 if (nx < 0 || ny < 0 || nx >= Width || ny >= Height)
@@ -506,8 +506,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bool updated = false;
             int nd;
 
-            int ax = x + RecastUtils.GetDirOffsetX(dir1);
-            int ay = y + RecastUtils.GetDirOffsetY(dir1);
+            int ax = x + ContourSet.GetDirOffsetX(dir1);
+            int ay = y + ContourSet.GetDirOffsetY(dir1);
             int ai = Cells[ax + ay * Width].Index + s.GetCon(dir1);
             var asp = Spans[ai];
             nd = Math.Min(dist[ai] + 2, 255);
@@ -522,8 +522,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return updated;
             }
 
-            int aax = ax + RecastUtils.GetDirOffsetX(dir2);
-            int aay = ay + RecastUtils.GetDirOffsetY(dir2);
+            int aax = ax + ContourSet.GetDirOffsetX(dir2);
+            int aay = ay + ContourSet.GetDirOffsetY(dir2);
             int aai = Cells[aax + aay * Width].Index + asp.GetCon(dir2);
             nd = Math.Min(dist[aai] + 3, 255);
             if (nd < d)
@@ -561,8 +561,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    int nx = x + ContourSet.GetDirOffsetX(dir);
+                    int ny = y + ContourSet.GetDirOffsetY(dir);
                     int nidx = Cells[nx + ny * Width].Index + s.GetCon(dir);
                     if (Areas[nidx] != AreaTypes.RC_NULL_AREA)
                     {
@@ -594,8 +594,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int r = 0;
             if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + ContourSet.GetDirOffsetX(dir);
+                int ay = y + ContourSet.GetDirOffsetY(dir);
                 int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                 r = srcReg[ai];
             }
@@ -632,16 +632,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + ContourSet.GetDirOffsetX(dir);
+                int ay = y + ContourSet.GetDirOffsetY(dir);
                 int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                 var a = Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[1] = Spans[ai].Reg | ((int)Areas[ai] << 16);
                 if (a.GetCon(dirp) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dirp);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dirp);
+                    int ax2 = ax + ContourSet.GetDirOffsetX(dirp);
+                    int ay2 = ay + ContourSet.GetDirOffsetY(dirp);
                     int ai2 = Cells[ax2 + ay2 * Width].Index + a.GetCon(dirp);
                     var as2 = Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
@@ -650,16 +650,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             if (s.GetCon(dirp) != ContourSet.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dirp);
-                int ay = y + RecastUtils.GetDirOffsetY(dirp);
+                int ax = x + ContourSet.GetDirOffsetX(dirp);
+                int ay = y + ContourSet.GetDirOffsetY(dirp);
                 int ai = Cells[ax + ay * Width].Index + s.GetCon(dirp);
                 var a = Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[3] = Spans[ai].Reg | ((int)Areas[ai] << 16);
                 if (a.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir);
+                    int ax2 = ax + ContourSet.GetDirOffsetX(dir);
+                    int ay2 = ay + ContourSet.GetDirOffsetY(dir);
                     int ai2 = Cells[ax2 + ay2 * Width].Index + a.GetCon(dir);
                     var as2 = Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
@@ -763,8 +763,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             continue;
                         }
 
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + ContourSet.GetDirOffsetX(dir);
+                        int ay = y + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                         var a = Spans[ai];
                         if (a.Reg != region)
@@ -813,8 +813,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var cs = Spans[c.I];
                 foreach (var dir in IterateSpanConnections(cs))
                 {
-                    int ax = c.X + RecastUtils.GetDirOffsetX(dir);
-                    int ay = c.Y + RecastUtils.GetDirOffsetY(dir);
+                    int ax = c.X + ContourSet.GetDirOffsetX(dir);
+                    int ay = c.Y + ContourSet.GetDirOffsetY(dir);
                     int hx = ax - hp.Bounds.X - borderSize;
                     int hy = ay - hp.Bounds.Y - borderSize;
 
@@ -855,13 +855,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Calculate minimum extents of the polygon based on input data.
-            float minExtent = RecastUtils.PolyMinExtent(verts);
+            float minExtent = Utils.PolyMinExtent(verts);
 
             // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
             if (minExtent < sampleDist * 2)
             {
                 outVerts = verts.ToArray();
-                outTris = RecastUtils.TriangulateHull(verts, hull);
+                outTris = TriangulationHelper.TriangulateHull(verts, hull);
 
                 return;
             }
@@ -870,7 +870,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // We're using the triangulateHull instead of delaunayHull as it tends to
             // create a bit better triangulation for long thin triangles when there
             // are no internal points.
-            var tris = RecastUtils.TriangulateHull(verts, hull);
+            var tris = TriangulationHelper.TriangulateHull(verts, hull);
             if (!tris.Any())
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
@@ -1030,7 +1030,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int maxi = -1;
                 for (int m = a + 1; m < b; ++m)
                 {
-                    float dev = RecastUtils.DistancePtSeg(edge[m], va, vb);
+                    float dev = Utils.DistancePtSeg(edge[m], va, vb);
                     if (dev > maxd)
                     {
                         maxd = dev;
@@ -1141,7 +1141,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     };
 
                     // Make sure the samples are not too close to the edges.
-                    if (RecastUtils.DistToPoly(polygon, pt) > -sampleDist / 2)
+                    if (Utils.DistToPoly(polygon, pt) > -sampleDist / 2)
                     {
                         continue;
                     }
@@ -1184,7 +1184,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Z = s.Z * sampleDist + GetJitterY(i) * cs * 0.1f
                 };
 
-                float d = RecastUtils.DistToTriMesh(verts, tris, pt);
+                float d = Utils.DistToTriMesh(verts, tris, pt);
                 if (d < 0)
                 {
                     continue; // did not hit the mesh.
@@ -1309,11 +1309,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int directDir;
                 if (hdItem.X == pcx)
                 {
-                    directDir = RecastUtils.GetDirForOffset(0, pcy > hdItem.Y ? 1 : -1);
+                    directDir = ContourSet.GetDirForOffset(0, pcy > hdItem.Y ? 1 : -1);
                 }
                 else
                 {
-                    directDir = RecastUtils.GetDirForOffset(pcx > hdItem.X ? 1 : -1, 0);
+                    directDir = ContourSet.GetDirForOffset(pcx > hdItem.X ? 1 : -1, 0);
                 }
 
                 // Push the direct dir last so we start with this on next iteration
@@ -1328,8 +1328,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int newX = hdItem.X + RecastUtils.GetDirOffsetX(dir);
-                    int newY = hdItem.Y + RecastUtils.GetDirOffsetY(dir);
+                    int newX = hdItem.X + ContourSet.GetDirOffsetX(dir);
+                    int newY = hdItem.Y + ContourSet.GetDirOffsetY(dir);
 
                     int hpx = newX - hp.Bounds.X;
                     int hpy = newY - hp.Bounds.Y;
@@ -1392,8 +1392,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int curReg = 0;
             if (ss.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + ContourSet.GetDirOffsetX(dir);
+                int ay = y + ContourSet.GetDirOffsetY(dir);
                 int ai = Cells[ax + ay * Width].Index + ss.GetCon(dir);
                 curReg = srcReg[ai];
             }
@@ -1410,8 +1410,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int r = 0;
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + ContourSet.GetDirOffsetX(dir);
+                        int ay = y + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                         r = srcReg[ai];
                     }
@@ -1427,8 +1427,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 else
                 {
                     int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    int nx = x + ContourSet.GetDirOffsetX(dir);
+                    int ny = y + ContourSet.GetDirOffsetY(dir);
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
                         var nc = Cells[nx + ny * Width];
@@ -1499,8 +1499,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var s = Spans[i];
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + ContourSet.GetDirOffsetX(dir);
+                        int ay = y + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                         r = Spans[ai].Reg;
                         if (area != Areas[ai])
@@ -1524,8 +1524,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 else
                 {
                     int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    int nx = x + ContourSet.GetDirOffsetX(dir);
+                    int ny = y + ContourSet.GetDirOffsetY(dir);
                     var s = Spans[i];
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
@@ -1583,8 +1583,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax = x + RecastUtils.GetDirOffsetX(dir);
-                    int ay = y + RecastUtils.GetDirOffsetY(dir);
+                    int ax = x + ContourSet.GetDirOffsetX(dir);
+                    int ay = y + ContourSet.GetDirOffsetY(dir);
                     int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
                     if (Areas[ai] != AreaTypes.RC_NULL_AREA)
                     {
@@ -1598,8 +1598,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                    int ax2 = ax + ContourSet.GetDirOffsetX(dir2);
+                    int ay2 = ay + ContourSet.GetDirOffsetY(dir2);
                     int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                     if (Areas[ai2] != AreaTypes.RC_NULL_AREA)
                     {
@@ -1829,8 +1829,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax = x + RecastUtils.GetDirOffsetX(dir);
-                    int ay = y + RecastUtils.GetDirOffsetY(dir);
+                    int ax = x + ContourSet.GetDirOffsetX(dir);
+                    int ay = y + ContourSet.GetDirOffsetY(dir);
                     int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
                     d += src.ElementAt(ai);
 
@@ -1843,8 +1843,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                    int ax2 = ax + ContourSet.GetDirOffsetX(dir2);
+                    int ay2 = ay + ContourSet.GetDirOffsetY(dir2);
                     int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                     d += src.ElementAt(ai2);
                 }
@@ -1904,8 +1904,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax = x + RecastUtils.GetDirOffsetX(dir);
-                    int ay = y + RecastUtils.GetDirOffsetY(dir);
+                    int ax = x + ContourSet.GetDirOffsetX(dir);
+                    int ay = y + ContourSet.GetDirOffsetY(dir);
                     int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
                     if (area == Areas[ai])
                     {
@@ -1930,8 +1930,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return;
             }
 
-            int ax = x + RecastUtils.GetDirOffsetX(id1);
-            int ay = y + RecastUtils.GetDirOffsetY(id1);
+            int ax = x + ContourSet.GetDirOffsetX(id1);
+            int ay = y + ContourSet.GetDirOffsetY(id1);
             int ai = Cells[ax + ay * w].Index + s.GetCon(id1);
             if (res[ai] + 2 < res[i])
             {
@@ -1944,8 +1944,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return;
             }
 
-            int aax = ax + RecastUtils.GetDirOffsetX(id2);
-            int aay = ay + RecastUtils.GetDirOffsetY(id2);
+            int aax = ax + ContourSet.GetDirOffsetX(id2);
+            int aay = ay + ContourSet.GetDirOffsetY(id2);
             int aai = Cells[aax + aay * w].Index + a.GetCon(id2);
             if (res[aai] + 3 < res[i])
             {
@@ -2009,8 +2009,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int previd = 0;
                         if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + ContourSet.GetDirOffsetX(0);
+                            int ay = y + ContourSet.GetDirOffsetY(0);
                             int ai = Cells[ax + ay * w].Index + s.GetCon(0);
                             if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
                             {
@@ -2029,8 +2029,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -y
                         if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + ContourSet.GetDirOffsetX(3);
+                            int ay = y + ContourSet.GetDirOffsetY(3);
                             int ai = Cells[ax + ay * w].Index + s.GetCon(3);
                             if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
                             {
@@ -2275,8 +2275,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int previd = 0;
                         if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + ContourSet.GetDirOffsetX(0);
+                            int ay = y + ContourSet.GetDirOffsetY(0);
                             int ai = Cells[ax + ay * w].Index + s.GetCon(0);
                             if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
                             {
@@ -2295,8 +2295,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -y
                         if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + ContourSet.GetDirOffsetX(3);
+                            int ay = y + ContourSet.GetDirOffsetY(3);
                             int ai = Cells[ax + ay * w].Index + s.GetCon(3);
                             if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
                             {
@@ -2398,8 +2398,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // 8 connected
                     if (cs.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                        int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                        int ax = cx + ContourSet.GetDirOffsetX(dir);
+                        int ay = cy + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * w].Index + cs.GetCon(dir);
                         if (Areas[ai] != area)
                         {
@@ -2421,8 +2421,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int dir2 = (dir + 1) & 0x3;
                         if (a.GetCon(dir2) != ContourSet.RC_NOT_CONNECTED)
                         {
-                            int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                            int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                            int ax2 = ax + ContourSet.GetDirOffsetX(dir2);
+                            int ay2 = ay + ContourSet.GetDirOffsetY(dir2);
                             int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                             if (Areas[ai2] != area)
                             {
@@ -2450,8 +2450,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (cs.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                        int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                        int ax = cx + ContourSet.GetDirOffsetX(dir);
+                        int ay = cy + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * w].Index + cs.GetCon(dir);
                         if (Areas[ai] != area)
                         {
@@ -2537,8 +2537,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     for (int dir = 0; dir < 4; ++dir)
                     {
                         if (s.GetCon(dir) == ContourSet.RC_NOT_CONNECTED) continue;
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + ContourSet.GetDirOffsetX(dir);
+                        int ay = y + ContourSet.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
                         if (Areas[ai] != area) continue;
                         if (srcReg[ai] > 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && srcDist[ai] + 2 < d2)
@@ -2684,8 +2684,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + ContourSet.GetDirOffsetX(dir);
+                                int ay = y + ContourSet.GetDirOffsetY(dir);
                                 int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
                                 int rai = srcReg[ai];
                                 if (rai > 0 && rai < nreg && rai != ri)

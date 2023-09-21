@@ -1227,7 +1227,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Append neighbour segments as obstacles.
             foreach (var s in ag.Boundary.GetSegments())
             {
-                if (DetourUtils.TriArea2D(ag.NPos, s.S1, s.S2) < 0.0f)
+                if (Utils.TriArea2D(ag.NPos, s.S1, s.S2) < 0.0f)
                 {
                     continue;
                 }

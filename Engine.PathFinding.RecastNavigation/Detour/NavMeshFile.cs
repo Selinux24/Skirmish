@@ -70,7 +70,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             foreach (var tile in file.NavMeshData)
             {
-                if (tile == null || tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                if (tile == null || !tile.Header.IsValid())
                 {
                     continue;
                 }
@@ -86,7 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 foreach (var tile in file.TileCacheData)
                 {
-                    if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+                    if (!tile.Header.IsValid())
                     {
                         continue;
                     }

@@ -45,6 +45,63 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public const int RC_BORDER_VERTEX = 0x10000;
 
+        private static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
+        private static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
+        private static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
+
+        /// <summary>
+        /// An array of the contours in the set. [Size: #nconts]
+        /// </summary>
+        public Contour[] Conts { get; set; }
+        /// <summary>
+        /// The number of contours in the set.
+        /// </summary>
+        public int NConts { get; set; }
+        /// <summary>
+        /// The minimum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMin { get; set; }
+        /// <summary>
+        /// The maximum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMax { get; set; }
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; set; }
+        /// <summary>
+        /// The width of the set. (Along the x-axis in cell units.) 
+        /// </summary>
+        public int Width { get; set; }
+        /// <summary>
+        /// The height of the set. (Along the z-axis in cell units.) 
+        /// </summary>
+        public int Height { get; set; }
+        /// <summary>
+        /// The AABB border size used to generate the source data from which the contours were derived.
+        /// </summary>
+        public int BorderSize { get; set; }
+        /// <summary>
+        /// The max edge error that this contour set was simplified with.
+        /// </summary>
+        public float MaxError { get; set; }
+
+        public static int GetDirOffsetX(int dir)
+        {
+            return OffsetsX[dir & 0x03];
+        }
+        public static int GetDirOffsetY(int dir)
+        {
+            return OffsetsY[dir & 0x03];
+        }
+        public static int GetDirForOffset(int x, int y)
+        {
+            return OffsetsDir[((y + 1) << 1) + x];
+        }
         /// <summary>
         /// Builds a new contour set
         /// </summary>
@@ -145,8 +202,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int r = 0;
                     if (s.GetCon(dir) != RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + GetDirOffsetX(dir);
+                        int ay = y + GetDirOffsetY(dir);
                         int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
                         r = chf.Spans[ai].Reg;
                     }
@@ -323,7 +380,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     while (ci != endi)
                     {
-                        float d = RecastUtils.DistancePtSeg2D(points.ElementAt(ci).X, points.ElementAt(ci).Z, ax, az, bx, bz);
+                        float d = Utils.DistancePtSeg2D(points.ElementAt(ci).X, points.ElementAt(ci).Z, ax, az, bx, bz);
                         if (d > maxd)
                         {
                             maxd = d;
@@ -458,7 +515,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int npts = simplified.Count;
             for (int i = 0; i < npts; ++i)
             {
-                int ni = RecastUtils.Next(i, npts);
+                int ni = Utils.Next(i, npts);
 
                 if (!VEqualXZ(simplified[i], simplified[ni]))
                 {
@@ -476,47 +533,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return a.X == b.X && a.Z == b.Z;
         }
-
-        /// <summary>
-        /// An array of the contours in the set. [Size: #nconts]
-        /// </summary>
-        public Contour[] Conts { get; set; }
-        /// <summary>
-        /// The number of contours in the set.
-        /// </summary>
-        public int NConts { get; set; }
-        /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CellSize { get; set; }
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CellHeight { get; set; }
-        /// <summary>
-        /// The width of the set. (Along the x-axis in cell units.) 
-        /// </summary>
-        public int Width { get; set; }
-        /// <summary>
-        /// The height of the set. (Along the z-axis in cell units.) 
-        /// </summary>
-        public int Height { get; set; }
-        /// <summary>
-        /// The AABB border size used to generate the source data from which the contours were derived.
-        /// </summary>
-        public int BorderSize { get; set; }
-        /// <summary>
-        /// The max edge error that this contour set was simplified with.
-        /// </summary>
-        public float MaxError { get; set; }
 
         private void AddContour(int reg, AreaTypes area, IEnumerable<Int4> verts, IEnumerable<Int4> simplified, int maxContours, int borderSize)
         {
@@ -614,7 +630,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var cont = Conts[i];
                 // If the contour is wound backwards, it is a hole.
-                winding[i] = RecastUtils.CalcAreaOfPolygon2D(cont.Vertices, cont.NVertices) < 0 ? -1 : 1;
+                winding[i] = cont.CalcAreaOfPolygon2D() < 0 ? -1 : 1;
                 if (winding[i] < 0)
                 {
                     nholes++;

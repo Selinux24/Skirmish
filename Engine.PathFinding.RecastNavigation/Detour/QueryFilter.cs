@@ -8,6 +8,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class QueryFilter
     {
         /// <summary>
+        /// The maximum number of user defined area ids.
+        /// </summary>
+        const int DT_MAX_AREAS = 64;
+
+        /// <summary>
         /// Cost per area type. (Used by default implementation.)
         /// </summary>
         public float[] AreaCost { get; set; }
@@ -25,7 +30,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public QueryFilter()
         {
-            AreaCost = Helper.CreateArray(DetourUtils.DT_MAX_AREAS, 1.0f);
+            AreaCost = Helper.CreateArray(DT_MAX_AREAS, 1.0f);
 
             SetAreaCost(SamplePolyAreas.Ground, 1.0f);
             SetAreaCost(SamplePolyAreas.Water, 10.0f);

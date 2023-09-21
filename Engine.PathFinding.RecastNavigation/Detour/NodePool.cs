@@ -8,6 +8,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class NodePool : IDisposable
     {
+        /// <summary>
+        /// A value that indicates the entity does not references to anything.
+        /// </summary>
+        const int DT_NULL_IDX = -1;
+
         public int MaxNodes { get; set; }
         public int NodeCount { get; set; }
 
@@ -27,8 +32,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             HashSize = hashSize;
 
             Nodes = new Node[MaxNodes];
-            Next = Helper.CreateArray(MaxNodes, DetourUtils.DT_NULL_IDX);
-            First = Helper.CreateArray(HashSize, DetourUtils.DT_NULL_IDX);
+            Next = Helper.CreateArray(MaxNodes, DT_NULL_IDX);
+            First = Helper.CreateArray(HashSize, DT_NULL_IDX);
             NodeCount = 0;
         }
         /// <summary>
@@ -61,16 +66,35 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// From Thomas Wang, https://gist.github.com/badboy/6267743
+        /// </remarks>
+        static int HashRef(int a)
+        {
+            a += ~(a << 15);
+            a ^= a >> 10;
+            a += a << 3;
+            a ^= a >> 6;
+            a += ~(a << 11);
+            a ^= a >> 16;
+            return a;
+        }
+
         public void Clear()
         {
-            First = Helper.CreateArray(HashSize, DetourUtils.DT_NULL_IDX);
+            First = Helper.CreateArray(HashSize, DT_NULL_IDX);
             NodeCount = 0;
         }
         public Node GetNode(int id, int state)
         {
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
+            int bucket = HashRef(id) & (HashSize - 1);
             int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            while (i != DT_NULL_IDX)
             {
                 if (Nodes[i] != null && Nodes[i].Id == id && Nodes[i].State == state)
                 {
@@ -105,9 +129,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public Node FindNode(int id, int state)
         {
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
+            int bucket = HashRef(id) & (HashSize - 1);
             int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            while (i != DT_NULL_IDX)
             {
                 if (Nodes[i].Id == id && Nodes[i].State == state)
                 {
@@ -122,9 +146,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             nodes = new Node[maxNodes];
 
             int n = 0;
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
+            int bucket = HashRef(id) & (HashSize - 1);
             int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            while (i != DT_NULL_IDX)
             {
                 if (Nodes[i].Id == id)
                 {

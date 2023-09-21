@@ -142,8 +142,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // -x
                 if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax = x + RecastUtils.GetDirOffsetX(0);
-                    int ay = y + RecastUtils.GetDirOffsetY(0);
+                    int ax = x + ContourSet.GetDirOffsetX(0);
+                    int ay = y + ContourSet.GetDirOffsetY(0);
                     int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(0);
                     if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && SourceRegions[ai] != 0xff)
                     {
@@ -161,8 +161,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // -y
                 if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax = x + RecastUtils.GetDirOffsetX(3);
-                    int ay = y + RecastUtils.GetDirOffsetY(3);
+                    int ax = x + ContourSet.GetDirOffsetX(3);
+                    int ay = y + ContourSet.GetDirOffsetY(3);
                     int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(3);
                     int nr = SourceRegions[ai];
                     if (nr != 0xff)
@@ -291,8 +291,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + ContourSet.GetDirOffsetX(dir);
+                        int ay = y + ContourSet.GetDirOffsetY(dir);
                         int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(dir);
                         int rai = SourceRegions[ai];
                         if (rai != 0xff && rai != ri)
@@ -741,8 +741,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                int ax = cx + ContourSet.GetDirOffsetX(dir);
+                int ay = cy + ContourSet.GetDirOffsetY(dir);
                 int ai = Heightfield.Cells[ax + ay * Width].Index + d;
                 int alid = SourceRegions[ai] != 0xff ? Regions[SourceRegions[ai]].LayerId : 0xff;
 

@@ -84,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     indices[j] = j;
                 }
 
-                int ntris = RecastUtils.Triangulate(cont.Vertices, ref indices, out var tris);
+                int ntris = TriangulationHelper.Triangulate(cont.Vertices, ref indices, out var tris);
                 if (ntris <= 0)
                 {
                     // Bad triangulation, should not happen.
@@ -112,7 +112,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var t = tris.ElementAt(j);
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
-                        polys[npolys] = new IndexedPolygon(DetourUtils.DT_VERTS_PER_POLYGON);
+                        polys[npolys] = new IndexedPolygon(NavMeshCreateParams.DT_VERTS_PER_POLYGON);
                         polys[npolys][0] = indices[t.X];
                         polys[npolys][1] = indices[t.Y];
                         polys[npolys][2] = indices[t.Z];
@@ -697,9 +697,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Start with one vertex, keep appending connected
             // segments to the start and end of the hole.
-            RecastUtils.PushBack(edges[0].X, hole, ref nhole);
-            RecastUtils.PushBack(edges[0].Z, hreg, ref nhreg);
-            RecastUtils.PushBack((SamplePolyAreas)edges[0].W, harea, ref nharea);
+            Utils.PushBack(edges[0].X, hole, ref nhole);
+            Utils.PushBack(edges[0].Z, hreg, ref nhreg);
+            Utils.PushBack((SamplePolyAreas)edges[0].W, harea, ref nharea);
 
             while (nedges != 0)
             {
@@ -715,17 +715,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (hole[0] == eb)
                     {
                         // The segment matches the beginning of the hole boundary.
-                        RecastUtils.PushFront(ea, hole, ref nhole);
-                        RecastUtils.PushFront(r, hreg, ref nhreg);
-                        RecastUtils.PushFront(a, harea, ref nharea);
+                        Utils.PushFront(ea, hole, ref nhole);
+                        Utils.PushFront(r, hreg, ref nhreg);
+                        Utils.PushFront(a, harea, ref nharea);
                         add = true;
                     }
                     else if (hole[nhole - 1] == ea)
                     {
                         // The segment matches the end of the hole boundary.
-                        RecastUtils.PushBack(eb, hole, ref nhole);
-                        RecastUtils.PushBack(r, hreg, ref nhreg);
-                        RecastUtils.PushBack(a, harea, ref nharea);
+                        Utils.PushBack(eb, hole, ref nhole);
+                        Utils.PushBack(r, hreg, ref nhreg);
+                        Utils.PushBack(a, harea, ref nharea);
                         add = true;
                     }
                     if (add)
@@ -759,7 +759,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Triangulate the hole.
-            int ntris = RecastUtils.Triangulate(tverts, ref thole, out var tris);
+            int ntris = TriangulationHelper.Triangulate(tverts, ref thole, out var tris);
             if (ntris < 0)
             {
                 Logger.WriteWarning(this, "removeVertex: triangulate() returned bad results.");

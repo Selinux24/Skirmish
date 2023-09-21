@@ -7,7 +7,6 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 
     /// <summary>
     /// Graph node
@@ -28,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var tileHeaders = mesh.TileCache
                     .GetTiles()
                     .Select(tile => tile.Header)
-                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC)
+                    .Where(header => header.IsValid())
                     .ToArray();
 
                 foreach (var header in tileHeaders)
@@ -46,7 +45,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var tiles = mesh.Tiles
                     .Take(mesh.MaxTiles)
-                    .Where(tile => tile.Header.Magic == DetourUtils.DT_NAVMESH_MAGIC)
+                    .Where(tile => tile.Header.IsValid())
                     .ToArray();
 
                 foreach (var tile in tiles)
@@ -103,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var tileHeaders = mesh.TileCache
                     .GetTiles()
                     .Select(tile => tile.Header)
-                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC);
+                    .Where(header => header.IsValid());
 
                 foreach (var header in tileHeaders)
                 {
@@ -124,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var tiles = mesh.Tiles
                     .Take(mesh.MaxTiles)
-                    .Where(tile => tile.Header.Magic == DetourUtils.DT_NAVMESH_MAGIC);
+                    .Where(tile => tile.Header.IsValid());
 
                 foreach (var tile in tiles)
                 {

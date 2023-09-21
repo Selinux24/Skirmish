@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Recast;
+using SharpDX;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -9,6 +10,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     [Serializable]
     public struct TileCacheLayerHeader
     {
+        const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
+        const int DT_TILECACHE_VERSION = 1;
+
         /// <summary>
         /// Data magic
         /// </summary>
@@ -67,9 +71,55 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public int MaxY { get; set; }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Creates a tile cache layer header
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="i"></param>
+        /// <param name="layer"></param>
+        /// <returns></returns>
+        public static TileCacheLayerHeader Create(int x, int y, int i, HeightfieldLayer layer)
+        {
+            return new TileCacheLayerHeader
+            {
+                Magic = DT_TILECACHE_MAGIC,
+                Version = DT_TILECACHE_VERSION,
+
+                // Tile layer location in the navmesh.
+                TX = x,
+                TY = y,
+                TLayer = i,
+                BBox = layer.BoundingBox,
+
+                // Tile info.
+                Width = layer.Width,
+                Height = layer.Height,
+                MinX = layer.MinX,
+                MaxX = layer.MaxX,
+                MinY = layer.MinY,
+                MaxY = layer.MaxY,
+                HMin = layer.HMin,
+                HMax = layer.HMax
+            };
+        }
+
+        /// <summary>
+        /// Validates the header magic number and version
+        /// </summary>
+        public readonly bool IsValid()
+        {
+            if (Magic != DT_TILECACHE_MAGIC)
+            {
+                return false;
+            }
+            if (Version != DT_TILECACHE_VERSION)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             if (Magic == 0 && Version == 0)
@@ -77,7 +127,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return "Empty;";
             }
 
-            if (Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+            if (Magic != DT_TILECACHE_MAGIC)
             {
                 return "Invalid;";
             }

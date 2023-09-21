@@ -108,7 +108,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+            for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
             {
                 var link = cur.Tile.Links[k];
                 if (link.NRef != 0 && neis.Count < maxNeis)

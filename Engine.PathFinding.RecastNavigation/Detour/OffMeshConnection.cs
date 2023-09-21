@@ -11,6 +11,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class OffMeshConnection
     {
         /// <summary>
+        /// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
+        /// </summary>
+        public const int DT_OFFMESH_CON_BIDIR = 1;
+
+        /// <summary>
         /// The start endpoint of the connection. [(ax, ay, az)]
         /// </summary>
         public Vector3 Start { get; set; }
@@ -42,16 +47,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int UserId { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("start: {0}; end: {1}; rad: {2}; poly: {3}; flags: {4}; side: {5}; userId: {6};",
-                Start, End,
-                Rad, Poly,
-                Flags, Side, UserId);
+            return $"start: {Start}; end: {End}; rad: {Rad}; poly: {Poly}; flags: {Flags}; side: {Side}; userId: {UserId};";
         }
     }
 }

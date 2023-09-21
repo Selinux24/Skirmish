@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation
             int nb = pb.CountPolyVerts();
 
             // If the merged polygon would be too big, do not merge.
-            if (na + nb - 2 > DetourUtils.DT_VERTS_PER_POLYGON)
+            if (na + nb - 2 > NavMeshCreateParams.DT_VERTS_PER_POLYGON)
             {
                 return (false, RC_MESH_NULL_IDX, RC_MESH_NULL_IDX);
             }
@@ -142,7 +142,7 @@ namespace Engine.PathFinding.RecastNavigation
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            var tmp = new IndexedPolygon(Math.Max(DetourUtils.DT_VERTS_PER_POLYGON, na - 1 + nb - 1));
+            var tmp = new IndexedPolygon(Math.Max(NavMeshCreateParams.DT_VERTS_PER_POLYGON, na - 1 + nb - 1));
 
             // Merge polygons.
             int n = 0;
@@ -226,7 +226,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the vertex count</returns>
         public int CountPolyVerts()
         {
-            for (int i = 0; i < DetourUtils.DT_VERTS_PER_POLYGON; ++i)
+            for (int i = 0; i < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++i)
             {
                 if (Vertices[i] == RC_MESH_NULL_IDX)
                 {
@@ -234,7 +234,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return DetourUtils.DT_VERTS_PER_POLYGON;
+            return NavMeshCreateParams.DT_VERTS_PER_POLYGON;
         }
         /// <summary>
         /// Gets the vertices list

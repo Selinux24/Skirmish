@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public bool Contains(Vector3 va, Vector3 vb)
         {
             // If the poly is not touching the edge to the next polygon, skip the connection it.
-            if (!DetourUtils.IntersectSegmentPoly2D(va, vb, Vertices, out float tmin, out float tmax, out _, out _))
+            if (!Utils.IntersectSegmentPoly2D(va, vb, Vertices, out float tmin, out float tmax, out _, out _))
             {
                 return false;
             }

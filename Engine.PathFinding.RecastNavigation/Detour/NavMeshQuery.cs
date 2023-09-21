@@ -11,6 +11,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class NavMeshQuery : IDisposable
     {
         /// <summary>
+        /// Limit raycasting during any angle pahfinding
+        /// The limit is given as a multiple of the character radius
+        /// </summary>
+        const float DT_RAY_CAST_LIMIT_PROPORTIONS = 50.0f;
+        const int DT_NODE_PARENT_BITS = 24;
+        const int DT_NODE_STATE_BITS = 2;
+        /// <summary>
+        /// Number of extra states per node. See dtNode::state
+        /// </summary>
+        const int DT_MAX_STATES_PER_NODE = 1 << DT_NODE_STATE_BITS;
+        /// <summary>
+        /// Search heuristic scale.
+        /// </summary>
+        const float H_SCALE = 0.999f;
+
+        /// <summary>
         /// Navmesh data.
         /// </summary>
         private readonly NavMesh m_nav = null;
@@ -40,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             m_query = new QueryData();
 
-            if (maxNodes > (1 << DetourUtils.DT_NODE_PARENT_BITS) - 1)
+            if (maxNodes > (1 << DT_NODE_PARENT_BITS) - 1)
             {
                 throw new ArgumentException("Invalid maximum nodes value.", nameof(maxNodes));
             }
@@ -117,6 +133,75 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
 
         /// <summary>
+        /// Returns a random point in a convex polygon.
+        /// Adapted from Graphics Gems article.
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="areas"></param>
+        /// <param name="s"></param>
+        /// <param name="t"></param>
+        /// <param name="outPoint"></param>
+        private static void RandomPointInConvexPoly(IEnumerable<Vector3> points, out float[] areas, float s, float t, out Vector3 outPoint)
+        {
+            areas = new float[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+
+            var pts = points.ToArray();
+
+            // Calc triangle areas
+            float areasum = 0.0f;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                areas[i] = Utils.TriArea2D(pts[0], pts[i - 1], pts[i]);
+                areasum += Math.Max(0.001f, areas[i]);
+            }
+            // Find sub triangle weighted by area.
+            float thr = s * areasum;
+            float acc = 0.0f;
+            float u = 1.0f;
+            int tri = pts.Length - 1;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                float dacc = areas[i];
+                if (thr >= acc && thr < (acc + dacc))
+                {
+                    u = (thr - acc) / dacc;
+                    tri = i;
+                    break;
+                }
+                acc += dacc;
+            }
+
+            float v = (float)Math.Sqrt(t);
+
+            float a = 1 - v;
+            float b = (1 - u) * v;
+            float c = u * v;
+            Vector3 pa = pts[0];
+            Vector3 pb = pts[tri - 1];
+            Vector3 pc = pts[tri];
+
+            outPoint = a * pa + b * pb + c * pc;
+        }
+        private static bool IntersectSegSeg2D(Vector3 ap, Vector3 aq, Vector3 bp, Vector3 bq, out float s, out float t)
+        {
+            s = 0;
+            t = 0;
+
+            Vector3 u = Vector3.Subtract(aq, ap);
+            Vector3 v = Vector3.Subtract(bq, bp);
+            Vector3 w = Vector3.Subtract(ap, bp);
+            float d = VperpXZ(u, v);
+            if (Math.Abs(d) < 1e-6f) return false;
+            s = VperpXZ(v, w) / d;
+            t = VperpXZ(u, w) / d;
+            return true;
+        }
+        private static float VperpXZ(Vector3 a, Vector3 b)
+        {
+            return a.X * b.Z - a.Z * b.X;
+        }
+
+        /// <summary>
         /// Finds a path from the start polygon to the end polygon.
         /// </summary>
         /// <param name="startRef">The refrence id of the start polygon.</param>
@@ -155,7 +240,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             startNode.Pos = startPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
-            startNode.Total = Vector3.Distance(startPos, endPos) * DetourUtils.H_SCALE;
+            startNode.Total = Vector3.Distance(startPos, endPos) * H_SCALE;
             startNode.Id = startRef;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
@@ -195,7 +280,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     parent = m_nav.GetTileAndPolyByRefUnsafe(parentRef);
                 }
 
-                for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+                for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
                 {
                     int neighbourRef = best.Tile.Links[i].NRef;
 
@@ -262,7 +347,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         // Cost
                         float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
                         cost = bestNode.Cost + curCost;
-                        heuristic = Vector3.Distance(neighbourNode.Pos, endPos) * DetourUtils.H_SCALE;
+                        heuristic = Vector3.Distance(neighbourNode.Pos, endPos) * H_SCALE;
                     }
 
                     float total = cost + heuristic;
@@ -424,7 +509,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         }
 
                         // If starting really close the portal, advance.
-                        if (i == 0 && DetourUtils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
+                        if (i == 0 && Utils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
                         {
                             continue;
                         }
@@ -439,9 +524,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // Right vertex.
-                    if (DetourUtils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
+                    if (Utils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
                     {
-                        if (DetourUtils.Vequal(portalApex, portalRight) || DetourUtils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
+                        if (Utils.Vequal(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
                             rightPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
@@ -499,9 +584,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // Left vertex.
-                    if (DetourUtils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
+                    if (Utils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
                     {
-                        if (DetourUtils.Vequal(portalApex, portalLeft) || DetourUtils.TriArea2D(portalApex, portalRight, left) < 0.0f)
+                        if (Utils.Vequal(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
                             leftPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
@@ -627,7 +712,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // so it is enough to compute it from the first tile.
                 MeshTile tile = m_nav.GetTileByRef(startRef);
                 float agentRadius = tile.Header.WalkableRadius;
-                m_query.RaycastLimitSqr = (float)Math.Pow(agentRadius * DetourUtils.DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
+                m_query.RaycastLimitSqr = (float)Math.Pow(agentRadius * DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
             }
 
             if (startRef == endRef)
@@ -643,7 +728,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             startNode.Pos = startPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
-            startNode.Total = Vector3.Distance(startPos, endPos) * DetourUtils.H_SCALE;
+            startNode.Total = Vector3.Distance(startPos, endPos) * H_SCALE;
             startNode.Id = startRef;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
@@ -741,7 +826,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     tryLOS = true;
                 }
 
-                for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+                for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
                 {
                     int neighbourRef = best.Tile.Links[i].NRef;
 
@@ -951,7 +1036,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             else
             {
-                heuristic = Vector3.Distance(neighbour.Node.Pos, m_query.EndPos) * DetourUtils.H_SCALE;
+                heuristic = Vector3.Distance(neighbour.Node.Pos, m_query.EndPos) * H_SCALE;
             }
 
             return heuristic;
@@ -1419,7 +1504,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             outOfNodes = false;
 
-            for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+            for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
                 var link = best.Tile.Links[i];
 
@@ -1661,8 +1746,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             float radiusSqr = (radius * radius);
 
-            Vector3[] pa = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
-            Vector3[] pb = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
+            Vector3[] pa = new Vector3[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+            Vector3[] pb = new Vector3[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
 
             Status status = Status.DT_SUCCESS;
 
@@ -1692,7 +1777,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // The API input has been cheked already, skip checking internal data.
                 var cur = m_nav.GetTileAndPolyByRefUnsafe(curNode.Id);
 
-                for (int i = cur.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
+                for (int i = cur.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
                 {
                     var link = cur.Tile.Links[i];
                     int neighbourRef = link.NRef;
@@ -1736,7 +1821,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the circle is not touching the next polygon, skip it.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
+                    float distSqr = Utils.DistancePtSegSqr2D(centerPos, va, vb, out _);
                     if (distSqr > radiusSqr)
                     {
                         continue;
@@ -1763,7 +1848,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                         // Connected polys do not overlap.
                         bool connected = false;
-                        for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+                        for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
                         {
                             if (cur.Tile.Links[k].NRef == pastRef)
                             {
@@ -1786,7 +1871,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             pb[k] = past.Tile.Verts[past.Poly.Verts[k]];
                         }
 
-                        if (DetourUtils.OverlapPolyPoly2D(pa, npa, pb, npb))
+                        if (Utils.OverlapPolyPoly2D(pa, npa, pb, npb))
                         {
                             overlap = true;
                             break;
@@ -1884,7 +1969,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
                 // If target is inside the poly, stop search.
-                if (DetourUtils.PointInPolygon(endPos, verts))
+                if (Utils.PointInPolygon(endPos, verts.ToArray()))
                 {
                     bestNode = curNode;
                     bestPos = endPos;
@@ -1898,10 +1983,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     int MAX_NEIS = 8;
                     var neis = new List<int>(MAX_NEIS);
 
-                    if ((cur.Poly.Neis[j] & DetourUtils.DT_EXT_LINK) != 0)
+                    if ((cur.Poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
                     {
                         // Tile border.
-                        for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+                        for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
                         {
                             Link link = cur.Tile.Links[k];
                             if (link.Edge == j && link.NRef != 0)
@@ -1930,7 +2015,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         // Wall edge, calc distance.
                         var vj = verts.ElementAt(j);
                         var vi = verts.ElementAt(i);
-                        float distSqr = DetourUtils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
+                        float distSqr = Utils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
                         if (distSqr < bestDist)
                         {
                             // Update nearest distance.
@@ -1958,7 +2043,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Skip the link if it is too far from search constraint.
                             var vj = verts.ElementAt(j);
                             var vi = verts.ElementAt(i);
-                            float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
+                            float distSqr = Utils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
                             if (distSqr > searchRadSqr)
                             {
                                 continue;
@@ -2051,7 +2136,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Collect vertices.
                 var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-                if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, out _, out float tmax, out _, out int segMax))
+                if (!Utils.IntersectSegmentPoly2D(startPos, endPos, verts, out _, out float tmax, out _, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
                     hit.Cut(n);
@@ -2093,7 +2178,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Follow neighbours.
                 next.Ref = 0;
 
-                for (int i = cur.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
+                for (int i = cur.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
                 {
                     var link = cur.Tile.Links[i];
 
@@ -2316,7 +2401,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int i = 0, j = best.Poly.VertCount - 1; i < best.Poly.VertCount; j = i++)
             {
                 // Skip non-solid edges.
-                if ((best.Poly.Neis[j] & DetourUtils.DT_EXT_LINK) != 0)
+                if ((best.Poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
                 {
                     // Tile border.
                     bool solid = BorderIsSolid(best, j, filter);
@@ -2338,7 +2423,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Calc distance to the edge.
                 var vj = best.Tile.Verts[best.Poly.Verts[j]];
                 var vi = best.Tile.Verts[best.Poly.Verts[i]];
-                float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, vj, vi, out float tseg);
+                float distSqr = Utils.DistancePtSegSqr2D(centerPos, vj, vi, out float tseg);
 
                 // Edge is too far, skip.
                 if (distSqr > radiusSqr)
@@ -2365,7 +2450,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             bool solid = true;
 
-            for (int k = best.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = best.Tile.Links[k].Next)
+            for (int k = best.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = best.Tile.Links[k].Next)
             {
                 var link = best.Tile.Links[k];
                 if (link.Edge == j)
@@ -2397,7 +2482,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             Status status = Status.DT_SUCCESS;
 
-            for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+            for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
                 var link = best.Tile.Links[i];
 
@@ -2447,7 +2532,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Calc distance to the edge.
             var va = best.Tile.Verts[best.Poly.Verts[link.Edge]];
             var vb = best.Tile.Verts[best.Poly.Verts[(link.Edge + 1) % best.Poly.VertCount]];
-            float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
+            float distSqr = Utils.DistancePtSegSqr2D(centerPos, va, vb, out _);
             if (distSqr > radiusSqr)
             {
                 // If the circle is not touching the next polygon, skip it.
@@ -2547,10 +2632,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var vi = cur.Tile.Verts[cur.Poly.Verts[i]];
 
                 // Skip non-solid edges.
-                if ((neij & DetourUtils.DT_EXT_LINK) != 0)
+                if ((neij & Poly.DT_EXT_LINK) != 0)
                 {
                     // Tile border.
-                    for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+                    for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
                     {
                         var link = cur.Tile.Links[k];
                         if (link.Edge == j && link.NRef != 0)
@@ -2731,7 +2816,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            DetourUtils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
             Status status = GetPolyHeight(polyRef, pt, out float h);
             if (status.HasFlag(Status.DT_FAILURE))
@@ -2757,7 +2842,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int i = 0; i < m_nav.MaxTiles; i++)
             {
                 var tl = m_nav.Tiles[i];
-                if (tl == null || tl.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                if (tl == null || !tl.Header.IsValid())
                 {
                     continue;
                 }
@@ -2852,7 +2937,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            DetourUtils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
             Status stat = GetPolyHeight(random.Ref, pt, out float h);
             if (stat.HasFlag(Status.DT_FAILURE))
@@ -2903,7 +2988,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Get parent poly and tile.
             int parentRef = m_nodePool.GetNodeAtIdx(best.Node.PIdx)?.Id ?? 0;
 
-            for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+            for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
                 var link = best.Tile.Links[i];
                 int neighbourRef = link.NRef;
@@ -2930,7 +3015,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // If the circle is not touching the next polygon, skip it.
-                float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
+                float distSqr = Utils.DistancePtSegSqr2D(centerPos, va, vb, out _);
                 if (distSqr > radiusSqr)
                 {
                     continue;
@@ -3048,7 +3133,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Collect vertices.
             var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-            bool inside = DetourUtils.DistancePtPolyEdgesSqr(pos, verts, out float[] edged, out float[] edget);
+            bool inside = Utils.DistancePtPolyEdgesSqr(pos, verts, out float[] edged, out float[] edget);
             if (inside)
             {
                 // Point is inside the polygon, return the point.
@@ -3113,7 +3198,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var v0 = cur.Tile.Verts[cur.Poly.Verts[0]];
                 var v1 = cur.Tile.Verts[cur.Poly.Verts[1]];
-                DetourUtils.DistancePtSegSqr2D(pos, v0, v1, out float t);
+                Utils.DistancePtSegSqr2D(pos, v0, v1, out float t);
                 height = v0.Y + (v1.Y - v0.Y) * t;
                 return Status.DT_SUCCESS;
             }
@@ -3152,7 +3237,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (m_nodePool == null) return false;
 
-            int n = m_nodePool.FindNodes(r, DetourUtils.DT_MAX_STATES_PER_NODE, out Node[] nodes);
+            int n = m_nodePool.FindNodes(r, DT_MAX_STATES_PER_NODE, out Node[] nodes);
 
             for (int i = 0; i < n; i++)
             {
@@ -3210,7 +3295,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     tile.BvTree[nodeIndex] :
                     new BVNode();
 
-                bool overlap = DetourUtils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
+                bool overlap = Utils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
                 bool isLeafNode = node.I >= 0;
 
                 if (isLeafNode && overlap)
@@ -3353,7 +3438,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Find the link that points to the 'to' polygon.
             Link? link = null;
-            for (int i = from.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = from.Tile.Links[i].Next)
+            for (int i = from.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = from.Tile.Links[i].Next)
             {
                 if (from.Tile.Links[i].NRef == to.Ref)
                 {
@@ -3419,7 +3504,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         private static Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
         {
-            if (straightPath.Count > 0 && DetourUtils.Vequal(straightPath.EndPath, pos))
+            if (straightPath.Count > 0 && Utils.Vequal(straightPath.EndPath, pos))
             {
                 // The vertices are equal, update flags and poly.
                 straightPath.SetFlags(straightPath.Count - 1, flags);
@@ -3480,7 +3565,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Append intersection
-                if (DetourUtils.IntersectSegSeg2D(startPos, endPos, left, right, out _, out float t))
+                if (IntersectSegSeg2D(startPos, endPos, left, right, out _, out float t))
                 {
                     Vector3 pt = Vector3.Lerp(left, right, t);
 

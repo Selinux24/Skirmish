@@ -9,6 +9,41 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     [Serializable]
     public class Poly
     {
+        /// <summary>
+        /// A flag that indicates that an entity links to an external entity.
+        /// (E.g. A polygon edge is a portal that links to another polygon.)
+        /// </summary>
+        public const int DT_EXT_LINK = 0x8000;
+
+        /// <summary>
+        /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
+        /// </summary>
+        public int FirstLink { get; set; }
+        /// <summary>
+        /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
+        /// </summary>
+        public int[] Verts { get; set; } = new int[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+        /// <summary>
+        /// Packed data representing neighbor polygons references and flags for each edge.
+        /// </summary>
+        public int[] Neis { get; set; } = new int[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+        /// <summary>
+        /// The user defined polygon flags.
+        /// </summary>
+        public SamplePolyFlagTypes Flags { get; set; }
+        /// <summary>
+        /// The number of vertices in the polygon.
+        /// </summary>
+        public int VertCount { get; set; }
+        /// <summary>
+        /// Polygon area
+        /// </summary>
+        public SamplePolyAreas Area { get; set; }
+        /// <summary>
+        /// Polygon type
+        /// </summary>
+        public PolyTypes Type { get; set; }
+
         public static Poly Create(IndexedPolygon src, SamplePolyFlagTypes flags, SamplePolyAreas area, int nvp)
         {
             int[] verts = new int[nvp];
@@ -60,19 +95,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
                 else if (dir == 0) // Portal x-
                 {
-                    return DetourUtils.DT_EXT_LINK | 4;
+                    return DT_EXT_LINK | 4;
                 }
                 else if (dir == 1) // Portal z+
                 {
-                    return DetourUtils.DT_EXT_LINK | 2;
+                    return DT_EXT_LINK | 2;
                 }
                 else if (dir == 2) // Portal x+
                 {
-                    return DetourUtils.DT_EXT_LINK;
+                    return DT_EXT_LINK;
                 }
                 else if (dir == 3) // Portal z-
                 {
-                    return DetourUtils.DT_EXT_LINK | 6;
+                    return DT_EXT_LINK | 6;
                 }
             }
             else
@@ -85,35 +120,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
 
         /// <summary>
-        /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
-        /// </summary>
-        public int FirstLink { get; set; }
-        /// <summary>
-        /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
-        /// </summary>
-        public int[] Verts { get; set; } = new int[DetourUtils.DT_VERTS_PER_POLYGON];
-        /// <summary>
-        /// Packed data representing neighbor polygons references and flags for each edge.
-        /// </summary>
-        public int[] Neis { get; set; } = new int[DetourUtils.DT_VERTS_PER_POLYGON];
-        /// <summary>
-        /// The user defined polygon flags.
-        /// </summary>
-        public SamplePolyFlagTypes Flags { get; set; }
-        /// <summary>
-        /// The number of vertices in the polygon.
-        /// </summary>
-        public int VertCount { get; set; }
-        /// <summary>
-        /// Polygon area
-        /// </summary>
-        public SamplePolyAreas Area { get; set; }
-        /// <summary>
-        /// Polygon type
-        /// </summary>
-        public PolyTypes Type { get; set; }
-
-        /// <summary>
         /// Gets the neighbour direction
         /// </summary>
         /// <param name="index">Neighbour index</param>
@@ -123,14 +129,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return Neis[index] & 0xff;
         }
 
-        /// <summary>
-        /// Gets the text representation of the polygon
-        /// </summary>
-        /// <returns>Returns the text representation of the polygon</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("FirstLink {0}; Flags {1}; Area: {2}; Type: {3}; Verts {4}; VertCount: {5}; Neis: {6}",
-                FirstLink, Flags, Area, Type, Verts, VertCount, Neis?.Join(","));
+            return $"FirstLink {FirstLink}; Flags {Flags}; Area: {Area}; Type: {Type}; Verts {Verts}; VertCount: {VertCount}; Neis: {Neis?.Join(",")}";
         }
     }
 }
