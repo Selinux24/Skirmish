@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,82 +19,68 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         const int SPAN_MAX_HEIGHT = 0xff;
 
         /// <summary>
-        /// Builds a new compact heightfield
+        /// The width of the heightfield. (Along the x-axis in cell units.)
         /// </summary>
-        /// <param name="hf">Heightfield</param>
-        /// <param name="walkableHeight">Walkable height</param>
-        /// <param name="walkableClimb">Walkable climb</param>
-        /// <returns>Returns the new compact heightfield</returns>
-        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
-        {
-            int w = hf.Width;
-            int h = hf.Height;
-            int spanCount = hf.GetSpanCount();
-            var bbox = hf.BoundingBox;
-            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
+        public int Width { get; set; }
+        /// <summary>
+        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// </summary>
+        public int Height { get; set; }
+        /// <summary>
+        /// The number of spans in the heightfield.
+        /// </summary>
+        public int SpanCount { get; set; }
+        /// <summary>
+        /// The walkable height used during the build of the field.  (See: rcConfig::walkableHeight)
+        /// </summary>
+        public int WalkableHeight { get; set; }
+        /// <summary>
+        /// The walkable climb used during the build of the field. (See: rcConfig::walkableClimb)
+        /// </summary>
+        public int WalkableClimb { get; set; }
+        /// <summary>
+        /// The AABB border size used during the build of the field. (See: rcConfig::borderSize)
+        /// </summary>
+        public int BorderSize { get; set; }
+        /// <summary>
+        /// The maximum distance value of any span within the field.         
+        /// </summary>
+        public int MaxDistance { get; set; }
+        /// <summary>
+        /// The maximum region id of any span within the field. 
+        /// </summary>
+        public int MaxRegions { get; set; }
+        /// <summary>
+        /// The minimum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public BoundingBox BoundingBox { get; set; }
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; set; }
+        /// <summary>
+        /// Array of cells. [Size: width*height] 
+        /// </summary>
+        public CompactCell[] Cells { get; set; }
+        /// <summary>
+        /// Array of spans. [Size: spanCount]
+        /// </summary>
+        public CompactSpan[] Spans { get; set; }
+        /// <summary>
+        /// Array containing border distance data. [Size: spanCount]      
+        /// </summary>
+        public int[] BorderDistances { get; set; }
+        /// <summary>
+        /// Array containing area id data. [Size: spanCount] 
+        /// </summary>
+        public AreaTypes[] Areas { get; set; }
 
-            // Fill in header.
-            var chf = new CompactHeightfield
-            {
-                Width = w,
-                Height = h,
-                SpanCount = spanCount,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                MaxRegions = 0,
-                BoundingBox = bbox,
-                CellSize = hf.CellSize,
-                CellHeight = hf.CellHeight,
-            };
+        #region Iterators
 
-            // Fill in cells and spans.
-            chf.FillCellsAndSpans(hf.Spans, spanCount);
-
-            // Find neighbour connections.
-            chf.FindNeighbourConnections();
-
-            return chf;
-        }
-        private static void InsertSort(ref AreaTypes[] a, int n)
-        {
-            int i, j;
-            for (i = 1; i < n; i++)
-            {
-                var value = a[i];
-                for (j = i - 1; j >= 0 && a[j] > value; j--)
-                {
-                    a[j + 1] = a[j];
-                }
-                a[j + 1] = value;
-            }
-        }
-        private static IEnumerable<LevelStackEntry> AppendStacks(IEnumerable<LevelStackEntry> srcStack, IEnumerable<int> srcReg)
-        {
-            var dstStack = new List<LevelStackEntry>();
-
-            for (int j = 0; j < srcStack.Count(); j++)
-            {
-                var stackj = srcStack.ElementAt(j);
-
-                int i = stackj.Index;
-                if ((i < 0) || (srcReg.ElementAt(i) != 0))
-                {
-                    continue;
-                }
-
-                dstStack.Add(stackj);
-            }
-
-            return dstStack;
-        }
-        private static float GetJitterX(int i)
-        {
-            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-        private static float GetJitterY(int i)
-        {
-            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
         private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells(IEnumerable<CompactCell> cells, int w, int h)
         {
             for (int y = 0; y < h; ++y)
@@ -183,6 +170,86 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 yield return dir;
             }
         }
+
+        #endregion
+
+        /// <summary>
+        /// Builds a new compact heightfield
+        /// </summary>
+        /// <param name="hf">Heightfield</param>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
+        /// <returns>Returns the new compact heightfield</returns>
+        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
+        {
+            int w = hf.Width;
+            int h = hf.Height;
+            int spanCount = hf.GetSpanCount();
+            var bbox = hf.BoundingBox;
+            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
+
+            // Fill in header.
+            var chf = new CompactHeightfield
+            {
+                Width = w,
+                Height = h,
+                SpanCount = spanCount,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                MaxRegions = 0,
+                BoundingBox = bbox,
+                CellSize = hf.CellSize,
+                CellHeight = hf.CellHeight,
+            };
+
+            // Fill in cells and spans.
+            chf.FillCellsAndSpans(hf.Spans, spanCount);
+
+            // Find neighbour connections.
+            chf.FindNeighbourConnections();
+
+            return chf;
+        }
+        private static void InsertSort(ref AreaTypes[] a, int n)
+        {
+            int i, j;
+            for (i = 1; i < n; i++)
+            {
+                var value = a[i];
+                for (j = i - 1; j >= 0 && a[j] > value; j--)
+                {
+                    a[j + 1] = a[j];
+                }
+                a[j + 1] = value;
+            }
+        }
+        private static LevelStackEntry[] AppendStacks(LevelStackEntry[] srcStack, int[] srcReg)
+        {
+            var dstStack = new List<LevelStackEntry>();
+
+            for (int j = 0; j < srcStack.Length; j++)
+            {
+                var stackj = srcStack[j];
+
+                int i = stackj.Index;
+                if ((i < 0) || (srcReg[i] != 0))
+                {
+                    continue;
+                }
+
+                dstStack.Add(stackj);
+            }
+
+            return dstStack.ToArray();
+        }
+        private static float GetJitterX(int i)
+        {
+            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+        private static float GetJitterY(int i)
+        {
+            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
         private static void GetCylinderBounds(Vector3 pos, float r, float h, out Vector3 bmin, out Vector3 bmax)
         {
             bmin.X = pos.X - r;
@@ -192,105 +259,1134 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bmax.Y = pos.Y + h;
             bmax.Z = pos.Z + r;
         }
-        private static void GetPolygonBounds(IEnumerable<Vector3> polygon, out Vector3 bmin, out Vector3 bmax)
+        private static void GetPolygonBounds(Vector3[] polygon, out Vector3 bmin, out Vector3 bmax)
         {
-            bmin = polygon.ElementAt(0);
-            bmax = polygon.ElementAt(0);
+            bmin = polygon[0];
+            bmax = polygon[0];
 
-            for (int i = 1; i < polygon.Count(); ++i)
+            for (int i = 1; i < polygon.Length; ++i)
             {
-                bmin = Vector3.Min(bmin, polygon.ElementAt(i));
-                bmax = Vector3.Max(bmax, polygon.ElementAt(i));
+                bmin = Vector3.Min(bmin, polygon[i]);
+                bmax = Vector3.Max(bmax, polygon[i]);
             }
         }
-        /// <summary>
-        /// Gets if the specified point is over the polygon (ignoring the Y component of p)
-        /// </summary>
-        /// <param name="nvert">Number of vertices in the polygon</param>
-        /// <param name="verts">Polygon vertices</param>
-        /// <param name="p">The point</param>
-        /// <returns>Returns true if the point p is into the polygon, ignoring the Y component of p</returns>
-        private static bool PointOverPoly(IEnumerable<Vector3> polygon, Vector3 p)
+        private static bool GetPolyVerts(Vector3[] polygon, int i, int j, out Vector3 vi, out Vector3 vj)
         {
-            bool c = false;
+            vj = polygon[j];
+            vi = polygon[i];
+            bool swapped = false;
 
-            int nvert = polygon.Count();
-
-            for (int i = 0, j = nvert - 1; i < nvert; j = i++)
+            // Make sure the segments are always handled in same order
+            // using lexological sort or else there will be seams.
+            if (Math.Abs(vj.X - vi.X) < 1e-6f)
             {
-                var vi = polygon.ElementAt(i);
-                var vj = polygon.ElementAt(j);
-
-                if (((vi.Z > p.Z) != (vj.Z > p.Z)) &&
-                    (p.X < (vj.X - vi.X) * (p.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                if (vj.Z > vi.Z)
                 {
-                    c = !c;
+                    Helper.Swap(ref vj, ref vi);
+                    swapped = true;
+                }
+            }
+            else
+            {
+                if (vj.X > vi.X)
+                {
+                    Helper.Swap(ref vj, ref vi);
+                    swapped = true;
                 }
             }
 
-            return c;
+            return swapped;
+        }
+        private static int[] SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
+        {
+            float sampleMaxError = param.SampleMaxError;
+
+            int[] idx = new int[BuildPolyDetailParams.MAX_VERTS_PER_EDGE];
+            idx[0] = 0;
+            idx[1] = nn;
+            int nidx = 2;
+            for (int k = 0; k < nidx - 1;)
+            {
+                int a = idx[k];
+                int b = idx[k + 1];
+                var va = edge[a];
+                var vb = edge[b];
+
+                // Find maximum deviation along the segment.
+                float maxd = 0;
+                int maxi = -1;
+                for (int m = a + 1; m < b; ++m)
+                {
+                    float dev = RecastUtils.DistancePtSeg(edge[m], va, vb);
+                    if (dev > maxd)
+                    {
+                        maxd = dev;
+                        maxi = m;
+                    }
+                }
+
+                // If the max deviation is larger than accepted error,
+                // add new point, else continue to next segment.
+                if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
+                {
+                    for (int m = nidx; m > k; --m)
+                    {
+                        idx[m] = idx[m - 1];
+                    }
+                    idx[k + 1] = maxi;
+                    nidx++;
+                }
+                else
+                {
+                    ++k;
+                }
+            }
+
+            return idx.Take(nidx).ToArray();
         }
 
         /// <summary>
-        /// The width of the heightfield. (Along the x-axis in cell units.)
+        /// Marks the geometry areas into the heightfield
         /// </summary>
-        public int Width { get; set; }
+        /// <param name="geometry">Geometry input</param>
+        public void MarkAreas(InputGeometry geometry)
+        {
+            var vols = geometry.GetAreas();
+            var vCount = geometry.GetAreaCount();
+            for (int i = 0; i < vCount; i++)
+            {
+                var vol = vols[i];
+
+                MarkConvexPolyArea(
+                    vol.Vertices.ToArray(),
+                    vol.MinHeight, vol.MaxHeight,
+                    (AreaTypes)vol.AreaType);
+            }
+        }
         /// <summary>
-        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// Marks a box area
         /// </summary>
-        public int Height { get; set; }
+        /// <param name="bmin">Box minimum</param>
+        /// <param name="bmax">Box maximum</param>
+        /// <param name="areaId">Area id</param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// </remarks>
+        public void MarkBoxArea(Vector3 bmin, Vector3 bmax, AreaTypes areaId)
+        {
+            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
+            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
+            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
+            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+
+            if (maxx < 0) return;
+            if (minx >= Width) return;
+            if (maxz < 0) return;
+            if (minz >= Height) return;
+
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height, maxz);
+
+            foreach (var (_, _, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            {
+                var s = Spans[i];
+
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                if (s.Y >= miny && s.Y <= maxy)
+                {
+                    Areas[i] = areaId;
+                }
+            }
+        }
         /// <summary>
-        /// The number of spans in the heightfield.
+        /// Marks a convex polygon area
         /// </summary>
-        public int SpanCount { get; set; }
+        /// <param name="polygon">Polygon vertices</param>
+        /// <param name="hmin">Minimum height</param>
+        /// <param name="hmax">Maximum height</param>
+        /// <param name="areaId">Area id</param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
+        /// </remarks>
+        public void MarkConvexPolyArea(Vector3[] polygon, float hmin, float hmax, AreaTypes areaId)
+        {
+            GetPolygonBounds(polygon, out var bmin, out var bmax);
+            bmin.Y = hmin;
+            bmax.Y = hmax;
+
+            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
+            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
+            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
+            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+
+            if (maxx < 0) return;
+            if (minx >= Width) return;
+            if (maxz < 0) return;
+            if (minz >= Height) return;
+
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height, maxz);
+
+            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            {
+                var s = Spans[i];
+
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                if (s.Y >= miny && s.Y <= maxy)
+                {
+                    var p = new Vector3
+                    {
+                        X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
+                        Y = 0,
+                        Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
+                    };
+
+                    if (DetourUtils.PointInPolygon(p, polygon))
+                    {
+                        Areas[i] = areaId;
+                    }
+                }
+            }
+        }
         /// <summary>
-        /// The walkable height used during the build of the field.  (See: rcConfig::walkableHeight)
+        /// Marks a cylinder area
         /// </summary>
-        public int WalkableHeight { get; set; }
+        /// <param name="pos">Position</param>
+        /// <param name="r">Radius</param>
+        /// <param name="h">Height</param>
+        /// <param name="areaId">Area id</param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// </remarks>
+        public void MarkCylinderArea(Vector3 pos, float r, float h, AreaTypes areaId)
+        {
+            GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
+            float r2 = r * r;
+
+            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
+            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
+            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
+            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+
+            if (maxx < 0) return;
+            if (minx >= Width) return;
+            if (maxz < 0) return;
+            if (minz >= Height) return;
+
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height, maxz);
+
+            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            {
+                var s = Spans[i];
+
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                if (s.Y >= miny && s.Y <= maxy)
+                {
+                    float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
+                    float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
+                    float dx = sx - pos.X;
+                    float dz = sz - pos.Z;
+
+                    if (dx * dx + dz * dz < r2)
+                    {
+                        Areas[i] = areaId;
+                    }
+                }
+            }
+        }
         /// <summary>
-        /// The walkable climb used during the build of the field. (See: rcConfig::walkableClimb)
+        /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.
         /// </summary>
-        public int WalkableClimb { get; set; }
+        /// <returns>Returns always true</returns>
+        public bool MedianFilterWalkableArea()
+        {
+            int w = Width;
+            int h = Height;
+
+            // Init distance.
+            var areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
+
+            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            {
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    areas[i] = Areas[i];
+                    continue;
+                }
+
+                var nei = Helper.CreateArray(9, Areas[i]);
+
+                var s = Spans[i];
+
+                for (int dir = 0; dir < 4; ++dir)
+                {
+                    if (s.GetCon(dir) == ContourSet.RC_NOT_CONNECTED)
+                    {
+                        continue;
+                    }
+
+                    int ax = x + RecastUtils.GetDirOffsetX(dir);
+                    int ay = y + RecastUtils.GetDirOffsetY(dir);
+                    int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
+                    if (Areas[ai] != AreaTypes.RC_NULL_AREA)
+                    {
+                        nei[dir * 2 + 0] = Areas[ai];
+                    }
+
+                    var a = Spans[ai];
+                    int dir2 = (dir + 1) & 0x3;
+                    if (a.GetCon(dir2) == ContourSet.RC_NOT_CONNECTED)
+                    {
+                        continue;
+                    }
+
+                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
+                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                    int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
+                    if (Areas[ai2] != AreaTypes.RC_NULL_AREA)
+                    {
+                        nei[dir * 2 + 1] = Areas[ai2];
+                    }
+                }
+
+                InsertSort(ref nei, 9);
+                areas[i] = nei[4];
+            }
+
+            Array.Copy(areas, Areas, SpanCount);
+
+            return true;
+        }
         /// <summary>
-        /// The AABB border size used during the build of the field. (See: rcConfig::borderSize)
+        /// Basically, any spans that are closer to a boundary or obstruction than the specified radius are marked as unwalkable.
         /// </summary>
-        public int BorderSize { get; set; }
+        /// <param name="radius">Radius</param>
+        /// <remarks>
+        /// This method is usually called immediately after the heightfield has been built.
+        /// </remarks>
+        public void ErodeWalkableArea(int radius)
+        {
+            int w = Width;
+            int h = Height;
+
+            // Init distance.
+            int[] dist = MarkBoundaryCellsNotNullAreas();
+
+            // Pass 1
+            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            {
+                // (0,-1) & (1,-1)
+                if (CalculateDistance(x, y, i, dist, 0, 3, out int newD1))
+                {
+                    dist[i] = newD1;
+                }
+
+                // (0,-1) & (1,-1)
+                if (CalculateDistance(x, y, i, dist, 3, 2, out int newD2))
+                {
+                    dist[i] = newD2;
+                }
+            }
+
+            // Pass 2
+            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
+            {
+                // (1,0) & (1,1)
+                if (CalculateDistance(x, y, i, dist, 2, 1, out int newD1))
+                {
+                    dist[i] = newD1;
+                }
+
+                // (0,1) & (-1,1)
+                if (CalculateDistance(x, y, i, dist, 1, 0, out int newD2))
+                {
+                    dist[i] = newD2;
+                }
+            }
+
+            int thr = radius * 2;
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                if (dist[i] < thr)
+                {
+                    Areas[i] = AreaTypes.RC_NULL_AREA;
+                }
+            }
+        }
         /// <summary>
-        /// The maximum distance value of any span within the field.         
+        /// Gets the height data
         /// </summary>
-        public int MaxDistance { get; set; }
+        /// <param name="poly">Polygon</param>
+        /// <param name="verts">Vertex indices</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="hp">Height patch</param>
+        /// <param name="region">Region index</param>
+        /// <remarks>
+        /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
+        /// </remarks>
+        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int borderSize, int region)
+        {
+            var queue = new List<HeightDataItem>(512);
+
+            // Set all heights to RC_UNSET_HEIGHT.
+            hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, HeightPatch.RC_UNSET_HEIGHT);
+
+            bool empty = true;
+
+            // We cannot sample from this poly if it was created from polys
+            // of different regions. If it was then it could potentially be overlapping
+            // with polys of that region and the heights sampled here could be wrong.
+            if (!IndexedPolygon.HasMultipleRegions(region))
+            {
+                empty = GetHeightDataFromMultipleRegions(hp, borderSize, region, out var qItems);
+
+                queue.AddRange(qItems);
+            }
+
+            // if the polygon does not contain any points from the current region (rare, but happens)
+            // or if it could potentially be overlapping polygons of the same region,
+            // then use the center as the seed point.
+            if (empty)
+            {
+                queue.AddRange(SeedArrayWithPolyCenter(poly, verts, borderSize, hp));
+            }
+
+            ProcessHeightDataQueue(hp, borderSize, queue);
+        }
         /// <summary>
-        /// The maximum region id of any span within the field. 
+        /// Walks the contour
         /// </summary>
-        public int MaxRegions { get; set; }
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="i">Index</param>
+        /// <param name="dir">Direction</param>
+        /// <param name="srcReg">Region list</param>
+        /// <returns>Returns the contour list</returns>
+        public int[] WalkContour(int x, int y, int i, int dir, int[] srcReg)
+        {
+            var cont = new List<int>();
+
+            int startDir = dir;
+            int starti = i;
+
+            var ss = Spans[i];
+            int curReg = 0;
+            if (ss.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+            {
+                int ax = x + RecastUtils.GetDirOffsetX(dir);
+                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ai = Cells[ax + ay * Width].Index + ss.GetCon(dir);
+                curReg = srcReg[ai];
+            }
+            cont.Add(curReg);
+
+            int iter = 0;
+            while (++iter < 40000)
+            {
+                var s = Spans[i];
+
+                if (IsSolidEdge(srcReg, x, y, i, dir))
+                {
+                    // Choose the edge corner
+                    int r = 0;
+                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                    {
+                        int ax = x + RecastUtils.GetDirOffsetX(dir);
+                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
+                        r = srcReg[ai];
+                    }
+
+                    if (r != curReg)
+                    {
+                        curReg = r;
+                        cont.Add(curReg);
+                    }
+
+                    dir = (dir + 1) & 0x3;  // Rotate CW
+                }
+                else
+                {
+                    int ni = -1;
+                    int nx = x + RecastUtils.GetDirOffsetX(dir);
+                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                    {
+                        var nc = Cells[nx + ny * Width];
+                        ni = nc.Index + s.GetCon(dir);
+                    }
+
+                    if (ni == -1)
+                    {
+                        // Should not happen.
+                        return Array.Empty<int>();
+                    }
+
+                    x = nx;
+                    y = ny;
+                    i = ni;
+                    dir = (dir + 3) & 0x3;  // Rotate CCW
+                }
+
+                if (starti == i && startDir == dir)
+                {
+                    break;
+                }
+            }
+
+            return cont.ToArray();
+        }
         /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
+        /// Walks the edge contour
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="i">Index</param>
+        /// <param name="flags">Edge flags</param>
+        /// <returns>Returns the edge contour list</returns>
+        public Int4[] WalkContour(int x, int y, int i, ref int[] flags)
+        {
+            var points = new List<Int4>();
+
+            // Choose the first non-connected edge
+            int dir = 0;
+            while ((flags[i] & (1 << dir)) == 0)
+            {
+                dir++;
+            }
+
+            int startDir = dir;
+            int starti = i;
+
+            var area = Areas[i];
+
+            int iter = 0;
+            while (++iter < 40000)
+            {
+                if ((flags[i] & (1 << dir)) != 0)
+                {
+                    // Choose the edge corner
+                    bool isAreaBorder = false;
+                    int px = x;
+                    int py = GetCornerHeight(x, y, i, dir, out bool isBorderVertex);
+                    int pz = y;
+                    switch (dir)
+                    {
+                        case 0: pz++; break;
+                        case 1: px++; pz++; break;
+                        case 2: px++; break;
+                    }
+                    int r = 0;
+                    var s = Spans[i];
+                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                    {
+                        int ax = x + RecastUtils.GetDirOffsetX(dir);
+                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
+                        r = Spans[ai].Reg;
+                        if (area != Areas[ai])
+                        {
+                            isAreaBorder = true;
+                        }
+                    }
+                    if (isBorderVertex)
+                    {
+                        r |= ContourSet.RC_BORDER_VERTEX;
+                    }
+                    if (isAreaBorder)
+                    {
+                        r |= ContourSet.RC_AREA_BORDER;
+                    }
+                    points.Add(new Int4(px, py, pz, r));
+
+                    flags[i] &= ~(1 << dir); // Remove visited edges
+                    dir = (dir + 1) & 0x3;  // Rotate CW
+                }
+                else
+                {
+                    int ni = -1;
+                    int nx = x + RecastUtils.GetDirOffsetX(dir);
+                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    var s = Spans[i];
+                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                    {
+                        var nc = Cells[nx + ny * Width];
+                        ni = nc.Index + s.GetCon(dir);
+                    }
+                    if (ni == -1)
+                    {
+                        // Should not happen.
+                        return Array.Empty<Int4>();
+                    }
+                    x = nx;
+                    y = ny;
+                    i = ni;
+                    dir = (dir + 3) & 0x3;  // Rotate CCW
+                }
+
+                if (starti == i && startDir == dir)
+                {
+                    break;
+                }
+            }
+
+            return points.ToArray();
+        }
         /// <summary>
-        /// The size of each cell. (On the xz-plane.)
+        /// Calculates the distance field
         /// </summary>
-        public float CellSize { get; set; }
+        /// <returns>Returns the array of distances</returns>
+        public int[] CalculateDistanceField()
+        {
+            int w = Width;
+            int h = Height;
+
+            // Mark boundary cells.
+            int[] res = MarkBoundaryCells(w, h);
+
+            // Pass 1
+            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            {
+                TestConn(x, y, i, w, 0, 3, ref res);
+                TestConn(x, y, i, w, 3, 2, ref res);
+            }
+
+            // Pass 2
+            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
+            {
+                TestConn(x, y, i, w, 2, 1, ref res);
+                TestConn(x, y, i, w, 1, 0, ref res);
+            }
+
+            MaxDistance = res.Max();
+
+            return res;
+        }
         /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// Builds regions
         /// </summary>
-        public float CellHeight { get; set; }
+        /// <param name="borderSize">Border size</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        /// <param name="mergeRegionArea">Merge region area</param>
+        /// <returns>Returns true when the region were correctly built</returns>
+        public bool BuildRegions(int borderSize, int minRegionArea, int mergeRegionArea)
+        {
+            int w = Width;
+            int h = Height;
+
+            int LOG_NB_STACKS = 3;
+            int NB_STACKS = 1 << LOG_NB_STACKS;
+            var lvlStacks = new List<List<LevelStackEntry>>(NB_STACKS);
+            for (int i = 0; i < NB_STACKS; i++)
+            {
+                lvlStacks.Add(new List<LevelStackEntry>());
+            }
+
+            var stack = new List<LevelStackEntry>();
+
+            int[] srcReg = new int[SpanCount];
+            int[] srcDist = new int[SpanCount];
+
+            int regionId = 1;
+            int level = (MaxDistance + 1) & ~1;
+
+            // Figure better formula, expandIters defines how much the 
+            // watershed "overflows" and simplifies the regions. Tying it to
+            // agent radius was usually good indication how greedy it could be.
+            //	const int expandIters = 4 + walkableRadius * 2
+            const int expandIters = 8;
+
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
+                PaintRectRegion(w - bw, w, 0, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
+                PaintRectRegion(0, w, 0, bh, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
+                PaintRectRegion(0, w, h - bh, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
+            }
+
+            BorderSize = borderSize;
+
+            int sId = -1;
+            while (level > 0)
+            {
+                level = level >= 2 ? level - 2 : 0;
+                sId = (sId + 1) & (NB_STACKS - 1);
+
+                if (sId == 0)
+                {
+                    SortCellsByLevel(level, srcReg, NB_STACKS, lvlStacks, 1);
+                }
+                else
+                {
+                    var stacks = AppendStacks(lvlStacks[sId - 1].ToArray(), srcReg); // copy left overs from last level
+                    lvlStacks[sId].AddRange(stacks);
+                }
+
+                // Expand current regions until no empty connected cells found.
+                ExpandRegions(expandIters, level, srcReg, srcDist, lvlStacks[sId], false);
+
+                // Mark new regions with IDs.
+                for (int j = 0; j < lvlStacks[sId].Count; j++)
+                {
+                    var current = lvlStacks[sId][j];
+                    int x = current.X;
+                    int y = current.Y;
+                    int i = current.Index;
+                    if (i >= 0 && srcReg[i] == 0)
+                    {
+                        var entry = new LevelStackEntry { X = x, Y = y, Index = i };
+                        var floodRes = FloodRegion(entry, level, regionId, srcReg, srcDist, stack);
+                        if (floodRes)
+                        {
+                            if (regionId == int.MaxValue)
+                            {
+                                throw new EngineException("rcBuildRegions: Region ID overflow");
+                            }
+
+                            regionId++;
+                        }
+                    }
+                }
+            }
+
+            // Expand current regions until no empty connected cells found.
+            ExpandRegions(expandIters * 8, 0, srcReg, srcDist, stack, true);
+
+            // Merge regions and filter out smalle regions.
+            MaxRegions = regionId;
+            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, regionId, srcReg, out int[] overlaps, out int maxRegionId);
+            MaxRegions = maxRegionId;
+            if (!merged)
+            {
+                return false;
+            }
+
+            // If overlapping regions were found during merging, split those regions.
+            if (overlaps.Length > 0)
+            {
+                throw new EngineException(string.Format("rcBuildRegions: {0} overlapping regions", overlaps.Length));
+            }
+
+            // Write the result out.
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                Spans[i].Reg = srcReg[i];
+            }
+
+            return true;
+        }
         /// <summary>
-        /// Array of cells. [Size: width*height] 
+        /// Builds monotone regions
         /// </summary>
-        public CompactCell[] Cells { get; set; }
+        /// <param name="borderSize">Border size</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        /// <param name="mergeRegionArea">Merge region area</param>
+        /// <returns>Returns true when the region were correctly built</returns>
+        public bool BuildRegionsMonotone(int borderSize, int minRegionArea, int mergeRegionArea)
+        {
+            int w = Width;
+            int h = Height;
+            int id = 1;
+
+            int[] srcReg = new int[SpanCount];
+
+            int nsweeps = Math.Max(Width, Height);
+            SweepSpan[] sweeps = new SweepSpan[nsweeps];
+
+            // Mark border regions.
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(w - bw, w, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(0, w, 0, bh, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(0, w, h - bh, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+            }
+
+            BorderSize = borderSize;
+
+            // Sweep one line at a time.
+            for (int y = borderSize; y < h - borderSize; ++y)
+            {
+                // Collect spans from this row.
+                int[] prev = new int[id + 1];
+                int rid = 1;
+
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = Cells[x + y * w];
+
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        var s = Spans[i];
+                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                        {
+                            continue;
+                        }
+
+                        // -x
+                        int previd = 0;
+                        if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
+                        {
+                            int ax = x + RecastUtils.GetDirOffsetX(0);
+                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ai = Cells[ax + ay * w].Index + s.GetCon(0);
+                            if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            {
+                                previd = srcReg[ai];
+                            }
+                        }
+
+                        if (previd == 0)
+                        {
+                            previd = rid++;
+                            sweeps[previd].RId = previd;
+                            sweeps[previd].NS = 0;
+                            sweeps[previd].Nei = 0;
+                        }
+
+                        // -y
+                        if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
+                        {
+                            int ax = x + RecastUtils.GetDirOffsetX(3);
+                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ai = Cells[ax + ay * w].Index + s.GetCon(3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            {
+                                int nr = srcReg[ai];
+                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
+                                {
+                                    sweeps[previd].Nei = nr;
+                                    sweeps[previd].NS++;
+                                    prev[nr]++;
+                                }
+                                else
+                                {
+                                    sweeps[previd].Nei = RC_NULL_NEI;
+                                }
+                            }
+                        }
+
+                        srcReg[i] = previd;
+                    }
+                }
+
+                // Create unique ID.
+                for (int i = 1; i < rid; ++i)
+                {
+                    if (sweeps[i].Nei != RC_NULL_NEI &&
+                        sweeps[i].Nei != 0 &&
+                        prev[sweeps[i].Nei] == sweeps[i].NS)
+                    {
+                        sweeps[i].Id = sweeps[i].Nei;
+                    }
+                    else
+                    {
+                        sweeps[i].Id = id++;
+                    }
+                }
+
+                // Remap IDs
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = Cells[x + y * w];
+
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        if (srcReg[i] > 0 && srcReg[i] < rid)
+                        {
+                            srcReg[i] = sweeps[srcReg[i]].Id;
+                        }
+                    }
+                }
+            }
+
+            // Merge regions and filter out small regions.
+            MaxRegions = id;
+            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, srcReg, out _, out var maxRegionId);
+            MaxRegions = maxRegionId;
+
+            if (!merged)
+            {
+                return false;
+            }
+
+            // Monotone partitioning does not generate overlapping regions.
+
+            // Store the result out.
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                Spans[i].Reg = srcReg[i];
+            }
+
+            return true;
+        }
         /// <summary>
-        /// Array of spans. [Size: spanCount]
+        /// Builds the layer regions
         /// </summary>
-        public CompactSpan[] Spans { get; set; }
+        /// <param name="borderSize">Border size</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        /// <returns>Returns true when the region were correctly built</returns>
+        public bool BuildLayerRegions(int borderSize, int minRegionArea)
+        {
+            int w = Width;
+            int h = Height;
+            int id = 1;
+
+            int[] srcReg = new int[SpanCount];
+
+            int nsweeps = Math.Max(Width, Height);
+            SweepSpan[] sweeps = Helper.CreateArray(nsweeps, new SweepSpan());
+
+            // Mark border regions.
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(w - bw, w, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(0, w, 0, bh, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+                PaintRectRegion(0, w, h - bh, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
+            }
+
+            BorderSize = borderSize;
+
+            // Sweep one line at a time.
+            for (int y = borderSize; y < h - borderSize; ++y)
+            {
+                // Collect spans from this row.
+                int[] prev = new int[1024];
+                int rid = 1;
+
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = Cells[x + y * w];
+
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        var s = Spans[i];
+                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                        {
+                            continue;
+                        }
+
+                        // -x
+                        int previd = 0;
+                        if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
+                        {
+                            int ax = x + RecastUtils.GetDirOffsetX(0);
+                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ai = Cells[ax + ay * w].Index + s.GetCon(0);
+                            if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            {
+                                previd = srcReg[ai];
+                            }
+                        }
+
+                        if (previd == 0)
+                        {
+                            previd = rid++;
+                            sweeps[previd].RId = previd;
+                            sweeps[previd].NS = 0;
+                            sweeps[previd].Nei = 0;
+                        }
+
+                        // -y
+                        if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
+                        {
+                            int ax = x + RecastUtils.GetDirOffsetX(3);
+                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ai = Cells[ax + ay * w].Index + s.GetCon(3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            {
+                                int nr = srcReg[ai];
+                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
+                                {
+                                    sweeps[previd].Nei = nr;
+                                    sweeps[previd].NS++;
+                                    prev[nr]++;
+                                }
+                                else
+                                {
+                                    sweeps[previd].Nei = RC_NULL_NEI;
+                                }
+                            }
+                        }
+
+                        srcReg[i] = previd;
+                    }
+                }
+
+                // Create unique ID.
+                for (int i = 1; i < rid; ++i)
+                {
+                    if (sweeps[i].Nei != RC_NULL_NEI &&
+                        sweeps[i].Nei != 0 &&
+                        prev[sweeps[i].Nei] == sweeps[i].NS)
+                    {
+                        sweeps[i].Id = sweeps[i].Nei;
+                    }
+                    else
+                    {
+                        sweeps[i].Id = id++;
+                    }
+                }
+
+                // Remap IDs
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = Cells[x + y * w];
+
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        if (srcReg[i] > 0 && srcReg[i] < rid)
+                        {
+                            srcReg[i] = sweeps[srcReg[i]].Id;
+                        }
+                    }
+                }
+            }
+
+            // Merge monotone regions to layers and remove small regions.
+            MaxRegions = id;
+            var merged = MergeAndFilterLayerRegions(minRegionArea, id, srcReg, out int maxRegionId);
+            MaxRegions = maxRegionId;
+            if (!merged)
+            {
+                return false;
+            }
+
+            // Store the result out.
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                Spans[i].Reg = srcReg[i];
+            }
+
+            return true;
+        }
         /// <summary>
-        /// Array containing border distance data. [Size: spanCount]      
+        /// Builds the distance field
         /// </summary>
-        public IEnumerable<int> BorderDistances { get; set; }
+        public void BuildDistanceField()
+        {
+            var src = CalculateDistanceField();
+
+            var dst = BoxBlur(1, src);
+
+            // Blur and Store distance.
+            if (dst != src)
+            {
+                BorderDistances = dst;
+            }
+            else
+            {
+                BorderDistances = src;
+            }
+        }
         /// <summary>
-        /// Array containing area id data. [Size: spanCount] 
+        /// Builds the polygon detail
         /// </summary>
-        public AreaTypes[] Areas { get; set; }
+        /// <param name="polygon">Polygon vertices</param>
+        /// <param name="param">Build settings</param>
+        /// <param name="hp">Height patch</param>
+        /// <param name="outVerts">Resulting vertices</param>
+        /// <param name="outTris">Resulting triangle indices</param>
+        public void BuildPolyDetail(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Int3[] outTris)
+        {
+            Vector3[] verts = polygon.ToArray();
+            int[] hull = Array.Empty<int>();
+
+            // Tessellate outlines.
+            // This is done in separate pass in order to ensure
+            // seamless height values across the ply boundaries.
+            float sampleDist = param.SampleDist;
+            if (sampleDist > 0)
+            {
+                verts = TesselateOutlines(verts, param, hp, out hull);
+            }
+
+            // Calculate minimum extents of the polygon based on input data.
+            float minExtent = RecastUtils.PolyMinExtent(verts);
+
+            // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
+            if (minExtent < sampleDist * 2)
+            {
+                outVerts = verts.ToArray();
+                outTris = TriangulateHelper.TriangulateHull(verts, hull);
+
+                return;
+            }
+
+            // Tessellate the base mesh.
+            // We're using the triangulateHull instead of delaunayHull as it tends to
+            // create a bit better triangulation for long thin triangles when there
+            // are no internal points.
+            var tris = TriangulateHelper.TriangulateHull(verts, hull);
+            if (!tris.Any())
+            {
+                // Could not triangulate the poly, make sure there is some valid data there.
+                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Length} verts).");
+
+                outVerts = verts;
+                outTris = Array.Empty<Int3>();
+
+                return;
+            }
+
+            if (sampleDist > 0)
+            {
+                // Create sample locations in a grid.
+                verts = CreateGridSampleLocations(verts, param, hp, hull, tris, out var newTris);
+                tris = newTris;
+            }
+
+            int ntris = tris.Length;
+            int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
+            if (ntris > MAX_TRIS)
+            {
+                tris = tris.Take(MAX_TRIS).ToArray();
+                Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
+            }
+
+            outVerts = verts;
+            outTris = tris;
+        }
 
         /// <summary>
         /// Fill in cells and spans.
@@ -407,80 +1503,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return s;
-        }
-        /// <summary>
-        /// Marks the geometry areas into the heightfield
-        /// </summary>
-        /// <param name="geometry">Geometry input</param>
-        public void MarkAreas(InputGeometry geometry)
-        {
-            var vols = geometry.GetAreas();
-            var vCount = geometry.GetAreaCount();
-            for (int i = 0; i < vCount; i++)
-            {
-                var vol = vols.ElementAt(i);
-
-                MarkConvexPolyArea(
-                    vol.Vertices,
-                    vol.MinHeight, vol.MaxHeight,
-                    (AreaTypes)vol.AreaType);
-            }
-        }
-        /// <summary>
-        /// Basically, any spans that are closer to a boundary or obstruction than the specified radius are marked as unwalkable.
-        /// </summary>
-        /// <param name="radius">Radius</param>
-        /// <remarks>
-        /// This method is usually called immediately after the heightfield has been built.
-        /// </remarks>
-        public void ErodeWalkableArea(int radius)
-        {
-            int w = Width;
-            int h = Height;
-
-            // Init distance.
-            int[] dist = MarkBoundaryCellsNotNullAreas();
-
-            // Pass 1
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
-            {
-                // (0,-1) & (1,-1)
-                if (CalculateDistance(x, y, i, dist, 0, 3, out int newD1))
-                {
-                    dist[i] = newD1;
-                }
-
-                // (0,-1) & (1,-1)
-                if (CalculateDistance(x, y, i, dist, 3, 2, out int newD2))
-                {
-                    dist[i] = newD2;
-                }
-            }
-
-            // Pass 2
-            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
-            {
-                // (1,0) & (1,1)
-                if (CalculateDistance(x, y, i, dist, 2, 1, out int newD1))
-                {
-                    dist[i] = newD1;
-                }
-
-                // (0,1) & (-1,1)
-                if (CalculateDistance(x, y, i, dist, 1, 0, out int newD2))
-                {
-                    dist[i] = newD2;
-                }
-            }
-
-            int thr = radius * 2;
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                if (dist[i] < thr)
-                {
-                    Areas[i] = AreaTypes.RC_NULL_AREA;
-                }
-            }
         }
         /// <summary>
         /// Calculates the distance map
@@ -690,46 +1712,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return ch;
         }
-        /// <summary>
-        /// Gets the height data
-        /// </summary>
-        /// <param name="poly">Polygon</param>
-        /// <param name="verts">Vertex indices</param>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="hp">Height patch</param>
-        /// <param name="region">Region index</param>
-        /// <remarks>
-        /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
-        /// </remarks>
-        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int borderSize, int region)
-        {
-            var queue = new List<HeightDataItem>(512);
-
-            // Set all heights to RC_UNSET_HEIGHT.
-            hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, HeightPatch.RC_UNSET_HEIGHT);
-
-            bool empty = true;
-
-            // We cannot sample from this poly if it was created from polys
-            // of different regions. If it was then it could potentially be overlapping
-            // with polys of that region and the heights sampled here could be wrong.
-            if (!IndexedPolygon.HasMultipleRegions(region))
-            {
-                empty = GetHeightDataFromMultipleRegions(hp, borderSize, region, out var qItems);
-
-                queue.AddRange(qItems);
-            }
-
-            // if the polygon does not contain any points from the current region (rare, but happens)
-            // or if it could potentially be overlapping polygons of the same region,
-            // then use the center as the seed point.
-            if (empty)
-            {
-                queue.AddRange(SeedArrayWithPolyCenter(poly, verts, borderSize, hp));
-            }
-
-            ProcessHeightDataQueue(hp, borderSize, queue);
-        }
 
         private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int borderSize, int region, out List<HeightDataItem> queue)
         {
@@ -786,12 +1768,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return empty;
         }
 
-        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, IEnumerable<HeightDataItem> dataQueue)
+        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, List<HeightDataItem> queue)
         {
             int RETRACT_SIZE = 256;
             int head = 0;
-
-            var queue = dataQueue.ToList();
 
             // We assume the seed is centered in the polygon, so a BFS to collect
             // height data will ensure we do not move onto overlapping polygons and
@@ -833,89 +1813,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
         /// <summary>
-        /// Builds the polygon detail
-        /// </summary>
-        /// <param name="polygon">Polygon vertices</param>
-        /// <param name="param">Build settings</param>
-        /// <param name="hp">Height patch</param>
-        /// <param name="outVerts">Resulting vertices</param>
-        /// <param name="outTris">Resulting triangle indices</param>
-        public void BuildPolyDetail(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<Vector3> outVerts, out IEnumerable<Int3> outTris)
-        {
-            IEnumerable<Vector3> verts = polygon.ToArray();
-            IEnumerable<int> hull = Enumerable.Empty<int>();
-
-            // Tessellate outlines.
-            // This is done in separate pass in order to ensure
-            // seamless height values across the ply boundaries.
-            float sampleDist = param.SampleDist;
-            if (sampleDist > 0)
-            {
-                verts = TesselateOutlines(verts, param, hp, out hull);
-            }
-
-            // Calculate minimum extents of the polygon based on input data.
-            float minExtent = RecastUtils.PolyMinExtent(verts);
-
-            // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
-            if (minExtent < sampleDist * 2)
-            {
-                outVerts = verts.ToArray();
-                outTris = RecastUtils.TriangulateHull(verts, hull);
-
-                return;
-            }
-
-            // Tessellate the base mesh.
-            // We're using the triangulateHull instead of delaunayHull as it tends to
-            // create a bit better triangulation for long thin triangles when there
-            // are no internal points.
-            var tris = RecastUtils.TriangulateHull(verts, hull);
-            if (!tris.Any())
-            {
-                // Could not triangulate the poly, make sure there is some valid data there.
-                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Count()} verts).");
-
-                outVerts = verts.ToArray();
-                outTris = Enumerable.Empty<Int3>();
-
-                return;
-            }
-
-            if (sampleDist > 0)
-            {
-                // Create sample locations in a grid.
-                verts = CreateGridSampleLocations(verts, param, hp, hull, tris, out var newTris);
-                tris = newTris;
-            }
-
-            int ntris = tris.Count();
-            int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
-            if (ntris > MAX_TRIS)
-            {
-                tris = tris.Take(MAX_TRIS);
-                Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
-            }
-
-            outVerts = verts.ToArray();
-            outTris = tris.ToArray();
-        }
-        /// <summary>
         /// Tessellate outlines.
         /// </summary>
-        private IEnumerable<Vector3> TesselateOutlines(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<int> hull)
+        private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
         {
             var verts = new List<Vector3>(polygon);
             var edge = new Vector3[(BuildPolyDetailParams.MAX_VERTS_PER_EDGE + 1)];
             var hullList = new List<int>(BuildPolyDetailParams.MAX_VERTS);
 
-            int ninp = polygon.Count();
+            int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
             {
                 bool swapped = GetPolyVerts(polygon, i, j, out var vi, out var vj);
 
                 // Create samples along the edge.
-                int nn = CreateSamples(verts, param, hp, vi, vj, ref edge);
+                int nn = CreateSamples(verts.ToArray(), param, hp, vi, vj, ref edge);
 
                 // Simplify samples.
                 var idx = SimplifySamples(edge, nn, param);
@@ -923,12 +1835,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 hullList.Add(j);
 
                 // Add new vertices.
-                int nidx = idx.Count();
+                int nidx = idx.Length;
                 if (swapped)
                 {
                     for (int k = nidx - 2; k > 0; --k)
                     {
-                        verts.Add(edge[idx.ElementAt(k)]);
+                        verts.Add(edge[idx[k]]);
                         hullList.Add(verts.Count - 1);
                     }
                 }
@@ -936,7 +1848,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     for (int k = 1; k < nidx - 1; ++k)
                     {
-                        verts.Add(edge[idx.ElementAt(k)]);
+                        verts.Add(edge[idx[k]]);
                         hullList.Add(verts.Count - 1);
                     }
                 }
@@ -944,38 +1856,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             hull = hullList.ToArray();
 
-            return verts;
+            return verts.ToArray();
         }
 
-        private static bool GetPolyVerts(IEnumerable<Vector3> polygon, int i, int j, out Vector3 vi, out Vector3 vj)
-        {
-            vj = polygon.ElementAt(j);
-            vi = polygon.ElementAt(i);
-            bool swapped = false;
-
-            // Make sure the segments are always handled in same order
-            // using lexological sort or else there will be seams.
-            if (Math.Abs(vj.X - vi.X) < 1e-6f)
-            {
-                if (vj.Z > vi.Z)
-                {
-                    Helper.Swap(ref vj, ref vi);
-                    swapped = true;
-                }
-            }
-            else
-            {
-                if (vj.X > vi.X)
-                {
-                    Helper.Swap(ref vj, ref vi);
-                    swapped = true;
-                }
-            }
-
-            return swapped;
-        }
-
-        private int CreateSamples(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
+        private int CreateSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
         {
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
@@ -989,9 +1873,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float d = (float)Math.Sqrt(dx * dx + dz * dz);
             int nn = 1 + (int)Math.Floor(d / sampleDist);
             if (nn >= BuildPolyDetailParams.MAX_VERTS_PER_EDGE) nn = BuildPolyDetailParams.MAX_VERTS_PER_EDGE - 1;
-            if (polygon.Count() + nn >= BuildPolyDetailParams.MAX_VERTS)
+            if (polygon.Length + nn >= BuildPolyDetailParams.MAX_VERTS)
             {
-                nn = BuildPolyDetailParams.MAX_VERTS - 1 - polygon.Count();
+                nn = BuildPolyDetailParams.MAX_VERTS - 1 - polygon.Length;
             }
 
             for (int k = 0; k <= nn; ++k)
@@ -1009,58 +1893,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return nn;
         }
-
-        private static IEnumerable<int> SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
-        {
-            float sampleMaxError = param.SampleMaxError;
-
-            int[] idx = new int[BuildPolyDetailParams.MAX_VERTS_PER_EDGE];
-            idx[0] = 0;
-            idx[1] = nn;
-            int nidx = 2;
-            for (int k = 0; k < nidx - 1;)
-            {
-                int a = idx[k];
-                int b = idx[k + 1];
-                var va = edge[a];
-                var vb = edge[b];
-
-                // Find maximum deviation along the segment.
-                float maxd = 0;
-                int maxi = -1;
-                for (int m = a + 1; m < b; ++m)
-                {
-                    float dev = RecastUtils.DistancePtSeg(edge[m], va, vb);
-                    if (dev > maxd)
-                    {
-                        maxd = dev;
-                        maxi = m;
-                    }
-                }
-
-                // If the max deviation is larger than accepted error,
-                // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
-                {
-                    for (int m = nidx; m > k; --m)
-                    {
-                        idx[m] = idx[m - 1];
-                    }
-                    idx[k + 1] = maxi;
-                    nidx++;
-                }
-                else
-                {
-                    ++k;
-                }
-            }
-
-            return idx.Take(nidx).ToArray();
-        }
         /// <summary>
         /// Create sample locations in a grid
         /// </summary>
-        private IEnumerable<Vector3> CreateGridSampleLocations(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, IEnumerable<int> hull, IEnumerable<Int3> tris, out IEnumerable<Int3> newTris)
+        private Vector3[] CreateGridSampleLocations(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, int[] hull, Int3[] tris, out Int3[] newTris)
         {
             float sampleDist = param.SampleDist;
             float sampleMaxError = param.SampleMaxError;
@@ -1069,12 +1905,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var triList = new List<Int3>(tris);
 
             // Create sample locations in a grid.
-            var samples = new List<Int4>(InitializeSamples(polygon, param, hp));
+            var samples = InitializeSamples(polygon, param, hp);
 
             // Add the samples starting from the one that has the most
             // error. The procedure stops when all samples are added
             // or when the max error is within treshold.
-            int nsamples = samples.Count;
+            int nsamples = samples.Length;
             for (int iter = 0; iter < nsamples; ++iter)
             {
                 if (verts.Count >= BuildPolyDetailParams.MAX_VERTS)
@@ -1083,7 +1919,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Find sample with most error.
-                var (bestpt, bestd, besti) = FindSampleWithMostError(samples, sampleDist, verts, triList);
+                var (bestpt, bestd, besti) = FindSampleWithMostError(samples, sampleDist, verts.ToArray(), triList.ToArray());
 
                 // If the max error is within accepted threshold, stop tesselating.
                 if (bestd <= sampleMaxError || besti == -1)
@@ -1100,7 +1936,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 verts.Add(bestpt);
 
                 // Create new triangulation. Full rebuild.
-                var dhull = DelaunayHull.Build(verts, hull);
+                var dhull = DelaunayHull.Build(verts.ToArray(), hull);
                 var dTris = dhull.GetTris();
 
                 triList.Clear();
@@ -1112,7 +1948,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return verts.ToArray();
         }
 
-        private IEnumerable<Int4> InitializeSamples(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp)
+        private Int4[] InitializeSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
         {
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
@@ -1157,7 +1993,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return samples.ToArray();
         }
 
-        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(IEnumerable<Int4> samples, float sampleDist, IEnumerable<Vector3> verts, IEnumerable<Int3> tris)
+        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(Int4[] samples, float sampleDist, Vector3[] verts, Int3[] tris)
         {
             var bestpt = Vector3.Zero;
             float bestd = 0;
@@ -1165,10 +2001,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             float cs = CellSize;
 
-            int nsamples = samples.Count();
+            int nsamples = samples.Length;
             for (int i = 0; i < nsamples; ++i)
             {
-                var s = samples.ElementAt(i);
+                var s = samples[i];
                 if (s.W != 0)
                 {
                     // skip added.
@@ -1373,433 +2209,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return array;
         }
         /// <summary>
-        /// Walks the contour
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
-        /// <param name="dir">Direction</param>
-        /// <param name="srcReg">Region list</param>
-        /// <returns>Returns the contour list</returns>
-        public IEnumerable<int> WalkContour(int x, int y, int i, int dir, int[] srcReg)
-        {
-            var cont = new List<int>();
-
-            int startDir = dir;
-            int starti = i;
-
-            var ss = Spans[i];
-            int curReg = 0;
-            if (ss.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-            {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + ss.GetCon(dir);
-                curReg = srcReg[ai];
-            }
-            cont.Add(curReg);
-
-            int iter = 0;
-            while (++iter < 40000)
-            {
-                var s = Spans[i];
-
-                if (IsSolidEdge(srcReg, x, y, i, dir))
-                {
-                    // Choose the edge corner
-                    int r = 0;
-                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                    {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
-                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
-                        r = srcReg[ai];
-                    }
-
-                    if (r != curReg)
-                    {
-                        curReg = r;
-                        cont.Add(curReg);
-                    }
-
-                    dir = (dir + 1) & 0x3;  // Rotate CW
-                }
-                else
-                {
-                    int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
-                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                    {
-                        var nc = Cells[nx + ny * Width];
-                        ni = nc.Index + s.GetCon(dir);
-                    }
-
-                    if (ni == -1)
-                    {
-                        // Should not happen.
-                        return Array.Empty<int>();
-                    }
-
-                    x = nx;
-                    y = ny;
-                    i = ni;
-                    dir = (dir + 3) & 0x3;  // Rotate CCW
-                }
-
-                if (starti == i && startDir == dir)
-                {
-                    break;
-                }
-            }
-
-            return cont;
-        }
-        /// <summary>
-        /// Walks the edge contour
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
-        /// <param name="flags">Edge flags</param>
-        /// <returns>Returns the edge contour list</returns>
-        public IEnumerable<Int4> WalkContour(int x, int y, int i, ref int[] flags)
-        {
-            var points = new List<Int4>();
-
-            // Choose the first non-connected edge
-            int dir = 0;
-            while ((flags[i] & (1 << dir)) == 0)
-            {
-                dir++;
-            }
-
-            int startDir = dir;
-            int starti = i;
-
-            var area = Areas[i];
-
-            int iter = 0;
-            while (++iter < 40000)
-            {
-                if ((flags[i] & (1 << dir)) != 0)
-                {
-                    // Choose the edge corner
-                    bool isAreaBorder = false;
-                    int px = x;
-                    int py = GetCornerHeight(x, y, i, dir, out bool isBorderVertex);
-                    int pz = y;
-                    switch (dir)
-                    {
-                        case 0: pz++; break;
-                        case 1: px++; pz++; break;
-                        case 2: px++; break;
-                    }
-                    int r = 0;
-                    var s = Spans[i];
-                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                    {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
-                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
-                        r = Spans[ai].Reg;
-                        if (area != Areas[ai])
-                        {
-                            isAreaBorder = true;
-                        }
-                    }
-                    if (isBorderVertex)
-                    {
-                        r |= ContourSet.RC_BORDER_VERTEX;
-                    }
-                    if (isAreaBorder)
-                    {
-                        r |= ContourSet.RC_AREA_BORDER;
-                    }
-                    points.Add(new Int4(px, py, pz, r));
-
-                    flags[i] &= ~(1 << dir); // Remove visited edges
-                    dir = (dir + 1) & 0x3;  // Rotate CW
-                }
-                else
-                {
-                    int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
-                    var s = Spans[i];
-                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                    {
-                        var nc = Cells[nx + ny * Width];
-                        ni = nc.Index + s.GetCon(dir);
-                    }
-                    if (ni == -1)
-                    {
-                        // Should not happen.
-                        return Array.Empty<Int4>();
-                    }
-                    x = nx;
-                    y = ny;
-                    i = ni;
-                    dir = (dir + 3) & 0x3;  // Rotate CCW
-                }
-
-                if (starti == i && startDir == dir)
-                {
-                    break;
-                }
-            }
-
-            return points;
-        }
-        /// <summary>
-        /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.
-        /// </summary>
-        /// <param name="chf">Compact height field</param>
-        /// <returns>Returns always true</returns>
-        public bool MedianFilterWalkableArea()
-        {
-            int w = Width;
-            int h = Height;
-
-            // Init distance.
-            var areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
-
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
-            {
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    areas[i] = Areas[i];
-                    continue;
-                }
-
-                var nei = Helper.CreateArray(9, Areas[i]);
-
-                var s = Spans[i];
-
-                for (int dir = 0; dir < 4; ++dir)
-                {
-                    if (s.GetCon(dir) == ContourSet.RC_NOT_CONNECTED)
-                    {
-                        continue;
-                    }
-
-                    int ax = x + RecastUtils.GetDirOffsetX(dir);
-                    int ay = y + RecastUtils.GetDirOffsetY(dir);
-                    int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
-                    if (Areas[ai] != AreaTypes.RC_NULL_AREA)
-                    {
-                        nei[dir * 2 + 0] = Areas[ai];
-                    }
-
-                    var a = Spans[ai];
-                    int dir2 = (dir + 1) & 0x3;
-                    if (a.GetCon(dir2) == ContourSet.RC_NOT_CONNECTED)
-                    {
-                        continue;
-                    }
-
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
-                    int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
-                    if (Areas[ai2] != AreaTypes.RC_NULL_AREA)
-                    {
-                        nei[dir * 2 + 1] = Areas[ai2];
-                    }
-                }
-
-                InsertSort(ref nei, 9);
-                areas[i] = nei[4];
-            }
-
-            Array.Copy(areas, Areas, SpanCount);
-
-            return true;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bmin"></param>
-        /// <param name="bmax"></param>
-        /// <param name="areaId"></param>
-        /// <param name="chf"></param>
-        /// <remarks>
-        /// The value of spacial parameters are in world units.
-        /// </remarks>
-        public void MarkBoxArea(Vector3 bmin, Vector3 bmax, AreaTypes areaId)
-        {
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
-
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (_, _, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
-            {
-                var s = Spans[i];
-
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                if (s.Y >= miny && s.Y <= maxy)
-                {
-                    Areas[i] = areaId;
-                }
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="polygon">Polygon vertices</param>
-        /// <param name="hmin">Minimum height</param>
-        /// <param name="hmax">Maximum height</param>
-        /// <param name="areaId">Area id</param>
-        /// <remarks>
-        /// The value of spacial parameters are in world units.
-        /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
-        /// </remarks>
-        public void MarkConvexPolyArea(IEnumerable<Vector3> polygon, float hmin, float hmax, AreaTypes areaId)
-        {
-            GetPolygonBounds(polygon, out var bmin, out var bmax);
-            bmin.Y = hmin;
-            bmax.Y = hmax;
-
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
-
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
-            {
-                var s = Spans[i];
-
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                if (s.Y >= miny && s.Y <= maxy)
-                {
-                    var p = new Vector3
-                    {
-                        X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
-                        Y = 0,
-                        Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
-                    };
-
-                    if (PointOverPoly(polygon, p))
-                    {
-                        Areas[i] = areaId;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pos"></param>
-        /// <param name="r"></param>
-        /// <param name="h"></param>
-        /// <param name="areaId"></param>
-        /// <param name="chf"></param>
-        /// <remarks>
-        /// The value of spacial parameters are in world units.
-        /// </remarks>
-        public void MarkCylinderArea(Vector3 pos, float r, float h, AreaTypes areaId)
-        {
-            GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
-            float r2 = r * r;
-
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
-
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
-            {
-                var s = Spans[i];
-
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                if (s.Y >= miny && s.Y <= maxy)
-                {
-                    float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
-                    float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
-                    float dx = sx - pos.X;
-                    float dz = sz - pos.Z;
-
-                    if (dx * dx + dz * dz < r2)
-                    {
-                        Areas[i] = areaId;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Builds the distance field
-        /// </summary>
-        public void BuildDistanceField()
-        {
-            var src = CalculateDistanceField();
-
-            var dst = BoxBlur(1, src);
-
-            // Blur and Store distance.
-            if (dst != src)
-            {
-                BorderDistances = dst;
-            }
-            else
-            {
-                BorderDistances = src;
-            }
-        }
-        /// <summary>
         /// Box blur
         /// </summary>
         /// <param name="thr">Threshold</param>
         /// <param name="src">Distance field</param>
         /// <returns>Returns the blurred distance field</returns>
-        private IEnumerable<int> BoxBlur(int thr, IEnumerable<int> src)
+        private int[] BoxBlur(int thr, int[] src)
         {
             int[] dst = new int[SpanCount];
 
@@ -1810,7 +2225,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
             {
-                var cd = src.ElementAt(i);
+                var cd = src[i];
                 if (cd <= thr)
                 {
                     dst[i] = cd;
@@ -1832,7 +2247,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ax = x + RecastUtils.GetDirOffsetX(dir);
                     int ay = y + RecastUtils.GetDirOffsetY(dir);
                     int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
-                    d += src.ElementAt(ai);
+                    d += src[ai];
 
                     var a = Spans[ai];
                     int dir2 = (dir + 1) & 0x3;
@@ -1846,43 +2261,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
                     int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
                     int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
-                    d += src.ElementAt(ai2);
+                    d += src[ai2];
                 }
 
                 dst[i] = (d + 5) / 9;
             }
 
             return dst;
-        }
-        /// <summary>
-        /// Calculates the distance field
-        /// </summary>
-        /// <returns>Returns the array of distances</returns>
-        public IEnumerable<int> CalculateDistanceField()
-        {
-            int w = Width;
-            int h = Height;
-
-            // Mark boundary cells.
-            int[] res = MarkBoundaryCells(w, h);
-
-            // Pass 1
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
-            {
-                TestConn(x, y, i, w, 0, 3, ref res);
-                TestConn(x, y, i, w, 3, 2, ref res);
-            }
-
-            // Pass 2
-            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
-            {
-                TestConn(x, y, i, w, 2, 1, ref res);
-                TestConn(x, y, i, w, 1, 0, ref res);
-            }
-
-            MaxDistance = res.Max();
-
-            return res;
         }
 
         private int[] MarkBoundaryCells(int w, int h)
@@ -1951,419 +2336,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 res[i] = res[aai] + 3;
             }
-        }
-
-        /// <summary>
-        /// Builds monotone regions
-        /// </summary>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="minRegionArea">Minimum region area</param>
-        /// <param name="mergeRegionArea">Merge region area</param>
-        /// <returns>Returns true when the region were correctly built</returns>
-        public bool BuildRegionsMonotone(int borderSize, int minRegionArea, int mergeRegionArea)
-        {
-            int w = Width;
-            int h = Height;
-            int id = 1;
-
-            int[] srcReg = new int[SpanCount];
-
-            int nsweeps = Math.Max(Width, Height);
-            SweepSpan[] sweeps = new SweepSpan[nsweeps];
-
-            // Mark border regions.
-            if (borderSize > 0)
-            {
-                // Make sure border will not overflow.
-                int bw = Math.Min(w, borderSize);
-                int bh = Math.Min(h, borderSize);
-                // Paint regions
-                PaintRectRegion(0, bw, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(w - bw, w, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, 0, bh, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, h - bh, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-            }
-
-            BorderSize = borderSize;
-
-            // Sweep one line at a time.
-            for (int y = borderSize; y < h - borderSize; ++y)
-            {
-                // Collect spans from this row.
-                int[] prev = new int[id + 1];
-                int rid = 1;
-
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                    {
-                        var s = Spans[i];
-                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                        {
-                            continue;
-                        }
-
-                        // -x
-                        int previd = 0;
-                        if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(0);
-                            if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
-                            {
-                                previd = srcReg[ai];
-                            }
-                        }
-
-                        if (previd == 0)
-                        {
-                            previd = rid++;
-                            sweeps[previd].RId = previd;
-                            sweeps[previd].NS = 0;
-                            sweeps[previd].Nei = 0;
-                        }
-
-                        // -y
-                        if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(3);
-                            if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
-                            {
-                                int nr = srcReg[ai];
-                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
-                                {
-                                    sweeps[previd].Nei = nr;
-                                    sweeps[previd].NS++;
-                                    prev[nr]++;
-                                }
-                                else
-                                {
-                                    sweeps[previd].Nei = RC_NULL_NEI;
-                                }
-                            }
-                        }
-
-                        srcReg[i] = previd;
-                    }
-                }
-
-                // Create unique ID.
-                for (int i = 1; i < rid; ++i)
-                {
-                    if (sweeps[i].Nei != RC_NULL_NEI &&
-                        sweeps[i].Nei != 0 &&
-                        prev[sweeps[i].Nei] == sweeps[i].NS)
-                    {
-                        sweeps[i].Id = sweeps[i].Nei;
-                    }
-                    else
-                    {
-                        sweeps[i].Id = id++;
-                    }
-                }
-
-                // Remap IDs
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                    {
-                        if (srcReg[i] > 0 && srcReg[i] < rid)
-                        {
-                            srcReg[i] = sweeps[srcReg[i]].Id;
-                        }
-                    }
-                }
-            }
-
-            // Merge regions and filter out small regions.
-            MaxRegions = id;
-            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, srcReg, out _, out var maxRegionId);
-            MaxRegions = maxRegionId;
-
-            if (!merged)
-            {
-                return false;
-            }
-
-            // Monotone partitioning does not generate overlapping regions.
-
-            // Store the result out.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                Spans[i].Reg = srcReg[i];
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Builds regions
-        /// </summary>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="minRegionArea">Minimum region area</param>
-        /// <param name="mergeRegionArea">Merge region area</param>
-        /// <returns>Returns true when the region were correctly built</returns>
-        public bool BuildRegions(int borderSize, int minRegionArea, int mergeRegionArea)
-        {
-            int w = Width;
-            int h = Height;
-
-            int LOG_NB_STACKS = 3;
-            int NB_STACKS = 1 << LOG_NB_STACKS;
-            var lvlStacks = new List<List<LevelStackEntry>>(NB_STACKS);
-            for (int i = 0; i < NB_STACKS; i++)
-            {
-                lvlStacks.Add(new List<LevelStackEntry>());
-            }
-
-            var stack = new List<LevelStackEntry>();
-
-            int[] srcReg = new int[SpanCount];
-            int[] srcDist = new int[SpanCount];
-
-            int regionId = 1;
-            int level = (MaxDistance + 1) & ~1;
-
-            // Figure better formula, expandIters defines how much the 
-            // watershed "overflows" and simplifies the regions. Tying it to
-            // agent radius was usually good indication how greedy it could be.
-            //	const int expandIters = 4 + walkableRadius * 2
-            const int expandIters = 8;
-
-            if (borderSize > 0)
-            {
-                // Make sure border will not overflow.
-                int bw = Math.Min(w, borderSize);
-                int bh = Math.Min(h, borderSize);
-
-                // Paint regions
-                PaintRectRegion(0, bw, 0, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(w - bw, w, 0, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(0, w, 0, bh, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(0, w, h - bh, h, (regionId | ContourSet.RC_BORDER_REG), srcReg); regionId++;
-            }
-
-            BorderSize = borderSize;
-
-            int sId = -1;
-            while (level > 0)
-            {
-                level = level >= 2 ? level - 2 : 0;
-                sId = (sId + 1) & (NB_STACKS - 1);
-
-                if (sId == 0)
-                {
-                    SortCellsByLevel(level, srcReg, NB_STACKS, lvlStacks, 1);
-                }
-                else
-                {
-                    var stacks = AppendStacks(lvlStacks[sId - 1], srcReg); // copy left overs from last level
-                    lvlStacks[sId].AddRange(stacks);
-                }
-
-                // Expand current regions until no empty connected cells found.
-                ExpandRegions(expandIters, level, srcReg, srcDist, lvlStacks[sId], false);
-
-                // Mark new regions with IDs.
-                for (int j = 0; j < lvlStacks[sId].Count; j++)
-                {
-                    var current = lvlStacks[sId][j];
-                    int x = current.X;
-                    int y = current.Y;
-                    int i = current.Index;
-                    if (i >= 0 && srcReg[i] == 0)
-                    {
-                        var entry = new LevelStackEntry { X = x, Y = y, Index = i };
-                        var floodRes = FloodRegion(entry, level, regionId, srcReg, srcDist, stack);
-                        if (floodRes)
-                        {
-                            if (regionId == int.MaxValue)
-                            {
-                                throw new EngineException("rcBuildRegions: Region ID overflow");
-                            }
-
-                            regionId++;
-                        }
-                    }
-                }
-            }
-
-            // Expand current regions until no empty connected cells found.
-            ExpandRegions(expandIters * 8, 0, srcReg, srcDist, stack, true);
-
-            // Merge regions and filter out smalle regions.
-            MaxRegions = regionId;
-            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, regionId, srcReg, out int[] overlaps, out int maxRegionId);
-            MaxRegions = maxRegionId;
-            if (!merged)
-            {
-                return false;
-            }
-
-            // If overlapping regions were found during merging, split those regions.
-            if (overlaps.Length > 0)
-            {
-                throw new EngineException(string.Format("rcBuildRegions: {0} overlapping regions", overlaps.Length));
-            }
-
-            // Write the result out.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                Spans[i].Reg = srcReg[i];
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Builds the layer regions
-        /// </summary>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="minRegionArea">Minimum region area</param>
-        /// <returns>Returns true when the region were correctly built</returns>
-        public bool BuildLayerRegions(int borderSize, int minRegionArea)
-        {
-            int w = Width;
-            int h = Height;
-            int id = 1;
-
-            int[] srcReg = new int[SpanCount];
-
-            int nsweeps = Math.Max(Width, Height);
-            SweepSpan[] sweeps = Helper.CreateArray(nsweeps, new SweepSpan());
-
-            // Mark border regions.
-            if (borderSize > 0)
-            {
-                // Make sure border will not overflow.
-                int bw = Math.Min(w, borderSize);
-                int bh = Math.Min(h, borderSize);
-                // Paint regions
-                PaintRectRegion(0, bw, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(w - bw, w, 0, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, 0, bh, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, h - bh, h, id | ContourSet.RC_BORDER_REG, srcReg); id++;
-            }
-
-            BorderSize = borderSize;
-
-            // Sweep one line at a time.
-            for (int y = borderSize; y < h - borderSize; ++y)
-            {
-                // Collect spans from this row.
-                int[] prev = new int[1024];
-                int rid = 1;
-
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                    {
-                        var s = Spans[i];
-                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                        {
-                            continue;
-                        }
-
-                        // -x
-                        int previd = 0;
-                        if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(0);
-                            if ((srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
-                            {
-                                previd = srcReg[ai];
-                            }
-                        }
-
-                        if (previd == 0)
-                        {
-                            previd = rid++;
-                            sweeps[previd].RId = previd;
-                            sweeps[previd].NS = 0;
-                            sweeps[previd].Nei = 0;
-                        }
-
-                        // -y
-                        if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(3);
-                            if (srcReg[ai] != 0 && (srcReg[ai] & ContourSet.RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
-                            {
-                                int nr = srcReg[ai];
-                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
-                                {
-                                    sweeps[previd].Nei = nr;
-                                    sweeps[previd].NS++;
-                                    prev[nr]++;
-                                }
-                                else
-                                {
-                                    sweeps[previd].Nei = RC_NULL_NEI;
-                                }
-                            }
-                        }
-
-                        srcReg[i] = previd;
-                    }
-                }
-
-                // Create unique ID.
-                for (int i = 1; i < rid; ++i)
-                {
-                    if (sweeps[i].Nei != RC_NULL_NEI &&
-                        sweeps[i].Nei != 0 &&
-                        prev[sweeps[i].Nei] == sweeps[i].NS)
-                    {
-                        sweeps[i].Id = sweeps[i].Nei;
-                    }
-                    else
-                    {
-                        sweeps[i].Id = id++;
-                    }
-                }
-
-                // Remap IDs
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                    {
-                        if (srcReg[i] > 0 && srcReg[i] < rid)
-                        {
-                            srcReg[i] = sweeps[srcReg[i]].Id;
-                        }
-                    }
-                }
-            }
-
-            // Merge monotone regions to layers and remove small regions.
-            MaxRegions = id;
-            var merged = MergeAndFilterLayerRegions(minRegionArea, id, srcReg, out int maxRegionId);
-            MaxRegions = maxRegionId;
-            if (!merged)
-            {
-                return false;
-            }
-
-            // Store the result out.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                Spans[i].Reg = srcReg[i];
-            }
-
-            return true;
         }
 
         private bool FloodRegion(LevelStackEntry entry, int level, int r, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
@@ -2457,7 +2429,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             continue;
                         }
-                        if (BorderDistances.ElementAt(ai) >= lev && srcReg[ai] == 0)
+                        if (BorderDistances[ai] >= lev && srcReg[ai] == 0)
                         {
                             srcReg[ai] = r;
                             srcDist[ai] = 0;
@@ -2487,7 +2459,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    if (BorderDistances.ElementAt(i) >= level && srcReg[i] == 0)
+                    if (BorderDistances[i] >= level && srcReg[i] == 0)
                     {
                         stack.Add(new LevelStackEntry { X = x, Y = y, Index = i });
                     }
@@ -2609,7 +2581,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int level = BorderDistances.ElementAt(i) >> loglevelsPerStack;
+                int level = BorderDistances[i] >> loglevelsPerStack;
                 int sId = startLevel - level;
                 if (sId >= nbStacks)
                 {

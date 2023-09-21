@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -25,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int NearestRef() { return m_nearestRef; }
         public Vector3 NearestPoint() { return m_nearestPoint; }
 
-        public void Process(MeshTile tile, IEnumerable<int> refs)
+        public void Process(MeshTile tile, int[] refs)
         {
             if (refs?.Any() != true)
             {

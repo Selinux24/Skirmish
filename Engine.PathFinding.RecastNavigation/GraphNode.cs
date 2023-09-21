@@ -28,7 +28,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var tileHeaders = mesh.TileCache
                     .GetTiles()
                     .Select(tile => tile.Header)
-                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC)
+                    .Where(header => header.Magic == TileCache.DT_TILECACHE_MAGIC)
                     .ToArray();
 
                 foreach (var header in tileHeaders)
@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 nodes.Add(new GraphNode()
                 {
-                    Triangles = tris.ToArray(),
+                    Triangles = tris,
                     TotalCost = 1,
                     Color = tileColor,
                 });
@@ -103,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var tileHeaders = mesh.TileCache
                     .GetTiles()
                     .Select(tile => tile.Header)
-                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC);
+                    .Where(header => header.Magic == TileCache.DT_TILECACHE_MAGIC);
 
                 foreach (var header in tileHeaders)
                 {

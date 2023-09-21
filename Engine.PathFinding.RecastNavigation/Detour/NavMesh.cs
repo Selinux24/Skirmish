@@ -15,6 +15,67 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public const int MAX_LAYERS = 32;
 
+        private NavMeshParams m_params;
+        private Vector3 m_orig;
+        private readonly float m_tileWidth;
+        private readonly float m_tileHeight;
+        private readonly int m_tileLutMask;
+        private readonly MeshTile[] m_posLookup;
+        private MeshTile m_nextFree = null;
+        private readonly int m_tileBits;
+        private readonly int m_polyBits;
+        private readonly int m_saltBits;
+
+        public MeshTile[] Tiles { get; private set; }
+        public int MaxTiles { get; private set; }
+        public TileCache TileCache { get; internal set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public NavMesh(NavMeshParams nmparams)
+        {
+            m_params = nmparams;
+            m_orig = m_params.Origin;
+            m_tileWidth = m_params.TileWidth;
+            m_tileHeight = m_params.TileHeight;
+
+            // Init tiles
+            MaxTiles = m_params.MaxTiles;
+            var m_tileLutSize = Helper.NextPowerOfTwo(m_params.MaxTiles / 4);
+            if (m_tileLutSize == 0)
+            {
+                m_tileLutSize = 1;
+            }
+            m_tileLutMask = m_tileLutSize - 1;
+
+            Tiles = new MeshTile[MaxTiles];
+            m_posLookup = new MeshTile[m_tileLutSize];
+
+            m_nextFree = null;
+            for (int i = MaxTiles - 1; i >= 0; --i)
+            {
+                Tiles[i] = new MeshTile
+                {
+                    Index = i,
+                    Salt = 1,
+                    Next = m_nextFree
+                };
+                m_nextFree = Tiles[i];
+            }
+
+            // Init ID generator values.
+            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxTiles), 2);
+            m_polyBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxPolys), 2);
+            // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
+            m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
+
+            if (m_saltBits < 10)
+            {
+                throw new EngineException("DT_INVALID_PARAM");
+            }
+        }
+
         /// <summary>
         /// Builds a new navigation mesh
         /// </summary>
@@ -381,7 +442,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
         }
-        private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
+        private static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
         {
             // Allocate voxel heightfield where we rasterize our input data to.
             var tiles = new List<TileCacheData>();
@@ -431,7 +492,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var layer = lset.Layers[i];
 
-                DetourTileCache.BuildTileCacheLayer(layer.Heights, layer.Areas, layer.Cons, out var data);
+                var data = layer.BuildTileCacheLayer();
 
                 // Store data
                 var tile = new TileCacheData
@@ -439,8 +500,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Store header
                     Header = new TileCacheLayerHeader
                     {
-                        Magic = DetourTileCache.DT_TILECACHE_MAGIC,
-                        Version = DetourTileCache.DT_TILECACHE_VERSION,
+                        Magic = TileCache.DT_TILECACHE_MAGIC,
+                        Version = TileCache.DT_TILECACHE_VERSION,
 
                         // Tile layer location in the navmesh.
                         TX = x,
@@ -591,67 +652,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
-            }
-        }
-
-        private NavMeshParams m_params;
-        private Vector3 m_orig;
-        private readonly float m_tileWidth;
-        private readonly float m_tileHeight;
-        private readonly int m_tileLutMask;
-        private readonly MeshTile[] m_posLookup;
-        private MeshTile m_nextFree = null;
-        private readonly int m_tileBits;
-        private readonly int m_polyBits;
-        private readonly int m_saltBits;
-
-        public MeshTile[] Tiles { get; private set; }
-        public int MaxTiles { get; private set; }
-        public TileCache TileCache { get; internal set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public NavMesh(NavMeshParams nmparams)
-        {
-            m_params = nmparams;
-            m_orig = m_params.Origin;
-            m_tileWidth = m_params.TileWidth;
-            m_tileHeight = m_params.TileHeight;
-
-            // Init tiles
-            MaxTiles = m_params.MaxTiles;
-            var m_tileLutSize = Helper.NextPowerOfTwo(m_params.MaxTiles / 4);
-            if (m_tileLutSize == 0)
-            {
-                m_tileLutSize = 1;
-            }
-            m_tileLutMask = m_tileLutSize - 1;
-
-            Tiles = new MeshTile[MaxTiles];
-            m_posLookup = new MeshTile[m_tileLutSize];
-
-            m_nextFree = null;
-            for (int i = MaxTiles - 1; i >= 0; --i)
-            {
-                Tiles[i] = new MeshTile
-                {
-                    Index = i,
-                    Salt = 1,
-                    Next = m_nextFree
-                };
-                m_nextFree = Tiles[i];
-            }
-
-            // Init ID generator values.
-            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxTiles), 2);
-            m_polyBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxPolys), 2);
-            // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
-            m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
-
-            if (m_saltBits < 10)
-            {
-                throw new EngineException("DT_INVALID_PARAM");
             }
         }
 
@@ -1398,7 +1398,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxcon">Maximum resulting connections</param>
         /// <param name="con">Resulting connections</param>
         /// <param name="conarea">Resulting connection areas</param>
-        private void FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out IEnumerable<int> con, out IEnumerable<Vector2> conarea)
+        private void FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out int[] con, out Vector2[] conarea)
         {
             var conList = new List<int>();
             var conareaList = new List<Vector2>();
@@ -1411,7 +1411,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int bse = GetTileRef(tile);
 
             var polys = tile.GetPolys();
-            for (int i = 0; i < polys.Count(); ++i)
+            for (int i = 0; i < polys.Length; ++i)
             {
                 var poly = tile.Polys[i];
                 int nv = poly.VertCount;
@@ -1615,9 +1615,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var vb = tile.GetPolyVertex(poly, (j + 1) % nv);
                 FindConnectingPolys(va, vb, target, DetourUtils.OppositeTile(dir), 4, out var neis, out var neiareas);
 
-                for (int k = 0; k < neis.Count(); k++)
+                for (int k = 0; k < neis.Length; k++)
                 {
-                    var nei = neis.ElementAt(k);
+                    var nei = neis[k];
                     int idx = DetourUtils.AllocLink(tile);
                     if (idx != DetourUtils.DT_NULL_LINK)
                     {
@@ -1631,7 +1631,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         poly.FirstLink = idx;
 
                         // Compress portal limits to an integer value.
-                        Vector2Int? bounds = CompressPortalLimits(va, vb, dir, neiareas.ElementAt(k));
+                        Vector2Int? bounds = CompressPortalLimits(va, vb, dir, neiareas[k]);
                         if (bounds.HasValue)
                         {
                             link.BMin = bounds.Value.X;

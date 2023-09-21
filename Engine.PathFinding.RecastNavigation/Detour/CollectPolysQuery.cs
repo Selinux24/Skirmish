@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -19,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Overflow = false;
         }
 
-        public void Process(MeshTile tile, IEnumerable<int> refs)
+        public void Process(MeshTile tile, int[] refs)
         {
             if (refs?.Any() != true)
             {
@@ -27,14 +26,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             int numLeft = MaxPolys - NumCollected;
-            int toCopy = refs.Count();
+            int toCopy = refs.Length;
             if (toCopy > numLeft)
             {
                 Overflow = true;
                 toCopy = numLeft;
             }
 
-            Array.Copy(refs.ToArray(), 0, Polys, NumCollected, toCopy);
+            Array.Copy(refs, 0, Polys, NumCollected, toCopy);
 
             NumCollected += toCopy;
         }

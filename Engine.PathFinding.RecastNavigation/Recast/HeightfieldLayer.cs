@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using SharpDX;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -60,5 +61,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Maxy usable sub-region.
         /// </summary>
         public int MaxY { get; set; }
+
+
+        public TileCacheLayerData BuildTileCacheLayer()
+        {
+            return new TileCacheLayerData()
+            {
+                Heights = Heights,
+                Areas = Areas,
+                Connections = Cons,
+            };
+        }
     }
 }

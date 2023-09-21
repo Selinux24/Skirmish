@@ -130,10 +130,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return Neis?.Take(NNeis)?.Contains(v) ?? false;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Id: {LayerId}; Layers: {NLayers}; Neighbors: {NNeis}; Base: {IsBase}";

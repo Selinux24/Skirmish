@@ -66,10 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int MaxY { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             if (Magic == 0 && Version == 0)
@@ -77,7 +74,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return "Empty;";
             }
 
-            if (Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+            if (Magic != TileCache.DT_TILECACHE_MAGIC)
             {
                 return "Invalid;";
             }

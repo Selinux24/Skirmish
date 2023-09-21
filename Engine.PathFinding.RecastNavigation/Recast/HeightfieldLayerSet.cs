@@ -7,6 +7,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class HeightfieldLayerSet
     {
         /// <summary>
+        /// Layer list
+        /// </summary>
+        public HeightfieldLayer[] Layers { get; set; }
+        /// <summary>
+        /// Number of layers
+        /// </summary>
+        public int NLayers { get; set; }
+
+        /// <summary>
         /// Builds a new heightfield layer set
         /// </summary>
         /// <param name="chf">Compact heightfield</param>
@@ -43,14 +52,5 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return lset;
         }
-
-        /// <summary>
-        /// Layer list
-        /// </summary>
-        public HeightfieldLayer[] Layers { get; set; }
-        /// <summary>
-        /// Number of layers
-        /// </summary>
-        public int NLayers { get; set; }
     }
 }

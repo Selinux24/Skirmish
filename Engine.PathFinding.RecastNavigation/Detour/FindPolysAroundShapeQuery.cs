@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -11,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Shape vertices (polygon)
         /// </summary>
-        public IEnumerable<Vector3> Vertices { get; set; }
+        public Vector3[] Vertices { get; set; }
 
         /// <summary>
         /// Performs the query against a segment

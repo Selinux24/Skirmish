@@ -86,7 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 foreach (var tile in file.TileCacheData)
                 {
-                    if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+                    if (tile.Header.Magic != TileCache.DT_TILECACHE_MAGIC)
                     {
                         continue;
                     }

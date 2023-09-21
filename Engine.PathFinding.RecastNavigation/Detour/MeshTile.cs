@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -81,7 +80,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the polygon list
         /// </summary>
-        public IEnumerable<Poly> GetPolys()
+        public Poly[] GetPolys()
         {
             return Polys.Take(Header.PolyCount).ToArray();
         }
@@ -115,7 +114,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 center += v;
             }
 
-            center *= 1.0f / verts.Count();
+            center *= 1.0f / verts.Length;
 
             return center;
         }
@@ -143,12 +142,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the vertex list</returns>
-        public IEnumerable<Vector3> GetPolyVerts(Poly poly)
+        public Vector3[] GetPolyVerts(Poly poly)
         {
+            Vector3[] res = new Vector3[poly.VertCount];
+
             for (int j = 0; j < poly.VertCount; j++)
             {
-                yield return Verts[poly.Verts[j]];
+                res[j] = Verts[poly.Verts[j]];
             }
+
+            return res;
         }
         /// <summary>
         /// Calculates the bounds of the Polygon
@@ -193,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the off-mesh connection list
         /// </summary>
-        public IEnumerable<OffMeshConnection> GetOffMeshConnections()
+        public OffMeshConnection[] GetOffMeshConnections()
         {
             return OffMeshCons
                 .Take(Header.OffMeshConCount)
@@ -349,16 +352,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="p">Polygon</param>
         /// <returns>Returns a triangle array</returns>
-        public IEnumerable<Triangle> GetDetailTris(Poly p)
+        public Triangle[] GetDetailTris(Poly p)
         {
             var pd = GetDetailMesh(p);
 
+            Triangle[] res = new Triangle[pd.TriCount];
             for (int k = 0; k < pd.TriCount; k++)
             {
                 var pmt = DetailTris[pd.TriBase + k];
 
-                yield return GetDetailTri(p, pd.VertBase, pmt);
+                res[k] = GetDetailTri(p, pd.VertBase, pmt);
             }
+            return res;
         }
 
         /// <summary>
@@ -394,10 +399,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Index: {Index}; Salt: {Salt}; Links: {LinksFreeList}; Flags: {Flags}; Header: {Header}; Data: {Data}";

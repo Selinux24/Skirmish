@@ -1,12 +1,8 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     static class DetourUtils
     {
         #region Constants
@@ -59,13 +55,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public const float DT_RAY_CAST_LIMIT_PROPORTIONS = 50.0f;
 
         public const int DT_NODE_PARENT_BITS = 24;
+
         public const int DT_NODE_STATE_BITS = 2;
         /// <summary>
         /// Number of extra states per node. See dtNode::state
         /// </summary>
         public const int DT_MAX_STATES_PER_NODE = 1 << DT_NODE_STATE_BITS;
-
-        public const int MESH_NULL_IDX = -1;
         /// <summary>
         /// Search heuristic scale.
         /// </summary>
@@ -167,7 +162,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return false;
         }
 
-        public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, IEnumerable<Vector3> polyVerts, out float tmin, out float tmax, out int segMin, out int segMax)
+        public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, Vector3[] verts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
             float EPS = 0.00000001f;
 
@@ -177,7 +172,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             segMax = -1;
 
             Vector3 dir = Vector3.Subtract(p1, p0);
-            Vector3[] verts = polyVerts.ToArray();
 
             for (int i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
             {
@@ -259,17 +253,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets if a point is into a polygon.
         /// </summary>
         /// <param name="pt">Point to test</param>
-        /// <param name="vertices">Polygon vertex list</param>
+        /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns true if the point is into the polygon</returns>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool PointInPolygon(Vector3 pt, IEnumerable<Vector3> vertices)
+        public static bool PointInPolygon(Vector3 pt, Vector3[] verts)
         {
             bool c = false;
-            var verts = vertices.ToArray();
-            for (int i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
+            int nverts = verts.Length;
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                Vector3 vi = verts[i];
-                Vector3 vj = verts[j];
+                var vi = verts[i];
+                var vj = verts[j];
                 if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
                     (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
                 {
@@ -287,9 +281,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="et">Distance from first edge point to closest point list</param>
         /// <returns>Returns true if the point is into the polygon</returns>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool DistancePtPolyEdgesSqr(Vector3 pt, IEnumerable<Vector3> verts, out float[] ed, out float[] et)
+        public static bool DistancePtPolyEdgesSqr(Vector3 pt, Vector3[] verts, out float[] ed, out float[] et)
         {
-            int nverts = verts.Count();
+            int nverts = verts.Length;
 
             ed = new float[nverts];
             et = new float[nverts];
@@ -298,8 +292,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             bool c = false;
             for (i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                var vi = verts.ElementAt(i);
-                var vj = verts.ElementAt(j);
+                var vi = verts[i];
+                var vj = verts[j];
                 if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
                     (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
                 {
@@ -408,11 +402,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="s"></param>
         /// <param name="t"></param>
         /// <param name="outPoint"></param>
-        public static void RandomPointInConvexPoly(IEnumerable<Vector3> points, out float[] areas, float s, float t, out Vector3 outPoint)
+        public static void RandomPointInConvexPoly(Vector3[] pts, out float[] areas, float s, float t, out Vector3 outPoint)
         {
             areas = new float[DT_VERTS_PER_POLYGON];
-
-            var pts = points.ToArray();
 
             // Calc triangle areas
             float areasum = 0.0f;
@@ -471,185 +463,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         #region DETOURNAVMESHBUILDER
 
-        public static void CalcExtends(BVItem[] items, int imin, int imax, out Int3 bmin, out Int3 bmax)
-        {
-            bmin.X = items[imin].BMin.X;
-            bmin.Y = items[imin].BMin.Y;
-            bmin.Z = items[imin].BMin.Z;
-
-            bmax.X = items[imin].BMax.X;
-            bmax.Y = items[imin].BMax.Y;
-            bmax.Z = items[imin].BMax.Z;
-
-            for (int i = imin + 1; i < imax; ++i)
-            {
-                BVItem it = items[i];
-                if (it.BMin.X < bmin.X) bmin.X = it.BMin.X;
-                if (it.BMin.Y < bmin.Y) bmin.Y = it.BMin.Y;
-                if (it.BMin.Z < bmin.Z) bmin.Z = it.BMin.Z;
-
-                if (it.BMax.X > bmax.X) bmax.X = it.BMax.X;
-                if (it.BMax.Y > bmax.Y) bmax.Y = it.BMax.Y;
-                if (it.BMax.Z > bmax.Z) bmax.Z = it.BMax.Z;
-            }
-        }
-        private static int LongestAxis(int x, int y, int z)
-        {
-            int axis = 0;
-            int maxVal = x;
-            if (y > maxVal)
-            {
-                axis = 1;
-                maxVal = y;
-            }
-            if (z > maxVal)
-            {
-                axis = 2;
-            }
-            return axis;
-        }
-        private static void Subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, ref List<BVNode> nodes)
-        {
-            int inum = imax - imin;
-            int icur = curNode;
-
-            var node = new BVNode();
-            nodes.Add(node);
-            curNode++;
-
-            if (inum == 1)
-            {
-                // Leaf
-                node.BMin = items[imin].BMin;
-                node.BMax = items[imin].BMax;
-                node.I = items[imin].I;
-            }
-            else
-            {
-                // Split
-                CalcExtends(items, imin, imax, out var bmin, out var bmax);
-                node.BMin = bmin;
-                node.BMax = bmax;
-
-                int axis = LongestAxis(
-                    node.BMax.X - node.BMin.X,
-                    node.BMax.Y - node.BMin.Y,
-                    node.BMax.Z - node.BMin.Z);
-
-                if (axis == 0)
-                {
-                    // Sort along x-axis
-                    Array.Sort(items, imin, inum, BVItem.XComparer);
-                }
-                else if (axis == 1)
-                {
-                    // Sort along y-axis
-                    Array.Sort(items, imin, inum, BVItem.YComparer);
-                }
-                else
-                {
-                    // Sort along z-axis
-                    Array.Sort(items, imin, inum, BVItem.ZComparer);
-                }
-
-                int isplit = imin + inum / 2;
-
-                // Left
-                Subdivide(items, nitems, imin, isplit, ref curNode, ref nodes);
-                // Right
-                Subdivide(items, nitems, isplit, imax, ref curNode, ref nodes);
-
-                int iescape = curNode - icur;
-                // Negative index means escape.
-                node.I = -iescape;
-            }
-        }
-        public static int CreateBVTree(NavMeshCreateParams param, out List<BVNode> nodes)
-        {
-            nodes = new List<BVNode>();
-
-            // Build tree
-            float quantFactor = 1 / param.CellSize;
-            BVItem[] items = new BVItem[param.PolyCount];
-            for (int i = 0; i < param.PolyCount; i++)
-            {
-                var it = items[i];
-                it.I = i;
-                // Calc polygon bounds. Use detail meshes if available.
-                if (param.DetailMeshes != null)
-                {
-                    CalcDetailBounds(ref it, param.DetailMeshes[i], param.DetailVerts, param.BMin, quantFactor);
-                }
-                else
-                {
-                    CalcPolygonBounds(ref it, param.Polys[i], param.Nvp, param.Verts, param.CellSize, param.CellHeight);
-                }
-                items[i] = it;
-            }
-
-            int curNode = 0;
-            Subdivide(items, param.PolyCount, 0, param.PolyCount, ref curNode, ref nodes);
-
-            return curNode;
-        }
-        private static void CalcDetailBounds(ref BVItem it, PolyMeshDetailIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
-        {
-            int vb = dm.VertBase;
-            int ndv = dm.VertCount;
-            GetMinMaxBounds(detailVerts, vb, ndv, out var bmin, out var bmax);
-
-            // BV-tree uses cs for all dimensions
-            it.BMin = new Int3
-            {
-                X = MathUtil.Clamp((int)((bmin.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bmin.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bmin.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
-            };
-
-            it.BMax = new Int3
-            {
-                X = MathUtil.Clamp((int)((bmax.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bmax.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bmax.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
-            };
-        }
-        private static void GetMinMaxBounds(Vector3[] vectors, int vb, int ndv, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = vectors[vb];
-            bmax = vectors[vb];
-            for (int j = 1; j < ndv; j++)
-            {
-                bmin = Vector3.Min(bmin, vectors[vb + j]);
-                bmax = Vector3.Max(bmax, vectors[vb + j]);
-            }
-        }
-        private static void CalcPolygonBounds(ref BVItem it, IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
-        {
-            var itBMin = verts[p[0]];
-            var itBMax = verts[p[0]];
-
-            for (int j = 1; j < nvp; ++j)
-            {
-                if (p[j] == MESH_NULL_IDX) break;
-                var x = verts[p[j]].X;
-                var y = verts[p[j]].Y;
-                var z = verts[p[j]].Z;
-
-                if (x < it.BMin.X) itBMin.X = x;
-                if (y < it.BMin.Y) itBMin.Y = y;
-                if (z < it.BMin.Z) itBMin.Z = z;
-
-                if (x > it.BMax.X) itBMax.X = x;
-                if (y > it.BMax.Y) itBMax.Y = y;
-                if (z > it.BMax.Z) itBMax.Z = z;
-            }
-            // Remap y
-            itBMin.Y = (int)Math.Floor(it.BMin.Y * ch / cs);
-            itBMax.Y = (int)Math.Ceiling(it.BMax.Y * ch / cs);
-
-            it.BMin = itBMin;
-            it.BMax = itBMax;
-        }
         public static int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
         {
             int xp = 1 << 0;
@@ -754,7 +567,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Store and create BVtree.
             if (param.BuildBvTree)
             {
-                CreateBVTree(param, out var nodes);
+                BVItem.CreateBVTree(param, out var nodes);
 
                 data.NavBvtree.AddRange(nodes);
             }
@@ -826,7 +639,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 for (int j = 0; j < nvp; ++j)
                 {
-                    if (p[j] == MESH_NULL_IDX)
+                    if (p[j] == BVItem.MESH_NULL_IDX)
                     {
                         break;
                     }
@@ -993,29 +806,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             tile.Links[link].Next = tile.LinksFreeList;
             tile.LinksFreeList = link;
-        }
-
-        #endregion
-
-        #region DETOURNODE
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// From Thomas Wang, https://gist.github.com/badboy/6267743
-        /// </remarks>
-        public static int HashRef(int a)
-        {
-            a += ~(a << 15);
-            a ^= (a >> 10);
-            a += (a << 3);
-            a ^= (a >> 6);
-            a += ~(a << 11);
-            a ^= (a >> 16);
-            return a;
         }
 
         #endregion

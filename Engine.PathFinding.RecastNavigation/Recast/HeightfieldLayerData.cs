@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -194,7 +192,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Create unique ID.
         /// </summary>
-        private static int CreateUniqueId(IEnumerable<int> prevCount, int regId, ref LayerSweepSpan[] sweeps, int nsweeps)
+        private static int CreateUniqueId(int[] prevCount, int regId, ref LayerSweepSpan[] sweeps, int nsweeps)
         {
             int id = regId;
 
@@ -202,7 +200,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 // If the neighbour is set and there is only one continuous connection to it,
                 // the sweep will be merged with the previous one, else new region is created.
-                if (sweeps[i].Nei != 0xff && prevCount.ElementAt(sweeps[i].Nei) == sweeps[i].NS)
+                if (sweeps[i].Nei != 0xff && prevCount[sweeps[i].Nei] == sweeps[i].NS)
                 {
                     sweeps[i].Id = sweeps[i].Nei;
 
@@ -222,7 +220,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Remap local sweep ids to region ids.
         /// </summary>
-        private void RemapRegionIds(int y, IEnumerable<LayerSweepSpan> sweeps)
+        private void RemapRegionIds(int y, LayerSweepSpan[] sweeps)
         {
             for (int x = BorderSize; x < Width - BorderSize; ++x)
             {
@@ -232,7 +230,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (SourceRegions[i] != 0xff)
                     {
-                        SourceRegions[i] = sweeps.ElementAt(SourceRegions[i]).Id;
+                        SourceRegions[i] = sweeps[SourceRegions[i]].Id;
                     }
                 }
             }
@@ -261,14 +259,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Allocate and init layer region cell.
         /// </summary>
-        private (IEnumerable<int> LayerRegions, int LayerRegionsCount) AllocateRegionCell(int x, int y)
+        private (int[] LayerRegions, int LayerRegionsCount) AllocateRegionCell(int x, int y)
         {
             var c = Heightfield.Cells[x + y * Width];
 
             int[] lregs = new int[LayerRegion.MaxLayers];
             int nlregs = 0;
 
-            for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
                 var s = Heightfield.Spans[i];
                 int ri = SourceRegions[i];
@@ -311,14 +309,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Update overlapping regions.
         /// </summary>
-        private void UpdayeOverlappingRegions(IEnumerable<int> lregs, int nlregs)
+        private void UpdayeOverlappingRegions(int[] lregs, int nlregs)
         {
             for (int i = 0; i < nlregs - 1; ++i)
             {
                 for (int j = i + 1; j < nlregs; ++j)
                 {
-                    var li = lregs.ElementAt(i);
-                    var lj = lregs.ElementAt(j);
+                    var li = lregs[i];
+                    var lj = lregs[j];
 
                     if (li == lj)
                     {

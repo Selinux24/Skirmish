@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -197,6 +198,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>Removes adjacent neigbours after addition</remarks>
         public void AddConnections(IEnumerable<int> neighbours)
         {
+            if (!neighbours.Any())
+            {
+                return;
+            }
+
             connections.AddRange(neighbours);
 
             RemoveAdjacentNeighbours();

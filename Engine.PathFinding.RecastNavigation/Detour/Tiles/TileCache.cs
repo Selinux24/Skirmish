@@ -10,7 +10,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public class TileCache
     {
-        const int MAX_TILES = 32;
+        private const int MAX_TILES = 32;
+        private const int MAX_UPDATE = 64;
+        private const int MAX_REQUESTS = 64;
+
+        public const int VERTEX_BUCKET_COUNT2 = 1 << 8;
+        public const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
+        public const int DT_TILECACHE_VERSION = 1;
+        public const int DT_TILECACHE_NULL_AREA = 0;
+        public const int DT_TILECACHE_WALKABLE_AREA = 63;
+        public const int DT_TILECACHE_NULL_IDX = -1;
+        public const int DT_MAX_TOUCHED_TILES = 8;
 
         private readonly NavMesh m_navMesh;
         private TileCacheParams m_params;
@@ -25,6 +35,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private readonly int m_saltBits;
         private readonly List<ObstacleRequest> m_reqs = new();
         private readonly List<CompressedTile> m_update = new();
+
+        public static int ComputeTileHash(int x, int y, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint n = h1 * (uint)x + h2 * (uint)y;
+            return (int)(n & mask);
+        }
 
         /// <summary>
         /// Constructor
@@ -151,7 +169,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the tile list
         /// </summary>
         /// <returns>Returns a tile list</returns>
-        public IEnumerable<CompressedTile> GetTiles()
+        public CompressedTile[] GetTiles()
         {
             return m_tiles?.ToArray() ?? Array.Empty<CompressedTile>();
         }
@@ -162,7 +180,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="y">Y coordinate</param>
         /// <param name="maxTiles">Maximum tiles to return</param>
         /// <returns>Returns a list of tiles</returns>
-        public IEnumerable<CompressedTile> GetTilesAt(int x, int y, int maxTiles)
+        public CompressedTile[] GetTilesAt(int x, int y, int maxTiles)
         {
             var tiles = new List<CompressedTile>();
 
@@ -222,11 +240,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             // Make sure the data is in right format.
             var header = data.Header;
-            if (header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+            if (header.Magic != DT_TILECACHE_MAGIC)
             {
                 throw new EngineException("DT_WRONG_MAGIC");
             }
-            if (header.Version != DetourTileCache.DT_TILECACHE_VERSION)
+            if (header.Version != DT_TILECACHE_VERSION)
             {
                 throw new EngineException("DT_WRONG_VERSION");
             }
@@ -288,7 +306,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             data = TileCacheLayerData.Empty;
 
             // Remove tile from hash lookup.
-            int h = DetourTileCache.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
+            int h = ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
             CompressedTile prev = null;
             CompressedTile cur = m_posLookup[h];
             while (cur != null)
@@ -456,7 +474,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             result = 0;
 
-            if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
+            if (m_reqs.Count >= MAX_REQUESTS)
             {
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
@@ -498,7 +516,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="r">Reference</param>
         public Status RemoveObstacle(int r)
         {
-            if (r == 0 || m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
+            if (r == 0 || m_reqs.Count >= MAX_REQUESTS)
             {
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
@@ -572,14 +590,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Find touched tiles.
             var bbox = ob.GetObstacleBounds();
 
-            var tiles = QueryTiles(bbox, DetourTileCache.DT_MAX_TOUCHED_TILES);
+            var tiles = QueryTiles(bbox, DT_MAX_TOUCHED_TILES);
             ob.Touched.AddRange(tiles);
 
             // Add tiles to update list.
             ob.Pending.Clear();
             foreach (var touched in ob.Touched)
             {
-                if (m_update.Count < DetourTileCache.MAX_UPDATE)
+                if (m_update.Count < MAX_UPDATE)
                 {
                     if (!m_update.Contains(touched))
                     {
@@ -598,7 +616,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             ob.Pending.Clear();
             foreach (var touched in ob.Touched)
             {
-                if (m_update.Count < DetourTileCache.MAX_UPDATE)
+                if (m_update.Count < MAX_UPDATE)
                 {
                     if (!m_update.Contains(touched))
                     {
@@ -676,7 +694,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return false;
         }
-        private IEnumerable<CompressedTile> QueryTiles(BoundingBox bbox, int maxResults)
+        private CompressedTile[] QueryTiles(BoundingBox bbox, int maxResults)
         {
             var results = new List<CompressedTile>();
 
@@ -766,17 +784,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!DetourTileCache.BuildTileCacheRegions(bc, walkableClimbVx))
+            if (!bc.BuildTileCacheRegions(walkableClimbVx))
             {
                 return false;
             }
 
-            if (!DetourTileCache.BuildTileCacheContours(bc, walkableClimbVx, m_params.MaxSimplificationError))
+            if (!bc.BuildTileCacheContours(walkableClimbVx, m_params.MaxSimplificationError))
             {
                 return false;
             }
 
-            if (!DetourTileCache.BuildTileCachePolyMesh(bc))
+            if (!bc.BuildTileCachePolyMesh())
             {
                 return false;
             }

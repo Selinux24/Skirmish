@@ -348,15 +348,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             maxSize = max;
 
-            this.referenceList = new int[maxSize];
-            this.Count = 0;
+            referenceList = new int[maxSize];
+            Count = 0;
         }
 
         /// <summary>
         /// Gets the current path
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<int> GetPath()
+        public int[] GetPath()
         {
             return referenceList.Take(Count).ToArray();
         }

@@ -46,6 +46,47 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public const int RC_BORDER_VERTEX = 0x10000;
 
         /// <summary>
+        /// An array of the contours in the set. [Size: #nconts]
+        /// </summary>
+        public Contour[] Conts { get; set; }
+        /// <summary>
+        /// The number of contours in the set.
+        /// </summary>
+        public int NConts { get; set; }
+        /// <summary>
+        /// The minimum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMin { get; set; }
+        /// <summary>
+        /// The maximum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMax { get; set; }
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; set; }
+        /// <summary>
+        /// The width of the set. (Along the x-axis in cell units.) 
+        /// </summary>
+        public int Width { get; set; }
+        /// <summary>
+        /// The height of the set. (Along the z-axis in cell units.) 
+        /// </summary>
+        public int Height { get; set; }
+        /// <summary>
+        /// The AABB border size used to generate the source data from which the contours were derived.
+        /// </summary>
+        public int BorderSize { get; set; }
+        /// <summary>
+        /// The max edge error that this contour set was simplified with.
+        /// </summary>
+        public float MaxError { get; set; }
+
+        /// <summary>
         /// Builds a new contour set
         /// </summary>
         /// <param name="chf">Compact heightfield</param>
@@ -159,7 +200,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
 
-        private static IEnumerable<Int4> SimplifyContour(IEnumerable<Int4> points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        private static Int4[] SimplifyContour(Int4[] points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             // Add initial points.
             var simplified = Initialize(points);
@@ -180,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Add initial points.
         /// </summary>
-        private static IEnumerable<Int4> Initialize(IEnumerable<Int4> points)
+        private static Int4[] Initialize(Int4[] points)
         {
             var simplified = new List<Int4>();
 
@@ -202,14 +243,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 simplified.AddRange(initialPoints);
             }
 
-            return simplified;
+            return simplified.ToArray();
         }
-        private static bool PointsHasConnections(IEnumerable<Int4> points)
+        private static bool PointsHasConnections(Int4[] points)
         {
             bool hasConnections = false;
-            for (int i = 0; i < points.Count(); i++)
+            for (int i = 0; i < points.Length; i++)
             {
-                if ((points.ElementAt(i).W & RC_CONTOUR_REG_MASK) != 0)
+                if ((points[i].W & RC_CONTOUR_REG_MASK) != 0)
                 {
                     hasConnections = true;
                     break;
@@ -220,18 +261,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Add a new point to every location where the region changes.
         /// </summary>
-        private static IEnumerable<Int4> GetChangePoints(IEnumerable<Int4> points)
+        private static IEnumerable<Int4> GetChangePoints(Int4[] points)
         {
             var changes = new List<Int4>();
 
-            for (int i = 0, ni = points.Count(); i < ni; ++i)
+            for (int i = 0, ni = points.Length; i < ni; ++i)
             {
                 int ii = (i + 1) % ni;
-                bool differentRegs = (points.ElementAt(i).W & RC_CONTOUR_REG_MASK) != (points.ElementAt(ii).W & RC_CONTOUR_REG_MASK);
-                bool areaBorders = (points.ElementAt(i).W & RC_AREA_BORDER) != (points.ElementAt(ii).W & RC_AREA_BORDER);
+                bool differentRegs = (points[i].W & RC_CONTOUR_REG_MASK) != (points[ii].W & RC_CONTOUR_REG_MASK);
+                bool areaBorders = (points[i].W & RC_AREA_BORDER) != (points[ii].W & RC_AREA_BORDER);
                 if (differentRegs || areaBorders)
                 {
-                    changes.Add(new Int4(points.ElementAt(i).X, points.ElementAt(i).Y, points.ElementAt(i).Z, i));
+                    changes.Add(new Int4(points[i].X, points[i].Y, points[i].Z, i));
                 }
             }
 
@@ -240,23 +281,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Find lower-left and upper-right vertices of the contour.
         /// </summary>
-        private static IEnumerable<Int4> CreateInitialPoints(IEnumerable<Int4> points)
+        private static IEnumerable<Int4> CreateInitialPoints(Int4[] points)
         {
             var initialPoints = new List<Int4>();
 
-            int llx = points.First().X;
-            int lly = points.First().Y;
-            int llz = points.First().Z;
+            int llx = points[0].X;
+            int lly = points[0].Y;
+            int llz = points[0].Z;
             int lli = 0;
-            int urx = points.First().X;
-            int ury = points.First().Y;
-            int urz = points.First().Z;
+            int urx = points[0].X;
+            int ury = points[0].Y;
+            int urz = points[0].Z;
             int uri = 0;
-            for (int i = 0; i < points.Count(); i++)
+            for (int i = 0; i < points.Length; i++)
             {
-                int x = points.ElementAt(i).X;
-                int y = points.ElementAt(i).Y;
-                int z = points.ElementAt(i).Z;
+                int x = points[i].X;
+                int y = points[i].Y;
+                int z = points[i].Z;
                 if (x < llx || (x == llx && z < llz))
                 {
                     llx = x;
@@ -277,11 +318,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return initialPoints;
         }
-        private static IEnumerable<Int4> AddPoints(IEnumerable<Int4> points, IEnumerable<Int4> list, float maxError)
+        private static Int4[] AddPoints(Int4[] points, Int4[] list, float maxError)
         {
             var simplified = new List<Int4>(list);
 
-            int pn = points.Count();
+            int pn = points.Length;
             for (int i = 0; i < simplified.Count;)
             {
                 int ii = (i + 1) % simplified.Count;
@@ -318,12 +359,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Tessellate only outer edges or edges between areas.
-                if ((points.ElementAt(ci).W & RC_CONTOUR_REG_MASK) == 0 ||
-                    (points.ElementAt(ci).W & RC_AREA_BORDER) != 0)
+                if ((points[ci].W & RC_CONTOUR_REG_MASK) == 0 ||
+                    (points[ci].W & RC_AREA_BORDER) != 0)
                 {
                     while (ci != endi)
                     {
-                        float d = RecastUtils.DistancePtSeg2D(points.ElementAt(ci).X, points.ElementAt(ci).Z, ax, az, bx, bz);
+                        float d = RecastUtils.DistancePtSeg2D(points[ci].X, points[ci].Z, ax, az, bx, bz);
                         if (d > maxd)
                         {
                             maxd = d;
@@ -338,7 +379,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (maxi != -1 && maxd > (maxError * maxError))
                 {
                     // Add the point.
-                    simplified.Insert(i + 1, new Int4(points.ElementAt(maxi).X, points.ElementAt(maxi).Y, points.ElementAt(maxi).Z, maxi));
+                    simplified.Insert(i + 1, new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
                 }
                 else
                 {
@@ -346,9 +387,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return simplified;
+            return simplified.ToArray();
         }
-        private static IEnumerable<Int4> SplitLongEdges(IEnumerable<Int4> points, IEnumerable<Int4> list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        private static Int4[] SplitLongEdges(Int4[] points, Int4[] list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             bool tesselate = maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0;
             if (!tesselate)
@@ -358,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var simplified = new List<Int4>(list);
 
-            int pn = points.Count();
+            int pn = points.Length;
             for (int i = 0; i < simplified.Count;)
             {
                 int ii = (i + 1) % simplified.Count;
@@ -380,14 +421,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Wall edges.
                 if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
-                    (points.ElementAt(ci).W & RC_CONTOUR_REG_MASK) == 0)
+                    (points[ci].W & RC_CONTOUR_REG_MASK) == 0)
                 {
                     tess = true;
                 }
 
                 // Edges between areas.
                 if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
-                    (points.ElementAt(ci).W & RC_AREA_BORDER) != 0)
+                    (points[ci].W & RC_AREA_BORDER) != 0)
                 {
                     tess = true;
                 }
@@ -421,7 +462,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (maxi != -1)
                 {
                     // Add the point.
-                    simplified.Insert(i + 1, new Int4(points.ElementAt(maxi).X, points.ElementAt(maxi).Y, points.ElementAt(maxi).Z, maxi));
+                    simplified.Insert(i + 1, new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
                 }
                 else
                 {
@@ -429,13 +470,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return simplified;
+            return simplified.ToArray();
         }
-        private static IEnumerable<Int4> UpdateNeighbors(IEnumerable<Int4> points, IEnumerable<Int4> list)
+        private static Int4[] UpdateNeighbors(Int4[] points, Int4[] list)
         {
             var simplified = new List<Int4>(list);
 
-            int pn = points.Count();
+            int pn = points.Length;
             for (int i = 0; i < simplified.Count; ++i)
             {
                 // The edge vertex flag is take from the current raw point,
@@ -443,13 +484,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var sv = simplified[i];
                 int ai = (sv.W + 1) % pn;
                 int bi = sv.W;
-                sv.W = (points.ElementAt(ai).W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points.ElementAt(bi).W & RC_BORDER_VERTEX);
+                sv.W = (points[ai].W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points[bi].W & RC_BORDER_VERTEX);
                 simplified[i] = sv;
             }
 
-            return simplified;
+            return simplified.ToArray();
         }
-        private static IEnumerable<Int4> RemoveDegenerateSegments(IEnumerable<Int4> list)
+        private static Int4[] RemoveDegenerateSegments(Int4[] list)
         {
             var simplified = new List<Int4>(list);
 
@@ -458,7 +499,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int npts = simplified.Count;
             for (int i = 0; i < npts; ++i)
             {
-                int ni = RecastUtils.Next(i, npts);
+                int ni = TriangulateHelper.Next(i, npts);
 
                 if (!VEqualXZ(simplified[i], simplified[ni]))
                 {
@@ -470,53 +511,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 npts = simplified.Count;
             }
 
-            return simplified;
+            return simplified.ToArray();
         }
         private static bool VEqualXZ(Int4 a, Int4 b)
         {
             return a.X == b.X && a.Z == b.Z;
         }
-
-        /// <summary>
-        /// An array of the contours in the set. [Size: #nconts]
-        /// </summary>
-        public Contour[] Conts { get; set; }
-        /// <summary>
-        /// The number of contours in the set.
-        /// </summary>
-        public int NConts { get; set; }
-        /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CellSize { get; set; }
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CellHeight { get; set; }
-        /// <summary>
-        /// The width of the set. (Along the x-axis in cell units.) 
-        /// </summary>
-        public int Width { get; set; }
-        /// <summary>
-        /// The height of the set. (Along the z-axis in cell units.) 
-        /// </summary>
-        public int Height { get; set; }
-        /// <summary>
-        /// The AABB border size used to generate the source data from which the contours were derived.
-        /// </summary>
-        public int BorderSize { get; set; }
-        /// <summary>
-        /// The max edge error that this contour set was simplified with.
-        /// </summary>
-        public float MaxError { get; set; }
 
         private void AddContour(int reg, AreaTypes area, IEnumerable<Int4> verts, IEnumerable<Int4> simplified, int maxContours, int borderSize)
         {
@@ -590,7 +590,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var verts = chf.WalkContour(x, y, i, ref flags);
                 var simplified = SimplifyContour(verts, maxError, maxEdgeLen, buildFlags);
 
-                if (simplified.Count() < 3)
+                if (simplified.Length < 3)
                 {
                     continue;
                 }
@@ -614,7 +614,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var cont = Conts[i];
                 // If the contour is wound backwards, it is a hole.
-                winding[i] = RecastUtils.CalcAreaOfPolygon2D(cont.Vertices, cont.NVertices) < 0 ? -1 : 1;
+                winding[i] = cont.CalcAreaOfPolygon2D() < 0 ? -1 : 1;
                 if (winding[i] < 0)
                 {
                     nholes++;

@@ -29,13 +29,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public Span next;
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Min {0} Max {1} Area: {2}; Next Span {3};", this.smin, this.smax, this.area, this.next != null);
+            return $"Min {smin} Max {smax} Area: {area}; Next Span {next};";
         }
     }
 }

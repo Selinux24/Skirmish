@@ -88,6 +88,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        public int CalcAreaOfPolygon2D()
+        {
+            int area = 0;
+
+            for (int i = 0, j = NVertices - 1; i < NVertices; j = i++)
+            {
+                var vi = Vertices[i];
+                var vj = Vertices[j];
+                area += vi.X * vj.Z - vj.X * vi.Z;
+            }
+
+            return (area + 1) / 2;
+        }
 
         /// <summary>
         /// Gets the text representation of the instance

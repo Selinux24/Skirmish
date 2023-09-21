@@ -30,10 +30,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"{nameof(BVNode)} Region Id: {I}; BMin: {BMin}; BMax: {BMax};";

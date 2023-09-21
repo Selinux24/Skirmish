@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     /// <summary>
@@ -13,6 +12,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="refs"></param>
-        void Process(MeshTile tile, IEnumerable<int> refs);
+        void Process(MeshTile tile, int[] refs);
     }
 }

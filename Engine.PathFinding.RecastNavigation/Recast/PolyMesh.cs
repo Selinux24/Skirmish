@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -15,7 +14,68 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Vertex bucket count
         /// </summary>
-        const int VERTEX_BUCKET_COUNT = (1 << 12);
+        const int VERTEX_BUCKET_COUNT = 1 << 12;
+
+        /// <summary>
+        /// The mesh vertices. [Form: (x, y, z) * #nverts]
+        /// </summary>
+        public Int3[] Verts { get; set; }
+        /// <summary>
+        /// Polygon and neighbor data. [Length: #maxpolys * 2 * #nvp]
+        /// </summary>
+        public IndexedPolygon[] Polys { get; set; }
+        /// <summary>
+        /// The region id assigned to each polygon. [Length: #maxpolys]
+        /// </summary>
+        public int[] Regs { get; set; }
+        /// <summary>
+        /// The user defined flags for each polygon. [Length: #maxpolys]
+        /// </summary>
+        public SamplePolyFlagTypes[] Flags { get; set; }
+        /// <summary>
+        /// The area id assigned to each polygon. [Length: #maxpolys]
+        /// </summary>
+        public SamplePolyAreas[] Areas { get; set; }
+        /// <summary>
+        /// The number of vertices.
+        /// </summary>
+        public int NVerts { get; set; }
+        /// <summary>
+        /// The number of polygons.
+        /// </summary>
+        public int NPolys { get; set; }
+        /// <summary>
+        /// The number of allocated polygons.
+        /// </summary>
+        public int MaxPolys { get; set; }
+        /// <summary>
+        /// The maximum number of vertices per polygon.
+        /// </summary>
+        public int NVP { get; set; }
+        /// <summary>
+        /// The minimum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMin { get; set; }
+        /// <summary>
+        /// The maximum bounds in world space. [(x, y, z)]
+        /// </summary>
+        public Vector3 BMax { get; set; }
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CS { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CH { get; set; }
+        /// <summary>
+        /// The AABB border size used to generate the source data from which the mesh was derived.
+        /// </summary>
+        public int BorderSize { get; set; }
+        /// <summary>
+        /// The max error of the polygon edges in the mesh.
+        /// </summary>
+        public float MaxEdgeError { get; set; }
 
         /// <summary>
         /// Builds a polygon mesh
@@ -84,7 +144,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     indices[j] = j;
                 }
 
-                int ntris = RecastUtils.Triangulate(cont.Vertices, ref indices, out var tris);
+                int ntris = TriangulateHelper.Triangulate(cont.Vertices, ref indices, out var tris);
                 if (ntris <= 0)
                 {
                     // Bad triangulation, should not happen.
@@ -191,7 +251,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 if (vflags[i] != 0)
                 {
-                    if (!mesh.CanRemoveVertex(i))
+                    if (!IndexedPolygon.CanRemoveVertex(mesh.Polys, mesh.NPolys, i))
                     {
                         continue;
                     }
@@ -271,14 +331,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="meshes">Polygon mesh list</param>
         /// <returns>Returns the new polygon mesh</returns>
-        public static PolyMesh Merge(IEnumerable<PolyMesh> meshes)
+        public static PolyMesh Merge(PolyMesh[] meshes)
         {
             if (!meshes.Any())
             {
                 return null;
             }
 
-            var first = meshes.First();
+            var first = meshes[0];
 
             var res = new PolyMesh
             {
@@ -400,67 +460,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// The mesh vertices. [Form: (x, y, z) * #nverts]
-        /// </summary>
-        public Int3[] Verts { get; set; }
-        /// <summary>
-        /// Polygon and neighbor data. [Length: #maxpolys * 2 * #nvp]
-        /// </summary>
-        public IndexedPolygon[] Polys { get; set; }
-        /// <summary>
-        /// The region id assigned to each polygon. [Length: #maxpolys]
-        /// </summary>
-        public int[] Regs { get; set; }
-        /// <summary>
-        /// The user defined flags for each polygon. [Length: #maxpolys]
-        /// </summary>
-        public SamplePolyFlagTypes[] Flags { get; set; }
-        /// <summary>
-        /// The area id assigned to each polygon. [Length: #maxpolys]
-        /// </summary>
-        public SamplePolyAreas[] Areas { get; set; }
-        /// <summary>
-        /// The number of vertices.
-        /// </summary>
-        public int NVerts { get; set; }
-        /// <summary>
-        /// The number of polygons.
-        /// </summary>
-        public int NPolys { get; set; }
-        /// <summary>
-        /// The number of allocated polygons.
-        /// </summary>
-        public int MaxPolys { get; set; }
-        /// <summary>
-        /// The maximum number of vertices per polygon.
-        /// </summary>
-        public int NVP { get; set; }
-        /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CS { get; set; }
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CH { get; set; }
-        /// <summary>
-        /// The AABB border size used to generate the source data from which the mesh was derived.
-        /// </summary>
-        public int BorderSize { get; set; }
-        /// <summary>
-        /// The max error of the polygon edges in the mesh.
-        /// </summary>
-        public float MaxEdgeError { get; set; }
-
-        /// <summary>
         /// Adds a new vertex to the polygon mesh
         /// </summary>
         /// <param name="x">X value</param>
@@ -491,114 +490,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             firstVert[bucket] = i;
 
             return i;
-        }
-        /// <summary>
-        /// Gets whether the specified vertex can be removed
-        /// </summary>
-        /// <param name="rem">Vertex to remove</param>
-        /// <returns>Returns true if the vertex can be removed</returns>
-        private bool CanRemoveVertex(int rem)
-        {
-            // Count number of polygons to remove.
-            int numRemovedVerts = 0;
-            int numTouchedVerts = 0;
-            int numRemainingEdges = 0;
-            for (int i = 0; i < NPolys; ++i)
-            {
-                var p = Polys[i];
-                int nv = p.CountPolyVerts();
-                int numRemoved = 0;
-                int numVerts = 0;
-                for (int j = 0; j < nv; ++j)
-                {
-                    if (p[j] == rem)
-                    {
-                        numTouchedVerts++;
-                        numRemoved++;
-                    }
-                    numVerts++;
-                }
-                if (numRemoved != 0)
-                {
-                    numRemovedVerts += numRemoved;
-                    numRemainingEdges += numVerts - (numRemoved + 1);
-                }
-            }
-
-            // There would be too few edges remaining to create a polygon.
-            // This can happen for example when a tip of a triangle is marked
-            // as deletion, but there are no other polys that share the vertex.
-            // In this case, the vertex should not be removed.
-            if (numRemainingEdges <= 2)
-            {
-                return false;
-            }
-
-            // Find edges which share the removed vertex.
-            int maxEdges = numTouchedVerts * 2;
-            int nedges = 0;
-            Int3[] edges = new Int3[maxEdges];
-
-            for (int i = 0; i < NPolys; ++i)
-            {
-                var p = Polys[i];
-                int nv = p.CountPolyVerts();
-
-                // Collect edges which touches the removed vertex.
-                for (int j = 0, k = nv - 1; j < nv; k = j++)
-                {
-                    if (p[j] == rem || p[k] == rem)
-                    {
-                        // Arrange edge so that a=rem.
-                        int a = p[j], b = p[k];
-                        if (b == rem)
-                        {
-                            Helper.Swap(ref a, ref b);
-                        }
-
-                        // Check if the edge exists
-                        bool exists = false;
-                        for (int m = 0; m < nedges; ++m)
-                        {
-                            var e = edges[m];
-                            if (e[1] == b)
-                            {
-                                // Exists, increment vertex share count.
-                                e[2]++;
-                                exists = true;
-                            }
-                        }
-                        // Add new edge.
-                        if (!exists)
-                        {
-                            var e = new Int3();
-                            e[0] = a;
-                            e[1] = b;
-                            e[2] = 1;
-                            edges[nedges] = e;
-                            nedges++;
-                        }
-                    }
-                }
-            }
-
-            // There should be no more than 2 open edges.
-            // This catches the case that two non-adjacent polygons
-            // share the removed vertex. In that case, do not remove the vertex.
-            int numOpenEdges = 0;
-            for (int i = 0; i < nedges; ++i)
-            {
-                if (edges[i][2] < 2)
-                {
-                    numOpenEdges++;
-                }
-            }
-            if (numOpenEdges > 2)
-            {
-                return false;
-            }
-
-            return true;
         }
         /// <summary>
         /// Removes the specified vertex
@@ -759,7 +650,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Triangulate the hole.
-            int ntris = RecastUtils.Triangulate(tverts, ref thole, out var tris);
+            int ntris = TriangulateHelper.Triangulate(tverts, ref thole, out var tris);
             if (ntris < 0)
             {
                 Logger.WriteWarning(this, "removeVertex: triangulate() returned bad results.");

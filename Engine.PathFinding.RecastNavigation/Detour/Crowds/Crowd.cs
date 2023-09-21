@@ -454,7 +454,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Gets the agents int the agent pool.
         /// </summary>
         /// <returns>The collection of agents.</returns>
-        public IEnumerable<CrowdAgent> GetAgents()
+        public CrowdAgent[] GetAgents()
         {
             return m_agents.ToArray();
         }
@@ -462,11 +462,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Gets the active agents int the agent pool.
         /// </summary>
         /// <returns>The collection of active agents.</returns>
-        public IEnumerable<CrowdAgent> GetActiveAgents()
+        public CrowdAgent[] GetActiveAgents()
         {
-            var agents = m_agents.Where(a => a.Active);
-
-            return agents.ToArray();
+            return m_agents.Where(a => a.Active).ToArray();
         }
 
         /// <summary>
@@ -866,9 +864,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Put the old path infront of the old path.
-            if (path.Count() > 1)
+            if (path.Length > 1)
             {
-                res.Merge(path, path.Count());
+                res.Merge(path, path.Length);
             }
 
             // Check for partial path.

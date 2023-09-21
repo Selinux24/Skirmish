@@ -378,7 +378,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 int leftPolyRef = path.Start;
                 int rightPolyRef = path.Start;
 
-                var pathNodes = path.GetPath();
+                var pathNodes = path.GetPath().ToArray();
 
                 for (int i = 0; i < path.Count; ++i)
                 {
@@ -390,8 +390,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         // Next portal.
                         var ppStatus = GetPortalPoints(
-                            pathNodes.ElementAt(i),
-                            pathNodes.ElementAt(i + 1),
+                            pathNodes[i],
+                            pathNodes[i + 1],
                             out left, out right, out _, out toType);
 
                         if (ppStatus.HasFlag(Status.DT_FAILURE))
@@ -399,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
                             // Clamp the end point to path[i], and return the path so far.
 
-                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes.ElementAt(i), endPos, out closestEndPos);
+                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
                             if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
                             {
                                 // This should only happen when the first polygon is invalid.
@@ -417,7 +417,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                             // Ignore status return value as we're just about to return anyway.
                             AppendVertex(
-                                closestEndPos, 0, pathNodes.ElementAt(i), maxStraightPath,
+                                closestEndPos, 0, pathNodes[i], maxStraightPath,
                                 ref resultPath);
 
                             return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
@@ -444,7 +444,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (DetourUtils.Vequal(portalApex, portalRight) || DetourUtils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
-                            rightPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
+                            rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             rightPolyType = toType;
                             rightIndex = i;
                         }
@@ -504,7 +504,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (DetourUtils.Vequal(portalApex, portalLeft) || DetourUtils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
-                            leftPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
+                            leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             leftPolyType = toType;
                             leftIndex = i;
                         }
@@ -1015,7 +1015,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxPath">The max number of polygons the @p path array can hold.</param>
         /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FinalizeSlicedFindPathPartial(int maxPath, IEnumerable<int> existing, out SimplePath path)
+        public Status FinalizeSlicedFindPathPartial(int maxPath, int[] existing, out SimplePath path)
         {
             path = null;
 
@@ -1042,9 +1042,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Find furthest existing node that was visited.
                 Node node = null;
-                for (int i = existing.Count() - 1; i >= 0; --i)
+                for (int i = existing.Length - 1; i >= 0; --i)
                 {
-                    m_nodePool.FindNodes(existing.ElementAt(i), 1, out Node[] nodes);
+                    m_nodePool.FindNodes(existing[i], 1, out Node[] nodes);
                     if (nodes != null)
                     {
                         node = nodes[0];
@@ -1322,13 +1322,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, IEnumerable<Vector3> verts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, QueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                verts == null || verts.Count() < 3 ||
+                verts == null || verts.Length < 3 ||
                 filter == null ||
                 maxResult < 0)
             {
@@ -1343,7 +1343,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 centerPos += v;
             }
-            centerPos *= (1.0f / verts.Count());
+            centerPos *= 1.0f / verts.Length;
 
             var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
@@ -1928,8 +1928,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     if (neis.Count == 0)
                     {
                         // Wall edge, calc distance.
-                        var vj = verts.ElementAt(j);
-                        var vi = verts.ElementAt(i);
+                        var vj = verts[j];
+                        var vi = verts[i];
                         float distSqr = DetourUtils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
                         if (distSqr < bestDist)
                         {
@@ -1956,8 +1956,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             }
 
                             // Skip the link if it is too far from search constraint.
-                            var vj = verts.ElementAt(j);
-                            var vi = verts.ElementAt(i);
+                            var vj = verts[j];
+                            var vi = verts[i];
                             float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
                             if (distSqr > searchRadSqr)
                             {
@@ -2188,8 +2188,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // and correct the height (since the raycast moves in 2d)
                     lastPos = curPos;
                     curPos = Vector3.Add(startPos, dir) * hit.T;
-                    var e1 = verts.ElementAt(segMax);
-                    var e2 = verts.ElementAt((segMax + 1) % verts.Count());
+                    var e1 = verts[segMax];
+                    var e2 = verts[(segMax + 1) % verts.Length];
                     var eDir = Vector3.Subtract(e2, e1);
                     var diff = Vector3.Subtract(curPos, e1);
                     float s = (eDir.X * eDir.X) > (eDir.Z * eDir.Z) ? diff.X / eDir.X : diff.Z / eDir.Z;
@@ -2204,9 +2204,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     // Calculate hit normal.
                     int a = segMax;
-                    int b = segMax + 1 < verts.Count() ? segMax + 1 : 0;
-                    var va = verts.ElementAt(a);
-                    var vb = verts.ElementAt(b);
+                    int b = segMax + 1 < verts.Length ? segMax + 1 : 0;
+                    var va = verts[a];
+                    var vb = verts[b];
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
                     hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
@@ -2691,9 +2691,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float areaSum = 0.0f;
             var polys = tile.GetPolys();
 
-            for (int i = 0; i < polys.Count(); ++i)
+            for (int i = 0; i < polys.Length; ++i)
             {
-                var p = polys.ElementAt(i);
+                var p = polys[i];
                 // Do not return off-mesh connection polygons.
                 if (p.Type != PolyTypes.Ground)
                 {
@@ -3069,11 +3069,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="edged">Distance to edges array</param>
         /// <param name="edget">Distance from first edge point to closest point list</param>
         /// <returns>Returns the closest position</returns>
-        private static Vector3 GetClosestPointOutsidePoly(IEnumerable<Vector3> verts, float[] edged, float[] edget)
+        private static Vector3 GetClosestPointOutsidePoly(Vector3[] verts, float[] edged, float[] edget)
         {
             float dmin = edged[0];
             int imin = 0;
-            for (int i = 1; i < verts.Count(); i++)
+            for (int i = 1; i < verts.Length; i++)
             {
                 if (edged[i] < dmin)
                 {
@@ -3081,8 +3081,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     imin = i;
                 }
             }
-            var va = verts.ElementAt(imin);
-            var vb = verts.ElementAt((imin + 1) % verts.Count());
+            var va = verts[imin];
+            var vb = verts[(imin + 1) % verts.Length];
             return Vector3.Lerp(va, vb, edget[imin]);
         }
         /// <summary>
@@ -3223,7 +3223,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                         if (polyRefs.Count == batchSize)
                         {
-                            query.Process(tile, polyRefs);
+                            query.Process(tile, polyRefs.ToArray());
                             polyRefs.Clear();
                         }
                     }
@@ -3241,7 +3241,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Process the last polygons that didn't make a full batch.
-            query.Process(tile, polyRefs);
+            query.Process(tile, polyRefs.ToArray());
         }
         /// <summary>
         /// Calculate quantized box
@@ -3306,14 +3306,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     if (polyRefs.Count == batchSize)
                     {
-                        query.Process(tile, polyRefs);
+                        query.Process(tile, polyRefs.ToArray());
                         polyRefs.Clear();
                     }
                 }
             }
 
             // Process the last polygons that didn't make a full batch.
-            query.Process(tile, polyRefs);
+            query.Process(tile, polyRefs.ToArray());
         }
         /// <summary>
         /// Returns portal points between two polygons.

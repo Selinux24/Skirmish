@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -159,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             while (npos < m_path.Count && polyRef != offMeshConRef)
             {
                 prevRef = polyRef;
-                polyRef = path.ElementAt(npos);
+                polyRef = path[npos];
                 npos++;
             }
             if (npos == m_path.Count)
@@ -200,7 +198,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Keep valid path as far as possible.
             int n = 0;
             var path = m_path.GetPath();
-            while (n < m_path.Count && navquery.IsValidPolyRef(path.ElementAt(n), filter))
+            while (n < m_path.Count && navquery.IsValidPolyRef(path[n], filter))
             {
                 n++;
             }
@@ -241,7 +239,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = m_path.GetPath();
             for (int i = 0; i < n; ++i)
             {
-                if (!navquery.IsValidPolyRef(path.ElementAt(i), filter))
+                if (!navquery.IsValidPolyRef(path[i], filter))
                 {
                     return false;
                 }
@@ -360,7 +358,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// The corridor's path.
         /// </summary>
         /// <returns>The corridor's path. [(polyRef) * #getPathCount()]</returns>
-        public IEnumerable<int> GetPath()
+        public int[] GetPath()
         {
             return m_path.GetPath();
         }

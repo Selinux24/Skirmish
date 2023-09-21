@@ -13,15 +13,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private readonly List<Int4> edges = new();
         private int faces;
 
-        public static DelaunayHull Build(IEnumerable<Vector3> pts, IEnumerable<int> hull)
+        public static DelaunayHull Build(Vector3[] pts, int[] hull)
         {
-            int max = pts.Count() * 10;
+            int max = pts.Length * 10;
             var dhull = new DelaunayHull(max);
 
-            int nhull = hull.Count();
+            int nhull = hull.Length;
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
             {
-                dhull.AddEdge(hull.ElementAt(j), hull.ElementAt(i), (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
+                dhull.AddEdge(hull[j], hull[i], (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
             }
 
             int currentEdge = 0;
@@ -40,7 +40,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dhull;
         }
-        private static IEnumerable<Int3> FilterTris(IEnumerable<Int3> triangles)
+        private static Int3[] FilterTris(Int3[] triangles)
         {
             Int3[] tris = triangles.ToArray();
 
@@ -109,11 +109,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             this.maxEdges = maxEdges;
         }
 
-        public IEnumerable<Int4> GetEdges()
+        public Int4[] GetEdges()
         {
             return edges.ToArray();
         }
-        public IEnumerable<Int3> GetTris()
+        public Int3[] GetTris()
         {
             Int3[] tris = Helper.CreateArray(faces, new Int3(-1, -1, -1));
 
@@ -178,7 +178,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 edges.Add(new Int4(s, t, l, r));
             }
         }
-        private void CompleteFacet(IEnumerable<Vector3> pts, int e)
+        private void CompleteFacet(Vector3[] pts, int e)
         {
             var edge = edges[e];
 
@@ -206,7 +206,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             pt = FindBestPointOnCircleFromPoint(s, t, pt, pts);
 
             // Add new triangle or update edge info if s-t is on hull.
-            if (pt >= pts.Count())
+            if (pt >= pts.Length)
             {
                 edges[e] = UpdateLeftFace(edges[e], s, t, (int)EdgeValues.EV_HULL);
 
@@ -240,23 +240,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             faces++;
         }
-        private int FindBestPointOnLeft(int s, int t, IEnumerable<Vector3> pts)
+        private int FindBestPointOnLeft(int s, int t, Vector3[] pts)
         {
-            return FindBestPointOnCircleFromPoint(s, t, pts.Count(), pts);
+            return FindBestPointOnCircleFromPoint(s, t, pts.Length, pts);
         }
-        private int FindBestPointOnCircleFromPoint(int s, int t, int point, IEnumerable<Vector3> pts)
+        private int FindBestPointOnCircleFromPoint(int s, int t, int point, Vector3[] pts)
         {
             int pt = point;
             Vector3 c = Vector3.Zero;
             float r = -1;
-            for (int u = 0; u < pts.Count(); ++u)
+            for (int u = 0; u < pts.Length; ++u)
             {
                 if (u == s || u == t)
                 {
                     continue;
                 }
 
-                if (RecastUtils.VCross2(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u)) <= float.Epsilon)
+                if (RecastUtils.VCross2(pts[s], pts[t], pts[u]) <= float.Epsilon)
                 {
                     continue;
                 }
@@ -265,13 +265,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     //Circle valid. Update
                     pt = u;
-                    CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
+                    CircumCircle(pts[s], pts[t], pts[u], out c, out r);
                 }
             }
 
             return pt;
         }
-        private bool PointOnCircleFromPoint(int s, int t, int u, IEnumerable<Vector3> pts, Vector3 c, float r)
+        private bool PointOnCircleFromPoint(int s, int t, int u, Vector3[] pts, Vector3 c, float r)
         {
             if (r < 0)
             {
@@ -279,7 +279,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return true;
             }
 
-            float d = Vector2.Distance(c.XZ(), pts.ElementAt(u).XZ());
+            float d = Vector2.Distance(c.XZ(), pts[u].XZ());
             if (d > r * (1 + Tolerance))
             {
                 // Outside current circumcircle, skip.
@@ -306,7 +306,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Edge is valid.
             return true;
         }
-        private bool OverlapEdges(int s, int t, IEnumerable<Vector3> pts)
+        private bool OverlapEdges(int s, int t, Vector3[] pts)
         {
             for (int i = 0; i < edges.Count; ++i)
             {
@@ -318,7 +318,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     continue;
                 }
-                if (RecastUtils.OverlapSegSeg2d(pts.ElementAt(s0), pts.ElementAt(t0), pts.ElementAt(s), pts.ElementAt(t)) != 0)
+                if (RecastUtils.OverlapSegSeg2d(pts[s0], pts[t0], pts[s], pts[t]) != 0)
                 {
                     return true;
                 }

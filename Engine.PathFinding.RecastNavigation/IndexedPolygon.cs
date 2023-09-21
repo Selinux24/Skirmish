@@ -27,6 +27,120 @@ namespace Engine.PathFinding.RecastNavigation
         public const int RC_MESH_NULL_IDX = -1;
 
         /// <summary>
+        /// Gets whether the specified vertex can be removed
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons in the list</param>
+        /// <param name="rem">Vertex to remove</param>
+        /// <param name="MAX_REM_EDGES">Maximum edges to remove</param>
+        /// <returns>Returns true if the vertex can be removed</returns>
+        public static bool CanRemoveVertex(IndexedPolygon[] polys, int npolys, int rem, int MAX_REM_EDGES = 0)
+        {
+            // Count number of polygons to remove.
+            int numRemovedVerts = 0;
+            int numTouchedVerts = 0;
+            int numRemainingEdges = 0;
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+                int nv = p.CountPolyVerts();
+                int numRemoved = 0;
+                int numVerts = 0;
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem)
+                    {
+                        numTouchedVerts++;
+                        numRemoved++;
+                    }
+                    numVerts++;
+                }
+                if (numRemoved != 0)
+                {
+                    numRemovedVerts += numRemoved;
+                    numRemainingEdges += numVerts - (numRemoved + 1);
+                }
+            }
+
+            // There would be too few edges remaining to create a polygon.
+            // This can happen for example when a tip of a triangle is marked
+            // as deletion, but there are no other polys that share the vertex.
+            // In this case, the vertex should not be removed.
+            if (numRemainingEdges <= 2)
+            {
+                return false;
+            }
+
+            // Check that there is enough memory for the test.
+            int maxEdges = numTouchedVerts * 2;
+            if (MAX_REM_EDGES > 0 && maxEdges > MAX_REM_EDGES)
+            {
+                return false;
+            }
+
+            // Find edges which share the removed vertex.
+            Int3[] edges = new Int3[maxEdges];
+            int nedges = 0;
+
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+                int nv = p.CountPolyVerts();
+
+                // Collect edges which touches the removed vertex.
+                for (int j = 0, k = nv - 1; j < nv; k = j++)
+                {
+                    if (p[j] == rem || p[k] == rem)
+                    {
+                        // Arrange edge so that a=rem.
+                        int a = p[j], b = p[k];
+                        if (b == rem)
+                        {
+                            Helper.Swap(ref a, ref b);
+                        }
+
+                        // Check if the edge exists
+                        bool exists = false;
+                        for (int m = 0; m < nedges; ++m)
+                        {
+                            var e = edges[m];
+                            if (e.Y == b)
+                            {
+                                // Exists, increment vertex share count.
+                                e.Z++;
+                                exists = true;
+                            }
+                            edges[m] = e;
+                        }
+                        // Add new edge.
+                        if (!exists)
+                        {
+                            edges[nedges] = new Int3(a, b, 1);
+                            nedges++;
+                        }
+                    }
+                }
+            }
+
+            // There should be no more than 2 open edges.
+            // This catches the case that two non-adjacent polygons
+            // share the removed vertex. In that case, do not remove the vertex.
+            int numOpenEdges = 0;
+            for (int i = 0; i < nedges; ++i)
+            {
+                if (edges[i].Z < 2)
+                {
+                    numOpenEdges++;
+                }
+            }
+            if (numOpenEdges > 2)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
         /// Gets the best polygon merge value between two polygons
         /// </summary>
         /// <param name="pa">First polygon</param>
@@ -35,7 +149,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="ea">Resulting first merge value</param>
         /// <param name="eb">Resulting second merge value</param>
         /// <returns>Returns the best merge value</returns>
-        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, IEnumerable<Int3> verts, out int ea, out int eb)
+        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, Int3[] verts, out int ea, out int eb)
         {
             var (CanMerge, EdgeA, EdgeB) = PolygonsCanMerge(pa, pb);
 
@@ -56,7 +170,7 @@ namespace Engine.PathFinding.RecastNavigation
             va = pa[(ea + na - 1) % na];
             vb = pa[ea];
             vc = pb[(eb + 2) % nb];
-            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            if (!Uleft(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
@@ -64,7 +178,7 @@ namespace Engine.PathFinding.RecastNavigation
             va = pb[(eb + nb - 1) % nb];
             vb = pb[eb];
             vc = pa[(ea + 2) % na];
-            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            if (!Uleft(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
@@ -72,8 +186,8 @@ namespace Engine.PathFinding.RecastNavigation
             va = pa[ea];
             vb = pa[(ea + 1) % na];
 
-            int dx = verts.ElementAt(va).X - verts.ElementAt(vb).X;
-            int dy = verts.ElementAt(va).Z - verts.ElementAt(vb).Z;
+            int dx = verts[va].X - verts[vb].X;
+            int dy = verts[va].Z - verts[vb].Z;
 
             return dx * dx + dy * dy;
         }
@@ -196,11 +310,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return this.Vertices[index];
+                return Vertices[index];
             }
             set
             {
-                this.Vertices[index] = value;
+                Vertices[index] = value;
             }
         }
 
@@ -217,7 +331,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="capacity">Polygon capacity</param>
         public IndexedPolygon(int capacity)
         {
-            this.Vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
+            Vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
         }
 
         /// <summary>
@@ -275,13 +389,10 @@ namespace Engine.PathFinding.RecastNavigation
             return nv;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", Vertices?.Join(","));
+            return $"{Vertices?.Join(",")}";
         }
     }
 }
