@@ -1,18 +1,19 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Indexed polygon
     /// </summary>
     [Serializable]
     public class IndexedPolygon
     {
+        /// <summary>
+        /// The maximum number of vertices per navigation polygon.
+        /// </summary>
+        public const int DT_VERTS_PER_POLYGON = 6;
         /// <summary>
         /// Polygon touches multiple regions.
         /// If a polygon has this region ID it was merged with or created
@@ -27,6 +28,27 @@ namespace Engine.PathFinding.RecastNavigation
         public const int RC_MESH_NULL_IDX = -1;
 
         /// <summary>
+        /// Vertex indices
+        /// </summary>
+        private int[] Vertices = null;
+        /// <summary>
+        /// Gets the polygon vertex index by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the polygon vertex index by index</returns>
+        public int this[int index]
+        {
+            get
+            {
+                return Vertices[index];
+            }
+            set
+            {
+                Vertices[index] = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the best polygon merge value between two polygons
         /// </summary>
         /// <param name="pa">First polygon</param>
@@ -35,14 +57,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="ea">Resulting first merge value</param>
         /// <param name="eb">Resulting second merge value</param>
         /// <returns>Returns the best merge value</returns>
-        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, IEnumerable<Int3> verts, out int ea, out int eb)
+        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, Int3[] verts, out int ea, out int eb)
         {
-            var (CanMerge, EdgeA, EdgeB) = PolygonsCanMerge(pa, pb);
-
-            ea = EdgeA;
-            eb = EdgeB;
-
-            if (!CanMerge)
+            if (!PolygonsCanMerge(pa, pb, out ea, out eb))
             {
                 return RC_MESH_NULL_IDX;
             }
@@ -56,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
             va = pa[(ea + na - 1) % na];
             vb = pa[ea];
             vc = pb[(eb + 2) % nb];
-            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            if (!ULeft2D(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
@@ -64,32 +81,42 @@ namespace Engine.PathFinding.RecastNavigation
             va = pb[(eb + nb - 1) % nb];
             vb = pb[eb];
             vc = pa[(ea + 2) % na];
-            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            if (!ULeft2D(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
 
             va = pa[ea];
             vb = pa[(ea + 1) % na];
-
-            int dx = verts.ElementAt(va).X - verts.ElementAt(vb).X;
-            int dy = verts.ElementAt(va).Z - verts.ElementAt(vb).Z;
+            int dx = verts[va].X - verts[vb].X;
+            int dy = verts[va].Z - verts[vb].Z;
 
             return dx * dx + dy * dy;
         }
-        private static (bool CanMerge, int EdgeA, int EdgeB) PolygonsCanMerge(IndexedPolygon pa, IndexedPolygon pb)
+        /// <summary>
+        /// Gets whether two polygons can merge
+        /// </summary>
+        /// <param name="pa">First polygon</param>
+        /// <param name="pb">Second polygon</param>
+        /// <param name="ea">Resulting first merge value</param>
+        /// <param name="eb">Resulting second merge value</param>
+        /// <returns>Returns whether two polygons can merge, and the best edge merge indices of each polygon</returns>
+        private static bool PolygonsCanMerge(IndexedPolygon pa, IndexedPolygon pb, out int ea, out int eb)
         {
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            // If the merged polygon would be too big, do not merge.
-            if (na + nb - 2 > NavMeshCreateParams.DT_VERTS_PER_POLYGON)
+            if (na + nb - 2 > DT_VERTS_PER_POLYGON)
             {
-                return (false, RC_MESH_NULL_IDX, RC_MESH_NULL_IDX);
+                // If the merged polygon would be too big, do not merge.
+                ea = RC_MESH_NULL_IDX;
+                eb = RC_MESH_NULL_IDX;
+
+                return false;
             }
 
-            int ea = RC_MESH_NULL_IDX;
-            int eb = RC_MESH_NULL_IDX;
+            ea = RC_MESH_NULL_IDX;
+            eb = RC_MESH_NULL_IDX;
 
             // Check if the polygons share an edge.
             for (int i = 0; i < na; ++i)
@@ -121,13 +148,16 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            // No common edge, cannot merge.
             if (ea == RC_MESH_NULL_IDX || eb == RC_MESH_NULL_IDX)
             {
-                return (false, RC_MESH_NULL_IDX, RC_MESH_NULL_IDX);
+                // No common edge, cannot merge.
+                ea = RC_MESH_NULL_IDX;
+                eb = RC_MESH_NULL_IDX;
+
+                return false;
             }
 
-            return (true, ea, eb);
+            return true;
         }
         /// <summary>
         /// Merges two polygons
@@ -142,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            var tmp = new IndexedPolygon(Math.Max(NavMeshCreateParams.DT_VERTS_PER_POLYGON, na - 1 + nb - 1));
+            var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1));
 
             // Merge polygons.
             int n = 0;
@@ -177,31 +207,15 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return index == RC_MESH_NULL_IDX;
         }
-
-        private static bool Uleft(Int3 a, Int3 b, Int3 c)
+        /// <summary>
+        /// Gets whether the specified points are sorted counter-clockwise in the xz plane
+        /// </summary>
+        /// <param name="a">Point a</param>
+        /// <param name="b">Point b</param>
+        /// <param name="c">Point c</param>
+        private static bool ULeft2D(Int3 a, Int3 b, Int3 c)
         {
             return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z) < 0;
-        }
-
-        /// <summary>
-        /// Vertex indices
-        /// </summary>
-        private int[] Vertices = null;
-        /// <summary>
-        /// Gets the polygon vertex index by index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the polygon vertex index by index</returns>
-        public int this[int index]
-        {
-            get
-            {
-                return this.Vertices[index];
-            }
-            set
-            {
-                this.Vertices[index] = value;
-            }
         }
 
         /// <summary>
@@ -217,7 +231,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="capacity">Polygon capacity</param>
         public IndexedPolygon(int capacity)
         {
-            this.Vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
+            Vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
         }
 
         /// <summary>
@@ -226,7 +240,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the vertex count</returns>
         public int CountPolyVerts()
         {
-            for (int i = 0; i < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++i)
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
             {
                 if (Vertices[i] == RC_MESH_NULL_IDX)
                 {
@@ -234,13 +248,14 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return NavMeshCreateParams.DT_VERTS_PER_POLYGON;
+            return DT_VERTS_PER_POLYGON;
         }
         /// <summary>
         /// Gets the vertices list
         /// </summary>
         public int[] GetVertices()
         {
+            //Copy array
             return Vertices.ToArray();
         }
         /// <summary>
@@ -251,11 +266,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return new IndexedPolygon(Vertices.Length)
             {
+                //Copy array
                 Vertices = Vertices.ToArray(),
             };
         }
         /// <summary>
-        /// Gets the first free index (RC_MESH_NULL_IDX value)
+        /// Gets the first free index (<see cref="RC_MESH_NULL_IDX"/> value)
         /// </summary>
         /// <param name="nvp">Vertex per polygon</param>
         /// <returns>Returns the first free index</returns>
@@ -275,13 +291,10 @@ namespace Engine.PathFinding.RecastNavigation
             return nv;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", Vertices?.Join(","));
+            return $"Indices: {Vertices?.Join(",")}";
         }
     }
 }

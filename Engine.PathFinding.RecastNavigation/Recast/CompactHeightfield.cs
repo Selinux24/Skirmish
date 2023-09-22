@@ -840,10 +840,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hp">Height patch</param>
         /// <param name="outVerts">Resulting vertices</param>
         /// <param name="outTris">Resulting triangle indices</param>
-        public void BuildPolyDetail(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<Vector3> outVerts, out IEnumerable<Int3> outTris)
+        public void BuildPolyDetail(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Int3[] outTris)
         {
-            IEnumerable<Vector3> verts = polygon.ToArray();
-            IEnumerable<int> hull = Enumerable.Empty<int>();
+            //Copy polygon array
+            var verts = polygon.ToArray();
+            var hull = Array.Empty<int>();
 
             // Tessellate outlines.
             // This is done in separate pass in order to ensure
@@ -860,7 +861,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
             if (minExtent < sampleDist * 2)
             {
-                outVerts = verts.ToArray();
+                outVerts = verts;
                 outTris = TriangulationHelper.TriangulateHull(verts, hull);
 
                 return;
@@ -874,10 +875,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (!tris.Any())
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
-                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Count()} verts).");
+                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Length} verts).");
 
-                outVerts = verts.ToArray();
-                outTris = Enumerable.Empty<Int3>();
+                outVerts = verts;
+                outTris = Array.Empty<Int3>();
 
                 return;
             }
@@ -889,27 +890,27 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 tris = newTris;
             }
 
-            int ntris = tris.Count();
+            int ntris = tris.Length;
             int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
             if (ntris > MAX_TRIS)
             {
-                tris = tris.Take(MAX_TRIS);
+                tris = tris.Take(MAX_TRIS).ToArray();
                 Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
-            outVerts = verts.ToArray();
-            outTris = tris.ToArray();
+            outVerts = verts;
+            outTris = tris;
         }
         /// <summary>
         /// Tessellate outlines.
         /// </summary>
-        private IEnumerable<Vector3> TesselateOutlines(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<int> hull)
+        private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
         {
             var verts = new List<Vector3>(polygon);
             var edge = new Vector3[(BuildPolyDetailParams.MAX_VERTS_PER_EDGE + 1)];
             var hullList = new List<int>(BuildPolyDetailParams.MAX_VERTS);
 
-            int ninp = polygon.Count();
+            int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
             {
                 bool swapped = GetPolyVerts(polygon, i, j, out var vi, out var vj);
@@ -944,7 +945,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             hull = hullList.ToArray();
 
-            return verts;
+            return verts.ToArray();
         }
 
         private static bool GetPolyVerts(IEnumerable<Vector3> polygon, int i, int j, out Vector3 vi, out Vector3 vj)
@@ -1060,7 +1061,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Create sample locations in a grid
         /// </summary>
-        private IEnumerable<Vector3> CreateGridSampleLocations(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, IEnumerable<int> hull, IEnumerable<Int3> tris, out IEnumerable<Int3> newTris)
+        private Vector3[] CreateGridSampleLocations(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, int[] hull, Int3[] tris, out Int3[] newTris)
         {
             float sampleDist = param.SampleDist;
             float sampleMaxError = param.SampleMaxError;
@@ -1463,7 +1464,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="i">Index</param>
         /// <param name="flags">Edge flags</param>
         /// <returns>Returns the edge contour list</returns>
-        public IEnumerable<Int4> WalkContour(int x, int y, int i, ref int[] flags)
+        public Int4[] WalkContour(int x, int y, int i, ref int[] flags)
         {
             var points = new List<Int4>();
 
@@ -1549,7 +1550,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return points;
+            return points.ToArray();
         }
         /// <summary>
         /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.

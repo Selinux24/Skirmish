@@ -1,7 +1,5 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -26,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             mesh = new TileCachePolyMesh
             {
-                NVP = NavMeshCreateParams.DT_VERTS_PER_POLYGON,
+                NVP = IndexedPolygon.DT_VERTS_PER_POLYGON,
                 Verts = Helper.CreateArray(maxVertices, () => new Int3()),
                 Polys = new IndexedPolygon[maxTris],
                 Areas = new SamplePolyAreas[maxTris],
@@ -81,10 +79,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 IndexedPolygon[] polys = new IndexedPolygon[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
-                    var t = tris.ElementAt(j);
+                    var t = tris[j];
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
-                        polys[npolys] = new IndexedPolygon(NavMeshCreateParams.DT_VERTS_PER_POLYGON);
+                        polys[npolys] = new IndexedPolygon(IndexedPolygon.DT_VERTS_PER_POLYGON);
                         polys[npolys][0] = indices[t.X];
                         polys[npolys][1] = indices[t.Y];
                         polys[npolys][2] = indices[t.Z];
@@ -97,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Merge polygons.
-                int maxVertsPerPoly = NavMeshCreateParams.DT_VERTS_PER_POLYGON;
+                int maxVertsPerPoly = IndexedPolygon.DT_VERTS_PER_POLYGON;
                 if (maxVertsPerPoly > 3)
                 {
                     while (true)
@@ -142,9 +140,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // Store polygons.
                 for (int j = 0; j < npolys; ++j)
                 {
-                    var p = new IndexedPolygon(NavMeshCreateParams.DT_VERTS_PER_POLYGON * 2);//Polygon with adjacency
+                    var p = new IndexedPolygon(IndexedPolygon.DT_VERTS_PER_POLYGON * 2);//Polygon with adjacency
                     var q = polys[j];
-                    for (int k = 0; k < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++k)
+                    for (int k = 0; k < IndexedPolygon.DT_VERTS_PER_POLYGON; ++k)
                     {
                         p[k] = q[k];
                     }

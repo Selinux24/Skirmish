@@ -143,7 +143,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="outPoint"></param>
         private static void RandomPointInConvexPoly(IEnumerable<Vector3> points, out float[] areas, float s, float t, out Vector3 outPoint)
         {
-            areas = new float[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+            areas = new float[IndexedPolygon.DT_VERTS_PER_POLYGON];
 
             var pts = points.ToArray();
 
@@ -526,7 +526,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Right vertex.
                     if (Utils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
                     {
-                        if (Utils.Vequal(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
+                        if (Utils.VClosest(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
                             rightPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
@@ -586,7 +586,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Left vertex.
                     if (Utils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
                     {
-                        if (Utils.Vequal(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
+                        if (Utils.VClosest(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
                             leftPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
@@ -1746,8 +1746,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             float radiusSqr = (radius * radius);
 
-            Vector3[] pa = new Vector3[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
-            Vector3[] pb = new Vector3[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+            Vector3[] pa = new Vector3[IndexedPolygon.DT_VERTS_PER_POLYGON];
+            Vector3[] pb = new Vector3[IndexedPolygon.DT_VERTS_PER_POLYGON];
 
             Status status = Status.DT_SUCCESS;
 
@@ -3504,7 +3504,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         private static Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
         {
-            if (straightPath.Count > 0 && Utils.Vequal(straightPath.EndPath, pos))
+            if (straightPath.Count > 0 && Utils.VClosest(straightPath.EndPath, pos))
             {
                 // The vertices are equal, update flags and poly.
                 straightPath.SetFlags(straightPath.Count - 1, flags);

@@ -48,7 +48,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         public static MeshData CreateNavMeshData(NavMeshCreateParams param)
         {
-            if (param.Nvp > NavMeshCreateParams.DT_VERTS_PER_POLYGON ||
+            if (param.Nvp > IndexedPolygon.DT_VERTS_PER_POLYGON ||
                 param.VertCount == 0 || param.Verts == null ||
                 param.PolyCount == 0 || param.Polys == null)
             {

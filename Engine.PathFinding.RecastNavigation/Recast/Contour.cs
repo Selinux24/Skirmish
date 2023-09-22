@@ -88,6 +88,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        /// <summary>
+        /// Calculates the area of the polygon's contour in the xz plane
+        /// </summary>
         public int CalcAreaOfPolygon2D()
         {
             int area = 0;
@@ -100,6 +103,33 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return (area + 1) / 2;
+        }
+        /// <summary>
+        /// Triangulates the polygon's contour
+        /// </summary>
+        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
+        /// <param name="indices">Resulting polygon indices</param>
+        /// <param name="tris">Resulting polygon triangles</param>
+        /// <returns>Returns the number of triangles</returns>
+        public int Triangulate(int maxVertsPerCont, out int[] indices, out Int3[] tris)
+        {
+            indices = new int[maxVertsPerCont];
+
+            // Triangulate contour
+            for (int j = 0; j < NVertices; ++j)
+            {
+                indices[j] = j;
+            }
+
+            int ntris = TriangulationHelper.Triangulate(Vertices, ref indices, out tris);
+            if (ntris <= 0)
+            {
+                // Bad triangulation, should not happen.
+                Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
+                ntris = -ntris;
+            }
+
+            return ntris;
         }
 
         /// <inheritdoc/>

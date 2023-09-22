@@ -843,7 +843,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 PolyAreas = bc.LMesh.Areas,
                 PolyFlags = bc.LMesh.Flags,
                 PolyCount = bc.LMesh.NPolys,
-                Nvp = NavMeshCreateParams.DT_VERTS_PER_POLYGON,
+                Nvp = IndexedPolygon.DT_VERTS_PER_POLYGON,
                 DetailMeshes = null,
                 DetailVerts = null,
                 DetailVertsCount = 0,

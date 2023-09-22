@@ -6,17 +6,26 @@ namespace Engine.PathFinding.RecastNavigation
 {
     static class TriangulationHelper
     {
-        public static int Triangulate(IEnumerable<Int4> verts, ref int[] indices, out IEnumerable<Int3> tris)
+        /// <summary>
+        /// Removable index mask
+        /// </summary>
+        const int SET_REMOVABLE_INDEX = 0x8000;
+        /// <summary>
+        /// Mask to remove the removable index mask
+        /// </summary>
+        const int REM_REMOVABLE_INDEX = 0x7fff;
+
+        public static int Triangulate(Int4[] verts, ref int[] indices, out Int3[] tris)
         {
             var dst = new List<Int3>();
 
             // The last bit of the index is used to indicate if the vertex can be removed.
-            SetRemovableIndices(verts, ref indices);
+            indices = SetRemovableIndices(verts, indices);
 
-            int n = verts.Count();
+            int n = verts.Length;
             while (n > 3)
             {
-                int mini = FindMinIndex(n, verts, indices);
+                int mini = FindMinIndex2D(n, verts, indices);
 
                 if (mini == -1)
                 {
@@ -31,14 +40,14 @@ namespace Engine.PathFinding.RecastNavigation
 
                 dst.Add(new Int3()
                 {
-                    X = indices[i] & 0x7fff,
-                    Y = indices[i1] & 0x7fff,
-                    Z = indices[i2] & 0x7fff
+                    X = indices[i] & REM_REMOVABLE_INDEX,
+                    Y = indices[i1] & REM_REMOVABLE_INDEX,
+                    Z = indices[i2] & REM_REMOVABLE_INDEX
                 });
 
                 // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
                 n--;
-                RemoveIndex(i1, n, ref indices);
+                indices = Utils.RemoveRange(indices, i1, n);
 
                 if (i1 >= n)
                 {
@@ -48,52 +57,61 @@ namespace Engine.PathFinding.RecastNavigation
                 i = Utils.Prev(i1, n);
 
                 // Update diagonal flags.
-                if (Diagonal(Utils.Prev(i, n), i1, n, verts, indices))
+                if (Diagonal2D(Utils.Prev(i, n), i1, n, verts, indices))
                 {
-                    indices[i] |= 0x8000;
+                    indices[i] |= SET_REMOVABLE_INDEX;
                 }
                 else
                 {
-                    indices[i] &= 0x7fff;
+                    indices[i] &= REM_REMOVABLE_INDEX;
                 }
 
-                if (Diagonal(i, Utils.Next(i1, n), n, verts, indices))
+                if (Diagonal2D(i, Utils.Next(i1, n), n, verts, indices))
                 {
-                    indices[i1] |= 0x8000;
+                    indices[i1] |= SET_REMOVABLE_INDEX;
                 }
                 else
                 {
-                    indices[i1] &= 0x7fff;
+                    indices[i1] &= REM_REMOVABLE_INDEX;
                 }
             }
 
             // Append the remaining triangle.
             dst.Add(new Int3
             {
-                X = indices[0] & 0x7fff,
-                Y = indices[1] & 0x7fff,
-                Z = indices[2] & 0x7fff,
+                X = indices[0] & REM_REMOVABLE_INDEX,
+                Y = indices[1] & REM_REMOVABLE_INDEX,
+                Z = indices[2] & REM_REMOVABLE_INDEX,
             });
 
             tris = dst.ToArray();
 
             return dst.Count;
         }
-        private static void SetRemovableIndices(IEnumerable<Int4> verts, ref int[] indices)
+        private static int[] SetRemovableIndices(Int4[] verts, int[] indices)
         {
-            int n = verts.Count();
+            var res = indices.ToArray();
+
+            int n = verts.Length;
 
             for (int i = 0; i < n; i++)
             {
                 int i1 = Utils.Next(i, n);
                 int i2 = Utils.Next(i1, n);
-                if (Diagonal(i, i2, n, verts, indices))
+                if (Diagonal2D(i, i2, n, verts, res))
                 {
-                    indices[i1] |= 0x8000;
+                    res[i1] |= SET_REMOVABLE_INDEX;
                 }
             }
+
+            return res;
         }
-        private static int FindMinIndex(int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
+        private static bool IsRemovable(int index)
+        {
+            return (index & SET_REMOVABLE_INDEX) == 0;
+        }
+
+        private static int FindMinIndex2D(int n, Int4[] verts, int[] indices)
         {
             int minLen = -1;
             int mini = -1;
@@ -102,13 +120,13 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 int i1x = Utils.Next(ix, n);
 
-                if ((indices.ElementAt(i1x) & 0x8000) == 0)
+                if (IsRemovable(indices[i1x]))
                 {
                     continue;
                 }
 
-                var p0 = verts.ElementAt(indices.ElementAt(ix) & 0x7fff);
-                var p2 = verts.ElementAt(indices.ElementAt(Utils.Next(i1x, n)) & 0x7fff);
+                var p0 = verts[indices[ix] & REM_REMOVABLE_INDEX];
+                var p2 = verts[indices[Utils.Next(i1x, n)] & REM_REMOVABLE_INDEX];
 
                 int dx = p2.X - p0.X;
                 int dz = p2.Z - p0.Z;
@@ -122,72 +140,73 @@ namespace Engine.PathFinding.RecastNavigation
 
             return mini;
         }
-        private static void RemoveIndex(int i1, int n, ref int[] indices)
+        private static bool Diagonal2D(int i, int j, int n, Int4[] verts, int[] indices)
         {
-            for (int k = i1; k < n; k++)
-            {
-                indices[k] = indices[k + 1];
-            }
+            return InCone2D(i, j, n, verts, indices) && Diagonalie2D(i, j, n, verts, indices);
         }
-        private static bool Diagonal(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
+        private static bool InCone2D(int i, int j, int n, Int4[] verts, int[] indices)
         {
-            return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
-        }
-        private static bool InCone(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
-        {
-            var pi = verts.ElementAt(indices.ElementAt(i) & 0x7fff);
-            var pj = verts.ElementAt(indices.ElementAt(j) & 0x7fff);
-            var pi1 = verts.ElementAt(indices.ElementAt(Utils.Next(i, n)) & 0x7fff);
-            var pin1 = verts.ElementAt(indices.ElementAt(Utils.Prev(i, n)) & 0x7fff);
+            var pi = verts[indices[i] & REM_REMOVABLE_INDEX];
+            var pj = verts[indices[j] & REM_REMOVABLE_INDEX];
+            var pi1 = verts[indices[Utils.Next(i, n)] & REM_REMOVABLE_INDEX];
+            var pin1 = verts[indices[Utils.Prev(i, n)] & REM_REMOVABLE_INDEX];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
-            if (LeftOn(pin1, pi, pi1))
+            if (LeftOn2D(pin1, pi, pi1))
             {
-                return Left(pi, pj, pin1) && Left(pj, pi, pi1);
+                return Left2D(pi, pj, pin1) && Left2D(pj, pi, pi1);
             }
+
             // Assume (i-1,i,i+1) not collinear.
             // else P[i] is reflex.
-            return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
+            return !(LeftOn2D(pi, pj, pi1) && LeftOn2D(pj, pi, pin1));
         }
-        private static bool Diagonalie(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
+        private static bool Diagonalie2D(int i, int j, int n, Int4[] verts, int[] indices)
         {
-            var d0 = verts.ElementAt(indices.ElementAt(i) & 0x7fff);
-            var d1 = verts.ElementAt(indices.ElementAt(j) & 0x7fff);
+            var d0 = verts[indices[i] & REM_REMOVABLE_INDEX];
+            var d1 = verts[indices[j] & REM_REMOVABLE_INDEX];
 
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
             {
                 int k1 = Utils.Next(k, n);
+
                 // Skip edges incident to i or j
-                if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
+                if ((k == i) || (k1 == i) || (k == j) || (k1 == j))
                 {
-                    var p0 = verts.ElementAt(indices.ElementAt(k) & 0x7fff);
-                    var p1 = verts.ElementAt(indices.ElementAt(k1) & 0x7fff);
+                    continue;
+                }
 
-                    if (VEqual(d0, p0) || VEqual(d1, p0) || VEqual(d0, p1) || VEqual(d1, p1))
-                        continue;
+                var p0 = verts[indices[k] & REM_REMOVABLE_INDEX];
+                var p1 = verts[indices[k1] & REM_REMOVABLE_INDEX];
 
-                    if (Intersect(d0, d1, p0, p1))
-                        return false;
+                if (Utils.VEqual2D(d0, p0) || Utils.VEqual2D(d1, p0) || Utils.VEqual2D(d0, p1) || Utils.VEqual2D(d1, p1))
+                {
+                    continue;
+                }
+
+                if (Intersect2D(d0, d1, p0, p1))
+                {
+                    return false;
                 }
             }
+
             return true;
         }
         /// <summary>
         /// Returns true iff segments ab and cd intersect, properly or improperly.
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <returns></returns>
-        public static bool Intersect(Int4 a, Int4 b, Int4 c, Int4 d)
+        /// <param name="a">Segment ab Point a</param>
+        /// <param name="b">Segment ab Point b</param>
+        /// <param name="c">Segment cd Point c</param>
+        /// <param name="d">Segment cd Point d</param>
+        public static bool Intersect2D(Int4 a, Int4 b, Int4 c, Int4 d)
         {
-            if (IntersectProp(a, b, c, d))
+            if (IntersectProp2D(a, b, c, d))
             {
                 return true;
             }
-            else if (Between(a, b, c) || Between(a, b, d) || Between(c, d, a) || Between(c, d, b))
+            else if (Between2D(a, b, c) || Between2D(a, b, d) || Between2D(c, d, a) || Between2D(c, d, b))
             {
                 return true;
             }
@@ -197,103 +216,93 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
-        /// Returns true iff ab properly intersects cd: they share 
-        /// a point interior to both segments.
+        /// Returns true iff ab properly intersects cd: they share a point interior to both segments.
         /// The properness of the intersection is ensured by using strict leftness.
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <returns></returns>
-        private static bool IntersectProp(Int4 a, Int4 b, Int4 c, Int4 d)
+        /// <param name="a">Segment ab Point a</param>
+        /// <param name="b">Segment ab Point b</param>
+        /// <param name="c">Segment cd Point c</param>
+        /// <param name="d">Segment cd Point d</param>
+        /// <returns>Returns true iff ab properly intersects cd</returns>
+        private static bool IntersectProp2D(Int4 a, Int4 b, Int4 c, Int4 d)
         {
             // Eliminate improper cases.
-            if (Collinear(a, b, c) || Collinear(a, b, d) ||
-                Collinear(c, d, a) || Collinear(c, d, b))
+            if (Collinear2D(a, b, c) || Collinear2D(a, b, d) || Collinear2D(c, d, a) || Collinear2D(c, d, b))
+            {
                 return false;
+            }
 
-            return Xorb(Left(a, b, c), Left(a, b, d)) && Xorb(Left(c, d, a), Left(c, d, b));
-        }
-        private static bool Collinear(Int4 aV, Int4 bV, Int4 cV)
-        {
-            return Area2(aV, bV, cV) == 0;
-        }
-        private static int Area2(Int4 a, Int4 b, Int4 c)
-        {
-            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
+            return (Left2D(a, b, c) ^ Left2D(a, b, d)) && (Left2D(c, d, a) ^ Left2D(c, d, b));
         }
         /// <summary>
-        /// Exclusive or: true iff exactly one argument is true.
-        /// The arguments are negated to ensure that they are 0/1 values.
-        /// Then the bitwise Xor operator may apply.
-        /// (This idea is due to Michael Baldwin.)
+        /// Gets whether the specified ab line is collinear respect of the c point
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        private static bool Xorb(bool x, bool y)
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        /// <param name="c">Point C</param>
+        /// <returns>Returns true if collinear</returns>
+        /// <remarks>Three points of a triangle are collinear if the its area is zero</remarks>
+        private static bool Collinear2D(Int4 a, Int4 b, Int4 c)
         {
-            return !x ^ !y;
+            return Utils.TriArea2D(a, b, c) == 0;
         }
         /// <summary>
         /// Returns T iff (a,b,c) are collinear and point c lies on the closed segement ab.
         /// </summary>
-        /// <param name="aV"></param>
-        /// <param name="bV"></param>
-        /// <param name="cV"></param>
-        /// <returns></returns>
-        private static bool Between(Int4 aV, Int4 bV, Int4 cV)
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        /// <param name="c">Point C</param>
+        private static bool Between2D(Int4 a, Int4 b, Int4 c)
         {
-            if (!Collinear(aV, bV, cV))
+            if (!Collinear2D(a, b, c))
             {
                 return false;
             }
 
-            // If ab not vertical, check betweenness on x; else on y.
-            if (aV.X != bV.X)
+            // If ab not vertical, check betweenness on x; else on z.
+            if (a.X != b.X)
             {
-                return ((aV.X <= cV.X) && (cV.X <= bV.X)) || ((aV.X >= cV.X) && (cV.X >= bV.X));
+                return ((a.X <= c.X) && (c.X <= b.X)) || ((a.X >= c.X) && (c.X >= b.X));
             }
             else
             {
-                return ((aV.Z <= cV.Z) && (cV.Z <= bV.Z)) || ((aV.Z >= cV.Z) && (cV.Z >= bV.Z));
+                return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
             }
         }
-        private static bool VEqual(Int4 a, Int4 b)
+
+        private static bool Left2D(Int4 a, Int4 b, Int4 c)
         {
-            return a.X == b.X && a.Z == b.Z;
+            return Utils.TriArea2D(a, b, c) > 0;
         }
-        private static bool Left(Int4 aV, Int4 bV, Int4 cV)
+
+        private static bool LeftOn2D(Int4 a, Int4 b, Int4 c)
         {
-            return Area2(aV, bV, cV) < 0;
+            return Utils.TriArea2D(a, b, c) >= 0;
         }
-        private static bool LeftOn(Int4 aV, Int4 bV, Int4 cV)
+
+        public static bool InCone2D(int i, int n, Int4[] verts, Int4 pj)
         {
-            return Area2(aV, bV, cV) <= 0;
-        }
-        public static bool InCone(int i, int n, IEnumerable<Int4> verts, Int4 pj)
-        {
-            var pi = verts.ElementAt(i);
-            var pi1 = verts.ElementAt(Utils.Next(i, n));
-            var pin1 = verts.ElementAt(Utils.Prev(i, n));
+            var pi = verts[i];
+            var pi1 = verts[Utils.Next(i, n)];
+            var pin1 = verts[Utils.Prev(i, n)];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
-            if (LeftOn(pin1, pi, pi1))
+            if (LeftOn2D(pin1, pi, pi1))
             {
-                return Left(pi, pj, pin1) && Left(pj, pi, pi1);
+                return Left2D(pi, pj, pin1) && Left2D(pj, pi, pi1);
             }
+
             // Assume (i-1,i,i+1) not collinear.
             // else P[i] is reflex.
-            return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
+            return !(LeftOn2D(pi, pj, pi1) && LeftOn2D(pj, pi, pin1));
         }
 
-        public static IEnumerable<Int3> TriangulateHull(IEnumerable<Vector3> verts, IEnumerable<int> hull)
+        public static Int3[] TriangulateHull(Vector3[] verts, int[] hull)
         {
             var tris = new List<Int3>();
 
-            int nhull = hull.Count();
-            int nin = verts.Count();
+            int nhull = hull.Length;
+            int nin = verts.Length;
 
             int start = 0, left = 1, right = nhull - 1;
 
@@ -302,16 +311,16 @@ namespace Engine.PathFinding.RecastNavigation
             float dmin = float.MaxValue;
             for (int i = 0; i < nhull; i++)
             {
-                if (hull.ElementAt(i) >= nin)
+                if (hull[i] >= nin)
                 {
                     continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
                 }
 
                 int pi = Utils.Prev(i, nhull);
                 int ni = Utils.Next(i, nhull);
-                var pv = verts.ElementAt(hull.ElementAt(pi));
-                var cv = verts.ElementAt(hull.ElementAt(i));
-                var nv = verts.ElementAt(hull.ElementAt(ni));
+                var pv = verts[hull[pi]];
+                var cv = verts[hull[i]];
+                var nv = verts[hull[ni]];
 
                 float d =
                     Vector2.Distance(new Vector2(pv.X, pv.Z), new Vector2(cv.X, cv.Z)) +
@@ -329,9 +338,9 @@ namespace Engine.PathFinding.RecastNavigation
             // Add first triangle
             tris.Add(new Int3()
             {
-                X = hull.ElementAt(start),
-                Y = hull.ElementAt(left),
-                Z = hull.ElementAt(right),
+                X = hull[start],
+                Y = hull[left],
+                Z = hull[right],
             });
 
             // Triangulate the polygon by moving left or right,
@@ -344,10 +353,10 @@ namespace Engine.PathFinding.RecastNavigation
                 int nleft = Utils.Next(left, nhull);
                 int nright = Utils.Prev(right, nhull);
 
-                var cvleft = verts.ElementAt(hull.ElementAt(left));
-                var nvleft = verts.ElementAt(hull.ElementAt(nleft));
-                var cvright = verts.ElementAt(hull.ElementAt(right));
-                var nvright = verts.ElementAt(hull.ElementAt(nright));
+                var cvleft = verts[hull[left]];
+                var nvleft = verts[hull[nleft]];
+                var cvright = verts[hull[right]];
+                var nvright = verts[hull[nright]];
                 float dleft =
                     Vector2.Distance(new Vector2(cvleft.X, cvleft.Z), new Vector2(nvleft.X, nvleft.Z)) +
                     Vector2.Distance(new Vector2(nvleft.X, nvleft.Z), new Vector2(cvright.X, cvright.Z));
@@ -360,9 +369,9 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     tris.Add(new Int3()
                     {
-                        X = hull.ElementAt(left),
-                        Y = hull.ElementAt(nleft),
-                        Z = hull.ElementAt(right),
+                        X = hull[left],
+                        Y = hull[nleft],
+                        Z = hull[right],
                     });
 
                     left = nleft;
@@ -371,9 +380,9 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     tris.Add(new Int3()
                     {
-                        X = hull.ElementAt(left),
-                        Y = hull.ElementAt(nright),
-                        Z = hull.ElementAt(right),
+                        X = hull[left],
+                        Y = hull[nright],
+                        Z = hull[right],
                     });
 
                     right = nright;

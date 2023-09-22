@@ -10,11 +10,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public struct NavMeshCreateParams
     {
-        /// <summary>
-        /// The maximum number of vertices per navigation polygon.
-        /// </summary>
-        public const int DT_VERTS_PER_POLYGON = 6;
-
         #region Polygon Mesh Attributes
 
         // Used to create the base navigation graph.

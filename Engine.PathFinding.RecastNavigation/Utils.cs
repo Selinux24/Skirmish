@@ -7,6 +7,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     static class Utils
     {
+        static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
+
         /// <summary>
         /// Gets the next index value in a fixed length array
         /// </summary>
@@ -56,6 +58,27 @@ namespace Engine.PathFinding.RecastNavigation
             arr[an] = v;
             an++;
         }
+
+        /// <summary>
+        /// Removes n items from i position in the specified array
+        /// </summary>
+        /// <param name="arr">Array</param>
+        /// <param name="i">Start position</param>
+        /// <param name="n">Number of items</param>
+        /// <returns>Returns the resulting array</returns>
+        public static T[] RemoveRange<T>(T[] arr, int i, int n)
+        {
+            //Copy array
+            var res = arr.ToArray();
+
+            for (int k = i; k < n; k++)
+            {
+                res[k] = res[k + 1];
+            }
+
+            return res;
+        }
+
 
         public static int ComputeTileHash(int x, int y, int mask)
         {
@@ -140,18 +163,37 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>The signed xz-plane area of the triangle</returns>
         public static float TriArea2D(Vector3 a, Vector3 b, Vector3 c)
         {
-            float abx = b.X - a.X;
-            float abz = b.Z - a.Z;
-            float acx = c.X - a.X;
-            float acz = c.Z - a.Z;
-            return acx * abz - abx * acz;
+            return (c.X - a.X) * (b.Z - a.Z) - (b.X - a.X) * (c.Z - a.Z);
+        }
+        /// <summary>
+        /// Derives the signed xz-plane area of the triangle ABC, or the relationship of line AB to point C.
+        /// </summary>
+        /// <param name="a">Vertex A. [(x, y, z)]</param>
+        /// <param name="b">Vertex B. [(x, y, z)]</param>
+        /// <param name="c">Vertex C. [(x, y, z)]</param>
+        /// <returns>The signed xz-plane area of the triangle</returns>
+        public static int TriArea2D(Int4 a, Int4 b, Int4 c)
+        {
+            return (c.X - a.X) * (b.Z - a.Z) - (b.X - a.X) * (c.Z - a.Z);
+        }
+        /// <summary>
+        /// Gets whether the specified points are equals in the xz plane
+        /// </summary>
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        public static bool VEqual2D(Int4 a, Int4 b)
+        {
+            return a.X == b.X && a.Z == b.Z;
         }
 
-        public static bool Vequal(Vector3 p0, Vector3 p1)
+        /// <summary>
+        /// Gets whether the specified points are closest enough to be nearest equal
+        /// </summary>
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        public static bool VClosest(Vector3 a, Vector3 b)
         {
-            float thr = (float)Math.Pow(1.0f / 16384.0f, 2);
-            float d = Vector3.DistanceSquared(p0, p1);
-            return d < thr;
+            return Vector3.DistanceSquared(a, b) < EqualityTHR;
         }
 
         public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, IEnumerable<Vector3> polyVerts, out float tmin, out float tmax, out int segMin, out int segMax)

@@ -158,9 +158,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Build polygon navmesh from the contours.
             var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError) ?? throw new EngineException("buildNavigation: Could not build detail mesh.");
-            if (cfg.MaxVertsPerPoly > NavMeshCreateParams.DT_VERTS_PER_POLYGON)
+            if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
-                throw new EngineException($"buildNavigation: {cfg.MaxVertsPerPoly} is bigger than DetourUtils.DT_VERTS_PER_POLYGON ({NavMeshCreateParams.DT_VERTS_PER_POLYGON}).");
+                throw new EngineException($"buildNavigation: {cfg.MaxVertsPerPoly} is bigger than {nameof(IndexedPolygon.DT_VERTS_PER_POLYGON)} ({IndexedPolygon.DT_VERTS_PER_POLYGON}).");
             }
             progressCallback?.Invoke(10f / passCount);
 
@@ -326,7 +326,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return null;
             }
 
-            if (cfg.MaxVertsPerPoly > NavMeshCreateParams.DT_VERTS_PER_POLYGON)
+            if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
                 return null;
             }

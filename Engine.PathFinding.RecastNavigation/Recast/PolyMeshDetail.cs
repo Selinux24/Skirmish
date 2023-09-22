@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -10,6 +9,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class PolyMeshDetail
     {
+        /// <summary>
+        /// The sub-mesh data.
+        /// </summary>
+        public List<PolyMeshDetailIndices> Meshes { get; set; } = new();
+        /// <summary>
+        /// The mesh vertices.
+        /// </summary>
+        public List<Vector3> Vertices { get; set; } = new();
+        /// <summary>
+        /// The mesh triangles.
+        /// </summary>
+        public List<PolyMeshTriangleIndices> Triangles { get; set; } = new();
+
         /// <summary>
         /// Builds a new polygon mesh detail
         /// </summary>
@@ -47,7 +59,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var iPoly = mesh.Polys[i];
                 var region = mesh.Regs[i];
-                var b = bounds.ElementAt(i);
+                var b = bounds[i];
 
                 // Store polygon vertices for processing.
                 var poly = BuildPolyVertices(iPoly, mesh);
@@ -76,9 +88,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 dmesh.Meshes.Add(new PolyMeshDetailIndices
                 {
                     VertBase = dmesh.Vertices.Count,
-                    VertCount = verts.Count(),
+                    VertCount = verts.Length,
                     TriBase = dmesh.Triangles.Count,
-                    TriCount = tris.Count(),
+                    TriCount = tris.Length,
                 });
 
                 // Store vertices
@@ -91,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dmesh;
         }
-        private static (IEnumerable<Int4> Bounds, int MaxHWidth, int MaxHHeight) FindBounds(PolyMesh mesh, CompactHeightfield chf)
+        private static (Int4[] Bounds, int MaxHWidth, int MaxHHeight) FindBounds(PolyMesh mesh, CompactHeightfield chf)
         {
             var bounds = new List<Int4>();
 
@@ -119,7 +131,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 maxhh = Math.Max(maxhh, YMax - YMin);
             }
 
-            return (bounds, maxhw, maxhh);
+            return (bounds.ToArray(), maxhw, maxhh);
         }
         private static (int XMin, int XMax, int YMin, int YMax, int PolyVerts) FindMaxSizeArea(PolyMesh mesh, CompactHeightfield chf, IndexedPolygon p)
         {
@@ -150,7 +162,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return (xmin, xmax, ymin, ymax, polyVerts);
         }
-        private static IEnumerable<Vector3> BuildPolyVertices(IndexedPolygon p, PolyMesh mesh)
+        private static Vector3[] BuildPolyVertices(IndexedPolygon p, PolyMesh mesh)
         {
             var res = new List<Vector3>();
 
@@ -172,13 +184,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res.ToArray();
         }
-        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> verts, Vector3 orig, float cellHeight)
+        private static Vector3[] MoveToWorldSpace(Vector3[] verts, Vector3 orig, float cellHeight)
         {
             var res = new List<Vector3>();
 
-            for (int j = 0; j < verts.Count(); ++j)
+            for (int j = 0; j < verts.Length; ++j)
             {
-                var v = verts.ElementAt(j) + orig;
+                var v = verts[j] + orig;
                 v.Y += cellHeight;// Is this offset necessary?
 
                 res.Add(v);
@@ -186,20 +198,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res.ToArray();
         }
-        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> poly, Vector3 orig)
+        private static Vector3[] MoveToWorldSpace(Vector3[] poly, Vector3 orig)
         {
             var res = new List<Vector3>();
 
-            for (int j = 0; j < poly.Count(); ++j)
+            for (int j = 0; j < poly.Length; ++j)
             {
-                var p = poly.ElementAt(j) + orig;
+                var p = poly[j] + orig;
 
                 res.Add(p);
             }
 
             return res.ToArray();
         }
-        private static IEnumerable<PolyMeshTriangleIndices> BuildTriangleList(IEnumerable<Int3> tris, IEnumerable<Vector3> verts, IEnumerable<Vector3> poly)
+        private static PolyMeshTriangleIndices[] BuildTriangleList(Int3[] tris, Vector3[] verts, Vector3[] poly)
         {
             var res = new List<PolyMeshTriangleIndices>();
 
@@ -210,7 +222,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Point1 = t.X,
                     Point2 = t.Y,
                     Point3 = t.Z,
-                    Flags = GetTriFlags(verts.ElementAt(t.X), verts.ElementAt(t.Y), verts.ElementAt(t.Z), poly),
+                    Flags = GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly),
                 });
             }
 
@@ -222,7 +234,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="meshes">Mesh list</param>
         /// <returns>Returns the merged polygon mesh detail</returns>
-        public static PolyMeshDetail Merge(IEnumerable<PolyMeshDetail> meshes)
+        public static PolyMeshDetail Merge(PolyMeshDetail[] meshes)
         {
             var res = new PolyMeshDetail();
 
@@ -269,16 +281,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res;
         }
-        private static int GetEdgeFlags(Vector3 va, Vector3 vb, IEnumerable<Vector3> vpoly)
+        private static int GetEdgeFlags(Vector3 va, Vector3 vb, Vector3[] vpoly)
         {
-            int npoly = vpoly.Count();
+            int npoly = vpoly.Length;
 
             // Return true if edge (va,vb) is part of the polygon.
             float thrSqr = 0.001f * 0.001f;
             for (int i = 0, j = npoly - 1; i < npoly; j = i++)
             {
-                var vi = vpoly.ElementAt(i);
-                var vj = vpoly.ElementAt(j);
+                var vi = vpoly[i];
+                var vj = vpoly[j];
                 if (Utils.DistancePtSeg2D(va, vj, vi) < thrSqr &&
                     Utils.DistancePtSeg2D(vb, vj, vi) < thrSqr)
                 {
@@ -287,7 +299,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return 0;
         }
-        private static int GetTriFlags(Vector3 va, Vector3 vb, Vector3 vc, IEnumerable<Vector3> vpoly)
+        private static int GetTriFlags(Vector3 va, Vector3 vb, Vector3 vc, Vector3[] vpoly)
         {
             int flags = 0;
             flags |= GetEdgeFlags(va, vb, vpoly) << 0;
@@ -295,18 +307,5 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             flags |= GetEdgeFlags(vc, va, vpoly) << 4;
             return flags;
         }
-
-        /// <summary>
-        /// The sub-mesh data.
-        /// </summary>
-        public List<PolyMeshDetailIndices> Meshes { get; set; } = new List<PolyMeshDetailIndices>();
-        /// <summary>
-        /// The mesh vertices.
-        /// </summary>
-        public List<Vector3> Vertices { get; set; } = new List<Vector3>();
-        /// <summary>
-        /// The mesh triangles.
-        /// </summary>
-        public List<PolyMeshTriangleIndices> Triangles { get; set; } = new List<PolyMeshTriangleIndices>();
     }
 }

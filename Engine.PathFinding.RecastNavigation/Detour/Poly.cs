@@ -22,11 +22,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
         /// </summary>
-        public int[] Verts { get; set; } = new int[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+        public int[] Verts { get; set; } = new int[IndexedPolygon.DT_VERTS_PER_POLYGON];
         /// <summary>
         /// Packed data representing neighbor polygons references and flags for each edge.
         /// </summary>
-        public int[] Neis { get; set; } = new int[NavMeshCreateParams.DT_VERTS_PER_POLYGON];
+        public int[] Neis { get; set; } = new int[IndexedPolygon.DT_VERTS_PER_POLYGON];
         /// <summary>
         /// The user defined polygon flags.
         /// </summary>

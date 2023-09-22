@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                if (TriangulationHelper.Intersect(d0, d1, p0, p1))
+                if (TriangulationHelper.Intersect2D(d0, d1, p0, p1))
                 {
                     return true;
                 }
@@ -135,7 +135,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < outline.NVertices; j++)
             {
-                if (TriangulationHelper.InCone(j, outline.NVertices, outline.Vertices, corner))
+                if (TriangulationHelper.InCone2D(j, outline.NVertices, outline.Vertices, corner))
                 {
                     int dx = outline.Vertices[j].X - corner.X;
                     int dz = outline.Vertices[j].Z - corner.Z;

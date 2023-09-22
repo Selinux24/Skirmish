@@ -216,7 +216,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
 
-        private static IEnumerable<Int4> SimplifyContour(IEnumerable<Int4> points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        private static IEnumerable<Int4> SimplifyContour(Int4[] points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             // Add initial points.
             var simplified = Initialize(points);
@@ -488,11 +488,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return simplified;
         }
-        private static IEnumerable<Int4> UpdateNeighbors(IEnumerable<Int4> points, IEnumerable<Int4> list)
+        private static IEnumerable<Int4> UpdateNeighbors(Int4[] points, IEnumerable<Int4> list)
         {
             var simplified = new List<Int4>(list);
 
-            int pn = points.Count();
+            int pn = points.Length;
             for (int i = 0; i < simplified.Count; ++i)
             {
                 // The edge vertex flag is take from the current raw point,
@@ -500,7 +500,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var sv = simplified[i];
                 int ai = (sv.W + 1) % pn;
                 int bi = sv.W;
-                sv.W = (points.ElementAt(ai).W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points.ElementAt(bi).W & RC_BORDER_VERTEX);
+                sv.W = (points[ai].W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points[bi].W & RC_BORDER_VERTEX);
                 simplified[i] = sv;
             }
 
@@ -534,6 +534,27 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return a.X == b.X && a.Z == b.Z;
         }
 
+        public void GetGeometryConfiguration(out int maxVertices, out int maxTris, out int maxVertsPerCont)
+        {
+            maxVertices = 0;
+            maxTris = 0;
+            maxVertsPerCont = 0;
+
+            for (int i = 0; i < NConts; ++i)
+            {
+                var nverts = Conts[i].NVertices;
+
+                // Skip null contours.
+                if (nverts < 3)
+                {
+                    continue;
+                }
+
+                maxVertices += nverts;
+                maxTris += nverts - 2;
+                maxVertsPerCont = Math.Max(maxVertsPerCont, nverts);
+            }
+        }
         private void AddContour(int reg, AreaTypes area, IEnumerable<Int4> verts, IEnumerable<Int4> simplified, int maxContours, int borderSize)
         {
             if (NConts >= maxContours)
@@ -605,7 +626,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var area = chf.Areas[i];
                 var verts = chf.WalkContour(x, y, i, ref flags);
                 var simplified = SimplifyContour(verts, maxError, maxEdgeLen, buildFlags);
-
                 if (simplified.Count() < 3)
                 {
                     continue;

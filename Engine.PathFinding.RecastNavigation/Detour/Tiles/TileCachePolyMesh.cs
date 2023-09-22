@@ -55,7 +55,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            int maxEdgeCount = NPolys * NavMeshCreateParams.DT_VERTS_PER_POLYGON;
+            int maxEdgeCount = NPolys * IndexedPolygon.DT_VERTS_PER_POLYGON;
             int[] firstEdge = new int[NVerts];
             int[] nextEdge = new int[maxEdgeCount];
             int edgeCount = 0;
@@ -74,11 +74,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < NPolys; ++i)
             {
                 var t = Polys[i];
-                for (int j = 0; j < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++j)
+                for (int j = 0; j < IndexedPolygon.DT_VERTS_PER_POLYGON; ++j)
                 {
                     if (t[j] == DT_TILECACHE_NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= NavMeshCreateParams.DT_VERTS_PER_POLYGON || t[j + 1] == DT_TILECACHE_NULL_IDX) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= IndexedPolygon.DT_VERTS_PER_POLYGON || t[j + 1] == DT_TILECACHE_NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
                         var edge = new Edge()
@@ -105,11 +105,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < NPolys; ++i)
             {
                 var t = Polys[i];
-                for (int j = 0; j < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++j)
+                for (int j = 0; j < IndexedPolygon.DT_VERTS_PER_POLYGON; ++j)
                 {
                     if (t[j] == DT_TILECACHE_NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= NavMeshCreateParams.DT_VERTS_PER_POLYGON || t[j + 1] == DT_TILECACHE_NULL_IDX) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= IndexedPolygon.DT_VERTS_PER_POLYGON || t[j + 1] == DT_TILECACHE_NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 > v1)
                     {
                         bool found = false;
@@ -252,13 +252,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var p0 = Polys[e.Poly[0]];
                     var p1 = Polys[e.Poly[1]];
-                    p0[NavMeshCreateParams.DT_VERTS_PER_POLYGON + e.PolyEdge[0]] = e.Poly[1];
-                    p1[NavMeshCreateParams.DT_VERTS_PER_POLYGON + e.PolyEdge[1]] = e.Poly[0];
+                    p0[IndexedPolygon.DT_VERTS_PER_POLYGON + e.PolyEdge[0]] = e.Poly[1];
+                    p1[IndexedPolygon.DT_VERTS_PER_POLYGON + e.PolyEdge[1]] = e.Poly[0];
                 }
                 else if (e.PolyEdge[1] != 0xff)
                 {
                     var p0 = Polys[e.Poly[0]];
-                    p0[NavMeshCreateParams.DT_VERTS_PER_POLYGON + e.PolyEdge[0]] = 0x8000 | e.PolyEdge[1];
+                    p0[IndexedPolygon.DT_VERTS_PER_POLYGON + e.PolyEdge[0]] = 0x8000 | e.PolyEdge[1];
                 }
             }
 
@@ -587,7 +587,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Merge polygons.
-            int maxVertsPerPoly = NavMeshCreateParams.DT_VERTS_PER_POLYGON;
+            int maxVertsPerPoly = IndexedPolygon.DT_VERTS_PER_POLYGON;
             if (maxVertsPerPoly > 3)
             {
                 while (true)
@@ -635,7 +635,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 if (NPolys >= maxTris) break;
                 var p = Polys[NPolys];
-                for (int j = 0; j < NavMeshCreateParams.DT_VERTS_PER_POLYGON; ++j)
+                for (int j = 0; j < IndexedPolygon.DT_VERTS_PER_POLYGON; ++j)
                 {
                     p[j] = polys[i][j];
                 }

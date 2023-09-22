@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navquery, QueryFilter filter)
         {
-            int MAX_SEGS_PER_POLY = NavMeshCreateParams.DT_VERTS_PER_POLYGON * 3;
+            int MAX_SEGS_PER_POLY = IndexedPolygon.DT_VERTS_PER_POLYGON * 3;
             float collisionQueryRangeSq = collisionQueryRange * collisionQueryRange;
 
             if (r <= 0)
@@ -88,7 +88,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-      
+
         public Vector3 GetCenter()
         {
             return m_center;
