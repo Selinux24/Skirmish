@@ -118,7 +118,7 @@ namespace Engine.PathFinding
         /// Gets area list
         /// </summary>
         /// <returns>Returns the area list</returns>
-        public IEnumerable<IGraphArea> GetAreas()
+        public IGraphArea[] GetAreas()
         {
             return areas.ToArray();
         }

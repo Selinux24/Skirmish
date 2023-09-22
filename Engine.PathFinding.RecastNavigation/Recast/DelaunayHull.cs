@@ -82,7 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var v2 = Vector3.Subtract(p2, p1);
             var v3 = Vector3.Subtract(p3, p1);
 
-            float cp = Utils.VCross2(v1, v2, v3);
+            float cp = Utils.VCross2D(v1, v2, v3);
             if (Math.Abs(cp) > EPS)
             {
                 float v1Sq = Vector2.Dot(v1.XZ(), v1.XZ());
@@ -256,7 +256,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                if (Utils.VCross2(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u)) <= float.Epsilon)
+                if (Utils.VCross2D(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u)) <= float.Epsilon)
                 {
                     continue;
                 }
@@ -318,7 +318,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     continue;
                 }
-                if (Utils.OverlapSegSeg2d(pts.ElementAt(s0), pts.ElementAt(t0), pts.ElementAt(s), pts.ElementAt(t)) != 0)
+                if (Utils.OverlapSegSeg2D(pts.ElementAt(s0), pts.ElementAt(t0), pts.ElementAt(s), pts.ElementAt(t)) != 0)
                 {
                     return true;
                 }

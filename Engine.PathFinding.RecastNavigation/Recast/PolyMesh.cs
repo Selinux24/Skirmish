@@ -644,7 +644,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int npolys = 0;
             for (int j = 0; j < ntris; ++j)
             {
-                var t = tris.ElementAt(j);
+                var t = tris[j];
                 if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                 {
                     polys[npolys] = new IndexedPolygon();

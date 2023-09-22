@@ -1407,13 +1407,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, IEnumerable<Vector3> verts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, QueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                verts == null || verts.Count() < 3 ||
+                verts == null || verts.Length < 3 ||
                 filter == null ||
                 maxResult < 0)
             {
@@ -1428,7 +1428,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 centerPos += v;
             }
-            centerPos *= (1.0f / verts.Count());
+            centerPos *= 1.0f / verts.Length;
 
             var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
@@ -1477,10 +1477,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
 
-                var query = new FindPolysAroundShapeQuery()
-                {
-                    Vertices = verts,
-                };
+                var query = new FindPolysAroundShapeQuery(verts);
                 ProcessTileLinksQuery(best, parent, query, filter, out bool outOfNodes);
                 if (outOfNodes)
                 {
@@ -1969,7 +1966,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
                 // If target is inside the poly, stop search.
-                if (Utils.PointInPolygon(endPos, verts.ToArray()))
+                if (Utils.PointInPolygon2D(endPos, verts.ToArray()))
                 {
                     bestNode = curNode;
                     bestPos = endPos;
@@ -2273,8 +2270,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // and correct the height (since the raycast moves in 2d)
                     lastPos = curPos;
                     curPos = Vector3.Add(startPos, dir) * hit.T;
-                    var e1 = verts.ElementAt(segMax);
-                    var e2 = verts.ElementAt((segMax + 1) % verts.Count());
+                    var e1 = verts[segMax];
+                    var e2 = verts[(segMax + 1) % verts.Length];
                     var eDir = Vector3.Subtract(e2, e1);
                     var diff = Vector3.Subtract(curPos, e1);
                     float s = (eDir.X * eDir.X) > (eDir.Z * eDir.Z) ? diff.X / eDir.X : diff.Z / eDir.Z;
@@ -2289,9 +2286,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     // Calculate hit normal.
                     int a = segMax;
-                    int b = segMax + 1 < verts.Count() ? segMax + 1 : 0;
-                    var va = verts.ElementAt(a);
-                    var vb = verts.ElementAt(b);
+                    int b = segMax + 1 < verts.Length ? segMax + 1 : 0;
+                    var va = verts[a];
+                    var vb = verts[b];
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
                     hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
@@ -3133,7 +3130,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Collect vertices.
             var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-            bool inside = Utils.DistancePtPolyEdgesSqr(pos, verts, out float[] edged, out float[] edget);
+            bool inside = Utils.DistancePtPolyEdgesSqr2D(pos, verts, out float[] edged, out float[] edget);
             if (inside)
             {
                 // Point is inside the polygon, return the point.

@@ -6,7 +6,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class Span
     {
-        public const int SpanHeightBits = 13;
+        /// <summary>
+        /// Span height bits
+        /// </summary>
+        const int SpanHeightBits = 13;
         /// <summary>
         /// Defines the maximum value for smin and smax.
         /// </summary>
@@ -15,27 +18,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The lower limit of the span
         /// </summary>
-        public int smin;
+        public int SMin;
         /// <summary>
         /// The upper limit of the span
         /// </summary>
-        public int smax;
+        public int SMax;
         /// <summary>
         /// The area id assigned to the span.
         /// </summary>
-        public AreaTypes area;
+        public AreaTypes Area;
         /// <summary>
         /// The next span higher up in column.
         /// </summary>
-        public Span next;
+        public Span Next;
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Min {0} Max {1} Area: {2}; Next Span {3};", this.smin, this.smax, this.area, this.next != null);
+            return $"Min {SMin} Max {SMax} Area: {Area}; {(Next != null ? "Next =>" : "")};";
         }
     }
 }

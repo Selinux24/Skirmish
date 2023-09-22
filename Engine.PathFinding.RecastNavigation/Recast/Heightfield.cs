@@ -66,12 +66,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int asmin = minimumAccessibleNeigbor;
             int asmax = maximumAccessibleNeigbor;
 
-            int bot = span.smax;
-            int top = span.next != null ? span.next.smin : int.MaxValue;
+            int bot = span.SMax;
+            int top = span.Next != null ? span.Next.SMin : int.MaxValue;
 
             // From minus infinity to the first span.
             int nbot = -walkableClimb;
-            int ntop = nSpan != null ? nSpan.smin : int.MaxValue;
+            int ntop = nSpan != null ? nSpan.SMin : int.MaxValue;
 
             // Skip neightbour if the gap between the spans is too small.
             if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
@@ -82,8 +82,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var ns = nSpan;
             while (ns != null)
             {
-                nbot = ns.smax;
-                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
+                nbot = ns.SMax;
+                ntop = ns.Next != null ? ns.Next.SMin : int.MaxValue;
 
                 // Skip neightbour if the gap between the spans is too small.
                 if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
@@ -99,7 +99,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 }
 
-                ns = ns.next;
+                ns = ns.Next;
             }
 
             return (minh, asmin, asmax);
@@ -120,9 +120,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    for (Span s = Spans[x + y * w]; s != null; s = s.next)
+                    for (Span s = Spans[x + y * w]; s != null; s = s.Next)
                     {
-                        if (s.area != AreaTypes.RC_NULL_AREA)
+                        if (s.Area != AreaTypes.RC_NULL_AREA)
                         {
                             spanCount++;
                         }
@@ -139,32 +139,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public Span AllocSpan()
         {
             // If running out of memory, allocate new page and update the freelist.
-            if (FreeList == null || FreeList.next == null)
+            if (FreeList == null || FreeList.Next == null)
             {
                 // Create new page.
-                // Allocate memory for the new pool.
-                var pool = new SpanPool
-                {
-                    // Add the pool into the list of pools.
-                    next = Pools.Count > 0 ? Pools[^1] : null
-                };
+                var pool = new SpanPool();
                 Pools.Add(pool);
+
                 // Add new items to the free list.
-                var freelist = FreeList;
-                int itIndex = SpanPool.RC_SPANS_PER_POOL;
-                do
-                {
-                    var it = pool.items[--itIndex];
-                    it.next = freelist;
-                    freelist = it;
-                }
-                while (itIndex > 0);
-                FreeList = pool.items[itIndex];
+                FreeList = pool.Add(FreeList);
             }
 
             // Pop item from in front of the free list.
             var s = FreeList;
-            FreeList = FreeList.next;
+            FreeList = FreeList.Next;
             return s;
         }
         /// <summary>
@@ -176,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (cur == null) return;
 
             // Add the node in front of the free list.
-            cur.next = FreeList;
+            cur.Next = FreeList;
             FreeList = cur;
         }
         /// <summary>
@@ -193,10 +180,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int idx = x + y * Width;
 
             Span s = AllocSpan();
-            s.smin = smin;
-            s.smax = smax;
-            s.area = area;
-            s.next = null;
+            s.SMin = smin;
+            s.SMax = smax;
+            s.Area = area;
+            s.Next = null;
 
             // Empty cell, add the first span.
             if (Spans[idx] == null)
@@ -210,41 +197,41 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Insert and merge spans.
             while (cur != null)
             {
-                if (cur.smin > s.smax)
+                if (cur.SMin > s.SMax)
                 {
                     // Current span is further than the new span, break.
                     break;
                 }
-                else if (cur.smax < s.smin)
+                else if (cur.SMax < s.SMin)
                 {
                     // Current span is before the new span advance.
                     prev = cur;
-                    cur = cur.next;
+                    cur = cur.Next;
                 }
                 else
                 {
                     // Merge spans.
-                    if (cur.smin < s.smin)
+                    if (cur.SMin < s.SMin)
                     {
-                        s.smin = cur.smin;
+                        s.SMin = cur.SMin;
                     }
-                    if (cur.smax > s.smax)
+                    if (cur.SMax > s.SMax)
                     {
-                        s.smax = cur.smax;
+                        s.SMax = cur.SMax;
                     }
 
                     // Merge flags.
-                    if (Math.Abs(s.smax - cur.smax) <= flagMergeThr)
+                    if (Math.Abs(s.SMax - cur.SMax) <= flagMergeThr)
                     {
-                        s.area = (AreaTypes)Math.Max((int)s.area, (int)cur.area);
+                        s.Area = (AreaTypes)Math.Max((int)s.Area, (int)cur.Area);
                     }
 
                     // Remove current span.
-                    Span next = cur.next;
+                    Span next = cur.Next;
                     FreeSpan(cur);
                     if (prev != null)
                     {
-                        prev.next = next;
+                        prev.Next = next;
                     }
                     else
                     {
@@ -258,12 +245,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Insert new span.
             if (prev != null)
             {
-                s.next = prev.next;
-                prev.next = s;
+                s.Next = prev.Next;
+                prev.Next = s;
             }
             else
             {
-                s.next = Spans[idx];
+                s.Next = Spans[idx];
                 Spans[idx] = s;
             }
         }
@@ -286,19 +273,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                     Span ps = null;
 
-                    for (Span s = Spans[x + y * w]; s != null; ps = s, s = s.next)
+                    for (Span s = Spans[x + y * w]; s != null; ps = s, s = s.Next)
                     {
-                        bool walkable = s.area != AreaTypes.RC_NULL_AREA;
+                        bool walkable = s.Area != AreaTypes.RC_NULL_AREA;
 
                         // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
-                        if (!walkable && previousWalkable && Math.Abs(s.smax - ps.smax) <= walkableClimb)
+                        if (!walkable && previousWalkable && Math.Abs(s.SMax - ps.SMax) <= walkableClimb)
                         {
-                            s.area = previousArea;
+                            s.Area = previousArea;
                         }
 
                         // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
                         previousWalkable = walkable;
-                        previousArea = s.area;
+                        previousArea = s.Area;
                     }
                 }
             }
@@ -315,10 +302,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < Width; ++x)
                 {
-                    for (Span s = Spans[x + y * Width]; s != null; s = s.next)
+                    for (Span s = Spans[x + y * Width]; s != null; s = s.Next)
                     {
                         // Skip non walkable spans.
-                        if (s.area == AreaTypes.RC_NULL_AREA)
+                        if (s.Area == AreaTypes.RC_NULL_AREA)
                         {
                             continue;
                         }
@@ -334,8 +321,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int minh = int.MaxValue;
 
             // Min and max height of accessible neighbours.
-            int asmin = span.smax;
-            int asmax = span.smax;
+            int asmin = span.SMax;
+            int asmax = span.SMax;
 
             for (int dir = 0; dir < 4; ++dir)
             {
@@ -344,7 +331,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int dy = y + ContourSet.GetDirOffsetY(dir);
                 if (dx < 0 || dy < 0 || dx >= width || dy >= height)
                 {
-                    minh = Math.Min(minh, -walkableClimb - span.smax);
+                    minh = Math.Min(minh, -walkableClimb - span.SMax);
                     continue;
                 }
 
@@ -358,12 +345,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (minh < -walkableClimb)
             {
                 // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
-                span.area = AreaTypes.RC_NULL_AREA;
+                span.Area = AreaTypes.RC_NULL_AREA;
             }
             else if ((asmax - asmin) > walkableClimb)
             {
                 // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
-                span.area = AreaTypes.RC_NULL_AREA;
+                span.Area = AreaTypes.RC_NULL_AREA;
             }
         }
         /// <summary>
@@ -380,14 +367,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    for (var s = Spans[x + y * w]; s != null; s = s.next)
+                    for (var s = Spans[x + y * w]; s != null; s = s.Next)
                     {
-                        int bot = s.smax;
-                        int top = s.next != null ? s.next.smin : int.MaxValue;
+                        int bot = s.SMax;
+                        int top = s.Next != null ? s.Next.SMin : int.MaxValue;
 
                         if ((top - bot) <= walkableHeight)
                         {
-                            s.area = AreaTypes.RC_NULL_AREA;
+                            s.Area = AreaTypes.RC_NULL_AREA;
                         }
                     }
                 }

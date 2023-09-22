@@ -2145,7 +2145,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var verts = tile.GetPolyVerts(poly);
 
-            if (!Utils.PointInPolygon(pos, verts.ToArray()))
+            if (!Utils.PointInPolygon2D(pos, verts.ToArray()))
             {
                 return false;
             }

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -11,7 +10,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Shape vertices (polygon)
         /// </summary>
-        public IEnumerable<Vector3> Vertices { get; set; }
+        private readonly Vector3[] vertices;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="vertices"></param>
+        public FindPolysAroundShapeQuery(Vector3[] vertices)
+        {
+            this.vertices = vertices;
+        }
 
         /// <summary>
         /// Performs the query against a segment
@@ -22,7 +30,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public bool Contains(Vector3 va, Vector3 vb)
         {
             // If the poly is not touching the edge to the next polygon, skip the connection it.
-            if (!Utils.IntersectSegmentPoly2D(va, vb, Vertices, out float tmin, out float tmax, out _, out _))
+            if (!Utils.IntersectSegmentPoly2D(va, vb, vertices, out float tmin, out float tmax, out _, out _))
             {
                 return false;
             }

@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 center += v;
             }
 
-            center *= 1.0f / verts.Count();
+            center *= 1.0f / verts.Length;
 
             return center;
         }
@@ -148,12 +148,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the vertex list</returns>
-        public IEnumerable<Vector3> GetPolyVerts(Poly poly)
+        public Vector3[] GetPolyVerts(Poly poly)
         {
+            Vector3[] res = new Vector3[poly.VertCount];
+
             for (int j = 0; j < poly.VertCount; j++)
             {
-                yield return Verts[poly.Verts[j]];
+                res[j] = Verts[poly.Verts[j]];
             }
+
+            return res;
         }
         /// <summary>
         /// Calculates the bounds of the Polygon
@@ -198,7 +202,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the off-mesh connection list
         /// </summary>
-        public IEnumerable<OffMeshConnection> GetOffMeshConnections()
+        public OffMeshConnection[] GetOffMeshConnections()
         {
             return OffMeshCons
                 .Take(Header.OffMeshConCount)

@@ -72,89 +72,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Array containing border distance data. [Size: spanCount]      
         /// </summary>
-        public IEnumerable<int> BorderDistances { get; set; }
+        public int[] BorderDistances { get; set; }
         /// <summary>
         /// Array containing area id data. [Size: spanCount] 
         /// </summary>
         public AreaTypes[] Areas { get; set; }
 
-        /// <summary>
-        /// Builds a new compact heightfield
-        /// </summary>
-        /// <param name="hf">Heightfield</param>
-        /// <param name="walkableHeight">Walkable height</param>
-        /// <param name="walkableClimb">Walkable climb</param>
-        /// <returns>Returns the new compact heightfield</returns>
-        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
-        {
-            int w = hf.Width;
-            int h = hf.Height;
-            int spanCount = hf.GetSpanCount();
-            var bbox = hf.BoundingBox;
-            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
+        #region Iterators
 
-            // Fill in header.
-            var chf = new CompactHeightfield
-            {
-                Width = w,
-                Height = h,
-                SpanCount = spanCount,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                MaxRegions = 0,
-                BoundingBox = bbox,
-                CellSize = hf.CellSize,
-                CellHeight = hf.CellHeight,
-            };
-
-            // Fill in cells and spans.
-            chf.FillCellsAndSpans(hf.Spans, spanCount);
-
-            // Find neighbour connections.
-            chf.FindNeighbourConnections();
-
-            return chf;
-        }
-        private static void InsertSort(ref AreaTypes[] a, int n)
-        {
-            int i, j;
-            for (i = 1; i < n; i++)
-            {
-                var value = a[i];
-                for (j = i - 1; j >= 0 && a[j] > value; j--)
-                {
-                    a[j + 1] = a[j];
-                }
-                a[j + 1] = value;
-            }
-        }
-        private static IEnumerable<LevelStackEntry> AppendStacks(IEnumerable<LevelStackEntry> srcStack, IEnumerable<int> srcReg)
-        {
-            var dstStack = new List<LevelStackEntry>();
-
-            for (int j = 0; j < srcStack.Count(); j++)
-            {
-                var stackj = srcStack.ElementAt(j);
-
-                int i = stackj.Index;
-                if ((i < 0) || (srcReg.ElementAt(i) != 0))
-                {
-                    continue;
-                }
-
-                dstStack.Add(stackj);
-            }
-
-            return dstStack;
-        }
-        private static float GetJitterX(int i)
-        {
-            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-        private static float GetJitterY(int i)
-        {
-            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
         private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells(IEnumerable<CompactCell> cells, int w, int h)
         {
             for (int y = 0; y < h; ++y)
@@ -244,52 +169,162 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 yield return dir;
             }
         }
-        private static void GetCylinderBounds(Vector3 pos, float r, float h, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin.X = pos.X - r;
-            bmin.Y = pos.Y;
-            bmin.Z = pos.Z - r;
-            bmax.X = pos.X + r;
-            bmax.Y = pos.Y + h;
-            bmax.Z = pos.Z + r;
-        }
-        private static void GetPolygonBounds(IEnumerable<Vector3> polygon, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = polygon.ElementAt(0);
-            bmax = polygon.ElementAt(0);
 
-            for (int i = 1; i < polygon.Count(); ++i)
-            {
-                bmin = Vector3.Min(bmin, polygon.ElementAt(i));
-                bmax = Vector3.Max(bmax, polygon.ElementAt(i));
-            }
-        }
+        #endregion
+
         /// <summary>
-        /// Gets if the specified point is over the polygon (ignoring the Y component of p)
+        /// Builds a new compact heightfield
         /// </summary>
-        /// <param name="nvert">Number of vertices in the polygon</param>
-        /// <param name="verts">Polygon vertices</param>
-        /// <param name="p">The point</param>
-        /// <returns>Returns true if the point p is into the polygon, ignoring the Y component of p</returns>
-        private static bool PointOverPoly(IEnumerable<Vector3> polygon, Vector3 p)
+        /// <param name="hf">Heightfield</param>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
+        /// <returns>Returns the new compact heightfield</returns>
+        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
         {
-            bool c = false;
+            int w = hf.Width;
+            int h = hf.Height;
+            int spanCount = hf.GetSpanCount();
+            var bbox = hf.BoundingBox;
+            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
 
-            int nvert = polygon.Count();
-
-            for (int i = 0, j = nvert - 1; i < nvert; j = i++)
+            // Fill in header.
+            var chf = new CompactHeightfield
             {
-                var vi = polygon.ElementAt(i);
-                var vj = polygon.ElementAt(j);
+                Width = w,
+                Height = h,
+                SpanCount = spanCount,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                MaxRegions = 0,
+                BoundingBox = bbox,
+                CellSize = hf.CellSize,
+                CellHeight = hf.CellHeight,
+            };
 
-                if (((vi.Z > p.Z) != (vj.Z > p.Z)) &&
-                    (p.X < (vj.X - vi.X) * (p.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+            // Fill in cells and spans.
+            chf.FillCellsAndSpans(hf.Spans, spanCount);
+
+            // Find neighbour connections.
+            chf.FindNeighbourConnections();
+
+            return chf;
+        }
+        private static AreaTypes[] InsertSort(AreaTypes[] arr, int n)
+        {
+            //Copy array
+            var a = arr.ToArray();
+
+            int i, j;
+            for (i = 1; i < n; i++)
+            {
+                var value = a[i];
+                for (j = i - 1; j >= 0 && a[j] > value; j--)
                 {
-                    c = !c;
+                    a[j + 1] = a[j];
+                }
+                a[j + 1] = value;
+            }
+
+            return a;
+        }
+        private static LevelStackEntry[] AppendStacks(LevelStackEntry[] srcStack, int[] srcReg)
+        {
+            var dstStack = new List<LevelStackEntry>();
+
+            foreach (var stack in srcStack)
+            {
+                int i = stack.Index;
+                if ((i < 0) || (srcReg[i] != 0))
+                {
+                    continue;
+                }
+
+                dstStack.Add(stack);
+            }
+
+            return dstStack.ToArray();
+        }
+        private static float GetJitterX(int i)
+        {
+            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+        private static float GetJitterY(int i)
+        {
+            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+        private static bool GetPolyVerts(Vector3 vi, Vector3 vj, out Vector3 rvi, out Vector3 rvj)
+        {
+            rvj = vi;
+            rvi = vj;
+            bool swapped = false;
+
+            // Make sure the segments are always handled in same order
+            // using lexological sort or else there will be seams.
+            if (Math.Abs(rvj.X - rvi.X) < 1e-6f)
+            {
+                if (rvj.Z > rvi.Z)
+                {
+                    (rvi, rvj) = (rvj, rvi);
+                    swapped = true;
+                }
+            }
+            else
+            {
+                if (rvj.X > rvi.X)
+                {
+                    (rvi, rvj) = (rvj, rvi);
+                    swapped = true;
                 }
             }
 
-            return c;
+            return swapped;
+        }
+        private static int[] SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
+        {
+            float sampleMaxError = param.SampleMaxError;
+
+            int[] idx = new int[BuildPolyDetailParams.MAX_VERTS_PER_EDGE];
+            idx[0] = 0;
+            idx[1] = nn;
+            int nidx = 2;
+            for (int k = 0; k < nidx - 1;)
+            {
+                int a = idx[k];
+                int b = idx[k + 1];
+                var va = edge[a];
+                var vb = edge[b];
+
+                // Find maximum deviation along the segment.
+                float maxd = 0;
+                int maxi = -1;
+                for (int m = a + 1; m < b; ++m)
+                {
+                    float dev = Utils.DistancePtSeg(edge[m], va, vb);
+                    if (dev > maxd)
+                    {
+                        maxd = dev;
+                        maxi = m;
+                    }
+                }
+
+                // If the max deviation is larger than accepted error,
+                // add new point, else continue to next segment.
+                if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
+                {
+                    for (int m = nidx; m > k; --m)
+                    {
+                        idx[m] = idx[m - 1];
+                    }
+                    idx[k + 1] = maxi;
+                    nidx++;
+                }
+                else
+                {
+                    ++k;
+                }
+            }
+
+            return idx.Take(nidx).ToArray();
         }
 
         /// <summary>
@@ -316,18 +351,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var s = span;
                 do
                 {
-                    if (s.area != AreaTypes.RC_NULL_AREA)
+                    if (s.Area != AreaTypes.RC_NULL_AREA)
                     {
-                        int bot = s.smax;
-                        int top = s.next != null ? s.next.smin : int.MaxValue;
+                        int bot = s.SMax;
+                        int top = s.Next != null ? s.Next.SMin : int.MaxValue;
                         Spans[idx].Y = MathUtil.Clamp(bot, 0, SPAN_MAX_WIDTH);
                         Spans[idx].H = MathUtil.Clamp(top - bot, 0, SPAN_MAX_HEIGHT);
-                        Areas[idx] = s.area;
+                        Areas[idx] = s.Area;
                         idx++;
                         c.Count++;
                     }
 
-                    s = s.next;
+                    s = s.Next;
                 }
                 while (s != null);
 
@@ -418,10 +453,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var vCount = geometry.GetAreaCount();
             for (int i = 0; i < vCount; i++)
             {
-                var vol = vols.ElementAt(i);
+                var vol = vols[i];
 
                 MarkConvexPolyArea(
-                    vol.Vertices,
+                    vol.Vertices.ToArray(),
                     vol.MinHeight, vol.MaxHeight,
                     (AreaTypes)vol.AreaType);
             }
@@ -786,12 +821,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return empty;
         }
 
-        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, IEnumerable<HeightDataItem> dataQueue)
+        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, List<HeightDataItem> queue)
         {
             int RETRACT_SIZE = 256;
             int head = 0;
-
-            var queue = dataQueue.ToList();
 
             // We assume the seed is centered in the polygon, so a BFS to collect
             // height data will ensure we do not move onto overlapping polygons and
@@ -856,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Calculate minimum extents of the polygon based on input data.
-            float minExtent = Utils.PolyMinExtent(verts);
+            float minExtent = Utils.PolyMinExtent2D(verts);
 
             // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
             if (minExtent < sampleDist * 2)
@@ -913,10 +946,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
             {
-                bool swapped = GetPolyVerts(polygon, i, j, out var vi, out var vj);
+                bool swapped = GetPolyVerts(polygon[i], polygon[j], out var vi, out var vj);
 
                 // Create samples along the edge.
-                int nn = CreateSamples(verts, param, hp, vi, vj, ref edge);
+                int nn = CreateSamples(verts.Count, param, hp, vi, vj, ref edge);
 
                 // Simplify samples.
                 var idx = SimplifySamples(edge, nn, param);
@@ -924,12 +957,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 hullList.Add(j);
 
                 // Add new vertices.
-                int nidx = idx.Count();
+                int nidx = idx.Length;
                 if (swapped)
                 {
                     for (int k = nidx - 2; k > 0; --k)
                     {
-                        verts.Add(edge[idx.ElementAt(k)]);
+                        verts.Add(edge[idx[k]]);
                         hullList.Add(verts.Count - 1);
                     }
                 }
@@ -937,7 +970,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     for (int k = 1; k < nidx - 1; ++k)
                     {
-                        verts.Add(edge[idx.ElementAt(k)]);
+                        verts.Add(edge[idx[k]]);
                         hullList.Add(verts.Count - 1);
                     }
                 }
@@ -948,35 +981,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return verts.ToArray();
         }
 
-        private static bool GetPolyVerts(IEnumerable<Vector3> polygon, int i, int j, out Vector3 vi, out Vector3 vj)
-        {
-            vj = polygon.ElementAt(j);
-            vi = polygon.ElementAt(i);
-            bool swapped = false;
-
-            // Make sure the segments are always handled in same order
-            // using lexological sort or else there will be seams.
-            if (Math.Abs(vj.X - vi.X) < 1e-6f)
-            {
-                if (vj.Z > vi.Z)
-                {
-                    Helper.Swap(ref vj, ref vi);
-                    swapped = true;
-                }
-            }
-            else
-            {
-                if (vj.X > vi.X)
-                {
-                    Helper.Swap(ref vj, ref vi);
-                    swapped = true;
-                }
-            }
-
-            return swapped;
-        }
-
-        private int CreateSamples(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
+        private int CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
         {
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
@@ -990,9 +995,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float d = (float)Math.Sqrt(dx * dx + dz * dz);
             int nn = 1 + (int)Math.Floor(d / sampleDist);
             if (nn >= BuildPolyDetailParams.MAX_VERTS_PER_EDGE) nn = BuildPolyDetailParams.MAX_VERTS_PER_EDGE - 1;
-            if (polygon.Count() + nn >= BuildPolyDetailParams.MAX_VERTS)
+            if (npolys + nn >= BuildPolyDetailParams.MAX_VERTS)
             {
-                nn = BuildPolyDetailParams.MAX_VERTS - 1 - polygon.Count();
+                nn = BuildPolyDetailParams.MAX_VERTS - 1 - npolys;
             }
 
             for (int k = 0; k <= nn; ++k)
@@ -1009,54 +1014,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return nn;
-        }
-
-        private static IEnumerable<int> SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
-        {
-            float sampleMaxError = param.SampleMaxError;
-
-            int[] idx = new int[BuildPolyDetailParams.MAX_VERTS_PER_EDGE];
-            idx[0] = 0;
-            idx[1] = nn;
-            int nidx = 2;
-            for (int k = 0; k < nidx - 1;)
-            {
-                int a = idx[k];
-                int b = idx[k + 1];
-                var va = edge[a];
-                var vb = edge[b];
-
-                // Find maximum deviation along the segment.
-                float maxd = 0;
-                int maxi = -1;
-                for (int m = a + 1; m < b; ++m)
-                {
-                    float dev = Utils.DistancePtSeg(edge[m], va, vb);
-                    if (dev > maxd)
-                    {
-                        maxd = dev;
-                        maxi = m;
-                    }
-                }
-
-                // If the max deviation is larger than accepted error,
-                // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
-                {
-                    for (int m = nidx; m > k; --m)
-                    {
-                        idx[m] = idx[m - 1];
-                    }
-                    idx[k + 1] = maxi;
-                    nidx++;
-                }
-                else
-                {
-                    ++k;
-                }
-            }
-
-            return idx.Take(nidx).ToArray();
         }
         /// <summary>
         /// Create sample locations in a grid
@@ -1084,7 +1041,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Find sample with most error.
-                var (bestpt, bestd, besti) = FindSampleWithMostError(samples, sampleDist, verts, triList);
+                var (bestpt, bestd, besti) = FindSampleWithMostError(samples.ToArray(), sampleDist, verts.ToArray(), triList.ToArray());
 
                 // If the max error is within accepted threshold, stop tesselating.
                 if (bestd <= sampleMaxError || besti == -1)
@@ -1113,12 +1070,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return verts.ToArray();
         }
 
-        private IEnumerable<Int4> InitializeSamples(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp)
+        private Int4[] InitializeSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
         {
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
 
-            GetPolygonBounds(polygon, out var bmin, out var bmax);
+            Utils.GetPolygonBounds(polygon, out var bmin, out var bmax);
 
             int x0 = (int)Math.Floor(bmin.X / sampleDist);
             int x1 = (int)Math.Ceiling(bmax.X / sampleDist);
@@ -1142,7 +1099,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     };
 
                     // Make sure the samples are not too close to the edges.
-                    if (Utils.DistToPoly(polygon, pt) > -sampleDist / 2)
+                    if (Utils.DistToPoly2D(polygon, pt) > -sampleDist / 2)
                     {
                         continue;
                     }
@@ -1158,7 +1115,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return samples.ToArray();
         }
 
-        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(IEnumerable<Int4> samples, float sampleDist, IEnumerable<Vector3> verts, IEnumerable<Int3> tris)
+        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(Int4[] samples, float sampleDist, Vector3[] verts, Int3[] tris)
         {
             var bestpt = Vector3.Zero;
             float bestd = 0;
@@ -1166,10 +1123,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             float cs = CellSize;
 
-            int nsamples = samples.Count();
+            int nsamples = samples.Length;
             for (int i = 0; i < nsamples; ++i)
             {
-                var s = samples.ElementAt(i);
+                var s = samples[i];
                 if (s.W != 0)
                 {
                     // skip added.
@@ -1212,7 +1169,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        private IEnumerable<HeightDataItem> SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, int borderSize, HeightPatch hp)
+        private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, int borderSize, HeightPatch hp)
         {
             int[] offset =
             {
@@ -1371,7 +1328,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var chs = Spans[hdItem.I];
             hp.Data[hdItem.X - hp.Bounds.X + (hdItem.Y - hp.Bounds.Y) * hp.Bounds.Width] = chs.Y;
 
-            return array;
+            return array.ToArray();
         }
         /// <summary>
         /// Walks the contour
@@ -1382,7 +1339,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="dir">Direction</param>
         /// <param name="srcReg">Region list</param>
         /// <returns>Returns the contour list</returns>
-        public IEnumerable<int> WalkContour(int x, int y, int i, int dir, int[] srcReg)
+        public int[] WalkContour(int x, int y, int i, int dir, int[] srcReg)
         {
             var cont = new List<int>();
 
@@ -1454,7 +1411,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return cont;
+            return cont.ToArray();
         }
         /// <summary>
         /// Walks the edge contour
@@ -1608,7 +1565,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
                 }
 
-                InsertSort(ref nei, 9);
+                nei = InsertSort(nei, 9);
                 areas[i] = nei[4];
             }
 
@@ -1671,9 +1628,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The value of spacial parameters are in world units.
         /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
         /// </remarks>
-        public void MarkConvexPolyArea(IEnumerable<Vector3> polygon, float hmin, float hmax, AreaTypes areaId)
+        public void MarkConvexPolyArea(Vector3[] polygon, float hmin, float hmax, AreaTypes areaId)
         {
-            GetPolygonBounds(polygon, out var bmin, out var bmax);
+            Utils.GetPolygonBounds(polygon, out var bmin, out var bmax);
             bmin.Y = hmin;
             bmax.Y = hmax;
 
@@ -1712,7 +1669,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
                     };
 
-                    if (PointOverPoly(polygon, p))
+                    if (Utils.PointInPolygon2D(p, polygon))
                     {
                         Areas[i] = areaId;
                     }
@@ -1732,7 +1689,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         public void MarkCylinderArea(Vector3 pos, float r, float h, AreaTypes areaId)
         {
-            GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
+            Utils.GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
             float r2 = r * r;
 
             int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
@@ -1800,7 +1757,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="thr">Threshold</param>
         /// <param name="src">Distance field</param>
         /// <returns>Returns the blurred distance field</returns>
-        private IEnumerable<int> BoxBlur(int thr, IEnumerable<int> src)
+        private int[] BoxBlur(int thr, int[] src)
         {
             int[] dst = new int[SpanCount];
 
@@ -1811,7 +1768,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
             {
-                var cd = src.ElementAt(i);
+                var cd = src[i];
                 if (cd <= thr)
                 {
                     dst[i] = cd;
@@ -1833,7 +1790,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ax = x + ContourSet.GetDirOffsetX(dir);
                     int ay = y + ContourSet.GetDirOffsetY(dir);
                     int ai = Cells[ax + ay * w].Index + s.GetCon(dir);
-                    d += src.ElementAt(ai);
+                    d += src[ai];
 
                     var a = Spans[ai];
                     int dir2 = (dir + 1) & 0x3;
@@ -1847,7 +1804,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ax2 = ax + ContourSet.GetDirOffsetX(dir2);
                     int ay2 = ay + ContourSet.GetDirOffsetY(dir2);
                     int ai2 = Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
-                    d += src.ElementAt(ai2);
+                    d += src[ai2];
                 }
 
                 dst[i] = (d + 5) / 9;
@@ -1859,7 +1816,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Calculates the distance field
         /// </summary>
         /// <returns>Returns the array of distances</returns>
-        public IEnumerable<int> CalculateDistanceField()
+        public int[] CalculateDistanceField()
         {
             int w = Width;
             int h = Height;
@@ -1953,7 +1910,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 res[i] = res[aai] + 3;
             }
         }
-
         /// <summary>
         /// Builds monotone regions
         /// </summary>
@@ -2117,10 +2073,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int LOG_NB_STACKS = 3;
             int NB_STACKS = 1 << LOG_NB_STACKS;
-            var lvlStacks = new List<List<LevelStackEntry>>(NB_STACKS);
+            var lvlStacks = new List<LevelStackEntry>[NB_STACKS];
             for (int i = 0; i < NB_STACKS; i++)
             {
-                lvlStacks.Add(new List<LevelStackEntry>());
+                lvlStacks[i] = new List<LevelStackEntry>();
             }
 
             var stack = new List<LevelStackEntry>();
@@ -2164,7 +2120,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
                 else
                 {
-                    var stacks = AppendStacks(lvlStacks[sId - 1], srcReg); // copy left overs from last level
+                    var stacks = AppendStacks(lvlStacks[sId - 1].ToArray(), srcReg); // copy left overs from last level
                     lvlStacks[sId].AddRange(stacks);
                 }
 
@@ -2458,7 +2414,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             continue;
                         }
-                        if (BorderDistances.ElementAt(ai) >= lev && srcReg[ai] == 0)
+                        if (BorderDistances[ai] >= lev && srcReg[ai] == 0)
                         {
                             srcReg[ai] = r;
                             srcDist[ai] = 0;
@@ -2488,7 +2444,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    if (BorderDistances.ElementAt(i) >= level && srcReg[i] == 0)
+                    if (BorderDistances[i] >= level && srcReg[i] == 0)
                     {
                         stack.Add(new LevelStackEntry { X = x, Y = y, Index = i });
                     }
@@ -2591,7 +2547,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="nbStacks">Number of stacks</param>
         /// <param name="stacks">Stack list</param>
         /// <param name="loglevelsPerStack">The levels per stack (2 in our case) as a bit shift</param>
-        private void SortCellsByLevel(int startLevel, int[] srcReg, int nbStacks, List<List<LevelStackEntry>> stacks, int loglevelsPerStack)
+        private void SortCellsByLevel(int startLevel, int[] srcReg, int nbStacks, List<LevelStackEntry>[] stacks, int loglevelsPerStack)
         {
             int w = Width;
             int h = Height;
@@ -2610,7 +2566,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int level = BorderDistances.ElementAt(i) >> loglevelsPerStack;
+                int level = BorderDistances[i] >> loglevelsPerStack;
                 int sId = startLevel - level;
                 if (sId >= nbStacks)
                 {
