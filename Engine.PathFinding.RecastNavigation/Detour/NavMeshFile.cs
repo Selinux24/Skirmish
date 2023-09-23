@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 NavMeshData = new List<MeshData>(),
 
                 HasTileCache = navmesh.TileCache != null,
-                TileCacheParams = navmesh.TileCache != null ? navmesh.TileCache.GetParams() : new TileCacheParams(),
+                TileCacheParams = navmesh.TileCache?.GetParams() ?? new TileCacheParams(),
                 TileCacheData = new List<TileCacheData>()
             };
 
@@ -80,9 +80,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             if (file.HasTileCache)
             {
-                var tmproc = new TileCacheMeshProcess(null);
-
-                navmesh.TileCache = new TileCache(navmesh, tmproc, file.TileCacheParams);
+                navmesh.CreateTileCache(null, file.TileCacheParams);
 
                 foreach (var tile in file.TileCacheData)
                 {

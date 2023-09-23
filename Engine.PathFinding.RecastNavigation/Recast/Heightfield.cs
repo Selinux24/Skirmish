@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Height field
+    /// </summary>
     class Heightfield
     {
         /// <summary>
@@ -60,6 +63,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Spans = new Span[width * height],
             };
         }
+        /// <summary>
+        /// Finds the minimum height
+        /// </summary>
         private static (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
         {
             int minh = minHeight;
@@ -256,10 +262,32 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Filter heightfield
+        /// </summary>
+        /// <param name="cfg">Configuration</param>
+        public void FilterHeightfield(Config cfg)
+        {
+            // Once all geometry is rasterized, we do initial pass of filtering to
+            // remove unwanted overhangs caused by the conservative rasterization
+            // as well as filter spans where the character cannot possibly stand.
+            if (cfg.FilterLowHangingObstacles)
+            {
+                FilterLowHangingWalkableObstacles(cfg.WalkableClimb);
+            }
+            if (cfg.FilterLedgeSpans)
+            {
+                FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb);
+            }
+            if (cfg.FilterWalkableLowHeightSpans)
+            {
+                FilterWalkableLowHeightSpans(cfg.WalkableHeight);
+            }
+        }
+        /// <summary>
         /// Filters the low-hanging obstables
         /// </summary>
         /// <param name="walkableClimb">Walkable climb</param>
-        public void FilterLowHangingWalkableObstacles(int walkableClimb)
+        private void FilterLowHangingWalkableObstacles(int walkableClimb)
         {
             int w = Width;
             int h = Height;
@@ -295,7 +323,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="walkableHeight">Walkable height</param>
         /// <param name="walkableClimb">Walkable climb</param>
-        public void FilterLedgeSpans(int walkableHeight, int walkableClimb)
+        private void FilterLedgeSpans(int walkableHeight, int walkableClimb)
         {
             // Mark border spans.
             for (int y = 0; y < Height; ++y)
@@ -315,6 +343,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        /// <summary>
+        /// Filter ledge span
+        /// </summary>
+        /// <param name="span">Span</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="width">Span width</param>
+        /// <param name="height">Span height</param>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
         private void FilterLedgeSpan(Span span, int x, int y, int width, int height, int walkableHeight, int walkableClimb)
         {
             // Find neighbours minimum height.
@@ -357,7 +395,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Filters the low-height spans
         /// </summary>
         /// <param name="walkableHeight">Walkable height</param>
-        public void FilterWalkableLowHeightSpans(int walkableHeight)
+        private void FilterWalkableLowHeightSpans(int walkableHeight)
         {
             int w = Width;
             int h = Height;

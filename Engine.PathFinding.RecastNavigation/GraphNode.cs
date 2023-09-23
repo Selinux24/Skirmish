@@ -147,7 +147,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var polys = tile
                 .GetPolys()
-                .Where(p => p.Type != PolyTypes.OffmeshConnection);
+                .Where(p => p.Type != PolyTypes.OffmeshConnection)
+                .ToArray();
 
             foreach (var p in polys)
             {

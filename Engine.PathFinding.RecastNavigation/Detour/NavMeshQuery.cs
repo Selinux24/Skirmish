@@ -133,72 +133,126 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
 
         /// <summary>
-        /// Returns a random point in a convex polygon.
-        /// Adapted from Graphics Gems article.
+        /// Calculate quantized box
         /// </summary>
-        /// <param name="pts"></param>
-        /// <param name="areas"></param>
-        /// <param name="s"></param>
-        /// <param name="t"></param>
-        /// <param name="outPoint"></param>
-        private static void RandomPointInConvexPoly(IEnumerable<Vector3> points, out float[] areas, float s, float t, out Vector3 outPoint)
+        private static void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
         {
-            areas = new float[IndexedPolygon.DT_VERTS_PER_POLYGON];
+            var tb = tile.Header.Bounds;
+            float qfac = tile.Header.BvQuantFactor;
 
-            var pts = points.ToArray();
+            // Clamp query box to world box.
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
 
-            // Calc triangle areas
-            float areasum = 0.0f;
-            for (int i = 2; i < pts.Length; i++)
+            // Quantize
+            bmin = new Int3();
+            bmax = new Int3();
+            bmin.X = (int)(qfac * minx) & 0xfffe;
+            bmin.Y = (int)(qfac * miny) & 0xfffe;
+            bmin.Z = (int)(qfac * minz) & 0xfffe;
+            bmax.X = (int)(qfac * maxx + 1) | 1;
+            bmax.Y = (int)(qfac * maxy + 1) | 1;
+            bmax.Z = (int)(qfac * maxz + 1) | 1;
+        }
+        /// <summary>
+        /// Selects a tile reference
+        /// </summary>
+        /// <param name="best">Best tile</param>
+        /// <param name="tile">Candidate tile</param>
+        /// <param name="areaSum">Area sumatory</param>
+        /// <returns>Returns the selected tile</returns>
+        private static TileRef SelectBestTile(TileRef best, TileRef tile, ref float areaSum)
+        {
+            // Place random locations on on ground.
+            if (best.Poly.Type == PolyTypes.Ground)
             {
-                areas[i] = Utils.TriArea2D(pts[0], pts[i - 1], pts[i]);
-                areasum += Math.Max(0.001f, areas[i]);
-            }
-            // Find sub triangle weighted by area.
-            float thr = s * areasum;
-            float acc = 0.0f;
-            float u = 1.0f;
-            int tri = pts.Length - 1;
-            for (int i = 2; i < pts.Length; i++)
-            {
-                float dacc = areas[i];
-                if (thr >= acc && thr < (acc + dacc))
+                // Calc area of the polygon.
+                float polyArea = best.Tile.GetPolyArea(best.Poly);
+                // Choose random polygon weighted by area, using reservoi sampling.
+                areaSum += polyArea;
+                float u = Helper.RandomGenerator.NextFloat(0, 1);
+                if (u * areaSum <= polyArea)
                 {
-                    u = (thr - acc) / dacc;
-                    tri = i;
+                    return best;
+                }
+            }
+
+            return tile;
+        }
+        /// <summary>
+        /// Returns portal points between two polygons.
+        /// </summary>
+        private static Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
+        {
+            left = new Vector3();
+            right = new Vector3();
+
+            // Find the link that points to the 'to' polygon.
+            Link? link = null;
+            for (int i = from.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = from.Tile.Links[i].Next)
+            {
+                if (from.Tile.Links[i].NRef == to.Ref)
+                {
+                    link = from.Tile.Links[i];
                     break;
                 }
-                acc += dacc;
+            }
+            if (!link.HasValue)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            float v = (float)Math.Sqrt(t);
+            // Handle off-mesh connections.
+            if (from.Poly.Type == PolyTypes.OffmeshConnection)
+            {
+                // Find link that points to first vertex.
+                return from.Tile.FindLinkToNeighbour(from.Poly, to.Ref, out left, out right);
+            }
 
-            float a = 1 - v;
-            float b = (1 - u) * v;
-            float c = u * v;
-            Vector3 pa = pts[0];
-            Vector3 pb = pts[tri - 1];
-            Vector3 pc = pts[tri];
+            if (to.Poly.Type == PolyTypes.OffmeshConnection)
+            {
+                return to.Tile.FindLinkToNeighbour(to.Poly, from.Ref, out left, out right);
+            }
 
-            outPoint = a * pa + b * pb + c * pc;
+            // Find portal vertices.
+            int v0 = from.Poly.Verts[link.Value.Edge];
+            int v1 = from.Poly.Verts[(link.Value.Edge + 1) % from.Poly.VertCount];
+            left = from.Tile.Verts[v0];
+            right = from.Tile.Verts[v1];
+
+            // If the link is at tile boundary, dtClamp the vertices to
+            // the link width.
+            if (link.Value.Side != 0xff && (link.Value.BMin != 0 || link.Value.BMax != 255))
+            {
+                // Unpack portal limits.
+                float s = 1.0f / 255.0f;
+                float tmin = link.Value.BMin * s;
+                float tmax = link.Value.BMax * s;
+                left = Vector3.Lerp(from.Tile.Verts[v0], from.Tile.Verts[v1], tmin);
+                right = Vector3.Lerp(from.Tile.Verts[v0], from.Tile.Verts[v1], tmax);
+            }
+
+            return Status.DT_SUCCESS;
         }
-        private static bool IntersectSegSeg2D(Vector3 ap, Vector3 aq, Vector3 bp, Vector3 bq, out float s, out float t)
+        /// <summary>
+        /// Returns edge mid point between two polygons.
+        /// </summary>
+        private static Status GetEdgeMidPoint(TileRef from, TileRef to, out Vector3 mid)
         {
-            s = 0;
-            t = 0;
+            mid = new Vector3();
 
-            Vector3 u = Vector3.Subtract(aq, ap);
-            Vector3 v = Vector3.Subtract(bq, bp);
-            Vector3 w = Vector3.Subtract(ap, bp);
-            float d = VperpXZ(u, v);
-            if (Math.Abs(d) < 1e-6f) return false;
-            s = VperpXZ(v, w) / d;
-            t = VperpXZ(u, w) / d;
-            return true;
-        }
-        private static float VperpXZ(Vector3 a, Vector3 b)
-        {
-            return a.X * b.Z - a.Z * b.X;
+            if (GetPortalPoints(from, to, out Vector3 left, out Vector3 right).HasFlag(Status.DT_FAILURE))
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            mid = (left + right) * 0.5f;
+
+            return Status.DT_SUCCESS;
         }
 
         /// <summary>
@@ -440,9 +494,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Add start point.
-            var startPStatus = AppendVertex(
-                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Start, maxStraightPath,
-                ref resultPath);
+            var startPStatus = resultPath.AppendVertex(closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Start, maxStraightPath);
             if (startPStatus != Status.DT_IN_PROGRESS)
             {
                 return startPStatus;
@@ -501,9 +553,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             }
 
                             // Ignore status return value as we're just about to return anyway.
-                            AppendVertex(
-                                closestEndPos, 0, pathNodes.ElementAt(i), maxStraightPath,
-                                ref resultPath);
+                            resultPath.AppendVertex(closestEndPos, 0, pathNodes.ElementAt(i), maxStraightPath);
 
                             return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
                         }
@@ -562,10 +612,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             int r = leftPolyRef;
 
                             // Append or update vertex
-                            var stat = AppendVertex(
-                                portalApex, flags, r, maxStraightPath,
-                                ref resultPath);
-
+                            var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
                             if (stat != Status.DT_IN_PROGRESS)
                             {
                                 return stat;
@@ -623,10 +670,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             int r = rightPolyRef;
 
                             // Append or update vertex
-                            var stat = AppendVertex(
-                                portalApex, flags, r, maxStraightPath,
-                                ref resultPath);
-
+                            var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
                             if (stat != Status.DT_IN_PROGRESS)
                             {
                                 return stat;
@@ -658,9 +702,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Ignore status return value as we're just about to return anyway.
-            AppendVertex(
-                closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath,
-                ref resultPath);
+            resultPath.AppendVertex(closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath);
 
             return Status.DT_SUCCESS | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
         }
@@ -1229,7 +1271,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="node">First Node</param>
         /// <param name="maxPath">Max path length</param>
         /// <returns>Returns the reference list path</returns>
-        private IEnumerable<int> StorePath(Node node, int maxPath)
+        private int[] StorePath(Node node, int maxPath)
         {
             var pathList = new List<int>();
 
@@ -1262,7 +1304,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxPath">Maximum partial path items</param>
         /// <param name="partialPath">Resulting partial path node list</param>
         /// <returns>Returns true </returns>
-        private Status BuildNodePath(Node node, Node next, int maxPath, out IEnumerable<int> partialPath)
+        private Status BuildNodePath(Node node, Node next, int maxPath, out int[] partialPath)
         {
             Status status = 0;
 
@@ -2010,8 +2052,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     if (neis.Count == 0)
                     {
                         // Wall edge, calc distance.
-                        var vj = verts.ElementAt(j);
-                        var vi = verts.ElementAt(i);
+                        var vj = verts[j];
+                        var vi = verts[i];
                         float distSqr = Utils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
                         if (distSqr < bestDist)
                         {
@@ -2038,8 +2080,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             }
 
                             // Skip the link if it is too far from search constraint.
-                            var vj = verts.ElementAt(j);
-                            var vi = verts.ElementAt(i);
+                            var vj = verts[j];
+                            var vi = verts[i];
                             float distSqr = Utils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
                             if (distSqr > searchRadSqr)
                             {
@@ -2766,56 +2808,48 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Randomly pick one polygon weighted by polygon area.
-            Poly poly = null;
-            int polyRef = 0;
+            Poly bestPoly = null;
+            int bestPolyRef = 0;
             int bse = m_nav.GetTileRef(tile);
 
             float areaSum = 0.0f;
-            var polys = tile.GetPolys();
+            var polys = tile
+                .GetPolys()
+                .Where(p => p.Type != PolyTypes.OffmeshConnection && filter.PassFilter(p.Flags))
+                .ToArray();
 
-            for (int i = 0; i < polys.Count(); ++i)
+            for (int i = 0; i < polys.Length; ++i)
             {
-                var p = polys.ElementAt(i);
-                // Do not return off-mesh connection polygons.
-                if (p.Type != PolyTypes.Ground)
-                {
-                    continue;
-                }
-
-                // Must pass filter
+                var poly = polys[i];
                 int r = bse | i;
-                if (!filter.PassFilter(p.Flags))
-                {
-                    continue;
-                }
 
                 // Calc area of the polygon.
-                float polyArea = tile.GetPolyArea(p);
+                float polyArea = tile.GetPolyArea(poly);
 
                 // Choose random polygon weighted by area, using reservoi sampling.
                 areaSum += polyArea;
                 float u = Helper.RandomGenerator.NextFloat(0, 1);
                 if (u * areaSum <= polyArea)
                 {
-                    poly = p;
-                    polyRef = r;
+                    bestPoly = poly;
+                    bestPolyRef = r;
                 }
             }
 
-            if (poly == null)
+            if (bestPoly == null)
             {
                 return Status.DT_FAILURE;
             }
 
             // Randomly pick point on polygon.
-            var verts = tile.GetPolyVerts(poly);
+            var verts = tile.GetPolyVerts(bestPoly);
 
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            Utils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
-            Status status = GetPolyHeight(polyRef, pt, out float h);
+            Status status = GetPolyHeight(bestPolyRef, pt, out float h);
             if (status.HasFlag(Status.DT_FAILURE))
             {
                 return status;
@@ -2823,7 +2857,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             pt.Y = h;
 
             randomPt = pt;
-            randomRef = polyRef;
+            randomRef = bestPolyRef;
 
             return Status.DT_SUCCESS;
         }
@@ -2934,7 +2968,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            Utils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
             Status stat = GetPolyHeight(random.Ref, pt, out float h);
             if (stat.HasFlag(Status.DT_FAILURE))
@@ -2947,31 +2981,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             randomRef = random.Ref;
 
             return Status.DT_SUCCESS;
-        }
-        /// <summary>
-        /// Selects a tile reference
-        /// </summary>
-        /// <param name="best">Best tile</param>
-        /// <param name="tile">Candidate tile</param>
-        /// <param name="areaSum">Area sumatory</param>
-        /// <returns>Returns the selected tile</returns>
-        private static TileRef SelectBestTile(TileRef best, TileRef tile, ref float areaSum)
-        {
-            // Place random locations on on ground.
-            if (best.Poly.Type == PolyTypes.Ground)
-            {
-                // Calc area of the polygon.
-                float polyArea = best.Tile.GetPolyArea(best.Poly);
-                // Choose random polygon weighted by area, using reservoi sampling.
-                areaSum += polyArea;
-                float u = Helper.RandomGenerator.NextFloat(0, 1);
-                if (u * areaSum <= polyArea)
-                {
-                    return best;
-                }
-            }
-
-            return tile;
         }
         /// <summary>
         /// Evaluates the tile list
@@ -3139,33 +3148,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
-                closest = GetClosestPointOutsidePoly(verts, edged, edget);
+                closest = Utils.GetClosestPointOutsidePoly(verts, edged, edget);
             }
 
             return Status.DT_SUCCESS;
-        }
-        /// <summary>
-        /// Gets the closest point on the closest edge
-        /// </summary>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="edged">Distance to edges array</param>
-        /// <param name="edget">Distance from first edge point to closest point list</param>
-        /// <returns>Returns the closest position</returns>
-        private static Vector3 GetClosestPointOutsidePoly(IEnumerable<Vector3> verts, float[] edged, float[] edget)
-        {
-            float dmin = edged[0];
-            int imin = 0;
-            for (int i = 1; i < verts.Count(); i++)
-            {
-                if (edged[i] < dmin)
-                {
-                    dmin = edged[i];
-                    imin = i;
-                }
-            }
-            var va = verts.ElementAt(imin);
-            var vb = verts.ElementAt((imin + 1) % verts.Count());
-            return Vector3.Lerp(va, vb, edget[imin]);
         }
         /// <summary>
         /// Gets the height of the polygon at the provided position using the height detail. (Most accurate.)
@@ -3200,7 +3186,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_SUCCESS;
             }
 
-            return NavMesh.GetPolyHeight(cur.Tile, cur.Poly, pos, out height) ?
+            return cur.Tile.GetPolyHeight(cur.Poly, pos, out height) ?
                 Status.DT_SUCCESS :
                 Status.DT_FAILURE | Status.DT_INVALID_PARAM;
         }
@@ -3326,32 +3312,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             query.Process(tile, polyRefs);
         }
         /// <summary>
-        /// Calculate quantized box
-        /// </summary>
-        private static void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
-        {
-            var tb = tile.Header.Bounds;
-            float qfac = tile.Header.BvQuantFactor;
-
-            // Clamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-
-            // Quantize
-            bmin = new Int3();
-            bmax = new Int3();
-            bmin.X = (int)(qfac * minx) & 0xfffe;
-            bmin.Y = (int)(qfac * miny) & 0xfffe;
-            bmin.Z = (int)(qfac * minz) & 0xfffe;
-            bmax.X = (int)(qfac * maxx + 1) | 1;
-            bmax.Y = (int)(qfac * maxy + 1) | 1;
-            bmax.Z = (int)(qfac * maxz + 1) | 1;
-        }
-        /// <summary>
         ///  Queries polygons within a tile reference by reference.
         /// </summary>
         private void QueryPolygonsInTileByRef(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query)
@@ -3426,107 +3386,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return GetPortalPoints(fromT, toT, out left, out right);
         }
         /// <summary>
-        /// Returns portal points between two polygons.
-        /// </summary>
-        private static Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
-        {
-            left = new Vector3();
-            right = new Vector3();
-
-            // Find the link that points to the 'to' polygon.
-            Link? link = null;
-            for (int i = from.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = from.Tile.Links[i].Next)
-            {
-                if (from.Tile.Links[i].NRef == to.Ref)
-                {
-                    link = from.Tile.Links[i];
-                    break;
-                }
-            }
-            if (!link.HasValue)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
-            // Handle off-mesh connections.
-            if (from.Poly.Type == PolyTypes.OffmeshConnection)
-            {
-                // Find link that points to first vertex.
-                return from.Tile.FindLinkToNeighbour(from.Poly, to.Ref, out left, out right);
-            }
-
-            if (to.Poly.Type == PolyTypes.OffmeshConnection)
-            {
-                return to.Tile.FindLinkToNeighbour(to.Poly, from.Ref, out left, out right);
-            }
-
-            // Find portal vertices.
-            int v0 = from.Poly.Verts[link.Value.Edge];
-            int v1 = from.Poly.Verts[(link.Value.Edge + 1) % from.Poly.VertCount];
-            left = from.Tile.Verts[v0];
-            right = from.Tile.Verts[v1];
-
-            // If the link is at tile boundary, dtClamp the vertices to
-            // the link width.
-            if (link.Value.Side != 0xff && (link.Value.BMin != 0 || link.Value.BMax != 255))
-            {
-                // Unpack portal limits.
-                float s = 1.0f / 255.0f;
-                float tmin = link.Value.BMin * s;
-                float tmax = link.Value.BMax * s;
-                left = Vector3.Lerp(from.Tile.Verts[v0], from.Tile.Verts[v1], tmin);
-                right = Vector3.Lerp(from.Tile.Verts[v0], from.Tile.Verts[v1], tmax);
-            }
-
-            return Status.DT_SUCCESS;
-        }
-        /// <summary>
-        /// Returns edge mid point between two polygons.
-        /// </summary>
-        private static Status GetEdgeMidPoint(TileRef from, TileRef to, out Vector3 mid)
-        {
-            mid = new Vector3();
-
-            if (GetPortalPoints(from, to, out Vector3 left, out Vector3 right).HasFlag(Status.DT_FAILURE))
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
-            mid = (left + right) * 0.5f;
-
-            return Status.DT_SUCCESS;
-        }
-        /// <summary>
-        /// Appends vertex to a straight path
-        /// </summary>
-        private static Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
-        {
-            if (straightPath.Count > 0 && Utils.VClosest(straightPath.EndPath, pos))
-            {
-                // The vertices are equal, update flags and poly.
-                straightPath.SetFlags(straightPath.Count - 1, flags);
-                straightPath.SetRef(straightPath.Count - 1, r);
-            }
-            else
-            {
-                // Append new vertex.
-                straightPath.Append(pos, flags, r);
-
-                // If there is no space to append more vertices, return.
-                if (straightPath.Count >= maxStraightPath)
-                {
-                    return Status.DT_SUCCESS | Status.DT_BUFFER_TOO_SMALL;
-                }
-
-                // If reached end of path, return.
-                if (flags == StraightPathFlagTypes.DT_STRAIGHTPATH_END)
-                {
-                    return Status.DT_SUCCESS;
-                }
-            }
-            return Status.DT_IN_PROGRESS;
-        }
-        /// <summary>
         /// Appends intermediate portal points to a straight path.
         /// </summary>
         private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, int maxStraightPath, StraightPathOptions options, ref StraightPath straightPath)
@@ -3562,13 +3421,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Append intersection
-                if (IntersectSegSeg2D(startPos, endPos, left, right, out _, out float t))
+                if (Utils.IntersectSegments2D(startPos, endPos, left, right, out _, out float t))
                 {
-                    Vector3 pt = Vector3.Lerp(left, right, t);
+                    var pt = Vector3.Lerp(left, right, t);
 
-                    Status stat = AppendVertex(
-                        pt, 0, path[i + 1], maxStraightPath,
-                        ref straightPath);
+                    var stat = straightPath.AppendVertex(pt, 0, path[i + 1], maxStraightPath);
                     if (stat != Status.DT_IN_PROGRESS)
                     {
                         return stat;

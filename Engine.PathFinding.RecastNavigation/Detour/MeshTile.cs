@@ -86,7 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the polygon list
         /// </summary>
-        public IEnumerable<Poly> GetPolys()
+        public Poly[] GetPolys()
         {
             return Polys.Take(Header.PolyCount).ToArray();
         }
@@ -219,6 +219,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return OffMeshCons[index];
         }
 
+        /// <summary>
+        /// Allocates a link
+        /// </summary>
         public int AllocLink()
         {
             if (LinksFreeList == DT_NULL_LINK)
@@ -229,7 +232,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             LinksFreeList = Links[link].Next;
             return link;
         }
-
+        /// <summary>
+        /// Frees the specified link
+        /// </summary>
+        /// <param name="link">Link</param>
         public void FreeLink(int link)
         {
             Links[link].Next = LinksFreeList;
@@ -417,6 +423,125 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
             if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
             if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the closest point on edges
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="pos">Position</param>
+        /// <param name="onlyBoundary">Use only boundaries or not</param>
+        /// <param name="closest">Resulting closest point</param>
+        public void ClosestPointOnDetailEdges(Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
+        {
+            var pd = GetDetailMesh(poly);
+
+            float dmin = float.MaxValue;
+            float tmin = 0;
+            var pmin = Vector3.Zero;
+            var pmax = Vector3.Zero;
+
+            int ANY_BOUNDARY_EDGE =
+                ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 4);
+
+            for (int i = 0; i < pd.TriCount; i++)
+            {
+                var tris = DetailTris[pd.TriBase + i];
+
+                if (onlyBoundary && (tris.Flags & ANY_BOUNDARY_EDGE) == 0)
+                {
+                    continue;
+                }
+
+                var v = GetDetailTri(poly, pd.VertBase, tris);
+
+                for (int k = 0, j = 2; k < 3; j = k++)
+                {
+                    var edgeFlags = tris.GetDetailTriEdgeFlags(j);
+
+                    if (!edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary) &&
+                        (onlyBoundary || tris[j] < tris[k]))
+                    {
+                        // Only looking at boundary edges and this is internal, or
+                        // this is an inner edge that we will see again or have already seen.
+                        continue;
+                    }
+
+                    float d = Utils.DistancePtSegSqr2D(pos, v[j], v[k], out var t);
+                    if (d < dmin)
+                    {
+                        dmin = d;
+                        tmin = t;
+                        pmin = v[j];
+                        pmax = v[k];
+                    }
+                }
+            }
+
+            closest = Vector3.Lerp(pmin, pmax, tmin);
+        }
+        /// <summary>
+        /// Gets the polygon height
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="pos">Position</param>
+        /// <param name="height">Resulting height</param>
+        /// <returns>Returns true if the height were found</returns>
+        public bool GetPolyHeight(Poly poly, Vector3 pos, out float height)
+        {
+            height = 0;
+
+            // Off-mesh connections do not have detail polys and getting height
+            // over them does not make sense.
+            if (poly.Type == PolyTypes.OffmeshConnection)
+            {
+                return false;
+            }
+
+            var pd = GetDetailMesh(poly);
+
+            var verts = GetPolyVerts(poly);
+
+            if (!Utils.PointInPolygon2D(pos, verts.ToArray()))
+            {
+                return false;
+            }
+
+            // Find height at the location.
+            for (int j = 0; j < pd.TriCount; j++)
+            {
+                var t = DetailTris[pd.TriBase + j];
+                Vector3[] v = new Vector3[3];
+                for (int k = 0; k < 3; ++k)
+                {
+                    if (t[k] < poly.VertCount)
+                    {
+                        v[k] = Verts[poly.Verts[t[k]]];
+                    }
+                    else
+                    {
+                        v[k] = DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
+                    }
+                }
+
+                if (Utils.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
+                {
+                    height = h;
+                    return true;
+                }
+            }
+
+            // If all triangle checks failed above (can happen with degenerate triangles
+            // or larger floating point values) the point is on an edge, so just select
+            // closest. This should almost never happen so the extra iteration here is
+            // ok.
+            ClosestPointOnDetailEdges(poly, pos, false, out var closest);
+
+            height = closest.Y;
+
+            return true;
         }
 
         /// <inheritdoc/>

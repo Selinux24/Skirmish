@@ -328,6 +328,71 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
+        /// </summary>
+        /// <param name="cfg">Configuration</param>
+        /// <remarks>
+        /// There are 3 martitioning methods, each with some pros and cons:
+        /// 1) Watershed partitioning
+        ///   - the classic Recast partitioning
+        ///   - creates the nicest tessellation
+        ///   - usually slowest
+        ///   - partitions the heightfield into nice regions without holes or overlaps
+        ///   - the are some corner cases where this method creates produces holes and overlaps
+        ///      - holes may appear when a small obstacles is close to large open area (triangulation can handle this)
+        ///      - overlaps may occur if you have narrow spiral corridors (i.e stairs), this make triangulation to fail
+        ///   * generally the best choice if you precompute the navmesh, use this if you have large open areas
+        /// 2) Monotone partioning
+        ///   - fastest
+        ///   - partitions the heightfield into regions without holes and overlaps (guaranteed)
+        ///   - creates long thin polygons, which sometimes causes paths with detours
+        ///   * use this if you want fast navmesh generation
+        /// 3) Layer partitoining
+        ///   - quite fast
+        ///   - partitions the heighfield into non-overlapping regions
+        ///   - relies on the triangulation code to cope with holes (thus slower than monotone partitioning)
+        ///   - produces better triangles than monotone partitioning
+        ///   - does not have the corner cases of watershed partitioning
+        ///   - can be slow and create a bit ugly tessellation (still better than monotone)
+        ///     if you have large open areas with small obstacles (not a problem if you use tiles)
+        ///   * good choice to use for tiled navmesh with medium and small sized tiles
+        /// </remarks>
+        public void SamplePartition(Config cfg)
+        {
+            if (cfg.PartitionType == SamplePartitionTypes.Watershed)
+            {
+                // Prepare for region partitioning, by calculating distance field along the walkable surface.
+                BuildDistanceField();
+
+                // Partition the walkable surface into simple regions without holes.
+                bool built = BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
+                if (!built)
+                {
+                    throw new EngineException("buildNavigation: Could not build watershed regions.");
+                }
+            }
+            else if (cfg.PartitionType == SamplePartitionTypes.Monotone)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                // Monotone partitioning does not need distancefield.
+                bool built = BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
+                if (!built)
+                {
+                    throw new EngineException("buildNavigation: Could not build monotone regions.");
+                }
+            }
+            else if (cfg.PartitionType == SamplePartitionTypes.Layers)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                bool built = BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea);
+                if (!built)
+                {
+                    throw new EngineException("buildNavigation: Could not build layer regions.");
+                }
+            }
+        }
+
+        /// <summary>
         /// Fill in cells and spans.
         /// </summary>
         /// <param name="spans">Heightfield span list</param>

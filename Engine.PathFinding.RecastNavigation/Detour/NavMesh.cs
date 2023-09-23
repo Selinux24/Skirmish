@@ -11,24 +11,58 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class NavMesh
     {
         /// <summary>
-        /// Maximum number of layers
+        /// Navigation parameters
         /// </summary>
-        public const int MAX_LAYERS = 32;
-
         private NavMeshParams m_params;
+        /// <summary>
+        /// Origin
+        /// </summary>
         private Vector3 m_orig;
+        /// <summary>
+        /// Tile width
+        /// </summary>
         private readonly float m_tileWidth;
+        /// <summary>
+        /// Tile height
+        /// </summary>
         private readonly float m_tileHeight;
+        /// <summary>
+        /// Tile lut mask
+        /// </summary>
         private readonly int m_tileLutMask;
+        /// <summary>
+        /// Position look up list
+        /// </summary>
         private readonly MeshTile[] m_posLookup;
+        /// <summary>
+        /// Next free tile
+        /// </summary>
         private MeshTile m_nextFree = null;
+        /// <summary>
+        /// Tile bits
+        /// </summary>
         private readonly int m_tileBits;
+        /// <summary>
+        /// Poly bits
+        /// </summary>
         private readonly int m_polyBits;
+        /// <summary>
+        /// Salt bits
+        /// </summary>
         private readonly int m_saltBits;
 
+        /// <summary>
+        /// Mesh tile list
+        /// </summary>
         public MeshTile[] Tiles { get; private set; }
+        /// <summary>
+        /// Maximum tiles
+        /// </summary>
         public int MaxTiles { get; private set; }
-        public TileCache TileCache { get; internal set; }
+        /// <summary>
+        /// Tile cache
+        /// </summary>
+        public TileCache TileCache { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -128,7 +162,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(2f / passCount);
 
             // Performs the heightfield filters
-            FilterHeightfield(solid, cfg);
+            solid.FilterHeightfield(cfg);
             progressCallback?.Invoke(3f / passCount);
 
             // Compact the heightfield so that it is faster to handle from now on.
@@ -146,7 +180,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(6f / passCount);
 
             // Sample partition
-            SamplePartition(chf, cfg);
+            chf.SamplePartition(cfg);
             progressCallback?.Invoke(7f / passCount);
 
             // Create contours.
@@ -165,7 +199,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(10f / passCount);
 
             // Update poly flags from areas.
-            UpdatePolyFlags(pmesh);
+            pmesh.UpdatePolyFlags();
             progressCallback?.Invoke(11f / passCount);
 
             var param = new NavMeshCreateParams
@@ -252,13 +286,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Generation params.
                 var cfg = settings.GetTileCacheConfig(agent, bbox);
 
-                var tmproc = new TileCacheMeshProcess(geometry);
-
-                nm.TileCache = new TileCache(nm, tmproc, cfg.TileCacheParams);
+                nm.CreateTileCache(geometry, cfg.TileCacheParams);
 
                 if (settings.BuildAllTiles)
                 {
-                    BuildTileCache(nm.TileCache, geometry, cfg, (progress) =>
+                    nm.TileCache.BuildTileCache(geometry, cfg, (progress) =>
                     {
                         progressCallback?.Invoke((progress / passes) + (1f / passes));
                     });
@@ -267,8 +299,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return nm;
         }
+        /// <summary>
+        /// Builds the mesh data
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="cfg">Configuration</param>
         private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, Config cfg)
         {
+            if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
+            {
+                return null;
+            }
+
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Allocate voxel heightfield where we rasterize our input data to.
@@ -292,7 +336,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Performs the heightfield filters
-            FilterHeightfield(solid, cfg);
+            solid.FilterHeightfield(cfg);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
@@ -306,11 +350,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             chf.MarkAreas(geometry);
 
             // Sample partition
-            SamplePartition(chf, cfg);
+            chf.SamplePartition(cfg);
 
             // Create contours.
             var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
-
             if (cset.NConts == 0)
             {
                 return null;
@@ -326,13 +369,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return null;
             }
 
-            if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
-            {
-                return null;
-            }
-
             // Update poly flags from areas.
-            UpdatePolyFlags(pmesh);
+            pmesh.UpdatePolyFlags();
 
             var param = new NavMeshCreateParams
             {
@@ -365,105 +403,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return MeshData.CreateNavMeshData(param);
         }
-        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, Config cfg, Action<float> progressCallback)
-        {
-            var settings = tileCache.GetParams();
-
-            float total = settings.TileHeight * settings.TileWidth * 2;
-            int curr = 0;
-
-            for (int y = 0; y < settings.TileHeight; y++)
-            {
-                for (int x = 0; x < settings.TileWidth; x++)
-                {
-                    var tiles = RasterizeTileLayers(x, y, geometry, cfg);
-
-                    foreach (var tile in tiles)
-                    {
-                        tileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
-                    }
-
-                    progressCallback?.Invoke(++curr / total);
-                }
-            }
-
-            // Build initial meshes
-            for (int y = 0; y < settings.TileHeight; y++)
-            {
-                for (int x = 0; x < settings.TileWidth; x++)
-                {
-                    tileCache.BuildTilesAt(x, y);
-
-                    progressCallback?.Invoke(++curr / total);
-                }
-            }
-        }
-        private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
-        {
-            // Allocate voxel heightfield where we rasterize our input data to.
-            var tiles = new List<TileCacheData>();
-
-            var chunkyMesh = geometry.ChunkyMesh;
-
-            // Update tile bounds.
-            cfg.UpdateTileBounds(x, y);
-
-            // Create heightfield
-            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
-
-            var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
-
-            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
-            if (!cid.Any())
-            {
-                return tiles.ToArray(); // empty
-            }
-
-            foreach (var id in cid)
-            {
-                var tris = chunkyMesh.GetTriangles(id);
-                if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
-                {
-                    return tiles.ToArray();
-                }
-            }
-
-            // Once all geometry is rasterized, we do initial pass of filtering to
-            // remove unwanted overhangs caused by the conservative rasterization
-            // as well as filter spans where the character cannot possibly stand.
-            FilterHeightfield(solid, cfg);
-
-            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
-
-            // Erode the walkable area by agent radius.
-            chf.ErodeWalkableArea(cfg.WalkableRadius);
-
-            // Mark areas.
-            chf.MarkAreas(geometry);
-
-            var lset = HeightfieldLayerSet.Build(chf, cfg.BorderSize, cfg.WalkableHeight);
-
-            for (int i = 0; i < Math.Min(lset.NLayers, MAX_LAYERS); i++)
-            {
-                var layer = lset.Layers[i];
-
-                var data = layer.BuildTileCacheLayer();
-
-                // Store data
-                var tile = new TileCacheData
-                {
-                    // Store header
-                    Header = TileCacheLayerHeader.Create(x, y, i, layer),
-
-                    Data = data
-                };
-
-                tiles.Add(tile);
-            }
-
-            return tiles.ToArray();
-        }
+        /// <summary>
+        /// Gets the tile located at the specified position
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="geom">Input geometry</param>
+        /// <param name="settings">Build settings</param>
+        /// <param name="x">Resulting x tile coordinate</param>
+        /// <param name="y">Resulting y tile coordinate</param>
+        /// <param name="tileBounds">Tile bounds</param>
         public static void GetTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings, out int x, out int y, out BoundingBox tileBounds)
         {
             var bbox = settings.Bounds ?? geom.BoundingBox;
@@ -473,13 +421,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             tileBounds = GetTileBounds(x, y, settings.TileCellSize, bbox);
         }
+        /// <summary>
+        /// Gets the specified tile bounding box
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="geom">Input geometry</param>
+        /// <param name="settings">Build settings</param>
         public static BoundingBox GetTileBounds(int x, int y, InputGeometry geom, BuildSettings settings)
         {
-            var bbox = settings.Bounds ?? geom.BoundingBox;
-
-            return GetTileBounds(x, y, settings.TileCellSize, bbox);
+            return GetTileBounds(x, y, settings.TileCellSize, settings.Bounds ?? geom.BoundingBox);
         }
-        public static BoundingBox GetTileBounds(int x, int y, float tileSize, BoundingBox bbox)
+        /// <summary>
+        /// Gets the specified tile bounding box
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="tileSize">Tile size</param>
+        /// <param name="bbox">Bounding box</param>
+        private static BoundingBox GetTileBounds(int x, int y, float tileSize, BoundingBox bbox)
         {
             var tbbox = new BoundingBox();
 
@@ -493,102 +453,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return tbbox;
         }
-        private static void FilterHeightfield(Heightfield solid, Config cfg)
-        {
-            // Once all geometry is rasterized, we do initial pass of filtering to
-            // remove unwanted overhangs caused by the conservative rasterization
-            // as well as filter spans where the character cannot possibly stand.
-            if (cfg.FilterLowHangingObstacles)
-            {
-                solid.FilterLowHangingWalkableObstacles(cfg.WalkableClimb);
-            }
-            if (cfg.FilterLedgeSpans)
-            {
-                solid.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb);
-            }
-            if (cfg.FilterWalkableLowHeightSpans)
-            {
-                solid.FilterWalkableLowHeightSpans(cfg.WalkableHeight);
-            }
-        }
         /// <summary>
-        /// Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
+        /// Check for horizontal overlap.
         /// </summary>
-        /// <param name="chf"></param>
-        /// <param name="cfg"></param>
-        /// <remarks>
-        /// There are 3 martitioning methods, each with some pros and cons:
-        /// 1) Watershed partitioning
-        ///   - the classic Recast partitioning
-        ///   - creates the nicest tessellation
-        ///   - usually slowest
-        ///   - partitions the heightfield into nice regions without holes or overlaps
-        ///   - the are some corner cases where this method creates produces holes and overlaps
-        ///      - holes may appear when a small obstacles is close to large open area (triangulation can handle this)
-        ///      - overlaps may occur if you have narrow spiral corridors (i.e stairs), this make triangulation to fail
-        ///   * generally the best choice if you precompute the navmesh, use this if you have large open areas
-        /// 2) Monotone partioning
-        ///   - fastest
-        ///   - partitions the heightfield into regions without holes and overlaps (guaranteed)
-        ///   - creates long thin polygons, which sometimes causes paths with detours
-        ///   * use this if you want fast navmesh generation
-        /// 3) Layer partitoining
-        ///   - quite fast
-        ///   - partitions the heighfield into non-overlapping regions
-        ///   - relies on the triangulation code to cope with holes (thus slower than monotone partitioning)
-        ///   - produces better triangles than monotone partitioning
-        ///   - does not have the corner cases of watershed partitioning
-        ///   - can be slow and create a bit ugly tessellation (still better than monotone)
-        ///     if you have large open areas with small obstacles (not a problem if you use tiles)
-        ///   * good choice to use for tiled navmesh with medium and small sized tiles
-        /// </remarks>
-        private static void SamplePartition(CompactHeightfield chf, Config cfg)
-        {
-            if (cfg.PartitionType == SamplePartitionTypes.Watershed)
-            {
-                // Prepare for region partitioning, by calculating distance field along the walkable surface.
-                chf.BuildDistanceField();
-
-                // Partition the walkable surface into simple regions without holes.
-                bool built = chf.BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
-                if (!built)
-                {
-                    throw new EngineException("buildNavigation: Could not build watershed regions.");
-                }
-            }
-            else if (cfg.PartitionType == SamplePartitionTypes.Monotone)
-            {
-                // Partition the walkable surface into simple regions without holes.
-                // Monotone partitioning does not need distancefield.
-                bool built = chf.BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
-                if (!built)
-                {
-                    throw new EngineException("buildNavigation: Could not build monotone regions.");
-                }
-            }
-            else if (cfg.PartitionType == SamplePartitionTypes.Layers)
-            {
-                // Partition the walkable surface into simple regions without holes.
-                bool built = chf.BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea);
-                if (!built)
-                {
-                    throw new EngineException("buildNavigation: Could not build layer regions.");
-                }
-            }
-        }
-        private static void UpdatePolyFlags(PolyMesh pmesh)
-        {
-            for (int i = 0; i < pmesh.NPolys; ++i)
-            {
-                if ((int)pmesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
-                {
-                    pmesh.Areas[i] = SamplePolyAreas.Ground;
-                }
-
-                pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
-            }
-        }
-        public static bool OverlapSlabs(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax, float px, float py)
+        private static bool OverlapSlabs(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax, float px, float py)
         {
             // Check for horizontal overlap.
             // The segment is shrunken a little so that slabs which touch
@@ -627,7 +495,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return false;
         }
-        public static float GetSlabCoord(Vector3 va, int side)
+        /// <summary>
+        /// Gets the slab coordinate
+        /// </summary>
+        private static float GetSlabCoord(Vector3 va, int side)
         {
             if (side == 0 || side == 4)
             {
@@ -639,7 +510,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             return 0;
         }
-        public static void CalcSlabEndPoints(Vector3 va, Vector3 vb, out Vector2 bmin, out Vector2 bmax, int side)
+        /// <summary>
+        /// Calculate slabs end points
+        /// </summary>
+        private static void CalcSlabEndPoints(Vector3 va, Vector3 vb, out Vector2 bmin, out Vector2 bmax, int side)
         {
             bmin = new Vector2();
             bmax = new Vector2();
@@ -679,7 +553,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
         }
-        public static int OppositeTile(int side)
+        /// <summary>
+        /// Gets the opposite tile of the specified side
+        /// </summary>
+        /// <param name="side">Side index</param>
+        private static int OppositeTile(int side)
         {
             return (side + 4) & 0x7;
         }
@@ -731,19 +609,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             return m_params;
         }
-        /// <summary>
-        /// Gets the maximum number of tiles in the navigation mesh
-        /// </summary>
-        public int GetMaxTiles()
-        {
-            return MaxTiles;
-        }
 
         /// <summary>
         /// Builds all tiles at specified tile coordinates
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Tiled generation config</param>
         /// <param name="tileCacheCfg">Tile cache generation config</param>
@@ -761,7 +632,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             if (TileCache != null)
             {
-                var tiles = RasterizeTileLayers(x, y, geometry, tileCacheCfg);
+                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
 
                 foreach (var tile in tiles)
                 {
@@ -774,8 +645,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Removes all tiles at specified tile coordinates
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
         public void RemoveTilesAtPosition(int x, int y)
         {
             RemoveTiles(x, y);
@@ -1101,7 +972,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="y">Y coordinate</param>
         /// <param name="maxTiles">Maximum number of resulting tiles</param>
         /// <returns>Returns a tile collection</returns>
-        public IEnumerable<MeshTile> GetTilesAt(int x, int y, int maxTiles)
+        public MeshTile[] GetTilesAt(int x, int y, int maxTiles)
         {
             var tiles = new List<MeshTile>();
 
@@ -1434,7 +1305,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="side">Side number</param>
         /// <param name="maxTiles">Maximum resulting tiles</param>
         /// <returns>Returns a tile collection</returns>
-        private IEnumerable<MeshTile> GetNeighbourTilesAt(int x, int y, int side, int maxTiles)
+        private MeshTile[] GetNeighbourTilesAt(int x, int y, int side, int maxTiles)
         {
             int nx = x;
             int ny = y;
@@ -1463,7 +1334,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxcon">Maximum resulting connections</param>
         /// <param name="con">Resulting connections</param>
         /// <param name="conarea">Resulting connection areas</param>
-        private void FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out IEnumerable<int> con, out IEnumerable<Vector2> conarea)
+        private void FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out int[] con, out Vector2[] conarea)
         {
             var conList = new List<int>();
             var conareaList = new List<Vector2>();
@@ -1474,11 +1345,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Remove links pointing to 'side' and compact the links array. 
             int m = Poly.DT_EXT_LINK | side;
             int bse = GetTileRef(tile);
-
             var polys = tile.GetPolys();
-            for (int i = 0; i < polys.Count(); ++i)
+
+            for (int i = 0; i < polys.Length; ++i)
             {
-                var poly = tile.Polys[i];
+                var poly = polys[i];
                 int nv = poly.VertCount;
 
                 for (int j = 0; j < nv; ++j)
@@ -1528,30 +1399,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private void ConnectIntLinks(MeshTile tile)
         {
             int bse = GetTileRef(tile);
+            var polys = tile
+                .GetPolys()
+                .Where(p => p.Type != PolyTypes.OffmeshConnection)
+                .ToArray();
 
-            var polys = tile.GetPolys();
-            foreach (var poly in polys)
+            for (int i = 0; i < polys.Length; ++i)
             {
+                var poly = polys[i];
                 poly.FirstLink = MeshTile.DT_NULL_LINK;
-
-                if (poly.Type == PolyTypes.OffmeshConnection)
-                {
-                    continue;
-                }
 
                 // Build edge links backwards so that the links will be
                 // in the linked list from lowest index to highest.
                 for (int j = poly.VertCount - 1; j >= 0; --j)
                 {
                     // Skip hard and non-internal edges.
-                    if (poly.Neis[j] == 0 || (poly.Neis[j] & Poly.DT_EXT_LINK) != 0) continue;
+                    if (poly.Neis[j] == 0 || (poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
+                    {
+                        continue;
+                    }
 
                     int idx = tile.AllocLink();
                     if (idx != MeshTile.DT_NULL_LINK)
                     {
                         var link = new Link
                         {
-                            NRef = (bse | (poly.Neis[j] - 1)),
+                            NRef = bse | (poly.Neis[j] - 1),
                             Edge = j,
                             Side = 0xff,
                             BMin = 0,
@@ -1645,10 +1518,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             // Connect border links.
             var polys = tile.GetPolys();
-            foreach (var poly in polys)
+
+            for (int i = 0; i < polys.Length; ++i)
             {
                 // Create new links.
-                CreatePolygonLinks(poly, tile, target, side);
+                CreatePolygonLinks(polys[i], tile, target, side);
             }
         }
         /// <summary>
@@ -1680,31 +1554,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var vb = tile.GetPolyVertex(poly, (j + 1) % nv);
                 FindConnectingPolys(va, vb, target, OppositeTile(dir), 4, out var neis, out var neiareas);
 
-                for (int k = 0; k < neis.Count(); k++)
+                for (int k = 0; k < neis.Length; k++)
                 {
-                    var nei = neis.ElementAt(k);
+                    var nei = neis[k];
                     int idx = tile.AllocLink();
-                    if (idx != MeshTile.DT_NULL_LINK)
+                    if (idx == MeshTile.DT_NULL_LINK)
                     {
-                        var link = new Link
-                        {
-                            NRef = nei,
-                            Edge = j,
-                            Side = dir,
-                            Next = poly.FirstLink
-                        };
-                        poly.FirstLink = idx;
-
-                        // Compress portal limits to an integer value.
-                        Vector2Int? bounds = CompressPortalLimits(va, vb, dir, neiareas.ElementAt(k));
-                        if (bounds.HasValue)
-                        {
-                            link.BMin = bounds.Value.X;
-                            link.BMax = bounds.Value.Y;
-                        }
-
-                        tile.Links[idx] = link;
+                        continue;
                     }
+
+                    var link = new Link
+                    {
+                        NRef = nei,
+                        Edge = j,
+                        Side = dir,
+                        Next = poly.FirstLink
+                    };
+                    poly.FirstLink = idx;
+
+                    // Compress portal limits to an integer value.
+                    var bounds = CompressPortalLimits(va, vb, dir, neiareas[k]);
+                    if (bounds.HasValue)
+                    {
+                        link.BMin = bounds.Value.X;
+                        link.BMax = bounds.Value.Y;
+                    }
+
+                    tile.Links[idx] = link;
                 }
             }
         }
@@ -1863,10 +1739,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private void UnconnectLinks(MeshTile tile, MeshTile target)
         {
             int targetNum = DecodePolyIdTile(GetTileRef(target));
-
             var polys = tile.GetPolys();
-            foreach (var poly in polys)
+
+            for (int i = 0; i < polys.Length; ++i)
             {
+                var poly = polys[i];
                 int j = poly.FirstLink;
                 int pj = MeshTile.DT_NULL_LINK;
                 while (j != MeshTile.DT_NULL_LINK)
@@ -1903,7 +1780,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="bounds">Bounds</param>
         /// <param name="maxPolys">Maximum resulting polygons</param>
         /// <returns>Returns a collection of polygon references</returns>
-        private IEnumerable<int> QueryPolygonsInTile(MeshTile tile, BoundingBox bounds, int maxPolys)
+        private int[] QueryPolygonsInTile(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
             if (tile.BvTree?.Length > 0)
             {
@@ -1921,7 +1798,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="bounds">Bounds</param>
         /// <param name="maxPolys">Maximum resulting polygons</param>
         /// <returns>Returns a collection of polygon references</returns>
-        private IEnumerable<int> QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, int maxPolys)
+        private int[] QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
             var polys = new List<int>(maxPolys);
 
@@ -1976,7 +1853,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return polys;
+            return polys.ToArray();
         }
         /// <summary>
         /// Performs a query in the polygons of the specified tile
@@ -1985,7 +1862,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="bounds">Bounds</param>
         /// <param name="maxPolys">Maximum resulting polygons</param>
         /// <returns>Returns a collection of polygon references</returns>
-        private IEnumerable<int> QueryPolygonsInTileByRefs(MeshTile tile, BoundingBox bounds, int maxPolys)
+        private int[] QueryPolygonsInTileByRefs(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
             var polys = new List<int>(maxPolys);
 
@@ -2010,7 +1887,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return polys;
+            return polys.ToArray();
         }
         /// <summary>
         /// Finds the nearest polygon in a tile, from the specified position
@@ -2063,127 +1940,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return nearest;
         }
-        /// <summary>
-        /// Gets the closest point on edges
-        /// </summary>
-        /// <param name="tile">Mest tile</param>
-        /// <param name="poly">Polygon</param>
-        /// <param name="pos">Position</param>
-        /// <param name="onlyBoundary">Use only boundaries or not</param>
-        /// <param name="closest">Resulting closest point</param>
-        private static void ClosestPointOnDetailEdges(MeshTile tile, Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
-        {
-            var pd = tile.GetDetailMesh(poly);
-
-            float dmin = float.MaxValue;
-            float tmin = 0;
-            var pmin = Vector3.Zero;
-            var pmax = Vector3.Zero;
-
-            int ANY_BOUNDARY_EDGE =
-                ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
-                ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
-                ((int)DetailTriEdgeFlagTypes.Boundary << 4);
-
-            for (int i = 0; i < pd.TriCount; i++)
-            {
-                var tris = tile.DetailTris[pd.TriBase + i];
-
-                if (onlyBoundary && (tris.Flags & ANY_BOUNDARY_EDGE) == 0)
-                {
-                    continue;
-                }
-
-                var v = tile.GetDetailTri(poly, pd.VertBase, tris);
-
-                for (int k = 0, j = 2; k < 3; j = k++)
-                {
-                    var edgeFlags = tris.GetDetailTriEdgeFlags(j);
-
-                    if (!edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary) &&
-                        (onlyBoundary || tris[j] < tris[k]))
-                    {
-                        // Only looking at boundary edges and this is internal, or
-                        // this is an inner edge that we will see again or have already seen.
-                        continue;
-                    }
-
-                    float d = Utils.DistancePtSegSqr2D(pos, v[j], v[k], out var t);
-                    if (d < dmin)
-                    {
-                        dmin = d;
-                        tmin = t;
-                        pmin = v[j];
-                        pmax = v[k];
-                    }
-                }
-            }
-
-            closest = Vector3.Lerp(pmin, pmax, tmin);
-        }
-
-        /// <summary>
-        /// Gets the polygon height
-        /// </summary>
-        /// <param name="tile">Mesh tile</param>
-        /// <param name="poly">Polygon</param>
-        /// <param name="pos">Position</param>
-        /// <param name="height">Resulting height</param>
-        /// <returns>Returns true if the height were found</returns>
-        public static bool GetPolyHeight(MeshTile tile, Poly poly, Vector3 pos, out float height)
-        {
-            height = 0;
-
-            // Off-mesh connections do not have detail polys and getting height
-            // over them does not make sense.
-            if (poly.Type == PolyTypes.OffmeshConnection)
-            {
-                return false;
-            }
-
-            var pd = tile.GetDetailMesh(poly);
-
-            var verts = tile.GetPolyVerts(poly);
-
-            if (!Utils.PointInPolygon2D(pos, verts.ToArray()))
-            {
-                return false;
-            }
-
-            // Find height at the location.
-            for (int j = 0; j < pd.TriCount; j++)
-            {
-                var t = tile.DetailTris[pd.TriBase + j];
-                Vector3[] v = new Vector3[3];
-                for (int k = 0; k < 3; ++k)
-                {
-                    if (t[k] < poly.VertCount)
-                    {
-                        v[k] = tile.Verts[poly.Verts[t[k]]];
-                    }
-                    else
-                    {
-                        v[k] = tile.DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
-                    }
-                }
-
-                if (Utils.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
-                {
-                    height = h;
-                    return true;
-                }
-            }
-
-            // If all triangle checks failed above (can happen with degenerate triangles
-            // or larger floating point values) the point is on an edge, so just select
-            // closest. This should almost never happen so the extra iteration here is
-            // ok.
-            ClosestPointOnDetailEdges(tile, poly, pos, false, out var closest);
-
-            height = closest.Y;
-
-            return true;
-        }
 
         /// <summary>
         /// Gets the closest point in a polygon, from the specified position
@@ -2199,7 +1955,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var tileRef = GetTileAndPolyByRefUnsafe(r);
 
-            if (GetPolyHeight(tileRef.Tile, tileRef.Poly, pos, out float h))
+            if (tileRef.Tile.GetPolyHeight(tileRef.Poly, pos, out float h))
             {
                 closest.Y = h;
                 posOverPoly = true;
@@ -2217,7 +1973,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Outside poly that is not an offmesh connection.
-            ClosestPointOnDetailEdges(tileRef.Tile, tileRef.Poly, pos, true, out closest);
+            tileRef.Tile.ClosestPointOnDetailEdges(tileRef.Poly, pos, true, out closest);
+        }
+        /// <summary>
+        /// Creates the tile caché
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="cacheParams">Parameters</param>
+        public void CreateTileCache(InputGeometry geometry, TileCacheParams cacheParams)
+        {
+            TileCache = new TileCache(this, new TileCacheMeshProcess(geometry), cacheParams);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,7 +101,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 CH = cset.CellHeight,
                 BorderSize = cset.BorderSize,
                 MaxEdgeError = cset.MaxError,
-                
+
                 Verts = new Int3[maxVertices],
                 Polys = new IndexedPolygon[maxTris],
                 Regs = new int[maxTris],
@@ -1061,6 +1062,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     vflags[j] = vflags[j + 1];
                 }
                 --i;
+            }
+        }
+        /// <summary>
+        /// Updates the polygon flags
+        /// </summary>
+        public void UpdatePolyFlags()
+        {
+            for (int i = 0; i < NPolys; ++i)
+            {
+                if ((int)Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                {
+                    Areas[i] = SamplePolyAreas.Ground;
+                }
+
+                Flags[i] = QueryFilter.EvaluateArea(Areas[i]);
             }
         }
     }

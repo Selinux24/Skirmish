@@ -337,7 +337,7 @@ namespace Engine.PathFinding.RecastNavigation
             float v2 = p3.Z - p1.Z;
             return u1 * v2 - v1 * u2;
         }
-        private static float VPerp2D(Vector3 u, Vector3 v)
+        public static float VPerp2D(Vector3 u, Vector3 v)
         {
             return u.Z * v.X - u.X * v.Z;
         }
@@ -523,7 +523,87 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
+        public static bool IntersectSegments2D(Vector3 ap, Vector3 aq, Vector3 bp, Vector3 bq, out float s, out float t)
+        {
+            s = 0;
+            t = 0;
 
+            Vector3 u = Vector3.Subtract(aq, ap);
+            Vector3 v = Vector3.Subtract(bq, bp);
+            Vector3 w = Vector3.Subtract(ap, bp);
+            float d = VPerp2D(u, v);
+            if (Math.Abs(d) < 1e-6f) return false;
+            s = VPerp2D(v, w) / d;
+            t = VPerp2D(u, w) / d;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the closest point on the closest edge
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="edged">Distance to edges array</param>
+        /// <param name="edget">Distance from first edge point to closest point list</param>
+        /// <returns>Returns the closest position</returns>
+        public static Vector3 GetClosestPointOutsidePoly(Vector3[] verts, float[] edged, float[] edget)
+        {
+            float dmin = edged[0];
+            int imin = 0;
+            for (int i = 1; i < verts.Length; i++)
+            {
+                if (edged[i] < dmin)
+                {
+                    dmin = edged[i];
+                    imin = i;
+                }
+            }
+            var va = verts[imin];
+            var vb = verts[(imin + 1) % verts.Length];
+            return Vector3.Lerp(va, vb, edget[imin]);
+        }
+        /// <summary>
+        /// Returns a random point in a convex polygon.
+        /// Adapted from Graphics Gems article.
+        /// </summary>
+        public static void RandomPointInConvexPoly(Vector3[] pts, out float[] areas, float s, float t, out Vector3 outPoint)
+        {
+            areas = new float[IndexedPolygon.DT_VERTS_PER_POLYGON];
+
+            // Calc triangle areas
+            float areasum = 0.0f;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                areas[i] = TriArea2D(pts[0], pts[i - 1], pts[i]);
+                areasum += Math.Max(0.001f, areas[i]);
+            }
+            // Find sub triangle weighted by area.
+            float thr = s * areasum;
+            float acc = 0.0f;
+            float u = 1.0f;
+            int tri = pts.Length - 1;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                float dacc = areas[i];
+                if (thr >= acc && thr < (acc + dacc))
+                {
+                    u = (thr - acc) / dacc;
+                    tri = i;
+                    break;
+                }
+                acc += dacc;
+            }
+
+            float v = (float)Math.Sqrt(t);
+
+            float a = 1 - v;
+            float b = (1 - u) * v;
+            float c = u * v;
+            Vector3 pa = pts[0];
+            Vector3 pb = pts[tri - 1];
+            Vector3 pc = pts[tri];
+
+            outPoint = a * pa + b * pb + c * pc;
+        }
         /// <summary>
         /// Gets whether the specified points are closest enough to be nearest equal
         /// </summary>

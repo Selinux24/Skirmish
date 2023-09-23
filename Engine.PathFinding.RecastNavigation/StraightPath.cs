@@ -219,6 +219,37 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Appends vertex to a straight path
+        /// </summary>
+        public Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath)
+        {
+            if (Count > 0 && Utils.VClosest(EndPath, pos))
+            {
+                // The vertices are equal, update flags and poly.
+                SetFlags(Count - 1, flags);
+                SetRef(Count - 1, r);
+            }
+            else
+            {
+                // Append new vertex.
+                Append(pos, flags, r);
+
+                // If there is no space to append more vertices, return.
+                if (Count >= maxStraightPath)
+                {
+                    return Status.DT_SUCCESS | Status.DT_BUFFER_TOO_SMALL;
+                }
+
+                // If reached end of path, return.
+                if (flags == StraightPathFlagTypes.DT_STRAIGHTPATH_END)
+                {
+                    return Status.DT_SUCCESS;
+                }
+            }
+            return Status.DT_IN_PROGRESS;
+        }
+
+        /// <summary>
         /// Copies the instance
         /// </summary>
         /// <returns>Returns a new instance</returns>

@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
         public TileCacheMeshProcess(InputGeometry geometry)
         {
-            this.m_geom = geometry;
+            m_geom = geometry;
         }
 
         public void Process(ref NavMeshCreateParams param, NavMeshTileBuildContext bc)
