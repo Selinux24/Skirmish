@@ -2674,8 +2674,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int MAX_INTERVAL = 16;
             var ints = new List<SegInterval>();
 
-            bool storePortals = false;
-
             Status status = Status.DT_SUCCESS;
 
             for (int i = 0, j = cur.Poly.VertCount - 1; i < cur.Poly.VertCount; j = i++)
@@ -2716,7 +2714,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the edge leads to another polygon and portals are not stored, skip.
-                    if (neiRef != 0 && !storePortals)
+                    if (neiRef != 0)
                     {
                         continue;
                     }
@@ -2746,7 +2744,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int k = 1; k < ints.Count; ++k)
                 {
                     // Portal segment.
-                    if (storePortals && ints[k].R != 0)
+                    if (ints[k].R != 0)
                     {
                         float tmin = ints[k].TMin / 255.0f;
                         float tmax = ints[k].TMax / 255.0f;
@@ -3816,7 +3814,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
                 if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
-                    !Utils.InRange(steerPath.GetPath(ns), startPos, minTargetDist, 1000.0f))
+                    !Utils.InRange(steerPath.GetPathPosition(ns), startPos, minTargetDist, 1000.0f))
                 {
                     break;
                 }
@@ -3828,7 +3826,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return false;
             }
 
-            var pos = steerPath.GetPath(ns);
+            var pos = steerPath.GetPathPosition(ns);
             pos.Y = startPos.Y;
 
             target.Position = pos;

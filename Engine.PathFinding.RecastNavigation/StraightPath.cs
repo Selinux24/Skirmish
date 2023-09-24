@@ -127,6 +127,15 @@ namespace Engine.PathFinding.RecastNavigation
             return pathPositions.Take(Count).ToArray();
         }
         /// <summary>
+        /// Gets the path position at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the position at index</returns>
+        public Vector3 GetPathPosition(int index)
+        {
+            return pathPositions[index];
+        }
+        /// <summary>
         /// Gets the current flags
         /// </summary>
         /// <returns>Returns the reference list array</returns>
@@ -135,12 +144,30 @@ namespace Engine.PathFinding.RecastNavigation
             return pathFlags.Take(Count).ToArray();
         }
         /// <summary>
+        /// Gets the path flags at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the flags at index</returns>
+        public StraightPathFlagTypes GetFlag(int index)
+        {
+            return pathFlags[index];
+        }
+        /// <summary>
         /// Gets the current reference list
         /// </summary>
         /// <returns>Returns the reference list array</returns>
         public int[] GetRefs()
         {
             return pathRefs.Take(Count).ToArray();
+        }
+        /// <summary>
+        /// Gets the path polygon reference at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the polygon reference at index</returns>
+        public int GetRef(int index)
+        {
+            return pathRefs[index];
         }
 
         /// <summary>
@@ -169,35 +196,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-
-        /// <summary>
-        /// Gets the path position at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the position at index</returns>
-        public Vector3 GetPath(int index)
-        {
-            return pathPositions[index];
-        }
-        /// <summary>
-        /// Gets the path flags at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the flags at index</returns>
-        public StraightPathFlagTypes GetFlag(int index)
-        {
-            return pathFlags[index];
-        }
-        /// <summary>
-        /// Gets the path polygon reference at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the polygon reference at index</returns>
-        public int GetRef(int index)
-        {
-            return pathRefs[index];
-        }
-
         /// <summary>
         /// Sets the flags value at index
         /// </summary>

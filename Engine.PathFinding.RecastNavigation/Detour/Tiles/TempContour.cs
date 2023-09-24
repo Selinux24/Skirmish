@@ -54,20 +54,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public bool AppendVertex(int x, int y, int z, int r)
         {
             // Try to merge with existing segments.
-            if (nverts > 1)
+            if (nverts > 1 && MergeVertex(x, y, z, r))
             {
-                if (MergeVertex(x, y, z, r))
-                {
-                    return true;
-                }
+                return true;
             }
 
-            // Add new point.
             if (nverts + 1 > cverts)
             {
+                // Limit reached
                 return false;
             }
 
+            // Add new point.
             verts[nverts++] = new(x, y, z, r);
 
             return true;
