@@ -11,22 +11,6 @@ namespace Engine.PathFinding.RecastNavigation
     public class ChunkyTriMesh
     {
         /// <summary>
-        /// Checks wether the extents overlaps
-        /// </summary>
-        /// <param name="amin">A minimum rectangle point</param>
-        /// <param name="amax">A maximum rectangle point</param>
-        /// <param name="bounds">Bounds</param>
-        /// <returns>Returns true if rectangles overlap</returns>
-        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
-        {
-            bool overlap =
-                !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
-                !(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
-
-            return overlap;
-        }
-
-        /// <summary>
         /// X comparer
         /// </summary>
         private static readonly BoundsItemComparerX xComparer = new();
@@ -236,7 +220,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets all the triangles in the mesh
         /// </summary>
         /// <returns>Returns the triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles()
+        public Triangle[] GetTriangles()
         {
             return triangles?.ToArray() ?? Array.Empty<Triangle>();
         }
@@ -245,7 +229,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="index">Node index</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public IEnumerable<Triangle> GetTriangles(int index)
+        public Triangle[] GetTriangles(int index)
         {
             return GetTriangles(nodes[index]);
         }
@@ -254,21 +238,29 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public IEnumerable<Triangle> GetTriangles(ChunkyTriMeshNode node)
+        public Triangle[] GetTriangles(ChunkyTriMeshNode node)
         {
-            var res = new List<Triangle>();
-
-            if (node.Index >= 0)
+            if (node.Index < 0)
             {
-                var indices = triangleIndices.Skip(node.Index).Take(node.Count);
-
-                foreach (var index in indices)
-                {
-                    res.Add(triangles.ElementAt(index));
-                }
+                return Array.Empty<Triangle>();
             }
 
-            return res;
+            var tris = GetTriangles();
+            if (!tris.Any())
+            {
+                return Array.Empty<Triangle>();
+            }
+
+            var indices = triangleIndices.Skip(node.Index).Take(node.Count);
+
+            var res = new List<Triangle>();
+
+            foreach (var index in indices)
+            {
+                res.Add(tris[index]);
+            }
+
+            return res.ToArray();
         }
 
         /// <summary>
@@ -277,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="bmin">Bounding box minimum</param>
         /// <param name="bmax">Bounding box maximum</param>
         /// <returns>Returns a list of indices</returns>
-        public IEnumerable<int> GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
+        public int[] GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
         {
             var ids = new List<int>();
 
@@ -286,7 +278,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (i < nodes.Length)
             {
                 var node = nodes[i];
-                bool overlap = CheckOverlapRect(bmin, bmax, node.Bounds);
+                bool overlap = Utils.OverlapRect(bmin, bmax, node.Bounds);
                 bool isLeafNode = node.Index >= 0;
 
                 if (isLeafNode && overlap)
@@ -305,7 +297,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return ids;
+            return ids.ToArray();
         }
     }
 }

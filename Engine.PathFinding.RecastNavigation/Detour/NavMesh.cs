@@ -8,6 +8,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
     using Engine.PathFinding.RecastNavigation.Recast;
 
+    /// <summary>
+    /// Navigation mesh
+    /// </summary>
     public class NavMesh
     {
         /// <summary>
@@ -155,7 +158,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(1f / passCount);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
-            if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
+            if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
             {
                 return null;
             }
@@ -168,7 +171,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
             progressCallback?.Invoke(4f / passCount);
 
             // Erode the walkable area by agent radius.
@@ -329,7 +332,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
+                if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
                 {
                     return null;
                 }
@@ -341,7 +344,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
             chf.ErodeWalkableArea(cfg.WalkableRadius);
@@ -1343,7 +1346,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float apos = GetSlabCoord(va, side);
 
             // Remove links pointing to 'side' and compact the links array. 
-            int m = Poly.DT_EXT_LINK | side;
+            int m = Poly.PointToSide(side);
             int bse = GetTileRef(tile);
             var polys = tile.GetPolys();
 
@@ -1414,7 +1417,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int j = poly.VertCount - 1; j >= 0; --j)
                 {
                     // Skip hard and non-internal edges.
-                    if (poly.Neis[j] == 0 || (poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
+                    if (poly.Neis[j] == 0 || poly.NeighbourIsExternalLink(j))
                     {
                         continue;
                     }
@@ -1538,7 +1541,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int j = 0; j < nv; ++j)
             {
                 // Skip non-portal edges.
-                if ((poly.Neis[j] & Poly.DT_EXT_LINK) == 0)
+                if (poly.NeighbourIsExternalLink(j))
                 {
                     continue;
                 }
@@ -1694,41 +1697,39 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int idx = target.AllocLink();
             if (idx != MeshTile.DT_NULL_LINK)
             {
-                var link = new Link
+                target.Links[idx] = new Link
                 {
                     NRef = r,
                     Edge = 1,
                     Side = oppositeSide,
                     BMin = 0,
                     BMax = 0,
-                    // Add to linked list.
-                    Next = targetPoly.FirstLink
+                    Next = targetPoly.FirstLink, // Add to linked list.
                 };
-                target.Links[idx] = link;
                 targetPoly.FirstLink = idx;
             }
 
             // Link target poly to off-mesh connection.
-            if ((targetCon.Flags & OffMeshConnection.DT_OFFMESH_CON_BIDIR) != 0)
+            if (!targetCon.IsBidirectional())
             {
-                int tidx = tile.AllocLink();
-                if (tidx != MeshTile.DT_NULL_LINK)
+                return;
+            }
+
+            int tidx = tile.AllocLink();
+            if (tidx != MeshTile.DT_NULL_LINK)
+            {
+                var landPolyIdx = DecodePolyIdPoly(r);
+                var landPoly = tile.Polys[landPolyIdx];
+                tile.Links[tidx] = new Link
                 {
-                    var landPolyIdx = DecodePolyIdPoly(r);
-                    var landPoly = tile.Polys[landPolyIdx];
-                    var link = new Link
-                    {
-                        NRef = (GetTileRef(target) | (targetCon.Poly)),
-                        Edge = 0xff,
-                        Side = (side == -1 ? 0xff : side),
-                        BMin = 0,
-                        BMax = 0,
-                        // Add to linked list.
-                        Next = landPoly.FirstLink
-                    };
-                    tile.Links[tidx] = link;
-                    landPoly.FirstLink = tidx;
-                }
+                    NRef = GetTileRef(target) | (targetCon.Poly),
+                    Edge = 0xff,
+                    Side = side == -1 ? 0xff : side,
+                    BMin = 0,
+                    BMax = 0,
+                    Next = landPoly.FirstLink, // Add to linked list.
+                };
+                landPoly.FirstLink = tidx;
             }
         }
         /// <summary>
@@ -1834,7 +1835,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     tile.BvTree[nodeIndex] :
                     new BVNode();
 
-                bool overlap = Utils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
+                bool overlap = Utils.OverlapBounds(bmin, bmax, node.BMin, node.BMax);
                 bool isLeafNode = node.I >= 0;
 
                 if (isLeafNode && overlap && polys.Count < maxPolys)

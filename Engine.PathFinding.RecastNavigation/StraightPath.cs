@@ -1,11 +1,10 @@
 ﻿using SharpDX;
+using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
-    using System;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Straight path
@@ -15,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Maximum nodes
         /// </summary>
-        public const int MaxStraightPath = 256;
+        const int MaxStraightPath = 256;
 
         /// <summary>
         /// Maximum path elements
@@ -123,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the current path
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<Vector3> GetPaths()
+        public Vector3[] GetPath()
         {
             return pathPositions.Take(Count).ToArray();
         }
@@ -131,7 +130,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the current flags
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<StraightPathFlagTypes> GetFlags()
+        public StraightPathFlagTypes[] GetFlags()
         {
             return pathFlags.Take(Count).ToArray();
         }
@@ -139,7 +138,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the current reference list
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<int> GetRefs()
+        public int[] GetRefs()
         {
             return pathRefs.Take(Count).ToArray();
         }

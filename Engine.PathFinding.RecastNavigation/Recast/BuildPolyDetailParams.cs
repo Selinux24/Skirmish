@@ -1,13 +1,22 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Build poligon detail parameters
+    /// </summary>
     struct BuildPolyDetailParams
     {
-        public const int MAX_VERTS = 127;
-        public const int MAX_VERTS_PER_EDGE = 32;
-
+        /// <summary>
+        /// Sample distance
+        /// </summary>
         public float SampleDist { get; set; }
+        /// <summary>
+        /// Sample maximum error
+        /// </summary>
         public float SampleMaxError { get; set; }
+        /// <summary>
+        /// Height search radius
+        /// </summary>
         public int HeightSearchRadius { get; set; }
     }
 }

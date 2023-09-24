@@ -21,12 +21,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             this.vertices = vertices;
         }
 
-        /// <summary>
-        /// Performs the query against a segment
-        /// </summary>
-        /// <param name="va">Segment point A</param>
-        /// <param name="vb">Segment point B</param>
-        /// <returns>Returns true if the query passes</returns>
+        /// <inheritdoc/>
         public bool Contains(Vector3 va, Vector3 vb)
         {
             // If the poly is not touching the edge to the next polygon, skip the connection it.

@@ -58,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
+                if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
                 {
                     return tiles.ToArray();
                 }
@@ -69,7 +69,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // as well as filter spans where the character cannot possibly stand.
             solid.FilterHeightfield(cfg);
 
-            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            // Compact the heightfield so that it is faster to handle from now on.
+            // This will result more cache coherent data as well as the neighbours
+            // between walkable cells will be calculated.
+            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
             chf.ErodeWalkableArea(cfg.WalkableRadius);

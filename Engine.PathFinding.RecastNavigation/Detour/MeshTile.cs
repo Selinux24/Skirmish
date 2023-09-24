@@ -543,6 +543,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
+        /// <summary>
+        /// Calculate quantized box
+        /// </summary>
+        public void CalculateQuantizedBox(BoundingBox bounds, out Int3 bmin, out Int3 bmax)
+        {
+            var tb = Header.Bounds;
+            float qfac = Header.BvQuantFactor;
+
+            // Clamp query box to world box.
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+
+            // Quantize
+            bmin = new Int3();
+            bmax = new Int3();
+            bmin.X = (int)(qfac * minx) & 0xfffe;
+            bmin.Y = (int)(qfac * miny) & 0xfffe;
+            bmin.Z = (int)(qfac * minz) & 0xfffe;
+            bmax.X = (int)(qfac * maxx + 1) | 1;
+            bmax.Y = (int)(qfac * maxy + 1) | 1;
+            bmax.Z = (int)(qfac * maxz + 1) | 1;
+        }
 
         /// <inheritdoc/>
         public override string ToString()

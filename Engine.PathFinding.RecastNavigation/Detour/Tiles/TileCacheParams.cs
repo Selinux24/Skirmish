@@ -62,10 +62,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int MaxObstacles { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Origin: {Origin}; CellSize: {CellSize}; CellHeight: {CellHeight}; Width: {Width}; Height: {Height}; WalkableHeight: {WalkableHeight}; WalkableRadius: {WalkableRadius}; WalkableClimb: {WalkableClimb}; MaxSimplificationError: {MaxSimplificationError}; MaxTiles: {MaxTiles}; MaxObstacles: {MaxObstacles};";

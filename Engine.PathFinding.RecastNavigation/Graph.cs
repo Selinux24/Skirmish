@@ -15,386 +15,6 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class Graph : IGraph
     {
-        public const int MAX_POLYS = 256;
-        public const int MAX_SMOOTH = 2048;
-
-        /// <summary>
-        /// Data to update tiles
-        /// </summary>
-        class UpdateTileData
-        {
-            /// <summary>
-            /// X tile position
-            /// </summary>
-            public int X { get; set; }
-            /// <summary>
-            /// Y tile position
-            /// </summary>
-            public int Y { get; set; }
-            /// <summary>
-            /// Bounding box
-            /// </summary>
-            public BoundingBox BoundingBox { get; set; }
-
-            /// <inheritdoc/>
-            public override string ToString()
-            {
-                return $"X:{X}; Y:{Y};";
-            }
-        }
-
-        /// <summary>
-        /// Calcs a path
-        /// </summary>
-        /// <param name="navQuery">Navigation query</param>
-        /// <param name="filter">Filter</param>
-        /// <param name="polyPickExt">Extensions</param>
-        /// <param name="mode">Path mode</param>
-        /// <param name="startPos">Start position</param>
-        /// <param name="endPos">End position</param>
-        /// <param name="resultPath">Result path</param>
-        /// <returns>Returns the status of the path calculation</returns>
-        private static Status CalcPath(
-            NavMeshQuery navQuery, QueryFilter filter, Vector3 polyPickExt,
-            PathFindingMode mode,
-            Vector3 startPos, Vector3 endPos,
-            out IEnumerable<Vector3> resultPath)
-        {
-            resultPath = null;
-
-            navQuery.FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out _);
-            navQuery.FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out _);
-
-            var endPointsDefined = (startRef != 0 && endRef != 0);
-            if (!endPointsDefined)
-            {
-                return Status.DT_FAILURE;
-            }
-
-            if (mode == PathFindingMode.Follow)
-            {
-                if (CalcPathFollow(navQuery, filter, startPos, endPos, startRef, endRef, out var path))
-                {
-                    resultPath = path;
-
-                    return Status.DT_SUCCESS;
-                }
-            }
-            else if (mode == PathFindingMode.Straight)
-            {
-                if (CalcPathStraigh(navQuery, filter, startPos, endPos, startRef, endRef, out var path))
-                {
-                    resultPath = path;
-
-                    return Status.DT_SUCCESS;
-                }
-            }
-            else if (mode == PathFindingMode.Sliced)
-            {
-                var status = navQuery.InitSlicedFindPath(startRef, endRef, startPos, endPos, filter);
-                if (status != Status.DT_SUCCESS)
-                {
-                    return status;
-                }
-                return navQuery.UpdateSlicedFindPath(20, out _);
-            }
-
-            return Status.DT_FAILURE;
-        }
-
-        private static bool CalcPathFollow(
-            NavMeshQuery navQuery, QueryFilter filter,
-            Vector3 startPos, Vector3 endPos,
-            int startRef, int endRef,
-            out IEnumerable<Vector3> resultPath)
-        {
-            resultPath = null;
-
-            navQuery.FindPath(
-                startRef, endRef, startPos, endPos, filter,
-                MAX_POLYS,
-                out var iterPath);
-
-            if (iterPath.Count <= 0)
-            {
-                return false;
-            }
-
-            // Iterate over the path to find smooth path on the detail mesh surface.
-            navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
-            navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
-
-            var smoothPath = new List<Vector3>
-            {
-                iterPos
-            };
-
-            // Move towards target a small advancement at a time until target reached or
-            // when ran out of memory to store the path.
-            while (iterPath.Count != 0 && smoothPath.Count < MAX_SMOOTH)
-            {
-                if (IterPathFollow(navQuery, filter, targetPos, smoothPath, iterPath, ref iterPos))
-                {
-                    //End reached
-                    break;
-                }
-            }
-
-            resultPath = smoothPath.ToArray();
-
-            return smoothPath.Count > 0;
-        }
-        private static bool IterPathFollow(
-            NavMeshQuery navQuery, QueryFilter filter,
-            Vector3 targetPos,
-            List<Vector3> smoothPath,
-            SimplePath iterPath,
-            ref Vector3 iterPos)
-        {
-            float SLOP = 0.01f;
-
-            // Find location to steer towards.
-            if (!GetSteerTarget(navQuery, iterPos, targetPos, SLOP, iterPath, out var target))
-            {
-                return true;
-            }
-
-            bool endOfPath = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
-            bool offMeshConnection = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
-
-            // Find movement delta.
-            Vector3 moveTgt = FindMovementDelta(iterPos, target.Position, endOfPath || offMeshConnection);
-
-            // Move
-            navQuery.MoveAlongSurface(
-                iterPath.Start, iterPos, moveTgt, filter, 16,
-                out var result, out var visited);
-
-            SimplePath.FixupCorridor(iterPath, visited);
-            SimplePath.FixupShortcuts(iterPath, navQuery);
-
-            navQuery.GetPolyHeight(iterPath.Start, result, out float h);
-            result.Y = h;
-            iterPos = result;
-
-            bool inRange = InRange(iterPos, target.Position, SLOP, 1.0f);
-            if (!inRange)
-            {
-                // Store results.
-                if (smoothPath.Count < MAX_SMOOTH)
-                {
-                    smoothPath.Add(iterPos);
-                }
-
-                return false;
-            }
-
-            // Handle end of path and off-mesh links when close enough.
-            if (endOfPath)
-            {
-                // Reached end of path.
-                iterPos = targetPos;
-
-                if (smoothPath.Count < MAX_SMOOTH)
-                {
-                    smoothPath.Add(iterPos);
-                }
-
-                return true;
-            }
-
-            if (offMeshConnection)
-            {
-                // Reached off-mesh connection.
-                HandleOffMeshConnection(navQuery, target, smoothPath, iterPath, ref iterPos);
-
-                // Store results.
-                if (smoothPath.Count < MAX_SMOOTH)
-                {
-                    smoothPath.Add(iterPos);
-                }
-
-                return false;
-            }
-
-            // Store results.
-            if (smoothPath.Count < MAX_SMOOTH)
-            {
-                smoothPath.Add(iterPos);
-            }
-
-            return false;
-        }
-        private static Vector3 FindMovementDelta(
-            Vector3 position,
-            Vector3 targetPos,
-            bool overMesh)
-        {
-            float STEP_SIZE = 0.5f;
-
-            // Find movement delta.
-            Vector3 delta = Vector3.Subtract(targetPos, position);
-            float len = delta.Length();
-
-            // If the steer target is end of path or off-mesh link, do not move past the location.
-            if (overMesh && len < STEP_SIZE)
-            {
-                len = 1;
-            }
-            else
-            {
-                len = STEP_SIZE / len;
-            }
-
-            return Vector3.Add(position, delta * len);
-        }
-        private static void HandleOffMeshConnection(
-            NavMeshQuery navQuery,
-            SteerTarget target,
-            List<Vector3> smoothPath,
-            SimplePath iterPath, ref Vector3 iterPos)
-        {
-            // Advance the path up to and over the off-mesh connection.
-            int prevRef = 0;
-            int polyRef = iterPath.Start;
-            int npos = 0;
-            var iterNodes = iterPath.GetPath();
-            while (npos < iterPath.Count && polyRef != target.Ref)
-            {
-                prevRef = polyRef;
-                polyRef = iterNodes.ElementAt(npos);
-                npos++;
-            }
-            iterPath.Prune(npos);
-
-            // Handle the connection.
-            if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
-                prevRef, polyRef, out Vector3 sPos, out Vector3 ePos))
-            {
-                if (smoothPath.Count < MAX_SMOOTH)
-                {
-                    smoothPath.Add(sPos);
-                }
-
-                // Move position at the other side of the off-mesh link.
-                iterPos = ePos;
-                navQuery.GetPolyHeight(iterPath.Start, iterPos, out float eh);
-                iterPos.Y = eh;
-            }
-        }
-
-        private static bool CalcPathStraigh(
-            NavMeshQuery navQuery, QueryFilter filter,
-            Vector3 startPos, Vector3 endPos,
-            int startRef, int endRef,
-            out IEnumerable<Vector3> resultPath)
-        {
-            navQuery.FindPath(
-                startRef, endRef, startPos, endPos, filter, MAX_POLYS,
-                out var polys);
-
-            if (polys.Count < 0)
-            {
-                resultPath = Array.Empty<Vector3>();
-
-                return false;
-            }
-
-            // In case of partial path, make sure the end point is clamped to the last polygon.
-            Vector3 epos = endPos;
-            if (polys.End != endRef)
-            {
-                navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out _);
-            }
-
-            navQuery.FindStraightPath(
-                startPos, epos, polys,
-                MAX_POLYS, StraightPathOptions.AllCrossings,
-                out var straightPath);
-
-            resultPath = straightPath.GetPaths();
-
-            return straightPath.Count > 0;
-        }
-
-        /// <summary>
-        /// Gets a steer target
-        /// </summary>
-        /// <param name="navQuery">Navigation query</param>
-        /// <param name="startPos">Start position</param>
-        /// <param name="endPos">End position</param>
-        /// <param name="minTargetDist">Miminum tangent distance</param>
-        /// <param name="path">Current path</param>
-        /// <param name="target">Out target</param>
-        /// <returns></returns>
-        private static bool GetSteerTarget(
-            NavMeshQuery navQuery,
-            Vector3 startPos, Vector3 endPos,
-            float minTargetDist,
-            SimplePath path,
-            out SteerTarget target)
-        {
-            target = new SteerTarget
-            {
-                Position = Vector3.Zero,
-                Flag = 0,
-                Ref = 0,
-                Points = null,
-                PointCount = 0
-            };
-
-            // Find steer target.
-            int MAX_STEER_POINTS = 3;
-            navQuery.FindStraightPath(
-                startPos, endPos, path,
-                MAX_STEER_POINTS, StraightPathOptions.None,
-                out var steerPath);
-
-            if (steerPath.Count == 0)
-            {
-                return false;
-            }
-
-            target.PointCount = steerPath.Count;
-            target.Points = steerPath.GetPaths().ToArray();
-
-            // Find vertex far enough to steer to.
-            int ns = 0;
-            while (ns < steerPath.Count)
-            {
-                // Stop at Off-Mesh link or when point is further than slop away.
-                if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
-                    !InRange(steerPath.GetPath(ns), startPos, minTargetDist, 1000.0f))
-                {
-                    break;
-                }
-                ns++;
-            }
-            // Failed to find good point to steer to.
-            if (ns >= steerPath.Count)
-            {
-                return false;
-            }
-
-            var pos = steerPath.GetPath(ns);
-            pos.Y = startPos.Y;
-
-            target.Position = pos;
-            target.Flag = steerPath.GetFlag(ns);
-            target.Ref = steerPath.GetRef(ns);
-
-            return true;
-        }
-
-        private static bool InRange(Vector3 v1, Vector3 v2, float radius, float height)
-        {
-            float dx = v2.X - v1.X;
-            float dy = v2.Y - v1.Y;
-            float dz = v2.Z - v1.Z;
-
-            return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
-        }
-
         /// <inheritdoc/>
         public event EventHandler Updating;
         /// <inheritdoc/>
@@ -412,6 +32,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// Debug info
         /// </summary>
         private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new();
+        /// <summary>
+        /// Agent query list
+        /// </summary>
+        private readonly List<GraphAgentQueryFactory> agentQuerieFactories = new();
+        /// <summary>
+        /// Crowd list
+        /// </summary>
+        private readonly List<Crowd> crowds = new();
 
         /// <inheritdoc/>
         public bool Initialized { get; set; }
@@ -423,14 +51,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// Build settings
         /// </summary>
         public BuildSettings Settings { get; set; }
-        /// <summary>
-        /// Agent query list
-        /// </summary>
-        public List<GraphAgentQuery> AgentQueries { get; set; } = new List<GraphAgentQuery>();
-        /// <summary>
-        /// Crowd list
-        /// </summary>
-        public List<Crowd> Crowds { get; set; } = new List<Crowd>();
 
         /// <summary>
         /// Constructor
@@ -461,24 +81,44 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                foreach (var item in AgentQueries)
+                foreach (var item in agentQuerieFactories)
                 {
                     item?.Dispose();
                 }
 
-                AgentQueries.Clear();
-                AgentQueries = null;
+                agentQuerieFactories.Clear();
             }
         }
 
+        /// <summary>
+        /// Adds an agent to the graph
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="navMesh">Navigation mesh</param>
+        public void AddAgent(Agent agent, NavMesh navMesh)
+        {
+            agentQuerieFactories.Add(new GraphAgentQueryFactory
+            {
+                Agent = agent,
+                NavMesh = navMesh,
+                MaxNodes = Settings.MaxNodes,
+            });
+        }
+        /// <summary>
+        /// Gets the agent list
+        /// </summary>
+        public IEnumerable<(Agent Agent, NavMesh NavMesh)> GetAgents()
+        {
+            return agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh)).ToArray();
+        }
         /// <summary>
         /// Gets a query for the specified agent
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <returns>Returns a new navigation mesh query</returns>
-        private GraphAgentQuery GetAgentQuery(AgentType agent)
+        private GraphAgentQueryFactory GetAgentQueryFactory(AgentType agent)
         {
-            return AgentQueries.Find(a => agent.Equals(a.Agent));
+            return agentQuerieFactories.Find(a => agent.Equals(a.Agent));
         }
 
         /// <summary>
@@ -553,7 +193,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tiles = LookupTiles(positions);
 
-            foreach (var agentQ in AgentQueries)
+            foreach (var agentQ in agentQuerieFactories)
             {
                 BuildTiles(agentQ, tiles, update);
             }
@@ -566,7 +206,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tiles = LookupTiles(bbox);
 
-            foreach (var agentQ in AgentQueries)
+            foreach (var agentQ in agentQuerieFactories)
             {
                 BuildTiles(agentQ, tiles, update);
             }
@@ -576,7 +216,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agentQ">Agent query</param>
         /// <param name="tiles">Tile list</param>
-        private void BuildTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles, bool update)
+        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<UpdateTileData> tiles, bool update)
         {
             var bbox = Settings.Bounds ?? Input.BoundingBox;
 
@@ -601,9 +241,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tiles = LookupTiles(positions);
 
-            foreach (var agentQ in AgentQueries)
+            foreach (var agentQ in agentQuerieFactories)
             {
-                RemoveTiles(agentQ, tiles);
+                agentQ.RemoveTiles(tiles);
             }
         }
         /// <summary>
@@ -614,21 +254,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tiles = LookupTiles(bbox);
 
-            foreach (var agentQ in AgentQueries)
+            foreach (var agentQ in agentQuerieFactories)
             {
-                RemoveTiles(agentQ, tiles);
-            }
-        }
-        /// <summary>
-        /// Removes the tiles in the list
-        /// </summary>
-        /// <param name="agentQ">Agent query</param>
-        /// <param name="tiles">Tile list</param>
-        private static void RemoveTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
-        {
-            foreach (var tile in tiles)
-            {
-                agentQ.NavMesh.RemoveTilesAtPosition(tile.X, tile.Y);
+                agentQ.RemoveTiles(tiles);
             }
         }
 
@@ -775,7 +403,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            var graphQuery = GetAgentQuery(agent);
+            var graphQuery = GetAgentQueryFactory(agent);
             if (graphQuery == null)
             {
                 return Enumerable.Empty<IGraphNode>();
@@ -786,7 +414,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IGraphNode FindNode(AgentType agent, Vector3 point)
         {
-            var graphQuery = GetAgentQuery(agent);
+            var graphQuery = GetAgentQueryFactory(agent);
             if (graphQuery == null)
             {
                 return null;
@@ -797,14 +425,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            var graphQuery = GetAgentQuery(agent);
+            var graphQuery = GetAgentQueryFactory(agent)?.CreateQuery();
             if (graphQuery == null)
             {
                 return Enumerable.Empty<Vector3>();
             }
 
-            var status = CalcPath(
-                graphQuery.CreateQuery(),
+            var status = graphQuery.CalcPath(
                 new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                 from, to, out var result);
 
@@ -832,7 +459,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = null;
 
             //Find agent query
-            var query = GetAgentQuery(agent)?.CreateQuery();
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
             if (query == null)
             {
                 return false;
@@ -864,7 +491,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agentQ in AgentQueries)
+            foreach (var agentQ in agentQuerieFactories)
             {
                 var cache = agentQ.NavMesh.TileCache;
                 if (cache != null)
@@ -917,7 +544,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var item in instance.Indices)
             {
-                var tileCache = GetAgentQuery(item.Item1)?.NavMesh.TileCache;
+                var tileCache = GetAgentQueryFactory(item.Item1)?.NavMesh.TileCache;
 
                 tileCache?.RemoveObstacle(item.Item2);
             }
@@ -928,7 +555,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent)
         {
-            var query = GetAgentQuery(agent)?.CreateQuery();
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
             if (query == null)
             {
                 return null;
@@ -945,7 +572,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
         {
-            var query = GetAgentQuery(agent)?.CreateQuery();
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
             if (query == null)
             {
                 return null;
@@ -971,7 +598,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
-            var agentNms = AgentQueries
+            var agentNms = agentQuerieFactories
                 .Select(agentQ => agentQ.NavMesh)
                 .Where(nm => nm.TileCache != null);
 
@@ -995,7 +622,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            foreach (var crowd in Crowds)
+            foreach (var crowd in crowds)
             {
                 debugInfo.TryGetValue(crowd, out var debug);
 
@@ -1010,22 +637,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new crowd</returns>
         public Crowd AddCrowd(CrowdParameters settings)
         {
-            var navMesh = (GetAgentQuery(settings.Agent)?.NavMesh) ?? throw new ArgumentException($"No navigation mesh found for the specified {nameof(settings.Agent)}.", nameof(settings));
+            var navMesh = (GetAgentQueryFactory(settings.Agent)?.NavMesh) ?? throw new ArgumentException($"No navigation mesh found for the specified {nameof(settings.Agent)}.", nameof(settings));
 
             var cr = new Crowd(navMesh, settings);
-            Crowds.Add(cr);
+            crowds.Add(cr);
             return cr;
-        }
-        /// <summary>
-        /// Adds a croud agent
-        /// </summary>
-        /// <param name="crowd">Crowd</param>
-        /// <param name="pos">Position</param>
-        /// <param name="param">Agent parameters</param>
-        /// <returns>Returns the agent</returns>
-        public static CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParameters param)
-        {
-            return crowd.AddAgent(pos, param);
         }
         /// <summary>
         /// Request move all agents in the crowd
@@ -1036,7 +652,7 @@ namespace Engine.PathFinding.RecastNavigation
         public void RequestMoveCrowd(Crowd crowd, AgentType agent, Vector3 p)
         {
             //Find agent query
-            var query = GetAgentQuery(agent)?.CreateQuery();
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
             if (query == null)
             {
                 return;
@@ -1050,7 +666,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var ag in crowd.GetAgents())
             {
-                Crowd.RequestMoveTarget(ag, poly, nP);
+                ag.RequestMoveTarget(poly, nP);
             }
         }
         /// <summary>
@@ -1063,7 +679,7 @@ namespace Engine.PathFinding.RecastNavigation
         public void RequestMoveAgent(Crowd crowd, CrowdAgent crowdAgent, AgentType agent, Vector3 p)
         {
             //Find agent query
-            var query = GetAgentQuery(agent)?.CreateQuery();
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
             if (query == null)
             {
                 return;
@@ -1075,7 +691,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            Crowd.RequestMoveTarget(crowdAgent, poly, nP);
+            crowdAgent.RequestMoveTarget(poly, nP);
         }
 
         /// <summary>

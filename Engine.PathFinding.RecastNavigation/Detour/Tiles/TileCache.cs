@@ -157,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private static int DecodeObstacleIdSalt(int r)
         {
             int saltMask = (1 << 16) - 1;
-            return ((r >> 16) & saltMask);
+            return (r >> 16) & saltMask;
         }
         /// <summary>
         /// Decodes an obstacle id.
@@ -165,40 +165,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private static int DecodeObstacleIdObstacle(int r)
         {
             int tileMask = (1 << 16) - 1;
-            return (r & tileMask);
-        }
-        /// <summary>
-        /// Process the obstacle
-        /// </summary>
-        /// <param name="ob">Obstacle</param>
-        /// <param name="r">Tile</param>
-        private static bool ProcessObstacleUpdate(TileCacheObstacle ob, CompressedTile r)
-        {
-            // Remove handled tile from pending list.
-            ob.Pending.Remove(r);
-
-            // If all pending tiles processed, change state.
-            if (ob.Pending.Count == 0)
-            {
-                if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING)
-                {
-                    ob.State = ObstacleState.DT_OBSTACLE_PROCESSED;
-                }
-                else if (ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
-                {
-                    ob.State = ObstacleState.DT_OBSTACLE_EMPTY;
-                    // Update salt, salt should never be zero.
-                    ob.Salt = (ob.Salt + 1) & ((1 << 16) - 1);
-                    if (ob.Salt == 0)
-                    {
-                        ob.Salt++;
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
+            return r & tileMask;
         }
 
         /// <summary>
@@ -817,11 +784,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 var ob = pendingObstacles[i];
 
-                bool processed = ProcessObstacleUpdate(ob, r);
-                if (processed)
+                if (ob.ProcessUpdate(r, m_nextFreeObstacle))
                 {
-                    // Return obstacle to free list.
-                    ob.Next = m_nextFreeObstacle;
                     m_nextFreeObstacle = i;
                 }
             }
@@ -946,11 +910,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
             bc.LCSet = lcset;
 
-            if (!bc.LCSet.BuildTileCachePolyMesh(out var mesh))
-            {
-                return false;
-            }
-            bc.LMesh = mesh;
+            bc.LMesh = TileCachePolyMesh.Build(bc.LCSet);
 
             // Early out if the mesh tile is empty.
             if (bc.LMesh.NPolys == 0)

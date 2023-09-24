@@ -31,10 +31,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int BMax { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns a text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Ref {NRef}; Next {Next}; Edge {Edge}; Side {Side}; BMin {BMin}; BMax {BMax};";

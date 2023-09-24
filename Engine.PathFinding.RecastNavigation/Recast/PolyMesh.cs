@@ -15,6 +15,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Vertex bucket count
         /// </summary>
         const int VERTEX_BUCKET_COUNT = 1 << 12;
+        /// <summary>
+        /// Null index
+        /// </summary>
+        const int NULL_IDX = -1;
 
         /// <summary>
         /// The mesh vertices. [Form: (x, y, z) * #<see cref="NVerts"/>]
@@ -114,7 +118,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             };
 
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
-            int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
+            int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, NULL_IDX);
 
             for (int i = 0; i < cset.NConts; ++i)
             {
@@ -142,7 +146,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Build initial polygons.
-                CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont, out var polys, out var npolys);
+                IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont, out var polys, out var npolys);
                 if (npolys == 0)
                 {
                     continue;
@@ -168,34 +172,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             mesh.Flags = new SamplePolyFlagTypes[mesh.NPolys];
 
             return mesh;
-        }
-        /// <summary>
-        /// Creates the initial polygon list
-        /// </summary>
-        /// <param name="indices">Triangle indices</param>
-        /// <param name="tris">Triangle list</param>
-        /// <param name="ntris">Number of triangles</param>
-        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
-        /// <param name="polys">Resulting indexed polygon list</param>
-        /// <param name="npolys">Resulting number of polygons in the list</param>
-        private static void CreateInitialPolygons(int[] indices, Int3[] tris, int ntris, int maxVertsPerCont, out IndexedPolygon[] polys, out int npolys)
-        {
-            npolys = 0;
-            polys = new IndexedPolygon[maxVertsPerCont];
-
-            for (int j = 0; j < ntris; ++j)
-            {
-                var t = tris[j];
-                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
-                {
-                    var poly = new IndexedPolygon(IndexedPolygon.DT_VERTS_PER_POLYGON);
-                    poly[0] = indices[t.X];
-                    poly[1] = indices[t.Y];
-                    poly[2] = indices[t.Z];
-
-                    polys[npolys++] = poly;
-                }
-            }
         }
         /// <summary>
         /// Merges a list of polygon meshes into a new one

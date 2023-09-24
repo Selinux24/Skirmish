@@ -62,5 +62,41 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             Obstacle.MarkArea(bc, tile.Header.BBox.Minimum, cellSize, cellHeight, 0);
         }
+        /// <summary>
+        /// Process the obstacle
+        /// </summary>
+        /// <param name="r">Tile</param>
+        /// <param name="next">Next free obstacle index</param>
+        public bool ProcessUpdate(CompressedTile r, int next)
+        {
+            // Remove handled tile from pending list.
+            Pending.Remove(r);
+
+            // If all pending tiles processed, change state.
+            if (Pending.Count == 0)
+            {
+                if (State == ObstacleState.DT_OBSTACLE_PROCESSING)
+                {
+                    State = ObstacleState.DT_OBSTACLE_PROCESSED;
+                }
+                else if (State == ObstacleState.DT_OBSTACLE_REMOVING)
+                {
+                    State = ObstacleState.DT_OBSTACLE_EMPTY;
+                    // Update salt, salt should never be zero.
+                    Salt = (Salt + 1) & ((1 << 16) - 1);
+                    if (Salt == 0)
+                    {
+                        Salt++;
+                    }
+
+                    // Return obstacle to free list.
+                    Next = next;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

@@ -30,10 +30,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int MaxPolys { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Origin: {Origin}; TileWidth: {TileWidth}; TileHeight: {TileHeight}; MaxTiles: {MaxTiles}; MaxPolys: {MaxPolys};";

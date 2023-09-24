@@ -1,14 +1,24 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    /// <summary>
+    /// Path corridor
+    /// </summary>
     public class PathCorridor
     {
+        /// <summary>
+        /// Position
+        /// </summary>
         private Vector3 m_pos;
+        /// <summary>
+        /// Target
+        /// </summary>
         private Vector3 m_target;
+        /// <summary>
+        /// Simple path
+        /// </summary>
         private SimplePath m_path = null;
 
         /// <summary>
@@ -39,9 +49,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="maxCorners">The maximum number of corners the buffers can hold.</param>
         /// <param name="cornerPolys">The corner list.</param>
-        public void FindCorners(
-            NavMeshQuery navquery, int maxCorners,
-            out StraightPath cornerPolys)
+        public void FindCorners(NavMeshQuery navquery, int maxCorners, out StraightPath cornerPolys)
         {
             float MIN_TARGET_DIST = 0.01f;
 
@@ -78,9 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="pathOptimizationRange">The maximum range to search. [Limit: > 0]</param>
         /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="filter">The filter to apply to the operation.</param>
-        public void OptimizePathVisibility(
-            Vector3 target, float pathOptimizationRange,
-            NavMeshQuery navquery, QueryFilter filter)
+        public void OptimizePathVisibility(Vector3 target, float pathOptimizationRange, NavMeshQuery navquery, QueryFilter filter)
         {
             // Clamp the ray to max distance.
             var goal = target;
@@ -143,10 +149,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return false;
         }
-
-        public bool MoveOverOffmeshConnection(
-            NavMeshQuery navquery, int offMeshConRef, int[] refs,
-            out Vector3 startPos, out Vector3 endPos)
+        /// <summary>
+        /// Move over off-mesh connection
+        /// </summary>
+        /// <param name="navquery">Navigation query</param>
+        /// <param name="offMeshConRef">Off-mesh connection reference</param>
+        /// <param name="refs">Reference list</param>
+        /// <param name="startPos">Resulting start position</param>
+        /// <param name="endPos">Resulting end position</param>
+        public bool MoveOverOffmeshConnection(NavMeshQuery navquery, int offMeshConRef, int[] refs, out Vector3 startPos, out Vector3 endPos)
         {
             startPos = Vector3.Zero;
             endPos = Vector3.Zero;
@@ -159,7 +170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             while (npos < m_path.Count && polyRef != offMeshConRef)
             {
                 prevRef = polyRef;
-                polyRef = path.ElementAt(npos);
+                polyRef = path[npos];
                 npos++;
             }
             if (npos == m_path.Count)
@@ -186,7 +197,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return false;
         }
-
+        /// <summary>
+        /// Fixes the start position
+        /// </summary>
+        /// <param name="safeRef">Safe reference</param>
+        /// <param name="safePos">Safe position</param>
         public bool FixPathStart(int safeRef, Vector3 safePos)
         {
             m_path.FixStart(safeRef);
@@ -194,13 +209,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-
+        /// <summary>
+        /// Tims invalid path
+        /// </summary>
+        /// <param name="safeRef">Safe reference</param>
+        /// <param name="safePos">Safe position</param>
+        /// <param name="navquery">Navigation query</param>
+        /// <param name="filter">Query filter</param>
         public bool TrimInvalidPath(int safeRef, Vector3 safePos, NavMeshQuery navquery, QueryFilter filter)
         {
             // Keep valid path as far as possible.
             int n = 0;
             var path = m_path.GetPath();
-            while (n < m_path.Count && navquery.IsValidPolyRef(path.ElementAt(n), filter))
+            while (n < m_path.Count && navquery.IsValidPolyRef(path[n], filter))
             {
                 n++;
             }
@@ -241,7 +262,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = m_path.GetPath();
             for (int i = 0; i < n; ++i)
             {
-                if (!navquery.IsValidPolyRef(path.ElementAt(i), filter))
+                if (!navquery.IsValidPolyRef(path[i], filter))
                 {
                     return false;
                 }
@@ -360,7 +381,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// The corridor's path.
         /// </summary>
         /// <returns>The corridor's path. [(polyRef) * #getPathCount()]</returns>
-        public IEnumerable<int> GetPath()
+        public int[] GetPath()
         {
             return m_path.GetPath();
         }

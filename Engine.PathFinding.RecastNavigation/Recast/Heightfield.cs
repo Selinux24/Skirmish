@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -9,6 +10,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class Heightfield
     {
+        /// <summary>
+        /// Rasterize item
+        /// </summary>
+        struct RasterizeItem
+        {
+            /// <summary>
+            /// Triangle
+            /// </summary>
+            public Triangle Triangle { get; set; }
+            /// <summary>
+            /// Area type
+            /// </summary>
+            public AreaTypes AreaType { get; set; }
+        }
+
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
         /// </summary>
@@ -110,12 +126,310 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return (minh, asmin, asmax);
         }
+        /// <summary>
+        /// Marks a walkable triangle list
+        /// </summary>
+        /// <param name="walkableSlopeAngle">Slope angle</param>
+        /// <param name="tris">Triangle list</param>
+        /// <returns>Returns a rasterize item collection</returns>
+        private static RasterizeItem[] MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris)
+        {
+            var res = new List<RasterizeItem>();
+
+            float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
+
+            foreach (var tri in tris)
+            {
+                // Check if the face is walkable.
+                var area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
+
+                res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Gets whether the span (min, max) is outside the specified box size
+        /// </summary>
+        /// <param name="min">Min size</param>
+        /// <param name="max">Max size</param>
+        /// <param name="size">Size</param>
+        private static bool SpanOutsideBBox(float min, float max, float size)
+        {
+            if (max < 0.0f) return true;
+            if (min > size) return true;
+
+            return false;
+        }
+        /// <summary>
+        /// Clamps the span (min, max) into the box size
+        /// </summary>
+        /// <param name="min">Min size</param>
+        /// <param name="max">Max size</param>
+        /// <param name="size">Size</param>
+        private static void SpanClamp(ref float min, ref float max, float size)
+        {
+            if (min < 0.0f) min = 0;
+            if (max > size) max = size;
+        }
+        /// <summary>
+        /// Calculates the span x sizes
+        /// </summary>
+        /// <param name="spanVertices">Vertex list</param>
+        /// <param name="bbox">Bounding box</param>
+        private static (float MinX, float MaxX) CalculateSpanMinMaxX(Vector3[] spanVertices, BoundingBox bbox)
+        {
+            float minX = spanVertices[0].X;
+            float maxX = spanVertices[0].X;
+            for (int i = 1; i < spanVertices.Length; i++)
+            {
+                minX = Math.Min(minX, spanVertices[i].X);
+                maxX = Math.Max(maxX, spanVertices[i].X);
+            }
+            minX -= bbox.Minimum.X;
+            maxX -= bbox.Minimum.X;
+
+            return (minX, maxX);
+        }
+        /// <summary>
+        /// Calculates the span y sizes
+        /// </summary>
+        /// <param name="spanVertices">Vertex list</param>
+        /// <param name="bbox">Bounding box</param>
+        private static (float MinY, float MaxY) CalculateSpanMinMaxY(Vector3[] spanVertices, BoundingBox bbox)
+        {
+            float minY = spanVertices[0].Y;
+            float maxY = spanVertices[0].Y;
+            for (int i = 1; i < spanVertices.Length; ++i)
+            {
+                minY = Math.Min(minY, spanVertices[i].Y);
+                maxY = Math.Max(maxY, spanVertices[i].Y);
+            }
+            minY -= bbox.Minimum.Y;
+            maxY -= bbox.Minimum.Y;
+
+            return (minY, maxY);
+        }
+        /// <summary>
+        /// Divides the specified polygon along the axis
+        /// </summary>
+        private static (Vector3[] Poly1, Vector3[] Poly2) DividePoly(Vector3[] inPoly, float x, int axis)
+        {
+            var outPoly1 = new List<Vector3>();
+            var outPoly2 = new List<Vector3>();
+
+            var d = GetPolyVerticesAxis(inPoly, x, axis);
+
+            for (int i = 0, j = inPoly.Length - 1; i < inPoly.Length; j = i, i++)
+            {
+                var va = inPoly[j];
+                var vb = inPoly[i];
+
+                float na = d[j];
+                float nb = d[i];
+
+                bool ina = na >= 0;
+                bool inb = nb >= 0;
+                if (ina != inb)
+                {
+                    float s = na / (na - nb);
+                    var v = va + (vb - va) * s;
+                    outPoly1.Add(v);
+                    outPoly2.Add(v);
+
+                    // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
+                    // since these were already added above
+                    if (nb > 0)
+                    {
+                        outPoly1.Add(vb);
+                    }
+                    else if (nb < 0)
+                    {
+                        outPoly2.Add(vb);
+                    }
+                }
+                else // same side
+                {
+                    // add the i'th point to the right polygon. Addition is done even for points on the dividing line
+                    if (nb >= 0)
+                    {
+                        outPoly1.Add(vb);
+
+                        if (nb != 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    outPoly2.Add(vb);
+                }
+            }
+
+            return (outPoly1.ToArray(), outPoly2.ToArray());
+        }
+        /// <summary>
+        /// Gets polygon vertices in the axis
+        /// </summary>
+        private static float[] GetPolyVerticesAxis(Vector3[] inPoly, float x, int axis)
+        {
+            float[] d = new float[inPoly.Length];
+            for (int i = 0; i < inPoly.Length; i++)
+            {
+                d[i] = x - inPoly[i][axis];
+            }
+
+            return d;
+        }
+
+        /// <summary>
+        /// Builds a new compact heightfield
+        /// </summary>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
+        /// <returns>Returns the new compact heightfield</returns>
+        public CompactHeightfield Build(int walkableHeight, int walkableClimb)
+        {
+            int spanCount = GetSpanCount();
+            var bbox = BoundingBox;
+            bbox.Maximum.Y += walkableHeight * CellHeight;
+
+            // Fill in header.
+            var chf = new CompactHeightfield
+            {
+                Width = Width,
+                Height = Height,
+                SpanCount = spanCount,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                MaxRegions = 0,
+                BoundingBox = bbox,
+                CellSize = CellSize,
+                CellHeight = CellHeight,
+            };
+
+            // Fill in cells and spans.
+            chf.FillCellsAndSpans(Spans, spanCount);
+
+            // Find neighbour connections.
+            chf.FindNeighbourConnections();
+
+            return chf;
+        }
+
+        /// <summary>
+        /// Rasterizes the specified triangle list
+        /// </summary>
+        /// <param name="tris">Triangle list</param>
+        /// <param name="walkableSlopeAngle">Slope angle</param>
+        /// <param name="walkableClimb">Maximum climb</param>
+        /// <param name="solid">Target solid</param>
+        /// <returns>Returns true if the rasterization finishes correctly</returns>
+        public bool Rasterize(Triangle[] tris, float walkableSlopeAngle, int walkableClimb)
+        {
+            var triareas = MarkWalkableTriangles(walkableSlopeAngle, tris);
+
+            return RasterizeTriangles(walkableClimb, triareas);
+        }
+        /// <summary>
+        /// Rasterizes the specified item list
+        /// </summary>
+        private bool RasterizeTriangles(int flagMergeThr, RasterizeItem[] items)
+        {
+            // Rasterize triangles.
+            foreach (var item in items)
+            {
+                // Rasterize.
+                if (!RasterizeTriangle(flagMergeThr, item))
+                {
+                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Rasterizes the specified item
+        /// </summary>
+        private bool RasterizeTriangle(int flagMergeThr, RasterizeItem item)
+        {
+            float cs = CellSize;
+            float ics = 1.0f / CellSize;
+            float ich = 1.0f / CellHeight;
+            int w = Width;
+            int h = Height;
+            var b = BoundingBox;
+            float by = b.Height;
+
+            // Calculate the bounding box of the triangle.
+            var triverts = item.Triangle.GetVertices().ToArray();
+            var t = SharpDXExtensions.BoundingBoxFromPoints(triverts);
+
+            // If the triangle does not touch the bbox of the heightfield, skip the triagle.
+            if (b.Contains(t) == ContainmentType.Disjoint)
+            {
+                return true;
+            }
+
+            // Calculate the footprint of the triangle on the grid's y-axis
+            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
+            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
+            y0 = MathUtil.Clamp(y0, 0, h - 1);
+            y1 = MathUtil.Clamp(y1, 0, h - 1);
+
+            // Clip the triangle into all grid cells it touches.
+            var inb = triverts.ToArray();
+
+            for (int y = y0; y <= y1; ++y)
+            {
+                // Clip polygon to row. Store the remaining polygon as well
+                float cz = b.Minimum.Z + y * cs;
+                var (Zp1, Zp2) = DividePoly(inb, cz + cs, 2);
+                Helper.Swap(ref inb, ref Zp2);
+                if (Zp1.Length < 3) continue;
+
+                // find the horizontal bounds in the row
+                var (MinX, MaxX) = CalculateSpanMinMaxX(Zp1, b);
+                int x0 = (int)(MinX * ics);
+                int x1 = (int)(MaxX * ics);
+                x0 = MathUtil.Clamp(x0, 0, w - 1);
+                x1 = MathUtil.Clamp(x1, 0, w - 1);
+
+                for (int x = x0; x <= x1; ++x)
+                {
+                    // Clip polygon to column. store the remaining polygon as well
+                    float cx = b.Minimum.X + x * cs;
+                    var (Xp1, Xp2) = DividePoly(Zp1, cx + cs, 0);
+                    Helper.Swap(ref Zp1, ref Xp2);
+                    if (Xp1.Length < 3) continue;
+
+                    // Calculate min and max of the span.
+                    var (MinY, MaxY) = CalculateSpanMinMaxY(Xp1, b);
+                    float minY = MinY;
+                    float maxY = MaxY;
+                    // Skip the span if it is outside the heightfield bbox
+                    if (SpanOutsideBBox(minY, maxY, by))
+                    {
+                        continue;
+                    }
+                    // Clamp the span to the heightfield bbox.
+                    SpanClamp(ref minY, ref maxY, by);
+
+                    // Snap the span to the heightfield height grid.
+                    int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
+                    int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
+
+                    AddSpan(x, y, ismin, ismax, item.AreaType, flagMergeThr);
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Gets the span count
         /// </summary>
         /// <returns>Returns the span count</returns>
-        public int GetSpanCount()
+        private int GetSpanCount()
         {
             int w = Width;
             int h = Height;
@@ -142,7 +456,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Allocates a new span
         /// </summary>
         /// <returns>Returns the new span</returns>
-        public Span AllocSpan()
+        private Span AllocSpan()
         {
             // If running out of memory, allocate new page and update the freelist.
             if (FreeList == null || FreeList.Next == null)
@@ -164,7 +478,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Frees the specified span
         /// </summary>
         /// <param name="cur">Span</param>
-        public void FreeSpan(Span cur)
+        private void FreeSpan(Span cur)
         {
             if (cur == null) return;
 
@@ -181,7 +495,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="smax">Upper limit</param>
         /// <param name="area">Area type</param>
         /// <param name="flagMergeThr">Merge threshold</param>
-        public void AddSpan(int x, int y, int smin, int smax, AreaTypes area, int flagMergeThr)
+        private void AddSpan(int x, int y, int smin, int smax, AreaTypes area, int flagMergeThr)
         {
             int idx = x + y * Width;
 

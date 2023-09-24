@@ -1,126 +1,205 @@
 ﻿using SharpDX;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    /// <summary>
+    /// Temporal contour helper class
+    /// </summary>
     public class TempContour
     {
-        public Int4[] Verts { get; set; }
-        public int Nverts { get; set; }
-        public int Cverts { get; set; }
-        public IndexedPolygon Poly { get; set; }
-        public int Npoly { get; set; }
-        public int Cpoly { get; set; }
+        /// <summary>
+        /// Vertices buffer
+        /// </summary>
+        private readonly Int4[] verts;
+        /// <summary>
+        /// Number of vertices in the buffer
+        /// </summary>
+        private int nverts;
+        /// <summary>
+        /// Contour vertices
+        /// </summary>
+        private readonly int cverts;
+        /// <summary>
+        /// Indexed polygon
+        /// </summary>
+        private readonly IndexedPolygon poly;
+        /// <summary>
+        /// Number of vertices in the polygon
+        /// </summary>
+        private int npoly;
 
-        public TempContour(Int4[] vbuf, int nvbuf, IndexedPolygon pbuf, int npbuf)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="verts">Polygon vertices</param>
+        /// <param name="cverts">Number of vertices</param>
+        /// <param name="poly">Indexed polygon definition</param>
+        public TempContour(Int4[] verts, int cverts, IndexedPolygon poly)
         {
-            Verts = vbuf;
-            Nverts = 0;
-            Cverts = nvbuf;
-            Poly = pbuf;
-            Npoly = 0;
-            Cpoly = npbuf;
+            this.verts = verts;
+            nverts = 0;
+            this.cverts = cverts;
+            this.poly = poly;
+            npoly = 0;
         }
 
+        /// <summary>
+        /// Appends a vertex to the contour
+        /// </summary>
+        /// <param name="x">X value</param>
+        /// <param name="y">Y value</param>
+        /// <param name="z">Z value</param>
+        /// <param name="r">Neighbour reference</param>
         public bool AppendVertex(int x, int y, int z, int r)
         {
             // Try to merge with existing segments.
-            if (Nverts > 1)
+            if (nverts > 1)
             {
-                var pa = Verts[Nverts - 2];
-                var pb = Verts[Nverts - 1];
-                if (pb.W == r)
+                if (MergeVertex(x, y, z, r))
                 {
-                    if (pa.X == pb.X && pb.X == x)
-                    {
-                        // The verts are aligned aling x-axis, update z.
-                        pb.Y = y;
-                        pb.Z = z;
-                        Verts[Nverts - 1] = pb;
-                        return true;
-                    }
-                    else if (pa.Z == pb.Z && pb.Z == z)
-                    {
-                        // The verts are aligned aling z-axis, update x.
-                        pb.X = x;
-                        pb.Y = y;
-                        Verts[Nverts - 1] = pb;
-                        return true;
-                    }
+                    return true;
                 }
             }
 
             // Add new point.
-            if (Nverts + 1 > Cverts)
+            if (nverts + 1 > cverts)
             {
                 return false;
             }
 
-            Verts[Nverts] = new Int4(x, y, z, r);
-            Nverts++;
+            verts[nverts++] = new(x, y, z, r);
 
             return true;
         }
-        public void SimplifyContour(float maxError)
+        /// <summary>
+        /// Try to merge with existing segments.
+        /// </summary>
+        private bool MergeVertex(int x, int y, int z, int r)
         {
-            Npoly = 0;
-
-            for (int i = 0; i < Nverts; ++i)
+            var pa = verts[nverts - 2];
+            var pb = verts[nverts - 1];
+            if (pb.W == r)
             {
-                int j = (i + 1) % Nverts;
-                // Check for start of a wall segment.
-                int ra = Verts[j].W;
-                int rb = Verts[i].W;
-                if (ra != rb)
+                if (pa.X == pb.X && pb.X == x)
                 {
-                    Poly[Npoly++] = i;
+                    // The verts are aligned aling x-axis, update z.
+                    pb.Y = y;
+                    pb.Z = z;
+                    verts[nverts - 1] = pb;
+                    return true;
+                }
+                else if (pa.Z == pb.Z && pb.Z == z)
+                {
+                    // The verts are aligned aling z-axis, update x.
+                    pb.X = x;
+                    pb.Y = y;
+                    verts[nverts - 1] = pb;
+                    return true;
                 }
             }
-            if (Npoly < 2)
+
+            return false;
+        }
+        /// <summary>
+        /// Simplifies the contour
+        /// </summary>
+        /// <param name="maxError">Max error value</param>
+        public Int4[] SimplifyContour(float maxError)
+        {
+            CheckWallSegment();
+
+            if (npoly < 2)
             {
                 // If there is no transitions at all,
                 // create some initial points for the simplification process. 
                 // Find lower-left and upper-right vertices of the contour.
-                int llx = Verts[0].X;
-                int llz = Verts[0].Z;
-                int lli = 0;
-                int urx = Verts[0].X;
-                int urz = Verts[0].Z;
-                int uri = 0;
-                for (int i = 1; i < Nverts; ++i)
-                {
-                    int x = Verts[i].X;
-                    int z = Verts[i].Z;
-                    if (x < llx || (x == llx && z < llz))
-                    {
-                        llx = x;
-                        llz = z;
-                        lli = i;
-                    }
-                    if (x > urx || (x == urx && z > urz))
-                    {
-                        urx = x;
-                        urz = z;
-                        uri = i;
-                    }
-                }
-                Npoly = 0;
-                Poly[Npoly++] = lli;
-                Poly[Npoly++] = uri;
+                AddInitialPointsToPolygon();
             }
 
-            // Add points until all raw points are within
-            // error tolerance to the simplified shape.
-            for (int i = 0; i < Npoly;)
+            // Add points until all raw points are within error tolerance to the simplified shape.
+            FillPoints(maxError);
+
+            // Remap vertices
+            RemapVertices();
+
+            // Return simplified vertices
+            return verts.Take(nverts).ToArray();
+        }
+        /// <summary>
+        /// Check for start of a wall segment
+        /// </summary>
+        private void CheckWallSegment()
+        {
+            npoly = 0;
+
+            for (int i = 0; i < nverts; ++i)
             {
-                int ii = (i + 1) % Npoly;
+                int j = (i + 1) % nverts;
 
-                int ai = Poly[i];
-                int ax = Verts[ai].X;
-                int az = Verts[ai].Z;
+                // Check for start of a wall segment.
+                int ra = verts[j].W;
+                int rb = verts[i].W;
+                if (ra != rb)
+                {
+                    poly[npoly++] = i;
+                }
+            }
+        }
+        /// <summary>
+        /// Creates some initial points for the simplification process
+        /// </summary>
+        /// <remarks>
+        /// Find lower-left and upper-right vertices of the contour.
+        /// </remarks>
+        private void AddInitialPointsToPolygon()
+        {
+            int llx = verts[0].X;
+            int llz = verts[0].Z;
+            int lli = 0;
+            int urx = verts[0].X;
+            int urz = verts[0].Z;
+            int uri = 0;
+            for (int i = 1; i < nverts; ++i)
+            {
+                int x = verts[i].X;
+                int z = verts[i].Z;
+                if (x < llx || (x == llx && z < llz))
+                {
+                    llx = x;
+                    llz = z;
+                    lli = i;
+                }
+                if (x > urx || (x == urx && z > urz))
+                {
+                    urx = x;
+                    urz = z;
+                    uri = i;
+                }
+            }
+            npoly = 0;
+            poly[npoly++] = lli;
+            poly[npoly++] = uri;
+        }
+        /// <summary>
+        /// Add points until all raw points are within error tolerance to the simplified shape.
+        /// </summary>
+        /// <param name="maxError">Maximum error value</param>
+        private void FillPoints(float maxError)
+        {
+            float maxErrorSqr = maxError * maxError;
 
-                int bi = Poly[ii];
-                int bx = Verts[bi].X;
-                int bz = Verts[bi].Z;
+            for (int i = 0; i < npoly;)
+            {
+                int ii = (i + 1) % npoly;
+
+                int ai = poly[i];
+                int ax = verts[ai].X;
+                int az = verts[ai].Z;
+
+                int bi = poly[ii];
+                int bx = verts[bi].X;
+                int bz = verts[bi].Z;
 
                 // Find maximum deviation from the segment.
                 float maxd = 0;
@@ -133,67 +212,85 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 if (bx > ax || (bx == ax && bz > az))
                 {
                     cinc = 1;
-                    ci = (ai + cinc) % Nverts;
+                    ci = (ai + cinc) % nverts;
                     endi = bi;
                 }
                 else
                 {
-                    cinc = Nverts - 1;
-                    ci = (bi + cinc) % Nverts;
+                    cinc = nverts - 1;
+                    ci = (bi + cinc) % nverts;
                     endi = ai;
                 }
 
                 // Tessellate only outer edges or edges between areas.
                 while (ci != endi)
                 {
-                    float d = Utils.DistancePtSeg2D(Verts[ci].X, Verts[ci].Z, ax, az, bx, bz);
+                    float d = Utils.DistancePtSeg2D(verts[ci].X, verts[ci].Z, ax, az, bx, bz);
                     if (d > maxd)
                     {
                         maxd = d;
                         maxi = ci;
                     }
-                    ci = (ci + cinc) % Nverts;
+                    ci = (ci + cinc) % nverts;
                 }
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (maxError * maxError))
+                if (maxi != -1 && maxd > maxErrorSqr)
                 {
-                    Npoly++;
-                    for (int j = Npoly - 1; j > i; --j)
+                    npoly++;
+                    for (int j = npoly - 1; j > i; --j)
                     {
-                        Poly[j] = Poly[j - 1];
+                        poly[j] = poly[j - 1];
                     }
-                    Poly[i + 1] = maxi;
+                    poly[i + 1] = maxi;
                 }
                 else
                 {
                     i++;
                 }
             }
-
-            // Remap vertices
+        }
+        /// <summary>
+        /// Remap vertices
+        /// </summary>
+        private void RemapVertices()
+        {
+            //Look for the start index in the polygon
             int start = 0;
-            for (int i = 1; i < Npoly; ++i)
+            for (int i = 1; i < npoly; ++i)
             {
-                if (Poly[i] < Poly[start])
+                if (poly[i] < poly[start])
                 {
                     start = i;
                 }
             }
 
-            Nverts = 0;
-            for (int i = 0; i < Npoly; ++i)
+            //Remap from the start position
+            nverts = 0;
+            for (int i = 0; i < npoly; ++i)
             {
-                int j = (start + i) % Npoly;
-                var src = Verts[Poly[j]];
-                Verts[Nverts++] = new Int4()
-                {
-                    X = src.X,
-                    Y = src.Y,
-                    Z = src.Z,
-                    W = src.W,
-                };
+                int j = (start + i) % npoly;
+                verts[nverts++] = new(verts[poly[j]]);
+            }
+        }
+        /// <summary>
+        /// Reset the contour
+        /// </summary>
+        public void Reset()
+        {
+            nverts = 0;
+        }
+        /// <summary>
+        /// Remove last vertex
+        /// </summary>
+        public void RemoveLast()
+        {
+            var pa = verts[nverts - 1];
+            var pb = verts[0];
+            if (pa[0] == pb[0] && pa[2] == pb[2])
+            {
+                nverts--;
             }
         }
     }

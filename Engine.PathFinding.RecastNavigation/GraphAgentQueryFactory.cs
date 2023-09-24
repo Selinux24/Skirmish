@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -7,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Graph agent query
     /// </summary>
-    public class GraphAgentQuery : IDisposable
+    class GraphAgentQueryFactory : IDisposable
     {
         /// <summary>
         /// Agent
@@ -25,21 +26,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Constructor
         /// </summary>
-        public GraphAgentQuery()
+        public GraphAgentQueryFactory()
         {
 
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~GraphAgentQuery()
+        ~GraphAgentQueryFactory()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -53,8 +52,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                this.Agent = null;
-                this.NavMesh = null;
+                Agent = null;
+                NavMesh = null;
             }
         }
 
@@ -64,7 +63,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new navigation mesh query</returns>
         public NavMeshQuery CreateQuery()
         {
-            return new NavMeshQuery(this.NavMesh, this.MaxNodes);
+            return new NavMeshQuery(NavMesh, MaxNodes);
+        }
+        /// <summary>
+        /// Removes the tiles in the list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        public void RemoveTiles(IEnumerable<UpdateTileData> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                NavMesh.RemoveTilesAtPosition(tile.X, tile.Y);
+            }
         }
     }
 }

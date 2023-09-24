@@ -25,10 +25,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int TriCount { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the polygon detail
-        /// </summary>
-        /// <returns>Returns the text representation of the polygon detail</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"VertBase {VertBase}; TriBase {TriBase}; VertCount {VertCount}; TriCount {TriCount};";

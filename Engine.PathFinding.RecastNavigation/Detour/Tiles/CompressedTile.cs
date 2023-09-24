@@ -65,10 +65,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return layer;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Salt {Salt}; Flags {Flags}; Header {Header} Data {Data} Next {Next != null}";

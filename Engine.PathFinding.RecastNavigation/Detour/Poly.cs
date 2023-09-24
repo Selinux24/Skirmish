@@ -13,7 +13,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// A flag that indicates that an entity links to an external entity.
         /// (E.g. A polygon edge is a portal that links to another polygon.)
         /// </summary>
-        public const int DT_EXT_LINK = 0x8000;
+        const int DT_EXT_LINK = 0x8000;
 
         /// <summary>
         /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
@@ -44,37 +44,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public PolyTypes Type { get; set; }
 
-        public static Poly Create(IndexedPolygon src, SamplePolyFlagTypes flags, SamplePolyAreas area, int nvp)
+        /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="start">Start reference</param>
+        /// <param name="end">End reference</param>
+        /// <param name="flags">Connection flags</param>
+        /// <param name="area">Area flags</param>
+        public static Poly CreateOffMesh(int start, int end, SamplePolyFlagTypes flags, SamplePolyAreas area)
         {
-            int[] verts = new int[nvp];
-            int[] neis = new int[nvp];
-
-            Array.ConstrainedCopy(src.GetVertices(), 0, verts, 0, nvp);
-            Array.ConstrainedCopy(src.GetVertices(), nvp, neis, 0, nvp);
-
-            neis = neis.Select(n => DecodeNei(n)).ToArray();
-
-            int vertCount = Array.IndexOf(verts, -1);
-            vertCount = vertCount < 0 ? nvp : vertCount;
-
             var p = new Poly
             {
                 Flags = flags,
                 Area = area,
-                Type = PolyTypes.Ground,
-                Verts = verts,
-                Neis = neis,
-                VertCount = vertCount,
-            };
-
-            return p;
-        }
-        public static Poly Create(int start, int end, GraphConnectionFlagTypes flags, GraphConnectionAreaTypes area)
-        {
-            var p = new Poly
-            {
-                Flags = (SamplePolyFlagTypes)flags,
-                Area = (SamplePolyAreas)area,
                 Type = PolyTypes.OffmeshConnection
             };
             p.Verts[0] = start;
@@ -83,9 +65,44 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return p;
         }
+        /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="flags">Sample flags</param>
+        /// <param name="area">Sample area</param>
+        /// <param name="nvp">Maximum vertices per poligon</param>
+        public static Poly Create(IndexedPolygon polygon, SamplePolyFlagTypes flags, SamplePolyAreas area, int nvp)
+        {
+            int[] verts = new int[nvp];
+            int[] neis = new int[nvp];
+
+            var polyVerts = polygon.GetVertices();
+
+            Array.ConstrainedCopy(polyVerts, 0, verts, 0, nvp);
+            Array.ConstrainedCopy(polyVerts, nvp, neis, 0, nvp);
+
+            neis = neis.Select(DecodeNei).ToArray();
+
+            int vertCount = Array.IndexOf(verts, -1);
+            vertCount = vertCount < 0 ? nvp : vertCount;
+
+            return new Poly
+            {
+                Flags = flags,
+                Area = area,
+                Type = PolyTypes.Ground,
+                Verts = verts,
+                Neis = neis,
+                VertCount = vertCount,
+            };
+        }
+        /// <summary>
+        /// Decodes the neighbor index
+        /// </summary>
+        /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if ((n & 0x8000) != 0)
+            if ((n & DT_EXT_LINK) != 0)
             {
                 // Border or portal edge.
                 var dir = n & 0xf;
@@ -118,6 +135,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return n;
         }
+        /// <summary>
+        /// Gets the point to side index
+        /// </summary>
+        /// <param name="side">Side</param>
+        public static int PointToSide(int side)
+        {
+            return DT_EXT_LINK | side;
+        }
 
         /// <summary>
         /// Gets the neighbour direction
@@ -127,6 +152,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int GetNeighbourDir(int index)
         {
             return Neis[index] & 0xff;
+        }
+        /// <summary>
+        /// Gets whether the neighbour is an external link or not
+        /// </summary>
+        /// <param name="nei">Neighbour index</param>
+        public bool NeighbourIsExternalLink(int nei)
+        {
+            return (Neis[nei] & DT_EXT_LINK) != 0;
         }
 
         /// <inheritdoc/>

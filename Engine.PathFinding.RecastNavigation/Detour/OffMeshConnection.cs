@@ -11,11 +11,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class OffMeshConnection
     {
         /// <summary>
-        /// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
-        /// </summary>
-        public const int DT_OFFMESH_CON_BIDIR = 1;
-
-        /// <summary>
         /// The start endpoint of the connection. [(ax, ay, az)]
         /// </summary>
         public Vector3 Start { get; set; }
@@ -37,7 +32,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <remarks>
         /// These are not the connection's user defined flags. Those are assigned via the connection's dtPoly definition. These are link flags used for internal purposes.
         /// </remarks>
-        public int Flags { get; set; }
+        public OffMeshConnectionDirections Direction { get; set; }
         /// <summary>
         /// End point side.
         /// </summary>
@@ -47,10 +42,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int UserId { get; set; }
 
+        /// <summary>
+        /// Gets whether this off-mesh connection is bidirectional or not
+        /// </summary>
+        /// <returns></returns>
+        public bool IsBidirectional()
+        {
+            return Direction == OffMeshConnectionDirections.Bidirectional;
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"start: {Start}; end: {End}; rad: {Rad}; poly: {Poly}; flags: {Flags}; side: {Side}; userId: {UserId};";
+            return $"start: {Start}; end: {End}; rad: {Rad}; poly: {Poly}; direction: {Direction}; side: {Side}; userId: {UserId};";
         }
     }
 }

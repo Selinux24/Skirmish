@@ -56,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation
             var tris = await graph.Input.GetTriangles();
             string hash = GetHash(graph.Settings, tris);
 
-            var meshFiles = graph.AgentQueries.Select(agentQ => (agentQ.Agent, NavMeshFile.FromNavmesh(agentQ.NavMesh))).ToList();
+            var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
 
             return new GraphFile()
             {
@@ -73,7 +73,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the graph</returns>
         public static async Task<Graph> FromGraphFile(GraphFile file, InputGeometry inputGeometry)
         {
-            var agentQueries = new List<GraphAgentQuery>();
+            var graph = new Graph
+            {
+                Settings = file.Settings,
+                Input = inputGeometry,
+                Initialized = true,
+            };
 
             await Task.Run(() =>
             {
@@ -82,22 +87,11 @@ namespace Engine.PathFinding.RecastNavigation
                     var agent = agentData.Agent;
                     var navMesh = NavMeshFile.FromNavmeshFile(agentData.NavMesh);
 
-                    agentQueries.Add(new GraphAgentQuery
-                    {
-                        Agent = agent,
-                        NavMesh = navMesh,
-                        MaxNodes = file.Settings.MaxNodes,
-                    });
+                    graph.AddAgent(agent, navMesh);
                 }
             });
 
-            return new Graph
-            {
-                Settings = file.Settings,
-                AgentQueries = agentQueries,
-                Input = inputGeometry,
-                Initialized = true,
-            };
+            return graph;
         }
         /// <summary>
         /// Loads the graph file from a file name

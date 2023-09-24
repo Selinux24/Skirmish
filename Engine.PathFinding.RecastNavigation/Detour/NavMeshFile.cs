@@ -118,5 +118,4 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public List<TileCacheData> TileCacheData { get; set; }
     }
-
 }

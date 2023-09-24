@@ -1,7 +1,6 @@
 ﻿using Engine.PathFinding.RecastNavigation.Recast;
 using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -10,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public struct TileCacheLayer
     {
-        public const int DT_LAYER_MAX_NEIS = 16;
+        const int DT_LAYER_MAX_NEIS = 16;
 
         /// <summary>
         /// Header
@@ -37,6 +36,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int[] Regs { get; set; }
 
+        /// <summary>
+        /// Gets whether two regions can merge or not
+        /// </summary>
+        /// <param name="oldRegId">Old region id</param>
+        /// <param name="newRegId">New region id</param>
+        /// <param name="regs">Region list</param>
+        /// <param name="nregs">Number of regions in the list</param>
         private static bool CanMerge(int oldRegId, int newRegId, LayerMonotoneRegion[] regs, int nregs)
         {
             int count = 0;
@@ -309,7 +315,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var tempVerts = new Int4[maxTempVerts];
             var tempPoly = new IndexedPolygon(maxTempVerts);
 
-            var temp = new TempContour(tempVerts, maxTempVerts, tempPoly, maxTempVerts);
+            var temp = new TempContour(tempVerts, maxTempVerts, tempPoly);
 
             // Find contours.
             for (int y = 0; y < h; ++y)
@@ -340,18 +346,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         return false;
                     }
 
-                    temp.SimplifyContour(maxError);
+                    var verts = temp.SimplifyContour(maxError);
+                    int nverts = verts.Length;
 
                     // Store contour.
-                    cont.NVerts = temp.Nverts;
+                    cont.NVerts = nverts;
                     if (cont.NVerts > 0)
                     {
-                        cont.Verts = new Int4[temp.Nverts];
+                        cont.Verts = new Int4[nverts];
 
-                        for (int i = 0, j = temp.Nverts - 1; i < temp.Nverts; j = i++)
+                        for (int i = 0, j = nverts - 1; i < nverts; j = i++)
                         {
-                            var v = temp.Verts[j];
-                            var vn = temp.Verts[i];
+                            var v = verts[j];
+                            var vn = verts[i];
                             int nei = vn.W; // The neighbour reg is stored at segment vertex of a segment. 
                             bool shouldRemove = false;
                             int lh = GetCornerHeight(v.X, v.Y, v.Z, walkableClimb, ref shouldRemove);
@@ -428,7 +435,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = Header.Width;
             int h = Header.Height;
 
-            cont.Nverts = 0;
+            cont.Reset();
 
             int startX = x;
             int startY = y;
@@ -502,12 +509,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Remove last vertex if it is duplicate of the first one.
-            var pa = cont.Verts[cont.Nverts - 1];
-            var pb = cont.Verts[0];
-            if (pa[0] == pb[0] && pa[2] == pb[2])
-            {
-                cont.Nverts--;
-            }
+            cont.RemoveLast();
 
             return true;
         }

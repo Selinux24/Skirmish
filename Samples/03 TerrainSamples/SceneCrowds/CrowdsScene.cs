@@ -554,7 +554,7 @@ namespace TerrainSamples.SceneCrowds
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                tankAgents[i].CrowdAgent = Graph.AddCrowdAgent(crowd, tankAgents[i].Manipulator.Position, par);
+                tankAgents[i].CrowdAgent = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
 
                 graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }

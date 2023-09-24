@@ -11,6 +11,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     [Serializable]
     public struct BVItem
     {
+        #region Helper classes
+
         /// <summary>
         /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundingVolumeTreeNode"/>s on the X axis.
         /// </summary>
@@ -78,7 +80,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
 
-        public const int MESH_NULL_IDX = -1;
+        #endregion
+
+        const int MESH_NULL_IDX = -1;
 
         /// <summary>
         /// X axis comparer
@@ -114,22 +118,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         }
 
-        private static void GetMinMaxBounds(Vector3[] vectors, int vb, int ndv, out Vector3 bmin, out Vector3 bmax)
+        /// <summary>
+        /// Gets whether the specified index is null or not
+        /// </summary>
+        /// <param name="index">Index to test</param>
+        public static bool ItemIsNull(int index)
         {
-            bmin = vectors[vb];
-            bmax = vectors[vb];
-            for (int j = 1; j < ndv; j++)
-            {
-                bmin = Vector3.Min(bmin, vectors[vb + j]);
-                bmax = Vector3.Max(bmax, vectors[vb + j]);
-            }
+            return index == MESH_NULL_IDX;
         }
 
+        /// <summary>
+        /// Calculates detail bounds
+        /// </summary>
+        /// <param name="dm">Detail mesh</param>
+        /// <param name="detailVerts">Detail vertices</param>
         public void CalcDetailBounds(PolyMeshDetailIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
         {
             int vb = dm.VertBase;
             int ndv = dm.VertCount;
-            GetMinMaxBounds(detailVerts, vb, ndv, out var bmin, out var bmax);
+            Utils.GetMinMaxBounds(detailVerts, vb, ndv, out var bmin, out var bmax);
 
             // BV-tree uses cs for all dimensions
             BMin = new Int3
@@ -146,6 +153,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Z = MathUtil.Clamp((int)((bmax.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
         }
+        /// <summary>
+        /// Calculates polygon bounds
+        /// </summary>
+        /// <param name="p">Indexed polygon</param>
+        /// <param name="nvp">Number of vertices</param>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="ch">Cell height</param>
+        /// <param name="cs">Cell size</param>
         public void CalcPolygonBounds(IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
         {
             var itBMin = verts[p[0]];
@@ -166,6 +181,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (y > BMax.Y) itBMax.Y = y;
                 if (z > BMax.Z) itBMax.Z = z;
             }
+
             // Remap y
             itBMin.Y = (int)Math.Floor(BMin.Y * ch / cs);
             itBMax.Y = (int)Math.Ceiling(BMax.Y * ch / cs);

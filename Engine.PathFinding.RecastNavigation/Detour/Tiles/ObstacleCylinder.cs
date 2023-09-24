@@ -6,20 +6,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Cylinder obstacle
     /// </summary>
-    public struct ObstacleCylinder : IObstacle
+    public readonly struct ObstacleCylinder : IObstacle
     {
         /// <summary>
         /// Center position
         /// </summary>
-        public Vector3 Center { get; set; }
+        private readonly Vector3 center;
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; set; }
+        private readonly float radius;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; }
+        private readonly float height;
 
         /// <summary>
         /// Constructor
@@ -27,52 +27,41 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="cylinder">Cylinder</param>
         public ObstacleCylinder(BoundingCylinder cylinder)
         {
-            Center = cylinder.Center;
-            Radius = cylinder.Radius;
-            Height = cylinder.Height;
+            center = cylinder.Center;
+            radius = cylinder.Radius;
+            height = cylinder.Height;
         }
 
-        /// <summary>
-        /// Gets the obstacle bounds
-        /// </summary>
-        /// <returns>Returns a bounding box</returns>
+        /// <inheritdoc/>
         public readonly BoundingBox GetBounds()
         {
             Vector3 bmin;
             Vector3 bmax;
-            float hh = Height * 0.5f;
+            float hh = height * 0.5f;
 
-            bmin.X = Center.X - Radius;
-            bmin.Y = Center.Y - hh;
-            bmin.Z = Center.Z - Radius;
-            bmax.X = Center.X + Radius;
-            bmax.Y = Center.Y + hh;
-            bmax.Z = Center.Z + Radius;
+            bmin.X = center.X - radius;
+            bmin.Y = center.Y - hh;
+            bmin.Z = center.Z - radius;
+            bmax.X = center.X + radius;
+            bmax.Y = center.Y + hh;
+            bmax.Z = center.Z + radius;
 
             return new BoundingBox(bmin, bmax);
         }
-        /// <summary>
-        /// Marks the build context area with the specified area type
-        /// </summary>
-        /// <param name="tc">Build context</param>
-        /// <param name="orig">Origin</param>
-        /// <param name="cs">Cell size</param>
-        /// <param name="ch">Cell height</param>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns true if all layer areas were marked</returns>
+        /// <inheritdoc/>
         public readonly bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             var bbox = GetBounds();
 
-            float r2 = (float)Math.Pow(Radius / cs + 0.5f, 2.0f);
+            float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
 
             int w = tc.Layer.Header.Width;
             int h = tc.Layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            float px = (Center.X - orig.X) * ics;
-            float pz = (Center.Z - orig.Z) * ics;
+            float px = (center.X - orig.X) * ics;
+            float pz = (center.Z - orig.Z) * ics;
 
             var bounds = ComputeBounds(bbox, orig, w, h, ics, ich);
             if (!bounds.HasValue)
@@ -106,6 +95,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
+        /// <summary>
+        /// Computes obstacle bounds
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="orig">Origin</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <param name="ics">Cell size</param>
+        /// <param name="ich">Cell height</param>
         private static BoundingBoxInt? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
         {
             int minx = (int)Math.Floor((bbox.Minimum.X - orig.X) * ics);

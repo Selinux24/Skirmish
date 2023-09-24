@@ -6,12 +6,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Axis aligned box obstacle
     /// </summary>
-    public struct ObstacleBox : IObstacle
+    public readonly struct ObstacleBox : IObstacle
     {
         /// <summary>
         /// Box
         /// </summary>
-        public BoundingBox Box { get; set; }
+        private readonly BoundingBox bbox;
 
         /// <summary>
         /// Constructor
@@ -19,7 +19,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="bbox">Bounding box</param>
         public ObstacleBox(BoundingBox bbox)
         {
-            Box = bbox;
+            this.bbox = bbox;
         }
         /// <summary>
         /// Constructor
@@ -28,26 +28,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="max">Box maximum</param>
         public ObstacleBox(Vector3 min, Vector3 max)
         {
-            Box = new BoundingBox(min, max);
+            bbox = new BoundingBox(min, max);
         }
 
-        /// <summary>
-        /// Gets the obstacle bounds
-        /// </summary>
-        /// <returns>Returns a bounding box</returns>
+        /// <inheritdoc/>
         public readonly BoundingBox GetBounds()
         {
-            return Box;
+            return bbox;
         }
-        /// <summary>
-        /// Marks the build context area with the specified area type
-        /// </summary>
-        /// <param name="tc">Build context</param>
-        /// <param name="orig">Origin</param>
-        /// <param name="cs">Cell size</param>
-        /// <param name="ch">Cell height</param>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns true if all layer areas were marked</returns>
+        /// <inheritdoc/>
         public bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             int w = tc.Layer.Header.Width;
@@ -80,14 +69,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
+        /// <summary>
+        /// Computes the obstacle bounds
+        /// </summary>
+        /// <param name="orig">Origin</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <param name="ics">Cell size</param>
+        /// <param name="ich">Cell height</param>
         private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float ics, float ich)
         {
-            int minx = (int)Math.Floor((Box.Minimum.X - orig.X) * ics);
-            int miny = (int)Math.Floor((Box.Minimum.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((Box.Minimum.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((Box.Maximum.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((Box.Maximum.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((Box.Maximum.Z - orig.Z) * ics);
+            int minx = (int)Math.Floor((bbox.Minimum.X - orig.X) * ics);
+            int miny = (int)Math.Floor((bbox.Minimum.Y - orig.Y) * ich);
+            int minz = (int)Math.Floor((bbox.Minimum.Z - orig.Z) * ics);
+            int maxx = (int)Math.Floor((bbox.Maximum.X - orig.X) * ics);
+            int maxy = (int)Math.Floor((bbox.Maximum.Y - orig.Y) * ich);
+            int maxz = (int)Math.Floor((bbox.Maximum.Z - orig.Z) * ics);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

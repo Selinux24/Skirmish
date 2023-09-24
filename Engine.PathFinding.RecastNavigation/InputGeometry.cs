@@ -73,12 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
                     progressCallback?.Invoke(progress * (i + 1) / agentCount);
                 });
 
-                graph.AgentQueries.Add(new GraphAgentQuery
-                {
-                    Agent = agent,
-                    NavMesh = nm,
-                    MaxNodes = graph.Settings.MaxNodes,
-                });
+                graph.AddAgent(agent, nm);
             }
 
             graph.Initialized = true;

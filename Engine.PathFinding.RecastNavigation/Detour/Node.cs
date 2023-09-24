@@ -2,6 +2,9 @@
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    /// <summary>
+    /// Node
+    /// </summary>
     public class Node
     {
         /// <summary>

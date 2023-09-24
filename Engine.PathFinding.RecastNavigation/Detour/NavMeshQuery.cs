@@ -15,7 +15,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The limit is given as a multiple of the character radius
         /// </summary>
         const float DT_RAY_CAST_LIMIT_PROPORTIONS = 50.0f;
+        /// <summary>
+        /// Parent node bits
+        /// </summary>
         const int DT_NODE_PARENT_BITS = 24;
+        /// <summary>
+        /// State node bits
+        /// </summary>
         const int DT_NODE_STATE_BITS = 2;
         /// <summary>
         /// Number of extra states per node. See dtNode::state
@@ -25,6 +31,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Search heuristic scale.
         /// </summary>
         const float H_SCALE = 0.999f;
+        /// <summary>
+        /// Maximum polygon count in the query
+        /// </summary>
+        const int MAX_POLYS = 256;
+        /// <summary>
+        /// Maximum smooth points in the query
+        /// </summary>
+        const int MAX_SMOOTH = 2048;
 
         /// <summary>
         /// Navmesh data.
@@ -133,32 +147,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
 
         /// <summary>
-        /// Calculate quantized box
-        /// </summary>
-        private static void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
-        {
-            var tb = tile.Header.Bounds;
-            float qfac = tile.Header.BvQuantFactor;
-
-            // Clamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-
-            // Quantize
-            bmin = new Int3();
-            bmax = new Int3();
-            bmin.X = (int)(qfac * minx) & 0xfffe;
-            bmin.Y = (int)(qfac * miny) & 0xfffe;
-            bmin.Z = (int)(qfac * minz) & 0xfffe;
-            bmax.X = (int)(qfac * maxx + 1) | 1;
-            bmax.Y = (int)(qfac * maxy + 1) | 1;
-            bmax.Z = (int)(qfac * maxz + 1) | 1;
-        }
-        /// <summary>
         /// Selects a tile reference
         /// </summary>
         /// <param name="best">Best tile</param>
@@ -253,6 +241,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             mid = (left + right) * 0.5f;
 
             return Status.DT_SUCCESS;
+        }
+        /// <summary>
+        /// Finds movement delta
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="targetPos">Target position</param>
+        /// <param name="overMesh">Over mesh flag</param>
+        private static Vector3 FindMovementDelta(Vector3 position, Vector3 targetPos, bool overMesh)
+        {
+            const float STEP_SIZE = 0.5f;
+
+            // Find movement delta.
+            Vector3 delta = Vector3.Subtract(targetPos, position);
+            float len = delta.Length();
+
+            // If the steer target is end of path or off-mesh link, do not move past the location.
+            if (overMesh && len < STEP_SIZE)
+            {
+                len = 1;
+            }
+            else
+            {
+                len = STEP_SIZE / len;
+            }
+
+            return Vector3.Add(position, delta * len);
         }
 
         /// <summary>
@@ -527,8 +541,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         // Next portal.
                         var ppStatus = GetPortalPoints(
-                            pathNodes.ElementAt(i),
-                            pathNodes.ElementAt(i + 1),
+                            pathNodes[i],
+                            pathNodes[i + 1],
                             out left, out right, out _, out toType);
 
                         if (ppStatus.HasFlag(Status.DT_FAILURE))
@@ -536,7 +550,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
                             // Clamp the end point to path[i], and return the path so far.
 
-                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes.ElementAt(i), endPos, out closestEndPos);
+                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
                             if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
                             {
                                 // This should only happen when the first polygon is invalid.
@@ -548,12 +562,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             {
                                 // Ignore status return value as we're just about to return anyway.
                                 AppendPortals(
-                                    apexIndex, i, closestEndPos, pathNodes.ToArray(), maxStraightPath, options,
+                                    apexIndex, i, closestEndPos, pathNodes, maxStraightPath, options,
                                     ref resultPath);
                             }
 
                             // Ignore status return value as we're just about to return anyway.
-                            resultPath.AppendVertex(closestEndPos, 0, pathNodes.ElementAt(i), maxStraightPath);
+                            resultPath.AppendVertex(closestEndPos, 0, pathNodes[i], maxStraightPath);
 
                             return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
                         }
@@ -579,7 +593,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (Utils.VClosest(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
-                            rightPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
+                            rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             rightPolyType = toType;
                             rightIndex = i;
                         }
@@ -589,7 +603,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
                             {
                                 var appendStatus = AppendPortals(
-                                    apexIndex, leftIndex, portalLeft, pathNodes.ToArray(), maxStraightPath, options,
+                                    apexIndex, leftIndex, portalLeft, pathNodes, maxStraightPath, options,
                                     ref resultPath);
                                 if (appendStatus != Status.DT_IN_PROGRESS)
                                 {
@@ -636,7 +650,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (Utils.VClosest(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
-                            leftPolyRef = (i + 1 < path.Count) ? pathNodes.ElementAt(i + 1) : 0;
+                            leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             leftPolyType = toType;
                             leftIndex = i;
                         }
@@ -646,7 +660,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
                             {
                                 var appendStatus = AppendPortals(
-                                    apexIndex, rightIndex, portalRight, pathNodes.ToArray(), maxStraightPath, options,
+                                    apexIndex, rightIndex, portalRight, pathNodes, maxStraightPath, options,
                                     ref resultPath);
 
                                 if (appendStatus != Status.DT_IN_PROGRESS)
@@ -691,7 +705,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
                 {
                     var stat = AppendPortals(
-                        apexIndex, path.Count - 1, closestEndPos, pathNodes.ToArray(), maxStraightPath, options,
+                        apexIndex, path.Count - 1, closestEndPos, pathNodes, maxStraightPath, options,
                         ref resultPath);
 
                     if (stat != Status.DT_IN_PROGRESS)
@@ -1142,7 +1156,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxPath">The max number of polygons the @p path array can hold.</param>
         /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FinalizeSlicedFindPathPartial(int maxPath, IEnumerable<int> existing, out SimplePath path)
+        public Status FinalizeSlicedFindPathPartial(int maxPath, int[] existing, out SimplePath path)
         {
             path = null;
 
@@ -1169,9 +1183,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Find furthest existing node that was visited.
                 Node node = null;
-                for (int i = existing.Count() - 1; i >= 0; --i)
+                for (int i = existing.Length - 1; i >= 0; --i)
                 {
-                    m_nodePool.FindNodes(existing.ElementAt(i), 1, out Node[] nodes);
+                    m_nodePool.FindNodes(existing[i], 1, out Node[] nodes);
                     if (nodes != null)
                     {
                         node = nodes[0];
@@ -2022,7 +2036,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     int MAX_NEIS = 8;
                     var neis = new List<int>(MAX_NEIS);
 
-                    if ((cur.Poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
+                    if (cur.Poly.NeighbourIsExternalLink(j))
                     {
                         // Tile border.
                         for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
@@ -2440,7 +2454,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int i = 0, j = best.Poly.VertCount - 1; i < best.Poly.VertCount; j = i++)
             {
                 // Skip non-solid edges.
-                if ((best.Poly.Neis[j] & Poly.DT_EXT_LINK) != 0)
+                if (best.Poly.NeighbourIsExternalLink(j))
                 {
                     // Tile border.
                     bool solid = BorderIsSolid(best, j, filter);
@@ -2666,12 +2680,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = 0, j = cur.Poly.VertCount - 1; i < cur.Poly.VertCount; j = i++)
             {
-                int neij = cur.Poly.Neis[j];
                 var vj = cur.Tile.Verts[cur.Poly.Verts[j]];
                 var vi = cur.Tile.Verts[cur.Poly.Verts[i]];
 
                 // Skip non-solid edges.
-                if ((neij & Poly.DT_EXT_LINK) != 0)
+                if (cur.Poly.NeighbourIsExternalLink(i))
                 {
                     // Tile border.
                     for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
@@ -2690,6 +2703,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 else
                 {
                     // Internal edge
+                    int neij = cur.Poly.Neis[j];
                     int neiRef = 0;
                     if (neij != 0)
                     {
@@ -3265,7 +3279,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var polyRefs = new List<int>(batchSize);
 
             // Calculate quantized box
-            CalculateQuantizedBox(tile, bounds, out var bmin, out var bmax);
+            tile.CalculateQuantizedBox(bounds, out var bmin, out var bmax);
 
             // Traverse tree
             int bse = m_nav.GetTileRef(tile);
@@ -3278,7 +3292,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     tile.BvTree[nodeIndex] :
                     new BVNode();
 
-                bool overlap = Utils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
+                bool overlap = Utils.OverlapBounds(bmin, bmax, node.BMin, node.BMax);
                 bool isLeafNode = node.I >= 0;
 
                 if (isLeafNode && overlap)
@@ -3475,6 +3489,353 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             return Status.DT_SUCCESS;
+        }
+
+        /// <summary>
+        /// Calcs a path
+        /// </summary>
+        /// <param name="filter">Filter</param>
+        /// <param name="polyPickExt">Extensions</param>
+        /// <param name="mode">Path mode</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="resultPath">Result path</param>
+        /// <returns>Returns the status of the path calculation</returns>
+        public Status CalcPath(
+            QueryFilter filter,
+            Vector3 polyPickExt,
+            PathFindingMode mode,
+            Vector3 startPos, Vector3 endPos,
+            out IEnumerable<Vector3> resultPath)
+        {
+            resultPath = null;
+
+            FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out _);
+            FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out _);
+
+            var endPointsDefined = (startRef != 0 && endRef != 0);
+            if (!endPointsDefined)
+            {
+                return Status.DT_FAILURE;
+            }
+
+            if (mode == PathFindingMode.Follow)
+            {
+                if (CalcPathFollow(filter, startPos, endPos, startRef, endRef, out var path))
+                {
+                    resultPath = path;
+
+                    return Status.DT_SUCCESS;
+                }
+            }
+            else if (mode == PathFindingMode.Straight)
+            {
+                if (CalcPathStraigh(filter, startPos, endPos, startRef, endRef, out var path))
+                {
+                    resultPath = path;
+
+                    return Status.DT_SUCCESS;
+                }
+            }
+            else if (mode == PathFindingMode.Sliced)
+            {
+                var status = InitSlicedFindPath(startRef, endRef, startPos, endPos, filter);
+                if (status != Status.DT_SUCCESS)
+                {
+                    return status;
+                }
+                return UpdateSlicedFindPath(20, out _);
+            }
+
+            return Status.DT_FAILURE;
+        }
+        /// <summary>
+        /// Calculates the result path
+        /// </summary>
+        /// <param name="filter">Query filter</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="startRef">Start reference</param>
+        /// <param name="endRef">End reference</param>
+        /// <param name="resultPath">Resulting path</param>
+        private bool CalcPathFollow(
+            QueryFilter filter,
+            Vector3 startPos, Vector3 endPos,
+            int startRef, int endRef,
+            out IEnumerable<Vector3> resultPath)
+        {
+            resultPath = null;
+
+            FindPath(
+                startRef, endRef, startPos, endPos, filter,
+                MAX_POLYS,
+                out var iterPath);
+
+            if (iterPath.Count <= 0)
+            {
+                return false;
+            }
+
+            // Iterate over the path to find smooth path on the detail mesh surface.
+            ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
+            ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
+
+            var smoothPath = new List<Vector3>
+            {
+                iterPos
+            };
+
+            // Move towards target a small advancement at a time until target reached or
+            // when ran out of memory to store the path.
+            while (iterPath.Count != 0 && smoothPath.Count < MAX_SMOOTH)
+            {
+                if (IterPathFollow(filter, targetPos, smoothPath, iterPath, ref iterPos))
+                {
+                    //End reached
+                    break;
+                }
+            }
+
+            resultPath = smoothPath.ToArray();
+
+            return smoothPath.Count > 0;
+        }
+        /// <summary>
+        /// Smooths the path
+        /// </summary>
+        /// <param name="filter">Query filter</param>
+        /// <param name="targetPos">Target position</param>
+        /// <param name="smoothPath">Smooth path</param>
+        /// <param name="iterPath">Path to iterate</param>
+        /// <param name="iterPos">Current iteration position</param>
+        private bool IterPathFollow(
+            QueryFilter filter,
+            Vector3 targetPos,
+            List<Vector3> smoothPath,
+            SimplePath iterPath,
+            ref Vector3 iterPos)
+        {
+            float SLOP = 0.01f;
+
+            // Find location to steer towards.
+            if (!GetSteerTarget(iterPos, targetPos, SLOP, iterPath, out var target))
+            {
+                return true;
+            }
+
+            bool endOfPath = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
+            bool offMeshConnection = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
+
+            // Find movement delta.
+            Vector3 moveTgt = FindMovementDelta(iterPos, target.Position, endOfPath || offMeshConnection);
+
+            // Move
+            MoveAlongSurface(
+                iterPath.Start, iterPos, moveTgt, filter, 16,
+                out var result, out var visited);
+
+            SimplePath.FixupCorridor(iterPath, visited);
+            SimplePath.FixupShortcuts(iterPath, this);
+
+            GetPolyHeight(iterPath.Start, result, out float h);
+            result.Y = h;
+            iterPos = result;
+
+            bool inRange = Utils.InRange(iterPos, target.Position, SLOP, 1.0f);
+            if (!inRange)
+            {
+                // Store results.
+                if (smoothPath.Count < MAX_SMOOTH)
+                {
+                    smoothPath.Add(iterPos);
+                }
+
+                return false;
+            }
+
+            // Handle end of path and off-mesh links when close enough.
+            if (endOfPath)
+            {
+                // Reached end of path.
+                iterPos = targetPos;
+
+                if (smoothPath.Count < MAX_SMOOTH)
+                {
+                    smoothPath.Add(iterPos);
+                }
+
+                return true;
+            }
+
+            if (offMeshConnection)
+            {
+                // Reached off-mesh connection.
+                HandleOffMeshConnection(target, smoothPath, iterPath, ref iterPos);
+
+                // Store results.
+                if (smoothPath.Count < MAX_SMOOTH)
+                {
+                    smoothPath.Add(iterPos);
+                }
+
+                return false;
+            }
+
+            // Store results.
+            if (smoothPath.Count < MAX_SMOOTH)
+            {
+                smoothPath.Add(iterPos);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Handle off-mesh connection
+        /// </summary>
+        /// <param name="target">Target position</param>
+        /// <param name="smoothPath">Smooth path</param>
+        /// <param name="iterPath">Path to iterate</param>
+        /// <param name="iterPos">Current iteration position</param>
+        private void HandleOffMeshConnection(
+            SteerTarget target,
+            List<Vector3> smoothPath,
+            SimplePath iterPath,
+            ref Vector3 iterPos)
+        {
+            // Advance the path up to and over the off-mesh connection.
+            int prevRef = 0;
+            int polyRef = iterPath.Start;
+            int npos = 0;
+            var iterNodes = iterPath.GetPath();
+            while (npos < iterPath.Count && polyRef != target.Ref)
+            {
+                prevRef = polyRef;
+                polyRef = iterNodes[npos];
+                npos++;
+            }
+            iterPath.Prune(npos);
+
+            // Handle the connection.
+            if (GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
+                prevRef, polyRef, out Vector3 sPos, out Vector3 ePos))
+            {
+                if (smoothPath.Count < MAX_SMOOTH)
+                {
+                    smoothPath.Add(sPos);
+                }
+
+                // Move position at the other side of the off-mesh link.
+                iterPos = ePos;
+                GetPolyHeight(iterPath.Start, iterPos, out float eh);
+                iterPos.Y = eh;
+            }
+        }
+        /// <summary>
+        /// Calculates straigh path
+        /// </summary>
+        /// <param name="filter">Query filter</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="startRef">Start reference</param>
+        /// <param name="endRef">End reference</param>
+        /// <param name="resultPath">Resulting path</param>
+        private bool CalcPathStraigh(
+            QueryFilter filter,
+            Vector3 startPos, Vector3 endPos,
+            int startRef, int endRef,
+            out IEnumerable<Vector3> resultPath)
+        {
+            FindPath(
+                startRef, endRef, startPos, endPos, filter, MAX_POLYS,
+                out var polys);
+
+            if (polys.Count < 0)
+            {
+                resultPath = Array.Empty<Vector3>();
+
+                return false;
+            }
+
+            // In case of partial path, make sure the end point is clamped to the last polygon.
+            Vector3 epos = endPos;
+            if (polys.End != endRef)
+            {
+                ClosestPointOnPoly(polys.End, endPos, out epos, out _);
+            }
+
+            FindStraightPath(
+                startPos, epos, polys,
+                MAX_POLYS, StraightPathOptions.AllCrossings,
+                out var straightPath);
+
+            resultPath = straightPath.GetPath();
+
+            return straightPath.Count > 0;
+        }
+        /// <summary>
+        /// Gets a steer target
+        /// </summary>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="minTargetDist">Miminum tangent distance</param>
+        /// <param name="path">Current path</param>
+        /// <param name="target">Out target</param>
+        private bool GetSteerTarget(
+            Vector3 startPos, Vector3 endPos,
+            float minTargetDist,
+            SimplePath path,
+            out SteerTarget target)
+        {
+            target = new SteerTarget
+            {
+                Position = Vector3.Zero,
+                Flag = 0,
+                Ref = 0,
+                Points = null,
+                PointCount = 0
+            };
+
+            // Find steer target.
+            int MAX_STEER_POINTS = 3;
+            FindStraightPath(
+                startPos, endPos, path,
+                MAX_STEER_POINTS, StraightPathOptions.None,
+                out var steerPath);
+
+            if (steerPath.Count == 0)
+            {
+                return false;
+            }
+
+            target.PointCount = steerPath.Count;
+            target.Points = steerPath.GetPath();
+
+            // Find vertex far enough to steer to.
+            int ns = 0;
+            while (ns < steerPath.Count)
+            {
+                // Stop at Off-Mesh link or when point is further than slop away.
+                if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
+                    !Utils.InRange(steerPath.GetPath(ns), startPos, minTargetDist, 1000.0f))
+                {
+                    break;
+                }
+                ns++;
+            }
+            // Failed to find good point to steer to.
+            if (ns >= steerPath.Count)
+            {
+                return false;
+            }
+
+            var pos = steerPath.GetPath(ns);
+            pos.Y = startPos.Y;
+
+            target.Position = pos;
+            target.Flag = steerPath.GetFlag(ns);
+            target.Ref = steerPath.GetRef(ns);
+
+            return true;
         }
     }
 }

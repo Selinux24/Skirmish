@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Utils
+    /// </summary>
     static class Utils
     {
         static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
@@ -647,40 +650,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        /// <summary>
-        /// Determines if two axis-aligned bounding boxes overlap.
-        /// </summary>
-        /// <param name="amin">Minimum bounds of box A</param>
-        /// <param name="amax">Maximum bounds of box A</param>
-        /// <param name="bmin">Minimum bounds of box B</param>
-        /// <param name="bmax">Maximum bounds of box B</param>
-        /// <returns>True if the two AABB's overlap</returns>
-        public static bool OverlapQuantBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
-        {
-            return
-                !(amin.X > bmax.X || amax.X < bmin.X) &&
-                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
-                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
-        }
-        /// <summary>
-        /// Determines if two axis-aligned bounding boxes overlap.
-        /// </summary>
-        /// <param name="amin">Minimum bounds of box A</param>
-        /// <param name="amax">Maximum bounds of box A</param>
-        /// <param name="bmin">Minimum bounds of box B</param>
-        /// <param name="bmax">Maximum bounds of box B</param>
-        /// <returns>True if the two AABB's overlap.</returns>
-        public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
-        {
-            return
-                !(amin.X > bmax.X || amax.X < bmin.X) &&
-                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
-                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
-        }
-        public static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
-        {
-            return !((amin + eps) > bmax || (amax - eps) < bmin);
-        }
         public static float DistancePtSeg(Vector3 pt, Vector3 p, Vector3 q)
         {
             float pqx = q.X - p.X;
@@ -735,6 +704,109 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return dmin;
+        }
+        /// <summary>
+        /// Get minimum and maximum bounds of the specified vector list
+        /// </summary>
+        /// <param name="point">Point list</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="length">Length</param>
+        /// <param name="bmin">Resulting minimum bound's position</param>
+        /// <param name="bmax">Resulting maximum bound's position</param>
+        public static void GetMinMaxBounds(Vector3[] point, int startIndex, int length, out Vector3 bmin, out Vector3 bmax)
+        {
+            bmin = point[startIndex];
+            bmax = point[startIndex];
+            for (int j = 1; j < length; j++)
+            {
+                bmin = Vector3.Min(bmin, point[startIndex + j]);
+                bmax = Vector3.Max(bmax, point[startIndex + j]);
+            }
+        }
+        /// <summary>
+        /// Gets the longest axis
+        /// </summary>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        /// <param name="z">Z position</param>
+        public static int LongestAxis(int x, int y, int z)
+        {
+            int axis = 0;
+            int maxVal = x;
+            if (y > maxVal)
+            {
+                axis = 1;
+                maxVal = y;
+            }
+            if (z > maxVal)
+            {
+                axis = 2;
+            }
+            return axis;
+        }
+        public static float Tween(float t, float t0, float t1)
+        {
+            return MathUtil.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
+        }
+        public static bool InRange(Vector3 a, Vector3 b, float radius, float height)
+        {
+            float dx = b.X - a.X;
+            float dy = b.Y - a.Y;
+            float dz = b.Z - a.Z;
+
+            return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
+        }
+
+        /// <summary>
+        /// Determines if two axis-aligned bounding boxes overlap.
+        /// </summary>
+        /// <param name="amin">Minimum bounds of box A</param>
+        /// <param name="amax">Maximum bounds of box A</param>
+        /// <param name="bmin">Minimum bounds of box B</param>
+        /// <param name="bmax">Maximum bounds of box B</param>
+        /// <returns>True if the two AABB's overlap</returns>
+        public static bool OverlapBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
+        {
+            return
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
+                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
+        }
+        /// <summary>
+        /// Determines if two axis-aligned bounding boxes overlap.
+        /// </summary>
+        /// <param name="amin">Minimum bounds of box A</param>
+        /// <param name="amax">Maximum bounds of box A</param>
+        /// <param name="bmin">Minimum bounds of box B</param>
+        /// <param name="bmax">Maximum bounds of box B</param>
+        /// <returns>True if the two AABB's overlap.</returns>
+        public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
+        {
+            return
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
+                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
+        }
+        /// <summary>
+        /// Checks wether the extents overlaps
+        /// </summary>
+        /// <param name="amin">A minimum rectangle point</param>
+        /// <param name="amax">A maximum rectangle point</param>
+        /// <param name="bounds">Bounds</param>
+        /// <returns>Returns true if rectangles overlap</returns>
+        public static bool OverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
+        {
+            return
+                !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
+                !(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
+        }
+        public static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
+        {
+            return !((amin + eps) > bmax || (amax - eps) < bmin);
+        }
+        public static bool OverlapRange(int amin, int amax, int bmin, int bmax)
+        {
+            return !(amin >= bmax || amax <= bmin);
         }
     }
 }

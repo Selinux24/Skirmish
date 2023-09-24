@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Maximum nodes
         /// </summary>
-        public const int MaxSimplePath = 256;
+        const int MaxSimplePath = 256;
 
         /// <summary>
         /// Fix ups corridor
@@ -138,7 +138,11 @@ namespace Engine.PathFinding.RecastNavigation
                 path.Cut(offset);
             }
         }
-
+        /// <summary>
+        /// Merge corridor start
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorStartMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -192,7 +196,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             path.Count = req + size;
         }
-
+        /// <summary>
+        /// Merge corridor end
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorEndMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -234,7 +242,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             path.Count = ppos + count;
         }
-
+        /// <summary>
+        /// Merge corridor start shortcut
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorStartShortcut(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -356,7 +368,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the current path
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<int> GetPath()
+        public int[] GetPath()
         {
             return referenceList.Take(Count).ToArray();
         }

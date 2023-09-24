@@ -235,6 +235,35 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Creates the initial polygon list
+        /// </summary>
+        /// <param name="indices">Triangle indices</param>
+        /// <param name="tris">Triangle list</param>
+        /// <param name="ntris">Number of triangles</param>
+        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
+        /// <param name="polys">Resulting indexed polygon list</param>
+        /// <param name="npolys">Resulting number of polygons in the list</param>
+        public static void CreateInitialPolygons(int[] indices, Int3[] tris, int ntris, int maxVertsPerCont, out IndexedPolygon[] polys, out int npolys)
+        {
+            npolys = 0;
+            polys = new IndexedPolygon[maxVertsPerCont];
+
+            for (int j = 0; j < ntris; ++j)
+            {
+                var t = tris[j];
+                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
+                {
+                    var poly = new IndexedPolygon(DT_VERTS_PER_POLYGON);
+                    poly[0] = indices[t.X];
+                    poly[1] = indices[t.Y];
+                    poly[2] = indices[t.Z];
+
+                    polys[npolys++] = poly;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the vertex count
         /// </summary>
         /// <returns>Returns the vertex count</returns>

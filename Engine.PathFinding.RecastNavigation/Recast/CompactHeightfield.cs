@@ -16,6 +16,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         const int RC_NULL_NEI = -1;
         const int SPAN_MAX_WIDTH = 0xffff;
         const int SPAN_MAX_HEIGHT = 0xff;
+        const int MAX_VERTS_PER_EDGE = 32;
+        const int MAX_VERTS = 127;
 
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
@@ -172,42 +174,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         #endregion
 
-        /// <summary>
-        /// Builds a new compact heightfield
-        /// </summary>
-        /// <param name="hf">Heightfield</param>
-        /// <param name="walkableHeight">Walkable height</param>
-        /// <param name="walkableClimb">Walkable climb</param>
-        /// <returns>Returns the new compact heightfield</returns>
-        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
+        private static float GetJitterX(int i)
         {
-            int w = hf.Width;
-            int h = hf.Height;
-            int spanCount = hf.GetSpanCount();
-            var bbox = hf.BoundingBox;
-            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
-
-            // Fill in header.
-            var chf = new CompactHeightfield
-            {
-                Width = w,
-                Height = h,
-                SpanCount = spanCount,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                MaxRegions = 0,
-                BoundingBox = bbox,
-                CellSize = hf.CellSize,
-                CellHeight = hf.CellHeight,
-            };
-
-            // Fill in cells and spans.
-            chf.FillCellsAndSpans(hf.Spans, spanCount);
-
-            // Find neighbour connections.
-            chf.FindNeighbourConnections();
-
-            return chf;
+            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+        private static float GetJitterY(int i)
+        {
+            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
         private static AreaTypes[] InsertSort(AreaTypes[] arr, int n)
         {
@@ -244,14 +217,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dstStack.ToArray();
         }
-        private static float GetJitterX(int i)
-        {
-            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-        private static float GetJitterY(int i)
-        {
-            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
         private static bool GetPolyVerts(Vector3 vi, Vector3 vj, out Vector3 rvi, out Vector3 rvj)
         {
             rvj = vi;
@@ -283,7 +248,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             float sampleMaxError = param.SampleMaxError;
 
-            int[] idx = new int[BuildPolyDetailParams.MAX_VERTS_PER_EDGE];
+            int[] idx = new int[MAX_VERTS_PER_EDGE];
             idx[0] = 0;
             idx[1] = nn;
             int nidx = 2;
@@ -397,7 +362,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="spans">Heightfield span list</param>
         /// <param name="spanCount">Heightfield span count</param>
-        private void FillCellsAndSpans(Span[] spans, int spanCount)
+        public void FillCellsAndSpans(Span[] spans, int spanCount)
         {
             Cells = new CompactCell[Width * Height];
             Spans = new CompactSpan[spanCount];
@@ -437,7 +402,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Find neighbour connections.
         /// </summary>
-        private void FindNeighbourConnections()
+        public void FindNeighbourConnections()
         {
             // Find neighbour connections.
             int maxLayers = ContourSet.RC_NOT_CONNECTED - 1;
@@ -830,12 +795,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             ProcessHeightDataQueue(hp, borderSize, queue);
         }
-
-        private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int borderSize, int region, out List<HeightDataItem> queue)
+        /// <summary>
+        /// Gets the heigth data of the specified region
+        /// </summary>
+        /// <param name="hp">Height patch</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="region">Region id</param>
+        /// <param name="dataItems">Resulting data item list</param>
+        /// <returns>Returns true if the resulting heigth data is empty</returns>
+        private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int borderSize, int region, out HeightDataItem[] dataItems)
         {
             bool empty = true;
 
-            queue = new List<HeightDataItem>();
+            var queue = new List<HeightDataItem>();
 
             // Copy the height from the same region, and mark region borders
             // as seed points to fill the rest.
@@ -883,12 +855,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
+            dataItems = queue.ToArray();
+
             return empty;
         }
-
+        /// <summary>
+        /// Process height data item queue
+        /// </summary>
+        /// <param name="hp">Height patch</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="queue">Data item queue to process</param>
         private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, List<HeightDataItem> queue)
         {
-            int RETRACT_SIZE = 256;
+            const int RETRACT_SIZE = 256;
             int head = 0;
 
             // We assume the seed is centered in the polygon, so a BFS to collect
@@ -1005,8 +984,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
         {
             var verts = new List<Vector3>(polygon);
-            var edge = new Vector3[(BuildPolyDetailParams.MAX_VERTS_PER_EDGE + 1)];
-            var hullList = new List<int>(BuildPolyDetailParams.MAX_VERTS);
+            var edge = new Vector3[(MAX_VERTS_PER_EDGE + 1)];
+            var hullList = new List<int>(MAX_VERTS);
 
             int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
@@ -1045,7 +1024,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return verts.ToArray();
         }
-
+        /// <summary>
+        /// Creates height patch samples
+        /// </summary>
+        /// <param name="npolys">Number of polygons</param>
+        /// <param name="param">Build parameters</param>
+        /// <param name="hp">Height patch</param>
         private int CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
         {
             float sampleDist = param.SampleDist;
@@ -1059,10 +1043,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float dz = vi.Z - vj.Z;
             float d = (float)Math.Sqrt(dx * dx + dz * dz);
             int nn = 1 + (int)Math.Floor(d / sampleDist);
-            if (nn >= BuildPolyDetailParams.MAX_VERTS_PER_EDGE) nn = BuildPolyDetailParams.MAX_VERTS_PER_EDGE - 1;
-            if (npolys + nn >= BuildPolyDetailParams.MAX_VERTS)
+            if (nn >= MAX_VERTS_PER_EDGE)
             {
-                nn = BuildPolyDetailParams.MAX_VERTS - 1 - npolys;
+                nn = MAX_VERTS_PER_EDGE - 1;
+            }
+            if (npolys + nn >= MAX_VERTS)
+            {
+                nn = MAX_VERTS - 1 - npolys;
             }
 
             for (int k = 0; k <= nn; ++k)
@@ -1100,7 +1087,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int nsamples = samples.Count;
             for (int iter = 0; iter < nsamples; ++iter)
             {
-                if (verts.Count >= BuildPolyDetailParams.MAX_VERTS)
+                if (verts.Count >= MAX_VERTS)
                 {
                     break;
                 }
@@ -1134,7 +1121,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return verts.ToArray();
         }
-
+        /// <summary>
+        /// Initialize samples
+        /// </summary>
+        /// <param name="polygon">Polygon vertices</param>
+        /// <param name="param">Build polygon parameters</param>
+        /// <param name="hp">Height patch</param>
         private Int4[] InitializeSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
         {
             float sampleDist = param.SampleDist;
@@ -1179,7 +1171,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return samples.ToArray();
         }
-
+        /// <summary>
+        /// Finds samples with most error
+        /// </summary>
+        /// <param name="samples">Sample list</param>
+        /// <param name="sampleDist">Sample distance</param>
+        /// <param name="verts">Vertices</param>
+        /// <param name="tris">Triangles</param>
         private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(Int4[] samples, float sampleDist, Vector3[] verts, Int3[] tris)
         {
             var bestpt = Vector3.Zero;
@@ -1907,7 +1905,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res;
         }
-
+        /// <summary>
+        /// Marks boundary cells
+        /// </summary>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
         private int[] MarkBoundaryCells(int w, int h)
         {
             // Init distance and points.
@@ -1944,7 +1946,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res;
         }
-
+        /// <summary>
+        /// Test connections
+        /// </summary>
         private void TestConn(int x, int y, int i, int w, int id1, int id2, ref int[] res)
         {
             var s = Spans[i];
@@ -2387,7 +2391,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
-
+        /// <summary>
+        /// Flood region
+        /// </summary>
         private bool FloodRegion(LevelStackEntry entry, int level, int r, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
             int w = Width;
@@ -2491,7 +2497,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return count > 0;
         }
-
+        /// <summary>
+        /// Expand region
+        /// </summary>
         private void ExpandRegions(int maxIter, int level, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack, bool fillStack)
         {
             int w = Width;
@@ -2645,7 +2653,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 stacks[sId].Add(new LevelStackEntry { X = x, Y = y, Index = i });
             }
         }
-
+        /// <summary>
+        /// Paint rectangle region
+        /// </summary>
         private void PaintRectRegion(int minx, int maxx, int miny, int maxy, int regId, int[] srcReg)
         {
             int w = Width;
@@ -2658,7 +2668,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
-
+        /// <summary>
+        /// Merge and filter layer regions
+        /// </summary>
         private bool MergeAndFilterLayerRegions(int minRegionArea, int maxRegionId, int[] srcReg, out int maxRegionIdResult)
         {
             int w = Width;
@@ -2890,7 +2902,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
-
+        /// <summary>
+        /// Merge and filter region
+        /// </summary>
         private bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, int maxRegionId, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
         {
             int w = Width;
