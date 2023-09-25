@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
     /// <summary>
@@ -6,6 +7,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class HeightfieldLayerSet
     {
+        /// <summary>
+        /// Empty heightfield layer set
+        /// </summary>
+        public static HeightfieldLayerSet Empty
+        {
+            get
+            {
+                return new()
+                {
+                    Layers = Array.Empty<HeightfieldLayer>(),
+                    NLayers = 0,
+                };
+            }
+        }
+
+        /// <summary>
+        /// Layer list
+        /// </summary>
+        public HeightfieldLayer[] Layers { get; set; }
+        /// <summary>
+        /// Number of layers
+        /// </summary>
+        public int NLayers { get; set; }
+
         /// <summary>
         /// Builds a new heightfield layer set
         /// </summary>
@@ -18,13 +43,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var ldata = HeightfieldLayerData.Create(chf, borderSize, walkableHeight);
             if (ldata == null)
             {
-                return new HeightfieldLayerSet();
+                return Empty;
             }
 
-            return StoreLayers(ldata);
-        }
-        private static HeightfieldLayerSet StoreLayers(HeightfieldLayerData ldata)
-        {
             var lset = new HeightfieldLayerSet
             {
                 Layers = new HeightfieldLayer[ldata.LayerId],
@@ -36,21 +57,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var layer = lset.Layers[i];
 
                 // Copy height and area from compact heightfield. 
-                ldata.CopyToLayer(ref layer, i);
+                layer.CopyToLayer(ldata, i);
 
                 lset.Layers[i] = layer;
             }
 
             return lset;
         }
-
-        /// <summary>
-        /// Layer list
-        /// </summary>
-        public HeightfieldLayer[] Layers { get; set; }
-        /// <summary>
-        /// Number of layers
-        /// </summary>
-        public int NLayers { get; set; }
     }
 }

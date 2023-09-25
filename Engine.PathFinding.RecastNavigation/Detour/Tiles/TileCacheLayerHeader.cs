@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -10,17 +9,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     [Serializable]
     public struct TileCacheLayerHeader
     {
+        /// <summary>
+        /// Magic number
+        /// </summary>
         const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
+        /// <summary>
+        /// Version number
+        /// </summary>
         const int DT_TILECACHE_VERSION = 1;
 
         /// <summary>
         /// Data magic
         /// </summary>
-        public int Magic { get; set; }
+        public int Magic { get; private set; } = DT_TILECACHE_MAGIC;
         /// <summary>
         /// Data version
         /// </summary>
-        public int Version { get; set; }
+        public int Version { get; private set; } = DT_TILECACHE_VERSION;
         /// <summary>
         /// Tile x
         /// </summary>
@@ -71,36 +76,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public int MaxY { get; set; }
 
         /// <summary>
-        /// Creates a tile cache layer header
+        /// Constructor
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="i"></param>
-        /// <param name="layer"></param>
-        /// <returns></returns>
-        public static TileCacheLayerHeader Create(int x, int y, int i, HeightfieldLayer layer)
+        public TileCacheLayerHeader()
         {
-            return new TileCacheLayerHeader
-            {
-                Magic = DT_TILECACHE_MAGIC,
-                Version = DT_TILECACHE_VERSION,
 
-                // Tile layer location in the navmesh.
-                TX = x,
-                TY = y,
-                TLayer = i,
-                BBox = layer.BoundingBox,
-
-                // Tile info.
-                Width = layer.Width,
-                Height = layer.Height,
-                MinX = layer.MinX,
-                MaxX = layer.MaxX,
-                MinY = layer.MinY,
-                MaxY = layer.MaxY,
-                HMin = layer.HMin,
-                HMax = layer.HMax
-            };
         }
 
         /// <summary>

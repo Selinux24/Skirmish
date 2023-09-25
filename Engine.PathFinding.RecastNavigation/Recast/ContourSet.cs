@@ -45,10 +45,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public const int RC_BORDER_VERTEX = 0x10000;
 
-        private static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
-        private static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
-        private static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
-
         /// <summary>
         /// An array of the contours in the set. [Size: #nconts]
         /// </summary>
@@ -90,18 +86,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public float MaxError { get; set; }
 
-        public static int GetDirOffsetX(int dir)
-        {
-            return OffsetsX[dir & 0x03];
-        }
-        public static int GetDirOffsetY(int dir)
-        {
-            return OffsetsY[dir & 0x03];
-        }
-        public static int GetDirForOffset(int x, int y)
-        {
-            return OffsetsDir[((y + 1) << 1) + x];
-        }
         /// <summary>
         /// Builds a new contour set
         /// </summary>
@@ -202,8 +186,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int r = 0;
                     if (s.GetCon(dir) != RC_NOT_CONNECTED)
                     {
-                        int ax = x + GetDirOffsetX(dir);
-                        int ay = y + GetDirOffsetY(dir);
+                        int ax = x + Utils.GetDirOffsetX(dir);
+                        int ay = y + Utils.GetDirOffsetY(dir);
                         int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
                         r = chf.Spans[ai].Reg;
                     }

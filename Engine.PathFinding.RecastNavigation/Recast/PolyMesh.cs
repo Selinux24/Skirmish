@@ -1,7 +1,6 @@
 ﻿using Engine.PathFinding.RecastNavigation.Detour;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -178,14 +177,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="meshes">Polygon mesh list</param>
         /// <returns>Returns the new polygon mesh</returns>
-        public static PolyMesh Merge(IEnumerable<PolyMesh> meshes)
+        public static PolyMesh Merge(PolyMesh[] meshes)
         {
             if (!meshes.Any())
             {
                 return null;
             }
 
-            var first = meshes.First();
+            var first = meshes[0];
 
             var res = new PolyMesh
             {
@@ -287,24 +286,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res;
         }
-        /// <summary>
-        /// Computes the vertex hash
-        /// </summary>
-        /// <param name="x">X value</param>
-        /// <param name="y">Y value</param>
-        /// <param name="z">Z value</param>
-        /// <returns>Returns the hash value</returns>
-        /// <remarks>
-        /// Using the vertex coordinates, calculates a unique bucket number for easy storing and retrieval.
-        /// </remarks>
-        private static int ComputeVertexHash(int x, int y, int z)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint h3 = 0xcb1ab31f;
-            uint n = (uint)(h1 * x + h2 * y + h3 * z);
-            return (int)(n & (VERTEX_BUCKET_COUNT - 1));
-        }
 
         /// <summary>
         /// Adds a new vertex to the polygon mesh
@@ -317,7 +298,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the added index</returns>
         private int AddVertex(int x, int y, int z, ref int[] firstVert, ref int[] nextVert)
         {
-            int bucket = ComputeVertexHash(x, 0, z);
+            int bucket = Utils.ComputeVertexHash(x, 0, z, VERTEX_BUCKET_COUNT - 1);
             int i = firstVert[bucket];
 
             while (i != -1)

@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -9,7 +10,56 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     static class Utils
     {
+        static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
+        static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
+        static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
         static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
+        const float EPS = 1e-6f;
+
+        public static int GetDirOffsetX(int dir)
+        {
+            return OffsetsX[dir & 0x03];
+        }
+        public static int GetDirOffsetY(int dir)
+        {
+            return OffsetsY[dir & 0x03];
+        }
+        public static int GetDirForOffset(int x, int y)
+        {
+            return OffsetsDir[((y + 1) << 1) + x];
+        }
+
+        /// <summary>
+        /// Computes a tile hash
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="mask">Tile lut mask</param>
+        public static int ComputeTileHash(int x, int y, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint n = (uint)(h1 * x + h2 * y);
+            return (int)(n & mask);
+        }
+        /// <summary>
+        /// Computes the vertex hash
+        /// </summary>
+        /// <param name="x">X value</param>
+        /// <param name="y">Y value</param>
+        /// <param name="z">Z value</param>
+        /// <returns>Returns the hash value</returns>
+        /// <remarks>
+        /// Using the vertex coordinates, calculates a unique bucket number for easy storing and retrieval.
+        /// </remarks>
+        public static int ComputeVertexHash(int x, int y, int z, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint h3 = 0xcb1ab31f;
+            uint n = (uint)(h1 * x + h2 * y + h3 * z);
+            return (int)(n & mask);
+        }
 
         /// <summary>
         /// Gets the next index value in a fixed length array
@@ -59,78 +109,38 @@ namespace Engine.PathFinding.RecastNavigation
             arr[an] = v;
             an++;
         }
-        /// <summary>
-        /// Removes n items from i position in the specified array
-        /// </summary>
-        /// <param name="arr">Array</param>
-        /// <param name="i">Start position</param>
-        /// <param name="n">Number of items</param>
-        /// <returns>Returns the resulting array</returns>
-        public static T[] RemoveRange<T>(T[] arr, int i, int n)
+        public static T[] RemoveFirst<T>(T[] arr, int n)
         {
             //Copy array
             var res = arr.ToArray();
 
-            for (int k = i; k < n; k++)
+            for (int i = 0; i < n; i++)
             {
-                res[k] = res[k + 1];
+                res[i] = res[i + 1];
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Removes n items from index position in the specified array
+        /// </summary>
+        /// <param name="arr">Array</param>
+        /// <param name="index">Start position</param>
+        /// <param name="n">Number of items</param>
+        /// <returns>Returns the resulting array</returns>
+        public static T[] RemoveRange<T>(T[] arr, int index, int n)
+        {
+            //Copy array
+            var res = arr.ToArray();
+
+            for (int i = index; i < n; i++)
+            {
+                res[i] = res[i + 1];
             }
 
             return res;
         }
 
-        public static int ComputeTileHash(int x, int y, int mask)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint n = (uint)(h1 * x + h2 * y);
-            return (int)(n & mask);
-        }
-        /// <summary>
-        /// Derives the y-axis height of the closest point on the triangle from the specified reference point.
-        /// </summary>
-        /// <param name="p">The reference point from which to test.</param>
-        /// <param name="a">Vertex A of triangle ABC.</param>
-        /// <param name="b">Vertex B of triangle ABC.</param>
-        /// <param name="c">Vertex C of triangle ABC.</param>
-        /// <param name="h">The resulting height.</param>
-        /// <returns>Returns true if point lies inside the triangle.</returns>
-        public static bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
-        {
-            h = float.MaxValue;
-
-            float EPS = 1e-6f;
-            Vector3 v0 = Vector3.Subtract(c, a);
-            Vector3 v1 = Vector3.Subtract(b, a);
-            Vector3 v2 = Vector3.Subtract(p, a);
-
-            // Compute scaled barycentric coordinates
-            float denom = v0.X * v1.Z - v0.Z * v1.X;
-            if (Math.Abs(denom) < EPS)
-            {
-                return false;
-            }
-
-            float u = v1.Z * v2.X - v1.X * v2.Z;
-            float v = v0.X * v2.Z - v0.Z * v2.X;
-
-            if (denom < 0)
-            {
-                denom = -denom;
-                u = -u;
-                v = -v;
-            }
-
-            // If point lies inside the triangle, return interpolated ycoord.
-            if (u >= 0.0f && v >= 0.0f && (u + v) <= denom)
-            {
-                h = a.Y + (v0.Y * u + v1.Y * v) / denom;
-
-                return true;
-            }
-
-            return false;
-        }
         /// <summary>
         /// Gets if a point is into a polygon.
         /// </summary>
@@ -157,40 +167,6 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return c;
-        }
-        /// <summary>
-        /// Gets the cylinder bounds
-        /// </summary>
-        /// <param name="pos">Position</param>
-        /// <param name="r">Radius</param>
-        /// <param name="h">Height</param>
-        /// <param name="bmin">Resulting minimum bounding box point</param>
-        /// <param name="bmax">Resulting maximum bounding box point</param>
-        public static void GetCylinderBounds(Vector3 pos, float r, float h, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin.X = pos.X - r;
-            bmin.Y = pos.Y;
-            bmin.Z = pos.Z - r;
-            bmax.X = pos.X + r;
-            bmax.Y = pos.Y + h;
-            bmax.Z = pos.Z + r;
-        }
-        /// <summary>
-        /// Gets the polygon bounds
-        /// </summary>
-        /// <param name="polygon">Polygon vertices</param>
-        /// <param name="bmin">Resulting minimum bounding box point</param>
-        /// <param name="bmax">Resulting maximum bounding box point</param>
-        public static void GetPolygonBounds(Vector3[] polygon, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = polygon[0];
-            bmax = polygon[0];
-
-            for (int i = 1; i < polygon.Length; ++i)
-            {
-                bmin = Vector3.Min(bmin, polygon[i]);
-                bmax = Vector3.Max(bmax, polygon[i]);
-            }
         }
         /// <summary>
         /// Derives the signed xz-plane area of the triangle ABC, or the relationship of line AB to point C.
@@ -223,37 +199,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return a.X == b.X && a.Z == b.Z;
         }
-        /// <summary>
-        /// Gets if a point is into a polygon, an all the distances to the polygon edges
-        /// </summary>
-        /// <param name="pt">Point to test</param>
-        /// <param name="verts">Polygon vertex list</param>
-        /// <param name="ed">Distance to edges array</param>
-        /// <param name="et">Distance from first edge point to closest point list</param>
-        /// <returns>Returns true if the point is into the polygon</returns>
-        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool DistancePtPolyEdgesSqr2D(Vector3 pt, Vector3[] verts, out float[] ed, out float[] et)
-        {
-            int nverts = verts.Length;
 
-            ed = new float[nverts];
-            et = new float[nverts];
-
-            int i, j;
-            bool c = false;
-            for (i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                var vi = verts[i];
-                var vj = verts[j];
-                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
-                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
-                {
-                    c = !c;
-                }
-                ed[j] = DistancePtSegSqr2D(pt, vj, vi, out et[j]);
-            }
-            return c;
-        }
         /// <summary>
         /// Gets the minimum distance from the pt point to the (p,q) segment
         /// </summary>
@@ -289,75 +235,6 @@ namespace Engine.PathFinding.RecastNavigation
             dx = p.X + t * pqx - pt.X;
             dz = p.Z + t * pqz - pt.Z;
             return dx * dx + dz * dz;
-        }
-        public static bool OverlapPolyPoly2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
-        {
-            float eps = 1e-4f;
-
-            for (int i = 0, j = npolya - 1; i < npolya; j = i++)
-            {
-                var va = polya[j];
-                var vb = polya[i];
-                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
-                ProjectPoly2D(n, polya, npolya, out float amin, out float amax);
-                ProjectPoly2D(n, polyb, npolyb, out float bmin, out float bmax);
-                if (!OverlapRange(amin, amax, bmin, bmax, eps))
-                {
-                    // Found separating axis
-                    return false;
-                }
-            }
-            for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
-            {
-                var va = polyb[j];
-                var vb = polyb[i];
-                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
-                ProjectPoly2D(n, polya, npolya, out float amin, out float amax);
-                ProjectPoly2D(n, polyb, npolyb, out float bmin, out float bmax);
-                if (!OverlapRange(amin, amax, bmin, bmax, eps))
-                {
-                    // Found separating axis
-                    return false;
-                }
-            }
-            return true;
-        }
-        public static void ProjectPoly2D(Vector3 axis, Vector3[] poly, int npoly, out float rmin, out float rmax)
-        {
-            rmin = rmax = Vector2.Dot(axis.XZ(), poly[0].XZ());
-            for (int i = 1; i < npoly; ++i)
-            {
-                float d = Vector2.Dot(axis.XZ(), poly[i].XZ());
-                rmin = Math.Min(rmin, d);
-                rmax = Math.Max(rmax, d);
-            }
-        }
-        public static float VCross2D(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            float u1 = p2.X - p1.X;
-            float v1 = p2.Z - p1.Z;
-            float u2 = p3.X - p1.X;
-            float v2 = p3.Z - p1.Z;
-            return u1 * v2 - v1 * u2;
-        }
-        public static float VPerp2D(Vector3 u, Vector3 v)
-        {
-            return u.Z * v.X - u.X * v.Z;
-        }
-        public static int OverlapSegSeg2D(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-        {
-            float a1 = VCross2D(a, b, d);
-            float a2 = VCross2D(a, b, c);
-            if (a1 * a2 < 0.0f)
-            {
-                float a3 = VCross2D(c, d, a);
-                float a4 = a3 + a2 - a1;
-                if (a3 * a4 < 0.0f)
-                {
-                    return 1;
-                }
-            }
-            return 0;
         }
         public static float DistancePtSeg2D(Vector3 pt, Vector3 p, Vector3 q)
         {
@@ -415,7 +292,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return dx * dx + dz * dz;
         }
-        public static float DistPtTri2D(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+        public static float DistancePtTri2D(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
         {
             Vector3 v0 = Vector3.Subtract(c, a);
             Vector3 v1 = Vector3.Subtract(b, a);
@@ -443,7 +320,38 @@ namespace Engine.PathFinding.RecastNavigation
 
             return float.MaxValue;
         }
-        public static float DistToPoly2D(Vector3[] verts, Vector3 p)
+        /// <summary>
+        /// Gets if a point is into a polygon, an all the distances to the polygon edges
+        /// </summary>
+        /// <param name="pt">Point to test</param>
+        /// <param name="verts">Polygon vertex list</param>
+        /// <param name="ed">Distance to edges array</param>
+        /// <param name="et">Distance from first edge point to closest point list</param>
+        /// <returns>Returns true if the point is into the polygon</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static bool DistancePtPolyEdgesSqr2D(Vector3 pt, Vector3[] verts, out float[] ed, out float[] et)
+        {
+            int nverts = verts.Length;
+
+            ed = new float[nverts];
+            et = new float[nverts];
+
+            int i, j;
+            bool c = false;
+            for (i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                var vi = verts[i];
+                var vj = verts[j];
+                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
+                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                {
+                    c = !c;
+                }
+                ed[j] = DistancePtSegSqr2D(pt, vj, vi, out et[j]);
+            }
+            return c;
+        }
+        public static float DistancePtPoly2D(Vector3[] verts, Vector3 p)
         {
             float dmin = float.MaxValue;
             int nvert = verts.Length;
@@ -460,34 +368,56 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return c ? -dmin : dmin;
         }
-        public static float PolyMinExtent2D(Vector3[] verts)
+
+
+        public static bool OverlapPolyPoly2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
         {
-            float minDist = float.MaxValue;
+            float eps = 1e-4f;
 
-            for (int i = 0; i < verts.Length; i++)
+            for (int i = 0, j = npolya - 1; i < npolya; j = i++)
             {
-                int ni = (i + 1) % verts.Length;
-
-                var p1 = verts[i];
-                var p2 = verts[ni];
-
-                float maxEdgeDist = 0;
-                for (int j = 0; j < verts.Length; j++)
+                var va = polya[j];
+                var vb = polya[i];
+                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
+                ProjectPoly2D(n, polya, npolya, out float amin, out float amax);
+                ProjectPoly2D(n, polyb, npolyb, out float bmin, out float bmax);
+                if (!OverlapRange(amin, amax, bmin, bmax, eps))
                 {
-                    if (j == i || j == ni)
-                    {
-                        continue;
-                    }
-
-                    float d = DistancePtSeg2D(verts[j], p1, p2);
-                    maxEdgeDist = Math.Max(maxEdgeDist, d);
+                    // Found separating axis
+                    return false;
                 }
-
-                minDist = Math.Min(minDist, maxEdgeDist);
             }
-
-            return (float)Math.Sqrt(minDist);
+            for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
+            {
+                var va = polyb[j];
+                var vb = polyb[i];
+                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
+                ProjectPoly2D(n, polya, npolya, out float amin, out float amax);
+                ProjectPoly2D(n, polyb, npolyb, out float bmin, out float bmax);
+                if (!OverlapRange(amin, amax, bmin, bmax, eps))
+                {
+                    // Found separating axis
+                    return false;
+                }
+            }
+            return true;
         }
+        public static int OverlapSegSeg2D(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            float a1 = VCross2D(a, b, d);
+            float a2 = VCross2D(a, b, c);
+            if (a1 * a2 < 0.0f)
+            {
+                float a3 = VCross2D(c, d, a);
+                float a4 = a3 + a2 - a1;
+                if (a3 * a4 < 0.0f)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
         public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, Vector3[] verts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
             float EPS = 0.00000001f;
@@ -541,6 +471,102 @@ namespace Engine.PathFinding.RecastNavigation
             return true;
         }
 
+
+        public static void ProjectPoly2D(Vector3 axis, Vector3[] poly, int npoly, out float rmin, out float rmax)
+        {
+            rmin = rmax = Vector2.Dot(axis.XZ(), poly[0].XZ());
+            for (int i = 1; i < npoly; ++i)
+            {
+                float d = Vector2.Dot(axis.XZ(), poly[i].XZ());
+                rmin = Math.Min(rmin, d);
+                rmax = Math.Max(rmax, d);
+            }
+        }
+        public static float VCross2D(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            float u1 = p2.X - p1.X;
+            float v1 = p2.Z - p1.Z;
+            float u2 = p3.X - p1.X;
+            float v2 = p3.Z - p1.Z;
+            return u1 * v2 - v1 * u2;
+        }
+        public static float VPerp2D(Vector3 u, Vector3 v)
+        {
+            return u.Z * v.X - u.X * v.Z;
+        }
+        public static float PolyMinExtent2D(Vector3[] verts)
+        {
+            float minDist = float.MaxValue;
+
+            for (int i = 0; i < verts.Length; i++)
+            {
+                int ni = (i + 1) % verts.Length;
+
+                var p1 = verts[i];
+                var p2 = verts[ni];
+
+                float maxEdgeDist = 0;
+                for (int j = 0; j < verts.Length; j++)
+                {
+                    if (j == i || j == ni)
+                    {
+                        continue;
+                    }
+
+                    float d = DistancePtSeg2D(verts[j], p1, p2);
+                    maxEdgeDist = Math.Max(maxEdgeDist, d);
+                }
+
+                minDist = Math.Min(minDist, maxEdgeDist);
+            }
+
+            return (float)Math.Sqrt(minDist);
+        }
+
+        /// <summary>
+        /// Derives the y-axis height of the closest point on the triangle from the specified reference point.
+        /// </summary>
+        /// <param name="p">The reference point from which to test.</param>
+        /// <param name="a">Vertex A of triangle ABC.</param>
+        /// <param name="b">Vertex B of triangle ABC.</param>
+        /// <param name="c">Vertex C of triangle ABC.</param>
+        /// <param name="h">The resulting height.</param>
+        /// <returns>Returns true if point lies inside the triangle.</returns>
+        public static bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
+        {
+            h = float.MaxValue;
+
+            Vector3 v0 = Vector3.Subtract(c, a);
+            Vector3 v1 = Vector3.Subtract(b, a);
+            Vector3 v2 = Vector3.Subtract(p, a);
+
+            // Compute scaled barycentric coordinates
+            float denom = v0.X * v1.Z - v0.Z * v1.X;
+            if (Math.Abs(denom) < EPS)
+            {
+                return false;
+            }
+
+            float u = v1.Z * v2.X - v1.X * v2.Z;
+            float v = v0.X * v2.Z - v0.Z * v2.X;
+
+            if (denom < 0)
+            {
+                denom = -denom;
+                u = -u;
+                v = -v;
+            }
+
+            // If point lies inside the triangle, return interpolated ycoord.
+            if (u >= 0.0f && v >= 0.0f && (u + v) <= denom)
+            {
+                h = a.Y + (v0.Y * u + v1.Y * v) / denom;
+
+                return true;
+            }
+
+            return false;
+        }
         /// <summary>
         /// Gets the closest point on the closest edge
         /// </summary>
@@ -566,19 +592,27 @@ namespace Engine.PathFinding.RecastNavigation
         }
         /// <summary>
         /// Returns a random point in a convex polygon.
-        /// Adapted from Graphics Gems article.
         /// </summary>
-        public static void RandomPointInConvexPoly(Vector3[] pts, out float[] areas, float s, float t, out Vector3 outPoint)
+        /// <remarks>
+        /// Adapted from Graphics Gems article.
+        /// </remarks>
+        /// <param name="pts">Polygon point list</param>
+        /// <returns>Returns a a random point</returns>
+        public static Vector3 RandomPointInConvexPoly(Vector3[] pts)
         {
-            areas = new float[IndexedPolygon.DT_VERTS_PER_POLYGON];
+            float s = Helper.RandomGenerator.NextFloat(0, 1);
+            float t = Helper.RandomGenerator.NextFloat(0, 1);
+
+            List<int> areas = new();
 
             // Calc triangle areas
             float areasum = 0.0f;
             for (int i = 2; i < pts.Length; i++)
             {
-                areas[i] = TriArea2D(pts[0], pts[i - 1], pts[i]);
-                areasum += Math.Max(0.001f, areas[i]);
+                var area = TriArea2D(pts[0], pts[i - 1], pts[i]);
+                areasum += Math.Max(0.001f, area);
             }
+
             // Find sub triangle weighted by area.
             float thr = s * areasum;
             float acc = 0.0f;
@@ -601,11 +635,11 @@ namespace Engine.PathFinding.RecastNavigation
             float a = 1 - v;
             float b = (1 - u) * v;
             float c = u * v;
-            Vector3 pa = pts[0];
-            Vector3 pb = pts[tri - 1];
-            Vector3 pc = pts[tri];
+            var pa = pts[0];
+            var pb = pts[tri - 1];
+            var pc = pts[tri];
 
-            outPoint = a * pa + b * pb + c * pc;
+            return a * pa + b * pb + c * pc;
         }
         /// <summary>
         /// Gets whether the specified points are closest enough to be nearest equal
@@ -691,7 +725,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var vb = verts[tri.Y];
                 var vc = verts[tri.Z];
 
-                float d = DistPtTri2D(p, va, vb, vc);
+                float d = DistancePtTri2D(p, va, vb, vc);
                 if (d < dmin)
                 {
                     dmin = d;
@@ -757,6 +791,40 @@ namespace Engine.PathFinding.RecastNavigation
             return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
         }
 
+        /// <summary>
+        /// Gets the cylinder bounds
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="r">Radius</param>
+        /// <param name="h">Height</param>
+        /// <param name="bmin">Resulting minimum bounding box point</param>
+        /// <param name="bmax">Resulting maximum bounding box point</param>
+        public static void GetCylinderBounds(Vector3 pos, float r, float h, out Vector3 bmin, out Vector3 bmax)
+        {
+            bmin.X = pos.X - r;
+            bmin.Y = pos.Y;
+            bmin.Z = pos.Z - r;
+            bmax.X = pos.X + r;
+            bmax.Y = pos.Y + h;
+            bmax.Z = pos.Z + r;
+        }
+        /// <summary>
+        /// Gets the polygon bounds
+        /// </summary>
+        /// <param name="polygon">Polygon vertices</param>
+        /// <param name="bmin">Resulting minimum bounding box point</param>
+        /// <param name="bmax">Resulting maximum bounding box point</param>
+        public static void GetPolygonBounds(Vector3[] polygon, out Vector3 bmin, out Vector3 bmax)
+        {
+            bmin = polygon[0];
+            bmax = polygon[0];
+
+            for (int i = 1; i < polygon.Length; ++i)
+            {
+                bmin = Vector3.Min(bmin, polygon[i]);
+                bmax = Vector3.Max(bmax, polygon[i]);
+            }
+        }
         /// <summary>
         /// Determines if two axis-aligned bounding boxes overlap.
         /// </summary>
