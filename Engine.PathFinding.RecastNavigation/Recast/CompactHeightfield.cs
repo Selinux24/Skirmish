@@ -1205,7 +1205,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Z = s.Z * sampleDist + GetJitterY(i) * cs * 0.1f
                 };
 
-                float d = Utils.DistToTriMesh(verts, tris, pt);
+                float d = Utils.DistanceTriMesh(pt, verts, tris);
                 if (d < 0)
                 {
                     continue; // did not hit the mesh.

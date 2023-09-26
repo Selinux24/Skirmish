@@ -3154,7 +3154,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
-                closest = Utils.GetClosestPointOutsidePoly(verts, edged, edget);
+                closest = Utils.ClosestPointOutsidePoly(verts, edged, edget);
             }
 
             return Status.DT_SUCCESS;
