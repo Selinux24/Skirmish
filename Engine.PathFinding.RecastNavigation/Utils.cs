@@ -1010,5 +1010,46 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return !(amin >= bmax || amax <= bmin);
         }
+
+        /// <summary>
+        /// Adds the origin to the vertex list
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="orig">Origin</param>
+        /// <param name="cellHeight">Cell height offset</param>
+        /// <returns>Returns the tranformed vertex list</returns>
+        public static Vector3[] MoveToWorldSpace(Vector3[] verts, Vector3 orig, float cellHeight)
+        {
+            if (orig == Vector3.Zero)
+            {
+                return verts.ToArray();
+            }
+
+            var res = new List<Vector3>();
+
+            for (int j = 0; j < verts.Length; ++j)
+            {
+                var p = verts[j] + orig;
+
+                if (cellHeight != 0)
+                {
+                    p.Y += cellHeight;// Is this offset necessary?
+                }
+
+                res.Add(p);
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Adds the origin to the vertex list
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="orig">Origin</param>
+        /// <returns>Returns the tranformed vertex list</returns>
+        public static Vector3[] MoveToWorldSpace(Vector3[] verts, Vector3 orig)
+        {
+            return MoveToWorldSpace(verts, orig, 0);
+        }
     }
 }

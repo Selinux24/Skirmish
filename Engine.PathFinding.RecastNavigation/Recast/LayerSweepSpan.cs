@@ -1,7 +1,10 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    public struct LayerSweepSpan
+    /// <summary>
+    /// Layer sweep span
+    /// </summary>
+    struct LayerSweepSpan
     {
         /// <summary>
         /// Number samples
@@ -16,10 +19,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int Nei { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Samples {NS}; Region {Id}; Neighbour {Nei};";

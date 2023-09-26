@@ -1,6 +1,7 @@
 ﻿using Engine.PathFinding.RecastNavigation.Detour;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -285,6 +286,101 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             res.BuildMeshAdjacency();
 
             return res;
+        }
+
+        /// <summary>
+        /// Build polygon vertices
+        /// </summary>
+        /// <param name="p">Indexed polygon</param>
+        public Vector3[] BuildPolyVertices(IndexedPolygon p)
+        {
+            var res = new List<Vector3>();
+
+            float cs = CS;
+            float ch = CH;
+
+            for (int j = 0; j < NVP; ++j)
+            {
+                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                {
+                    break;
+                }
+
+                var v = Verts[p[j]];
+                var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
+
+                res.Add(pv);
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Finds polygon bounds
+        /// </summary>
+        /// <param name="chf">Compact heightfield</param>
+        public (Int4[] Bounds, int MaxHWidth, int MaxHHeight) FindBounds(CompactHeightfield chf)
+        {
+            var bounds = new List<Int4>();
+
+            int nPolyVerts = 0;
+            int maxhw = 0;
+            int maxhh = 0;
+
+            // Find max size for a polygon area.
+            for (int i = 0; i < NPolys; ++i)
+            {
+                var p = Polys[i];
+
+                var (XMin, XMax, YMin, YMax, PolyVerts) = FindMaxSizeArea(chf, p);
+
+                bounds.Add(new Int4(XMin, XMax, YMin, YMax));
+                nPolyVerts += PolyVerts;
+
+                // Try to store max size
+                if (XMin >= XMax || YMin >= YMax)
+                {
+                    continue;
+                }
+
+                maxhw = Math.Max(maxhw, XMax - XMin);
+                maxhh = Math.Max(maxhh, YMax - YMin);
+            }
+
+            return (bounds.ToArray(), maxhw, maxhh);
+        }
+        /// <summary>
+        /// Finds maximum area size of polygon
+        /// </summary>
+        /// <param name="chf">Compact heightfield</param>
+        /// <param name="p">Indexed polygon</param>
+        private (int XMin, int XMax, int YMin, int YMax, int PolyVerts) FindMaxSizeArea(CompactHeightfield chf, IndexedPolygon p)
+        {
+            int xmin = chf.Width;
+            int xmax = 0;
+            int ymin = chf.Height;
+            int ymax = 0;
+            int polyVerts = 0;
+
+            for (int j = 0; j < NVP; ++j)
+            {
+                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                {
+                    break;
+                }
+
+                var v = Verts[p[j]];
+                xmin = Math.Min(xmin, v.X);
+                xmax = Math.Max(xmax, v.X);
+                ymin = Math.Min(ymin, v.Z);
+                ymax = Math.Max(ymax, v.Z);
+                polyVerts++;
+            }
+            xmin = Math.Max(0, xmin - 1);
+            xmax = Math.Min(chf.Width, xmax + 1);
+            ymin = Math.Max(0, ymin - 1);
+            ymax = Math.Min(chf.Height, ymax + 1);
+
+            return (xmin, xmax, ymin, ymax, polyVerts);
         }
 
         /// <summary>

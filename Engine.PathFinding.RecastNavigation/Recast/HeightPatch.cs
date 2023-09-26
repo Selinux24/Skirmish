@@ -6,7 +6,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// <summary>
     /// Height patch
     /// </summary>
-    public class HeightPatch
+    class HeightPatch
     {
         public const int RC_UNSET_HEIGHT = -1;
 

@@ -5,14 +5,40 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Delaunay hull
+    /// </summary>
     class DelaunayHull
     {
-        private const float Tolerance = 0.001f;
+        const float Tolerance = 0.001f;
 
+        /// <summary>
+        /// Maximum edges
+        /// </summary>
         private readonly int maxEdges;
+        /// <summary>
+        /// Edge list
+        /// </summary>
         private readonly List<Int4> edges = new();
+        /// <summary>
+        /// Number of faces
+        /// </summary>
         private int faces;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxEdges">Max edges</param>
+        public DelaunayHull(int maxEdges)
+        {
+            this.maxEdges = maxEdges;
+        }
+
+        /// <summary>
+        /// Builds a hull
+        /// </summary>
+        /// <param name="pts">Point list</param>
+        /// <param name="hull">Hull indices</param>
         public static DelaunayHull Build(Vector3[] pts, int[] hull)
         {
             int max = pts.Length * 10;
@@ -40,6 +66,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dhull;
         }
+        /// <summary>
+        /// Filter triangles
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the filtered list</returns>
         private static Int3[] FilterTris(Int3[] triangles)
         {
             // Copy array
@@ -59,24 +90,32 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return tris;
         }
+        /// <summary>
+        /// Update left face
+        /// </summary>
+        /// <param name="edge">Edge</param>
         private static Int4 UpdateLeftFace(Int4 edge, int s, int t, int f)
         {
+            // Copy edge
             var e = edge;
 
-            if (e[0] == s && e[1] == t && e[2] == (int)EdgeValues.EV_UNDEF)
+            if (e.X == s && e.Y == t && e.Z == (int)EdgeValues.EV_UNDEF)
             {
-                e[2] = f;
+                e.Z = f;
             }
-            else if (e[1] == s && e[0] == t && e[3] == (int)EdgeValues.EV_UNDEF)
+            else if (e.Y == s && e.X == t && e.W == (int)EdgeValues.EV_UNDEF)
             {
-                e[3] = f;
+                e.W = f;
             }
 
             return e;
         }
+        /// <summary>
+        /// Circum circle
+        /// </summary>
         private static void CircumCircle(Vector3 p1, Vector3 p2, Vector3 p3, out Vector3 center, out float radius)
         {
-            float EPS = 1e-6f;
+            const float eps = 1e-6f;
 
             // Calculate the circle relative to p1, to avoid some precision issues.
             var v1 = new Vector3();
@@ -84,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var v3 = Vector3.Subtract(p3, p1);
 
             float cp = Utils.VCross2D(v1, v2, v3);
-            if (Math.Abs(cp) > EPS)
+            if (Math.Abs(cp) > eps)
             {
                 float v1Sq = Vector2.Dot(v1.XZ(), v1.XZ());
                 float v2Sq = Vector2.Dot(v2.XZ(), v2.XZ());
@@ -105,15 +144,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
 
-        public DelaunayHull(int maxEdges)
-        {
-            this.maxEdges = maxEdges;
-        }
-
+        /// <summary>
+        /// Gets the edge list
+        /// </summary>
         public Int4[] GetEdges()
         {
             return edges.ToArray();
         }
+        /// <summary>
+        /// Gets the triangle list
+        /// </summary>
         public Int3[] GetTris()
         {
             Int3[] tris = Helper.CreateArray(faces, new Int3(-1, -1, -1));
@@ -164,6 +204,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return FilterTris(tris);
         }
 
+        /// <summary>
+        /// Adds an edge
+        /// </summary>
         private void AddEdge(int s, int t, int l, int r)
         {
             if (edges.Count >= maxEdges)
@@ -179,6 +222,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 edges.Add(new Int4(s, t, l, r));
             }
         }
+        /// <summary>
+        /// Completes a facet
+        /// </summary>
+        /// <param name="pts">Point list</param>
+        /// <param name="e">Edge index</param>
         private void CompleteFacet(Vector3[] pts, int e)
         {
             var edge = edges[e];
@@ -241,10 +289,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             faces++;
         }
+        /// <summary>
+        /// Finds best point on left
+        /// </summary>
         private int FindBestPointOnLeft(int s, int t, Vector3[] pts)
         {
             return FindBestPointOnCircleFromPoint(s, t, pts.Length, pts);
         }
+        /// <summary>
+        /// Finds best point on cicle from point
+        /// </summary>
         private int FindBestPointOnCircleFromPoint(int s, int t, int point, Vector3[] pts)
         {
             int pt = point;
@@ -272,6 +326,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return pt;
         }
+        /// <summary>
+        /// Point on circle from point
+        /// </summary>
         private bool PointOnCircleFromPoint(int s, int t, int u, Vector3[] pts, Vector3 c, float r)
         {
             if (r < 0)
@@ -307,6 +364,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Edge is valid.
             return true;
         }
+        /// <summary>
+        /// Overlap edges
+        /// </summary>
         private bool OverlapEdges(int s, int t, Vector3[] pts)
         {
             for (int i = 0; i < edges.Count; ++i)
@@ -326,6 +386,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return false;
         }
+        /// <summary>
+        /// Finds edge
+        /// </summary>
         private int FindEdge(int s, int t)
         {
             for (int i = 0; i < edges.Count; i++)
