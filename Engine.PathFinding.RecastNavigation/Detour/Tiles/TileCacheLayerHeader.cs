@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -82,39 +81,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public TileCacheLayerHeader()
         {
 
-        }
-
-        /// <summary>
-        /// Creates a tile cache layer header
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="i"></param>
-        /// <param name="layer"></param>
-        /// <returns></returns>
-        internal static TileCacheLayerHeader Create(int x, int y, int i, HeightfieldLayer layer)
-        {
-            return new TileCacheLayerHeader
-            {
-                Magic = DT_TILECACHE_MAGIC,
-                Version = DT_TILECACHE_VERSION,
-
-                // Tile layer location in the navmesh.
-                TX = x,
-                TY = y,
-                TLayer = i,
-                BBox = layer.BoundingBox,
-
-                // Tile info.
-                Width = layer.Width,
-                Height = layer.Height,
-                MinX = layer.MinX,
-                MaxX = layer.MaxX,
-                MinY = layer.MinY,
-                MaxY = layer.MaxY,
-                HMin = layer.HMin,
-                HMax = layer.HMax
-            };
         }
 
         /// <summary>

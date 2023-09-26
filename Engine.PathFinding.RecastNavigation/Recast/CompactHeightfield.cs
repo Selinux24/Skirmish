@@ -2364,7 +2364,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     var c = Cells[x + y * w];
 
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                     {
                         if (srcReg[i] > 0 && srcReg[i] < rid)
                         {

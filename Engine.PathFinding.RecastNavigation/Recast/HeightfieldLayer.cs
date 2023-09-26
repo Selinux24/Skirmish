@@ -122,7 +122,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Connections = Cons,
             };
         }
-
         /// <summary>
         /// Copy height and area from compact heightfield. 
         /// </summary>
