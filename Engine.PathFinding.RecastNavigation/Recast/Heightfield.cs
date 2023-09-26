@@ -679,8 +679,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int dir = 0; dir < 4; ++dir)
             {
                 // Skip neighbours which are out of bounds.
-                int dx = x + ContourSet.GetDirOffsetX(dir);
-                int dy = y + ContourSet.GetDirOffsetY(dir);
+                int dx = x + Utils.GetDirOffsetX(dir);
+                int dy = y + Utils.GetDirOffsetY(dir);
                 if (dx < 0 || dy < 0 || dx >= width || dy >= height)
                 {
                     minh = Math.Min(minh, -walkableClimb - span.SMax);

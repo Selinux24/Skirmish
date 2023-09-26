@@ -126,24 +126,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return mesh;
         }
-        /// <summary>
-        /// Computes the vertex hash
-        /// </summary>
-        /// <param name="x">X value</param>
-        /// <param name="y">Y value</param>
-        /// <param name="z">Z value</param>
-        /// <returns>Returns the hash value</returns>
-        /// <remarks>
-        /// Using the vertex coordinates, calculates a unique bucket number for easy storing and retrieval.
-        /// </remarks>
-        private static int ComputeVertexHash(int x, int y, int z)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint h3 = 0xcb1ab31f;
-            uint n = (uint)(h1 * x + h2 * y + h3 * z);
-            return (int)(n & (VERTEX_BUCKET_COUNT2 - 1));
-        }
 
         /// <summary>
         /// Adds a new vertex to the polygon mesh
@@ -156,7 +138,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the added index</returns>
         public int AddVertex(int x, int y, int z, int[] firstVert, int[] nextVert)
         {
-            int bucket = ComputeVertexHash(x, 0, z);
+            int bucket = Utils.ComputeVertexHash(x, 0, z, VERTEX_BUCKET_COUNT2 - 1);
             int i = firstVert[bucket];
 
             while (i != DT_TILECACHE_NULL_IDX)

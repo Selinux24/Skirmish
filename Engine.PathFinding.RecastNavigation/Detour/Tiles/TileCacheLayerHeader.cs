@@ -10,17 +10,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     [Serializable]
     public struct TileCacheLayerHeader
     {
+        /// <summary>
+        /// Magic number
+        /// </summary>
         const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
+        /// <summary>
+        /// Version number
+        /// </summary>
         const int DT_TILECACHE_VERSION = 1;
 
         /// <summary>
         /// Data magic
         /// </summary>
-        public int Magic { get; set; }
+        public int Magic { get; private set; } = DT_TILECACHE_MAGIC;
         /// <summary>
         /// Data version
         /// </summary>
-        public int Version { get; set; }
+        public int Version { get; private set; } = DT_TILECACHE_VERSION;
         /// <summary>
         /// Tile x
         /// </summary>
@@ -71,6 +77,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public int MaxY { get; set; }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        public TileCacheLayerHeader()
+        {
+
+        }
+
+        /// <summary>
         /// Creates a tile cache layer header
         /// </summary>
         /// <param name="x"></param>
@@ -78,7 +92,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="i"></param>
         /// <param name="layer"></param>
         /// <returns></returns>
-        public static TileCacheLayerHeader Create(int x, int y, int i, HeightfieldLayer layer)
+        internal static TileCacheLayerHeader Create(int x, int y, int i, HeightfieldLayer layer)
         {
             return new TileCacheLayerHeader
             {

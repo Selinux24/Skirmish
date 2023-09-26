@@ -142,8 +142,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // -x
                 if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax = x + ContourSet.GetDirOffsetX(0);
-                    int ay = y + ContourSet.GetDirOffsetY(0);
+                    int ax = x + Utils.GetDirOffsetX(0);
+                    int ay = y + Utils.GetDirOffsetY(0);
                     int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(0);
                     if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && SourceRegions[ai] != 0xff)
                     {
@@ -161,8 +161,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // -y
                 if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
                 {
-                    int ax = x + ContourSet.GetDirOffsetX(3);
-                    int ay = y + ContourSet.GetDirOffsetY(3);
+                    int ax = x + Utils.GetDirOffsetX(3);
+                    int ay = y + Utils.GetDirOffsetY(3);
                     int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(3);
                     int nr = SourceRegions[ai];
                     if (nr != 0xff)
@@ -291,8 +291,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
                     {
-                        int ax = x + ContourSet.GetDirOffsetX(dir);
-                        int ay = y + ContourSet.GetDirOffsetY(dir);
+                        int ax = x + Utils.GetDirOffsetX(dir);
+                        int ay = y + Utils.GetDirOffsetY(dir);
                         int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(dir);
                         int rai = SourceRegions[ai];
                         if (rai != 0xff && rai != ri)
@@ -613,60 +613,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// Copy height and area from compact heightfield. 
-        /// </summary>
-        public void CopyToLayer(ref HeightfieldLayer layer, int curId)
-        {
-            int gridSize = LayerWidth * LayerHeight;
-
-            layer.Heights = Helper.CreateArray(gridSize, 0xff);
-            layer.Areas = Helper.CreateArray(gridSize, AreaTypes.RC_NULL_AREA);
-            layer.Cons = Helper.CreateArray(gridSize, 0x00);
-
-            // Find layer height bounds.
-            var (hmin, hmax) = FindLayerHeightBounds(curId);
-
-            layer.Width = LayerWidth;
-            layer.Height = LayerHeight;
-            layer.CS = Heightfield.CellSize;
-            layer.CH = Heightfield.CellHeight;
-
-            // Adjust the bbox to fit the heightfield.
-            var lbbox = BoundingBox;
-            lbbox.Minimum.Y = BoundingBox.Minimum.Y + hmin * Heightfield.CellHeight;
-            lbbox.Maximum.Y = BoundingBox.Minimum.Y + hmax * Heightfield.CellHeight;
-            layer.BoundingBox = lbbox;
-            layer.HMin = hmin;
-            layer.HMax = hmax;
-
-            // Update usable data region.
-            layer.MinX = layer.Width;
-            layer.MaxX = 0;
-            layer.MinY = layer.Height;
-            layer.MaxY = 0;
-
-            for (int y = 0; y < LayerHeight; ++y)
-            {
-                for (int x = 0; x < LayerWidth; ++x)
-                {
-                    CopyToLayerCell(ref layer, x, y, curId, hmin);
-                }
-            }
-
-            if (layer.MinX > layer.MaxX)
-            {
-                layer.MinX = layer.MaxX = 0;
-            }
-
-            if (layer.MinY > layer.MaxY)
-            {
-                layer.MinY = layer.MaxY = 0;
-            }
-        }
-        /// <summary>
         /// Find layer height bounds.
         /// </summary>
-        private (int Min, int Max) FindLayerHeightBounds(int curId)
+        public (int Min, int Max) FindLayerHeightBounds(int curId)
         {
             int hmin = 0;
             int hmax = 0;
@@ -683,95 +632,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return (hmin, hmax);
-        }
-        /// <summary>
-        /// Copy height and area from compact heightfield cell. 
-        /// </summary>
-        private void CopyToLayerCell(ref HeightfieldLayer layer, int x, int y, int curId, int hmin)
-        {
-            int cx = BorderSize + x;
-            int cy = BorderSize + y;
-            var c = Heightfield.Cells[cx + cy * Width];
-
-            for (int j = c.Index, nj = c.Index + c.Count; j < nj; ++j)
-            {
-                var s = Heightfield.Spans[j];
-
-                // Skip unassigned regions.
-                if (SourceRegions[j] == 0xff)
-                {
-                    continue;
-                }
-
-                // Skip of does nto belong to current layer.
-                int lid = Regions[SourceRegions[j]].LayerId;
-                if (lid != curId)
-                {
-                    continue;
-                }
-
-                // Update data bounds.
-                layer.MinX = Math.Min(layer.MinX, x);
-                layer.MaxX = Math.Max(layer.MaxX, x);
-                layer.MinY = Math.Min(layer.MinY, y);
-                layer.MaxY = Math.Max(layer.MaxY, y);
-
-                // Store height and area type.
-                int idx = x + y * LayerWidth;
-                layer.Heights[idx] = s.Y - hmin;
-                layer.Areas[idx] = Heightfield.Areas[j];
-
-                // Check connection.
-                CheckConnection(s, cx, cy, lid, idx, hmin, ref layer);
-            }
-        }
-        /// <summary>
-        /// Check connection.
-        /// </summary>
-        private void CheckConnection(CompactSpan s, int cx, int cy, int layerId, int layerIndex, int hmin, ref HeightfieldLayer layer)
-        {
-            int portal = 0;
-            int con = 0;
-
-            for (int dir = 0; dir < 4; ++dir)
-            {
-                int d = s.GetCon(dir);
-                if (d == ContourSet.RC_NOT_CONNECTED)
-                {
-                    continue;
-                }
-
-                int ax = cx + ContourSet.GetDirOffsetX(dir);
-                int ay = cy + ContourSet.GetDirOffsetY(dir);
-                int ai = Heightfield.Cells[ax + ay * Width].Index + d;
-                int alid = SourceRegions[ai] != 0xff ? Regions[SourceRegions[ai]].LayerId : 0xff;
-
-                // Portal mask
-                if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && layerId != alid)
-                {
-                    portal |= 1 << dir;
-
-                    // Update height so that it matches on both sides of the portal.
-                    var ass = Heightfield.Spans[ai];
-                    if (ass.Y > hmin)
-                    {
-                        layer.Heights[layerIndex] = Math.Max(layer.Heights[layerIndex], ass.Y - hmin);
-                    }
-                }
-
-                // Valid connection mask
-                if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && layerId == alid)
-                {
-                    int nx = ax - BorderSize;
-                    int ny = ay - BorderSize;
-                    if (nx >= 0 && ny >= 0 && nx < LayerWidth && ny < LayerHeight)
-                    {
-                        con |= 1 << dir;
-                    }
-                }
-            }
-
-            layer.Cons[layerIndex] = (portal << 4) | con;
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
+using Engine.Content.FmtObj;
+using Engine.Windows;
 using System;
 
 namespace TerrainSamples
 {
-    using Engine.Content.FmtObj;
-    using Engine.Windows;
-    using TerrainSamples.SceneStart;
-
     static class Program
     {
         [STAThread]
@@ -26,7 +24,7 @@ namespace TerrainSamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Terrain Samples", WindowsEngineForm.ScreenSize * 0.8f);
+                using Game cl = new("Terrain Samples", WindowsEngineForm.ScreenSize * 0.4f);
 #else
                 using Game cl = new("Terrain Samples");
 #endif
@@ -34,7 +32,7 @@ namespace TerrainSamples
                 GameResourceManager.RegisterLoader<LoaderCollada>();
                 GameResourceManager.RegisterLoader<LoaderObj>();
 
-                cl.SetScene<StartScene>();
+                cl.SetScene<SceneStart.StartScene>();
 
                 cl.Run();
             }

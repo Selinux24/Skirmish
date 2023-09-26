@@ -424,8 +424,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return 0xff;
             }
 
-            int bx = ax + ContourSet.GetDirOffsetX(dir);
-            int by = ay + ContourSet.GetDirOffsetY(dir);
+            int bx = ax + Utils.GetDirOffsetX(dir);
+            int by = ay + Utils.GetDirOffsetY(dir);
             int ib = bx + by * w;
 
             return Regs[ib];
@@ -491,8 +491,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 else
                 {
                     // Move to next.
-                    nx = x + ContourSet.GetDirOffsetX(dir);
-                    ny = y + ContourSet.GetDirOffsetY(dir);
+                    nx = x + Utils.GetDirOffsetX(dir);
+                    ny = y + Utils.GetDirOffsetY(dir);
                     ndir = (dir + 3) & 0x3; // Rotate CCW
                 }
 

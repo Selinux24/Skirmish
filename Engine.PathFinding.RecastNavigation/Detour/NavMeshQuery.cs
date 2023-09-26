@@ -2856,10 +2856,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Randomly pick point on polygon.
             var verts = tile.GetPolyVerts(bestPoly);
 
-            float s = Helper.RandomGenerator.NextFloat(0, 1);
-            float t = Helper.RandomGenerator.NextFloat(0, 1);
-
-            Utils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            var pt = Utils.RandomPointInConvexPoly(verts);
 
             Status status = GetPolyHeight(bestPolyRef, pt, out float h);
             if (status.HasFlag(Status.DT_FAILURE))
@@ -2977,10 +2974,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Randomly pick point on polygon.
             var verts = random.Tile.GetPolyVerts(random.Poly);
 
-            float s = Helper.RandomGenerator.NextFloat(0, 1);
-            float t = Helper.RandomGenerator.NextFloat(0, 1);
-
-            Utils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
+            var pt = Utils.RandomPointInConvexPoly(verts);
 
             Status stat = GetPolyHeight(random.Ref, pt, out float h);
             if (stat.HasFlag(Status.DT_FAILURE))

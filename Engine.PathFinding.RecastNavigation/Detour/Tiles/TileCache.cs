@@ -132,19 +132,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
 
         /// <summary>
-        /// Computes the tile hash
-        /// </summary>
-        /// <param name="x">X</param>
-        /// <param name="y">Y</param>
-        /// <param name="mask">Tile mask</param>
-        public static int ComputeTileHash(int x, int y, int mask)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint n = h1 * (uint)x + h2 * (uint)y;
-            return (int)(n & mask);
-        }
-        /// <summary>
         /// Encodes an obstacle id.
         /// </summary>
         private static int EncodeObstacleId(int salt, int it)
@@ -414,7 +401,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             data = TileCacheLayerData.Empty;
 
             // Remove tile from hash lookup.
-            int h = ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
+            int h = Utils.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
             CompressedTile prev = null;
             CompressedTile cur = m_posLookup[h];
             while (cur != null)

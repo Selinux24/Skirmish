@@ -1,11 +1,12 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Tile cache data
     /// </summary>
@@ -35,9 +36,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="cfg">Configuration</param>
         public static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
         {
-            // Allocate voxel heightfield where we rasterize our input data to.
-            var tiles = new List<TileCacheData>();
-
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Update tile bounds.
@@ -52,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
             if (!cid.Any())
             {
-                return tiles.ToArray(); // empty
+                return Array.Empty<TileCacheData>(); // empty
             }
 
             foreach (var id in cid)
@@ -60,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 var tris = chunkyMesh.GetTriangles(id);
                 if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
                 {
-                    return tiles.ToArray();
+                    return Array.Empty<TileCacheData>();
                 }
             }
 
@@ -82,22 +80,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             var lset = HeightfieldLayerSet.Build(chf, cfg.BorderSize, cfg.WalkableHeight);
 
+            // Allocate voxel heightfield where we rasterize our input data to.
+            var tiles = new List<TileCacheData>();
+
             for (int i = 0; i < Math.Min(lset.NLayers, MAX_LAYERS); i++)
             {
-                var layer = lset.Layers[i];
-
-                var data = layer.BuildTileCacheLayer();
-
-                // Store data
-                var tile = new TileCacheData
-                {
-                    // Store header
-                    Header = TileCacheLayerHeader.Create(x, y, i, layer),
-
-                    Data = data
-                };
-
-                tiles.Add(tile);
+                tiles.Add(lset.Layers[i].Create(x, y, i));
             }
 
             return tiles.ToArray();
