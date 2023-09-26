@@ -30,10 +30,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int Count { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Index {Index}; Count {Count}";

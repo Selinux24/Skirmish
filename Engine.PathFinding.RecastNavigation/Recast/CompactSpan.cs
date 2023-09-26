@@ -60,10 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return (Con >> shift) & 0x3f;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return $"Lower Extent {Y}; Region {Reg}; Connection {Con}; Height {H};";

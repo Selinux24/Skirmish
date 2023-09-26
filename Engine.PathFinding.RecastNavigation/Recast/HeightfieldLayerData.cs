@@ -204,7 +204,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int sid = 0xff;
 
                 // -x
-                if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
+                if (s.GetCon(0) != CompactHeightfield.RC_NOT_CONNECTED)
                 {
                     int ax = x + Utils.GetDirOffsetX(0);
                     int ay = y + Utils.GetDirOffsetY(0);
@@ -223,7 +223,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // -y
-                if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
+                if (s.GetCon(3) != CompactHeightfield.RC_NOT_CONNECTED)
                 {
                     int ax = x + Utils.GetDirOffsetX(3);
                     int ay = y + Utils.GetDirOffsetY(3);
@@ -325,7 +325,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Update neighbours
                 for (int dir = 0; dir < 4; ++dir)
                 {
-                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                    if (s.GetCon(dir) != CompactHeightfield.RC_NOT_CONNECTED)
                     {
                         int ax = x + Utils.GetDirOffsetX(dir);
                         int ay = y + Utils.GetDirOffsetY(dir);

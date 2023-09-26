@@ -1,6 +1,9 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Sweep span
+    /// </summary>
     public struct SweepSpan
     {
         /// <summary>
@@ -20,10 +23,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int Nei { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             if (RId != 0 || Id != 0 || NS != 0 || Nei != 0)

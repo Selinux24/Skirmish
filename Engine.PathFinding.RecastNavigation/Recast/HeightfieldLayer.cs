@@ -225,7 +225,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int dir = 0; dir < 4; ++dir)
             {
                 int d = s.GetCon(dir);
-                if (d == ContourSet.RC_NOT_CONNECTED)
+                if (d == CompactHeightfield.RC_NOT_CONNECTED)
                 {
                     continue;
                 }
