@@ -14,7 +14,6 @@ namespace Engine.PathFinding.RecastNavigation
         static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
         static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
         static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
-        const float EPS = 1e-6f;
 
         public static int GetDirOffsetX(int dir)
         {
@@ -159,14 +158,61 @@ namespace Engine.PathFinding.RecastNavigation
                 var vi = polygon[i];
                 var vj = polygon[j];
 
-                if (((vi.Z > p.Z) != (vj.Z > p.Z)) &&
-                    (p.X < (vj.X - vi.X) * (p.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                if (TestPtEdges2D(p, vi, vj))
                 {
                     c = !c;
                 }
             }
 
             return c;
+        }
+        /// <summary>
+        /// Gets if a point is into a polygon, an all the distances to the polygon edges
+        /// </summary>
+        /// <param name="p">Point to test</param>
+        /// <param name="polygon">Polygon vertex list</param>
+        /// <param name="ed">Distance to edges array</param>
+        /// <param name="et">Distance from first edge point to closest point list</param>
+        /// <returns>Returns true if the point is into the polygon</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static bool PointInPolygon2D(Vector3 p, Vector3[] polygon, out float[] ed, out float[] et)
+        {
+            bool c = false;
+
+            int nverts = polygon.Length;
+            ed = new float[nverts];
+            et = new float[nverts];
+
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                var vi = polygon[i];
+                var vj = polygon[j];
+
+                if (TestPtEdges2D(p, vi, vj))
+                {
+                    c = !c;
+                }
+
+                ed[j] = DistancePtSegSqr2D(p, vj, vi, out et[j]);
+            }
+
+            return c;
+        }
+        /// <summary>
+        /// Tests point to edges
+        /// </summary>
+        /// <param name="p">Point</param>
+        /// <param name="vi">First vertex</param>
+        /// <param name="vj">Second vertex</param>
+        private static bool TestPtEdges2D(Vector3 p, Vector3 vi, Vector3 vj)
+        {
+            if (((vi.Z > p.Z) != (vj.Z > p.Z)) &&
+                (p.X < (vj.X - vi.X) * (p.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+            {
+                return true;
+            }
+
+            return false;
         }
         /// <summary>
         /// Derives the signed xz-plane area of the triangle ABC, or the relationship of line AB to point C.
@@ -310,8 +356,8 @@ namespace Engine.PathFinding.RecastNavigation
             float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
             // If point lies inside the triangle, return interpolated y-coord.
-            float EPS = float.Epsilon;
-            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+            const float eps = float.Epsilon;
+            if (u >= -eps && v >= -eps && (u + v) <= 1 + eps)
             {
                 float y = a.Y + v0.Y * u + v1.Y * v;
 
@@ -321,51 +367,30 @@ namespace Engine.PathFinding.RecastNavigation
             return float.MaxValue;
         }
         /// <summary>
-        /// Gets if a point is into a polygon, an all the distances to the polygon edges
+        /// Gets the distance from p to the specified polygon
         /// </summary>
-        /// <param name="pt">Point to test</param>
-        /// <param name="verts">Polygon vertex list</param>
-        /// <param name="ed">Distance to edges array</param>
-        /// <param name="et">Distance from first edge point to closest point list</param>
-        /// <returns>Returns true if the point is into the polygon</returns>
-        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool DistancePtPolyEdgesSqr2D(Vector3 pt, Vector3[] verts, out float[] ed, out float[] et)
+        /// <param name="p">Point to test</param>
+        /// <param name="polygon">Polygon vertex list</param>
+        public static float DistancePtPoly2D(Vector3 p, Vector3[] polygon)
         {
-            int nverts = verts.Length;
-
-            ed = new float[nverts];
-            et = new float[nverts];
-
-            int i, j;
             bool c = false;
-            for (i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                var vi = verts[i];
-                var vj = verts[j];
-                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
-                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
-                {
-                    c = !c;
-                }
-                ed[j] = DistancePtSegSqr2D(pt, vj, vi, out et[j]);
-            }
-            return c;
-        }
-        public static float DistancePtPoly2D(Vector3[] verts, Vector3 p)
-        {
+         
             float dmin = float.MaxValue;
-            int nvert = verts.Length;
-            bool c = false;
+            int nvert = polygon.Length;
+            
             for (int i = 0, j = nvert - 1; i < nvert; j = i++)
             {
-                var vi = verts[i];
-                var vj = verts[j];
-                if (((vi.Z > p.Z) != (vj.Z > p.Z)) && (p.X < (vj.X - vi.X) * (p.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                var vi = polygon[i];
+                var vj = polygon[j];
+                
+                if (TestPtEdges2D(p, vi, vj))
                 {
                     c = !c;
                 }
+            
                 dmin = Math.Min(dmin, DistancePtSeg2D(p, vj, vi));
             }
+
             return c ? -dmin : dmin;
         }
 
@@ -402,7 +427,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return true;
         }
-        public static int OverlapSegSeg2D(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        public static bool OverlapSegSeg2D(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
         {
             float a1 = VCross2D(a, b, d);
             float a2 = VCross2D(a, b, c);
@@ -412,15 +437,15 @@ namespace Engine.PathFinding.RecastNavigation
                 float a4 = a3 + a2 - a1;
                 if (a3 * a4 < 0.0f)
                 {
-                    return 1;
+                    return true;
                 }
             }
-            return 0;
+            return false;
         }
 
         public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, Vector3[] verts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
-            float EPS = 0.00000001f;
+            const float eps = 0.00000001f;
 
             tmin = 0;
             tmax = 1;
@@ -435,7 +460,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 diff = Vector3.Subtract(p0, verts[j]);
                 float n = VPerp2D(edge, diff);
                 float d = VPerp2D(dir, edge);
-                if (Math.Abs(d) < EPS)
+                if (Math.Abs(d) < eps)
                 {
                     // S is nearly parallel to this edge
                     if (n < 0)
@@ -534,6 +559,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if point lies inside the triangle.</returns>
         public static bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
         {
+            const float eps = 1e-6f;
+
             h = float.MaxValue;
 
             Vector3 v0 = Vector3.Subtract(c, a);
@@ -542,7 +569,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Compute scaled barycentric coordinates
             float denom = v0.X * v1.Z - v0.Z * v1.X;
-            if (Math.Abs(denom) < EPS)
+            if (Math.Abs(denom) < eps)
             {
                 return false;
             }

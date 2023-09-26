@@ -3145,7 +3145,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Collect vertices.
             var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-            bool inside = Utils.DistancePtPolyEdgesSqr2D(pos, verts, out float[] edged, out float[] edget);
+            bool inside = Utils.PointInPolygon2D(pos, verts, out var edged, out var edget);
             if (inside)
             {
                 // Point is inside the polygon, return the point.

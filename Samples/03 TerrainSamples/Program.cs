@@ -24,7 +24,7 @@ namespace TerrainSamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Terrain Samples", WindowsEngineForm.ScreenSize * 0.4f);
+                using Game cl = new("Terrain Samples", WindowsEngineForm.ScreenSize * 0.8f);
 #else
                 using Game cl = new("Terrain Samples");
 #endif

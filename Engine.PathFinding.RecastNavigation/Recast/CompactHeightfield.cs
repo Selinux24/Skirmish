@@ -1110,7 +1110,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 verts.Add(bestpt);
 
                 // Create new triangulation. Full rebuild.
-                var dhull = DelaunayHull.Build(verts, hull);
+                var dhull = DelaunayHull.Build(verts.ToArray(), hull);
                 var dTris = dhull.GetTris();
 
                 triList.Clear();
@@ -1156,7 +1156,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     };
 
                     // Make sure the samples are not too close to the edges.
-                    if (Utils.DistancePtPoly2D(polygon, pt) > -sampleDist / 2)
+                    if (Utils.DistancePtPoly2D(pt, polygon) > -sampleDist / 2)
                     {
                         continue;
                     }
