@@ -31,7 +31,16 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var triangles = await GetTriangles();
 
-            return Create(settings, triangles, progressCallback);
+            try
+            {
+                return Create(settings, triangles, progressCallback);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, "Error creating the graph.", ex);
+
+                throw;
+            }
         }
         /// <summary>
         /// Creates a new graph from current geometry input
@@ -85,14 +94,24 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var triangles = await GetTriangles();
 
-            ChunkyMesh = await Task.Run(() => ChunkyTriMesh.Build(triangles));
+            try
+            {
+                ChunkyMesh = ChunkyTriMesh.Build(triangles);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, "Error creating the graph.", ex);
+
+                throw;
+            }
         }
 
         /// <inheritdoc/>
         public override async Task<string> GetHash(PathFinderSettings settings)
         {
-            var tris = await GetTriangles();
-            return GraphFile.GetHash(settings, tris);
+            var triangles = await GetTriangles();
+
+            return GraphFile.GetHash(settings, triangles);
         }
         /// <inheritdoc/>
         public override async Task<IGraph> Load(string fileName, string hash = null)

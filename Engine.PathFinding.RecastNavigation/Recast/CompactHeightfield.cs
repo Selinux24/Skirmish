@@ -14,9 +14,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Null neighbour index
         /// </summary>
         const int RC_NULL_NEI = -1;
+        /// <summary>
+        /// Maximum span width
+        /// </summary>
         const int SPAN_MAX_WIDTH = 0xffff;
+        /// <summary>
+        /// Maximum span height
+        /// </summary>
         const int SPAN_MAX_HEIGHT = 0xff;
+        /// <summary>
+        /// Maximum vertex per edge
+        /// </summary>
         const int MAX_VERTS_PER_EDGE = 32;
+        /// <summary>
+        /// Maximum number of vertices
+        /// </summary>
         const int MAX_VERTS = 127;
         /// <summary>
         /// Heighfield border flag.
@@ -94,6 +106,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         #region Iterators
 
+        /// <summary>
+        /// Enumerates the specified compact cell list
+        /// </summary>
+        /// <param name="cells">Compact cell list</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <returns>Returns each compact cell to evaulate</returns>
         private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells(IEnumerable<CompactCell> cells, int w, int h)
         {
             for (int y = 0; y < h; ++y)
@@ -109,6 +128,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        /// <summary>
+        /// Enumerates the specified compact cell list in reverse order
+        /// </summary>
+        /// <param name="cells">Compact cell list</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <returns>Returns each compact cell to evaulate</returns>
         private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsReverse(IEnumerable<CompactCell> cells, int w, int h)
         {
             for (int y = h - 1; y >= 0; --y)
@@ -124,7 +150,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
-        private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsBounds(int minx, int miny, int maxx, int maxy, IEnumerable<CompactCell> cells, int w)
+        /// <summary>
+        /// Enumerates the specified compact cell list, if is contained into the bounds
+        /// </summary>
+        /// <param name="cells">Compact cell list</param>
+        /// <param name="w">Width</param>
+        /// <param name="minx">Minimum x bound's coordinate</param>
+        /// <param name="miny">Minimum y bound's coordinate</param>
+        /// <param name="maxx">Maximum x bound's coordinate</param>
+        /// <param name="maxy">Maximum y bound's coordinate</param>
+        /// <returns>Returns each compact cell to evaulate</returns>
+        private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsBounds(IEnumerable<CompactCell> cells, int w, int minx, int miny, int maxx, int maxy)
         {
             for (int y = miny; y < maxy; ++y)
             {
@@ -139,7 +175,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
-        private static IEnumerable<(int x, int y, CompactCell cell, int hx, int hy)> IterateHeightPatch(HeightPatch hp, int borderSize, IEnumerable<CompactCell> cells, int w)
+        /// <summary>
+        /// Enumerates the specified compact cell list
+        /// </summary>
+        /// <param name="cells">Compact cell list</param>
+        /// <param name="w">Width</param>
+        /// <param name="hp">Height patch</param>
+        /// <param name="borderSize">Border size</param>
+        /// <returns>Returns each compact cell to evaulate</returns>
+        private static IEnumerable<(int x, int y, CompactCell cell, int hx, int hy)> IterateHeightPatch(IEnumerable<CompactCell> cells, int w, HeightPatch hp, int borderSize)
         {
             for (int hy = 0; hy < hp.Bounds.Height; hy++)
             {
@@ -186,32 +230,40 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         #endregion
 
-        private static float GetJitterX(int i)
-        {
-            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-        private static float GetJitterY(int i)
-        {
-            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
+        /// <summary>
+        /// Inserts an element into the array, maintaining their order
+        /// </summary>
+        /// <param name="arr">Array</param>
+        /// <param name="n">Number of items in the array</param>
+        /// <returns>Returns the new array</returns>
         private static AreaTypes[] InsertSort(AreaTypes[] arr, int n)
         {
             //Copy array
-            var a = arr.ToArray();
+            var res = arr.ToArray();
 
             int i, j;
             for (i = 1; i < n; i++)
             {
-                var value = a[i];
-                for (j = i - 1; j >= 0 && a[j] > value; j--)
+                var value = res[i];
+
+                //Make space in the array
+                for (j = i - 1; j >= 0 && res[j] > value; j--)
                 {
-                    a[j + 1] = a[j];
+                    res[j + 1] = res[j];
                 }
-                a[j + 1] = value;
+
+                //Set the value
+                res[j + 1] = value;
             }
 
-            return a;
+            return res;
         }
+        /// <summary>
+        /// Updates the stack list
+        /// </summary>
+        /// <param name="srcStack">Source stack list</param>
+        /// <param name="srcReg">Source region list</param>
+        /// <returns>Returns the updated stack list</returns>
         private static LevelStackEntry[] AppendStacks(LevelStackEntry[] srcStack, int[] srcReg)
         {
             var dstStack = new List<LevelStackEntry>();
@@ -229,34 +281,49 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dstStack.ToArray();
         }
-        private static bool GetPolyVerts(Vector3 vi, Vector3 vj, out Vector3 rvi, out Vector3 rvj)
+        /// <summary>
+        /// Sorts the specified edge vertices (vi, vj)
+        /// </summary>
+        /// <param name="a">Source edge vertex A</param>
+        /// <param name="b">Source edge vertex B</param>
+        /// <param name="ra">Resulting vertex A</param>
+        /// <param name="rb">Resulting vertex B</param>
+        /// <returns>Returns true if the sorting operation swaps de vertex order</returns>
+        private static bool GetPolyVerts(Vector3 a, Vector3 b, out Vector3 ra, out Vector3 rb)
         {
-            rvj = vi;
-            rvi = vj;
+            rb = a;
+            ra = b;
             bool swapped = false;
 
             // Make sure the segments are always handled in same order
             // using lexological sort or else there will be seams.
-            if (Math.Abs(rvj.X - rvi.X) < 1e-6f)
+            if (Math.Abs(rb.X - ra.X) < 1e-6f)
             {
-                if (rvj.Z > rvi.Z)
+                if (rb.Z > ra.Z)
                 {
-                    (rvi, rvj) = (rvj, rvi);
+                    (ra, rb) = (rb, ra);
                     swapped = true;
                 }
             }
             else
             {
-                if (rvj.X > rvi.X)
+                if (rb.X > ra.X)
                 {
-                    (rvi, rvj) = (rvj, rvi);
+                    (ra, rb) = (rb, ra);
                     swapped = true;
                 }
             }
 
             return swapped;
         }
-        private static int[] SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
+        /// <summary>
+        /// Simlifies the edge samples
+        /// </summary>
+        /// <param name="edgeSamples">Edge sample point list</param>
+        /// <param name="nn">Number of points</param>
+        /// <param name="param">Build parameters</param>
+        /// <returns>Returns the sample indices</returns>
+        private static int[] SimplifySamples(Vector3[] edgeSamples, int nn, BuildPolyDetailParams param)
         {
             float sampleMaxError = param.SampleMaxError;
 
@@ -268,15 +335,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int a = idx[k];
                 int b = idx[k + 1];
-                var va = edge[a];
-                var vb = edge[b];
+                var va = edgeSamples[a];
+                var vb = edgeSamples[b];
 
                 // Find maximum deviation along the segment.
                 float maxd = 0;
                 int maxi = -1;
                 for (int m = a + 1; m < b; ++m)
                 {
-                    float dev = Utils.DistancePtSeg(edge[m], va, vb);
+                    float dev = Utils.DistancePtSeg(edgeSamples[m], va, vb);
                     if (dev > maxd)
                     {
                         maxd = dev;
@@ -528,6 +595,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             MedianFilterWalkableArea();
         }
         /// <summary>
+        /// Gets the area bounds
+        /// </summary>
+        /// <param name="bmin">Area min</param>
+        /// <param name="bmax">Area max</param>
+        /// <param name="min">Resulting bounds min</param>
+        /// <param name="max">Resulting bounds max</param>
+        private void GetAreaBounds(Vector3 bmin, Vector3 bmax, out Int3 min, out Int3 max)
+        {
+            min = new Int3();
+            max = new Int3();
+
+            min.X = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
+            min.Y = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
+            min.Z = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
+            max.X = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
+            max.Y = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
+            max.Z = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+
+            if (max.X < 0) return;
+            if (min.X >= Width) return;
+            if (max.Z < 0) return;
+            if (min.Z >= Height) return;
+
+            min.X = Math.Max(0, min.X);
+            max.X = Math.Min(Width, max.X);
+            min.Z = Math.Max(0, min.Z);
+            max.Z = Math.Min(Height, max.Z);
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="bmin"></param>
@@ -539,33 +635,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         private void MarkBoxArea(Vector3 bmin, Vector3 bmax, AreaTypes areaId)
         {
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+            GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (_, _, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            foreach (var (_, _, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
             {
-                var s = Spans[i];
-
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
                     continue;
                 }
 
-                if (s.Y >= miny && s.Y <= maxy)
+                var sy = Spans[i].Y;
+                if (sy >= min.Y && sy <= max.Y)
                 {
                     Areas[i] = areaId;
                 }
@@ -588,33 +668,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bmin.Y = hmin;
             bmax.Y = hmax;
 
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+            GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            foreach (var (x, z, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
             {
-                var s = Spans[i];
-
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
                     continue;
                 }
 
-                if (s.Y >= miny && s.Y <= maxy)
+                var sy = Spans[i].Y;
+                if (sy >= min.Y && sy <= max.Y)
                 {
                     var p = new Vector3
                     {
@@ -646,33 +710,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             Utils.GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
             float r2 = r * r;
 
-            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+            GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            if (maxx < 0) return;
-            if (minx >= Width) return;
-            if (maxz < 0) return;
-            if (minz >= Height) return;
-
-            minx = Math.Max(0, minx);
-            maxx = Math.Min(Width, maxx);
-            minz = Math.Max(0, minz);
-            maxz = Math.Min(Height, maxz);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(minx, minz, maxx, maxz, Cells, Width))
+            foreach (var (x, z, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
             {
-                var s = Spans[i];
-
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
                     continue;
                 }
 
-                if (s.Y >= miny && s.Y <= maxy)
+                var sy = Spans[i].Y;
+                if (sy >= min.Y && sy <= max.Y)
                 {
                     float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
                     float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
@@ -690,7 +738,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.
         /// </summary>
         /// <returns>Returns always true</returns>
-        private bool MedianFilterWalkableArea()
+        private void MedianFilterWalkableArea()
         {
             int w = Width;
             int h = Height;
@@ -746,8 +794,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             Array.Copy(areas, Areas, SpanCount);
-
-            return true;
         }
 
         /// <summary>
@@ -1071,7 +1117,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Copy the height from the same region, and mark region borders
             // as seed points to fill the rest.
-            foreach (var (x, y, cell, hx, hy) in IterateHeightPatch(hp, borderSize, Cells, Width))
+            foreach (var (x, y, cell, hx, hy) in IterateHeightPatch(Cells, Width, hp, borderSize))
             {
                 for (int i = cell.Index, ni = cell.Index + cell.Count; i < ni; ++i)
                 {
@@ -1087,25 +1133,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                     // If any of the neighbours is not in same region,
                     // add the current location as flood fill start
-                    bool border = false;
-                    for (int dir = 0; dir < 4; ++dir)
-                    {
-                        if (s.GetCon(dir) == RC_NOT_CONNECTED)
-                        {
-                            continue;
-                        }
-
-                        int ax = x + Utils.GetDirOffsetX(dir);
-                        int ay = y + Utils.GetDirOffsetY(dir);
-                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
-                        var a = Spans[ai];
-                        if (a.Reg != region)
-                        {
-                            border = true;
-                            break;
-                        }
-                    }
-
+                    bool border = DetectBorder(x, y, region, s);
                     if (border)
                     {
                         queue.Add(new HeightDataItem { X = x, Y = y, I = i });
@@ -1118,6 +1146,34 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             dataItems = queue.ToArray();
 
             return empty;
+        }
+        /// <summary>
+        /// Finds whether all span neighbors were in other regions than the specified
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="region">Region id</param>
+        /// <param name="s">Compact span</param>
+        private bool DetectBorder(int x, int y, int region, CompactSpan s)
+        {
+            for (int dir = 0; dir < 4; ++dir)
+            {
+                if (s.GetCon(dir) == RC_NOT_CONNECTED)
+                {
+                    continue;
+                }
+
+                int ax = x + Utils.GetDirOffsetX(dir);
+                int ay = y + Utils.GetDirOffsetY(dir);
+                int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
+                var a = Spans[ai];
+                if (a.Reg != region)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         /// <summary>
         /// Process height data item queue
@@ -1244,8 +1300,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
         {
-            var verts = new List<Vector3>(polygon);
-            var edge = new Vector3[(MAX_VERTS_PER_EDGE + 1)];
+            var verts = polygon.ToList();
             var hullList = new List<int>(MAX_VERTS);
 
             int ninp = polygon.Length;
@@ -1254,10 +1309,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 bool swapped = GetPolyVerts(polygon[i], polygon[j], out var vi, out var vj);
 
                 // Create samples along the edge.
-                int nn = CreateSamples(verts.Count, param, hp, vi, vj, ref edge);
+                CreateSamples(verts.Count, param, hp, vi, vj, out var edgeSamples, out int nn);
 
                 // Simplify samples.
-                var idx = SimplifySamples(edge, nn, param);
+                var idx = SimplifySamples(edgeSamples, nn, param);
 
                 hullList.Add(j);
 
@@ -1267,16 +1322,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     for (int k = nidx - 2; k > 0; --k)
                     {
-                        verts.Add(edge[idx[k]]);
-                        hullList.Add(verts.Count - 1);
+                        hullList.Add(verts.Count);
+                        verts.Add(edgeSamples[idx[k]]);
                     }
                 }
                 else
                 {
                     for (int k = 1; k < nidx - 1; ++k)
                     {
-                        verts.Add(edge[idx[k]]);
-                        hullList.Add(verts.Count - 1);
+                        hullList.Add(verts.Count);
+                        verts.Add(edgeSamples[idx[k]]);
                     }
                 }
             }
@@ -1291,8 +1346,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="npolys">Number of polygons</param>
         /// <param name="param">Build parameters</param>
         /// <param name="hp">Height patch</param>
-        private int CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, ref Vector3[] edge)
+        /// <param name="edge">Edge vertices</param>
+        /// <param name="nn">Number of vertices in the edge</param>
+        private void CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, out Vector3[] edge, out int nn)
         {
+            var edgeList = new List<Vector3>(MAX_VERTS_PER_EDGE + 1);
+
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
 
@@ -1303,7 +1362,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float dy = vi.Y - vj.Y;
             float dz = vi.Z - vj.Z;
             float d = (float)Math.Sqrt(dx * dx + dz * dz);
-            int nn = 1 + (int)Math.Floor(d / sampleDist);
+            nn = 1 + (int)Math.Floor(d / sampleDist);
             if (nn >= MAX_VERTS_PER_EDGE)
             {
                 nn = MAX_VERTS_PER_EDGE - 1;
@@ -1323,10 +1382,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Z = vj.Z + dz * u
                 };
                 pos.Y = hp.GetHeight(pos, ics, CellHeight, heightSearchRadius) * CellHeight;
-                edge[k] = pos;
+                edgeList.Add(pos);
             }
 
-            return nn;
+            edge = edgeList.ToArray();
         }
         /// <summary>
         /// Create sample locations in a grid
@@ -1461,9 +1520,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var pt = new Vector3
                 {
-                    X = s.X * sampleDist + GetJitterX(i) * cs * 0.1f,
+                    X = s.X * sampleDist + Utils.GetJitterX(i) * cs * 0.1f,
                     Y = s.Y * CellHeight,
-                    Z = s.Z * sampleDist + GetJitterY(i) * cs * 0.1f
+                    Z = s.Z * sampleDist + Utils.GetJitterY(i) * cs * 0.1f
                 };
 
                 float d = Utils.DistanceTriMesh(pt, verts, tris);
@@ -2766,7 +2825,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int w = Width;
 
-            foreach (var (_, _, i, _) in IterateCellsBounds(minx, miny, maxx, maxy, Cells, w))
+            foreach (var (_, _, i, _) in IterateCellsBounds(Cells, w, minx, miny, maxx, maxy))
             {
                 if (Areas[i] != AreaTypes.RC_NULL_AREA)
                 {

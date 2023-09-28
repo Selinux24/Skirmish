@@ -10,6 +10,9 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     static class Utils
     {
+        const uint HDX = 0x8da6b343;
+        const uint HDY = 0xd8163841;
+        const uint HDZ = 0xcb1ab31f;
         static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
         static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
         static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
@@ -28,6 +31,23 @@ namespace Engine.PathFinding.RecastNavigation
             return OffsetsDir[((y + 1) << 1) + x];
         }
 
+        public static float GetJitterX(int i)
+        {
+            return GetJitter(i, HDX);
+        }
+        public static float GetJitterY(int i)
+        {
+            return GetJitter(i, HDY);
+        }
+        public static float GetJitterZ(int i)
+        {
+            return GetJitter(i, HDZ);
+        }
+        public static float GetJitter(int i, uint v)
+        {
+            return (((i * v) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+
         /// <summary>
         /// Computes a tile hash
         /// </summary>
@@ -36,8 +56,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="mask">Tile lut mask</param>
         public static int ComputeTileHash(int x, int y, int mask)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint h1 = HDX; // Large multiplicative constants
+            uint h2 = HDY; // here arbitrarily chosen primes
             uint n = (uint)(h1 * x + h2 * y);
             return (int)(n & mask);
         }
@@ -53,9 +73,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </remarks>
         public static int ComputeVertexHash(int x, int y, int z, int mask)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint h3 = 0xcb1ab31f;
+            uint h1 = HDX; // Large multiplicative constants
+            uint h2 = HDY; // here arbitrarily chosen primes
+            uint h3 = HDZ;
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
             return (int)(n & mask);
         }
