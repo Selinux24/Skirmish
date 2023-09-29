@@ -223,7 +223,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // Tessellate only outer edges or edges between areas.
                 while (ci != endi)
                 {
-                    float d = Utils.DistancePtSeg2D(verts[ci].X, verts[ci].Z, ax, az, bx, bz);
+                    float d = Utils.DistancePtSegSqr2D(verts[ci].X, verts[ci].Z, ax, az, bx, bz);
                     if (d > maxd)
                     {
                         maxd = d;

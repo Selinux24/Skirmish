@@ -259,7 +259,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Gets the minimum distance from the pt point to the (p,q) segment
+        /// Gets the squared minimum distance from the pt point to the (p,q) segment
         /// </summary>
         /// <param name="pt">Point to test</param>
         /// <param name="p">P segment point</param>
@@ -271,7 +271,7 @@ namespace Engine.PathFinding.RecastNavigation
             return DistancePtSegSqr2D(pt, p, q, out _);
         }
         /// <summary>
-        /// Gets the minimum distance from the pt point to the (p,q) segment
+        /// Gets the squared minimum distance from the pt point to the (p,q) segment
         /// </summary>
         /// <param name="pt">Point to test</param>
         /// <param name="p">P segment point</param>
@@ -295,43 +295,7 @@ namespace Engine.PathFinding.RecastNavigation
             return dx * dx + dz * dz;
         }
         /// <summary>
-        /// Gets the minimum distance from the pt point to the (p,q) segment
-        /// </summary>
-        /// <param name="pt">Point to test</param>
-        /// <param name="p">P segment point</param>
-        /// <param name="q">Q segment point</param>
-        /// <returns>Returns the distance from pt to closest point</returns>
-        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static float DistancePtSeg2D(Vector3 pt, Vector3 p, Vector3 q)
-        {
-            float pqx = q.X - p.X;
-            float pqz = q.Z - p.Z;
-            float dx = pt.X - p.X;
-            float dz = pt.Z - p.Z;
-            float d = pqx * pqx + pqz * pqz;
-            float t = pqx * dx + pqz * dz;
-
-            if (d > 0)
-            {
-                t /= d;
-            }
-
-            if (t < 0)
-            {
-                t = 0;
-            }
-            else if (t > 1)
-            {
-                t = 1;
-            }
-
-            dx = p.X + t * pqx - pt.X;
-            dz = p.Z + t * pqz - pt.Z;
-
-            return dx * dx + dz * dz;
-        }
-        /// <summary>
-        /// Gets the minimum distance from the pt point to the (p,q) segment
+        /// Gets the squared minimum distance from the pt point to the (p,q) segment
         /// </summary>
         /// <param name="ptx">X point coordinate to test</param>
         /// <param name="ptz">Y point coordinate to test</param>
@@ -340,7 +304,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="qx">Q segment x point coordinate</param>
         /// <param name="qz">Q segment y point coordinate</param>
         /// <returns>Returns the distance from pt to closest point</returns>
-        public static float DistancePtSeg2D(int ptx, int ptz, int px, int pz, int qx, int qz)
+        public static float DistancePtSegSqr2D(int ptx, int ptz, int px, int pz, int qx, int qz)
         {
             float pqx = qx - px;
             float pqz = qz - pz;
@@ -348,24 +312,11 @@ namespace Engine.PathFinding.RecastNavigation
             float dz = ptz - pz;
             float d = pqx * pqx + pqz * pqz;
             float t = pqx * dx + pqz * dz;
-
-            if (d > 0)
-            {
-                t /= d;
-            }
-
-            if (t < 0)
-            {
-                t = 0;
-            }
-            else if (t > 1)
-            {
-                t = 1;
-            }
-
+            if (d > 0) t /= d;
+            if (t < 0) t = 0;
+            else if (t > 1) t = 1;
             dx = px + t * pqx - ptx;
             dz = pz + t * pqz - ptz;
-
             return dx * dx + dz * dz;
         }
         /// <summary>
@@ -428,7 +379,7 @@ namespace Engine.PathFinding.RecastNavigation
                     c = !c;
                 }
 
-                dmin = Math.Min(dmin, DistancePtSeg2D(p, vj, vi));
+                dmin = Math.Min(dmin, DistancePtSegSqr2D(p, vj, vi));
             }
 
             return c ? -dmin : dmin;
@@ -633,7 +584,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    float d = DistancePtSeg2D(polygon[j], p1, p2);
+                    float d = DistancePtSegSqr2D(polygon[j], p1, p2);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
                 }
 

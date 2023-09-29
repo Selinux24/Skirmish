@@ -83,6 +83,22 @@ namespace Engine.PathFinding.Tests
         }
 
         [TestMethod()]
+        public void BuildAsyncTest()
+        {
+            var mockSettings = new Mock<PathFinderSettings>();
+
+            var fnc = () => { return zeroPlaneTris; };
+            var mockInput = new Mock<PathFinderInput>(new object[] { fnc });
+
+            var mockGraph = new Mock<IGraph>();
+            mockInput.Setup(i => i.CreateGraphAsync(It.IsAny<PathFinderSettings>(), null)).ReturnsAsync(mockGraph.Object);
+
+            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
+            var res = pfDesc.BuildAsync().GetAwaiter().GetResult();
+
+            Assert.IsNotNull(res);
+        }
+        [TestMethod()]
         public void BuildTest()
         {
             var mockSettings = new Mock<PathFinderSettings>();
@@ -91,10 +107,10 @@ namespace Engine.PathFinding.Tests
             var mockInput = new Mock<PathFinderInput>(new object[] { fnc });
 
             var mockGraph = new Mock<IGraph>();
-            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>(), null)).ReturnsAsync(mockGraph.Object);
+            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>(), null)).Returns(mockGraph.Object);
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
-            var res = pfDesc.Build().GetAwaiter().GetResult();
+            var res = pfDesc.Build();
 
             Assert.IsNotNull(res);
         }
@@ -107,7 +123,7 @@ namespace Engine.PathFinding.Tests
             var input = new InputGeometry(() => { return zeroPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
-            var graph = pfDesc.Build().GetAwaiter().GetResult();
+            var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
             var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
@@ -130,7 +146,7 @@ namespace Engine.PathFinding.Tests
             var input = new InputGeometry(() => { return hOnePlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
-            var graph = pfDesc.Build().GetAwaiter().GetResult();
+            var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
             var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
@@ -153,7 +169,7 @@ namespace Engine.PathFinding.Tests
             var input = new InputGeometry(() => { return hTwoPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
-            var graph = pfDesc.Build().GetAwaiter().GetResult();
+            var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
             var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
@@ -176,7 +192,7 @@ namespace Engine.PathFinding.Tests
             var input = new InputGeometry(() => { return sceneryTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
-            var graph = pfDesc.Build().GetAwaiter().GetResult();
+            var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
             var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
@@ -199,7 +215,7 @@ namespace Engine.PathFinding.Tests
             var input = new InputGeometry(() => { return inclinedPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
-            var graph = pfDesc.Build().GetAwaiter().GetResult();
+            var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentInclined, pointZero, 0.5f, out var n1);
             var walkable2 = graph.IsWalkable(agentInclined, pointOne, 0.5f, out var n2);

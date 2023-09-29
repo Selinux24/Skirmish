@@ -254,7 +254,7 @@ namespace TerrainSamples.SceneCrowds
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
 
-            await UpdateNavigationGraph((progress) =>
+            await UpdateNavigationGraphAsync((progress) =>
             {
                 help.Text = $"Loading navigation mesh {progress:0.0%}...";
             });

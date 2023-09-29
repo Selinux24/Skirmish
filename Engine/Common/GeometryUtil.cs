@@ -2168,6 +2168,11 @@ namespace Engine.Common
         /// <returns>Returns the minimum bounding box that contains all the specified vertex item list</returns>
         public static BoundingBox CreateBoundingBox<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
+            if (!vertexListItems.Any())
+            {
+                return new BoundingBox();
+            }
+
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
             return SharpDXExtensions.BoundingBoxFromPoints(points);
@@ -2179,6 +2184,11 @@ namespace Engine.Common
         /// <returns>Returns the minimum bounding sphere that contains all the specified vertex item list</returns>
         public static BoundingSphere CreateBoundingSphere<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
+            if (!vertexListItems.Any())
+            {
+                return new BoundingSphere();
+            }
+
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
             return SharpDXExtensions.BoundingSphereFromPoints(points);
@@ -2190,6 +2200,11 @@ namespace Engine.Common
         /// <returns>Returns the minimum bounding cylinder that contains all the specified vertex item list</returns>
         public static BoundingCylinder CreateBoundingCylinder<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
+            if (!vertexListItems.Any())
+            {
+                return new BoundingCylinder();
+            }
+
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
             return BoundingCylinder.FromPoints(points);
@@ -2201,6 +2216,11 @@ namespace Engine.Common
         /// <returns>Returns the minimum bounding capsule that contains all the specified vertex item list</returns>
         public static BoundingCapsule CreateBoundingCapsule<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
+            if (!vertexListItems.Any())
+            {
+                return new BoundingCapsule();
+            }
+
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
             return BoundingCapsule.FromPoints(points);

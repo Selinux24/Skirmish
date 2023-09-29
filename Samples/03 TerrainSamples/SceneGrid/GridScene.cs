@@ -384,7 +384,7 @@ namespace TerrainSamples.SceneGrid
             };
             PathFinderDescription = new PathFinderDescription(settings, input);
 
-            await UpdateNavigationGraph();
+            await UpdateNavigationGraphAsync();
 
             Camera.FarPlaneDistance = 1000f;
             Camera.Mode = CameraModes.FreeIsometric;

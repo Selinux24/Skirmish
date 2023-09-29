@@ -89,8 +89,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var vi = vpoly[i];
                 var vj = vpoly[j];
-                if (Utils.DistancePtSeg2D(va, vj, vi) < thrSqr &&
-                    Utils.DistancePtSeg2D(vb, vj, vi) < thrSqr)
+                if (Utils.DistancePtSegSqr2D(va, vj, vi) < thrSqr &&
+                    Utils.DistancePtSegSqr2D(vb, vj, vi) < thrSqr)
                 {
                     return 1;
                 }

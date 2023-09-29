@@ -27,9 +27,25 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
         {
-            var triangles = await GetTriangles();
+            var triangles = await GetTrianglesAsync();
+
+            try
+            {
+                return Create(settings, triangles, progressCallback);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, "Error creating the graph.", ex);
+
+                throw;
+            }
+        }
+        /// <inheritdoc/>
+        public override IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        {
+            var triangles = GetTriangles();
 
             try
             {
@@ -90,9 +106,25 @@ namespace Engine.PathFinding.RecastNavigation
             return graph;
         }
         /// <inheritdoc/>
-        public override async Task Refresh()
+        public override async Task RefreshAsync()
         {
-            var triangles = await GetTriangles();
+            var triangles = await GetTrianglesAsync();
+
+            try
+            {
+                ChunkyMesh = ChunkyTriMesh.Build(triangles);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, "Error creating the graph.", ex);
+
+                throw;
+            }
+        }
+        /// <inheritdoc/>
+        public override void Refresh()
+        {
+            var triangles = GetTriangles();
 
             try
             {
@@ -107,17 +139,24 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public override async Task<string> GetHash(PathFinderSettings settings)
+        public override async Task<string> GetHashAsync(PathFinderSettings settings)
         {
-            var triangles = await GetTriangles();
+            var triangles = await GetTrianglesAsync();
 
             return GraphFile.GetHash(settings, triangles);
         }
         /// <inheritdoc/>
-        public override async Task<IGraph> Load(string fileName, string hash = null)
+        public override string GetHash(PathFinderSettings settings)
+        {
+            var triangles = GetTriangles();
+
+            return GraphFile.GetHash(settings, triangles);
+        }
+        /// <inheritdoc/>
+        public override async Task<IGraph> LoadAsync(string fileName, string hash = null)
         {
             // Load file
-            var file = await GraphFile.Load(fileName);
+            var file = await GraphFile.LoadAsync(fileName);
 
             // Test hash
             if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
@@ -126,22 +165,52 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Create graph
-            var graph = await GraphFile.FromGraphFile(file, this);
+            var graph = await GraphFile.FromGraphFileAsync(file, this);
 
             // Initialize the input data
-            ChunkyMesh = ChunkyTriMesh.Build(await GetTriangles());
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync());
 
             return graph;
         }
         /// <inheritdoc/>
-        public override async Task Save(string fileName, IGraph graph)
+        public override IGraph Load(string fileName, string hash = null)
+        {
+            // Load file
+            var file = GraphFile.Load(fileName);
+
+            // Test hash
+            if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
+            {
+                return null;
+            }
+
+            // Create graph
+            var graph = GraphFile.FromGraphFile(file, this);
+
+            // Initialize the input data
+            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles());
+
+            return graph;
+        }
+        /// <inheritdoc/>
+        public override async Task SaveAsync(string fileName, IGraph graph)
         {
             if (graph is not Graph nmGraph)
             {
                 throw new ArgumentException($"Bad navigation mesh graph type: {graph}", nameof(graph));
             }
 
-            await GraphFile.Save(fileName, nmGraph);
+            await GraphFile.SaveAsync(fileName, nmGraph);
+        }
+        /// <inheritdoc/>
+        public override void Save(string fileName, IGraph graph)
+        {
+            if (graph is not Graph nmGraph)
+            {
+                throw new ArgumentException($"Bad navigation mesh graph type: {graph}", nameof(graph));
+            }
+
+            GraphFile.Save(fileName, nmGraph);
         }
     }
 }

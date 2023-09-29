@@ -143,6 +143,11 @@ namespace TerrainSamples.SceneModularDungeon
             postProcessingState.AddBloomLow();
         }
 
+        private string GetCurrentLeveName()
+        {
+            return scenery?.CurrentLevel.Name + nmFile;
+        }
+
         public override async Task Initialize()
         {
             await base.Initialize();
@@ -163,22 +168,22 @@ namespace TerrainSamples.SceneModularDungeon
 
             Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
-        public override async Task UpdateNavigationGraph(Action<float> progressCallback = null)
+        public override void NavigationGraphUpdating()
         {
             if (scenery?.CurrentLevel == null)
             {
                 return;
             }
 
-            var fileName = scenery.CurrentLevel.Name + nmFile;
+            var fileName = GetCurrentLeveName();
 
             if (File.Exists(fileName))
             {
                 try
                 {
-                    string hash = await PathFinderDescription.GetHash();
+                    string hash = PathFinderDescription.GetHash();
 
-                    var graph = await PathFinderDescription.Load(fileName, hash);
+                    var graph = PathFinderDescription.Load(fileName, hash);
                     if (graph != null)
                     {
                         SetNavigationGraph(graph);
@@ -191,22 +196,6 @@ namespace TerrainSamples.SceneModularDungeon
                     Logger.WriteError(this, $"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
                 }
             }
-
-            await base.UpdateNavigationGraph(progressCallback);
-
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    Logger.WriteDebug(this, $"Saving graph file. {fileName}");
-
-                    await PathFinderDescription.Save(fileName, NavigationGraph);
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-                }
-            });
         }
         public override void NavigationGraphUpdated()
         {
@@ -215,11 +204,26 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
+            if (scenery?.CurrentLevel != null)
+            {
+                var fileName = GetCurrentLeveName();
+                try
+                {
+                    Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+
+                    PathFinderDescription.Save(fileName, NavigationGraph);
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+                }
+            }
+
             //Update active paths with the new graph configuration
             if (ratController.HasPath)
             {
-                Vector3 from = rat.Manipulator.Position;
-                Vector3 to = ratController.Last;
+                var from = rat.Manipulator.Position;
+                var to = ratController.Last;
 
                 CalcPath(ratAgentType, from, to);
             }
@@ -894,11 +898,11 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Walk(playerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.Goto(walkerPos);
+                Camera.SetPosition(walkerPos);
             }
             else
             {
-                Camera.Goto(Camera.Position);
+                Camera.SetPosition(Camera.Position);
             }
 
             if (torch.Enabled)
@@ -1403,7 +1407,7 @@ namespace TerrainSamples.SceneModularDungeon
                 File.Delete(fileName);
             }
 
-            _ = UpdateNavigationGraph();
+            _ = UpdateNavigationGraphAsync();
         }
         private void SaveGraphToFile()
         {
@@ -1476,7 +1480,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             ConfigureNavigationGraph();
 
-            await UpdateNavigationGraph();
+            await UpdateNavigationGraphAsync();
         }
         private void ChangeToLevelCompleted(LoadResourcesResult res)
         {

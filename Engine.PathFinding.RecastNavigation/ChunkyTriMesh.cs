@@ -11,19 +11,22 @@ namespace Engine.PathFinding.RecastNavigation
     public class ChunkyTriMesh
     {
         /// <summary>
-        /// X comparer
-        /// </summary>
-        private static readonly BoundsItemComparerX xComparer = new();
-        /// <summary>
-        /// Y comparer
-        /// </summary>
-        private static readonly BoundsItemComparerY yComparer = new();
-
-        /// <summary>
         /// Subdivision data
         /// </summary>
         class SubdivideData
         {
+            /// <summary>
+            /// X comparer
+            /// </summary>
+            public static readonly BoundsItemComparerX XComparer = new();
+            /// <summary>
+            /// Y comparer
+            /// </summary>
+            public static readonly BoundsItemComparerY YComparer = new();
+
+            /// <summary>
+            /// Bound items
+            /// </summary>
             public BoundsItem[] Items { get; set; }
             /// <summary>
             /// Max nodes
@@ -41,6 +44,50 @@ namespace Engine.PathFinding.RecastNavigation
             /// Tirangles per chunk
             /// </summary>
             public int TrisPerChunk { get; set; }
+        }
+        /// <summary>
+        /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundsItem"/>s on the X axis.
+        /// </summary>
+        class BoundsItemComparerX : IComparer<BoundsItem>
+        {
+            /// <summary>
+            /// Compares two nodes's bounds on the X axis.
+            /// </summary>
+            /// <param name="x">A node.</param>
+            /// <param name="y">Another node.</param>
+            /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
+            public int Compare(BoundsItem x, BoundsItem y)
+            {
+                if (x.Bounds.Left < y.Bounds.Left) return -1;
+                if (x.Bounds.Left > y.Bounds.Left) return 1;
+                if (x.Bounds.Right < y.Bounds.Right) return -1;
+                if (x.Bounds.Right > y.Bounds.Right) return 1;
+                if (x.Index < y.Index) return -1;
+                if (x.Index > y.Index) return 1;
+                return 0;
+            }
+        }
+        /// <summary>
+        /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundsItem"/>s on the Y axis.
+        /// </summary>
+        class BoundsItemComparerY : IComparer<BoundsItem>
+        {
+            /// <summary>
+            /// Compares two nodes's bounds on the Y axis.
+            /// </summary>
+            /// <param name="x">A node.</param>
+            /// <param name="y">Another node.</param>
+            /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
+            public int Compare(BoundsItem x, BoundsItem y)
+            {
+                if (x.Bounds.Top < y.Bounds.Top) return -1;
+                if (x.Bounds.Top > y.Bounds.Top) return 1;
+                if (x.Bounds.Bottom < y.Bounds.Bottom) return -1;
+                if (x.Bounds.Bottom > y.Bounds.Bottom) return 1;
+                if (x.Index < y.Index) return -1;
+                if (x.Index > y.Index) return 1;
+                return 0;
+            }
         }
         /// <summary>
         /// Axis
@@ -147,12 +194,12 @@ namespace Engine.PathFinding.RecastNavigation
                 if (axis == Axis.X)
                 {
                     // Sort along x-axis
-                    Array.Sort(data.Items, imin, inum, xComparer);
+                    Array.Sort(data.Items, imin, inum, SubdivideData.XComparer);
                 }
                 else if (axis == Axis.Y)
                 {
                     // Sort along y-axis
-                    Array.Sort(data.Items, imin, inum, yComparer);
+                    Array.Sort(data.Items, imin, inum, SubdivideData.YComparer);
                 }
 
                 int isplit = imin + inum / 2;

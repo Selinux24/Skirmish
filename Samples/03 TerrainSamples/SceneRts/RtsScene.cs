@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Audio;
+using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -15,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneRts
 {
-    using Engine.Collada;
     using TerrainSamples.SceneRts.AI;
     using TerrainSamples.SceneRts.AI.Agents;
     using TerrainSamples.SceneRts.Controllers;
@@ -1073,7 +1073,7 @@ namespace TerrainSamples.SceneRts
 
             sw.Stop();
 
-            await UpdateNavigationGraph();
+            await UpdateNavigationGraphAsync();
 
             return new TaskResult()
             {
@@ -1087,7 +1087,12 @@ namespace TerrainSamples.SceneRts
             {
                 for (int i = 0; i < rocks.InstanceCount; i++)
                 {
-                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
+                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
+                    {
+                        rocks[i].Visible = false;
+
+                        continue;
+                    }
 
                     if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
@@ -1115,7 +1120,12 @@ namespace TerrainSamples.SceneRts
             {
                 for (int i = 0; i < tree1.InstanceCount; i++)
                 {
-                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
+                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
+                    {
+                        tree1[i].Visible = false;
+
+                        continue;
+                    }
 
                     if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
@@ -1131,7 +1141,12 @@ namespace TerrainSamples.SceneRts
 
                 for (int i = 0; i < tree2.InstanceCount; i++)
                 {
-                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
+                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
+                    {
+                        tree2[i].Visible = false;
+
+                        continue;
+                    }
 
                     if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
@@ -1610,11 +1625,11 @@ namespace TerrainSamples.SceneRts
 
             if (Walk(walkerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.Goto(walkerPos);
+                Camera.SetPosition(walkerPos);
             }
             else
             {
-                Camera.Goto(Camera.Position);
+                Camera.SetPosition(Camera.Position);
             }
         }
         private void UpdateInputFree(GameTime gameTime, PickingRay pickingRay)
@@ -2036,7 +2051,10 @@ namespace TerrainSamples.SceneRts
             {
                 for (int i = 0; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset);
+                    if (GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset, out var p))
+                    {
+                        cPoints[i] = p;
+                    }
                 }
             }
             else
@@ -2046,7 +2064,10 @@ namespace TerrainSamples.SceneRts
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset);
+                    if (GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset, out var p))
+                    {
+                        cPoints[i] = p;
+                    }
                 }
             }
 
@@ -2542,11 +2563,5 @@ namespace TerrainSamples.SceneRts
             var t2box = tankP2.GetOrientedBoundingBox();
             movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, new[] { hbox, t1box, t2box, })));
         }
-    }
-
-    class TaskResult
-    {
-        public TimeSpan Duration { get; set; }
-        public string Text { get; set; }
     }
 }

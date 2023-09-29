@@ -196,17 +196,9 @@ Space: Finds random over navmesh";
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1, 0.8f, -1) * maxD * 0.8f);
 
-            await UpdateNavigationGraph();
+            await UpdateNavigationGraphAsync();
 
             gameReady = true;
-        }
-
-        public override async Task UpdateNavigationGraph(Action<float> progressCallback = null)
-        {
-            var sw = Stopwatch.StartNew();
-            await base.UpdateNavigationGraph(progressCallback);
-            sw.Stop();
-            lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }
         public override void NavigationGraphUpdated()
         {
@@ -356,7 +348,7 @@ Space: Finds random over navmesh";
 
             if (updateGraph)
             {
-                _ = UpdateNavigationGraph();
+                _ = UpdateNavigationGraphAsync();
             }
 
             debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);

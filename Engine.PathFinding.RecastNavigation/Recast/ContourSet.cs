@@ -329,7 +329,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     while (ci != endi)
                     {
-                        float d = Utils.DistancePtSeg2D(points[ci].X, points[ci].Z, ax, az, bx, bz);
+                        float d = Utils.DistancePtSegSqr2D(points[ci].X, points[ci].Z, ax, az, bx, bz);
                         if (d > maxd)
                         {
                             maxd = d;

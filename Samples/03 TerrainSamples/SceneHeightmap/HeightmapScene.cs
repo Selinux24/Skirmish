@@ -685,7 +685,10 @@ namespace TerrainSamples.SceneHeightmap
         {
             for (int i = 0; i < rocks.InstanceCount; i++)
             {
-                var pos = GetRandomPoint(posRnd, Vector3.Zero, bbox);
+                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                {
+                    continue;
+                }
 
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
@@ -710,7 +713,12 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                var pos = GetRandomPoint(posRnd, Vector3.Zero, bbox);
+                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                {
+                    trees[i].Visible = false;
+                   
+                    continue;
+                }
 
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
@@ -727,7 +735,12 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees2.InstanceCount; i++)
             {
-                var pos = GetRandomPoint(posRnd, Vector3.Zero, bbox);
+                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                {
+                    trees2[i].Visible = false;
+
+                    continue;
+                }
 
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
@@ -1048,7 +1061,7 @@ namespace TerrainSamples.SceneHeightmap
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
-            await UpdateNavigationGraph();
+            await UpdateNavigationGraphAsync();
 
             gameReady = true;
 
@@ -1473,7 +1486,10 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void GenerateDust(Random rnd, BoundingSphere bsph)
         {
-            var pos = GetRandomPoint(rnd, Vector3.Zero, bsph);
+            if (!GetRandomPoint(rnd, Vector3.Zero, bsph, out var pos))
+            {
+                return;
+            }
 
             var velocity = Vector3.Normalize(bsph.Center + pos);
 

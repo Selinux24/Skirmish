@@ -52,25 +52,40 @@ namespace Engine.PathFinding
         /// Gets the triangle list
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Triangle>> GetTriangles()
+        public async Task<IEnumerable<Triangle>> GetTrianglesAsync()
         {
-            if (getTrianglesFnc != null)
-            {
-                IEnumerable<Triangle> tris = null;
-
-                await Task.Run(() =>
-                {
-                    tris = getTrianglesFnc();
-                });
-
-                BoundingBox = GeometryUtil.CreateBoundingBox(tris);
-
-                return tris ?? Array.Empty<Triangle>();
-            }
-            else
+            if (getTrianglesFnc == null)
             {
                 return Array.Empty<Triangle>();
             }
+
+            IEnumerable<Triangle> tris = null;
+
+            await Task.Run(() =>
+            {
+                tris = getTrianglesFnc() ?? Array.Empty<Triangle>();
+            });
+
+            BoundingBox = GeometryUtil.CreateBoundingBox(tris);
+
+            return tris;
+        }
+        /// <summary>
+        /// Gets the triangle list
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<Triangle> GetTriangles()
+        {
+            if (getTrianglesFnc == null)
+            {
+                return Array.Empty<Triangle>();
+            }
+
+            IEnumerable<Triangle> tris = getTrianglesFnc() ?? Array.Empty<Triangle>();
+
+            BoundingBox = GeometryUtil.CreateBoundingBox(tris);
+
+            return tris;
         }
 
         /// <summary>
@@ -213,18 +228,35 @@ namespace Engine.PathFinding
         /// <param name="settings">Creation settings</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null);
+        public abstract Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null);
+        /// <summary>
+        /// Creates a new graph from current input
+        /// </summary>
+        /// <param name="settings">Creation settings</param>
+        /// <param name="progressCallback">Optional progress callback</param>
+        /// <returns>Returns the new created graph</returns>
+        public abstract IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null);
         /// <summary>
         /// Refresh
         /// </summary>
-        public abstract Task Refresh();
+        public abstract Task RefreshAsync();
+        /// <summary>
+        /// Refresh
+        /// </summary>
+        public abstract void Refresh();
 
         /// <summary>
         /// Gets the input hash
         /// </summary>
         /// <param name="settings">Path finder settings</param>
         /// <returns>Returns the input hash</returns>
-        public abstract Task<string> GetHash(PathFinderSettings settings);
+        public abstract Task<string> GetHashAsync(PathFinderSettings settings);
+        /// <summary>
+        /// Gets the input hash
+        /// </summary>
+        /// <param name="settings">Path finder settings</param>
+        /// <returns>Returns the input hash</returns>
+        public abstract string GetHash(PathFinderSettings settings);
         /// <summary>
         /// Loads the graph from a file
         /// </summary>
@@ -232,12 +264,26 @@ namespace Engine.PathFinding
         /// <param name="hash">Source hash</param>
         /// <returns>Returns the loaded graph</returns>
         /// <remarks>If hash specified, the input proceed to compare file hash and specified hash. If they are different, the returns null.</remarks>
-        public abstract Task<IGraph> Load(string fileName, string hash = null);
+        public abstract Task<IGraph> LoadAsync(string fileName, string hash = null);
+        /// <summary>
+        /// Loads the graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="hash">Source hash</param>
+        /// <returns>Returns the loaded graph</returns>
+        /// <remarks>If hash specified, the input proceed to compare file hash and specified hash. If they are different, the returns null.</remarks>
+        public abstract IGraph Load(string fileName, string hash = null);
         /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph instance</param>
-        public abstract Task Save(string fileName, IGraph graph);
+        public abstract Task SaveAsync(string fileName, IGraph graph);
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="graph">Graph instance</param>
+        public abstract void Save(string fileName, IGraph graph);
     }
 }

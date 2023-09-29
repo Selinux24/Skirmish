@@ -19,30 +19,48 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
         {
-            var triangles = await GetTriangles();
+            var triangles = await GetTrianglesAsync();
 
             return await Task.Run(() => Grid.CreateGrid(settings, this, triangles, progressCallback));
         }
+        /// <inheritdoc/>
+        public override IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        {
+            var triangles = GetTriangles();
+
+            return Grid.CreateGrid(settings, this, triangles, progressCallback);
+        }
 
         /// <inheritdoc/>
-        public override async Task Refresh()
+        public override async Task RefreshAsync()
         {
             await Task.CompletedTask;
         }
+        /// <inheritdoc/>
+        public override void Refresh()
+        {
+            //Not applicable
+        }
 
         /// <inheritdoc/>
-        public override async Task<string> GetHash(PathFinderSettings settings)
+        public override async Task<string> GetHashAsync(PathFinderSettings settings)
         {
-            var tris = await GetTriangles();
+            var tris = await GetTrianglesAsync();
             return GridFile.GetHash(settings, tris);
         }
         /// <inheritdoc/>
-        public override async Task<IGraph> Load(string fileName, string hash = null)
+        public override string GetHash(PathFinderSettings settings)
+        {
+            var tris = GetTriangles();
+            return GridFile.GetHash(settings, tris);
+        }
+        /// <inheritdoc/>
+        public override async Task<IGraph> LoadAsync(string fileName, string hash = null)
         {
             // Load file
-            var file = await GridFile.Load(fileName);
+            var file = await GridFile.LoadAsync(fileName);
 
             // Test hash
             if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
@@ -50,17 +68,41 @@ namespace Engine.PathFinding.AStar
                 return null;
             }
 
-            return await GridFile.FromGraphFile(file, this);
+            return await GridFile.FromGraphFileAsync(file, this);
         }
         /// <inheritdoc/>
-        public override async Task Save(string fileName, IGraph graph)
+        public override IGraph Load(string fileName, string hash = null)
+        {
+            // Load file
+            var file = GridFile.Load(fileName);
+
+            // Test hash
+            if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
+            {
+                return null;
+            }
+
+            return GridFile.FromGraphFile(file, this);
+        }
+        /// <inheritdoc/>
+        public override async Task SaveAsync(string fileName, IGraph graph)
         {
             if (graph is not Grid grid)
             {
                 throw new ArgumentException($"Bad grid graph type: {graph}", nameof(graph));
             }
 
-            await GridFile.Save(fileName, grid);
+            await GridFile.SaveAsync(fileName, grid);
+        }
+        /// <inheritdoc/>
+        public override void Save(string fileName, IGraph graph)
+        {
+            if (graph is not Grid grid)
+            {
+                throw new ArgumentException($"Bad grid graph type: {graph}", nameof(graph));
+            }
+
+            GridFile.Save(fileName, grid);
         }
     }
 }

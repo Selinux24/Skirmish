@@ -414,7 +414,7 @@ namespace TerrainSamples.SceneSkybox
             //Generate the path finder description
             PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
 
-            await UpdateNavigationGraph((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
+            await UpdateNavigationGraphAsync((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
             await Task.Delay(500);
         }
         private void StartScene()
@@ -605,11 +605,11 @@ namespace TerrainSamples.SceneSkybox
         {
             if (Walk(walker, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.Goto(walkerPos);
+                Camera.SetPosition(walkerPos);
             }
             else
             {
-                Camera.Goto(Camera.Position);
+                Camera.SetPosition(Camera.Position);
             }
         }
         private void UpdateInputLights()
