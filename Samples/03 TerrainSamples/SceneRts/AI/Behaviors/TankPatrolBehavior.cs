@@ -35,7 +35,7 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
             }
 
             var model = Agent.SceneObject;
-            if (model?.ModelPartCount <= 0)
+            if (model == null || model.ModelPartCount <= 0)
             {
                 return;
             }

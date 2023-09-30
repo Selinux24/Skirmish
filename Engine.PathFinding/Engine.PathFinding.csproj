@@ -2,17 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <AssemblyName>Engine.PathFinding.RecastNavigation</AssemblyName>
-    <RootNamespace>Engine.PathFinding.RecastNavigation</RootNamespace>
+    <AssemblyName>Engine.PathFinding</AssemblyName>
+    <RootNamespace>Engine.PathFinding</RootNamespace>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Engine.PathFinding.RecastNavigation.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Engine.PathFinding.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.PathFinding\Engine.PathFinding.csproj" />
     <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 

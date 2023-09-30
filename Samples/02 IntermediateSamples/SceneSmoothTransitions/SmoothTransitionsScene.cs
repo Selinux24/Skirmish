@@ -2,7 +2,6 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
-using Engine.PathFinding;
 using Engine.UI;
 using SharpDX;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
-    public class SmoothTransitionsScene : WalkableScene
+    public class SmoothTransitionsScene : Scene
     {
         private UITextArea title = null;
         private UITextArea runtime = null;

@@ -3,7 +3,6 @@ using Engine.Audio;
 using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
-using Engine.PathFinding;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -18,7 +17,7 @@ namespace Tanks
     /// <summary>
     /// Tanks game scene
     /// </summary>
-    class SceneTanksGame : WalkableScene
+    class SceneTanksGame : Scene
     {
         const int layerUIModal = LayerUIEffects + 3;
         const string fontFilename = "Resources/LeagueSpartan-Bold.otf";

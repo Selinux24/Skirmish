@@ -1,10 +1,8 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.BuiltIn.PostProcess;
-using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
-using Engine.PathFinding;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -15,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
 {
-    public class DeferredLightsScene : WalkableScene
+    public class DeferredLightsScene : Scene
     {
         private readonly string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
 
@@ -247,10 +245,10 @@ namespace IntermediateSamples.SceneDeferredLights
 
             Lights.KeyLight.Enabled = false;
             Lights.KeyLight.CastShadow = false;
-         
+
             Lights.BackLight.Enabled = false;
             Lights.BackLight.CastShadow = false;
-         
+
             Lights.FillLight.Enabled = true;
             Lights.FillLight.CastShadow = true;
             Lights.FillLight.DiffuseColor = new Color3(0.8f, 0.9f, 1);

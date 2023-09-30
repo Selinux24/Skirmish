@@ -898,11 +898,11 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Walk(playerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.SetPosition(walkerPos);
+                Camera.Goto(walkerPos);
             }
             else
             {
-                Camera.SetPosition(Camera.Position);
+                Camera.Goto(Camera.Position);
             }
 
             if (torch.Enabled)

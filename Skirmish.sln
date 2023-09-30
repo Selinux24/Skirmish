@@ -49,6 +49,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "04 PhysicsSamples", "Sample
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "02 IntermediateSamples", "Samples\02 IntermediateSamples\02 IntermediateSamples.csproj", "{C48FB95A-F6A6-4B39-866D-F85688C6A100}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.PathFinding", "Engine.PathFinding\Engine.PathFinding.csproj", "{B284141C-D8B4-4F1D-9729-6F4FD0383F21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -275,6 +277,18 @@ Global
 		{C48FB95A-F6A6-4B39-866D-F85688C6A100}.Release|x64.Build.0 = Release|x64
 		{C48FB95A-F6A6-4B39-866D-F85688C6A100}.Release|x86.ActiveCfg = Release|x86
 		{C48FB95A-F6A6-4B39-866D-F85688C6A100}.Release|x86.Build.0 = Release|x86
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|x64.ActiveCfg = Debug|x64
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|x64.Build.0 = Debug|x64
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|x86.ActiveCfg = Debug|x86
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Debug|x86.Build.0 = Debug|x86
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|x64.ActiveCfg = Release|x64
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|x64.Build.0 = Release|x64
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|x86.ActiveCfg = Release|x86
+		{B284141C-D8B4-4F1D-9729-6F4FD0383F21}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,7 +11,6 @@ namespace Engine
     using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
-    using Engine.PathFinding;
 
     /// <summary>
     /// Ground garden planter
@@ -71,7 +70,7 @@ namespace Engine
             /// <param name="description">Vegetation task</param>
             /// <param name="gbbox">Relative bounding box to plant</param>
             /// <returns>Returns generated vertex data</returns>
-            private static IEnumerable<VertexBillboard> PlantNode(WalkableScene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
+            private static IEnumerable<VertexBillboard> PlantNode(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
             {
                 if (node == null)
                 {
@@ -105,7 +104,7 @@ namespace Engine
             /// <param name="bbox">Node box</param>
             /// <param name="rnd">Randomizer</param>
             /// <returns>Returns the planting point</returns>
-            private static VertexBillboard? CalculatePoint(WalkableScene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox bbox, Random rnd)
+            private static VertexBillboard? CalculatePoint(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox bbox, Random rnd)
             {
                 VertexBillboard? result = null;
 
@@ -161,7 +160,7 @@ namespace Engine
             /// <param name="size">Size</param>
             /// <param name="res">Resulting item</param>
             /// <returns>Returns true if an item has been planted</returns>
-            private static bool Plant(WalkableScene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
+            private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
             {
                 var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
 
@@ -228,7 +227,7 @@ namespace Engine
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
             /// <param name="gbbox">Relative bounding box to plant</param>
-            public async Task PlantAsync(WalkableScene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
+            public async Task PlantAsync(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
             {
                 if (Planting)
                 {
@@ -939,12 +938,7 @@ namespace Engine
                 return Description.PlantingArea;
             }
 
-            if (Scene is WalkableScene walkableScene)
-            {
-                return walkableScene.GetBoundingBox(SceneObjectUsages.Ground);
-            }
-
-            return null;
+            return Scene.GetBoundingBox(SceneObjectUsages.Ground);
         }
         /// <summary>
         /// Builds the quad-tree from the specified bounding box
@@ -1014,11 +1008,6 @@ namespace Engine
         /// </remarks>
         private async Task<IEnumerable<FoliagePatch>> DoPlantAsync(BoundingBox bbox)
         {
-            if (Scene is not WalkableScene walkableScene)
-            {
-                return Enumerable.Empty<FoliagePatch>();
-            }
-
             List<FoliagePatch> toAssignList = new();
 
             List<Task> plantTaskList = new();
@@ -1034,7 +1023,7 @@ namespace Engine
                     var fPatch = fPatchList.ElementAt(i);
                     if (!fPatch.Planted)
                     {
-                        plantTaskList.Add(fPatch.PlantAsync(walkableScene, node, foliageMap, foliageMapChannels[i], bbox));
+                        plantTaskList.Add(fPatch.PlantAsync(Scene, node, foliageMap, foliageMapChannels[i], bbox));
                     }
                     else if (fPatch.HasData && !foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                     {

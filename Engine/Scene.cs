@@ -730,6 +730,153 @@ namespace Engine
             return Components.First<IGround>(SceneObjectUsages.Ground)?.GetCullingVolume();
         }
 
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Y, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Y, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Z, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(float x, float z, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            var bbox = GetBoundingBox(SceneObjectUsages.Ground);
+
+            float maxY = bbox.Maximum.Y + 1.0f;
+
+            return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
+        }
+
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindTopGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(x, z);
+
+            if (this.PickNearest<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(x, z);
+
+            if (this.PickFirst<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets all ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition<T>(float x, float z, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(x, z);
+
+            if (this.PickAll<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                results = res.SelectMany(r => r.PickingResults);
+
+                return true;
+            }
+
+            results = Enumerable.Empty<PickingResult<T>>();
+
+            return false;
+        }
+        /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition<T>(Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(from.X, from.Z);
+
+            bool picked = this.PickAll<T>(ray, SceneObjectUsages.Ground, out var pResults);
+            if (picked)
+            {
+                result = pResults
+                    .SelectMany(r => r.PickingResults)
+                    .OrderBy(r => Vector3.DistanceSquared(from, r.Position))
+                    .First();
+
+                return true;
+            }
+
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
+        }
+
         /// <inheritdoc/>
         public virtual IGameState GetState()
         {

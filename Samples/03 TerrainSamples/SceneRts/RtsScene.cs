@@ -1625,11 +1625,11 @@ namespace TerrainSamples.SceneRts
 
             if (Walk(walkerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
-                Camera.SetPosition(walkerPos);
+                Camera.Goto(walkerPos);
             }
             else
             {
-                Camera.SetPosition(Camera.Position);
+                Camera.Goto(Camera.Position);
             }
         }
         private void UpdateInputFree(GameTime gameTime, PickingRay pickingRay)
