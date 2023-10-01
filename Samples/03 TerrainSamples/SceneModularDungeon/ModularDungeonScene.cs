@@ -177,25 +177,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var fileName = GetCurrentLeveName();
 
-            if (File.Exists(fileName))
-            {
-                try
-                {
-                    string hash = PathFinderDescription.GetHash();
-
-                    var graph = PathFinderDescription.Load(fileName, hash);
-                    if (graph != null)
-                    {
-                        SetNavigationGraph(graph);
-
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError(this, $"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
-                }
-            }
+            LoadNavigationGraphFromFile(fileName);
         }
         public override void NavigationGraphUpdated()
         {
@@ -207,16 +189,8 @@ namespace TerrainSamples.SceneModularDungeon
             if (scenery?.CurrentLevel != null)
             {
                 var fileName = GetCurrentLeveName();
-                try
-                {
-                    Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
-                    PathFinderDescription.Save(fileName, NavigationGraph);
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-                }
+                SaveNavigationGraphToFile(fileName);
             }
 
             //Update active paths with the new graph configuration
@@ -1407,7 +1381,7 @@ namespace TerrainSamples.SceneModularDungeon
                 File.Delete(fileName);
             }
 
-            _ = UpdateNavigationGraphAsync();
+            EnqueueNavigationGraphUpdate();
         }
         private void SaveGraphToFile()
         {
@@ -1480,7 +1454,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             ConfigureNavigationGraph();
 
-            await UpdateNavigationGraphAsync();
+            EnqueueNavigationGraphUpdate();
         }
         private void ChangeToLevelCompleted(LoadResourcesResult res)
         {

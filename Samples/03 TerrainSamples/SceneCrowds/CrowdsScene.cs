@@ -215,7 +215,7 @@ namespace TerrainSamples.SceneCrowds
             };
             terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
         }
-        private async Task InitializeSceneComponentsCompleted(LoadResourcesResult res)
+        private void InitializeSceneComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -254,16 +254,10 @@ namespace TerrainSamples.SceneCrowds
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
 
-            await UpdateNavigationGraphAsync((progress) =>
+            EnqueueNavigationGraphUpdate((progress) =>
             {
                 help.Text = $"Loading navigation mesh {progress:0.0%}...";
             });
-
-            await Task.Delay(100);
-
-            help.Text = "Point & click over terrain to move the crowd. Press F1 to show the Navigation mesh.";
-
-            gameReady = true;
         }
         private void StartNodes()
         {
@@ -523,6 +517,10 @@ namespace TerrainSamples.SceneCrowds
 
         public override void NavigationGraphUpdated()
         {
+            gameReady = true;
+
+            help.Text = "Point & click over terrain to move the crowd. Press F1 to show the Navigation mesh.";
+
             UpdateGraphNodes(tankAgentType);
 
             if (NavigationGraph is not Graph nGraph)

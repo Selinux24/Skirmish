@@ -366,7 +366,7 @@ namespace TerrainSamples.SceneGrid
 
             lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLineDrawer", "DebugLineDrawer", desc);
         }
-        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        private void InitializeResourcesCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -384,86 +384,7 @@ namespace TerrainSamples.SceneGrid
             };
             PathFinderDescription = new PathFinderDescription(settings, input);
 
-            await UpdateNavigationGraphAsync();
-
-            Camera.FarPlaneDistance = 1000f;
-            Camera.Mode = CameraModes.FreeIsometric;
-
-            StartAnimations();
-            StartPositions();
-
-            cursor3D.Visible = true;
-            troops.Visible = true;
-            terrain.Visible = true;
-
-            await Task.Delay(2000);
-
-            GoToSoldier(skirmishGame.CurrentSoldier);
-
-            gameReady = true;
-        }
-        private void StartAnimations()
-        {
-            soldierCrawl = AnimationPlan.CreateLoop("crawl");
-            soldierWalk = AnimationPlan.CreateLoop("walk");
-            soldierRun = AnimationPlan.CreateLoop("run");
-            soldierAssault = AnimationPlan.CreateLoop("assault");
-            soldierStand = AnimationPlan.CreateLoop("stand");
-            soldierDefendAssault = AnimationPlan.CreateLoop("defendAssault");
-            soldierRandomFire = AnimationPlan.CreateLoop("randomFire");
-            soldierReload = AnimationPlan.Create("reload");
-            soldierUseItem = AnimationPlan.Create("useItem");
-            soldierMoraleRestored = AnimationPlan.Create("moraleRestored");
-        }
-        private void StartPositions()
-        {
-            var bbox = terrain.GetBoundingBox();
-
-            float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
-            float teamSeparation = terrainHeight / skirmishGame.Teams.Length;
-
-            float soldierSeparation = 12f;
-            int instanceIndex = 0;
-            uint teamIndex = 0;
-            foreach (var teamSoldiers in skirmishGame.Teams.Select(t => t.Soldiers))
-            {
-                float teamWidth = teamSoldiers.Length * soldierSeparation;
-
-                int soldierIndex = 0;
-                foreach (var soldierC in teamSoldiers)
-                {
-                    var soldier = troops[instanceIndex++];
-
-                    soldier.TextureIndex = teamIndex;
-                    soldier.AnimationController.Start(soldierStand, soldierIndex);
-
-                    float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
-                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
-
-                    if (!FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
-                    {
-                        throw new GameLogicException("Bad position");
-                    }
-
-                    var node = NavigationGraph.FindNode(soldierAgent, r.Position);
-
-                    soldier.Manipulator.SetPosition(node?.Center ?? r.Position, true);
-
-                    if (teamIndex == 0)
-                    {
-                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
-                    }
-
-                    soldierModels.Add(soldierC, soldier);
-                    var controller = new BasicManipulatorController();
-                    controller.PathEnd += Controller_PathEnd;
-                    soldierControllers.Add(soldierC, controller);
-
-                    soldierIndex++;
-                }
-
-                teamIndex++;
-            }
+            EnqueueNavigationGraphUpdate();
         }
 
         public override void Update(GameTime gameTime)
@@ -790,6 +711,86 @@ namespace TerrainSamples.SceneGrid
             float hRatio = Game.Form.RenderHeight / hudTextureSize.Height;
             gameArea = new(initialGameArea.X * wRatio, initialGameArea.Y * hRatio, initialGameArea.Width * wRatio, initialGameArea.Height * hRatio);
             minimapArea = new(initialMinimapArea.X * wRatio, initialMinimapArea.Y * hRatio, initialMinimapArea.Width * wRatio, initialMinimapArea.Height * hRatio);
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            Camera.FarPlaneDistance = 1000f;
+            Camera.Mode = CameraModes.FreeIsometric;
+
+            StartAnimations();
+            StartPositions();
+
+            cursor3D.Visible = true;
+            troops.Visible = true;
+            terrain.Visible = true;
+
+            GoToSoldier(skirmishGame.CurrentSoldier);
+
+            gameReady = true;
+        }
+        private void StartAnimations()
+        {
+            soldierCrawl = AnimationPlan.CreateLoop("crawl");
+            soldierWalk = AnimationPlan.CreateLoop("walk");
+            soldierRun = AnimationPlan.CreateLoop("run");
+            soldierAssault = AnimationPlan.CreateLoop("assault");
+            soldierStand = AnimationPlan.CreateLoop("stand");
+            soldierDefendAssault = AnimationPlan.CreateLoop("defendAssault");
+            soldierRandomFire = AnimationPlan.CreateLoop("randomFire");
+            soldierReload = AnimationPlan.Create("reload");
+            soldierUseItem = AnimationPlan.Create("useItem");
+            soldierMoraleRestored = AnimationPlan.Create("moraleRestored");
+        }
+        private void StartPositions()
+        {
+            var bbox = terrain.GetBoundingBox();
+
+            float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
+            float teamSeparation = terrainHeight / skirmishGame.Teams.Length;
+
+            float soldierSeparation = 12f;
+            int instanceIndex = 0;
+            uint teamIndex = 0;
+            foreach (var teamSoldiers in skirmishGame.Teams.Select(t => t.Soldiers))
+            {
+                float teamWidth = teamSoldiers.Length * soldierSeparation;
+
+                int soldierIndex = 0;
+                foreach (var soldierC in teamSoldiers)
+                {
+                    var soldier = troops[instanceIndex++];
+
+                    soldier.TextureIndex = teamIndex;
+                    soldier.AnimationController.Start(soldierStand, soldierIndex);
+
+                    float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
+                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
+
+                    if (!FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
+                    {
+                        throw new GameLogicException("Bad position");
+                    }
+
+                    var node = NavigationGraph.FindNode(soldierAgent, r.Position);
+
+                    soldier.Manipulator.SetPosition(node?.Center ?? r.Position, true);
+
+                    if (teamIndex == 0)
+                    {
+                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
+                    }
+
+                    soldierModels.Add(soldierC, soldier);
+                    var controller = new BasicManipulatorController();
+                    controller.PathEnd += Controller_PathEnd;
+                    soldierControllers.Add(soldierC, controller);
+
+                    soldierIndex++;
+                }
+
+                teamIndex++;
+            }
         }
 
         private void Controller_PathEnd(object sender, EventArgs e)

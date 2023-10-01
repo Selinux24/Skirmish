@@ -328,7 +328,7 @@ namespace TerrainSamples.SceneSkybox
             graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
-        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        private void InitializeResourcesCompleted(LoadResourcesResult res)
         {
             loadingReady = true;
 
@@ -342,13 +342,7 @@ namespace TerrainSamples.SceneSkybox
             //Put ground objects in position
             StartGroundObjects();
 
-            await StartPathFinding();
-
-            StartScene();
-
-            StartSounds();
-
-            gameReady = true;
+            StartPathFinding();
         }
         private void StartGroundObjects()
         {
@@ -398,7 +392,7 @@ namespace TerrainSamples.SceneSkybox
 
             fountain.Manipulator.SetScale(2.3f);
         }
-        private async Task StartPathFinding()
+        private void StartPathFinding()
         {
             //Configure the input geometry
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
@@ -414,75 +408,7 @@ namespace TerrainSamples.SceneSkybox
             //Generate the path finder description
             PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
 
-            await UpdateNavigationGraphAsync((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
-            await Task.Delay(500);
-        }
-        private void StartScene()
-        {
-            Lights.DirectionalLights[0].Enabled = true;
-            Lights.DirectionalLights[0].CastShadow = true;
-
-            Lights.DirectionalLights[1].Enabled = true;
-
-            Lights.DirectionalLights[2].Enabled = false;
-
-            directionalLightCount = Lights.DirectionalLights.Length;
-
-            movingFireLight = new SceneLightPoint(
-                "Moving fire light",
-                false,
-                Color.Orange.RGB(),
-                Color.Orange.RGB(),
-                true,
-                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
-
-            Lights.Add(movingFireLight);
-
-            skydom.Visible = true;
-            lakeBottom.Visible = true;
-            torchs.Visible = true;
-            obelisks.Visible = true;
-            fountain.Visible = true;
-            ruins.Visible = true;
-            water.Visible = true;
-            movingFire.Visible = true;
-            pManager.Visible = true;
-
-            postProcessingState.AddToneMapping(BuiltInToneMappingTones.SimpleReinhard);
-            Renderer.ClearPostProcessingEffects();
-            Renderer.PostProcessingObjectsEffects = postProcessingState;
-
-#if DEBUG
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
-#else
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
-#endif
-        }
-        private void StartSounds()
-        {
-            const string sphereSound = "target_balls_single_loop";
-            const string sphereEffect = "Sphere";
-
-            AudioManager.LoadSound(sphereSound, "SceneSkybox/resources/Audio/Effects", "target_balls_single_loop.wav");
-
-            AudioManager.AddEffectParams(
-                sphereEffect,
-                new GameAudioEffectParameters
-                {
-                    SoundName = sphereSound,
-                    IsLooped = true,
-                    UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
-                    Volume = 0.25f,
-                    EmitterRadius = 6,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            fireAudioEffect = AudioManager.CreateEffectInstance(sphereEffect, movingFire, Camera);
-            fireAudioEffect.Play();
-
-            AudioManager.MasterVolume = 0.5f;
-            AudioManager.Start();
+            EnqueueNavigationGraphUpdate((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }
 
         public override void Update(GameTime gameTime)
@@ -773,6 +699,82 @@ namespace TerrainSamples.SceneSkybox
             fps.SetPosition(new Vector2(0, 40));
             panel.Width = Game.Form.RenderWidth;
             panel.Height = 120;
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            StartScene();
+
+            StartSounds();
+
+            gameReady = true;
+        }
+        private void StartScene()
+        {
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
+
+            Lights.DirectionalLights[1].Enabled = true;
+
+            Lights.DirectionalLights[2].Enabled = false;
+
+            directionalLightCount = Lights.DirectionalLights.Length;
+
+            movingFireLight = new SceneLightPoint(
+                "Moving fire light",
+                false,
+                Color.Orange.RGB(),
+                Color.Orange.RGB(),
+                true,
+                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
+
+            Lights.Add(movingFireLight);
+
+            skydom.Visible = true;
+            lakeBottom.Visible = true;
+            torchs.Visible = true;
+            obelisks.Visible = true;
+            fountain.Visible = true;
+            ruins.Visible = true;
+            water.Visible = true;
+            movingFire.Visible = true;
+            pManager.Visible = true;
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.SimpleReinhard);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
+
+#if DEBUG
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+#else
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+#endif
+        }
+        private void StartSounds()
+        {
+            const string sphereSound = "target_balls_single_loop";
+            const string sphereEffect = "Sphere";
+
+            AudioManager.LoadSound(sphereSound, "SceneSkybox/resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            AudioManager.AddEffectParams(
+                sphereEffect,
+                new GameAudioEffectParameters
+                {
+                    SoundName = sphereSound,
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                });
+
+            fireAudioEffect = AudioManager.CreateEffectInstance(sphereEffect, movingFire, Camera);
+            fireAudioEffect.Play();
+
+            AudioManager.MasterVolume = 0.5f;
+            AudioManager.Start();
         }
     }
 }

@@ -182,7 +182,7 @@ Space: Finds random over navmesh";
             };
             volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
         }
-        private async Task InitializeMapDataCompleted(LoadResourcesResult res)
+        private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -196,13 +196,13 @@ Space: Finds random over navmesh";
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1, 0.8f, -1) * maxD * 0.8f);
 
-            await UpdateNavigationGraphAsync();
-
-            gameReady = true;
+            EnqueueNavigationGraphUpdate();
         }
         public override void NavigationGraphUpdated()
         {
             DrawGraphNodes(agent);
+
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -249,6 +249,16 @@ Space: Finds random over navmesh";
             if (Game.Input.KeyPressed(Keys.S))
             {
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(Game.GameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(Game.GameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -348,7 +358,7 @@ Space: Finds random over navmesh";
 
             if (updateGraph)
             {
-                _ = UpdateNavigationGraphAsync();
+                EnqueueNavigationGraphUpdate();
             }
 
             debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
@@ -391,8 +401,7 @@ Space: Finds random over navmesh";
 
                 if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    var graphTask = Task.Run(() => PathFinderDescription.Load(dlg.FileName));
-                    SetNavigationGraph(graphTask.Result);
+                    LoadNavigationGraphFromFile(dlg.FileName);
                 }
             }
         }

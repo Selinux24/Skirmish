@@ -716,7 +716,7 @@ namespace TerrainSamples.SceneHeightmap
                 if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
                 {
                     trees[i].Visible = false;
-                   
+
                     continue;
                 }
 
@@ -992,6 +992,23 @@ namespace TerrainSamples.SceneHeightmap
 
             await Task.CompletedTask;
         }
+        private void LoadingTaskTerrainObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                stats.Text = res.GetErrorMessage();
+
+                return;
+            }
+
+            var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
+            lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
+            Lights.Add(lantern);
+
+            SetDebugInfo();
+
+            SetPathFindingInfo();
+        }
         private void SetDebugInfo()
         {
             var terrainBoxes = terrain.GetBoundingBoxes(5);
@@ -1011,25 +1028,7 @@ namespace TerrainSamples.SceneHeightmap
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.ReverseNormal(tris2));
         }
-        private async Task LoadingTaskTerrainObjectsCompleted(LoadResourcesResult res)
-        {
-            if (!res.Completed)
-            {
-                stats.Text = res.GetErrorMessage();
-
-                return;
-            }
-
-            var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
-            lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
-            Lights.Add(lantern);
-
-            SetDebugInfo();
-
-            await SetPathFindingInfo();
-        }
-
-        private async Task SetPathFindingInfo()
+        private void SetPathFindingInfo()
         {
             //Agent
             var sbbox = soldier.GetBoundingBox();
@@ -1061,14 +1060,7 @@ namespace TerrainSamples.SceneHeightmap
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
-            await UpdateNavigationGraphAsync();
-
-            gameReady = true;
-
-            uiTweener.ClearTween(fadePanel);
-            uiTweener.TweenAlpha(fadePanel, fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
-
-            UpdateGraphNodes(agent);
+            EnqueueNavigationGraphUpdate();
         }
 
         public override void Update(GameTime gameTime)
@@ -1616,6 +1608,15 @@ namespace TerrainSamples.SceneHeightmap
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
 
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
+
+            uiTweener.ClearTween(fadePanel);
+            uiTweener.TweenAlpha(fadePanel, fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
+
+            UpdateGraphNodes(agent);
+        }
         private void UpdateGraphNodes(AgentType agent)
         {
             if (updatingNodes)

@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,19 @@ namespace Engine.PathFinding
     /// </summary>
     public class WalkableScene : Scene
     {
+        /// <summary>
+        /// Navigation graph update requested
+        /// </summary>
+        private bool navigationGraphUpdateRequested = false;
+        /// <summary>
+        /// Navigation graph update callback
+        /// </summary>
+        private Action<float> navigationGraphUpdateCallback = null;
+        /// <summary>
+        /// Navigation graph updating
+        /// </summary>
+        private bool navigationGraphUpdating = false;
+
         /// <summary>
         /// Gets the current scene geometry for navigation
         /// </summary>
@@ -112,9 +126,91 @@ namespace Engine.PathFinding
         {
             NavigationGraph?.Update(gameTime);
 
+            FireUpdateNavigationGraph();
+
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// Loads a navigation graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void LoadNavigationGraphFromFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    string hash = PathFinderDescription.GetHash();
+
+                    var graph = PathFinderDescription.Load(fileName, hash);
+                    if (graph != null)
+                    {
+                        SetNavigationGraph(graph);
+
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
+
+                    throw;
+                }
+            }
+        }
+        /// <summary>
+        /// Saves a navigation graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void SaveNavigationGraphToFile(string fileName)
+        {
+            try
+            {
+                Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+
+                PathFinderDescription.Save(fileName, NavigationGraph);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Enqueues a navigation graph update
+        /// </summary>
+        /// <param name="progressCallback">Progres callback</param>
+        public void EnqueueNavigationGraphUpdate(Action<float> progressCallback = null)
+        {
+            if (navigationGraphUpdateRequested) return;
+
+            navigationGraphUpdateRequested = true;
+            navigationGraphUpdateCallback = progressCallback;
+        }
+        /// <summary>
+        /// Fires a navigation graph update
+        /// </summary>
+        private void FireUpdateNavigationGraph()
+        {
+            if (navigationGraphUpdating) return;
+
+            if (!navigationGraphUpdateRequested) return;
+
+            var progressCallback = navigationGraphUpdateCallback;
+
+            navigationGraphUpdateRequested = false;
+            navigationGraphUpdateCallback = null;
+
+            Task.Run(() =>
+            {
+                UpdateNavigationGraph(progressCallback);
+
+                navigationGraphUpdating = false;
+            });
+        }
         /// <summary>
         /// Updates the navigation graph
         /// </summary>
@@ -131,8 +227,6 @@ namespace Engine.PathFinding
             var graph = await PathFinderDescription.BuildAsync(progressCallback);
 
             SetNavigationGraph(graph);
-
-            NavigationGraphUpdated();
         }
         /// <summary>
         /// Updates the navigation graph
@@ -150,36 +244,67 @@ namespace Engine.PathFinding
             var graph = PathFinderDescription.Build(progressCallback);
 
             SetNavigationGraph(graph);
-
-            NavigationGraphUpdated();
         }
         /// <summary>
         /// Sets a navigation graph
         /// </summary>
         /// <param name="graph">Navigation graph</param>
-        public void SetNavigationGraph(IGraph graph)
+        private void SetNavigationGraph(IGraph graph)
         {
-            NavigationGraphUpdating();
-
             if (NavigationGraph != null)
             {
+                NavigationGraphRemoving();
+
                 NavigationGraph.Updating -= GraphUpdating;
                 NavigationGraph.Updated -= GraphUpdated;
 
                 NavigationGraph.Dispose();
                 NavigationGraph = null;
+
+                NavigationGraphRemoved();
             }
 
-            if (graph != null)
+            if (graph == null)
             {
-                NavigationGraph = graph;
-                NavigationGraph.Updating += GraphUpdating;
-                NavigationGraph.Updated += GraphUpdated;
+                return;
             }
+
+            NavigationGraphUpdating();
+
+            NavigationGraph = graph;
+            NavigationGraph.Updating += GraphUpdating;
+            NavigationGraph.Updated += GraphUpdated;
 
             NavigationGraphUpdated();
         }
+        /// <summary>
+        /// Fires when graph is removing
+        /// </summary>
+        public virtual void NavigationGraphRemoving()
+        {
 
+        }
+        /// <summary>
+        /// Fires when graph is removed
+        /// </summary>
+        public virtual void NavigationGraphRemoved()
+        {
+
+        }
+        /// <summary>
+        /// Fires when graph is updating
+        /// </summary>
+        public virtual void NavigationGraphUpdating()
+        {
+
+        }
+        /// <summary>
+        /// Fires when graph is updated
+        /// </summary>
+        public virtual void NavigationGraphUpdated()
+        {
+
+        }
         /// <summary>
         /// Graph updating event
         /// </summary>
@@ -205,20 +330,6 @@ namespace Engine.PathFinding
             Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} Call");
             NavigationGraphUpdated();
             Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} End");
-        }
-        /// <summary>
-        /// Fires when graph is updating
-        /// </summary>
-        public virtual void NavigationGraphUpdating()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is updated
-        /// </summary>
-        public virtual void NavigationGraphUpdated()
-        {
-
         }
 
         /// <summary>

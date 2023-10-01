@@ -1073,7 +1073,7 @@ namespace TerrainSamples.SceneRts
 
             sw.Stop();
 
-            await UpdateNavigationGraphAsync();
+            EnqueueNavigationGraphUpdate();
 
             return new TaskResult()
             {
@@ -1267,16 +1267,13 @@ namespace TerrainSamples.SceneRts
 
             started = true;
 
-            Task.Run(() =>
-            {
-                StartHelicopter();
-                StartTanks();
-                StartDebug();
+            StartHelicopter();
+            StartTanks();
+            StartDebug();
 
-                BeginToggleGarageLights();
+            BeginToggleGarageLights();
 
-                gameReady = true;
-            });
+            gameReady = true;
         }
         private void StartHelicopter()
         {
