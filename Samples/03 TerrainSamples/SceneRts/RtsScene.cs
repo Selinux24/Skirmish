@@ -2027,6 +2027,22 @@ namespace TerrainSamples.SceneRts
                 PostLoop = CurveLoopType.Constant
             };
 
+            var cPoints = GeneratePathPoints();
+
+            float time = 0;
+            for (int i = 0; i < cPoints.Length; i++)
+            {
+                if (i > 0) time += Vector3.Distance(cPoints[i - 1], cPoints[i]);
+
+                curve.AddPosition(time, cPoints[i]);
+            }
+
+            curve.SetTangents();
+
+            return curve;
+        }
+        private Vector3[] GeneratePathPoints()
+        {
             Vector3[] cPoints = new Vector3[15];
 
             if (helicopterController != null && helicopterController.HasPath)
@@ -2060,17 +2076,7 @@ namespace TerrainSamples.SceneRts
                 cPoints[^1] = r.Position;
             }
 
-            float time = 0;
-            for (int i = 0; i < cPoints.Length; i++)
-            {
-                if (i > 0) time += Vector3.Distance(cPoints[i - 1], cPoints[i]);
-
-                curve.AddPosition(time, cPoints[i]);
-            }
-
-            curve.SetTangents();
-
-            return curve;
+            return cPoints;
         }
 
         private void Agent_Moving(object sender, BehaviorEventArgs e)
