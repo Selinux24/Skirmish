@@ -783,7 +783,7 @@ namespace TerrainSamples.SceneRts
                 Duration = sw.Elapsed,
             };
         }
-        private async Task InitializeModelsCompleted(LoadResourcesResult res)
+        private void InitializeModelsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -804,7 +804,7 @@ namespace TerrainSamples.SceneRts
             Camera.Goto(heliport.Manipulator.Position + Vector3.One * 25f);
             Camera.LookTo(0, 10, 0);
 
-            await StartPathFinding();
+            StartPathFinding();
         }
         private void StartAudio()
         {
@@ -1045,21 +1045,30 @@ namespace TerrainSamples.SceneRts
             Lights.DirectionalLights[1].Enabled = true;
             Lights.DirectionalLights[2].Enabled = true;
         }
-        private async Task<TaskResult> StartPathFinding()
+        private void StartPathFinding()
         {
             var sw = Stopwatch.StartNew();
             sw.Restart();
 
             var posRnd = new Random(1);
 
-            await StartRocks(posRnd);
-            await StartTrees(posRnd);
+            StartRocks(posRnd);
+            StartTrees(posRnd);
 
-            await Task.WhenAll(
-                StartHeliport(),
-                StartGarage(),
-                StartBuildings(),
-                StartObelisk());
+            var actionList = new[]
+            {
+                StartHeliport,
+                StartGarage,
+                StartBuildings,
+                StartObelisk,
+            };
+
+            ParallelOptions options = new()
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+            };
+
+            Parallel.ForEach(actionList, options, a => a());
 
             var navSettings = BuildSettings.Default;
             navSettings.Agents = new[]
@@ -1074,161 +1083,137 @@ namespace TerrainSamples.SceneRts
             sw.Stop();
 
             EnqueueNavigationGraphUpdate();
-
-            return new TaskResult()
-            {
-                Text = "PathFinding",
-                Duration = sw.Elapsed,
-            };
         }
-        private async Task StartRocks(Random posRnd)
+        private void StartRocks(Random posRnd)
         {
-            await Task.Run(() =>
+            for (int i = 0; i < rocks.InstanceCount; i++)
             {
-                for (int i = 0; i < rocks.InstanceCount; i++)
+                if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
                 {
-                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
-                    {
-                        rocks[i].Visible = false;
+                    rocks[i].Visible = false;
 
-                        continue;
-                    }
-
-                    if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        continue;
-                    }
-
-                    float scale = i switch
-                    {
-                        < 5 => posRnd.NextFloat(2f, 5f),
-                        < 30 => posRnd.NextFloat(0.5f, 2f),
-                        _ => posRnd.NextFloat(0.1f, 0.2f)
-                    };
-
-                    rocks[i].Manipulator.SetTransform(
-                        r.Position,
-                        Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi)),
-                        scale);
+                    continue;
                 }
-                rocks.Visible = true;
-            });
+
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    continue;
+                }
+
+                float scale = i switch
+                {
+                    < 5 => posRnd.NextFloat(2f, 5f),
+                    < 30 => posRnd.NextFloat(0.5f, 2f),
+                    _ => posRnd.NextFloat(0.1f, 0.2f)
+                };
+
+                rocks[i].Manipulator.SetTransform(
+                    r.Position,
+                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi)),
+                    scale);
+            }
+            rocks.Visible = true;
         }
-        private async Task StartTrees(Random posRnd)
+        private void StartTrees(Random posRnd)
         {
-            await Task.Run(() =>
+            for (int i = 0; i < tree1.InstanceCount; i++)
             {
-                for (int i = 0; i < tree1.InstanceCount; i++)
+                if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
                 {
-                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
-                    {
-                        tree1[i].Visible = false;
+                    tree1[i].Visible = false;
 
-                        continue;
-                    }
-
-                    if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        continue;
-                    }
-
-                    tree1[i].Manipulator.SetTransform(
-                        r.Position,
-                        Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
-                        posRnd.NextFloat(0.25f, 0.75f));
+                    continue;
                 }
-                tree1.Visible = true;
 
-                for (int i = 0; i < tree2.InstanceCount; i++)
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
-                    if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
-                    {
-                        tree2[i].Visible = false;
-
-                        continue;
-                    }
-
-                    if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        continue;
-                    }
-
-                    tree2[i].Manipulator.SetTransform(
-                        r.Position,
-                        Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
-                        posRnd.NextFloat(0.25f, 0.75f));
+                    continue;
                 }
-                tree2.Visible = true;
-            });
+
+                tree1[i].Manipulator.SetTransform(
+                    r.Position,
+                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
+                    posRnd.NextFloat(0.25f, 0.75f));
+            }
+            tree1.Visible = true;
+
+            for (int i = 0; i < tree2.InstanceCount; i++)
+            {
+                if (!GetRandomPoint(posRnd, Vector3.Zero, out var pos))
+                {
+                    tree2[i].Visible = false;
+
+                    continue;
+                }
+
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    continue;
+                }
+
+                tree2[i].Manipulator.SetTransform(
+                    r.Position,
+                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
+                    posRnd.NextFloat(0.25f, 0.75f));
+            }
+            tree2.Visible = true;
         }
-        private async Task StartHeliport()
+        private void StartHeliport()
         {
-            await Task.Run(() =>
+            if (FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
             {
-                if (FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
-                {
-                    heliport.Manipulator.SetPosition(r.Position);
-                }
-                heliport.Visible = true;
-                heliport.Lights.ToList().ForEach(l => l.Enabled = true);
-            });
+                heliport.Manipulator.SetPosition(r.Position);
+            }
+            heliport.Visible = true;
+            heliport.Lights.ToList().ForEach(l => l.Enabled = true);
         }
-        private async Task StartGarage()
+        private void StartGarage()
         {
-            await Task.Run(() =>
+            if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
             {
-                if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
-                {
-                    garage.Manipulator.SetPosition(r.Position);
-                    garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
-                }
-                garage.Visible = true;
-                garage.Lights.ToList().ForEach(l => l.Enabled = true);
-            });
+                garage.Manipulator.SetPosition(r.Position);
+                garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+            }
+            garage.Visible = true;
+            garage.Lights.ToList().ForEach(l => l.Enabled = true);
         }
-        private async Task StartBuildings()
+        private void StartBuildings()
         {
-            await Task.Run(() =>
+            if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
             {
-                if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
-                {
-                    building.Manipulator.SetPosition(r.Position);
-                    building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
-                }
-                building.Visible = true;
-                building.Lights.ToList().ForEach(l => l.Enabled = true);
-            });
+                building.Manipulator.SetPosition(r.Position);
+                building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+            }
+            building.Visible = true;
+            building.Lights.ToList().ForEach(l => l.Enabled = true);
         }
-        private async Task StartObelisk()
+        private void StartObelisk()
         {
-            await Task.Run(() =>
+            for (int i = 0; i < obelisk.InstanceCount; i++)
             {
-                for (int i = 0; i < obelisk.InstanceCount; i++)
+                Vector2 o = i switch
                 {
-                    Vector2 o = i switch
-                    {
-                        0 => new Vector2(1, 1),
-                        1 => new Vector2(-1, 1),
-                        2 => new Vector2(1, -1),
-                        _ => new Vector2(-1, -1),
-                    };
+                    0 => new Vector2(1, 1),
+                    1 => new Vector2(-1, 1),
+                    2 => new Vector2(1, -1),
+                    _ => new Vector2(-1, -1),
+                };
 
-                    if (!FindTopGroundPosition(o.X * 50, o.Y * 50, out PickingResult<Triangle> r))
-                    {
-                        continue;
-                    }
-
-                    var obeliskInstance = obelisk[i];
-
-                    obeliskInstance.Manipulator.SetPosition(r.Position);
-                    obeliskInstance.Manipulator.SetScale(1.5f);
-                    obeliskInstance.Manipulator.SetTransform(
-                        r.Position,
-                        Quaternion.RotationYawPitchRoll(MathUtil.PiOverFour, 0, 0),
-                        1.5f);
+                if (!FindTopGroundPosition(o.X * 50, o.Y * 50, out PickingResult<Triangle> r))
+                {
+                    continue;
                 }
-                obelisk.Visible = true;
-            });
+
+                var obeliskInstance = obelisk[i];
+
+                obeliskInstance.Manipulator.SetPosition(r.Position);
+                obeliskInstance.Manipulator.SetScale(1.5f);
+                obeliskInstance.Manipulator.SetTransform(
+                    r.Position,
+                    Quaternion.RotationYawPitchRoll(MathUtil.PiOverFour, 0, 0),
+                    1.5f);
+            }
+            obelisk.Visible = true;
         }
         private void PrepareLights(IEnumerable<ISceneLight> lights)
         {
