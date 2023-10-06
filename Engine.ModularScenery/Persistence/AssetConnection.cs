@@ -25,5 +25,11 @@ namespace Engine.Modular.Persistence
         /// Direction
         /// </summary>
         public Direction3 Direction { get; set; } = Direction3.ForwardLH;
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Type}. Position {Position} => {Direction}";
+        }
     }
 }

@@ -12,23 +12,24 @@ namespace Engine.Collada.Types
 
         public BasicColor(float r, float g, float b)
         {
-            this.Values = new float[] { r, g, b };
+            Values = new float[] { r, g, b };
         }
 
         public BasicColor(float r, float g, float b, float a)
         {
-            this.Values = new float[] { r, g, b, a };
+            Values = new float[] { r, g, b, a };
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Values != null && this.Values.Length == 3)
+            if (Values != null && Values.Length == 3)
             {
-                return string.Format("(R:{0}, G:{1}, B:{2})", this.Values[0], this.Values[1], this.Values[2]);
+                return $"(R:{Values[0]}, G:{Values[1]}, B:{Values[2]})";
             }
-            else if (this.Values != null && this.Values.Length == 4)
+            else if (Values != null && Values.Length == 4)
             {
-                return string.Format("(R:{0}, G:{1}, B:{2}, A{3})", this.Values[0], this.Values[1], this.Values[2], this.Values[3]);
+                return $"(R:{Values[0]}, G:{Values[1]}, B:{Values[2]}, A{Values[3]})";
             }
             else
             {

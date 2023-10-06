@@ -59,6 +59,12 @@
     ],
     "timeStep": 0.0
   },
+  "hullMeshes": [
+    "volume",
+    "volumes",
+    "_volume",
+    "_volumes"
+  ],
   "useControllerTransform": false,
   "bakeTransforms": true,
   "readAnimations": true

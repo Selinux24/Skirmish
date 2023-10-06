@@ -69,10 +69,10 @@ namespace Engine
         /// <param name="data">Channel data</param>
         public FoliageMap(Color4[,] data)
         {
-            this.m_Data = data;
+            m_Data = data;
 
-            this.MaxX = data.GetUpperBound(0);
-            this.MaxY = data.GetUpperBound(1);
+            MaxX = data.GetUpperBound(0);
+            MaxY = data.GetUpperBound(1);
         }
         /// <summary>
         /// Destructor
@@ -98,7 +98,7 @@ namespace Engine
         {
             if (disposing)
             {
-                this.m_Data = null;
+                m_Data = null;
             }
         }
 
@@ -110,12 +110,12 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 Get(float x, float y)
         {
-            if (this.m_Data != null)
+            if (m_Data != null)
             {
-                float pX = ConvertRelative(x, this.MaxX, 0, 1);
-                float pZ = ConvertRelative(y, this.MaxY, 0, 1);
+                float pX = ConvertRelative(x, MaxX, 0, 1);
+                float pZ = ConvertRelative(y, MaxY, 0, 1);
 
-                return this.m_Data[(int)pX, (int)pZ];
+                return m_Data[(int)pX, (int)pZ];
             }
 
             return Color4.Black;
@@ -128,9 +128,9 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 GetAbsolute(int x, int y)
         {
-            if (this.m_Data != null)
+            if (m_Data != null)
             {
-                return this.m_Data[x, y];
+                return m_Data[x, y];
             }
 
             return Color4.Black;
@@ -144,12 +144,12 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 GetRelative(Vector3 pos, Vector2 min, Vector2 max)
         {
-            if (this.m_Data != null)
+            if (m_Data != null)
             {
-                float x = ConvertRelative(pos.X, this.MaxX, min.X, max.X);
-                float z = ConvertRelative(pos.Z, this.MaxY, min.Y, max.Y);
+                float x = ConvertRelative(pos.X, MaxX, min.X, max.X);
+                float z = ConvertRelative(pos.Z, MaxY, min.Y, max.Y);
 
-                return this.m_Data[(int)x, (int)z];
+                return m_Data[(int)x, (int)z];
             }
 
             return Color4.Black;

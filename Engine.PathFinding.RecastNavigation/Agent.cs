@@ -49,11 +49,7 @@ namespace Engine.PathFinding.RecastNavigation
             MaxSlope = 45.0f;
         }
 
-        /// <summary>
-        /// Compares another object with this instance for equality.
-        /// </summary>
-        /// <param name="obj">An object.</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             if (!base.Equals(obj)) return false;
@@ -61,17 +57,14 @@ namespace Engine.PathFinding.RecastNavigation
             if (obj is Agent other)
             {
                 return
-                    other.Radius == this.Radius &&
-                    other.MaxClimb == this.MaxClimb &&
-                    other.MaxSlope == this.MaxSlope;
+                    other.Radius == Radius &&
+                    other.MaxClimb == MaxClimb &&
+                    other.MaxSlope == MaxSlope;
             }
 
             return false;
         }
-        /// <summary>
-        /// Calculates a hash code unique to the contents of this instance.
-        /// </summary>
-        /// <returns>A hash code.</returns>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return base.GetHashCode();

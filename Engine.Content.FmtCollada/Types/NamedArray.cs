@@ -7,9 +7,10 @@ namespace Engine.Collada.Types
         [XmlAttribute("count")]
         public int Count { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Count: {0}; ", this.Count) + base.ToString();
+            return base.ToString() + $" Count: {Count};";
         }
     }
 }

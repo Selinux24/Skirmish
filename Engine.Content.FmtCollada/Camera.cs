@@ -16,10 +16,5 @@ namespace Engine.Collada
         public Imager Imager { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
-
-        public override string ToString()
-        {
-            return "Camera; " + base.ToString();
-        }
     }
 }

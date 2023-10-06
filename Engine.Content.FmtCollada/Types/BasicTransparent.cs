@@ -11,9 +11,10 @@ namespace Engine.Collada.Types
         [XmlAttribute("opaque")]
         public EnumOpaque Opaque { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("SId: {0}; Value: {1};", this.SId, this.Opaque);
+            return $"SId: {SId}; Value: {Opaque};";
         }
     }
 }

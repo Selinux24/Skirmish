@@ -17,9 +17,10 @@ namespace Engine.Collada
         [XmlElement("source_data")]
         public string SourceData { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Author: {0}; Tool: {1};", this.Author, this.AuthoringTool);
+            return $"Author: {Author}; Tool: {AuthoringTool};";
         }
     }
 }

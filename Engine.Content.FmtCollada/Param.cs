@@ -15,23 +15,24 @@ namespace Engine.Collada
         [XmlAttribute("type")]
         public string Type { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(this.SId) && !string.IsNullOrEmpty(this.Name))
+            if (!string.IsNullOrEmpty(SId) && !string.IsNullOrEmpty(Name))
             {
-                return string.Format("SId: {0}; Name: {1}; Semantic: {2}; Type: {3};", this.SId, this.Name, this.Semantic, this.Type);
+                return $"SId: {SId}; Name: {Name}; Semantic: {Semantic}; Type: {Type};";
             }
-            else if (!string.IsNullOrEmpty(this.SId))
+            else if (!string.IsNullOrEmpty(SId))
             {
-                return string.Format("SId: {0}; Semantic: {1}; Type: {2};", this.SId, this.Semantic, this.Type);
+                return $"SId: {SId}; Semantic: {Semantic}; Type: {Type};";
             }
-            else if (!string.IsNullOrEmpty(this.Name))
+            else if (!string.IsNullOrEmpty(Name))
             {
-                return string.Format("Name: {0}; Semantic: {1}; Type: {2};", this.Name, this.Semantic, this.Type);
+                return $"Name: {Name}; Semantic: {Semantic}; Type: {Type};";
             }
             else
             {
-                return string.Format("Semantic: {0}; Type: {1};", this.Semantic, this.Type);
+                return $"Semantic: {Semantic}; Type: {Type};";
             }
         }
     }

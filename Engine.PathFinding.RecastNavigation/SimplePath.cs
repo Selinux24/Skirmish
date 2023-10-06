@@ -360,8 +360,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             maxSize = max;
 
-            this.referenceList = new int[maxSize];
-            this.Count = 0;
+            referenceList = new int[maxSize];
+            Count = 0;
         }
 
         /// <summary>

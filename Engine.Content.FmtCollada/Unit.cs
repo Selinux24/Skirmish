@@ -11,9 +11,10 @@ namespace Engine.Collada
         [XmlAttribute("name")]
         public string Name { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Name: {0}; Meter: {1}", this.Name, this.Meter);
+            return $"Name: {Name}; Meter: {Meter}";
         }
     }
 }

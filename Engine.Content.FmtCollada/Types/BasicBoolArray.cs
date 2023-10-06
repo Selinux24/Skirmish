@@ -13,11 +13,11 @@ namespace Engine.Collada.Types
         {
             get
             {
-                return Collada.ConvertArrayToString(this.Values);
+                return Collada.ConvertArrayToString(Values);
             }
             set
             {
-                this.Values = Collada.ConvertArray<bool>(value);
+                Values = Collada.ConvertArray<bool>(value);
             }
         }
         [XmlIgnore]
@@ -27,17 +27,18 @@ namespace Engine.Collada.Types
         {
             get
             {
-                return this.Values[index];
+                return Values[index];
             }
             set
             {
-                this.Values[index] = value;
+                Values[index] = value;
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Count: {0};", this.Values != null ? this.Values.Length : 0);
+            return $"Count: {(Values != null ? Values.Length : 0)};";
         }
     }
 }

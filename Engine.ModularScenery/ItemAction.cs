@@ -14,5 +14,11 @@ namespace Engine.Modular
         /// Animation plan name
         /// </summary>
         public string Action { get; set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Id} => {Action}";
+        }
     }
 }

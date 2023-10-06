@@ -35,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public GraphItem()
         {
-            this.Id = GetNextId();
+            Id = GetNextId();
         }
     }
 }

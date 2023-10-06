@@ -5,9 +5,10 @@ namespace TerrainSamples.SceneGrid.Rules
     {
         public string Text { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 }

@@ -30,7 +30,7 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return this.Factions.Length <= 1;
+                return Factions.Length <= 1;
             }
         }
 
@@ -41,7 +41,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public bool ContainsSoldier(Soldier soldier)
         {
-            if (this.soldiers.Contains(soldier))
+            if (soldiers.Contains(soldier))
             {
                 return true;
             }
@@ -50,16 +50,16 @@ namespace TerrainSamples.SceneGrid.Rules
         }
         public void AddFighter(Soldier soldier)
         {
-            if (!this.soldiers.Contains(soldier))
+            if (!soldiers.Contains(soldier))
             {
-                this.soldiers.Add(soldier);
+                soldiers.Add(soldier);
             }
         }
         public void RemoveFighter(Soldier soldier)
         {
-            if (this.soldiers.Contains(soldier))
+            if (soldiers.Contains(soldier))
             {
-                this.soldiers.Remove(soldier);
+                soldiers.Remove(soldier);
             }
         }
 
@@ -67,12 +67,12 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             for (int i = 1; i <= 10; i++)
             {
-                Soldier[] iSoldiers = this.soldiers.FindAll(s => s.CurrentInitiative == i).ToArray();
+                Soldier[] iSoldiers = soldiers.FindAll(s => s.CurrentInitiative == i).ToArray();
                 if (iSoldiers.Length > 0)
                 {
                     foreach (Soldier s in iSoldiers)
                     {
-                        var enemy = this.GetRandomEnemy(s);
+                        var enemy = GetRandomEnemy(s);
                         if (enemy != null && s.FightingTest())
                         {
                             enemy.HitTest(s.CurrentMeleeWeapon);
@@ -81,12 +81,12 @@ namespace TerrainSamples.SceneGrid.Rules
                 }
             }
 
-            this.soldiers.ForEach((s) =>
+            soldiers.ForEach((s) =>
             {
                 if (s.CurrentHealth == HealthStates.Disabled) s.MeleeDisolved();
             });
 
-            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStates.Disabled);
+            soldiers.RemoveAll(s => s.CurrentHealth == HealthStates.Disabled);
         }
         public void Disolve()
         {
@@ -98,7 +98,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         private Soldier GetRandomEnemy(Soldier soldier)
         {
-            Soldier[] enemyList = this.soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction).ToArray();
+            Soldier[] enemyList = soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction).ToArray();
             if (enemyList.Length > 0)
             {
                 return enemyList[Helper.RandomGenerator.Next(0, enemyList.Length - 1)];

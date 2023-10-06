@@ -31,12 +31,12 @@ namespace TerrainSamples.SceneGrid.Rules
         public BoundingFrustum GetFrustum()
         {
             return BoundingFrustum.FromCamera(
-                this.Position,
-                this.Direction,
+                Position,
+                Direction,
                 Vector3.Up,
-                this.Angle,
+                Angle,
                 1,
-                this.Distance,
+                Distance,
                 1);
         }
     }

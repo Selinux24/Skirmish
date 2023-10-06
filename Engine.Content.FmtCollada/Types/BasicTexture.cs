@@ -15,9 +15,10 @@ namespace Engine.Collada.Types
         [XmlElement("extra", typeof(Extra))]
         public Extra Extra { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Texture: {0}; TextureCoordinate: {1};", this.Texture, this.TextureCoordinate);
+            return $"Texture: {Texture}; TextureCoordinate: {TextureCoordinate};";
         }
     }
 }

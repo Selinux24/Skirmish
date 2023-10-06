@@ -60,9 +60,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (disposing)
             {
-                this.Nodes = null;
-                this.Next = null;
-                this.First = null;
+                Nodes = null;
+                Next = null;
+                First = null;
             }
         }
 

@@ -410,7 +410,6 @@ namespace Engine.Content.OnePageDungeon
         {
             return new LevelMap
             {
-                Hulls = configuration.Hulls.ToArray(),
                 Levels = new[] { CreateLevel(dungeon, configuration) }
             };
         }

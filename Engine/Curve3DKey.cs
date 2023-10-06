@@ -68,22 +68,12 @@ namespace Engine
             this.Continuity = continuity;
         }
 
-        /// <summary>
-        /// Compares whether two <see cref="CurveKey"/> instances are not equal.
-        /// </summary>
-        /// <param name="value1"><see cref="CurveKey"/> instance on the left of the not equal sign.</param>
-        /// <param name="value2"><see cref="CurveKey"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
+        /// <inheritdoc/>
         public static bool operator !=(Curve3DKey value1, Curve3DKey value2)
         {
             return !(value1 == value2);
         }
-        /// <summary>
-        /// Compares whether two <see cref="CurveKey"/> instances are equal.
-        /// </summary>
-        /// <param name="value1"><see cref="CurveKey"/> instance on the left of the equal sign.</param>
-        /// <param name="value2"><see cref="CurveKey"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <inheritdoc/>
         public static bool operator ==(Curve3DKey value1, Curve3DKey value2)
         {
             if (object.Equals(value1, null))
@@ -102,86 +92,46 @@ namespace Engine
                 && (value1.TangentOut == value2.TangentOut)
                 && (value1.Continuity == value2.Continuity);
         }
-        /// <summary>
-        /// Gets wether the left curve is major than the right one
-        /// </summary>
-        /// <param name="left">Left curve</param>
-        /// <param name="right">Right curve</param>
-        /// <returns>Returns wether the left curve is major than the right one</returns>
+        /// <inheritdoc/>
         public static bool operator >(Curve3DKey left, Curve3DKey right)
         {
             return left.CompareTo(right) > 0;
         }
-        /// <summary>
-        /// Gets wether the left curve is minor than the right one
-        /// </summary>
-        /// <param name="left">Left curve</param>
-        /// <param name="right">Right curve</param>
-        /// <returns>Returns wether the left curve is minor than the right one</returns>
+        /// <inheritdoc/>
         public static bool operator <(Curve3DKey left, Curve3DKey right)
         {
             return left.CompareTo(right) < 0;
         }
-        /// <summary>
-        /// Gets wether the left curve is major than or equal to the right one
-        /// </summary>
-        /// <param name="left">Left curve</param>
-        /// <param name="right">Right curve</param>
-        /// <returns>Returns wether the left curve is major than or equal to the right one</returns>
+        /// <inheritdoc/>
         public static bool operator >=(Curve3DKey left, Curve3DKey right)
         {
             return left.CompareTo(right) >= 0;
         }
-        /// <summary>
-        /// Gets wether the left curve is minor than or equal to the right one
-        /// </summary>
-        /// <param name="left">Left curve</param>
-        /// <param name="right">Right curve</param>
-        /// <returns>Returns wether the left curve is minor than or equal to the right one</returns>
+        /// <inheritdoc/>
         public static bool operator <=(Curve3DKey left, Curve3DKey right)
         {
             return left.CompareTo(right) <= 0;
         }
 
-        /// <summary>
-        /// Compares another curve with this instance for equality.
-        /// </summary>
-        /// <param name="other">A curve</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
+        /// <inheritdoc/>
         public int CompareTo(Curve3DKey other)
         {
-            return this.Position.CompareTo(other.Position);
+            return Position.CompareTo(other.Position);
         }
-        /// <summary>
-        /// Compares another curve with this instance for equality.
-        /// </summary>
-        /// <param name="other">A curve</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
+        /// <inheritdoc/>
         public bool Equals(Curve3DKey other)
         {
-            return (this == other);
+            return this == other;
         }
-        /// <summary>
-        /// Compares another object with this instance for equality.
-        /// </summary>
-        /// <param name="obj">An object.</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return (obj is Curve3DKey key) && Equals(key);
         }
-        /// <summary>
-        /// Calculates a hash code unique to the contents of this instance.
-        /// </summary>
-        /// <returns>A hash code.</returns>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return
-                this.Position.GetHashCode() ^
-                this.Value.GetHashCode() ^
-                this.TangentIn.GetHashCode() ^
-                this.TangentOut.GetHashCode() ^
-                this.Continuity.GetHashCode();
+            return HashCode.Combine(Position, Value, TangentIn, TangentOut, Continuity);
         }
     }
 }

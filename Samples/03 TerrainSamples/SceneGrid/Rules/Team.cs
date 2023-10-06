@@ -15,14 +15,14 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return this.soldiers[0];
+                return soldiers[0];
             }
         }
         public Soldier[] Soldiers
         {
             get
             {
-                return this.soldiers.ToArray();
+                return soldiers.ToArray();
             }
         }
 
@@ -38,22 +38,22 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public Team(string name)
         {
-            this.Name = name;
+            Name = name;
 
-            this.AirStrikeProbability = 0;
-            this.AirStrikeRequests = 0;
-            this.AirStrikePenetration = 0;
-            this.AirStrikeDamage = 0;
-            this.OrdnanceProbability = 0;
-            this.OrdnanceRequests = 0;
-            this.OrdnancePenetration = 0;
-            this.OrdnanceDamage = 0;
-            this.ReinforcementProbability = 0;
+            AirStrikeProbability = 0;
+            AirStrikeRequests = 0;
+            AirStrikePenetration = 0;
+            AirStrikeDamage = 0;
+            OrdnanceProbability = 0;
+            OrdnanceRequests = 0;
+            OrdnancePenetration = 0;
+            OrdnanceDamage = 0;
+            ReinforcementProbability = 0;
         }
 
         public void NextTurn()
         {
-            foreach (Soldier soldier in this.soldiers)
+            foreach (Soldier soldier in soldiers)
             {
                 soldier.NextTurn();
             }
@@ -61,12 +61,13 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public void AddSoldier(string name, SoldierClasses soldierClass)
         {
-            this.soldiers.Add(new Soldier(name, soldierClass, this));
+            soldiers.Add(new Soldier(name, soldierClass, this));
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0} ++ {1} ++ {2} -> Soldiers {3}", this.Name, this.Faction, this.Role, this.soldiers.Count);
+            return $"{Name} ++ {Faction} ++ {Role} -> Soldiers {soldiers.Count}";
         }
     }
 }

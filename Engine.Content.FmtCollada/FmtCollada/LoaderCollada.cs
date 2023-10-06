@@ -186,7 +186,12 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns true if the geometry name starts with any of the hull names in the collection</returns>
         private static bool IsHull(string geometryName, IEnumerable<string> hulls)
         {
-            return hulls?.Any(v => geometryName.StartsWith(v, StringComparison.OrdinalIgnoreCase)) == true;
+            if (hulls?.Any() != true)
+            {
+                return false;
+            }
+
+            return hulls.Any(v => geometryName.StartsWith(v, StringComparison.OrdinalIgnoreCase) || geometryName.EndsWith(v, StringComparison.OrdinalIgnoreCase));
         }
 
         #region Dictionary loaders
@@ -367,15 +372,13 @@ namespace Engine.Content.FmtCollada
 
             foreach (var geometry in dae.LibraryGeometries)
             {
-                bool isHull = IsHull(geometry.Name, hulls);
-
-                var info = ProcessGeometry(geometry, isHull);
-                if (info?.Any() != true)
+                var subMeshes = ProcessGeometry(geometry, hulls);
+                if (subMeshes?.Any() != true)
                 {
                     continue;
                 }
 
-                foreach (var subMesh in info)
+                foreach (var subMesh in subMeshes)
                 {
                     string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
                     if (!string.IsNullOrWhiteSpace(materialName) && modelContent.Materials.TryGetValue(materialName, out var value))
@@ -442,10 +445,12 @@ namespace Engine.Content.FmtCollada
         /// Process geometry list
         /// </summary>
         /// <param name="geometry">Geometry info</param>
-        /// <param name="isHull">Current geometry is a hull mesh</param>
+        /// <param name="hulls">Hull mesh names</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, bool isHull)
+        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, IEnumerable<string> hulls)
         {
+            bool isHull = IsHull(geometry.Name, hulls);
+
             if (geometry.Mesh != null)
             {
                 return ProcessMesh(geometry.Mesh, isHull);

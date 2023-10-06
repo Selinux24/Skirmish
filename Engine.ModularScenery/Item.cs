@@ -39,5 +39,11 @@ namespace Engine.Modular
             Emitters = emitters;
             CurrentState = state;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Object?.Name} - {Instance?.Id}. State: {CurrentState}; {Emitters?.Length ?? 0} emitters.";
+        }
     }
 }

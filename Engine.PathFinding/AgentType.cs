@@ -38,8 +38,8 @@ namespace Engine.PathFinding
             if (obj is AgentType other)
             {
                 return
-                    other.Name == this.Name &&
-                    other.Height == this.Height;
+                    other.Name == Name &&
+                    other.Height == Height;
             }
 
             return false;

@@ -28,5 +28,11 @@ namespace Engine.Modular
         /// List of actions referenced by the trigger
         /// </summary>
         public IEnumerable<ItemAction> Actions { get; set; } = Enumerable.Empty<ItemAction>();
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Name}. {StateFrom} => {StateTo}; Animation: {AnimationPlan}; {Actions?.Count() ?? 0} actions.";
+        }
     }
 }

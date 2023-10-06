@@ -465,7 +465,12 @@ namespace TerrainSamples.SceneModularDungeon
             }
             else
             {
-                desc = ModularSceneryDescription.FromFolder(Path.Combine(resourcesFolder, dungeonDefFile));
+                string contentFolder = Path.Combine(resourcesFolder, dungeonDefFile);
+                const string contentFile = "assets.json";
+                const string assetMapFile = "assetsmap.json";
+                const string levelMapFile = "levels.json";
+
+                desc = ModularSceneryDescription.FromFolder(contentFolder, contentFile, assetMapFile, levelMapFile);
             }
 
             scenery = await AddComponentGround<ModularScenery, ModularSceneryDescription>("Scenery", "Scenery", desc);

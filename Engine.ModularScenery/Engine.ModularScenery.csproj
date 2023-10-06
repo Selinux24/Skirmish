@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>Engine.ModularScenery</AssemblyName>
-    <RootNamespace>Engine.ModularScenery</RootNamespace>
+    <RootNamespace>Engine.Modular</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.ModularScenery.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>

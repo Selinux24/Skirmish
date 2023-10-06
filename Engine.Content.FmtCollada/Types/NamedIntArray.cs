@@ -15,11 +15,11 @@ namespace Engine.Collada.Types
         {
             get
             {
-                return Collada.ConvertArrayToString(this.Values);
+                return Collada.ConvertArrayToString(Values);
             }
             set
             {
-                this.Values = Collada.ConvertArray<int>(value);
+                Values = Collada.ConvertArray<int>(value);
             }
         }
         [XmlIgnore]
@@ -29,23 +29,24 @@ namespace Engine.Collada.Types
         {
             get
             {
-                return this.Values[index];
+                return Values[index];
             }
             set
             {
-                this.Values[index] = value;
+                Values[index] = value;
             }
         }
 
         public NamedIntArray()
         {
-            this.MinInclusive = -2147483648;
-            this.MaxInclusive = 2147483647;
+            MinInclusive = -2147483648;
+            MaxInclusive = 2147483647;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Values: {0}; ", this.Text) + base.ToString();
+            return base.ToString() + $"Values: {Text};";
         }
     }
 }

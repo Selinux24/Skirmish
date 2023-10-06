@@ -59,7 +59,7 @@ namespace Engine.Modular.Persistence
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Type: {Type}; Id: {Id}; AssetName: {AssetName};";
+            return $"Type: {Type}; Id: {Id}; AssetName: {AssetName}; PathFinding: {PathFinding};";
         }
     }
 }

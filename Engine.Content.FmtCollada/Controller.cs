@@ -16,10 +16,5 @@ namespace Engine.Collada
         public Morph Morph { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
-
-        public override string ToString()
-        {
-            return "Controller; " + base.ToString();
-        }
     }
 }

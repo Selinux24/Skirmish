@@ -1,10 +1,4 @@
 {
-  "hulls": [
-    "volume",
-    "volumes",
-    "_volume",
-    "_volumes"
-  ],
   "particleSystems": [
     {
       "particleType": "Fire",

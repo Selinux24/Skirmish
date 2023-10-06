@@ -27,13 +27,13 @@ namespace Engine.Collada.FX
 
         public Sampler2D()
         {
-            this.WrapS = EnumSamplerWrap.Wrap;
-            this.WrapT = EnumSamplerWrap.Wrap;
-            this.MinFilter = EnumSamplerFilter.None;
-            this.MagFilter = EnumSamplerFilter.None;
-            this.MipFilter = EnumSamplerFilter.None;
-            this.MipMapMaxLever = 255;
-            this.MipMapBias = 0;
+            WrapS = EnumSamplerWrap.Wrap;
+            WrapT = EnumSamplerWrap.Wrap;
+            MinFilter = EnumSamplerFilter.None;
+            MagFilter = EnumSamplerFilter.None;
+            MipFilter = EnumSamplerFilter.None;
+            MipMapMaxLever = 255;
+            MipMapBias = 0;
         }
     }
 }

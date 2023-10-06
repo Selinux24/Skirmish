@@ -79,22 +79,22 @@ namespace Engine
         public SkyPlaneDescription()
             : base()
         {
-            this.DepthEnabled = false;
-            this.BlendMode = BlendModes.Opaque | BlendModes.Additive;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Opaque | BlendModes.Additive;
 
-            this.MaxBrightness = 0.75f;
-            this.MinBrightness = 0.15f;
-            this.CloudBaseColor = Color3.White;
-            this.Size = 100;
-            this.Repeat = 2;
-            this.PlaneWidth = 50;
-            this.PlaneTop = 1f;
-            this.PlaneBottom = -0.5f;
-            this.FadingDistance = 20f;
-            this.Velocity = 1f;
-            this.Direction = Vector2.One;
-            this.PerturbationScale = 0.3f;
-            this.SkyMode = SkyPlaneModes.Static;
+            MaxBrightness = 0.75f;
+            MinBrightness = 0.15f;
+            CloudBaseColor = Color3.White;
+            Size = 100;
+            Repeat = 2;
+            PlaneWidth = 50;
+            PlaneTop = 1f;
+            PlaneBottom = -0.5f;
+            FadingDistance = 20f;
+            Velocity = 1f;
+            Direction = Vector2.One;
+            PerturbationScale = 0.3f;
+            SkyMode = SkyPlaneModes.Static;
         }
     }
 }

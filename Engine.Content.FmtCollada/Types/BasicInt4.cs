@@ -10,11 +10,12 @@ namespace Engine.Collada.Types
 
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Values != null && this.Values.Length == 4)
+            if (Values != null && Values.Length == 4)
             {
-                return string.Format("({0}, {1}, {2}, {3})", this.Values[0], this.Values[1], this.Values[2], this.Values[3]);
+                return $"({Values[0]}, {Values[1]}, {Values[2]}, {Values[3]})";
             }
             else
             {

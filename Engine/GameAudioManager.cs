@@ -83,7 +83,7 @@ namespace Engine
         /// <param name="audio">Game audio instance</param>
         public GameAudioManager()
         {
-            this.gameAudio = new GameAudio();
+            gameAudio = new GameAudio();
         }
         /// <summary>
         /// Destructor

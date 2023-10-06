@@ -25,10 +25,6 @@ namespace Engine.Modular.Persistence
         }
 
         /// <summary>
-        /// Hull meshes masks
-        /// </summary>
-        public IEnumerable<string> Hulls { get; set; } = Enumerable.Empty<string>();
-        /// <summary>
         /// Particle systems
         /// </summary>
         public IEnumerable<ParticleSystemFile> ParticleSystems { get; set; } = Enumerable.Empty<ParticleSystemFile>();

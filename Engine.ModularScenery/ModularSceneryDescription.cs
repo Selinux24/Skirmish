@@ -1,7 +1,7 @@
-﻿
+﻿using Engine.Content;
+
 namespace Engine.Modular
 {
-    using Engine.Content;
     using Engine.Modular.Persistence;
 
     /// <summary>
@@ -13,21 +13,29 @@ namespace Engine.Modular
         /// Gets a modular scenery from a folder
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
+        /// <param name="contentFile">Content asset collection file</param>
+        /// <param name="assetsMapFile">Assets map file</param>
+        /// <param name="levelsMapFile">Levels map file</param>
         /// <remarks>
-        /// The folder must contains the following files:
-        /// - assets.xml for asset collection in the ContentDataFile format
-        /// - assetsmap.xml for asset groups definition, like rooms or corridors, in the ModularSceneryAssetConfiguration format
-        /// - levels.xml for level description in the ModularSceneryLevels format
+        /// The <paramref name="contentFolder"/> folder must contains the following files:
+        /// - <paramref name="contentFile"/> for asset collection in the ContentDataFile format
+        /// - <paramref name="assetsMapFile"/> for asset groups definition, like rooms or corridors, in the ModularSceneryAssetConfiguration format
+        /// - <paramref name="levelsMapFile"/> for level description in the ModularSceneryLevels format
         /// </remarks>
-        public static ModularSceneryDescription FromFolder(string contentFolder)
+        public static ModularSceneryDescription FromFolder(string contentFolder, string contentFile, string assetsMapFile, string levelsMapFile)
         {
             return new ModularSceneryDescription()
             {
+                Content = ContentDescription.FromFile(contentFolder, contentFile),
+                AssetsConfigurationFile = assetsMapFile,
+                LevelsFile = levelsMapFile,
+
                 UseAnisotropic = true,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(contentFolder, "assets.json"),
-                AssetsConfigurationFile = "assetsmap.json",
-                LevelsFile = "levels.json",
+                ColliderType = ColliderTypes.None,
+                PathFindingHull = PickingHullTypes.None,
+                CullingVolumeType = CullingVolumeTypes.None,
+                PickingHull = PickingHullTypes.None,
             };
         }
 

@@ -21,18 +21,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Controllers?.Length == 1)
+            if (Controllers == null)
             {
-                return string.Format("{0}", this.Controllers[0]);
+                return $"{nameof(SkinningContent)}. Empty;";
             }
-            else if (this.Controllers?.Length > 1)
-            {
-                return string.Format("{0}", string.Join(", ", this.Controllers));
-            }
-            else
-            {
-                return "Empty Controller;";
-            }
+
+            return $"{nameof(SkinningContent)}. {string.Join(", ", Controllers)}";
         }
     }
 }

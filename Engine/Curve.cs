@@ -12,7 +12,7 @@ namespace Engine
         /// </summary>
         public bool IsConstant
         {
-            get { return this.Keys.Count <= 1; }
+            get { return Keys.Count <= 1; }
         }
         /// <summary>
         /// The collection of curve keys.

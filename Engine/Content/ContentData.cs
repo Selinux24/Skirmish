@@ -32,23 +32,23 @@ namespace Engine.Content
         /// <summary>
         /// Light dictionary
         /// </summary>
-        public Dictionary<string, LightContent> Lights { get; private set; } = new Dictionary<string, LightContent>();
+        public Dictionary<string, LightContent> Lights { get; private set; } = new();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public Dictionary<string, IImageContent> Images { get; private set; } = new Dictionary<string, IImageContent>();
+        public Dictionary<string, IImageContent> Images { get; private set; } = new();
         /// <summary>
         /// Material dictionary
         /// </summary>
-        public Dictionary<string, IMaterialContent> Materials { get; private set; } = new Dictionary<string, IMaterialContent>();
+        public Dictionary<string, IMaterialContent> Materials { get; private set; } = new();
         /// <summary>
         /// Geometry dictionary
         /// </summary>
-        public Dictionary<string, Dictionary<string, SubMeshContent>> Geometry { get; private set; } = new Dictionary<string, Dictionary<string, SubMeshContent>>();
+        public Dictionary<string, Dictionary<string, SubMeshContent>> Geometry { get; private set; } = new();
         /// <summary>
         /// Controller dictionary
         /// </summary>
-        public Dictionary<string, ControllerContent> Controllers { get; private set; } = new Dictionary<string, ControllerContent>();
+        public Dictionary<string, ControllerContent> Controllers { get; private set; } = new();
         /// <summary>
         /// Animation definition
         /// </summary>
@@ -56,11 +56,11 @@ namespace Engine.Content
         /// <summary>
         /// Animation dictionary
         /// </summary>
-        public Dictionary<string, IEnumerable<AnimationContent>> Animations { get; set; } = new Dictionary<string, IEnumerable<AnimationContent>>();
+        public Dictionary<string, IEnumerable<AnimationContent>> Animations { get; set; } = new();
         /// <summary>
         /// Skinning information
         /// </summary>
-        public Dictionary<string, SkinningContent> SkinningInfo { get; set; } = new Dictionary<string, SkinningContent>();
+        public Dictionary<string, SkinningContent> SkinningInfo { get; set; } = new();
 
         /// <summary>
         /// Generates a triangle list model content from scratch
@@ -214,7 +214,7 @@ namespace Engine.Content
         /// <returns>Returns next image name</returns>
         private string NextImageName()
         {
-            return string.Format("_image_{0}_", Images.Count + 1);
+            return $"_image_{Images.Count + 1}_";
         }
         /// <summary>
         /// Imports a texture
@@ -251,7 +251,7 @@ namespace Engine.Content
         {
             if (!Geometry.ContainsKey(meshName))
             {
-                Geometry.Add(meshName, new Dictionary<string, SubMeshContent>());
+                Geometry.Add(meshName, new());
             }
 
             var matDict = Geometry[meshName];
@@ -267,7 +267,9 @@ namespace Engine.Content
             {
                 if (matDict.ContainsKey(materialName))
                 {
-                    throw new EngineException($"{materialName} already exists for {meshName}");
+                    Logger.WriteWarning(this, $"{materialName} already exists for {meshName}");
+
+                    return;
                 }
 
                 matDict.Add(materialName, meshContent);
@@ -291,12 +293,7 @@ namespace Engine.Content
         /// <returns>Returns the controller attached to the mesh</returns>
         public ControllerContent GetControllerForMesh(string meshName)
         {
-            foreach (ControllerContent controller in Controllers.Values)
-            {
-                if (controller.Skin == meshName) return controller;
-            }
-
-            return null;
+            return Controllers.Values.FirstOrDefault(c => c.Skin == meshName);
         }
         /// <summary>
         /// Gets whether the specified joint has skinning data attached or not
@@ -388,7 +385,7 @@ namespace Engine.Content
         /// <param name="material">Material name</param>
         private void OptimizeStaticMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string material)
         {
-            List<SubMeshContent> staticM = new();
+            var staticM = new List<SubMeshContent>();
 
             foreach (string mesh in geometry.Keys)
             {
@@ -829,17 +826,19 @@ namespace Engine.Content
                 l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
 
-            if (lights.Any())
+            if (!lights.Any())
             {
-                foreach (var l in lights)
-                {
-                    if (res.Lights.ContainsKey(l.Key))
-                    {
-                        continue;
-                    }
+                return;
+            }
 
-                    res.Lights.Add(l.Key, l.Value);
+            foreach (var l in lights)
+            {
+                if (res.Lights.ContainsKey(l.Key))
+                {
+                    continue;
                 }
+
+                res.Lights.Add(l.Key, l.Value);
             }
         }
 
@@ -850,17 +849,19 @@ namespace Engine.Content
         /// <returns>Returns the number of meshes setted</returns>
         public int SetHullMark(bool isHull)
         {
+            if (Geometry.Count <= 0)
+            {
+                return 0;
+            }
+
             int count = 0;
 
-            if (Geometry.Count > 0)
+            foreach (var g in Geometry)
             {
-                foreach (var g in Geometry)
+                foreach (var s in g.Value.Values)
                 {
-                    foreach (var s in g.Value.Values)
-                    {
-                        s.IsHull = isHull;
-                        count++;
-                    }
+                    s.IsHull = isHull;
+                    count++;
                 }
             }
 
@@ -904,21 +905,23 @@ namespace Engine.Content
         /// <returns>Returns the number of meshes setted</returns>
         private int SetHullMarkGeo(string mask, bool isHull)
         {
-            int count = 0;
-
             var geo = Geometry.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-            if (geo.Any())
+            if (!geo.Any())
             {
-                foreach (var g in geo)
+                return 0;
+            }
+
+            int count = 0;
+
+            foreach (var g in geo)
+            {
+                foreach (var s in g.Value.Values)
                 {
-                    foreach (var s in g.Value.Values)
-                    {
-                        s.IsHull = isHull;
-                        count++;
-                    }
+                    s.IsHull = isHull;
+                    count++;
                 }
             }
 

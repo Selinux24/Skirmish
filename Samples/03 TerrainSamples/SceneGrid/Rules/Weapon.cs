@@ -17,7 +17,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public Weapon(string name)
         {
-            this.Name = name;
+            Name = name;
         }
 
         public void Reload()

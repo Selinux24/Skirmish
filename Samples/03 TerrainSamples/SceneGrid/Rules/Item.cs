@@ -10,8 +10,8 @@ namespace TerrainSamples.SceneGrid.Rules
 
         protected Item(string name, ItemClasses cls)
         {
-            this.Name = name;
-            this.Class = cls;
+            Name = name;
+            Class = cls;
         }
 
         public abstract void Use();

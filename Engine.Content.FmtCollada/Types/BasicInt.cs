@@ -13,11 +13,11 @@ namespace Engine.Collada.Types
         {
             get
             {
-                return Collada.ConvertToString(this.Value);
+                return Collada.ConvertToString(Value);
             }
             set
             {
-                this.Value = Collada.Convert<int>(value);
+                Value = Collada.Convert<int>(value);
             }
         }
         [XmlIgnore]
@@ -28,9 +28,10 @@ namespace Engine.Collada.Types
 
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", this.Value);
+            return $"{Value}";
         }
     }
 }

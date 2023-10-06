@@ -20,7 +20,7 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                Team[] idleTeams = this.IdleTeams;
+                Team[] idleTeams = IdleTeams;
 
                 return idleTeams.Length > 0 ? idleTeams[0] : null;
             }
@@ -29,7 +29,7 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return this.teams.ToArray();
+                return teams.ToArray();
             }
         }
         public Team[] IdleTeams
@@ -38,9 +38,9 @@ namespace TerrainSamples.SceneGrid.Rules
             {
                 var idleTeams = new List<Team>();
 
-                foreach (Team team in this.turnInfo.Keys)
+                foreach (Team team in turnInfo.Keys)
                 {
-                    if (this.turnInfo[team])
+                    if (turnInfo[team])
                     {
                         idleTeams.Add(team);
                     }
@@ -53,13 +53,13 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return this.Soldiers[this.currentSoldier];
+                return Soldiers[currentSoldier];
             }
             set
             {
                 if (value != null)
                 {
-                    this.currentSoldier = Array.IndexOf(this.Soldiers, value);
+                    currentSoldier = Array.IndexOf(Soldiers, value);
                 }
             }
         }
@@ -67,14 +67,14 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return this.CurrentTeam.Soldiers;
+                return CurrentTeam.Soldiers;
             }
         }
         public Soldier[] IdleSoldiers
         {
             get
             {
-                return Array.FindAll(this.CurrentTeam.Soldiers, s => s.IdleForPhase(this.CurrentPhase));
+                return Array.FindAll(CurrentTeam.Soldiers, s => s.IdleForPhase(CurrentPhase));
             }
         }
         public Soldier[] AllSoldiers
@@ -83,7 +83,7 @@ namespace TerrainSamples.SceneGrid.Rules
             {
                 var soldiers = new List<Soldier>();
 
-                foreach (Team team in this.Teams)
+                foreach (Team team in Teams)
                 {
                     soldiers.AddRange(team.Soldiers);
                 }
@@ -125,20 +125,20 @@ namespace TerrainSamples.SceneGrid.Rules
                 team.AddSoldier(string.Format("Doc Smith {0:00} of {1}", i + 1, name), SoldierClasses.Medic);
             }
 
-            this.teams.Add(team);
+            teams.Add(team);
         }
         public void Start()
         {
-            this.currentTurn = 1;
-            this.CurrentPhase = 0;
+            currentTurn = 1;
+            CurrentPhase = 0;
 
-            this.turnInfo.Clear();
-            foreach (Team team in this.teams)
+            turnInfo.Clear();
+            foreach (Team team in teams)
             {
-                this.turnInfo.Add(team, true);
+                turnInfo.Add(team, true);
             }
 
-            this.currentSoldier = 0;
+            currentSoldier = 0;
         }
         public Victory IsFinished()
         {
@@ -170,96 +170,96 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public Soldier NextSoldier(bool selectIdle)
         {
-            Soldier[] soldiers = this.Soldiers;
+            Soldier[] soldiers = Soldiers;
             if (soldiers.Length > 0)
             {
                 if (selectIdle)
                 {
-                    Soldier[] idles = this.IdleSoldiers;
+                    Soldier[] idles = IdleSoldiers;
                     if (idles.Length > 0)
                     {
-                        if (this.CurrentSoldier.IdleForPhase(this.CurrentPhase))
+                        if (CurrentSoldier.IdleForPhase(CurrentPhase))
                         {
-                            this.NextSoldierIndex();
+                            NextSoldierIndex();
                         }
 
-                        while (!this.CurrentSoldier.IdleForPhase(this.CurrentPhase))
+                        while (!CurrentSoldier.IdleForPhase(CurrentPhase))
                         {
-                            this.NextSoldierIndex();
+                            NextSoldierIndex();
                         }
                     }
                 }
                 else
                 {
-                    this.NextSoldierIndex();
+                    NextSoldierIndex();
                 }
             }
 
-            return this.CurrentSoldier;
+            return CurrentSoldier;
         }
         public Soldier PrevSoldier(bool selectIdle)
         {
-            Soldier current = this.CurrentSoldier;
+            Soldier current = CurrentSoldier;
 
-            Soldier[] selectables = selectIdle ? this.IdleSoldiers : this.Soldiers;
+            Soldier[] selectables = selectIdle ? IdleSoldiers : Soldiers;
             if (selectables.Length > 0)
             {
                 int index = Array.IndexOf(selectables, current);
                 if (index >= 0)
                 {
-                    this.PrevSoldierIndex();
+                    PrevSoldierIndex();
                 }
                 else
                 {
-                    this.currentSoldier = Array.IndexOf(this.Soldiers, selectables[0]);
-                    this.PrevSoldierIndex();
+                    currentSoldier = Array.IndexOf(Soldiers, selectables[0]);
+                    PrevSoldierIndex();
                 }
             }
 
-            return this.CurrentSoldier;
+            return CurrentSoldier;
         }
         private void NextSoldierIndex()
         {
-            this.currentSoldier++;
+            currentSoldier++;
 
-            if (this.currentSoldier > this.Soldiers.Length - 1)
+            if (currentSoldier > Soldiers.Length - 1)
             {
-                this.currentSoldier = 0;
+                currentSoldier = 0;
             }
         }
         private void PrevSoldierIndex()
         {
-            this.currentSoldier--;
+            currentSoldier--;
 
-            if (this.currentSoldier < 0)
+            if (currentSoldier < 0)
             {
-                this.currentSoldier = this.Soldiers.Length - 1;
+                currentSoldier = Soldiers.Length - 1;
             }
         }
 
         public ActionSpecification[] GetActions()
         {
-            Melee melee = this.GetMelee(this.CurrentSoldier);
+            Melee melee = GetMelee(CurrentSoldier);
 
             return ActionsManager.GetActions(
-                this.CurrentPhase,
-                this.CurrentTeam,
-                this.CurrentSoldier,
+                CurrentPhase,
+                CurrentTeam,
+                CurrentSoldier,
                 melee != null,
                 ActionTypes.Manual);
         }
         public Melee GetMelee(Soldier soldier)
         {
-            return this.melees.Find(m => m.ContainsSoldier(soldier));
+            return melees.Find(m => m.ContainsSoldier(soldier));
         }
         public void JoinMelee(Soldier active, Soldier passive)
         {
-            Melee melee = this.GetMelee(passive);
+            Melee melee = GetMelee(passive);
             if (melee == null)
             {
                 melee = new Melee();
 
-                this.melees.Add(melee);
+                melees.Add(melee);
 
                 melee.AddFighter(passive);
             }
@@ -269,44 +269,44 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public void NextPhase()
         {
-            if (this.CurrentPhase == Phase.End)
+            if (CurrentPhase == Phase.End)
             {
                 //All phases done for this team. Select next team
-                this.EndPhase();
+                EndPhase();
             }
             else
             {
                 //Done with current phase, next phase
-                this.OnePhase();
+                OnePhase();
             }
         }
         private void EndPhase()
         {
             //Get current
-            Team currentTeam = this.CurrentTeam;
+            Team currentTeam = CurrentTeam;
 
             //Mark actions done
-            this.turnInfo[currentTeam] = false;
+            turnInfo[currentTeam] = false;
 
             //Get new current (next idle)
-            currentTeam = this.CurrentTeam;
+            currentTeam = CurrentTeam;
             if (currentTeam == null)
             {
                 #region No idle teams, next turn
 
-                this.currentTurn++;
+                currentTurn++;
 
                 //Mark all teams idle
-                this.turnInfo.Clear();
-                foreach (Team team in this.teams)
+                turnInfo.Clear();
+                foreach (Team team in teams)
                 {
                     team.NextTurn();
 
-                    this.turnInfo.Add(team, true);
+                    turnInfo.Add(team, true);
                 }
 
-                this.CurrentPhase = 0;
-                this.currentSoldier = 0;
+                CurrentPhase = 0;
+                currentSoldier = 0;
 
                 #endregion
             }
@@ -314,18 +314,18 @@ namespace TerrainSamples.SceneGrid.Rules
             {
                 #region Next team
 
-                this.CurrentPhase = 0;
-                this.currentSoldier = 0;
+                CurrentPhase = 0;
+                currentSoldier = 0;
 
                 #endregion
             }
         }
         private void OnePhase()
         {
-            if (this.CurrentPhase == Phase.Melee)
+            if (CurrentPhase == Phase.Melee)
             {
                 //Resolve melees
-                foreach (Melee melee in this.melees)
+                foreach (Melee melee in melees)
                 {
                     melee.Resolve();
 
@@ -335,11 +335,11 @@ namespace TerrainSamples.SceneGrid.Rules
                     }
                 }
 
-                this.melees.RemoveAll(m => m.Done);
+                melees.RemoveAll(m => m.Done);
             }
 
-            this.CurrentPhase++;
-            this.currentSoldier = 0;
+            CurrentPhase++;
+            currentSoldier = 0;
         }
 
         public Team[] EnemyOf(Team team)
@@ -351,14 +351,10 @@ namespace TerrainSamples.SceneGrid.Rules
             return teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRoles.Neutral).ToArray();
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format(
-                "Battle -> {0} teams. Turn {1} ++ Phase {2}. Melees {3}",
-                this.teams.Count,
-                this.currentTurn,
-                this.CurrentPhase,
-                this.melees.Count);
+            return $"Battle -> {teams.Count} teams. Turn {currentTurn} ++ Phase {CurrentPhase}. Melees {melees.Count}";
         }
     }
 }

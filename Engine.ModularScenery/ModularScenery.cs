@@ -1,15 +1,14 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Modular
 {
-    using Engine.Animation;
-    using Engine.Common;
-    using Engine.Content;
     using Engine.Modular.Persistence;
 
     /// <summary>
@@ -17,15 +16,6 @@ namespace Engine.Modular
     /// </summary>
     public sealed class ModularScenery : Ground<ModularSceneryDescription>
     {
-        /// <summary>
-        /// Objects auto identifier counter
-        /// </summary>
-        private static int ObjectsAutoId = 1;
-        /// <summary>
-        /// Objects base string for identification build
-        /// </summary>
-        private static readonly string ObjectsAutoString = "__objauto__";
-
         /// <summary>
         /// Asset models dictionary
         /// </summary>
@@ -104,234 +94,6 @@ namespace Engine.Modular
         public event TriggerEndHandler TriggerEnd;
 
         /// <summary>
-        /// Populate objects empty ids
-        /// </summary>
-        /// <param name="level">Level definition</param>
-        private static void PopulateObjectIds(Level level)
-        {
-            if (level.Objects?.Any() != true)
-            {
-                return;
-            }
-
-            foreach (var obj in level.Objects)
-            {
-                if (!string.IsNullOrEmpty(obj.Id))
-                {
-                    continue;
-                }
-
-                obj.Id = $"{ObjectsAutoString}_{GetNextObjectId()}";
-            }
-        }
-        /// <summary>
-        /// Gets the next Id
-        /// </summary>
-        /// <returns>Returns the next Id</returns>
-        private static int GetNextObjectId()
-        {
-            return ++ObjectsAutoId;
-        }
-        /// <summary>
-        /// Gets the instance counter dictionary
-        /// </summary>
-        /// <param name="assets">Asset list</param>
-        /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        private static Dictionary<string, InstanceInfo> GetMapInstanceCounters(Level level, IEnumerable<Asset> assets)
-        {
-            Dictionary<string, InstanceInfo> res = new();
-
-            var vAssets = assets.ToArray();
-
-            foreach (var item in level.Map)
-            {
-                var asset = Array.Find(vAssets, a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
-                if (asset == null)
-                {
-                    continue;
-                }
-
-                var assetInstances = GetInstanceCounters(asset);
-                foreach (var key in assetInstances.Keys)
-                {
-                    var assetInstance = assetInstances[key];
-
-                    if (!res.ContainsKey(key))
-                    {
-                        res.Add(key, new InstanceInfo { Count = assetInstance.Count, PathFinding = assetInstance.PathFinding });
-
-                        continue;
-                    }
-
-                    res[key].Count += assetInstance.Count;
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Gets the instance count dictionary
-        /// </summary>
-        /// <param name="asset">Asset</param>
-        /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
-        private static Dictionary<string, (int Count, PathFindingModes PathFinding)> GetInstanceCounters(Asset asset)
-        {
-            Dictionary<string, (int, PathFindingModes)> res = new();
-
-            var assetNames = asset.References.Select(a => a.AssetName).Distinct();
-
-            foreach (var assetName in assetNames)
-            {
-                var count = asset.References.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
-                if (count > 0)
-                {
-                    var pf = asset.References.First(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase)).PathFinding;
-
-                    res.Add(assetName, (count, pf));
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Gets the instance transforms dictionary
-        /// </summary>
-        /// <param name="asset">Asset</param>
-        /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
-        private static Dictionary<string, Matrix[]> GetInstanceTransforms(Asset asset)
-        {
-            Dictionary<string, Matrix[]> res = new();
-
-            var assetNames = asset.References.Select(a => a.AssetName).Distinct();
-
-            foreach (var assetName in assetNames)
-            {
-                var transforms = asset.References
-                    .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                    .Select(a => GeometryUtil.Transformation(a.Position, a.Rotation, a.Scale)).ToArray();
-
-                res.Add(assetName, transforms);
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Gets the instance counter dictionary
-        /// </summary>
-        /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        private static Dictionary<string, InstanceInfo> GetObjectsInstanceCounters(Level level)
-        {
-            Dictionary<string, InstanceInfo> res = new();
-
-            foreach (var item in level.Objects)
-            {
-                if (string.IsNullOrEmpty(item.AssetName))
-                {
-                    continue;
-                }
-
-                if (!res.ContainsKey(item.AssetName))
-                {
-                    res.Add(item.AssetName, new InstanceInfo { Count = 0, PathFinding = item.PathFinding });
-                }
-
-                res[item.AssetName].Count += 1;
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Finds the asset reference by asset map id and asset id
-        /// </summary>
-        /// <param name="level">Level definition</param>
-        /// <param name="assets">Asset list</param>
-        /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
-        /// <param name="mapAssetId">Asset id in the asset map reference list</param>
-        /// <returns>Returns the asset reference</returns>
-        private static AssetReference FindAssetReference(Level level, IEnumerable<Asset> assets, string levelAssetId, string mapAssetId)
-        {
-            var res = assets
-                //Search any asset which contains a reference with the specified level, by asset name or by the level asset map id
-                .Where(a => level.Map.Any(r =>
-                    string.Equals(r.AssetName, a.Name, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(r.Id, levelAssetId, StringComparison.OrdinalIgnoreCase)));
-            var res2 = res
-                //Then, get the first reference which matching reference Id with the level asset id
-                .Select(a => a.References.FirstOrDefault(r => string.Equals(r.Id, mapAssetId, StringComparison.OrdinalIgnoreCase)));
-            var res3 = res2
-                .FirstOrDefault();
-
-            return res3;
-        }
-        /// <summary>
-        /// Gets the first index of the asset in the current configuration
-        /// </summary>
-        /// <param name="level">Level definition</param>
-        /// <param name="assets">Asset list</param>
-        /// <param name="assetName">Asset name</param>
-        /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
-        /// <param name="mapAssetId">Asset id in the asset map reference list</param>
-        /// <returns>Returns the first index</returns>
-        private static int GetMapInstanceIndex(Level level, IEnumerable<Asset> assets, string assetName, string levelAssetId, string mapAssetId)
-        {
-            int index = 0;
-
-            foreach (var item in level.Map)
-            {
-                var asset = assets
-                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
-
-                if (asset == null)
-                {
-                    continue;
-                }
-
-                foreach (var a in asset.References.Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    if (string.Equals(item.Id, levelAssetId, StringComparison.OrdinalIgnoreCase) &&
-                        string.Equals(a.Id, mapAssetId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return index;
-                    }
-
-                    index++;
-                }
-            }
-
-            return -1;
-        }
-        /// <summary>
-        /// Gets the first index of the object in the current configuration
-        /// </summary>
-        /// <param name="level">Level definition</param>
-        /// <param name="assetName">Asset name</param>
-        /// <param name="objectId">Object id</param>
-        /// <returns>Returns the first index</returns>
-        private static int GetObjectInstanceIndex(Level level, string assetName, string objectId)
-        {
-            int index = 0;
-
-            foreach (var item in level.Objects)
-            {
-                if (string.IsNullOrEmpty(item.AssetName))
-                {
-                    continue;
-                }
-
-                if (string.Equals(item.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (string.Equals(item.Id, objectId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return index;
-                    }
-
-                    index++;
-                }
-            }
-
-            return -1;
-        }
-        /// <summary>
         /// Gets the bounding sphere list of all items in the specified dictionary
         /// </summary>
         /// <param name="instances">Instances dictionary</param>
@@ -402,7 +164,7 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
         {
-            await LoadLevel(levelMap.Levels.FirstOrDefault(), progress);
+            await LoadLevel(FirstLevel, progress);
         }
         /// <summary>
         /// Loads the level by name
@@ -511,7 +273,7 @@ namespace Engine.Modular
         private async Task InitializeAssets(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
-            var instances = GetMapInstanceCounters(level, assetMap.Assets);
+            var instances = level.GetMapInstanceCounters(assetMap.Assets);
 
             float total = instances.Keys.Count;
             int current = 0;
@@ -599,10 +361,10 @@ namespace Engine.Modular
         private async Task InitializeObjects(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
             // Set auto-identifiers
-            PopulateObjectIds(level);
+            level.PopulateObjectIds();
 
             // Get instance count for all single geometries from Map
-            var instances = GetObjectsInstanceCounters(level);
+            var instances = level.GetObjectsInstanceCounters();
 
             float total = instances.Keys.Count;
             int current = 0;
@@ -898,7 +660,7 @@ namespace Engine.Modular
             };
 
             var asset = assetMap.Assets.ElementAt(assetIndex);
-            var assetTransforms = GetInstanceTransforms(asset);
+            var assetTransforms = asset.GetInstanceTransforms();
 
             foreach (var basicAsset in assetTransforms.Keys)
             {
@@ -945,15 +707,17 @@ namespace Engine.Modular
         private ModelInstance FindAssetModelInstance(string levelAssetId, string mapAssetId)
         {
             // Find the assetName by object asset_id
-            var res = FindAssetReference(CurrentLevel, assetMap.Assets, levelAssetId, mapAssetId);
-            if (res != null)
+            var res = CurrentLevel.FindAssetReference(assetMap.Assets, levelAssetId, mapAssetId);
+            if (res == null)
             {
-                // Look for all geometry references
-                int index = GetMapInstanceIndex(CurrentLevel, assetMap.Assets, res.AssetName, levelAssetId, mapAssetId);
-                if (index >= 0)
-                {
-                    return assets[res.AssetName][index];
-                }
+                return null;
+            }
+
+            // Look for all geometry references
+            int index = CurrentLevel.GetMapInstanceIndex(assetMap.Assets, res.AssetName, levelAssetId, mapAssetId);
+            if (index >= 0)
+            {
+                return assets[res.AssetName][index];
             }
 
             return null;
@@ -966,7 +730,7 @@ namespace Engine.Modular
         /// <returns>Returns the model instance</returns>
         private ModelInstance FindObjectInstance(string assetName, string id)
         {
-            var index = GetObjectInstanceIndex(CurrentLevel, assetName, id);
+            var index = CurrentLevel.GetObjectInstanceIndex(assetName, id);
             if (index >= 0)
             {
                 return objects[assetName][index];
@@ -1112,23 +876,6 @@ namespace Engine.Modular
             sceneTriangles = triangleLits.ToArray();
 
             return sceneTriangles;
-        }
-
-        /// <summary>
-        /// Gets all individual map asset volumes
-        /// </summary>
-        /// <returns>Returns a dictionary of individual asset volumes by asset name</returns>
-        public IDictionary<string, IEnumerable<BoundingBox>> GetMapAssetsVolumes()
-        {
-            return assets.Where(a => a.Value != null).ToImmutableDictionary(k => k.Key, v => v.Value.GetBoundingBoxes());
-        }
-        /// <summary>
-        /// Gets all objects volumes
-        /// </summary>
-        /// <returns>Returns a dictionary of object volumes by object name</returns>
-        public IDictionary<string, IEnumerable<BoundingBox>> GetObjectVolumes()
-        {
-            return objects.Where(o => o.Value != null).ToImmutableDictionary(k => k.Key, v => v.Value.GetBoundingBoxes());
         }
 
         /// <summary>
@@ -1522,20 +1269,6 @@ namespace Engine.Modular
                 Trigger = trigger;
                 Item = item;
             }
-        }
-        /// <summary>
-        /// Instance info
-        /// </summary>
-        class InstanceInfo
-        {
-            /// <summary>
-            /// Instance count
-            /// </summary>
-            public int Count { get; set; }
-            /// <summary>
-            /// Use of path finding
-            /// </summary>
-            public PathFindingModes PathFinding { get; set; }
         }
     }
 }

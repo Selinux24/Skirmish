@@ -28,7 +28,7 @@ namespace Engine
         /// </summary>
         public QuadtreeDescription()
         {
-            this.MaximumDepth = 3;
+            MaximumDepth = 3;
         }
     }
 }

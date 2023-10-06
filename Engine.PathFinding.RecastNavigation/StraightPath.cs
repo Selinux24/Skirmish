@@ -111,11 +111,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="maxStraightPath">Maximum path count</param>
         public StraightPath(int maxStraightPath)
         {
-            this.maxSize = maxStraightPath;
-            this.pathPositions = new Vector3[maxStraightPath];
-            this.pathFlags = new StraightPathFlagTypes[maxStraightPath];
-            this.pathRefs = new int[maxStraightPath];
-            this.Count = 0;
+            maxSize = maxStraightPath;
+            pathPositions = new Vector3[maxStraightPath];
+            pathFlags = new StraightPathFlagTypes[maxStraightPath];
+            pathRefs = new int[maxStraightPath];
+            Count = 0;
         }
 
         /// <summary>

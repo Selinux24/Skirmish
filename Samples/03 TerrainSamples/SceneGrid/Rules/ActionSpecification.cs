@@ -21,17 +21,18 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public ActionSpecification()
         {
-            this.Automatic = false;
-            this.ItemAction = false;
-            this.LeadersOnly = false;
-            this.NeedsCommunicator = false;
-            this.MeleeOnly = false;
-            this.Classes = SoldierClasses.Line | SoldierClasses.Heavy | SoldierClasses.Support | SoldierClasses.Medic;
+            Automatic = false;
+            ItemAction = false;
+            LeadersOnly = false;
+            NeedsCommunicator = false;
+            MeleeOnly = false;
+            Classes = SoldierClasses.Line | SoldierClasses.Heavy | SoldierClasses.Support | SoldierClasses.Medic;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", this.Name);
+            return $"{Name}";
         }
     }
 }

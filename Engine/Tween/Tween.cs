@@ -75,14 +75,14 @@ namespace Engine.Tween
             {
                 throw new ArgumentException("duration must be greater than 0", nameof(duration));
             }
-            this.DurationMilliseconds = duration;
+            DurationMilliseconds = duration;
 
             this.scaleFunc = scaleFunc ?? throw new ArgumentNullException(nameof(scaleFunc));
 
             State = TweenState.Running;
 
-            this.StartValue = start;
-            this.EndValue = end;
+            StartValue = start;
+            EndValue = end;
 
             UpdateValue();
         }

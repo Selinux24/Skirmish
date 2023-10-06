@@ -25,12 +25,13 @@ namespace Engine.Collada.FX
 
         public ProfileCG()
         {
-            this.Platform = "PC";
+            Platform = "PC";
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return "ProfileCG;";
+            return $"{nameof(ProfileCG)};";
         }
     }
 }

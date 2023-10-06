@@ -339,7 +339,7 @@ namespace Engine.Audio
         /// <param name="dspSettings">DSP settings</param>
         internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            x3DInstance ??= new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
+            x3DInstance ??= new X3DAudio(Speakers, X3DAudio.SpeedOfSound);
 
             x3DInstance.Calculate(listener, emitter, flags, dspSettings);
         }
