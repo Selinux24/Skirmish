@@ -174,12 +174,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
+            List<(int X, int Y)> tilesToBuild = new();
 
             for (int y = 0; y < m_params.TileHeight; y++)
             {
                 for (int x = 0; x < m_params.TileWidth; x++)
                 {
                     var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, cfg);
+                    if (!tiles.Any())
+                    {
+                        continue;
+                    }
+
+                    tilesToBuild.Add(new(x, y));
 
                     foreach (var tile in tiles)
                     {
@@ -191,14 +198,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Build initial meshes
-            for (int y = 0; y < m_params.TileHeight; y++)
+            foreach (var (x, y) in tilesToBuild)
             {
-                for (int x = 0; x < m_params.TileWidth; x++)
-                {
-                    BuildTilesAt(x, y);
+                BuildTilesAt(x, y);
 
-                    progressCallback?.Invoke(++curr / total);
-                }
+                progressCallback?.Invoke(++curr / total);
             }
         }
 

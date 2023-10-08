@@ -612,6 +612,18 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="taskGroup">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
+        {
+            Action<LoadResourcesResult<T>> callback = null;
+
+            return LoadResourcesAsync(taskGroup, callback);
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
@@ -682,6 +694,17 @@ namespace Engine
 
                 await callback?.Invoke(result);
             });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
+        {
+            Action<LoadResourcesResult> callback = null;
+
+            return LoadResourcesAsync(taskGroup, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks

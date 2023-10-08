@@ -193,6 +193,8 @@ namespace TerrainSamples.SceneModularDungeon
                 SaveNavigationGraphToFile(fileName);
             }
 
+            ChangeToLevelCompleted();
+
             //Update active paths with the new graph configuration
             if (ratController.HasPath)
             {
@@ -1444,7 +1446,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", ChangeToLevelAsync(name));
 
-            LoadResourcesAsync(resourceGroup, ChangeToLevelCompleted);
+            _ = LoadResourcesAsync(resourceGroup);
         }
         private async Task ChangeToLevelAsync(string name)
         {
@@ -1461,15 +1463,10 @@ namespace TerrainSamples.SceneModularDungeon
 
             EnqueueNavigationGraphUpdate();
         }
-        private void ChangeToLevelCompleted(LoadResourcesResult res)
+        private void ChangeToLevelCompleted()
         {
             try
             {
-                if (!res.Completed)
-                {
-                    res.ThrowExceptions();
-                }
-
                 StartEntities();
 
                 Vector3 pos = scenery.CurrentLevel.StartPosition;
