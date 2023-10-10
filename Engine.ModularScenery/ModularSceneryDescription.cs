@@ -1,4 +1,5 @@
 ﻿using Engine.Content;
+using System.Collections.Generic;
 
 namespace Engine.Modular
 {
@@ -68,7 +69,9 @@ namespace Engine.Modular
 
             if (!string.IsNullOrWhiteSpace(AssetsConfigurationFile))
             {
-                return AssetMap.FromFile(Content.ContentFolder ?? string.Empty, AssetsConfigurationFile);
+                AssetsConfiguration = AssetMap.FromFile(Content.ContentFolder ?? string.Empty, AssetsConfigurationFile);
+
+                return AssetsConfiguration;
             }
 
             return default;
@@ -85,10 +88,159 @@ namespace Engine.Modular
 
             if (!string.IsNullOrWhiteSpace(LevelsFile))
             {
-                return LevelMap.FromFile(Content.ContentFolder ?? string.Empty, LevelsFile);
+                Levels = LevelMap.FromFile(Content.ContentFolder ?? string.Empty, LevelsFile);
+
+                return Levels;
             }
 
             return default;
+        }
+
+        /// <summary>
+        /// Creates a particle system description list
+        /// </summary>
+        public IEnumerable<(string Name, ParticleSystemDescription SystemDescription)> GetLevelParticleSystems()
+        {
+            var levelMap = GetLevelMap();
+
+            foreach (var item in levelMap.ParticleSystems)
+            {
+                string contentPath = item.ContentPath ?? Content.ContentFolder;
+
+                var desc = ParticleSystemDescription.Initialize(item, contentPath);
+
+                yield return new(item.Name, desc);
+            }
+        }
+        /// <summary>
+        /// Creates a model description list for the assets of the specified level
+        /// </summary>
+        /// <param name="level">Level</param>
+        /// <param name="contentLibrary">Content library</param>
+        public IEnumerable<(string Name, ModelInstancedDescription ModelDescription)> GetLevelAssets(Level level, ContentLibrary contentLibrary)
+        {
+            var assetMap = GetAssetMap();
+
+            // Get instance count for all single geometries from Map
+            var instances = level.GetMapInstanceCounters(assetMap.Assets);
+
+            // Load all single geometries into single instanced model components
+            foreach (var assetName in instances.Keys)
+            {
+                int count = instances[assetName].Count;
+                if (count <= 0)
+                {
+                    continue;
+                }
+
+                var modelContent = contentLibrary.GetContentDataByName(assetName);
+                if (modelContent == null)
+                {
+                    continue;
+                }
+
+                yield return InitializeAsset(assetName, count, level, modelContent, instances[assetName].PathFinding);
+            }
+        }
+        /// <summary>
+        /// Creates a new instanced model description for the asset
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="count">Instance count</param>
+        /// <param name="level">Level</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="pathFinding">Path finding</param>
+        private (string Name, ModelInstancedDescription ModelDescription) InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        {
+            var assetId = $"Asset.{assetName}.{level.Name}";
+
+            var pf = pathFinding switch
+            {
+                PathFindingModes.None => PickingHullTypes.None,
+                PathFindingModes.Coarse => PickingHullTypes.Coarse,
+                PathFindingModes.Hull => PickingHullTypes.Hull,
+                PathFindingModes.Geometry => PickingHullTypes.Geometry,
+                _ => PickingHullTypes.None,
+            };
+
+            var desc = new ModelInstancedDescription()
+            {
+                CastShadow = CastShadow,
+                UseAnisotropicFiltering = UseAnisotropic,
+                Instances = count,
+                LoadAnimation = false,
+                BlendMode = BlendMode,
+                PathFindingHull = pf,
+                PickingHull = pf,
+                Content = ContentDescription.FromContentData(modelContent),
+            };
+
+            return new(assetId, desc);
+        }
+        /// <summary>
+        /// Creates a model description list for the objects of the specified level
+        /// </summary>
+        /// <param name="level">Level</param>
+        /// <param name="contentLibrary">Content library</param>
+        public IEnumerable<(string Name, ModelInstancedDescription ModelDescription)> GetLevelObjects(Level level, ContentLibrary contentLibrary)
+        {
+            // Set auto-identifiers
+            level.PopulateObjectIds();
+
+            // Get instance count for all single geometries from Map
+            var instances = level.GetObjectsInstanceCounters();
+
+            // Load all single geometries into single instanced model components
+            foreach (var assetName in instances.Keys)
+            {
+                var count = instances[assetName].Count;
+                if (count <= 0)
+                {
+                    continue;
+                }
+
+                var modelContent = contentLibrary.GetContentDataByName(assetName);
+                if (modelContent == null)
+                {
+                    continue;
+                }
+
+                yield return InitializeObject(assetName, count, level, modelContent, instances[assetName].PathFinding);
+            }
+        }
+        /// <summary>
+        /// Creates a new instanced model description for the object
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="count">Instance count</param>
+        /// <param name="level">Level</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="pathFinding">Path finding enabled flag</param>
+        private (string Name, ModelInstancedDescription ModelDescription) InitializeObject(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        {
+            var modelId = $"{assetName}.{level.Name}";
+
+            var pf = pathFinding switch
+            {
+                PathFindingModes.None => PickingHullTypes.None,
+                PathFindingModes.Coarse => PickingHullTypes.Coarse,
+                PathFindingModes.Hull => PickingHullTypes.Hull,
+                PathFindingModes.Geometry => PickingHullTypes.Geometry,
+                _ => PickingHullTypes.None,
+            };
+
+            var desc = new ModelInstancedDescription()
+            {
+                CastShadow = CastShadow,
+                UseAnisotropicFiltering = UseAnisotropic,
+                Instances = count,
+                BlendMode = BlendMode,
+                PathFindingHull = pf,
+                PickingHull = pf,
+                Content = ContentDescription.FromContentData(modelContent),
+            };
+
+            return new(modelId, desc);
         }
     }
 }

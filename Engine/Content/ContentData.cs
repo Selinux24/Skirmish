@@ -1,9 +1,12 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
     using Engine.Common;
     using Engine.Content.Persistence;
 
@@ -196,6 +199,17 @@ namespace Engine.Content
         }
 
         /// <summary>
+        /// Gets texture content
+        /// </summary>
+        public IEnumerable<(string Name, IImageContent Content)> GetTextures()
+        {
+            foreach (var images in Images)
+            {
+                yield return new(images.Key, images.Value);
+            }
+        }
+
+        /// <summary>
         /// Imports material texture data to image dictionary
         /// </summary>
         /// <param name="material">Material content</param>
@@ -276,10 +290,100 @@ namespace Engine.Content
             }
         }
         /// <summary>
+        /// Gets material content
+        /// </summary>
+        public IEnumerable<(string Name, IMaterialContent Content)> GetMaterials()
+        {
+            if (Materials?.Any() != true)
+            {
+                yield break;
+            }
+
+            foreach (var mat in Materials)
+            {
+                var matName = mat.Key;
+                var matContent = mat.Value;
+
+                yield return (matName, matContent);
+            }
+        }
+
+        /// <summary>
+        /// Gets the skinning data
+        /// </summary>
+        public SkinningData GetSkinningData()
+        {
+            if (SkinningInfo?.Any() != true)
+            {
+                return null;
+            }
+
+            //Use the definition to read animation data into a clip dictionary
+            var sInfo = SkinningInfo.Values.First();
+            var jointAnimations = InitializeJoints(sInfo.Skeleton.Root, sInfo.Controllers);
+
+            var skinningData = new SkinningData(sInfo.Skeleton);
+            skinningData.Initialize(jointAnimations, AnimationDefinition);
+
+            return skinningData;
+        }
+        /// <summary>
+        /// Initialize skeleton data
+        /// </summary>
+        /// <param name="joint">Joint to initialize</param>
+        /// <param name="skinController">Skin controller</param>
+        private IEnumerable<JointAnimation> InitializeJoints(Joint joint, IEnumerable<string> skinController)
+        {
+            var animations = new List<JointAnimation>();
+
+            var boneAnimations = new List<JointAnimation>();
+
+            //Find keyframes for current bone
+            var c = Animations.Values.FirstOrDefault(a => a.Any(ac => ac.JointName == joint.Name))?.ToArray();
+            if (c?.Any() == true)
+            {
+                //Set bones
+                var ja = c.Select(a => new JointAnimation(a.JointName, a.Keyframes)).ToArray();
+                boneAnimations.AddRange(ja);
+            }
+
+            if (boneAnimations.Count > 0)
+            {
+                //Only one bone animation (for now)
+                animations.Add(boneAnimations[0]);
+            }
+
+            foreach (string controllerName in skinController)
+            {
+                var controller = Controllers[controllerName];
+
+                Matrix ibm = Matrix.Identity;
+
+                if (controller.InverseBindMatrix.ContainsKey(joint.Bone))
+                {
+                    ibm = controller.InverseBindMatrix[joint.Bone];
+                }
+
+                joint.Offset = ibm;
+            }
+
+            if (joint.Childs?.Length > 0)
+            {
+                foreach (var child in joint.Childs)
+                {
+                    var ja = InitializeJoints(child, skinController);
+
+                    animations.AddRange(ja);
+                }
+            }
+
+            return animations.ToArray();
+        }
+        /// <summary>
         /// Skin name list
         /// </summary>
         /// <returns>Returns the skin name list</returns>
-        public IEnumerable<string> GetControllerSkins()
+        private IEnumerable<string> GetControllerSkins()
         {
             return Controllers.Values
                 .Select(item => item.Skin)
@@ -291,7 +395,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="meshName">Mesh name</param>
         /// <returns>Returns the controller attached to the mesh</returns>
-        public ControllerContent GetControllerForMesh(string meshName)
+        private ControllerContent GetControllerForMesh(string meshName)
         {
             return Controllers.Values.FirstOrDefault(c => c.Skin == meshName);
         }
@@ -299,35 +403,252 @@ namespace Engine.Content
         /// Gets whether the specified joint has skinning data attached or not
         /// </summary>
         /// <param name="jointName">Joint name</param>
-        public bool SkinHasJointData(string jointName)
+        private bool SkinHasJointData(string jointName)
         {
             return SkinningInfo.Values.Any(value => value.Skeleton.GetJointNames().Any(j => j == jointName));
         }
         /// <summary>
-        /// Gets the animation list for the specified skin content
+        /// Reads skinning data
         /// </summary>
-        /// <param name="skInfo">Skin content</param>
-        /// <returns>Returns the list of animations for the specified skin content</returns>
-        public IEnumerable<string> GetAnimationsForSkin(SkinningContent skInfo)
+        /// <param name="meshName">Mesh name</param>
+        /// <returns>Returns the skinnging data</returns>
+        private SkinningInfo? GetSkinningInfo(string meshName)
         {
-            List<string> result = new();
-
-            var jointNames = skInfo.Skeleton.GetJointNames();
-
-            foreach (var animation in Animations)
+            if (Controllers?.Any() != true)
             {
-                if (result.Contains(animation.Key))
+                return null;
+            }
+
+            if (SkinningInfo?.Any() != true)
+            {
+                return null;
+            }
+
+            var cInfo = GetControllerForMesh(meshName);
+            if (cInfo == null)
+            {
+                return null;
+            }
+
+            //Apply shape matrix if controller exists but we are not loading animation info
+            var bindShapeMatrix = cInfo.BindShapeMatrix;
+            var weights = cInfo.Weights;
+
+            //Find skeleton for controller
+            if (!SkinningInfo.ContainsKey(cInfo.Armature))
+            {
+                return null;
+            }
+
+            var sInfo = SkinningInfo[cInfo.Armature];
+            var boneNames = sInfo.Skeleton.GetBoneNames();
+
+            return new SkinningInfo
+            {
+                BindShapeMatrix = bindShapeMatrix,
+                Weights = weights,
+                BoneNames = boneNames,
+            };
+        }
+
+        /// <summary>
+        /// Initilize geometry
+        /// </summary>
+        /// <param name="loadAnimation">Load animations</param>
+        /// <param name="loadNormalMaps">Load normal maps</param>
+        /// <param name="constraint">Use constraint</param>
+        public async Task<Dictionary<string, Dictionary<string, Mesh>>> GetGeometry(bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
+        {
+            Dictionary<string, Dictionary<string, Mesh>> meshes = new();
+
+            if (Geometry?.Any() != true)
+            {
+                return meshes;
+            }
+
+            foreach (var meshName in Geometry.Keys)
+            {
+                var mesh = await GetGeometryMesh(meshName, loadAnimation, loadNormalMaps, constraint);
+
+                meshes.Add(meshName, mesh);
+            }
+
+            return meshes;
+        }
+        /// <summary>
+        /// Initialize geometry mesh
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="loadAnimation">Load animations</param>
+        /// <param name="loadNormalMaps">Load normal maps</param>
+        /// <param name="constraint">Use constraint</param>
+        private async Task<Dictionary<string, Mesh>> GetGeometryMesh(string meshName, bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
+        {
+            var materials = GetMaterials();
+            var submeshes = Geometry[meshName];
+            var skinningInfo = loadAnimation ? GetSkinningInfo(meshName) : null;
+            var isSkinned = skinningInfo.HasValue;
+
+            //Extract hull geometry
+            var hullTriangles = submeshes
+                .Where(g => g.Value.IsHull)
+                .SelectMany(material => material.Value.GetTriangles())
+                .ToArray();
+
+            //Extract meshes
+            var subMeshList = submeshes
+                .Where(g => !g.Value.IsHull)
+                .ToArray();
+
+            Dictionary<string, Mesh> meshes = new();
+
+            foreach (var subMesh in subMeshList)
+            {
+                var geometry = subMesh.Value;
+
+                //Get vertex type
+                var vertexType = GetVertexType(geometry.VertexType, isSkinned, loadNormalMaps, materials, subMesh.Key);
+
+                var meshInfo = await CreateMesh(meshName, geometry, vertexType, constraint, skinningInfo);
+                if (!meshInfo.Any())
                 {
                     continue;
                 }
 
-                if (animation.Value.Any(a => jointNames.Any(j => j == a.JointName)))
+                var nMesh = meshInfo.First().Mesh;
+                var materialName = meshInfo.First().MaterialName;
+
+                meshes.Add(materialName, nMesh);
+            }
+
+            return meshes;
+        }
+        /// <summary>
+        /// Get vertex type from geometry
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
+        /// <param name="loadNormalMaps">Load normal maps flag</param>
+        /// <param name="materials">Material dictionary</param>
+        /// <param name="material">Material name</param>
+        /// <returns>Returns the vertex type</returns>
+        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, IEnumerable<(string Name, IMaterialContent Content)> materials, string material)
+        {
+            var res = vertexType;
+            if (isSkinned)
+            {
+                //Get skinned equivalent
+                res = VertexData.GetSkinnedEquivalent(res);
+            }
+
+            if (!loadNormalMaps)
+            {
+                return res;
+            }
+
+            if (VertexData.IsTextured(res) && !VertexData.IsTangent(res))
+            {
+                var meshMaterial = materials
+                    .Where(m => m.Name == material)
+                    .Select(m => m.Content)
+                    .FirstOrDefault();
+
+                if (meshMaterial?.NormalMapTexture != null)
                 {
-                    result.Add(animation.Key);
+                    //Get tangent equivalent
+                    res = VertexData.GetTangentEquivalent(res);
                 }
             }
 
-            return result.ToArray();
+            return res;
+        }
+        /// <summary>
+        /// Creates a mesh
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="geometry">Submesh content</param>
+        /// <param name="vertexType">Vertext type</param>
+        /// <param name="constraint">Geometry constraint</param>
+        /// <param name="skinningInfo">Skinning information</param>
+        private static async Task<IEnumerable<MeshInfo>> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
+        {
+            //Process the vertex data
+            var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
+            var vertices = vertexData.vertices;
+            var indices = vertexData.indices;
+
+            IEnumerable<IVertexData> vertexList;
+            if (skinningInfo.HasValue)
+            {
+                if (!skinningInfo.Value.BindShapeMatrix.IsIdentity)
+                {
+                    vertices = VertexData.Transform(vertices, skinningInfo.Value.BindShapeMatrix);
+                }
+
+                //Convert the vertex data to final mesh data
+                vertexList = await VertexData.Convert(
+                    vertexType,
+                    vertices,
+                    skinningInfo.Value.Weights,
+                    skinningInfo.Value.BoneNames);
+            }
+            else
+            {
+                vertexList = await VertexData.Convert(
+                    vertexType,
+                    vertices,
+                    Enumerable.Empty<Weight>(),
+                    Enumerable.Empty<string>());
+            }
+
+            if (!vertexList.Any())
+            {
+                return Enumerable.Empty<MeshInfo>();
+            }
+
+            //Create the mesh
+            var nMesh = new Mesh(
+                meshName,
+                geometry.Topology,
+                geometry.Transform,
+                vertexList,
+                indices);
+
+            //Material name
+            string materialName = string.IsNullOrEmpty(geometry.Material) ? NoMaterial : geometry.Material;
+
+            return new[] { new MeshInfo(nMesh, materialName) };
+        }
+
+        /// <summary>
+        /// Gets hull meshes
+        /// </summary>
+        public IEnumerable<Triangle> GetHullMeshes()
+        {
+            var meshes = new List<Triangle>();
+
+            foreach (var meshName in Geometry.Keys)
+            {
+                var submeshes = GetHullMesh(meshName);
+
+                meshes.AddRange(submeshes);
+            }
+
+            return meshes;
+        }
+        /// <summary>
+        /// Gets hull mesh by mesh name
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        private IEnumerable<Triangle> GetHullMesh(string meshName)
+        {
+            var submeshes = Geometry[meshName];
+
+            //Extract hull geometry
+            return submeshes
+                .Where(g => g.Value.IsHull)
+                .SelectMany(material => material.Value.GetTriangles())
+                .ToArray();
         }
 
         /// <summary>
@@ -998,6 +1319,49 @@ namespace Engine.Content
                     AddAnimationContent(animation.Key, animation.Value);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Skinning information
+    /// </summary>
+    public struct SkinningInfo
+    {
+        /// <summary>
+        /// Bind shape matrix
+        /// </summary>
+        public Matrix BindShapeMatrix { get; set; }
+        /// <summary>
+        /// Weight list
+        /// </summary>
+        public IEnumerable<Weight> Weights { get; set; }
+        /// <summary>
+        /// Bone names
+        /// </summary>
+        public IEnumerable<string> BoneNames { get; set; }
+    }
+
+    /// <summary>
+    /// Mesh information
+    /// </summary>
+    public struct MeshInfo
+    {
+        /// <summary>
+        /// Created mesh
+        /// </summary>
+        public Mesh Mesh { get; set; }
+        /// <summary>
+        /// Material name
+        /// </summary>
+        public string MaterialName { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public MeshInfo(Mesh mesh, string materialName)
+        {
+            Mesh = mesh;
+            MaterialName = materialName;
         }
     }
 }

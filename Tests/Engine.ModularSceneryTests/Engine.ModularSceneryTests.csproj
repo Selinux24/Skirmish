@@ -9,7 +9,48 @@
     <None Remove="Resources\Assets.dae" />
     <None Remove="Resources\Assets.json" />
     <None Remove="Resources\AssetsMap.json" />
+    <None Remove="Resources\atlas1.jpg" />
+    <None Remove="Resources\bark_d.dds" />
+    <None Remove="Resources\bark_n.dds" />
+    <None Remove="Resources\BasicDungeon.png" />
+    <None Remove="Resources\bench_d.jpg" />
+    <None Remove="Resources\bookshelf_d.jpg" />
+    <None Remove="Resources\brick_d.png" />
+    <None Remove="Resources\brick_n.png" />
+    <None Remove="Resources\bronze_d.jpg" />
+    <None Remove="Resources\bronze_n.jpg" />
+    <None Remove="Resources\candleLight.png" />
+    <None Remove="Resources\crane_1_d.png" />
+    <None Remove="Resources\crane_2_d.png" />
+    <None Remove="Resources\crate_d.jpg" />
+    <None Remove="Resources\crate_n.png" />
+    <None Remove="Resources\fire.png" />
+    <None Remove="Resources\fire_d.png" />
+    <None Remove="Resources\floor_d.jpg" />
+    <None Remove="Resources\floor_n.jpg" />
+    <None Remove="Resources\furniture_atlas_1.png" />
+    <None Remove="Resources\green-algae.png" />
+    <None Remove="Resources\jewels_d.png" />
+    <None Remove="Resources\lava_d.jpg" />
+    <None Remove="Resources\lava_n.jpg" />
     <None Remove="Resources\Levels.json" />
+    <None Remove="Resources\Levels2.json" />
+    <None Remove="Resources\marble_d.png" />
+    <None Remove="Resources\metal_rust_d.jpg" />
+    <None Remove="Resources\oil_d.jpg" />
+    <None Remove="Resources\Pedestal_d.jpg" />
+    <None Remove="Resources\rag_d.png" />
+    <None Remove="Resources\rock_d.jpg" />
+    <None Remove="Resources\rock_n.jpg" />
+    <None Remove="Resources\rug.jpg" />
+    <None Remove="Resources\Statue_d.jpg" />
+    <None Remove="Resources\stuff_map.png" />
+    <None Remove="Resources\torch.jpg" />
+    <None Remove="Resources\treasure_d.jpg" />
+    <None Remove="Resources\wall_d.jpg" />
+    <None Remove="Resources\wall_n.jpg" />
+    <None Remove="Resources\wood_d.jpg" />
+    <None Remove="Resources\wrack1_d.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +63,130 @@
     <Content Include="Resources\AssetsMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\atlas1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bark_d.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bark_n.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BasicDungeon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bench_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bookshelf_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\brick_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\brick_n.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bronze_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bronze_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\candleLight.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\crane_1_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\crane_2_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\crate_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\crate_n.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\fire.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\fire_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\floor_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\floor_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\furniture_atlas_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\green-algae.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\jewels_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\lava_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\lava_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Levels.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Levels2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\marble_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\oil_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Pedestal_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\rag_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\rock_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\rock_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\rug.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Statue_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\stuff_map.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\torch.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\treasure_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\wall_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\wall_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\wood_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\wrack1_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -36,6 +200,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
+    <ProjectReference Include="..\..\Engine.Content.FmtObj\Engine.Content.FmtObj.csproj" />
     <ProjectReference Include="..\..\Engine.ModularScenery\Engine.ModularScenery.csproj" />
   </ItemGroup>
 

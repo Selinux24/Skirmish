@@ -51,6 +51,27 @@ namespace Engine.Common
             return res;
         }
         /// <summary>
+        /// Initialize skinning data
+        /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="modelContent">Model content</param>
+        private static async Task InitializeSkinningData(DrawingData drw, ContentData modelContent)
+        {
+            if (drw.SkinningData != null)
+            {
+                return;
+            }
+
+            SkinningData skinningData = null;
+
+            await Task.Run(() =>
+            {
+                skinningData = modelContent.GetSkinningData();
+            });
+
+            drw.SkinningData = skinningData;
+        }
+        /// <summary>
         /// Initialize textures
         /// </summary>
         /// <param name="drw">Drawing data</param>
@@ -58,14 +79,15 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static async Task InitializeTextures(DrawingData drw, Game game, ContentData modelContent)
         {
-            if (modelContent.Images?.Any() != true)
+            var textures = modelContent.GetTextures();
+            if (!textures.Any())
             {
                 return;
             }
 
-            foreach (var images in modelContent.Images)
+            foreach (var texture in textures)
             {
-                var info = images.Value;
+                var info = texture.Content;
 
                 var view = await game.ResourceManager.RequestResource(info);
                 if (view == null)
@@ -77,7 +99,7 @@ namespace Engine.Common
                     throw new EngineException(errorMessage);
                 }
 
-                drw.textures.Add(images.Key, view);
+                drw.textures.Add(texture.Name, view);
             }
         }
         /// <summary>
@@ -87,17 +109,19 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static async Task InitializeMaterials(DrawingData drw, ContentData modelContent)
         {
-            if (modelContent.Materials?.Any() != true)
+            var materials = modelContent.GetMaterials();
+
+            if (!materials.Any())
             {
                 return;
             }
 
             await Task.Run(() =>
             {
-                foreach (var mat in modelContent.Materials)
+                foreach (var mat in materials)
                 {
-                    var matName = mat.Key;
-                    var matContent = mat.Value;
+                    var matName = mat.Name;
+                    var matContent = mat.Content;
 
                     var meshMaterial = matContent.CreateMeshMaterial(drw.textures);
                     drw.materials.Add(matName, meshMaterial);
@@ -112,298 +136,17 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         private static async Task InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
         {
-            if (modelContent.Geometry?.Any() != true)
+            var geometry = await modelContent.GetGeometry(description.LoadAnimation, description.LoadNormalMaps, description.Constraint);
+            if (geometry.Any())
             {
-                return;
-            }
-
-            foreach (var meshName in modelContent.Geometry.Keys)
-            {
-                //Get the mesh geometry
-                var submeshes = modelContent.Geometry[meshName];
-
-                //Get the mesh skinning info
-                var skinningInfo = ReadSkinningData(description, modelContent, meshName);
-
-                await InitializeGeometryMesh(drw, description, skinningInfo, meshName, submeshes);
-            }
-        }
-        /// <summary>
-        /// Initialize geometry mesh
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="description">Description</param>
-        /// <param name="skinningInfo">Skinning information</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="submeshes">Submesh dictionary</param>
-        private static async Task InitializeGeometryMesh(DrawingData drw, DrawingDataDescription description, SkinningInfo? skinningInfo, string meshName, Dictionary<string, SubMeshContent> submeshes)
-        {
-            var isSkinned = skinningInfo.HasValue;
-
-            //Extract hull geometry
-            var hullTriangles = submeshes
-                .Where(g => g.Value.IsHull)
-                .SelectMany(material => material.Value.GetTriangles())
-                .ToArray();
-            drw.hullMesh.AddRange(hullTriangles);
-
-            //Extract meshes
-            var subMeshList = submeshes
-                .Where(g => !g.Value.IsHull)
-                .ToArray();
-
-            foreach (var subMesh in subMeshList)
-            {
-                var geometry = subMesh.Value;
-
-                //Get vertex type
-                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.materials, subMesh.Key);
-
-                var meshInfo = await CreateMesh(meshName, geometry, vertexType, description.Constraint, skinningInfo);
-                if (!meshInfo.Any())
+                foreach (var mesh in geometry)
                 {
-                    continue;
-                }
-
-                var nMesh = meshInfo.First().Mesh;
-                var materialName = meshInfo.First().MaterialName;
-
-                if (!drw.meshes.ContainsKey(meshName))
-                {
-                    var dict = new Dictionary<string, Mesh>
-                    {
-                        { materialName, nMesh }
-                    };
-
-                    drw.meshes.Add(meshName, dict);
-                }
-                else
-                {
-                    drw.meshes[meshName].Add(materialName, nMesh);
-                }
-            }
-        }
-        /// <summary>
-        /// Creates a mesh
-        /// </summary>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="geometry">Submesh content</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="constraint">Geometry constraint</param>
-        /// <param name="skinningInfo">Skinning information</param>
-        private static async Task<IEnumerable<MeshInfo>> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
-        {
-            //Process the vertex data
-            var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
-            var vertices = vertexData.vertices;
-            var indices = vertexData.indices;
-
-            IEnumerable<IVertexData> vertexList;
-            if (skinningInfo.HasValue)
-            {
-                if (!skinningInfo.Value.BindShapeMatrix.IsIdentity)
-                {
-                    vertices = VertexData.Transform(vertices, skinningInfo.Value.BindShapeMatrix);
-                }
-
-                //Convert the vertex data to final mesh data
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    skinningInfo.Value.Weights,
-                    skinningInfo.Value.BoneNames);
-            }
-            else
-            {
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    Enumerable.Empty<Weight>(),
-                    Enumerable.Empty<string>());
-            }
-
-            if (!vertexList.Any())
-            {
-                return Enumerable.Empty<MeshInfo>();
-            }
-
-            //Create the mesh
-            var nMesh = new Mesh(
-                meshName,
-                geometry.Topology,
-                geometry.Transform,
-                vertexList,
-                indices);
-
-            //Material name
-            string materialName = string.IsNullOrEmpty(geometry.Material) ? ContentData.NoMaterial : geometry.Material;
-
-            return new[] { new MeshInfo(nMesh, materialName) };
-        }
-        /// <summary>
-        /// Get vertex type from geometry
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
-        /// <param name="loadNormalMaps">Load normal maps flag</param>
-        /// <param name="materials">Material dictionary</param>
-        /// <param name="material">Material name</param>
-        /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, Dictionary<string, IMeshMaterial> materials, string material)
-        {
-            var res = vertexType;
-            if (isSkinned)
-            {
-                //Get skinned equivalent
-                res = VertexData.GetSkinnedEquivalent(res);
-            }
-
-            if (!loadNormalMaps)
-            {
-                return res;
-            }
-
-            if (VertexData.IsTextured(res) && !VertexData.IsTangent(res))
-            {
-                var meshMaterial = materials[material];
-                if (meshMaterial?.NormalMap != null)
-                {
-                    //Get tangent equivalent
-                    res = VertexData.GetTangentEquivalent(res);
+                    drw.meshes.Add(mesh.Key, mesh.Value);
                 }
             }
 
-            return res;
-        }
-        /// <summary>
-        /// Reads skinning data
-        /// </summary>
-        /// <param name="description">Description</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <returns>Returns the skinnging data</returns>
-        private static SkinningInfo? ReadSkinningData(DrawingDataDescription description, ContentData modelContent, string meshName)
-        {
-            if (!description.LoadAnimation)
-            {
-                return null;
-            }
-
-            if (modelContent.Controllers?.Any() != true)
-            {
-                return null;
-            }
-
-            if (modelContent.SkinningInfo?.Any() != true)
-            {
-                return null;
-            }
-
-            var cInfo = modelContent.GetControllerForMesh(meshName);
-            if (cInfo == null)
-            {
-                return null;
-            }
-
-            //Apply shape matrix if controller exists but we are not loading animation info
-            var bindShapeMatrix = cInfo.BindShapeMatrix;
-            var weights = cInfo.Weights;
-
-            //Find skeleton for controller
-            if (!modelContent.SkinningInfo.ContainsKey(cInfo.Armature))
-            {
-                return null;
-            }
-
-            var sInfo = modelContent.SkinningInfo[cInfo.Armature];
-            var boneNames = sInfo.Skeleton.GetBoneNames();
-
-            return new SkinningInfo
-            {
-                BindShapeMatrix = bindShapeMatrix,
-                Weights = weights,
-                BoneNames = boneNames,
-            };
-        }
-        /// <summary>
-        /// Initialize skinning data
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="modelContent">Model content</param>
-        private static async Task InitializeSkinningData(DrawingData drw, ContentData modelContent)
-        {
-            if (drw.SkinningData != null)
-            {
-                return;
-            }
-
-            if (modelContent.SkinningInfo?.Any() != true)
-            {
-                return;
-            }
-
-            await Task.Run(() =>
-            {
-                //Use the definition to read animation data into a clip dictionary
-                var sInfo = modelContent.SkinningInfo.Values.First();
-                var jointAnimations = InitializeJoints(modelContent, sInfo.Skeleton.Root, sInfo.Controllers);
-
-                drw.SkinningData = new SkinningData(sInfo.Skeleton);
-                drw.SkinningData.Initialize(jointAnimations, modelContent.AnimationDefinition);
-            });
-        }
-        /// <summary>
-        /// Initialize skeleton data
-        /// </summary>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="joint">Joint to initialize</param>
-        /// <param name="skinController">Skin controller</param>
-        private static IEnumerable<JointAnimation> InitializeJoints(ContentData modelContent, Joint joint, IEnumerable<string> skinController)
-        {
-            var animations = new List<JointAnimation>();
-
-            var boneAnimations = new List<JointAnimation>();
-
-            //Find keyframes for current bone
-            var c = modelContent.Animations.Values.FirstOrDefault(a => a.Any(ac => ac.JointName == joint.Name))?.ToArray();
-            if (c?.Any() == true)
-            {
-                //Set bones
-                var ja = c.Select(a => new JointAnimation(a.JointName, a.Keyframes)).ToArray();
-                boneAnimations.AddRange(ja);
-            }
-
-            if (boneAnimations.Count > 0)
-            {
-                //Only one bone animation (for now)
-                animations.Add(boneAnimations[0]);
-            }
-
-            foreach (string controllerName in skinController)
-            {
-                var controller = modelContent.Controllers[controllerName];
-
-                Matrix ibm = Matrix.Identity;
-
-                if (controller.InverseBindMatrix.ContainsKey(joint.Bone))
-                {
-                    ibm = controller.InverseBindMatrix[joint.Bone];
-                }
-
-                joint.Offset = ibm;
-            }
-
-            if (joint.Childs?.Length > 0)
-            {
-                foreach (var child in joint.Childs)
-                {
-                    var ja = InitializeJoints(modelContent, child, skinController);
-
-                    animations.AddRange(ja);
-                }
-            }
-
-            return animations.ToArray();
+            var hulls = modelContent.GetHullMeshes();
+            drw.hullMesh.AddRange(hulls);
         }
         /// <summary>
         /// Initialize mesh buffers in the graphics device
@@ -925,49 +668,6 @@ namespace Engine.Common
         public IEnumerable<ISceneLight> GetLights()
         {
             return lights.Select(l => l.Clone()).ToArray();
-        }
-
-        /// <summary>
-        /// Skinning information
-        /// </summary>
-        struct SkinningInfo
-        {
-            /// <summary>
-            /// Bind shape matrix
-            /// </summary>
-            public Matrix BindShapeMatrix;
-            /// <summary>
-            /// Weight list
-            /// </summary>
-            public IEnumerable<Weight> Weights;
-            /// <summary>
-            /// Bone names
-            /// </summary>
-            public IEnumerable<string> BoneNames;
-        }
-
-        /// <summary>
-        /// Mesh information
-        /// </summary>
-        struct MeshInfo
-        {
-            /// <summary>
-            /// Created mesh
-            /// </summary>
-            public Mesh Mesh;
-            /// <summary>
-            /// Material name
-            /// </summary>
-            public string MaterialName;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public MeshInfo(Mesh mesh, string materialName)
-            {
-                Mesh = mesh;
-                MaterialName = materialName;
-            }
         }
     }
 }

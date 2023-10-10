@@ -228,7 +228,8 @@ namespace Engine.Modular
         /// </summary>
         private async Task InitializeParticles(IProgress<LoadResourceProgress> progress = null)
         {
-            if (levelMap.ParticleSystems?.Any() != true)
+            var particleSystems = Description.GetLevelParticleSystems();
+            if (!particleSystems.Any())
             {
                 progress?.Report(new LoadResourceProgress { Progress = 1 });
 
@@ -243,23 +244,12 @@ namespace Engine.Modular
                 ParticleManagerDescription.Default(),
                 98);
 
-            float total = levelMap.ParticleSystems.Count();
+            float total = particleSystems.Count();
             int current = 0;
 
-            foreach (var item in levelMap.ParticleSystems)
+            foreach (var item in particleSystems)
             {
-                try
-                {
-                    string contentPath = item.ContentPath ?? Description.Content.ContentFolder;
-
-                    var pDesc = ParticleSystemDescription.Initialize(item, contentPath);
-
-                    particleDescriptors.Add(item.Name, pDesc);
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
-                }
+                particleDescriptors.Add(item.Name, item.SystemDescription);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -272,84 +262,21 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private async Task InitializeAssets(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
-            // Get instance count for all single geometries from Map
-            var instances = level.GetMapInstanceCounters(assetMap.Assets);
+            var assetDescriptions = Description.GetLevelAssets(level, contentLibrary);
 
-            float total = instances.Keys.Count;
+            float total = assetDescriptions.Count();
             int current = 0;
 
-            // Load all single geometries into single instanced model components
-            foreach (var assetName in instances.Keys)
+            foreach (var assetDesc in assetDescriptions)
             {
-                int count = instances[assetName].Count;
-                if (count <= 0)
-                {
-                    continue;
-                }
+                string assetName = assetDesc.Name;
 
-                var modelContent = contentLibrary.GetContentDataByName(assetName);
-                if (modelContent == null)
-                {
-                    continue;
-                }
-
-                var model = await InitializeAsset(assetName, count, level, modelContent, instances[assetName].PathFinding);
-                if (model == null)
-                {
-                    continue;
-                }
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetName, Name, assetDesc.ModelDescription, SceneObjectUsages.Object);
+                model.Owner = this;
 
                 assets.Add(assetName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
-            }
-        }
-        /// <summary>
-        /// Creates a new instanced model for the asset
-        /// </summary>
-        /// <param name="assetName">Asset name</param>
-        /// <param name="count">Instance count</param>
-        /// <param name="level">Level</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="pathFinding">Path finding</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
-        {
-            var assetId = $"{Name ?? nameof(ModularScenery)}.Asset.{assetName}.{level.Name}";
-
-            try
-            {
-                var pf = pathFinding switch
-                {
-                    PathFindingModes.None => PickingHullTypes.None,
-                    PathFindingModes.Coarse => PickingHullTypes.Coarse,
-                    PathFindingModes.Hull => PickingHullTypes.Hull,
-                    PathFindingModes.Geometry => PickingHullTypes.Geometry,
-                    _ => PickingHullTypes.None,
-                };
-
-                var desc = new ModelInstancedDescription()
-                {
-                    CastShadow = Description.CastShadow,
-                    UseAnisotropicFiltering = Description.UseAnisotropic,
-                    Instances = count,
-                    LoadAnimation = false,
-                    BlendMode = Description.BlendMode,
-                    Content = ContentDescription.FromContentData(modelContent),
-                };
-
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetId, Name, desc, SceneObjectUsages.Object);
-
-                model.Owner = this;
-                model.PathFindingHull = pf;
-                model.PickingHull = pf;
-
-                return model;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {assetId}: {ex.Message}", ex);
-
-                throw;
             }
         }
         /// <summary>
@@ -360,84 +287,21 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private async Task InitializeObjects(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
-            // Set auto-identifiers
-            level.PopulateObjectIds();
+            var objectDescriptions = Description.GetLevelObjects(level, contentLibrary);
 
-            // Get instance count for all single geometries from Map
-            var instances = level.GetObjectsInstanceCounters();
-
-            float total = instances.Keys.Count;
+            float total = objectDescriptions.Count();
             int current = 0;
 
-            // Load all single geometries into single instanced model components
-            foreach (var assetName in instances.Keys)
+            foreach (var objectDesc in objectDescriptions)
             {
-                var count = instances[assetName].Count;
-                if (count <= 0)
-                {
-                    continue;
-                }
+                string objectName = objectDesc.Name;
 
-                var modelContent = contentLibrary.GetContentDataByName(assetName);
-                if (modelContent == null)
-                {
-                    continue;
-                }
-
-                var model = await InitializeObject(assetName, count, level, modelContent, instances[assetName].PathFinding);
-                if (model == null)
-                {
-                    continue;
-                }
-
-                objects.Add(assetName, model);
-
-                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
-            }
-        }
-        /// <summary>
-        /// Creates a new instanced model for the object
-        /// </summary>
-        /// <param name="assetName">Asset name</param>
-        /// <param name="count">Instance count</param>
-        /// <param name="level">Level</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="pathFinding">Path finding enabled flag</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
-        {
-            var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
-
-            try
-            {
-                var pf = pathFinding switch
-                {
-                    PathFindingModes.None => PickingHullTypes.None,
-                    PathFindingModes.Coarse => PickingHullTypes.Coarse,
-                    PathFindingModes.Hull => PickingHullTypes.Hull,
-                    PathFindingModes.Geometry => PickingHullTypes.Geometry,
-                    _ => PickingHullTypes.None,
-                };
-
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
-                    modelId,
-                    Name,
-                    new ModelInstancedDescription()
-                    {
-                        CastShadow = Description.CastShadow,
-                        UseAnisotropicFiltering = Description.UseAnisotropic,
-                        Instances = count,
-                        BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromContentData(modelContent),
-                    },
-                    SceneObjectUsages.Object);
-
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(objectName, Name, objectDesc.ModelDescription, SceneObjectUsages.Object);
                 model.Owner = this;
-                model.PathFindingHull = pf;
-                model.PickingHull = pf;
 
                 //Get the object list to process
                 var objList = level.Objects
-                    .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    .Where(o => string.Equals(o.AssetName, objectName, StringComparison.OrdinalIgnoreCase))
                     .ToArray();
 
                 //Positioning
@@ -452,13 +316,9 @@ namespace Engine.Modular
                     InitializeObjectAnimations(objList[i], model[i]);
                 }
 
-                return model;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelId}: {ex.Message}", ex);
+                assets.Add(objectName, model);
 
-                throw;
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
         /// <summary>
