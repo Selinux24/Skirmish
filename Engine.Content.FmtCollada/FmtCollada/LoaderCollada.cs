@@ -1457,7 +1457,7 @@ namespace Engine.Content.FmtCollada
                 }
 
                 //Add skinning content for the skeleton
-                modelContent.SkinningInfo.Add(
+                modelContent.Skinning.Add(
                     skeleton.Name,
                     new SkinningContent
                     {

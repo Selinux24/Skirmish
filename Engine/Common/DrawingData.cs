@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
     using Engine.Content;
 
     /// <summary>
@@ -30,14 +29,14 @@ namespace Engine.Common
             //Animation
             if (description.LoadAnimation)
             {
-                await InitializeSkinningData(res, modelContent);
+                InitializeSkinningData(res, modelContent);
             }
 
             //Images
             await InitializeTextures(res, game, modelContent);
 
             //Materials
-            await InitializeMaterials(res, modelContent);
+            InitializeMaterials(res, modelContent);
 
             //Skins & Meshes
             await InitializeGeometry(res, modelContent, description);
@@ -46,7 +45,7 @@ namespace Engine.Common
             await InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
 
             //Lights
-            await InitializeLights(res, modelContent);
+            res.lights.AddRange(modelContent.GetLights());
 
             return res;
         }
@@ -55,21 +54,14 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static async Task InitializeSkinningData(DrawingData drw, ContentData modelContent)
+        private static void InitializeSkinningData(DrawingData drw, ContentData modelContent)
         {
             if (drw.SkinningData != null)
             {
                 return;
             }
 
-            SkinningData skinningData = null;
-
-            await Task.Run(() =>
-            {
-                skinningData = modelContent.GetSkinningData();
-            });
-
-            drw.SkinningData = skinningData;
+            drw.SkinningData = modelContent.GetSkinningData();
         }
         /// <summary>
         /// Initialize textures
@@ -107,7 +99,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static async Task InitializeMaterials(DrawingData drw, ContentData modelContent)
+        private static void InitializeMaterials(DrawingData drw, ContentData modelContent)
         {
             var modelMaterials = modelContent.GetMaterials();
             if (!modelMaterials.Any())
@@ -115,17 +107,14 @@ namespace Engine.Common
                 return;
             }
 
-            await Task.Run(() =>
+            foreach (var mat in modelMaterials)
             {
-                foreach (var mat in modelMaterials)
-                {
-                    var matName = mat.Name;
-                    var matContent = mat.Content;
+                var matName = mat.Name;
+                var matContent = mat.Content;
 
-                    var meshMaterial = matContent.CreateMeshMaterial(drw.textures);
-                    drw.materials.Add(matName, meshMaterial);
-                }
-            });
+                var meshMaterial = matContent.CreateMeshMaterial(drw.textures);
+                drw.materials.Add(matName, meshMaterial);
+            }
         }
         /// <summary>
         /// Initilize geometry
@@ -135,15 +124,14 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         private static async Task InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
         {
+            //Get drawing geometry
             var geometry = await modelContent.GetGeometry(description.LoadAnimation, description.LoadNormalMaps, description.Constraint);
-            if (geometry.Any())
+            foreach (var mesh in geometry)
             {
-                foreach (var mesh in geometry)
-                {
-                    drw.meshes.Add(mesh.Key, mesh.Value);
-                }
+                drw.meshes.Add(mesh.Key, mesh.Value);
             }
 
+            //Get hull geometry
             var hulls = modelContent.GetHullMeshes();
             drw.hullMesh.AddRange(hulls);
         }
@@ -234,37 +222,6 @@ namespace Engine.Common
 
                 throw;
             }
-        }
-        /// <summary>
-        /// Initialize lights
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="modelContent">Model content</param>
-        private static async Task InitializeLights(DrawingData drw, ContentData modelContent)
-        {
-            if (modelContent.Lights?.Any() != true)
-            {
-                return;
-            }
-
-            var modelLights = new List<ISceneLight>();
-
-            await Task.Run(() =>
-            {
-                foreach (var l in modelContent.Lights.Values)
-                {
-                    if (l.LightType == LightContentTypes.Point)
-                    {
-                        modelLights.Add(l.CreatePointLight());
-                    }
-                    else if (l.LightType == LightContentTypes.Spot)
-                    {
-                        modelLights.Add(l.CreateSpotLight());
-                    }
-                }
-            });
-
-            drw.lights.AddRange(modelLights);
         }
 
         /// <summary>

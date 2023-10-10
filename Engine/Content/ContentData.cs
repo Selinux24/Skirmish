@@ -29,6 +29,39 @@ namespace Engine.Content
         public const string DefaultMaterial = "_base_material_default_";
 
         /// <summary>
+        /// Skinning information
+        /// </summary>
+        struct SkinningInfo
+        {
+            /// <summary>
+            /// Bind shape matrix
+            /// </summary>
+            public Matrix BindShapeMatrix { get; set; }
+            /// <summary>
+            /// Weight list
+            /// </summary>
+            public IEnumerable<Weight> Weights { get; set; }
+            /// <summary>
+            /// Bone names
+            /// </summary>
+            public IEnumerable<string> BoneNames { get; set; }
+        }
+        /// <summary>
+        /// Mesh information
+        /// </summary>
+        struct MeshInfo
+        {
+            /// <summary>
+            /// Created mesh
+            /// </summary>
+            public Mesh Mesh { get; set; }
+            /// <summary>
+            /// Material name
+            /// </summary>
+            public string MaterialName { get; set; }
+        }
+
+        /// <summary>
         /// Content name
         /// </summary>
         public string Name { get; set; }
@@ -63,7 +96,7 @@ namespace Engine.Content
         /// <summary>
         /// Skinning information
         /// </summary>
-        public Dictionary<string, SkinningContent> SkinningInfo { get; set; } = new();
+        public Dictionary<string, SkinningContent> Skinning { get; set; } = new();
 
         /// <summary>
         /// Generates a triangle list model content from scratch
@@ -203,6 +236,11 @@ namespace Engine.Content
         /// </summary>
         public IEnumerable<(string Name, IImageContent Content)> GetTextures()
         {
+            if (Images?.Any() != true)
+            {
+                yield break;
+            }
+
             foreach (var images in Images)
             {
                 yield return new(images.Key, images.Value);
@@ -214,8 +252,13 @@ namespace Engine.Content
         /// </summary>
         /// <param name="material">Material content</param>
         /// <remarks>Replaces texture path with assigned name</remarks>
-        public void ImportImage(ref IMaterialContent material)
+        private void ImportTextures(ref IMaterialContent material)
         {
+            if (material == null)
+            {
+                return;
+            }
+
             material.AmbientTexture = ImportImage(material.AmbientTexture);
             material.DiffuseTexture = ImportImage(material.DiffuseTexture);
             material.EmissiveTexture = ImportImage(material.EmissiveTexture);
@@ -301,10 +344,7 @@ namespace Engine.Content
 
             foreach (var mat in Materials)
             {
-                var matName = mat.Key;
-                var matContent = mat.Value;
-
-                yield return (matName, matContent);
+                yield return (mat.Key, mat.Value);
             }
         }
 
@@ -313,13 +353,13 @@ namespace Engine.Content
         /// </summary>
         public SkinningData GetSkinningData()
         {
-            if (SkinningInfo?.Any() != true)
+            if (Skinning?.Any() != true)
             {
                 return null;
             }
 
             //Use the definition to read animation data into a clip dictionary
-            var sInfo = SkinningInfo.Values.First();
+            var sInfo = Skinning.Values.First();
             var jointAnimations = InitializeJoints(sInfo.Skeleton.Root, sInfo.Controllers);
 
             var skinningData = new SkinningData(sInfo.Skeleton);
@@ -405,7 +445,7 @@ namespace Engine.Content
         /// <param name="jointName">Joint name</param>
         private bool SkinHasJointData(string jointName)
         {
-            return SkinningInfo.Values.Any(value => value.Skeleton.GetJointNames().Any(j => j == jointName));
+            return Skinning.Values.Any(value => value.Skeleton.GetJointNames().Any(j => j == jointName));
         }
         /// <summary>
         /// Reads skinning data
@@ -419,7 +459,7 @@ namespace Engine.Content
                 return null;
             }
 
-            if (SkinningInfo?.Any() != true)
+            if (Skinning?.Any() != true)
             {
                 return null;
             }
@@ -435,12 +475,12 @@ namespace Engine.Content
             var weights = cInfo.Weights;
 
             //Find skeleton for controller
-            if (!SkinningInfo.ContainsKey(cInfo.Armature))
+            if (!Skinning.ContainsKey(cInfo.Armature))
             {
                 return null;
             }
 
-            var sInfo = SkinningInfo[cInfo.Armature];
+            var sInfo = Skinning[cInfo.Armature];
             var boneNames = sInfo.Skeleton.GetBoneNames();
 
             return new SkinningInfo
@@ -507,13 +547,13 @@ namespace Engine.Content
                 var vertexType = GetVertexType(geometry.VertexType, isSkinned, loadNormalMaps, materials, subMesh.Key);
 
                 var meshInfo = await CreateMesh(meshName, geometry, vertexType, constraint, skinningInfo);
-                if (!meshInfo.Any())
+                if (meshInfo == null)
                 {
                     continue;
                 }
 
-                var nMesh = meshInfo.First().Mesh;
-                var materialName = meshInfo.First().MaterialName;
+                var nMesh = meshInfo.Value.Mesh;
+                var materialName = meshInfo.Value.MaterialName;
 
                 meshes.Add(materialName, nMesh);
             }
@@ -567,7 +607,7 @@ namespace Engine.Content
         /// <param name="vertexType">Vertext type</param>
         /// <param name="constraint">Geometry constraint</param>
         /// <param name="skinningInfo">Skinning information</param>
-        private static async Task<IEnumerable<MeshInfo>> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
+        private static async Task<MeshInfo?> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
         {
             //Process the vertex data
             var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
@@ -600,7 +640,7 @@ namespace Engine.Content
 
             if (!vertexList.Any())
             {
-                return Enumerable.Empty<MeshInfo>();
+                return null;
             }
 
             //Create the mesh
@@ -614,38 +654,11 @@ namespace Engine.Content
             //Material name
             string materialName = string.IsNullOrEmpty(geometry.Material) ? NoMaterial : geometry.Material;
 
-            return new[] { new MeshInfo(nMesh, materialName) };
-        }
-
-        /// <summary>
-        /// Gets hull meshes
-        /// </summary>
-        public IEnumerable<Triangle> GetHullMeshes()
-        {
-            var meshes = new List<Triangle>();
-
-            foreach (var meshName in Geometry.Keys)
+            return new MeshInfo()
             {
-                var submeshes = GetHullMesh(meshName);
-
-                meshes.AddRange(submeshes);
-            }
-
-            return meshes;
-        }
-        /// <summary>
-        /// Gets hull mesh by mesh name
-        /// </summary>
-        /// <param name="meshName">Mesh name</param>
-        private IEnumerable<Triangle> GetHullMesh(string meshName)
-        {
-            var submeshes = Geometry[meshName];
-
-            //Extract hull geometry
-            return submeshes
-                .Where(g => g.Value.IsHull)
-                .SelectMany(material => material.Value.GetTriangles())
-                .ToArray();
+                Mesh = nMesh,
+                MaterialName = materialName,
+            };
         }
 
         /// <summary>
@@ -901,14 +914,14 @@ namespace Engine.Content
                 return false;
             }
 
-            if (!SkinningInfo.ContainsKey(armatureName))
+            if (!Skinning.ContainsKey(armatureName))
             {
                 return false;
             }
 
             modelContent = new ContentData();
 
-            var controllers = SkinningInfo[armatureName].Controllers;
+            var controllers = Skinning[armatureName].Controllers;
 
             foreach (var controller in controllers)
             {
@@ -991,7 +1004,7 @@ namespace Engine.Content
                 return;
             }
 
-            if (res.SkinningInfo.ContainsKey(controllerName))
+            if (res.Skinning.ContainsKey(controllerName))
             {
                 return;
             }
@@ -1018,14 +1031,14 @@ namespace Engine.Content
                 return;
             }
 
-            if (res.SkinningInfo.ContainsKey(armatureName))
+            if (res.Skinning.ContainsKey(armatureName))
             {
                 return;
             }
 
-            var s = SkinningInfo[armatureName];
+            var s = Skinning[armatureName];
 
-            res.SkinningInfo.Add(armatureName, s);
+            res.Skinning.Add(armatureName, s);
 
             //Add animations
             var animations = Animations.Where(g =>
@@ -1161,6 +1174,32 @@ namespace Engine.Content
         }
 
         /// <summary>
+        /// Gets hull meshes
+        /// </summary>
+        public IEnumerable<Triangle> GetHullMeshes()
+        {
+            var meshes = new List<Triangle>();
+
+            foreach (var meshName in Geometry.Keys)
+            {
+                meshes.AddRange(GetHullMesh(meshName));
+            }
+
+            return meshes;
+        }
+        /// <summary>
+        /// Gets hull mesh by mesh name
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        private IEnumerable<Triangle> GetHullMesh(string meshName)
+        {
+            //Extract hull geometry
+            return Geometry[meshName]
+                .Where(g => g.Value.IsHull)
+                .SelectMany(material => material.Value.GetTriangles())
+                .ToArray();
+        }
+        /// <summary>
         /// Marks hull flag for all the geometry contained into the model
         /// </summary>
         /// <param name="isHull">Hull flag value</param>
@@ -1273,7 +1312,7 @@ namespace Engine.Content
         /// <param name="material">Material content</param>
         public void AddMaterial(string name, IMaterialContent material)
         {
-            ImportImage(ref material);
+            ImportTextures(ref material);
             Materials.Add(name, material);
         }
         /// <summary>
@@ -1288,7 +1327,7 @@ namespace Engine.Content
                 return;
             }
 
-            if (SkinningInfo != null)
+            if (Skinning != null)
             {
                 //Filter content by existing joints
                 Animations[animationLib] = animationContent.Where(a => SkinHasJointData(a.JointName)).ToArray();
@@ -1316,49 +1355,6 @@ namespace Engine.Content
                     AddAnimationContent(animation.Key, animation.Value);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Skinning information
-    /// </summary>
-    public struct SkinningInfo
-    {
-        /// <summary>
-        /// Bind shape matrix
-        /// </summary>
-        public Matrix BindShapeMatrix { get; set; }
-        /// <summary>
-        /// Weight list
-        /// </summary>
-        public IEnumerable<Weight> Weights { get; set; }
-        /// <summary>
-        /// Bone names
-        /// </summary>
-        public IEnumerable<string> BoneNames { get; set; }
-    }
-
-    /// <summary>
-    /// Mesh information
-    /// </summary>
-    public struct MeshInfo
-    {
-        /// <summary>
-        /// Created mesh
-        /// </summary>
-        public Mesh Mesh { get; set; }
-        /// <summary>
-        /// Material name
-        /// </summary>
-        public string MaterialName { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public MeshInfo(Mesh mesh, string materialName)
-        {
-            Mesh = mesh;
-            MaterialName = materialName;
         }
     }
 }
