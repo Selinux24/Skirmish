@@ -598,18 +598,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
-            var agentNms = agentQuerieFactories
-                .Select(agentQ => agentQ.NavMesh)
-                .Where(nm => nm.TileCache != null);
+            var tcs = agentQuerieFactories
+                .Where(a => a.NavMesh?.TileCache != null)
+                .Select(a => a.NavMesh.TileCache);
 
-            foreach (var nm in agentNms)
+            foreach (var tc in tcs)
             {
-                if (nm.TileCache.Updating())
+                if (tc.Updating())
                 {
                     Updating?.Invoke(this, EventArgs.Empty);
                 }
 
-                var status = nm.TileCache.Update(out bool upToDate, out bool cacheUpdated);
+                var status = tc.Update(out bool upToDate, out bool cacheUpdated);
                 if (updated == upToDate || !status.HasFlag(Status.DT_SUCCESS))
                 {
                     continue;

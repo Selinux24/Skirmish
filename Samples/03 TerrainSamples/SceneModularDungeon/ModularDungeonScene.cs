@@ -249,15 +249,10 @@ namespace TerrainSamples.SceneModularDungeon
                 UpdateWind();
                 UpdatePlayerState(gameTime);
                 UpdateSelection();
-
-                return;
             }
-
-            if (gameState == GameStates.Map)
+            else if (gameState == GameStates.Map)
             {
                 UpdateStateMap();
-
-                return;
             }
         }
         private void UpdateStatePlayer(GameTime gameTime)
