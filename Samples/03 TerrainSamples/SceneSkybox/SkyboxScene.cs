@@ -701,7 +701,7 @@ namespace TerrainSamples.SceneSkybox
             panel.Height = 120;
         }
 
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             StartScene();
 

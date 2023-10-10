@@ -1243,7 +1243,7 @@ namespace TerrainSamples.SceneRts
             panel.Height = counters2.Top + counters2.Height + 3;
         }
 
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             if (started)
             {

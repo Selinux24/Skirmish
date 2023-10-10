@@ -713,7 +713,7 @@ namespace TerrainSamples.SceneGrid
             minimapArea = new(initialMinimapArea.X * wRatio, initialMinimapArea.Y * hRatio, initialMinimapArea.Width * wRatio, initialMinimapArea.Height * hRatio);
         }
 
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             Camera.FarPlaneDistance = 1000f;
             Camera.Mode = CameraModes.FreeIsometric;

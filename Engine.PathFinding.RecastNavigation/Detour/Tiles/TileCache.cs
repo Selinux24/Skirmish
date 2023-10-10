@@ -174,19 +174,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
-            List<(int X, int Y)> tilesToBuild = new();
 
             for (int y = 0; y < m_params.TileHeight; y++)
             {
                 for (int x = 0; x < m_params.TileWidth; x++)
                 {
                     var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, cfg);
-                    if (!tiles.Any())
-                    {
-                        continue;
-                    }
-
-                    tilesToBuild.Add(new(x, y));
 
                     foreach (var tile in tiles)
                     {
@@ -198,11 +191,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Build initial meshes
-            foreach (var (x, y) in tilesToBuild)
+            for (int y = 0; y < m_params.TileHeight; y++)
             {
-                BuildTilesAt(x, y);
+                for (int x = 0; x < m_params.TileWidth; x++)
+                {
+                    BuildTilesAt(x, y);
 
-                progressCallback?.Invoke(++curr / total);
+                    progressCallback?.Invoke(++curr / total);
+                }
             }
         }
 
@@ -630,12 +626,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return Status.DT_SUCCESS;
         }
 
+        public bool Updating()
+        {
+            return (m_update.Count + m_reqs.Count) > 0;
+        }
+
         /// <summary>
         /// Updates the tile-cache
         /// </summary>
         /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
-        public Status Update(out bool upToDate)
+        public Status Update(out bool upToDate, out bool cacheUpdated)
         {
+            bool updating = Updating();
+
             if (m_update.Count == 0)
             {
                 // Process requests.
@@ -645,6 +648,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             Status status = ProcessUpdates();
 
             upToDate = m_update.Count == 0 && m_reqs.Count == 0;
+            cacheUpdated = updating != Updating();
 
             return status;
         }

@@ -1283,10 +1283,7 @@ namespace Tanks
 
 You will lost all the game progress.",
                         CloseDialog,
-                        () =>
-                        {
-                            Game.Exit();
-                        });
+                        Game.Exit);
                 }
             }
         }
@@ -1426,19 +1423,23 @@ You will lost all the game progress.",
         }
         private void UpdateCameraCollision()
         {
-            if (!terrain.Intersects(new IntersectionVolumeSphere(Camera.Position, Camera.CameraRadius), out _))
+            var nextPosition = Camera.GetNextPosition();
+            var nextInterest = Camera.GetNextInterest();
+            var radius = Camera.CameraRadius;
+
+            if (!terrain.Intersects(new IntersectionVolumeSphere(nextPosition, radius), out _))
             {
                 return;
             }
 
-            var ray = new PickingRay(Camera.Position, Vector3.Down);
+            var ray = new PickingRay(nextPosition, Vector3.Down);
 
-            if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= Camera.CameraRadius)
+            if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= radius)
             {
-                var pos = Camera.Position;
-                var vw = Camera.Interest;
+                var pos = nextPosition;
+                var vw = nextInterest;
 
-                float y = MathUtil.Lerp(pos.Y, cRes.Position.Y + Camera.CameraRadius, 0.5f);
+                float y = MathUtil.Lerp(pos.Y, cRes.Position.Y + radius, 0.5f);
                 vw.Y -= pos.Y - y;
                 pos.Y = y;
 

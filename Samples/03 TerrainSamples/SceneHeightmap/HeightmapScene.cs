@@ -1608,7 +1608,7 @@ namespace TerrainSamples.SceneHeightmap
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
 
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             gameReady = true;
 

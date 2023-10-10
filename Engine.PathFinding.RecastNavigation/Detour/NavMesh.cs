@@ -1402,32 +1402,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private void ConnectIntLinks(MeshTile tile)
         {
             int bse = GetTileRef(tile);
-            var polys = tile
-                .GetPolys()
-                .Where(p => p.Type != PolyTypes.OffmeshConnection)
-                .ToArray();
 
-            for (int i = 0; i < polys.Length; ++i)
+            var polys = tile.GetPolys();
+            foreach (var poly in polys)
             {
-                var poly = polys[i];
                 poly.FirstLink = MeshTile.DT_NULL_LINK;
+
+                if (poly.Type == PolyTypes.OffmeshConnection)
+                {
+                    continue;
+                }
 
                 // Build edge links backwards so that the links will be
                 // in the linked list from lowest index to highest.
                 for (int j = poly.VertCount - 1; j >= 0; --j)
                 {
                     // Skip hard and non-internal edges.
-                    if (poly.Neis[j] == 0 || poly.NeighbourIsExternalLink(j))
-                    {
-                        continue;
-                    }
+                    if (poly.Neis[j] == 0 || poly.NeighbourIsExternalLink(j)) continue;
 
                     int idx = tile.AllocLink();
                     if (idx != MeshTile.DT_NULL_LINK)
                     {
                         var link = new Link
                         {
-                            NRef = bse | (poly.Neis[j] - 1),
+                            NRef = (bse | (poly.Neis[j] - 1)),
                             Edge = j,
                             Side = 0xff,
                             BMin = 0,

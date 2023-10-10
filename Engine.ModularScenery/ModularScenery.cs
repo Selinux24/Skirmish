@@ -267,11 +267,13 @@ namespace Engine.Modular
             float total = assetDescriptions.Count();
             int current = 0;
 
-            foreach (var assetDesc in assetDescriptions)
+            foreach (var asset in assetDescriptions)
             {
-                string assetName = assetDesc.Name;
+                string assetId = asset.Id;
+                string assetName = asset.Name;
+                var assetDesc = asset.ModelDescription;
 
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetName, Name, assetDesc.ModelDescription, SceneObjectUsages.Object);
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetId, assetName, assetDesc, SceneObjectUsages.Object);
                 model.Owner = this;
 
                 assets.Add(assetName, model);
@@ -292,11 +294,13 @@ namespace Engine.Modular
             float total = objectDescriptions.Count();
             int current = 0;
 
-            foreach (var objectDesc in objectDescriptions)
+            foreach (var obj in objectDescriptions)
             {
-                string objectName = objectDesc.Name;
+                string objectId = obj.Id;
+                string objectName = obj.Name;
+                var objectDesc = obj.ModelDescription;
 
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(objectName, Name, objectDesc.ModelDescription, SceneObjectUsages.Object);
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(objectId, objectName, objectDesc, SceneObjectUsages.Object);
                 model.Owner = this;
 
                 //Get the object list to process
@@ -316,7 +320,7 @@ namespace Engine.Modular
                     InitializeObjectAnimations(objList[i], model[i]);
                 }
 
-                assets.Add(objectName, model);
+                objects.Add(objectName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }

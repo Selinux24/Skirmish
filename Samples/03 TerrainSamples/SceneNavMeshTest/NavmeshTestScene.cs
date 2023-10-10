@@ -198,7 +198,7 @@ Space: Finds random over navmesh";
 
             EnqueueNavigationGraphUpdate();
         }
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             DrawGraphNodes(agent);
 

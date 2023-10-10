@@ -168,7 +168,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
-        public override void NavigationGraphUpdating()
+        public override void NavigationGraphLoading()
         {
             if (scenery?.CurrentLevel == null)
             {
@@ -179,7 +179,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             LoadNavigationGraphFromFile(fileName);
         }
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             if (!gameAssetsInitialized)
             {
@@ -194,7 +194,9 @@ namespace TerrainSamples.SceneModularDungeon
             }
 
             ChangeToLevelCompleted();
-
+        }
+        public override void NavigationGraphUpdated()
+        {
             //Update active paths with the new graph configuration
             if (ratController.HasPath)
             {
@@ -206,6 +208,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             UpdateGraphDebug(CurrentAgent);
         }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -241,6 +244,12 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 UpdateStatePlayer(gameTime);
 
+                UpdateRatController(gameTime);
+                UpdateEntities();
+                UpdateWind();
+                UpdatePlayerState(gameTime);
+                UpdateSelection();
+
                 return;
             }
 
@@ -250,13 +259,6 @@ namespace TerrainSamples.SceneModularDungeon
 
                 return;
             }
-
-            UpdateRatController(gameTime);
-            UpdateEntities();
-            UpdateWind();
-
-            UpdatePlayerState(gameTime);
-            UpdateSelection();
         }
         private void UpdateStatePlayer(GameTime gameTime)
         {
@@ -1597,7 +1599,7 @@ namespace TerrainSamples.SceneModularDungeon
                         ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
 
-                AudioManager.CreateEffectInstance(effectName, item, Camera).Play();
+                AudioManager.CreateEffectInstance(effectName, item, Camera)?.Play();
             }
         }
         private void StartEntitiesAudioBigFires()
@@ -1624,7 +1626,7 @@ namespace TerrainSamples.SceneModularDungeon
                         ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
 
-                AudioManager.CreateEffectInstance(effectName, item, Camera).Play();
+                AudioManager.CreateEffectInstance(effectName, item, Camera)?.Play();
             }
         }
         private void StartEntitiesObstacles()

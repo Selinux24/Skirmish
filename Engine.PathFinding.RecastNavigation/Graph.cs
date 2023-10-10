@@ -604,7 +604,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var nm in agentNms)
             {
-                var status = nm.TileCache.Update(out bool upToDate);
+                if (nm.TileCache.Updating())
+                {
+                    Updating?.Invoke(this, EventArgs.Empty);
+                }
+
+                var status = nm.TileCache.Update(out bool upToDate, out bool cacheUpdated);
                 if (updated == upToDate || !status.HasFlag(Status.DT_SUCCESS))
                 {
                     continue;
@@ -612,13 +617,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                 updated = upToDate;
 
-                if (updated)
+                if (cacheUpdated)
                 {
                     Updated?.Invoke(this, EventArgs.Empty);
-                }
-                else
-                {
-                    Updating?.Invoke(this, EventArgs.Empty);
                 }
             }
 

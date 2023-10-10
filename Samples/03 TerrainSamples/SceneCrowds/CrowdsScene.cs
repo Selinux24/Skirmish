@@ -515,7 +515,7 @@ namespace TerrainSamples.SceneCrowds
             upperPanel.Height = help.Top + help.Height + 3;
         }
 
-        public override void NavigationGraphUpdated()
+        public override void NavigationGraphLoaded()
         {
             gameReady = true;
 

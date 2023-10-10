@@ -117,7 +117,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="level">Level</param>
         /// <param name="contentLibrary">Content library</param>
-        public IEnumerable<(string Name, ModelInstancedDescription ModelDescription)> GetLevelAssets(Level level, ContentLibrary contentLibrary)
+        public IEnumerable<(string Id, string Name, ModelInstancedDescription ModelDescription)> GetLevelAssets(Level level, ContentLibrary contentLibrary)
         {
             var assetMap = GetAssetMap();
 
@@ -150,7 +150,7 @@ namespace Engine.Modular
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding</param>
-        private (string Name, ModelInstancedDescription ModelDescription) InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
             var assetId = $"Asset.{assetName}.{level.Name}";
 
@@ -175,14 +175,14 @@ namespace Engine.Modular
                 Content = ContentDescription.FromContentData(modelContent),
             };
 
-            return new(assetId, desc);
+            return new(assetId, assetName, desc);
         }
         /// <summary>
         /// Creates a model description list for the objects of the specified level
         /// </summary>
         /// <param name="level">Level</param>
         /// <param name="contentLibrary">Content library</param>
-        public IEnumerable<(string Name, ModelInstancedDescription ModelDescription)> GetLevelObjects(Level level, ContentLibrary contentLibrary)
+        public IEnumerable<(string Id, string Name, ModelInstancedDescription ModelDescription)> GetLevelObjects(Level level, ContentLibrary contentLibrary)
         {
             // Set auto-identifiers
             level.PopulateObjectIds();
@@ -191,34 +191,34 @@ namespace Engine.Modular
             var instances = level.GetObjectsInstanceCounters();
 
             // Load all single geometries into single instanced model components
-            foreach (var assetName in instances.Keys)
+            foreach (var objectName in instances.Keys)
             {
-                var count = instances[assetName].Count;
+                var count = instances[objectName].Count;
                 if (count <= 0)
                 {
                     continue;
                 }
 
-                var modelContent = contentLibrary.GetContentDataByName(assetName);
+                var modelContent = contentLibrary.GetContentDataByName(objectName);
                 if (modelContent == null)
                 {
                     continue;
                 }
 
-                yield return InitializeObject(assetName, count, level, modelContent, instances[assetName].PathFinding);
+                yield return InitializeObject(objectName, count, level, modelContent, instances[objectName].PathFinding);
             }
         }
         /// <summary>
         /// Creates a new instanced model description for the object
         /// </summary>
-        /// <param name="assetName">Asset name</param>
+        /// <param name="objectName">Asset name</param>
         /// <param name="count">Instance count</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding enabled flag</param>
-        private (string Name, ModelInstancedDescription ModelDescription) InitializeObject(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeObject(string objectName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
-            var modelId = $"{assetName}.{level.Name}";
+            var objectId = $"{objectName}.{level.Name}";
 
             var pf = pathFinding switch
             {
@@ -240,7 +240,7 @@ namespace Engine.Modular
                 Content = ContentDescription.FromContentData(modelContent),
             };
 
-            return new(modelId, desc);
+            return new(objectId, objectName, desc);
         }
     }
 }

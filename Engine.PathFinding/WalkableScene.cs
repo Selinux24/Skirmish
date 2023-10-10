@@ -269,13 +269,13 @@ namespace Engine.PathFinding
                 return;
             }
 
-            NavigationGraphUpdating();
+            NavigationGraphLoading();
 
             NavigationGraph = graph;
             NavigationGraph.Updating += GraphUpdating;
             NavigationGraph.Updated += GraphUpdated;
 
-            NavigationGraphUpdated();
+            NavigationGraphLoaded();
         }
         /// <summary>
         /// Fires when graph is removing
@@ -288,6 +288,20 @@ namespace Engine.PathFinding
         /// Fires when graph is removed
         /// </summary>
         public virtual void NavigationGraphRemoved()
+        {
+
+        }
+        /// <summary>
+        /// Fires when graph is loading
+        /// </summary>
+        public virtual void NavigationGraphLoading()
+        {
+
+        }
+        /// <summary>
+        /// Fires when graph is loaded
+        /// </summary>
+        public virtual void NavigationGraphLoaded()
         {
 
         }
