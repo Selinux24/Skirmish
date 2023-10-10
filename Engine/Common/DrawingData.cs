@@ -79,13 +79,13 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static async Task InitializeTextures(DrawingData drw, Game game, ContentData modelContent)
         {
-            var textures = modelContent.GetTextures();
-            if (!textures.Any())
+            var modelTextures = modelContent.GetTextures();
+            if (!modelTextures.Any())
             {
                 return;
             }
 
-            foreach (var texture in textures)
+            foreach (var texture in modelTextures)
             {
                 var info = texture.Content;
 
@@ -109,16 +109,15 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static async Task InitializeMaterials(DrawingData drw, ContentData modelContent)
         {
-            var materials = modelContent.GetMaterials();
-
-            if (!materials.Any())
+            var modelMaterials = modelContent.GetMaterials();
+            if (!modelMaterials.Any())
             {
                 return;
             }
 
             await Task.Run(() =>
             {
-                foreach (var mat in materials)
+                foreach (var mat in modelMaterials)
                 {
                     var matName = mat.Name;
                     var matContent = mat.Content;

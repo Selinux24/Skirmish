@@ -459,12 +459,12 @@ namespace Engine.Content
         /// <param name="constraint">Use constraint</param>
         public async Task<Dictionary<string, Dictionary<string, Mesh>>> GetGeometry(bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
         {
-            Dictionary<string, Dictionary<string, Mesh>> meshes = new();
-
             if (Geometry?.Any() != true)
             {
-                return meshes;
+                return default;
             }
+
+            Dictionary<string, Dictionary<string, Mesh>> meshes = new();
 
             foreach (var meshName in Geometry.Keys)
             {
@@ -484,25 +484,22 @@ namespace Engine.Content
         /// <param name="constraint">Use constraint</param>
         private async Task<Dictionary<string, Mesh>> GetGeometryMesh(string meshName, bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
         {
+            //Extract meshes
+            var submeshes = Geometry[meshName]
+                .Where(g => !g.Value.IsHull)
+                .ToArray();
+            if (!submeshes.Any())
+            {
+                return default;
+            }
+
             var materials = GetMaterials();
-            var submeshes = Geometry[meshName];
             var skinningInfo = loadAnimation ? GetSkinningInfo(meshName) : null;
             var isSkinned = skinningInfo.HasValue;
 
-            //Extract hull geometry
-            var hullTriangles = submeshes
-                .Where(g => g.Value.IsHull)
-                .SelectMany(material => material.Value.GetTriangles())
-                .ToArray();
-
-            //Extract meshes
-            var subMeshList = submeshes
-                .Where(g => !g.Value.IsHull)
-                .ToArray();
-
             Dictionary<string, Mesh> meshes = new();
 
-            foreach (var subMesh in subMeshList)
+            foreach (var subMesh in submeshes)
             {
                 var geometry = subMesh.Value;
 
