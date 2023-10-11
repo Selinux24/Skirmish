@@ -139,7 +139,7 @@ namespace Engine
 
                     var diffuseImage = new FileArrayImageContent(Textures.ContentPath, Textures.TexturesLR);
 
-                    modelContent.Images.Add(diffuseTexureName, diffuseImage);
+                    modelContent.AddTextureContent(diffuseTexureName, diffuseImage);
                 }
 
                 if (Textures?.NormalMaps?.Any() == true)
@@ -150,10 +150,10 @@ namespace Engine
 
                     var nmapImage = new FileArrayImageContent(Textures.ContentPath, Textures.NormalMaps);
 
-                    modelContent.Images.Add(nmapTexureName, nmapImage);
+                    modelContent.AddTextureContent(nmapTexureName, nmapImage);
                 }
 
-                modelContent.Materials.Add(materialName, material);
+                modelContent.AddMaterialContent(materialName, material);
                 modelContent.ImportMaterial(geoName, materialName, geo);
             });
 

@@ -364,7 +364,7 @@ namespace Engine
             GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
 
             // Retrieve lights from content
-            Lights = content.GetLights().ToArray();
+            Lights = content.CreateLights().ToArray();
 
             await IntializePatches();
         }

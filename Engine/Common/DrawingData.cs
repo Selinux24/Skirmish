@@ -29,150 +29,25 @@ namespace Engine.Common
             //Animation
             if (description.LoadAnimation)
             {
-                InitializeSkinningData(res, modelContent);
+                res.InitializeSkinningData(modelContent);
             }
 
             //Images
-            await InitializeTextures(res, game, modelContent);
+            await res.InitializeTextures(modelContent);
 
             //Materials
-            InitializeMaterials(res, modelContent);
+            res.InitializeMaterials(modelContent);
 
             //Skins & Meshes
-            await InitializeGeometry(res, modelContent, description);
+            await res.InitializeGeometry(modelContent);
 
             //Update meshes into device
-            await InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
+            await res.InitializeMeshes(name, instancingBuffer);
 
             //Lights
-            res.lights.AddRange(modelContent.GetLights());
+            res.InitializeLights(modelContent);
 
             return res;
-        }
-        /// <summary>
-        /// Initialize skinning data
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="modelContent">Model content</param>
-        private static void InitializeSkinningData(DrawingData drw, ContentData modelContent)
-        {
-            if (drw.SkinningData != null)
-            {
-                return;
-            }
-
-            drw.SkinningData = modelContent.GetSkinningData();
-        }
-        /// <summary>
-        /// Initialize textures
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="game">Game</param>
-        /// <param name="modelContent">Model content</param>
-        private static async Task InitializeTextures(DrawingData drw, Game game, ContentData modelContent)
-        {
-            var modelTextures = modelContent.GetTextures();
-            if (!modelTextures.Any())
-            {
-                return;
-            }
-
-            foreach (var texture in modelTextures)
-            {
-                var info = texture.Content;
-
-                var view = await game.ResourceManager.RequestResource(info);
-                if (view == null)
-                {
-                    string errorMessage = $"Texture cannot be requested: {info}";
-
-                    Logger.WriteError(nameof(DrawingData), errorMessage);
-
-                    throw new EngineException(errorMessage);
-                }
-
-                drw.textures.Add(texture.Name, view);
-            }
-        }
-        /// <summary>
-        /// Initialize materials
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="modelContent">Model content</param>
-        private static void InitializeMaterials(DrawingData drw, ContentData modelContent)
-        {
-            var modelMaterials = modelContent.GetMaterials();
-            if (!modelMaterials.Any())
-            {
-                return;
-            }
-
-            foreach (var mat in modelMaterials)
-            {
-                var matName = mat.Name;
-                var matContent = mat.Content;
-
-                var meshMaterial = matContent.CreateMeshMaterial(drw.textures);
-                drw.materials.Add(matName, meshMaterial);
-            }
-        }
-        /// <summary>
-        /// Initilize geometry
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="description">Description</param>
-        private static async Task InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
-        {
-            //Get drawing geometry
-            var geometry = await modelContent.GetGeometry(description.LoadAnimation, description.LoadNormalMaps, description.Constraint);
-            foreach (var mesh in geometry)
-            {
-                drw.meshes.Add(mesh.Key, mesh.Value);
-            }
-
-            //Get hull geometry
-            var hulls = modelContent.GetHullMeshes();
-            drw.hullMesh.AddRange(hulls);
-        }
-        /// <summary>
-        /// Initialize mesh buffers in the graphics device
-        /// </summary>
-        /// <param name="drw">Drawing data</param>
-        /// <param name="game">Game</param>
-        /// <param name="name">Owner name</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private static async Task InitializeMeshes(DrawingData drw, Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
-        {
-            if (drw.meshes?.Any() != true)
-            {
-                return;
-            }
-
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.meshes.Keys.AsEnumerable().Join("|")}");
-
-            var beforeCount = game.BufferManager.PendingRequestCount;
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
-
-            //Generates a task list from the materials-mesh dictionary
-            var taskList = drw.meshes.Values
-                .Where(dictionary => dictionary?.Any() == true)
-                .Select(dictionary => Task.Run(() => InitializeMeshDictionaryAsync(game, name, dynamicBuffers, instancingBuffer, dictionary)));
-
-            try
-            {
-                await Task.WhenAll(taskList);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(nameof(DrawingData), $"{name} Error processing parallel tasks => {ex.Message}", ex);
-
-                throw;
-            }
-
-            var afterCount = game.BufferManager.PendingRequestCount;
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
         }
         /// <summary>
         /// Initializes a mesh dictionary
@@ -181,12 +56,12 @@ namespace Engine.Common
         /// <param name="name">Owner name</param>
         /// <param name="dynamicBuffers">Create dynamic buffers</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        /// <param name="dictionary">Mesh dictionary</param>
-        private static void InitializeMeshDictionaryAsync(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> dictionary)
+        /// <param name="meshes">Mesh dictionary</param>
+        private static void InitializeMeshDictionaryAsync(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
         {
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {dictionary.Keys.AsEnumerable().Join("|")}");
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
 
-            foreach (var mesh in dictionary.Values)
+            foreach (var mesh in meshes.Values)
             {
                 InitializeMesh(game, name, dynamicBuffers, instancingBuffer, mesh);
             }
@@ -287,9 +162,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -328,6 +201,131 @@ namespace Engine.Common
 
                 SkinningData = null;
             }
+        }
+
+        /// <summary>
+        /// Initialize skinning data
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private void InitializeSkinningData(ContentData modelContent)
+        {
+            if (SkinningData != null)
+            {
+                return;
+            }
+
+            SkinningData = modelContent.CreateSkinningData();
+        }
+        /// <summary>
+        /// Initialize textures
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private async Task InitializeTextures(ContentData modelContent)
+        {
+            var modelTextures = modelContent.GetTextureContent();
+            if (!modelTextures.Any())
+            {
+                return;
+            }
+
+            foreach (var texture in modelTextures)
+            {
+                var info = texture.Content;
+
+                var view = await Game.ResourceManager.RequestResource(info);
+                if (view == null)
+                {
+                    string errorMessage = $"Texture cannot be requested: {info}";
+
+                    Logger.WriteError(nameof(DrawingData), errorMessage);
+
+                    throw new EngineException(errorMessage);
+                }
+
+                textures.Add(texture.Name, view);
+            }
+        }
+        /// <summary>
+        /// Initialize materials
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private void InitializeMaterials(ContentData modelContent)
+        {
+            var modelMaterials = modelContent.GetMaterialContent();
+            if (!modelMaterials.Any())
+            {
+                return;
+            }
+
+            foreach (var mat in modelMaterials)
+            {
+                var matName = mat.Name;
+                var matContent = mat.Content;
+
+                var meshMaterial = matContent.CreateMeshMaterial(textures);
+                materials.Add(matName, meshMaterial);
+            }
+        }
+        /// <summary>
+        /// Initilize geometry
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private async Task InitializeGeometry(ContentData modelContent)
+        {
+            //Get drawing geometry
+            var geometry = await modelContent.CreateGeometry(Description.LoadAnimation, Description.LoadNormalMaps, Description.Constraint);
+            foreach (var mesh in geometry)
+            {
+                meshes.Add(mesh.Key, mesh.Value);
+            }
+
+            //Get hull geometry
+            var hulls = modelContent.GetHullMeshes();
+            hullMesh.AddRange(hulls);
+        }
+        /// <summary>
+        /// Initialize mesh buffers in the graphics device
+        /// </summary>
+        /// <param name="name">Owner name</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private async Task InitializeMeshes(string name, BufferDescriptor instancingBuffer)
+        {
+            if (meshes?.Any() != true)
+            {
+                return;
+            }
+
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
+
+            var beforeCount = Game.BufferManager.PendingRequestCount;
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
+
+            //Generates a task list from the materials-mesh dictionary
+            var taskList = meshes.Values
+                .Where(dictionary => dictionary?.Any() == true)
+                .Select(dictionary => Task.Run(() => InitializeMeshDictionaryAsync(Game, name, Description.DynamicBuffers, instancingBuffer, dictionary)));
+
+            try
+            {
+                await Task.WhenAll(taskList);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(nameof(DrawingData), $"{name} Error processing parallel tasks => {ex.Message}", ex);
+
+                throw;
+            }
+
+            var afterCount = Game.BufferManager.PendingRequestCount;
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
+        }
+        /// <summary>
+        /// Initialize lights
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private void InitializeLights(ContentData modelContent)
+        {
+            lights.AddRange(modelContent.CreateLights());
         }
 
         /// <summary>

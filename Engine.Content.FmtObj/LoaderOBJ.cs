@@ -74,11 +74,12 @@ namespace Engine.Content.FmtObj
         {
             // Write the file
             using var wr = new StreamWriter(fileName, false, Encoding.Default);
-            foreach (var geo in models)
+            foreach (var content in models)
             {
-                foreach (var g in geo.Geometry.Values)
+                var geom = content.GetGeometryContent();
+                foreach (var g in geom)
                 {
-                    foreach (var s in g.Values)
+                    foreach (var s in g.Content.Values)
                     {
                         Writer.WriteObj(wr, s);
                     }
@@ -137,14 +138,14 @@ namespace Engine.Content.FmtObj
             {
                 foreach (var mat in materials)
                 {
-                    if (m.Materials.ContainsKey(mat.Name))
+                    if (m.ContainsMaterialContent(mat.Name))
                     {
                         continue;
                     }
 
                     var matContent = mat.CreateContent();
 
-                    m.Materials.Add(mat.Name, matContent);
+                    m.AddMaterialContent(mat.Name, matContent);
 
                     m.TryAddTexture(contentFolder, mat.MapKa);
                     m.TryAddTexture(contentFolder, mat.MapKd);
@@ -212,14 +213,18 @@ namespace Engine.Content.FmtObj
 
         public static void TryAddTexture(this ContentData m, string contentFolder, string texture)
         {
-            if (texture != null && !m.Images.ContainsKey(texture))
+            if (string.IsNullOrWhiteSpace(texture))
             {
-                string path = Path.Combine(contentFolder, texture);
-                if (File.Exists(path))
-                {
-                    m.Images.Add(texture, new FileArrayImageContent(path));
-                }
+                return;
             }
+
+            string path = Path.Combine(contentFolder, texture);
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            m.AddTextureContent(texture, new FileArrayImageContent(path));
         }
     }
 }

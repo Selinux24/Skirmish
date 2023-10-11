@@ -238,11 +238,13 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            modelContent.Lights[id] = new LightContent()
+            var content = new LightContent()
             {
                 LightType = LightContentTypes.Directional,
                 Color = light.Color.ToColor3(),
             };
+
+            modelContent.AddLightContent(id, content);
         }
         /// <summary>
         /// Process point light
@@ -257,7 +259,7 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            modelContent.Lights[id] = new LightContent()
+            var content = new LightContent()
             {
                 LightType = LightContentTypes.Point,
                 Color = light.Color.ToColor3(),
@@ -265,6 +267,8 @@ namespace Engine.Content.FmtCollada
                 LinearAttenuation = light.LinearAttenuation.Value,
                 QuadraticAttenuation = light.QuadraticAttenuation.Value,
             };
+
+            modelContent.AddLightContent(id, content);
         }
         /// <summary>
         /// Process spot light
@@ -279,7 +283,7 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            modelContent.Lights[id] = new LightContent()
+            var content = new LightContent()
             {
                 LightType = LightContentTypes.Spot,
                 Color = light.Color.ToColor3(),
@@ -289,6 +293,8 @@ namespace Engine.Content.FmtCollada
                 FallOffAngle = light.FalloffAngle.Value,
                 FallOffExponent = light.FalloffExponent.Value,
             };
+
+            modelContent.AddLightContent(id, content);
         }
         /// <summary>
         /// Process images
@@ -307,11 +313,11 @@ namespace Engine.Content.FmtCollada
             {
                 if (image.Data != null)
                 {
-                    modelContent.Images[image.Id] = new MemoryImageContent(new MemoryStream((byte[])image.Data));
+                    modelContent.AddTextureContent(image.Id, new MemoryImageContent(new MemoryStream((byte[])image.Data)));
                 }
                 else if (!string.IsNullOrEmpty(image.InitFrom))
                 {
-                    modelContent.Images[image.Id] = new FileArrayImageContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
+                    modelContent.AddTextureContent(image.Id, new FileArrayImageContent(contentFolder, Uri.UnescapeDataString(image.InitFrom)));
                 }
             }
         }
@@ -353,7 +359,7 @@ namespace Engine.Content.FmtCollada
 
                 if (effect.ProfileCommon != null)
                 {
-                    modelContent.Materials[material.Id] = ProcessTechniqueFX(effect.ProfileCommon);
+                    modelContent.AddMaterialContent(material.Id, ProcessTechniqueFX(effect.ProfileCommon));
                 }
             }
         }
@@ -381,10 +387,9 @@ namespace Engine.Content.FmtCollada
                 foreach (var subMesh in subMeshes)
                 {
                     string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
-                    if (!string.IsNullOrWhiteSpace(materialName) && modelContent.Materials.TryGetValue(materialName, out var value))
+                    var mat = modelContent.GetMaterialContent(materialName);
+                    if (mat != null)
                     {
-                        var mat = value;
-
                         subMesh.Material = materialName;
                         subMesh.SetTextured(mat.Textured);
                     }
@@ -410,7 +415,7 @@ namespace Engine.Content.FmtCollada
                 var info = ProcessController(controller);
                 if (info != null)
                 {
-                    modelContent.Controllers[controller.Id] = info;
+                    modelContent.AddControllerContent(controller.Id, info);
                 }
             }
         }
@@ -434,7 +439,7 @@ namespace Engine.Content.FmtCollada
                 modelContent.AddAnimationContent(animationLib.Id, info);
             }
 
-            modelContent.AnimationDefinition = animation;
+            modelContent.SetAnimationDefinition(animation);
         }
 
         #endregion
@@ -1453,11 +1458,11 @@ namespace Engine.Content.FmtCollada
                 var controllerNames = skeletonControllers.Select(sc => sc.Url.Replace("#", ""));
                 foreach (var controller in controllerNames)
                 {
-                    modelContent.Controllers[controller].Armature = skeleton.Name;
+                    modelContent.GetControllerContent(controller).Armature = skeleton.Name;
                 }
 
                 //Add skinning content for the skeleton
-                modelContent.Skinning.Add(
+                modelContent.AddSkinningContent(
                     skeleton.Name,
                     new SkinningContent
                     {
@@ -1546,12 +1551,11 @@ namespace Engine.Content.FmtCollada
             foreach (var il in lights)
             {
                 string lightName = il.Url.Replace("#", "");
-                if (!modelContent.Lights.ContainsKey(lightName))
+                var light = modelContent.GetLightContent(lightName);
+                if (light == null)
                 {
                     continue;
                 }
-
-                var light = modelContent.Lights[lightName];
 
                 light.Name = lightName;
                 light.Transform = trn;
@@ -1579,8 +1583,9 @@ namespace Engine.Content.FmtCollada
             foreach (var ig in geometry)
             {
                 string meshName = ig.Url.Replace("#", "");
+                var geom = modelContent.GetGeometryContent(meshName);
 
-                foreach (var submesh in modelContent.Geometry[meshName].Values)
+                foreach (var submesh in geom.Values)
                 {
                     if (bakeTransforms)
                     {
