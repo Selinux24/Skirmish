@@ -9,6 +9,7 @@ namespace Engine.Content
     using Engine.Animation;
     using Engine.Common;
     using Engine.Content.Persistence;
+    using System.Xml.Linq;
 
     /// <summary>
     /// Model content
@@ -178,6 +179,7 @@ namespace Engine.Content
                 materialName = DefaultMaterial;
                 textured = material.Textured;
 
+                modelContent.ImportTextures(ref material);
                 modelContent.AddMaterialContent(materialName, material);
             }
             else if (materialCount > 1)
@@ -188,8 +190,10 @@ namespace Engine.Content
                 for (int i = 0; i < materialCount; i++)
                 {
                     string name = i == 0 ? materialName : $"{materialName}_{i}";
+                    var material = materials.ElementAt(i);
 
-                    modelContent.AddMaterialContent(name, materials.ElementAt(i));
+                    modelContent.ImportTextures(ref material);
+                    modelContent.AddMaterialContent(name, material);
                 }
 
             }
@@ -253,6 +257,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public IImageContent GetTextureContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!images.ContainsKey(name))
             {
                 return null;
@@ -266,6 +275,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public bool ContainsTextureContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
             return images.ContainsKey(name);
         }
         /// <summary>
@@ -275,6 +289,11 @@ namespace Engine.Content
         /// <param name="content">Content</param>
         public void AddTextureContent(string name, IImageContent content)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
             if (images.ContainsKey(name))
             {
                 images[name] = content;
@@ -317,6 +336,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public IMaterialContent GetMaterialContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!materials.ContainsKey(name))
             {
                 return null;
@@ -330,6 +354,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public bool ContainsMaterialContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
             return materials.ContainsKey(name);
         }
         /// <summary>
@@ -339,8 +368,19 @@ namespace Engine.Content
         /// <param name="content">Material content</param>
         public void AddMaterialContent(string name, IMaterialContent content)
         {
-            ImportTextures(ref content);
-            materials.Add(name, content);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            if (materials.ContainsKey(name))
+            {
+                materials[name] = content;
+            }
+            else
+            {
+                materials.Add(name, content);
+            }
         }
         /// <summary>
         /// Adds a new material content list
@@ -375,6 +415,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public Dictionary<string, SubMeshContent> GetGeometryContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!geometry.ContainsKey(name))
             {
                 return null;
@@ -388,6 +433,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public bool ContainsGeometryContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
             return geometry.ContainsKey(name);
         }
         /// <summary>
@@ -397,6 +447,11 @@ namespace Engine.Content
         /// <param name="content">Content</param>
         public void AddGeometryContent(string name, Dictionary<string, SubMeshContent> content)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
             if (geometry.ContainsKey(name))
             {
                 geometry[name] = content;
@@ -481,6 +536,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public ControllerContent GetControllerContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!controllers.ContainsKey(name))
             {
                 return null;
@@ -494,6 +554,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public bool ContainsControllerContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
             return controllers.ContainsKey(name);
         }
         /// <summary>
@@ -503,6 +568,11 @@ namespace Engine.Content
         /// <param name="content">Content</param>
         public void AddControllerContent(string name, ControllerContent content)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
             if (controllers.ContainsKey(name))
             {
                 controllers[name] = content;
@@ -545,6 +615,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public SkinningContent GetSkinningContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!skinning.ContainsKey(name))
             {
                 return null;
@@ -558,6 +633,11 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public bool ContainsSkinningContent(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
             return skinning.ContainsKey(name);
         }
         /// <summary>
@@ -567,7 +647,19 @@ namespace Engine.Content
         /// <param name="content">Content</param>
         public void AddSkinningContent(string name, SkinningContent content)
         {
-            skinning.Add(name, content);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            if (skinning.ContainsKey(name))
+            {
+                skinning[name] = content;
+            }
+            else
+            {
+                skinning.Add(name, content);
+            }
         }
         /// <summary>
         /// Adds a new skinning content list
@@ -588,6 +680,11 @@ namespace Engine.Content
         /// <param name="content">Light content</param>
         public void AddLightContent(string id, LightContent content)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return;
+            }
+
             if (lights.ContainsKey(id))
             {
                 lights[id] = content;
@@ -603,12 +700,17 @@ namespace Engine.Content
         /// <param name="id">Id</param>
         public LightContent GetLightContent(string id)
         {
-            if (lights.ContainsKey(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
-                return lights[id];
+                return null;
             }
 
-            return null;
+            if (!lights.ContainsKey(id))
+            {
+                return null;
+            }
+
+            return lights[id]; 
         }
 
         /// <summary>
