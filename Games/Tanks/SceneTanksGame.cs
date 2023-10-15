@@ -1042,7 +1042,7 @@ namespace Tanks
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
                 var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = 5;// Helper.RandomGenerator.NextFloat(0.5f, 1f);
+                var scale = Helper.RandomGenerator.NextFloat(0.5f, 1f);
 
                 if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
