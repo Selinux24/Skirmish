@@ -131,6 +131,8 @@ namespace Tanks
 
         private DecalDrawer decalDrawer;
 
+        private PrimitiveListDrawer<Line3D> boundsDrawer;
+
         private readonly string loadGroupSceneObjects = "loadGroupSceneObjects";
 
         private readonly BuiltInPostProcessState onGamePostProcessing = BuiltInPostProcessState.Empty;
@@ -517,23 +519,24 @@ namespace Tanks
                 InitializeDecalDrawer(),
                 InitializeAudio(),
                 InitializeLights(),
+                InitializeDebugDrawer(),
             };
         }
         private async Task InitializeModelsTanks()
         {
             var tDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.All,
-                Optimize = false,
                 Content = ContentDescription.FromFile("Resources/Leopard", "Leopard.json"),
                 Instances = 2,
+                Optimize = false,
+                PickingHull = PickingHullTypes.Hull,
+                CastShadow = ShadowCastingAlgorihtms.All,
+                StartsVisible = false,
                 TransformNames = new[] { tankBarrelPart, tankTurretPart, tankHullPart },
                 TransformDependences = new[] { 1, 2, -1 },
-                PickingHull = PickingHullTypes.Hull,
             };
 
             tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
-            tanks.Visible = false;
         }
         private async Task InitializeModelsTerrain()
         {
@@ -567,9 +570,9 @@ namespace Tanks
             };
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
+            groundDesc.StartsVisible = false;
 
             terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", groundDesc);
-            terrain.Visible = false;
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
         }
@@ -584,15 +587,15 @@ namespace Tanks
 
                 var tDesc = new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot,
-                    Optimize = true,
                     Content = ContentDescription.FromFile("Resources/Environment/Tree", modelFileName),
                     Instances = instances,
+                    Optimize = true,
                     PickingHull = PickingHullTypes.Hull,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot,
+                    StartsVisible = false,
                 };
 
                 var tree = await AddComponent<ModelInstanced, ModelInstancedDescription>(modelName, modelName, tDesc, SceneObjectUsages.Agent);
-                tree.Visible = false;
 
                 treeModels.Add(tree);
             }
@@ -606,11 +609,11 @@ namespace Tanks
             var content = new ModelDescription
             {
                 Content = ContentDescription.FromContentData(sphereDesc, material),
-                DepthEnabled = false
+                DepthEnabled = false,
+                StartsVisible = false,
             };
 
             projectile = await AddComponent<Model, ModelDescription>("Projectile", "Projectile", content, SceneObjectUsages.None, LayerDefault + 1);
-            projectile.Visible = false;
         }
         private async Task InitializeParticleManager()
         {
@@ -833,6 +836,17 @@ namespace Tanks
 
             await Task.CompletedTask;
         }
+        private async Task InitializeDebugDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 100000,
+                CastShadow = ShadowCastingAlgorihtms.None,
+                StartsVisible = false,
+            };
+
+            boundsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
+        }
 
         private async Task LoadUICompleted(LoadResourcesResult res)
         {
@@ -1028,7 +1042,7 @@ namespace Tanks
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
                 var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = Helper.RandomGenerator.NextFloat(0.5f, 1f);
+                var scale = 5;// Helper.RandomGenerator.NextFloat(0.5f, 1f);
 
                 if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
@@ -1043,9 +1057,7 @@ namespace Tanks
 
                 treeCount--;
 
-                tree[treeCount].Manipulator.SetPosition(pos);
-                tree[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
-                tree[treeCount].Manipulator.SetScale(scale);
+                tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, -MathUtil.PiOverTwo, 0), scale);
             }
         }
         private void PrepareModels()
@@ -1241,6 +1253,8 @@ namespace Tanks
 
                 return;
             }
+
+            UpdateInputDebug();
 
             if (freeCamera)
             {
@@ -1446,6 +1460,32 @@ You will lost all the game progress.",
                 Camera.SetPosition(pos);
                 Camera.SetInterest(vw);
             }
+        }
+        private void UpdateInputDebug()
+        {
+            if (Game.Input.KeyJustReleased(Keys.F1))
+            {
+                boundsDrawer.Visible = !boundsDrawer.Visible;
+
+                if (boundsDrawer.Visible)
+                {
+                    UpdateBoundsDrawer();
+                }
+            }
+        }
+        private void UpdateBoundsDrawer()
+        {
+            List<Line3D> lines = new();
+
+            foreach (var treeModel in treeModels)
+            {
+                var sphList = treeModel.GetBoundingSpheres(true);
+
+                lines.AddRange(Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, sphList, 4, 4)));
+            }
+
+            boundsDrawer.Clear();
+            boundsDrawer.SetPrimitives(Color.Red, lines);
         }
 
         private void UpdateTurnStatus()

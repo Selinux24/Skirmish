@@ -464,7 +464,7 @@ namespace Engine.Content
         /// Adds a new geometry content list
         /// </summary>
         /// <param name="content">Content list</param>
-        public void AddTextureContent(Dictionary<string, Dictionary<string, SubMeshContent>> content)
+        public void AddGeometryContent(Dictionary<string, Dictionary<string, SubMeshContent>> content)
         {
             foreach (var geom in content)
             {

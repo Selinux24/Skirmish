@@ -147,27 +147,29 @@ namespace Engine
             Vector3 prePos = localTransform.TranslationVector;
             Velocity = position - prePos;
 
-            if (transformUpdateNeeded)
+            if (!transformUpdateNeeded)
             {
-                Matrix sca = Matrix.Scaling(scaling);
-                Matrix rot = Matrix.RotationQuaternion(rotation);
-                Matrix tra = Matrix.Translation(position);
-
-                localTransform = sca * rot * tra;
-
-                Forward = rot.Forward;
-                Backward = rot.Backward;
-                Left = rot.Left;
-                Right = rot.Right;
-                Up = rot.Up;
-                Down = rot.Down;
-
-                transformUpdateNeeded = false;
-
-                Updated?.Invoke(this, new EventArgs());
-
-                FrameCounters.PickCounters.TransformUpdatesPerFrame++;
+                return;
             }
+
+            Matrix sca = Matrix.Scaling(scaling);
+            Matrix rot = Matrix.RotationQuaternion(rotation);
+            Matrix tra = Matrix.Translation(position);
+
+            localTransform = sca * rot * tra;
+
+            Forward = rot.Forward;
+            Backward = rot.Backward;
+            Left = rot.Left;
+            Right = rot.Right;
+            Up = rot.Up;
+            Down = rot.Down;
+
+            transformUpdateNeeded = false;
+
+            Updated?.Invoke(this, new EventArgs());
+
+            FrameCounters.PickCounters.TransformUpdatesPerFrame++;
         }
 
         /// <inheritdoc/>

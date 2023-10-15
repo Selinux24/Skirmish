@@ -95,7 +95,7 @@ namespace Engine
                 .Where(i => i != null)
                 .Select(i => new VertexInstancingData
                 {
-                    Local = i.Manipulator.LocalTransform,
+                    Local = i.Manipulator.GlobalTransform,
                     TintColor = i.TintColor,
                     TextureIndex = i.TextureIndex,
                     MaterialIndex = i.MaterialIndex,

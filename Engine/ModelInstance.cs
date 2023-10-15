@@ -532,7 +532,7 @@ namespace Engine
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Id: {Id}; LOD: {LevelOfDetail}; Active: {Active}; Visible: {Visible}";
+            return $"{model.Id}.{Id}; LOD: {LevelOfDetail}; Active: {Active}; Visible: {Visible}";
         }
     }
 }
