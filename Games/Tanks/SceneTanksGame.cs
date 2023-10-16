@@ -1042,7 +1042,7 @@ namespace Tanks
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
                 var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = Helper.RandomGenerator.NextFloat(0.5f, 1f);
+                var scale = Helper.RandomGenerator.NextFloat(2.5f, 5f);
 
                 if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
@@ -1057,7 +1057,7 @@ namespace Tanks
 
                 treeCount--;
 
-                tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, -MathUtil.PiOverTwo, 0), scale);
+                tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, 0, 0), scale);
             }
         }
         private void PrepareModels()

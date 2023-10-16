@@ -338,6 +338,70 @@ namespace Engine.Common
 
             return result;
         }
+        /// <summary>
+        /// Transforms the specified vertex list by the given transform matrix
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex list</returns>
+        public static IEnumerable<IVertexData> Transform(IEnumerable<IVertexData> vertices, Matrix transform)
+        {
+            if (vertices?.Any() != true)
+            {
+                return Array.Empty<IVertexData>();
+            }
+
+            if (transform.IsIdentity)
+            {
+                return vertices.ToArray();
+            }
+
+            return vertices
+                .AsParallel()
+                .Select(r => Transform(r, transform))
+                .ToArray();
+        }
+        /// <summary>
+        /// Transforms the specified vertex by the given transform matrix
+        /// </summary>
+        /// <param name="vertex">Vertex</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex</returns>
+        public static IVertexData Transform(IVertexData vertex, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return vertex;
+            }
+
+            IVertexData result = vertex;
+
+            if (result.HasChannel(VertexDataChannels.Position))
+            {
+                var position = result.GetChannelValue<Vector3>(VertexDataChannels.Position);
+                result.SetChannelValue(VertexDataChannels.Position, Vector3.TransformCoordinate(position, transform));
+            }
+
+            if (result.HasChannel(VertexDataChannels.Normal))
+            {
+                var normal = result.GetChannelValue<Vector3>(VertexDataChannels.Normal);
+                result.SetChannelValue(VertexDataChannels.Normal, Vector3.TransformNormal(normal, transform));
+            }
+
+            if (result.HasChannel(VertexDataChannels.Tangent))
+            {
+                var tangent = result.GetChannelValue<Vector3>(VertexDataChannels.Tangent);
+                result.SetChannelValue(VertexDataChannels.Tangent, Vector3.TransformNormal(tangent, transform));
+            }
+
+            if (result.HasChannel(VertexDataChannels.BiNormal))
+            {
+                var binormal = result.GetChannelValue<Vector3>(VertexDataChannels.BiNormal);
+                result.SetChannelValue(VertexDataChannels.BiNormal, Vector3.TransformNormal(binormal, transform));
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Generates a vertex data array from a geometry descriptor

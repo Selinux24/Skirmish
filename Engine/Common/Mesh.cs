@@ -24,6 +24,14 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Vertices cache
+        /// </summary>
+        private readonly IEnumerable<IVertexData> vertices = Array.Empty<IVertexData>();
+        /// <summary>
+        /// Indices cache
+        /// </summary>
+        private readonly IEnumerable<uint> indices = Array.Empty<uint>();
+        /// <summary>
         /// Position list cache
         /// </summary>
         private IEnumerable<Vector3> positionCache = null;
@@ -37,17 +45,9 @@ namespace Engine.Common
         /// </summary>
         public int Id { get; set; }
         /// <summary>
-        /// Vertices cache
-        /// </summary>
-        public IEnumerable<IVertexData> Vertices { get; set; }
-        /// <summary>
         /// Indexed model
         /// </summary>
         public bool Indexed { get; set; } = false;
-        /// <summary>
-        /// Indices cache
-        /// </summary>
-        public IEnumerable<uint> Indices { get; set; }
 
         /// <summary>
         /// Name
@@ -115,9 +115,9 @@ namespace Engine.Common
             Name = name;
             Topology = topology;
             Transform = transform;
-            Vertices = vertices ?? Array.Empty<IVertexData>();
+            this.vertices = vertices ?? Array.Empty<IVertexData>();
             VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-            Indices = indices ?? Array.Empty<uint>();
+            this.indices = indices ?? Array.Empty<uint>();
             Indexed = indices?.Any() == true;
         }
         /// <summary>
@@ -143,6 +143,56 @@ namespace Engine.Common
         protected virtual void Dispose(bool disposing)
         {
 
+        }
+
+        /// <summary>
+        /// Initializes a mesh dictionary
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <param name="meshes">Mesh dictionary</param>
+        public static void InitializeMeshDictionary(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
+        {
+            Logger.WriteTrace(nameof(Mesh), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
+
+            foreach (var mesh in meshes.Values)
+            {
+                mesh.Initialize(game, name, dynamicBuffers, instancingBuffer);
+            }
+        }
+        /// <summary>
+        /// Initializes a mesh
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private void Initialize(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
+        {
+            try
+            {
+                Logger.WriteTrace(this, $"{name}.{Name} Processing Mesh => {this}");
+
+                //Vertices
+                var trnVertices = VertexData.Transform(vertices, Transform);
+                VertexBuffer = game.BufferManager.AddVertexData($"{name}.{Name}", dynamicBuffers, trnVertices, instancingBuffer);
+
+                if (Indexed)
+                {
+                    //Indices
+                    IndexBuffer = game.BufferManager.AddIndexData($"{name}.{Name}", dynamicBuffers, indices);
+                }
+
+                Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"{name}.{Name} Error Processing Mesh => {ex.Message}", ex);
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -216,18 +266,18 @@ namespace Engine.Common
                 return positionCache.ToArray();
             }
 
-            if (Vertices?.Any() != true)
+            if (!vertices.Any())
             {
                 return Enumerable.Empty<Vector3>();
             }
 
-            var first = Vertices.First();
+            var first = vertices.First();
             if (!first.HasChannel(VertexDataChannels.Position))
             {
                 return Enumerable.Empty<Vector3>();
             }
 
-            positionCache = Vertices.Select(v =>
+            positionCache = vertices.Select(v =>
             {
                 var p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
 
@@ -251,12 +301,12 @@ namespace Engine.Common
                 return positionCache.ToArray();
             }
 
-            if (Vertices?.Any() != true)
+            if (!vertices.Any())
             {
                 return Enumerable.Empty<Vector3>();
             }
 
-            var first = Vertices.First();
+            var first = vertices.First();
             if (!first.HasChannel(VertexDataChannels.Position) ||
                 !first.HasChannel(VertexDataChannels.BoneIndices) ||
                 !first.HasChannel(VertexDataChannels.Weights))
@@ -264,7 +314,7 @@ namespace Engine.Common
                 return Enumerable.Empty<Vector3>();
             }
 
-            positionCache = Vertices.Select(v =>
+            positionCache = vertices.Select(v =>
             {
                 var p = VertexData.ApplyWeight(v, boneTransforms);
 
@@ -282,24 +332,24 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
+            if (!refresh && triangleCache != null)
+            {
+                return triangleCache.ToArray();
+            }
+
             var positions = GetPoints(refresh);
             if (!positions.Any())
             {
                 return Enumerable.Empty<Triangle>();
             }
 
-            if (!refresh && triangleCache != null)
-            {
-                return triangleCache.ToArray();
-            }
-
-            if (Indices?.Any() != true)
+            if (!indices.Any())
             {
                 triangleCache = Triangle.ComputeTriangleList(Topology, positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions, indices);
             }
 
             return triangleCache.ToArray();
@@ -312,24 +362,24 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
+            if (!refresh && triangleCache != null)
+            {
+                return triangleCache.ToArray();
+            }
+
             var positions = GetPoints(boneTransforms, refresh);
             if (!positions.Any())
             {
                 return Enumerable.Empty<Triangle>();
             }
 
-            if (!refresh && triangleCache != null)
-            {
-                return triangleCache.ToArray();
-            }
-
-            if (Indices?.Any() != true)
+            if (!indices.Any())
             {
                 triangleCache = Triangle.ComputeTriangleList(Topology, positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions, indices);
             }
 
             return triangleCache.ToArray();
@@ -339,8 +389,8 @@ namespace Engine.Common
         public override string ToString()
         {
             return Indexed ?
-                $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}; Indices: {Indices?.Count() ?? 0}" :
-                $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}";
+                $"Id: {Id}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
+                $"Id: {Id}; Vertices: {vertices.Count()}";
         }
     }
 }
