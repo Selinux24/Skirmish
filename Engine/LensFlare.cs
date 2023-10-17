@@ -77,9 +77,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(LensFlareDescription description)
+        public override async Task ReadAssets(LensFlareDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             var gl = await Scene.CreateComponent<Sprite, SpriteDescription>(
                 $"{Id}.Glow",

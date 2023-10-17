@@ -83,9 +83,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIMinimapDescription description)
+        public override async Task ReadAssets(UIMinimapDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             BackColor = Description.BackColor;
 

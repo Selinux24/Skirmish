@@ -148,9 +148,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(SkyPlaneDescription description)
+        public override async Task ReadAssets(SkyPlaneDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             var img1 = new FileArrayImageContent(Description.ContentPath, Description.Texture1Name);
             skyTexture1 = await Game.ResourceManager.RequestResource(img1);

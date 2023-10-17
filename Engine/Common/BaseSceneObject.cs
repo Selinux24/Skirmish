@@ -59,14 +59,21 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Initializes internal assets
+        /// Reads assets
         /// </summary>
         /// <param name="description">Scene object description</param>
-        public virtual async Task InitializeAssets(T description)
+        public virtual async Task ReadAssets(T description)
         {
             Description = description ?? throw new ArgumentNullException(nameof(description), "The description must be specified");
             Active = description.StartsActive;
 
+            await Task.CompletedTask;
+        }
+        /// <summary>
+        /// Initializes assets into graphics device
+        /// </summary>
+        public virtual async Task InitializeAssets()
+        {
             await Task.CompletedTask;
         }
 

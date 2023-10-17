@@ -23,7 +23,7 @@ namespace Tanks
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f);
+                using Game cl = new("Tanks!!!", WindowsEngineForm.ScreenSize * 0.4f);
 #else
                 using Game cl = new("Tanks!!!");
 #endif

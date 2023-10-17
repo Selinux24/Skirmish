@@ -202,7 +202,7 @@ namespace Engine.Content
                 textured = false;
             }
 
-            SubMeshContent geo = new(topology, materialName, textured, false);
+            SubMeshContent geo = new(topology, materialName, textured, false, Matrix.Identity);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);

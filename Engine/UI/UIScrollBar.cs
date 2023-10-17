@@ -74,9 +74,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIScrollBarDescription description)
+        public override async Task ReadAssets(UIScrollBarDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             ScrollMode = Description.ScrollMode;
             MarkerSize = Description.MarkerSize;

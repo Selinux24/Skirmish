@@ -133,7 +133,7 @@ namespace Tanks
 
         private PrimitiveListDrawer<Line3D> boundsDrawer;
 
-        private readonly string loadGroupSceneObjects = "loadGroupSceneObjects";
+        private readonly string loadGroupSceneObjects = "Asset initializing";
 
         private readonly BuiltInPostProcessState onGamePostProcessing = BuiltInPostProcessState.Empty;
         private readonly BuiltInPostProcessState modalPostProcessing = BuiltInPostProcessState.Empty;
@@ -183,7 +183,7 @@ namespace Tanks
                 progressValue = Math.Max(progressValue, value.Progress);
 
                 loadingBar.ProgressValue = progressValue;
-                loadingBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
+                loadingBar.Caption.Text = $"{loadGroupSceneObjects} {(int)(progressValue * 100f)}%";
                 loadingBar.Visible = true;
             }
         }
@@ -857,23 +857,22 @@ namespace Tanks
 
             UpdateLayout();
 
-            PlantTrees();
-            PrepareModels();
-            GameEnvironment.Background = Color.Gray;
-            Lights.EnableFog(300, 1000, Color.Gray);
-            UpdateCamera(true);
-
-            AudioManager.MasterVolume = 1f;
-            AudioManager.Start();
-
-            PlayMusic();
-
             uiTweener.ClearTween(loadingText);
             uiTweener.Hide(loadingText, 1000);
+            await Task.Delay(1500);
+
+            PlantTrees();
+            PrepareModels();
+            PrepareLighting();
+            UpdateCamera(true);
+
+            AudioManager.MasterVolume = 0.75f;
+            AudioManager.Start();
+            PlayMusic();
+
             uiTweener.ClearTween(loadingBar);
             uiTweener.Hide(loadingBar, 500);
-
-            await Task.Delay(1500);
+            await Task.Delay(1000);
 
             await StartGame();
         }
@@ -1030,13 +1029,17 @@ namespace Tanks
             var max = bbox.Maximum.XZ();
             var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
 
+            int totalTrees = treeModels.Sum(t => t.InstanceCount);
+            int progressCount = 0;
             foreach (var treeModel in treeModels)
             {
-                PlantTree(treeModel, min, max, sph);
+                progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees);
             }
         }
-        private void PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph)
+        private int PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, int trees, int total)
         {
+            int count = trees;
+
             int treeCount = tree.InstanceCount;
             while (treeCount > 0)
             {
@@ -1057,8 +1060,15 @@ namespace Tanks
 
                 treeCount--;
 
+                float progressValue = count++ / (float)total;
+                loadingBar.ProgressValue = progressValue;
+                loadingBar.Caption.Text = $"Planting trees... {(int)(progressValue * 100f)}%";
+                loadingBar.Visible = true;
+
                 tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, 0, 0), scale);
             }
+
+            return count;
         }
         private void PrepareModels()
         {
@@ -1098,6 +1108,11 @@ namespace Tanks
             tanks[1].TintColor = player2Status.TintColor;
 
             tanks.Visible = true;
+        }
+        private void PrepareLighting()
+        {
+            GameEnvironment.Background = Color.Gray;
+            Lights.EnableFog(300, 1000, Color.Gray);
         }
 
         private void LoadNewGame()

@@ -77,9 +77,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIConsoleDescription description)
+        public override async Task ReadAssets(UIConsoleDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             logLinesSmall = Description.LogLinesSmall;
             logLinesBig = Description.LogLinesBig;

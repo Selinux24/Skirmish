@@ -54,7 +54,9 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = await DrawingData.Build(game, name, content, desc);
+                var drawingData = await DrawingData.Read(game, content, desc);
+
+                await drawingData.Initialize(name);
 
                 watch.Stop();
 
@@ -347,9 +349,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(GroundDescription description)
+        public override async Task ReadAssets(GroundDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             // Generate model content
             var contentList = await Description.ReadContentData();

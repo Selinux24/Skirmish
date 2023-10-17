@@ -56,9 +56,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIDialogDescription description)
+        public override async Task ReadAssets(UIDialogDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             var backPanel = await CreateBackpanel();
             AddChild(backPanel);

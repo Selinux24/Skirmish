@@ -49,9 +49,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextBoxDescription description)
+        public override async Task ReadAssets(UITextBoxDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Cursor = Description.Cursor;
             TabSpaces = Description.TabSpaces;

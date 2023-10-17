@@ -61,9 +61,9 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
+        public override async Task ReadAssets(T description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Visible = description.StartsVisible;
             CastShadow = description.CastShadow;

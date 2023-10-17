@@ -127,7 +127,7 @@ namespace Engine
 
                 var material = MaterialBlinnPhongContent.Default;
 
-                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Matrix.Identity);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

@@ -286,9 +286,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(TextDrawerDescription description)
+        public override async Task ReadAssets(TextDrawerDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Manipulator = new Manipulator2D(Game);
             ShadowManipulator = new Manipulator2D(Game);

@@ -122,9 +122,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(SpriteDescription description)
+        public override async Task ReadAssets(SpriteDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Color1 = Description.Color1;
             Color2 = Description.Color2;

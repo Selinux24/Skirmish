@@ -737,9 +737,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(GroundDescription description)
+        public override async Task ReadAssets(GroundDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             if (Description.Heightmap == null)
             {

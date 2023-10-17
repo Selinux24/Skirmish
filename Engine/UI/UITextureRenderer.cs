@@ -75,9 +75,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextureRendererDescription description)
+        public override async Task ReadAssets(UITextureRendererDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             var sprite = GeometryUtil.CreateUnitSprite();
 

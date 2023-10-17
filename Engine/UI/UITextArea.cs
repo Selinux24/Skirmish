@@ -316,9 +316,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextAreaDescription description)
+        public override async Task ReadAssets(UITextAreaDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             growControlWithText = Description.GrowControlWithText;
             Scroll = Description.Scroll;

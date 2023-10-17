@@ -334,7 +334,7 @@ namespace Engine.Content.FmtObj
                 faceIndex++;
             }
 
-            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false);
+            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix.Identity);
 
             content.SetVertices(vertexList);
             content.SetIndices(indexList);

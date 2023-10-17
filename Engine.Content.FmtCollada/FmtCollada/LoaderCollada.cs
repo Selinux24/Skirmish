@@ -586,7 +586,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull, Matrix.Identity);
 
                 meshInfo.SetVertices(data);
 
@@ -683,7 +683,7 @@ namespace Engine.Content.FmtCollada
                     continue;
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull, Matrix.Identity);
 
                 meshInfo.SetVertices(verts);
                 meshInfo.SetIndices(indices);
@@ -812,7 +812,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull, Matrix.Identity);
 
                 meshInfo.SetVertices(data);
 
@@ -1589,11 +1589,11 @@ namespace Engine.Content.FmtCollada
                 {
                     if (bakeTransforms)
                     {
-                        submesh.ApplyTransform(trn);
+                        submesh.BakeTransform(trn);
                     }
                     else
                     {
-                        submesh.Transform = trn;
+                        submesh.SetTransform(trn);
                     }
                 }
             }

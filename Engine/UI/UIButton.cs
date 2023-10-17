@@ -63,9 +63,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIButtonDescription description)
+        public override async Task ReadAssets(UIButtonDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             TwoStateButton = Description.TwoStateButton;
 

@@ -308,9 +308,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITabPanelDescription description)
+        public override async Task ReadAssets(UITabPanelDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             tabButtonsAreaSize = Description.TabButtonsAreaSize;
             tabButtonsPadding = Description.TabButtonsPadding;

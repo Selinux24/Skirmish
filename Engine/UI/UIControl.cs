@@ -548,9 +548,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
+        public override async Task ReadAssets(T description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             updateOrder = UIControlHelper.GetNextUpdateOrder();
 

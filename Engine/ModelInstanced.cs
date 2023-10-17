@@ -165,18 +165,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(ModelInstancedDescription description)
+        public override async Task ReadAssets(ModelInstancedDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             if (Description.Instances <= 0)
             {
                 throw new ArgumentException($"Instances parameter must be more than 0: {Description.Instances}");
             }
 
-            InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, Description.Instances);
-
-            await InitializeGeometry(description, InstancingBuffer);
+            await InitializeGeometry(description);
 
             InstanceCount = Description.Instances;
 
@@ -185,6 +183,16 @@ namespace Engine
             MaximumCount = -1;
 
             hasIndependentTransforms = Description.TransformDependences?.Any() == true;
+        }
+        /// <inheritdoc/>
+        public override async Task InitializeAssets()
+        {
+            InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, Description.Instances);
+
+            foreach (var drawable in GetDrawingDataCollection())
+            {
+                await drawable.Initialize(Name, InstancingBuffer);
+            }
         }
 
         /// <inheritdoc/>

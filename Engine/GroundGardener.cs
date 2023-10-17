@@ -645,9 +645,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(GroundGardenerDescription description)
+        public override async Task ReadAssets(GroundGardenerDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             if (Description == null)
             {

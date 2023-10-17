@@ -146,30 +146,13 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Initializes a mesh dictionary
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="name">Owner name</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        /// <param name="meshes">Mesh dictionary</param>
-        public static void InitializeMeshDictionary(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
-        {
-            Logger.WriteTrace(nameof(Mesh), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
-
-            foreach (var mesh in meshes.Values)
-            {
-                mesh.Initialize(game, name, dynamicBuffers, instancingBuffer);
-            }
-        }
-        /// <summary>
         /// Initializes a mesh
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="name">Owner name</param>
         /// <param name="dynamicBuffers">Create dynamic buffers</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private void Initialize(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
+        public void Initialize(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             try
             {
@@ -281,7 +264,10 @@ namespace Engine.Common
             {
                 var p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
 
-                if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+                if (!Transform.IsIdentity)
+                {
+                    p = Vector3.TransformCoordinate(p, Transform);
+                }
 
                 return p;
             });

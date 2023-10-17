@@ -17,35 +17,30 @@ namespace Engine.Common
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="name">Owner name</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Data description</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static async Task<DrawingData> Build(Game game, string name, ContentData modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
+        public static async Task<DrawingData> Read(Game game, ContentData modelContent, DrawingDataDescription description)
         {
             var res = new DrawingData(game, description);
 
             //Animation
             if (description.LoadAnimation)
             {
-                res.InitializeSkinningData(modelContent);
+                res.ReadSkinningData(modelContent);
             }
 
             //Images
-            await res.InitializeTextures(modelContent);
+            await res.ReadTextures(modelContent);
 
             //Materials
-            res.InitializeMaterials(modelContent);
+            res.ReadMaterials(modelContent);
 
             //Skins & Meshes
-            await res.InitializeGeometry(modelContent);
-
-            //Update meshes into device
-            await res.InitializeMeshes(name, instancingBuffer);
+            await res.ReadGeometry(modelContent);
 
             //Lights
-            res.InitializeLights(modelContent);
+            res.ReadLights(modelContent);
 
             return res;
         }
@@ -125,32 +120,48 @@ namespace Engine.Common
         /// <param name="disposing">Free managed resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing)
             {
-                foreach (var item in meshes.Values)
+                return;
+            }
+
+            foreach (var item in meshes.Values)
+            {
+                foreach (var mesh in item.Values)
                 {
-                    foreach (var mesh in item.Values)
-                    {
-                        //Remove data from buffer manager
-                        Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                    //Remove data from buffer manager
+                    Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                    Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
 
-                        if (mesh.IndexBuffer != null)
-                        {
-                            Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
-                        }
-
-                        //Dispose the mesh
-                        mesh.Dispose();
-                    }
+                    //Dispose the mesh
+                    mesh.Dispose();
                 }
-                meshes.Clear();
+            }
+            meshes.Clear();
 
-                materials.Clear();
+            materials.Clear();
 
-                //Don't dispose textures!
-                textures.Clear();
+            //Don't dispose textures!
+            textures.Clear();
 
-                SkinningData = null;
+            SkinningData = null;
+        }
+
+        /// <summary>
+        /// Initializes a mesh dictionary
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <param name="meshes">Mesh dictionary</param>
+        private static void InitializeMeshDictionary(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
+        {
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
+
+            foreach (var mesh in meshes.Values)
+            {
+                mesh.Initialize(game, name, dynamicBuffers, instancingBuffer);
             }
         }
 
@@ -158,7 +169,7 @@ namespace Engine.Common
         /// Initialize skinning data
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        private void InitializeSkinningData(ContentData modelContent)
+        private void ReadSkinningData(ContentData modelContent)
         {
             if (SkinningData != null)
             {
@@ -171,7 +182,7 @@ namespace Engine.Common
         /// Initialize textures
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        private async Task InitializeTextures(ContentData modelContent)
+        private async Task ReadTextures(ContentData modelContent)
         {
             var modelTextures = modelContent.GetTextureContent();
             if (!modelTextures.Any())
@@ -200,7 +211,7 @@ namespace Engine.Common
         /// Initialize materials
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        private void InitializeMaterials(ContentData modelContent)
+        private void ReadMaterials(ContentData modelContent)
         {
             var modelMaterials = modelContent.GetMaterialContent();
             if (!modelMaterials.Any())
@@ -221,7 +232,7 @@ namespace Engine.Common
         /// Initilize geometry
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        private async Task InitializeGeometry(ContentData modelContent)
+        private async Task ReadGeometry(ContentData modelContent)
         {
             //Get drawing geometry
             var geometry = await modelContent.CreateGeometry(Description.LoadAnimation, Description.LoadNormalMaps, Description.Constraint);
@@ -235,11 +246,19 @@ namespace Engine.Common
             hullMesh.AddRange(hulls);
         }
         /// <summary>
+        /// Initialize lights
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        private void ReadLights(ContentData modelContent)
+        {
+            lights.AddRange(modelContent.CreateLights());
+        }
+        /// <summary>
         /// Initialize mesh buffers in the graphics device
         /// </summary>
         /// <param name="name">Owner name</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private async Task InitializeMeshes(string name, BufferDescriptor instancingBuffer)
+        public async Task Initialize(string name, BufferDescriptor instancingBuffer = null)
         {
             if (meshes?.Any() != true)
             {
@@ -254,7 +273,7 @@ namespace Engine.Common
             //Generates a task list from the materials-mesh dictionary
             var taskList = meshes.Values
                 .Where(dictionary => dictionary?.Any() == true)
-                .Select(dictionary => Task.Run(() => Mesh.InitializeMeshDictionary(Game, name, Description.DynamicBuffers, instancingBuffer, dictionary)));
+                .Select(dictionary => Task.Run(() => InitializeMeshDictionary(Game, name, Description.DynamicBuffers, instancingBuffer, dictionary)));
 
             try
             {
@@ -269,14 +288,6 @@ namespace Engine.Common
 
             var afterCount = Game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
-        }
-        /// <summary>
-        /// Initialize lights
-        /// </summary>
-        /// <param name="modelContent">Model content</param>
-        private void InitializeLights(ContentData modelContent)
-        {
-            lights.AddRange(modelContent.CreateLights());
         }
 
         /// <summary>

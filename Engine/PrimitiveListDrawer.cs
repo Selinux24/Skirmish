@@ -91,9 +91,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(PrimitiveListDrawerDescription<T> description)
+        public override async Task ReadAssets(PrimitiveListDrawerDescription<T> description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             T tmp = default;
             stride = tmp.GetStride();

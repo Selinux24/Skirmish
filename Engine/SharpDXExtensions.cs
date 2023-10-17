@@ -11,11 +11,6 @@ namespace Engine
     public static class SharpDXExtensions
     {
         /// <summary>
-        /// Sphere radius helper vector
-        /// </summary>
-        private static readonly Vector3 RadiusVector = Vector3.Normalize(Vector3.One);
-
-        /// <summary>
         /// Project the point in the vector
         /// </summary>
         /// <param name="vector">Vector</param>
@@ -295,9 +290,17 @@ namespace Engine
                 return sphere;
             }
 
-            // Gets the new position and radius
+            // Try to extract scaling component
+            if (!transform.Decompose(out var scale, out _, out _))
+            {
+                return sphere;
+            }
+
+            // Adjust the radius
+            var radius = sphere.Radius * Math.Max(Math.Max(scale.X, scale.Y), scale.Z);
+
+            // Gets the new position
             var center = Vector3.TransformCoordinate(sphere.Center, transform);
-            var radius = Vector3.TransformNormal(RadiusVector * sphere.Radius, transform).Length();
 
             return new BoundingSphere(center, radius);
         }

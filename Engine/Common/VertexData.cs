@@ -423,10 +423,10 @@ namespace Engine.Common
                 res[i] = new VertexData()
                 {
                     Position = vertices[i],
-                    Normal = normals.Any() ? normals[i] : (Vector3?)null,
-                    Texture = uvs.Any() ? uvs[i] : (Vector2?)null,
-                    Tangent = tangents.Any() ? tangents[i] : (Vector3?)null,
-                    BiNormal = binormals.Any() ? binormals[i] : (Vector3?)null,
+                    Normal = normals.Any() ? normals[i] : null,
+                    Texture = uvs.Any() ? uvs[i] : null,
+                    Tangent = tangents.Any() ? tangents[i] : null,
+                    BiNormal = binormals.Any() ? binormals[i] : null,
                 };
             });
 

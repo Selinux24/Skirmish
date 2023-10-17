@@ -58,7 +58,7 @@ namespace Engine
         /// <summary>
         /// Audio manager
         /// </summary>
-        protected GameAudioManager AudioManager { get; private set; }
+        protected GameAudioManager AudioManager { get; private set; } = new();
 
         /// <summary>
         /// Game class
@@ -67,7 +67,7 @@ namespace Engine
         /// <summary>
         /// Game environment
         /// </summary>
-        public GameEnvironment GameEnvironment { get; private set; } = new GameEnvironment();
+        public GameEnvironment GameEnvironment { get; private set; } = new();
         /// <summary>
         /// Camera
         /// </summary>
@@ -83,7 +83,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        public SceneComponentCollection Components { get; private set; }
+        public SceneComponentCollection Components { get; private set; } = new();
         /// <summary>
         /// Scene lights
         /// </summary>
@@ -91,7 +91,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
-        public bool PerformFrustumCulling { get; protected set; }
+        public bool PerformFrustumCulling { get; protected set; } = true;
 
         /// <summary>
         /// Gets or sets the top most control in the UI hierarchy
@@ -108,24 +108,22 @@ namespace Engine
         /// <param name="game">Game class</param>
         public Scene(Game game)
         {
-            Game = game;
-            Game.Graphics.Resized += FireGraphicsResized;
+            if (game != null)
+            {
+                Game = game;
+                Game.Graphics.Resized += FireGraphicsResized;
 
-            Components = new();
+                var form = Game.Form;
+                Camera = Camera.CreateFree(
+                    Vector3.ForwardLH * -10f,
+                    Vector3.Zero,
+                    form.RenderWidth,
+                    form.RenderHeight);
+            }
+
             Components.Updated += ComponentsUpdated;
 
-            AudioManager = new GameAudioManager();
-
-            var form = Game.Form;
-            Camera = Camera.CreateFree(
-                Vector3.ForwardLH * -10f,
-                Vector3.Zero,
-                form.RenderWidth,
-                form.RenderHeight);
-
             Lights = SceneLights.CreateDefault(this);
-
-            PerformFrustumCulling = true;
         }
         /// <summary>
         /// Destructor
@@ -530,7 +528,8 @@ namespace Engine
         {
             var component = (TObj)Activator.CreateInstance(typeof(TObj), this, id, name);
 
-            await component.InitializeAssets(description);
+            await component.ReadAssets(description);
+            await component.InitializeAssets();
 
             return component;
         }

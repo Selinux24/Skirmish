@@ -121,9 +121,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIPanelDescription description)
+        public override async Task ReadAssets(UIPanelDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             if (Description.Background != null)
             {

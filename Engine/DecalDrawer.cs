@@ -104,9 +104,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(DecalDrawerDescription description)
+        public override async Task ReadAssets(DecalDrawerDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             MaxDecalCount = Description.MaxDecalCount;
             RotateDecals = Description.RotateDecals;

@@ -117,9 +117,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(ModelDescription description)
+        public override async Task ReadAssets(ModelDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             await InitializeGeometry(description);
 
@@ -147,6 +147,14 @@ namespace Engine
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
             boundsHelper = new(GetPoints());
+        }
+        /// <inheritdoc/>
+        public override async Task InitializeAssets()
+        {
+            foreach (var drawable in GetDrawingDataCollection())
+            {
+                await drawable.Initialize(Name);
+            }
         }
 
         /// <inheritdoc/>

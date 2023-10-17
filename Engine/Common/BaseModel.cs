@@ -79,9 +79,9 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
+        public override async Task ReadAssets(T description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
             CullingVolumeType = description?.CullingVolumeType ?? CullingVolumeTypes.SphericVolume;
@@ -93,22 +93,20 @@ namespace Engine.Common
         /// Initializes model geometry
         /// </summary>
         /// <param name="description">Description</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        protected Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
+        protected Task InitializeGeometry(T description)
         {
             if (description?.Content == null)
             {
                 throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
 
-            return InitializeGeometryInternal(description, instancingBuffer);
+            return InitializeGeometryInternal(description);
         }
         /// <summary>
         /// Initializes model geometry
         /// </summary>
         /// <param name="description">Description</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private async Task InitializeGeometryInternal(T description, BufferDescriptor instancingBuffer = null)
+        private async Task InitializeGeometryInternal(T description)
         {
             var geo = await description.Content.ReadContentData();
             if (!geo.Any())
@@ -133,7 +131,7 @@ namespace Engine.Common
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, instancingBuffer);
+                var drawable = await DrawingData.Read(Game, iGeo, desc);
 
                 meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -148,7 +146,7 @@ namespace Engine.Common
                         defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, instancingBuffer);
+                    var drawable = await DrawingData.Read(Game, content[lod], desc);
 
                     meshesByLOD.Add(lod, drawable);
                 }
@@ -282,6 +280,13 @@ namespace Engine.Common
             }
 
             return null;
+        }
+        /// <summary>
+        /// Gets the drawing data object collection
+        /// </summary>
+        public IEnumerable<DrawingData> GetDrawingDataCollection()
+        {
+            return meshesByLOD.Values.AsEnumerable();
         }
 
         /// <summary>

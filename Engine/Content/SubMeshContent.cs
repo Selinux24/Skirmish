@@ -61,7 +61,7 @@ namespace Engine.Content
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; set; } = Matrix.Identity;
+        public Matrix Transform { get; private set; } = Matrix.Identity;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -102,6 +102,11 @@ namespace Engine.Content
                         return false;
                     }
 
+                    if (!mesh.Transform.IsIdentity)
+                    {
+                        mesh.BakeTransform(mesh.Transform);
+                    }
+
                     if (mesh.Vertices.Length > 0)
                     {
                         verts.AddRange(mesh.Vertices);
@@ -115,7 +120,7 @@ namespace Engine.Content
                     indexOffset = (uint)verts.Count;
                 }
 
-                optimizedMesh = new SubMeshContent(topology, material, isTextured, false);
+                optimizedMesh = new SubMeshContent(topology, material, isTextured, false, Matrix.Identity);
 
                 optimizedMesh.SetVertices(verts);
                 optimizedMesh.SetIndices(idx);
@@ -131,7 +136,8 @@ namespace Engine.Content
         /// <param name="material">Material name</param>
         /// <param name="isTextured">Is textured mesh</param>
         /// <param name="isHull">Is hull mesh</param>
-        public SubMeshContent(Topology topology, string material, bool isTextured, bool isHull)
+        /// <param name="transform">Transform</param>
+        public SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
         {
             Id = GetNextId();
 
@@ -139,6 +145,7 @@ namespace Engine.Content
             Material = material;
             Textured = isTextured;
             IsHull = isHull;
+            Transform = transform;
         }
 
         /// <summary>
@@ -244,6 +251,20 @@ namespace Engine.Content
                 VertexType = VertexData.GetVertexType(Vertices[0], Textured);
             }
         }
+
+        /// <summary>
+        /// Gets vertex data list
+        /// </summary>
+        /// <returns>Returns the vertex data list</returns>
+        public IEnumerable<VertexData> GetVertices()
+        {
+            if (Transform.IsIdentity)
+            {
+                return Vertices.AsReadOnly();
+            }
+
+            return VertexData.Transform(Vertices, Transform);
+        }
         /// <summary>
         /// Gets triangle list
         /// </summary>
@@ -252,6 +273,8 @@ namespace Engine.Content
         {
             if (Topology == Topology.TriangleList)
             {
+                var vertices = GetVertices().ToArray();
+
                 var triangles = new List<Triangle>();
 
                 if (Indices.Length > 0)
@@ -259,19 +282,19 @@ namespace Engine.Content
                     for (int i = 0; i < Indices.Length; i += 3)
                     {
                         triangles.Add(new Triangle(
-                            Vertices[(int)Indices[i + 0]].Position.Value,
-                            Vertices[(int)Indices[i + 1]].Position.Value,
-                            Vertices[(int)Indices[i + 2]].Position.Value));
+                            vertices[(int)Indices[i + 0]].Position.Value,
+                            vertices[(int)Indices[i + 1]].Position.Value,
+                            vertices[(int)Indices[i + 2]].Position.Value));
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < Vertices.Length; i += 3)
+                    for (int i = 0; i < vertices.Length; i += 3)
                     {
                         triangles.Add(new Triangle(
-                            Vertices[i + 0].Position.Value,
-                            Vertices[i + 1].Position.Value,
-                            Vertices[i + 2].Position.Value));
+                            vertices[i + 0].Position.Value,
+                            vertices[i + 1].Position.Value,
+                            vertices[i + 2].Position.Value));
                     }
                 }
 
@@ -283,17 +306,30 @@ namespace Engine.Content
             }
         }
         /// <summary>
-        /// Transforms the vertex data
+        /// Transforms the vertex data and resets de internal transform to identity
         /// </summary>
         /// <param name="transform">Transform to apply</param>
-        public void ApplyTransform(Matrix transform)
+        public void BakeTransform(Matrix transform)
         {
+            if (transform.IsIdentity)
+            {
+                return;
+            }
+
             Transform = Matrix.Identity;
 
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i] = Vertices[i].Transform(transform);
             }
+        }
+        /// <summary>
+        /// Sets the specified transform matrix
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
+        public void SetTransform(Matrix transform)
+        {
+            Transform = transform;
         }
 
         /// <summary>

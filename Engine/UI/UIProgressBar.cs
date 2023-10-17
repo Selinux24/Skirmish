@@ -92,9 +92,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIProgressBarDescription description)
+        public override async Task ReadAssets(UIProgressBarDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             ProgressValue = 0;
 

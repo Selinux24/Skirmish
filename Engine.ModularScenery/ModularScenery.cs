@@ -149,9 +149,9 @@ namespace Engine.Modular
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(ModularSceneryDescription description)
+        public override async Task ReadAssets(ModularSceneryDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             assetMap = Description.GetAssetMap();
 

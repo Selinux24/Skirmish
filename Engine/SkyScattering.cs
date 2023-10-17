@@ -257,9 +257,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(SkyScatteringDescription description)
+        public override async Task ReadAssets(SkyScatteringDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             PlanetRadius = Description.PlanetRadius;
             PlanetAtmosphereRadius = Description.PlanetAtmosphereRadius;

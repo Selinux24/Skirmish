@@ -41,9 +41,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UICursorDescription description)
+        public override async Task ReadAssets(UICursorDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Centered = Description.Centered;
             Delta = Description.Delta;

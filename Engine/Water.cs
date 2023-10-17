@@ -87,9 +87,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(WaterDescription description)
+        public override async Task ReadAssets(WaterDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             WaterState = new WaterState
             {
