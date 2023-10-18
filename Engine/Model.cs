@@ -28,9 +28,9 @@ namespace Engine
         /// </summary>
         private readonly GeometryHelper geometryHelper = new();
         /// <summary>
-        /// Model parts collection
+        /// Model part helper
         /// </summary>
-        private readonly List<ModelPart> modelParts = new();
+        private readonly ModelPartHelper partHelper = new();
 
         /// <summary>
         /// Current drawing data
@@ -100,7 +100,7 @@ namespace Engine
         {
             get
             {
-                return modelParts.Count;
+                return partHelper.Count;
             }
         }
 
@@ -127,18 +127,17 @@ namespace Engine
 
             if (Description.TransformDependences?.Any() == true)
             {
-                AddModelParts(Description.TransformNames, Description.TransformDependences);
+                partHelper.AddModelParts(description.TransformNames, description.TransformDependences, ManipulatorUpdated);
+                Manipulator = partHelper.Root?.Manipulator;
             }
-            else
-            {
-                Manipulator = new Manipulator3D();
-                Manipulator.Updated += ManipulatorUpdated;
-            }
+
+            Manipulator ??= new();
+            Manipulator.Updated += ManipulatorUpdated;
 
             var drawData = GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
             {
-                SetModelPartsTransforms(drawData);
+                partHelper.SetTransforms(drawData);
 
                 Lights = drawData.GetLights();
             }
@@ -167,21 +166,18 @@ namespace Engine
             TransitionOffset = AnimationController.TransitionOffset;
             TransitionInterpolation = AnimationController.TransitionInterpolationAmount;
 
-            if (modelParts.Count > 0)
+            if (partHelper.Count > 0)
             {
-                modelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
+                partHelper.Update(context.GameTime);
             }
             else
             {
                 Manipulator.Update(context.GameTime);
             }
 
-            if (Lights.Any())
+            foreach (var light in Lights)
             {
-                foreach (var light in Lights)
-                {
-                    light.ParentTransform = Manipulator.LocalTransform;
-                }
+                light.ParentTransform = Manipulator.LocalTransform;
             }
         }
 
@@ -318,74 +314,6 @@ namespace Engine
             return count > 0;
         }
 
-        /// <summary>
-        /// Add model parts
-        /// </summary>
-        /// <param name="names">Part names</param>
-        /// <param name="dependences">Part dependences</param>
-        private void AddModelParts(string[] names, int[] dependences)
-        {
-            int parents = dependences.Count(i => i == -1);
-            if (parents != 1)
-            {
-                throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
-            }
-
-            if (Array.Exists(dependences, i => i < -1 || i > dependences.Length - 1))
-            {
-                throw new EngineException("Bad transformation dependency indices.");
-            }
-
-            for (int i = 0; i < names.Length; i++)
-            {
-                modelParts.Add(new ModelPart(names[i]));
-            }
-
-            for (int i = 0; i < names.Length; i++)
-            {
-                var thisPart = GetModelPartByName(names[i]);
-                if (thisPart == null)
-                {
-                    continue;
-                }
-
-                var thisMan = thisPart.Manipulator;
-                thisMan.Updated += ManipulatorUpdated;
-
-                var parentIndex = dependences[i];
-                if (parentIndex >= 0)
-                {
-                    var parentPart = GetModelPartByName(names[parentIndex]);
-
-                    thisMan.Parent = parentPart?.Manipulator;
-                }
-                else
-                {
-                    Manipulator = thisMan;
-                }
-            }
-        }
-        /// <summary>
-        /// Sets model part transforms from original meshes
-        /// </summary>
-        /// <param name="drawData">Drawing data</param>
-        private void SetModelPartsTransforms(DrawingData drawData)
-        {
-            for (int i = 0; i < modelParts.Count; i++)
-            {
-                var thisName = modelParts[i].Name;
-
-                var mesh = drawData?.GetMeshByName(thisName);
-                if (mesh == null)
-                {
-                    continue;
-                }
-
-                var part = modelParts.First(p => p.Name == thisName);
-                part.Manipulator.SetTransform(mesh.Transform);
-            }
-        }
-
         /// <inheritdoc/>
         public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
@@ -440,14 +368,12 @@ namespace Engine
         /// <inheritdoc/>
         public Matrix GetTransformByName(string name)
         {
-            var part = GetModelPartByName(name);
-
-            return part?.Manipulator.GlobalTransform ?? Manipulator.GlobalTransform;
+            return partHelper.GetTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public ModelPart GetModelPartByName(string name)
         {
-            return modelParts.Find(p => p.Name == name);
+            return partHelper.GetModelPartByName(name);
         }
 
         /// <summary>

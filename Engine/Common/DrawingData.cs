@@ -496,6 +496,11 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         public Mesh GetMeshByName(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
             if (!meshes.ContainsKey(name))
             {
                 return null;
