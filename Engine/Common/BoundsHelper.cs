@@ -47,8 +47,16 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        public BoundsHelper()
+        {
+
+        }
+
+        /// <summary>
+        /// Sets the point list
+        /// </summary>
         /// <param name="points">Point list</param>
-        public BoundsHelper(IEnumerable<Vector3> points)
+        public void SetPoints(IEnumerable<Vector3> points)
         {
             if (points?.Any() != true)
             {
@@ -72,7 +80,6 @@ namespace Engine.Common
                 orientedBox = new OrientedBoundingBox(initialAabb);
             }
         }
-
         /// <summary>
         /// Invalidates the internal state
         /// </summary>

@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Volume helper
         /// </summary>
-        private BoundsHelper boundsHelper;
+        private readonly BoundsHelper boundsHelper = new();
         /// <summary>
         /// Geometry helper
         /// </summary>
@@ -145,7 +145,7 @@ namespace Engine
             AnimationController = new AnimationController(this);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            boundsHelper = new(GetPoints());
+            boundsHelper.SetPoints(GetPoints());
         }
         /// <inheritdoc/>
         public override async Task InitializeAssets()
