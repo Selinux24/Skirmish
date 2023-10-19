@@ -1060,9 +1060,9 @@ namespace Tanks
 
                 treeCount--;
 
-                float progressValue = count++ / (float)total;
-                loadingBar.ProgressValue = progressValue;
-                loadingBar.Caption.Text = $"Planting trees... {(int)(progressValue * 100f)}%";
+                float progress = count++ / (float)total;
+                loadingBar.ProgressValue = progress;
+                loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
                 loadingBar.Visible = true;
 
                 tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, 0, 0), scale);

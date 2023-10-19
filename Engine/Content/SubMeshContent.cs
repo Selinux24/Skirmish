@@ -61,7 +61,7 @@ namespace Engine.Content
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; private set; } = Matrix.Identity;
+        public Matrix Transform { get; private set; }
 
         /// <summary>
         /// Submesh grouping optimization
@@ -71,60 +71,63 @@ namespace Engine.Content
         /// <returns>Returns true if the mesh array was optimized</returns>
         public static bool OptimizeMeshes(IEnumerable<SubMeshContent> meshArray, out SubMeshContent optimizedMesh)
         {
-            optimizedMesh = null;
+            if (meshArray?.Any() != true)
+            {
+                optimizedMesh = null;
 
-            int? count = meshArray?.Count();
+                return false;
+            }
 
-            if (count == 1)
+            if (meshArray.Count() == 1)
             {
                 optimizedMesh = meshArray.First();
+
+                return true;
             }
-            else if (count > 1)
+
+            var firstMesh = meshArray.First();
+
+            string material = firstMesh.Material;
+            var topology = firstMesh.Topology;
+            var vertexType = firstMesh.VertexType;
+            bool isTextured = firstMesh.Textured;
+
+            var verts = new List<VertexData>();
+            var idx = new List<uint>();
+
+            uint indexOffset = 0;
+
+            foreach (var mesh in meshArray)
             {
-                var firstMesh = meshArray.First();
-
-                string material = firstMesh.Material;
-                var topology = firstMesh.Topology;
-                var vertexType = firstMesh.VertexType;
-                bool isTextured = firstMesh.Textured;
-
-                var verts = new List<VertexData>();
-                var idx = new List<uint>();
-
-                uint indexOffset = 0;
-
-                foreach (var mesh in meshArray)
+                if (mesh.VertexType != vertexType || mesh.Topology != topology)
                 {
-                    if (mesh.VertexType != vertexType || mesh.Topology != topology)
-                    {
-                        optimizedMesh = null;
+                    optimizedMesh = null;
 
-                        return false;
-                    }
-
-                    if (!mesh.Transform.IsIdentity)
-                    {
-                        mesh.BakeTransform(mesh.Transform);
-                    }
-
-                    if (mesh.Vertices.Length > 0)
-                    {
-                        verts.AddRange(mesh.Vertices);
-                    }
-
-                    if (mesh.Indices.Length > 0)
-                    {
-                        idx.AddRange(mesh.Indices.Select(i => i + indexOffset));
-                    }
-
-                    indexOffset = (uint)verts.Count;
+                    return false;
                 }
 
-                optimizedMesh = new SubMeshContent(topology, material, isTextured, false, Matrix.Identity);
+                if (!mesh.Transform.IsIdentity)
+                {
+                    mesh.BakeTransform(mesh.Transform);
+                }
 
-                optimizedMesh.SetVertices(verts);
-                optimizedMesh.SetIndices(idx);
+                if (mesh.Vertices.Length > 0)
+                {
+                    verts.AddRange(mesh.Vertices);
+                }
+
+                if (mesh.Indices.Length > 0)
+                {
+                    idx.AddRange(mesh.Indices.Select(i => i + indexOffset));
+                }
+
+                indexOffset = (uint)verts.Count;
             }
+
+            optimizedMesh = new(topology, material, isTextured, false, Matrix.Identity);
+
+            optimizedMesh.SetVertices(verts);
+            optimizedMesh.SetIndices(idx);
 
             return true;
         }
