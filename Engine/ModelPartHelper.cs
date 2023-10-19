@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Model parts
         /// </summary>
-        private readonly List<ModelPart> modelParts = new();
+        private readonly List<IModelPart> modelParts = new();
 
         /// <summary>
         /// Model part count
@@ -29,7 +29,7 @@ namespace Engine
         /// <summary>
         /// Gets the root part
         /// </summary>
-        public ModelPart Root
+        public IModelPart Root
         {
             get
             {
@@ -42,7 +42,7 @@ namespace Engine
         /// </summary>
         /// <param name="names">Part names</param>
         /// <param name="dependences">Part dependences</param>
-        public IEnumerable<ModelPart> AddModelParts(string[] names, int[] dependences, EventHandler manipulatorChangedEvent)
+        public IEnumerable<IModelPart> AddModelParts(string[] names, int[] dependences, EventHandler manipulatorChangedEvent)
         {
             int parents = dependences.Count(i => i == -1);
             if (parents != 1)
@@ -101,7 +101,7 @@ namespace Engine
         /// Gets model part by name
         /// </summary>
         /// <param name="name">Name</param>
-        public ModelPart GetModelPartByName(string name)
+        public IModelPart GetModelPartByName(string name)
         {
             return modelParts.Find(p => p.Name == name);
         }
@@ -111,9 +111,7 @@ namespace Engine
         /// <param name="name">Name</param>
         public Matrix? GetTransformByName(string name)
         {
-            var part = GetModelPartByName(name);
-
-            return part?.GetTransform();
+            return GetModelPartByName(name)?.GetTransform();
         }
         /// <summary>
         /// Updates internal state

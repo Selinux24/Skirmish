@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>, IUseSkinningData
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts, IUseSkinningData
     {
         /// <summary>
         /// Global id counter
@@ -275,12 +275,10 @@ namespace Engine
         /// <inheritdoc/>
         public Matrix GetTransformByName(string name)
         {
-            var part = GetModelPartByName(name);
-
-            return part?.Manipulator.GlobalTransform ?? Manipulator.GlobalTransform;
+            return partHelper.GetTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public ModelPart GetModelPartByName(string name)
+        public IModelPart GetModelPartByName(string name)
         {
             return partHelper.GetModelPartByName(name);
         }

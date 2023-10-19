@@ -1512,7 +1512,7 @@ namespace Engine.Content.FmtCollada
 
                 if (procChilds && node.Nodes?.Length > 0)
                 {
-                    ProcessSceneNodes(node.Nodes, bakeTransforms ? trn : transform, true, bakeTransforms, modelContent);
+                    ProcessSceneNodes(node.Nodes, trn, true, bakeTransforms, modelContent);
                 }
             }
         }

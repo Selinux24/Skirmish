@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : BaseModel<ModelDescription>, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>
+    public class Model : BaseModel<ModelDescription>, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts
     {
         /// <summary>
         /// Level of detail
@@ -371,7 +371,7 @@ namespace Engine
             return partHelper.GetTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public ModelPart GetModelPartByName(string name)
+        public IModelPart GetModelPartByName(string name)
         {
             return partHelper.GetModelPartByName(name);
         }

@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Model has parts interface
     /// </summary>
-    public interface IModelHasParts<out T> where T : IModelPart
+    public interface IModelHasParts
     {
         /// <summary>
         /// Gets the model part count
@@ -22,6 +22,6 @@ namespace Engine
         /// Gets the model part by name
         /// </summary>
         /// <param name="name">Name</param>
-        T GetModelPartByName(string name);
+        IModelPart GetModelPartByName(string name);
     }
 }

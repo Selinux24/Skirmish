@@ -7,21 +7,13 @@ namespace Engine
     /// </summary>
     public class ModelPart : IModelPart
     {
-        /// <summary>
-        /// Part name
-        /// </summary>
-        public string Name { get; private set; }
-        /// <summary>
-        /// Parent model part
-        /// </summary>
-        public ModelPart Parent { get; private set; }
-        /// <summary>
-        /// Initial part transform
-        /// </summary>
+        /// <inheritdoc/>
+        public string Name { get; set; }
+        /// <inheritdoc/>
         public Matrix InitialTransform { get; set; } = Matrix.Identity;
-        /// <summary>
-        /// Manipulator
-        /// </summary>
+        /// <inheritdoc/>
+        public IModelPart Parent { get; private set; }
+        /// <inheritdoc/>
         public Manipulator3D Manipulator { get; private set; } = new();
 
         /// <summary>
@@ -33,21 +25,22 @@ namespace Engine
             Name = name;
         }
 
-        /// <summary>
-        /// Sets the parent model part
-        /// </summary>
-        /// <param name="parent">Parent</param>
-        public void SetParent(ModelPart parent)
+        /// <inheritdoc/>
+        public void SetParent(IModelPart parent)
         {
             Parent = parent;
-            Manipulator.Parent = parent?.Manipulator;
         }
-        /// <summary>
-        /// Gets the part transform
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix GetTransform()
         {
-            return Manipulator.GlobalTransform * InitialTransform;
+            // Calculate local transform
+            var localTransform = Matrix.Invert(InitialTransform) * Manipulator.LocalTransform * InitialTransform;
+
+            // Get the parent transform, if any
+            var parentTransform = Parent?.GetTransform() ?? Matrix.Identity;
+
+            // Build transform
+            return localTransform * parentTransform;
         }
 
         /// <inheritdoc/>
