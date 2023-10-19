@@ -46,6 +46,10 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModes sceneMode = SceneModes.Unknown;
+        /// <summary>
+        /// Audio manager
+        /// </summary>
+        private GameAudioManager audioManager = null;
 
         /// <summary>
         /// Scene bounding box
@@ -58,7 +62,13 @@ namespace Engine
         /// <summary>
         /// Audio manager
         /// </summary>
-        protected GameAudioManager AudioManager { get; private set; } = new();
+        protected GameAudioManager AudioManager
+        {
+            get
+            {
+                return audioManager ??= new();
+            }
+        }
 
         /// <summary>
         /// Game class
@@ -157,8 +167,8 @@ namespace Engine
             Renderer?.Dispose();
             Renderer = null;
 
-            AudioManager?.Dispose();
-            AudioManager = null;
+            audioManager?.Dispose();
+            audioManager = null;
 
             Camera?.Dispose();
             Camera = null;
