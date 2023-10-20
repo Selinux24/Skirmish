@@ -1523,7 +1523,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             var color = new Color(Color.Red.ToColor3(), 0.6f);
 
-            var tris = soldier.GetTriangles();
+            var tris = soldier.GetGeometry();
 
             if (soldierTris == null)
             {

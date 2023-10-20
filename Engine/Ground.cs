@@ -71,18 +71,6 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
-        {
-            return GetTriangles(refresh)
-                .SelectMany(t => t.GetVertices())
-                .AsEnumerable();
-        }
-        /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetTriangles(bool refresh = false)
-        {
-            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? Enumerable.Empty<Triangle>();
-        }
-        /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
             return BoundingSphere.FromBox(GetBoundingBox(refresh));
@@ -98,7 +86,7 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
@@ -109,15 +97,27 @@ namespace Engine
 
             if (hull.HasFlag(PickingHullTypes.Hull))
             {
-                return GetTriangles();
+                return GetGeometry(refresh);
             }
 
             if (hull.HasFlag(PickingHullTypes.Geometry))
             {
-                return GetTriangles();
+                return GetGeometry(refresh);
             }
 
             return Enumerable.Empty<Triangle>();
+        }
+        /// <inheritdoc/>
+        public virtual IEnumerable<Triangle> GetGeometry(bool refresh = false)
+        {
+            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? Enumerable.Empty<Triangle>();
+        }
+        /// <inheritdoc/>
+        public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
+        {
+            return GetGeometry(refresh)
+                .SelectMany(t => t.GetVertices())
+                .AsEnumerable();
         }
 
         /// <inheritdoc/>

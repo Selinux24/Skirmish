@@ -25,7 +25,7 @@ namespace PhysicsSamples.ScenePhysics
 
         private static ConvexMeshCollider CollisionTriangleSoupFromModel(Model model)
         {
-            var tris = model.GetTriangles(true);
+            var tris = model.GetGeometry(true);
             tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.GlobalTransform));
 
             return new ConvexMeshCollider(tris);

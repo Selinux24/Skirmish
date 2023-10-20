@@ -354,7 +354,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 float distToEnd = Vector3.Distance(pathPosition, soldierPath.Last);
 
                 var color = GetColor(distToEnd / soldierPath.Length);
-                var tris = soldier.GetTriangles();
+                var tris = soldier.GetGeometry();
                 itemTris.AddPrimitives(color, tris);
 
                 pathIndex += pathStep;
@@ -498,7 +498,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
                 animData.AppendLine($"PathUpdated  : {e.CurrentPath}");
 
-                var tris = soldier.GetTriangles();
+                var tris = soldier.GetGeometry();
                 itemTris.AddPrimitives(new Color(Color.MediumPurple.ToColor3(), 0.5f), tris);
             }
         }

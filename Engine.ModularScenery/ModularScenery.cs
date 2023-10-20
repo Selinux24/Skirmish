@@ -716,7 +716,7 @@ namespace Engine.Modular
             return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             if (sceneTriangles != null)
             {
@@ -727,13 +727,13 @@ namespace Engine.Modular
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
-                .SelectMany(instance => instance.GetGeometry(geometryType));
+                .SelectMany(instance => instance.GetGeometry(geometryType, refresh));
 
             triangleLits.AddRange(assetTriangles);
 
             var objTriangles = objects.Values
                 .SelectMany(obj => obj.GetInstances().Where(i => i.Visible))
-                .SelectMany(instance => instance.GetGeometry(geometryType));
+                .SelectMany(instance => instance.GetGeometry(geometryType, refresh));
 
             triangleLits.AddRange(objTriangles);
 

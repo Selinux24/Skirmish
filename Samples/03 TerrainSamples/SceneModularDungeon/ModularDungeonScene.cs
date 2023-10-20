@@ -808,7 +808,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            var boxes = items.Select(i => SharpDXExtensions.BoundingBoxFromPoints(i.GetPoints().ToArray()));
+            var boxes = items.Select(i => i.GetBoundingBox());
             bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
@@ -827,7 +827,7 @@ namespace TerrainSamples.SceneModularDungeon
             //Refresh affected obstacles (if any)
             obs.ToList().ForEach(o =>
             {
-                var obb = SharpDXExtensions.FromPoints(o.Item.GetPoints(true));
+                var obb = o.Item.GetOrientedBoundingBox();
 
                 RemoveObstacle(o.Index);
                 o.Index = AddObstacle(obb);
@@ -1018,7 +1018,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            var tris = selectedItem.Instance.GetTriangles();
+            var tris = selectedItem.Instance.GetGeometry();
             if (tris.Any())
             {
                 Color4 sItemColor = Color.LightYellow;
@@ -1635,7 +1635,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             foreach (var item in sceneryObjects)
             {
-                var obb = SharpDXExtensions.FromPoints(item.GetPoints());
+                var obb = item.GetOrientedBoundingBox();
 
                 int index = AddObstacle(obb);
                 if (index >= 0)

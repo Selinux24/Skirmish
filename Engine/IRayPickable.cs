@@ -62,8 +62,21 @@ namespace Engine
         /// Gets the picking hull of the instance
         /// </summary>
         /// <param name="geometryType">Geometry type</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns the geometry of the instance</returns>
-        IEnumerable<T> GetGeometry(GeometryTypes geometryType);
+        IEnumerable<T> GetGeometry(GeometryTypes geometryType, bool refresh = false);
+        /// <summary>
+        /// Gets primitive list
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        /// <returns></returns>
+        IEnumerable<T> GetGeometry(bool refresh = false);
+        /// <summary>
+        /// Gets point list
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        /// <returns></returns>
+        IEnumerable<Vector3> GetPoints(bool refresh = false);
     }
 
     /// <summary>

@@ -383,8 +383,8 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
-            boundsHelper?.Invalidate();
-            geometryHelper?.Invalidate();
+            boundsHelper.Invalidate();
+            geometryHelper.Invalidate();
         }
 
         /// <inheritdoc/>
@@ -420,7 +420,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
@@ -442,15 +442,33 @@ namespace Engine
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
 
-                return GetTriangles();
+                return GetGeometry(refresh);
             }
 
             if (hull.HasFlag(PickingHullTypes.Geometry))
             {
-                return GetTriangles();
+                return GetGeometry(refresh);
             }
 
             return Enumerable.Empty<Triangle>();
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetGeometry(bool refresh = false)
+        {
+            return geometryHelper.GetTriangles(
+                GetDrawingData(GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        {
+            return geometryHelper.GetPoints(
+                GetDrawingData(GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
         }
 
         /// <inheritdoc/>
@@ -495,25 +513,6 @@ namespace Engine
             }
 
             return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
-        {
-            return geometryHelper.GetPoints(
-                GetDrawingData(GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
-        }
-        /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
-        {
-            return geometryHelper.GetTriangles(
-                GetDrawingData(GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
         }
 
         /// <inheritdoc/>

@@ -39,7 +39,7 @@ namespace PhysicsSamples.ScenePhysics
             var bbox = model.GetBoundingBox();
             octree = new OcTree<ICollider>(bbox, 50);
 
-            var tris = model.GetTriangles(true);
+            var tris = model.GetGeometry(true);
             var colliders = new ICollider[tris.Count()];
             for (int i = 0; i < tris.Count(); i++)
             {

@@ -686,7 +686,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
             if (showItemDEBUG)
             {
-                var tris = selectedItem.GetTriangles();
+                var tris = selectedItem.GetGeometry();
                 var bbox = selectedItem.GetBoundingBox();
 
                 itemTris.SetPrimitives(itemTrisColor, tris);
