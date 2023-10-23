@@ -1642,10 +1642,10 @@ You will lost all the game progress.",
         }
         private (Vector3 Position, Vector3 Direction) GetTankBarrel(ModelInstance model)
         {
-            var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
+            var barrelTransform = model.GetTransformByName(tankBarrelPart);
 
-            var dir = barrelManipulator.GlobalTransform.Forward;
-            var pos = barrelManipulator.GlobalTransform.TranslationVector + (dir * 15f);
+            var dir = barrelTransform.Forward;
+            var pos = barrelTransform.TranslationVector + (dir * 15f);
 
             return (pos, dir);
         }
@@ -1674,7 +1674,30 @@ You will lost all the game progress.",
         }
         private void RotateTankTurretTo(ModelInstance model, Vector3 position)
         {
-            model.GetModelPartByName(tankTurretPart).Manipulator.RotateTo(position, Vector3.Up, Axis.Y, 0.01f);
+            //Gets the current barrel transform
+            var barrelTransform = model.GetTransformByName(tankTurretPart);
+
+            //Gets the position and direction of the barrel
+            var barrelDir = barrelTransform.Forward;
+            var barrelPos = barrelTransform.TranslationVector;
+
+            //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
+            var newDir = Vector3.Normalize(position - barrelPos);
+
+            var angle = Helper.AngleSigned(barrelDir, newDir);
+            if (MathUtil.IsZero(angle))
+            {
+                return;
+            }
+
+            //Apply the angle correction to the local manipulator direction
+            var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
+            var localPos = barrelManipulator.Position;
+            var c = Vector3.Cross(barrelDir, newDir);
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix.RotationAxis(c, angle));
+
+            //Apply de local delta
+            barrelManipulator.RotateTo(localPos + localDir, Vector3.Up, Axis.Y, 0.01f);
         }
         private void PaintMinimap()
         {
