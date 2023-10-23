@@ -1900,12 +1900,12 @@ You will lost all the game progress.",
                             if (Shooter.Intersects(IntersectDetectionMode.Mesh, tree, IntersectDetectionMode.Mesh))
                             {
                                 //Find collision vector
-                                var collision = Shooter.Manipulator.Position - tree.Manipulator.Position;
-                                collision.Y = 0;
-                                collision.Normalize();
+                                var collisionVector = Shooter.Manipulator.Position - tree.Manipulator.Position;
+                                collisionVector.Y = 0;
+                                collisionVector.Normalize();
 
                                 //Store a tree controller
-                                TreeController.AddFallingTree(tree, collision);
+                                TreeController.AddFallingTree(tree, collisionVector);
                             }
                         });
                 });

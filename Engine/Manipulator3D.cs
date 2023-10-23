@@ -475,19 +475,11 @@ namespace Engine
         /// <inheritdoc/>
         public void SetNormal(Vector3 normal, float interpolationAmount = 0, bool updateState = false)
         {
-            Quaternion newRotation;
-
             float angle = Helper.Angle(Up, normal);
-            if (angle != 0)
-            {
-                Vector3 axis = Vector3.Cross(Up, normal);
 
-                newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
-            }
-            else
-            {
-                newRotation = Quaternion.RotationAxis(Vector3.Left, 0f) * rotation;
-            }
+            var axis = angle != 0 ? Vector3.Cross(Up, normal) : Vector3.Left;
+
+            var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 
             if (interpolationAmount > 0)
             {

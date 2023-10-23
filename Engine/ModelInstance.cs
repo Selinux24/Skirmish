@@ -323,6 +323,24 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        {
+            return geometryHelper.GetPoints(
+                model.GetDrawingData(model.GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetGeometry(bool refresh = false)
+        {
+            return geometryHelper.GetTriangles(
+                model.GetDrawingData(model.GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
+        }
+        /// <inheritdoc/>
         public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
@@ -354,24 +372,6 @@ namespace Engine
             }
 
             return Enumerable.Empty<Triangle>();
-        }
-        /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
-        {
-            return geometryHelper.GetPoints(
-                model.GetDrawingData(model.GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
-        }
-        /// <inheritdoc/>
-        public IEnumerable<Triangle> GetGeometry(bool refresh = false)
-        {
-            return geometryHelper.GetTriangles(
-                model.GetDrawingData(model.GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
         }
 
         /// <inheritdoc/>

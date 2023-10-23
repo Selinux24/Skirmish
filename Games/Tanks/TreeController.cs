@@ -24,7 +24,7 @@ namespace Tanks
         /// </summary>
         /// <param name="tree">Tree</param>
         /// <param name="collision">Collision vector</param>
-        public static void AddFallingTree(ModelInstance tree, Vector3 collision)
+        public static void AddFallingTree(ModelInstance tree, Vector3 collisionVector)
         {
             if (brokenTrees.Exists(t => t == tree))
             {
@@ -33,7 +33,7 @@ namespace Tanks
 
             brokenTrees.Add(tree);
 
-            trees.Add(new FallingTreeController() { Tree = tree, Collision = collision, Active = true });
+            trees.Add(new FallingTreeController() { Tree = tree, CollisionVector = collisionVector, Active = true });
         }
         /// <summary>
         /// Adds a tree to the controller
@@ -101,9 +101,9 @@ namespace Tanks
             /// </summary>
             public ModelInstance Tree { get; set; }
             /// <summary>
-            /// Collision
+            /// Collision vector
             /// </summary>
-            public Vector3 Collision { get; set; }
+            public Vector3 CollisionVector { get; set; }
             /// <summary>
             /// Active
             /// </summary>
@@ -120,11 +120,9 @@ namespace Tanks
                     return;
                 }
 
-                var target = Tree.Manipulator.Position + (Collision * 10f);
+                Tree.Manipulator.SetNormal(-CollisionVector, 0.1f);
 
-                Tree.Manipulator.RotateTo(target, Axis.None, 0.1f);
-
-                if (MathUtil.NearEqual(1f, Vector3.Dot(Collision, Tree.Manipulator.Forward)))
+                if (MathUtil.NearEqual(1f, Vector3.Dot(-CollisionVector, Tree.Manipulator.Up)))
                 {
                     Active = false;
 
