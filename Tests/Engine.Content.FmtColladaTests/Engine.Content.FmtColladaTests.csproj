@@ -6,15 +6,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Tank\Leopard.bmp" />
+    <None Remove="Resources\Tank\Leopard.dae" />
+    <None Remove="Resources\Tank\Leopard.json" />
     <None Remove="Resources\Tree1.dae" />
     <None Remove="Resources\tree1.json" />
+    <None Remove="Resources\Tree\tree1_baked.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Tree1.dae">
+    <Content Include="Resources\Tank\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\tree1.json">
+    <Content Include="Resources\Tank\Leopard.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Tank\Leopard.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Tree\tree1_baked.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Tree\Tree1.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Tree\tree1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

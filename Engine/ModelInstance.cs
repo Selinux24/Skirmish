@@ -269,9 +269,14 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public Matrix GetTransformByName(string name)
+        public Matrix GetLocalTransformByName(string name)
         {
-            return partHelper.GetTransformByName(name) ?? Manipulator.GlobalTransform;
+            return partHelper.GetLocalTransformByName(name) ?? Manipulator.GlobalTransform;
+        }
+        /// <inheritdoc/>
+        public Matrix GetGlobalTransformByName(string name)
+        {
+            return partHelper.GetGlobalTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public IModelPart GetModelPartByName(string name)

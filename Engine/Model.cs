@@ -207,7 +207,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.");
 
-                var localTransform = GetTransformByName(meshName);
+                var localTransform = GetLocalTransformByName(meshName);
 
                 var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
                 if (drawer == null)
@@ -271,7 +271,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.");
 
-                var localTransform = GetTransformByName(meshName);
+                var localTransform = GetLocalTransformByName(meshName);
 
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
@@ -366,9 +366,14 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public Matrix GetTransformByName(string name)
+        public Matrix GetLocalTransformByName(string name)
         {
-            return partHelper.GetTransformByName(name) ?? Manipulator.GlobalTransform;
+            return partHelper.GetLocalTransformByName(name) ?? Manipulator.GlobalTransform;
+        }
+        /// <inheritdoc/>
+        public Matrix GetGlobalTransformByName(string name)
+        {
+            return partHelper.GetGlobalTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public IModelPart GetModelPartByName(string name)

@@ -31,7 +31,7 @@ namespace Engine.Common
             }
 
             //Images
-            await res.ReadTextures(modelContent);
+            res.ReadTextures(modelContent);
 
             //Materials
             res.ReadMaterials(modelContent);
@@ -56,7 +56,7 @@ namespace Engine.Common
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> textures = new();
+        private readonly Dictionary<string, MeshTexture> textures = new();
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
@@ -148,24 +148,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Initializes a mesh dictionary
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="name">Owner name</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        /// <param name="meshes">Mesh dictionary</param>
-        private static void InitializeMeshDictionary(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
-        {
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
-
-            foreach (var mesh in meshes.Values)
-            {
-                mesh.Initialize(game, name, dynamicBuffers, instancingBuffer);
-            }
-        }
-
-        /// <summary>
         /// Initialize skinning data
         /// </summary>
         /// <param name="modelContent">Model content</param>
@@ -182,7 +164,7 @@ namespace Engine.Common
         /// Initialize textures
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        private async Task ReadTextures(ContentData modelContent)
+        private void ReadTextures(ContentData modelContent)
         {
             var modelTextures = modelContent.GetTextureContent();
             if (!modelTextures.Any())
@@ -194,17 +176,7 @@ namespace Engine.Common
             {
                 var info = texture.Content;
 
-                var view = await Game.ResourceManager.RequestResource(info);
-                if (view == null)
-                {
-                    string errorMessage = $"Texture cannot be requested: {info}";
-
-                    Logger.WriteError(nameof(DrawingData), errorMessage);
-
-                    throw new EngineException(errorMessage);
-                }
-
-                textures.Add(texture.Name, view);
+                textures.Add(texture.Name, new() { Content = info });
             }
         }
         /// <summary>
@@ -253,6 +225,7 @@ namespace Engine.Common
         {
             lights.AddRange(modelContent.CreateLights());
         }
+
         /// <summary>
         /// Initialize mesh buffers in the graphics device
         /// </summary>
@@ -269,6 +242,9 @@ namespace Engine.Common
 
             var beforeCount = Game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
+
+            //Initilizes mesh textures
+            await InitializeMeshTextures();
 
             //Generates a task list from the materials-mesh dictionary
             var taskList = meshes.Values
@@ -288,6 +264,49 @@ namespace Engine.Common
 
             var afterCount = Game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
+        }
+        /// <summary>
+        /// Initializes the texture dictionary
+        /// </summary>
+        private async Task InitializeMeshTextures()
+        {
+            foreach (var textureName in textures.Keys)
+            {
+                var meshTexture = textures[textureName];
+
+                var info = meshTexture.Content;
+
+                var view = await Game.ResourceManager.RequestResource(info);
+                if (view == null)
+                {
+                    string errorMessage = $"Texture cannot be requested: {info}";
+
+                    Logger.WriteError(nameof(DrawingData), errorMessage);
+
+                    throw new EngineException(errorMessage);
+                }
+
+                meshTexture.Resource = view;
+
+                textures[textureName] = meshTexture;
+            }
+        }
+        /// <summary>
+        /// Initializes a mesh dictionary
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <param name="meshes">Mesh dictionary</param>
+        private static void InitializeMeshDictionary(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> meshes)
+        {
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
+
+            foreach (var mesh in meshes.Values)
+            {
+                mesh.Initialize(game, name, dynamicBuffers, instancingBuffer);
+            }
         }
 
         /// <summary>
@@ -590,5 +609,20 @@ namespace Engine.Common
         {
             return lights.Select(l => l.Clone()).ToArray();
         }
+    }
+
+    /// <summary>
+    /// Mesh texture
+    /// </summary>
+    public struct MeshTexture
+    {
+        /// <summary>
+        /// Texture content
+        /// </summary>
+        public IImageContent Content;
+        /// <summary>
+        /// Texture resource
+        /// </summary>
+        public EngineShaderResourceView Resource;
     }
 }

@@ -13,11 +13,17 @@ namespace Engine
         int ModelPartCount { get; }
 
         /// <summary>
-        /// Gets the transform by transform name
+        /// Gets the local transform by transform name
         /// </summary>
         /// <param name="name">Transform name</param>
         /// <returns>Return the transform of the specified transform name</returns>
-        Matrix GetTransformByName(string name);
+        Matrix GetLocalTransformByName(string name);
+        /// <summary>
+        /// Gets the global transform by transform name
+        /// </summary>
+        /// <param name="name">Transform name</param>
+        /// <returns>Return the transform of the specified transform name</returns>
+        Matrix GetGlobalTransformByName(string name);
         /// <summary>
         /// Gets the model part by name
         /// </summary>

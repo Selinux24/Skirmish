@@ -30,8 +30,12 @@ namespace Engine
         /// <param name="parent">Parent</param>
         void SetParent(IModelPart parent);
         /// <summary>
-        /// Gets the part transform
+        /// Gets the part local transform
         /// </summary>
-        Matrix GetTransform();
+        Matrix GetLocalTransform();
+        /// <summary>
+        /// Gets the part global transform
+        /// </summary>
+        Matrix GetGlobalTransform();
     }
 }

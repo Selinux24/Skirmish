@@ -1642,7 +1642,7 @@ You will lost all the game progress.",
         }
         private (Vector3 Position, Vector3 Direction) GetTankBarrel(ModelInstance model)
         {
-            var barrelTransform = model.GetTransformByName(tankBarrelPart);
+            var barrelTransform = model.GetLocalTransformByName(tankBarrelPart);
 
             var dir = barrelTransform.Forward;
             var pos = barrelTransform.TranslationVector + (dir * 15f);
@@ -1675,7 +1675,7 @@ You will lost all the game progress.",
         private void RotateTankTurretTo(ModelInstance model, Vector3 position)
         {
             //Gets the current barrel transform
-            var barrelTransform = model.GetTransformByName(tankTurretPart);
+            var barrelTransform = model.GetLocalTransformByName(tankTurretPart);
 
             //Gets the position and direction of the barrel
             var barrelDir = barrelTransform.Forward;

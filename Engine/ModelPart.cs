@@ -31,16 +31,27 @@ namespace Engine
             Parent = parent;
         }
         /// <inheritdoc/>
-        public Matrix GetTransform()
+        public Matrix GetLocalTransform()
         {
             // Calculate local transform
             var localTransform = Matrix.Invert(InitialTransform) * Manipulator.LocalTransform * InitialTransform;
 
             // Get the parent transform, if any
-            var parentTransform = Parent?.GetTransform() ?? Matrix.Identity;
+            var parentTransform = Parent?.GetLocalTransform() ?? Matrix.Identity;
 
             // Build transform
             return localTransform * parentTransform;
+        }
+        /// <inheritdoc/>
+        public Matrix GetGlobalTransform()
+        {
+            var transform = Manipulator.LocalTransform * InitialTransform;
+
+            // Get the parent transform, if any
+            var parentTransform = Parent?.GetGlobalTransform() ?? Matrix.Identity;
+
+            // Build transform
+            return transform * parentTransform;
         }
 
         /// <inheritdoc/>

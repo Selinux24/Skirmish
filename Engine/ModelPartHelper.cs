@@ -106,12 +106,20 @@ namespace Engine
             return modelParts.Find(p => p.Name == name);
         }
         /// <summary>
-        /// Gets the part transform by name
+        /// Gets the part's local transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetTransformByName(string name)
+        public Matrix? GetLocalTransformByName(string name)
         {
-            return GetModelPartByName(name)?.GetTransform();
+            return GetModelPartByName(name)?.GetLocalTransform();
+        }
+        /// <summary>
+        /// Gets the part's global transform by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public Matrix? GetGlobalTransformByName(string name)
+        {
+            return GetModelPartByName(name)?.GetGlobalTransform();
         }
         /// <summary>
         /// Updates internal state

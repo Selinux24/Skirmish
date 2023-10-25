@@ -40,6 +40,6 @@ namespace Engine
         /// </summary>
         /// <param name="textures">Texture dictionary</param>
         /// <returns>Returns a new mesh material</returns>
-        IMeshMaterial CreateMeshMaterial(IDictionary<string, EngineShaderResourceView> textures);
+        IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTexture> textures);
     }
 }
