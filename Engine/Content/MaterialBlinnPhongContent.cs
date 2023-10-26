@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Collections.Generic;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Material content
     /// </summary>
@@ -75,7 +74,7 @@ namespace Engine.Content
         public bool IsTransparent { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTexture> textures)
+        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTextureData> textures)
         {
             return new MeshMaterial
             {

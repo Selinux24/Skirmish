@@ -352,16 +352,16 @@ namespace Engine
 
             var dc = context.DeviceContext;
 
-            foreach (var meshMaterial in drawingData.IterateMaterials())
+            foreach (var matData in drawingData.IterateMaterials())
             {
-                string materialName = meshMaterial.MaterialName;
-                var material = meshMaterial.Material;
-                string meshName = meshMaterial.MeshName;
-                var mesh = meshMaterial.Mesh;
+                string materialName = matData.MaterialName;
+                var meshMaterial = matData.Material;
+                string meshName = matData.MeshName;
+                var mesh = matData.Mesh;
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, true, material.Material.IsTransparent);
+                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, true, meshMaterial.Material.IsTransparent);
                 if (drawer == null)
                 {
                     continue;
@@ -373,7 +373,7 @@ namespace Engine
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = material,
+                    Material = meshMaterial,
                     UseAnisotropic = false,
                     TextureIndex = 0,
                     TintColor = Color4.White,
@@ -482,16 +482,16 @@ namespace Engine
 
             var dc = context.DeviceContext;
 
-            foreach (var meshMaterial in drawingData.IterateMaterials())
+            foreach (var matData in drawingData.IterateMaterials())
             {
-                string materialName = meshMaterial.MaterialName;
-                var material = meshMaterial.Material;
-                string meshName = meshMaterial.MeshName;
-                var mesh = meshMaterial.Mesh;
+                string materialName = matData.MaterialName;
+                var meshMaterial = matData.Material;
+                string meshName = matData.MeshName;
+                var mesh = matData.Mesh;
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
-                bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
+                bool draw = context.ValidateDraw(BlendMode, meshMaterial.Material.IsTransparent);
                 if (!draw)
                 {
                     Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
@@ -508,7 +508,7 @@ namespace Engine
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = material,
+                    Material = meshMaterial,
                     UseAnisotropic = UseAnisotropicFiltering,
                     TextureIndex = 0,
                     TintColor = Color4.White,

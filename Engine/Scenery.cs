@@ -132,18 +132,18 @@ namespace Engine
 
                 int count = 0;
 
-                foreach (var meshMaterial in DrawingData.IterateMaterials())
+                foreach (var matData in DrawingData.IterateMaterials())
                 {
-                    var material = meshMaterial.Material;
-                    var mesh = meshMaterial.Mesh;
+                    var meshMaterial = matData.Material;
+                    var mesh = matData.Mesh;
 
-                    var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                    var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, meshMaterial.Material.IsTransparent);
                     if (sceneryDrawer == null)
                     {
                         continue;
                     }
 
-                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
+                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, meshMaterial))
                     {
                         count += mesh.Count;
                     }
@@ -161,12 +161,12 @@ namespace Engine
             {
                 int count = 0;
 
-                foreach (var meshMaterial in DrawingData.IterateMaterials())
+                foreach (var matData in DrawingData.IterateMaterials())
                 {
-                    var material = meshMaterial.Material;
-                    var mesh = meshMaterial.Mesh;
+                    var meshMaterial = matData.Material;
+                    var mesh = matData.Mesh;
 
-                    bool draw = context.ValidateDraw(blendMode, material.Material.IsTransparent);
+                    bool draw = context.ValidateDraw(blendMode, meshMaterial.Material.IsTransparent);
                     if (!draw)
                     {
                         continue;
@@ -178,7 +178,7 @@ namespace Engine
                         continue;
                     }
 
-                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
+                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, meshMaterial))
                     {
                         count += mesh.Count;
                     }

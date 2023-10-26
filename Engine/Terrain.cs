@@ -775,7 +775,7 @@ namespace Engine
             }
 
             // Read material
-            terrainMaterial = MeshMaterial.DefaultBlinnPhong;
+            terrainMaterial = MeshMaterial.FromMaterial(MaterialBlinnPhong.Default);
 
             // Get vertices and indices from height-map
             var (Vertices, Indices) = await heightMap.BuildGeometry(

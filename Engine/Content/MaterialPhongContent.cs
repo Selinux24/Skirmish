@@ -75,7 +75,7 @@ namespace Engine.Content
         public string NormalMapTexture { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTexture> textures)
+        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTextureData> textures)
         {
             return new MeshMaterial
             {

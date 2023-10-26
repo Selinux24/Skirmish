@@ -659,7 +659,7 @@ namespace Engine
             foliageSphere = new BoundingSphere(Vector3.Zero, Description.VisibleRadius);
 
             //Material
-            foliageMaterial = MeshMaterial.DefaultPhong;
+            foliageMaterial = MeshMaterial.FromMaterial(MaterialPhong.Default);
 
             //Read foliage textures
             string contentPath = Description.ContentPath;

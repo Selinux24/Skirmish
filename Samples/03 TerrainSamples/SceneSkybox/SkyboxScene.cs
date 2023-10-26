@@ -446,11 +446,11 @@ namespace TerrainSamples.SceneSkybox
             if (Game.Input.KeyJustReleased(Keys.F7))
             {
                 var m1 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro");
-                var bronze1 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                var bronze1 = MeshMaterial.FromMaterial(MaterialCookTorrance.FromBuiltIn(BuiltInMaterials.Bronze));
                 bronze1.DiffuseTexture = m1.DiffuseTexture;
 
                 var m2 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountai.000");
-                var bronze2 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                var bronze2 = MeshMaterial.FromMaterial(MaterialCookTorrance.FromBuiltIn(BuiltInMaterials.Bronze));
                 bronze2.DiffuseTexture = m2.DiffuseTexture;
 
                 fountain.ReplaceMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro", bronze1);

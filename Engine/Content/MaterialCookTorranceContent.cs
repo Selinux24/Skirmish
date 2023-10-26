@@ -80,7 +80,7 @@ namespace Engine.Content
         public float Roughness { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTexture> textures)
+        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTextureData> textures)
         {
             return new MeshMaterial
             {

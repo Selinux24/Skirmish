@@ -1456,7 +1456,7 @@ namespace Engine.Common
 
             List<IMeshMaterial> mats = new()
             {
-                MeshMaterial.DefaultBlinnPhong,
+                MeshMaterial.FromMaterial(MaterialBlinnPhong.Default),
             };
 
             var matComponents = Scene.Components.Get<IUseMaterials>().SelectMany(c => c.GetMaterials());

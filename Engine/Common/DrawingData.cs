@@ -52,11 +52,11 @@ namespace Engine.Common
         /// <summary>
         /// Materials dictionary
         /// </summary>
-        private readonly Dictionary<string, IMeshMaterial> materials = new();
+        private readonly Dictionary<string, MeshMaterialData> materials = new();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        private readonly Dictionary<string, MeshTexture> textures = new();
+        private readonly Dictionary<string, MeshTextureData> textures = new();
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
@@ -174,9 +174,7 @@ namespace Engine.Common
 
             foreach (var texture in modelTextures)
             {
-                var info = texture.Content;
-
-                textures.Add(texture.Name, new() { Content = info });
+                textures.Add(texture.Name, MeshTextureData.FromContent(texture.Content));
             }
         }
         /// <summary>
@@ -191,13 +189,9 @@ namespace Engine.Common
                 return;
             }
 
-            foreach (var mat in modelMaterials)
+            foreach (var material in modelMaterials)
             {
-                var matName = mat.Name;
-                var matContent = mat.Content;
-
-                var meshMaterial = matContent.CreateMeshMaterial(textures);
-                materials.Add(matName, meshMaterial);
+                materials.Add(material.Name, MeshMaterialData.FromContent(material.Content));
             }
         }
         /// <summary>
@@ -244,7 +238,17 @@ namespace Engine.Common
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
 
             //Initilizes mesh textures
-            await InitializeMeshTextures();
+            var resourceManager = Game.ResourceManager;
+            foreach (var texture in textures.Values)
+            {
+                await texture.RequestResource(resourceManager);
+            }
+
+            //Initialize mesh materials
+            foreach (var material in materials.Values)
+            {
+                material.AssignTextures(textures);
+            }
 
             //Generates a task list from the materials-mesh dictionary
             var taskList = meshes.Values
@@ -264,32 +268,6 @@ namespace Engine.Common
 
             var afterCount = Game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
-        }
-        /// <summary>
-        /// Initializes the texture dictionary
-        /// </summary>
-        private async Task InitializeMeshTextures()
-        {
-            foreach (var textureName in textures.Keys)
-            {
-                var meshTexture = textures[textureName];
-
-                var info = meshTexture.Content;
-
-                var view = await Game.ResourceManager.RequestResource(info);
-                if (view == null)
-                {
-                    string errorMessage = $"Texture cannot be requested: {info}";
-
-                    Logger.WriteError(nameof(DrawingData), errorMessage);
-
-                    throw new EngineException(errorMessage);
-                }
-
-                meshTexture.Resource = view;
-
-                textures[textureName] = meshTexture;
-            }
         }
         /// <summary>
         /// Initializes a mesh dictionary
@@ -329,7 +307,7 @@ namespace Engine.Common
 
                     var material = materials[materialName];
 
-                    yield return new(materialName, material, meshName, mesh);
+                    yield return new(materialName, material.Material, meshName, mesh);
                 }
             }
         }
@@ -533,7 +511,7 @@ namespace Engine.Common
         /// </summary>
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            return materials.Values.ToArray();
+            return materials.Values.Select(m => m.Material).ToArray();
         }
         /// <summary>
         /// Gets the material list by name
@@ -544,7 +522,7 @@ namespace Engine.Common
             var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
             if (meshMaterial != null)
             {
-                yield return materials[meshMaterial];
+                yield return materials[meshMaterial].Material;
             }
         }
         /// <summary>
@@ -557,7 +535,7 @@ namespace Engine.Common
             var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
             if (meshMaterial != null)
             {
-                return materials[meshMaterial];
+                return materials[meshMaterial].Material;
             }
 
             return null;
@@ -573,7 +551,7 @@ namespace Engine.Common
             var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
             if (meshMaterial != null)
             {
-                materials[meshMaterial] = material;
+                materials[meshMaterial].Material = material;
 
                 return true;
             }
@@ -596,7 +574,7 @@ namespace Engine.Common
 
             foreach (var meshMaterial in meshMaterials)
             {
-                materials[meshMaterial] = material;
+                materials[meshMaterial].Material = material;
             }
 
             return true;
@@ -609,20 +587,5 @@ namespace Engine.Common
         {
             return lights.Select(l => l.Clone()).ToArray();
         }
-    }
-
-    /// <summary>
-    /// Mesh texture
-    /// </summary>
-    public struct MeshTexture
-    {
-        /// <summary>
-        /// Texture content
-        /// </summary>
-        public IImageContent Content;
-        /// <summary>
-        /// Texture resource
-        /// </summary>
-        public EngineShaderResourceView Resource;
     }
 }
