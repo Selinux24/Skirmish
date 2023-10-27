@@ -56,7 +56,7 @@ namespace Engine.Common
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        private readonly Dictionary<string, MeshTextureData> textures = new();
+        private readonly Dictionary<string, MeshImageData> textures = new();
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
@@ -174,7 +174,7 @@ namespace Engine.Common
 
             foreach (var texture in modelTextures)
             {
-                textures.Add(texture.Name, MeshTextureData.FromContent(texture.Content));
+                textures.Add(texture.Name, MeshImageData.FromContent(texture.Content));
             }
         }
         /// <summary>

@@ -75,7 +75,7 @@ namespace Engine.Content
         public string NormalMapTexture { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTextureData> textures)
+        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshImageData> textures)
         {
             return new MeshMaterial
             {
@@ -88,10 +88,10 @@ namespace Engine.Content
                     Shininess = Shininess,
                     IsTransparent = IsTransparent,
                 },
-                EmissionTexture = string.IsNullOrWhiteSpace(EmissiveTexture) ? null : textures[EmissiveTexture].Resource,
-                AmbientTexture = string.IsNullOrWhiteSpace(AmbientTexture) ? null : textures[AmbientTexture].Resource,
-                DiffuseTexture = string.IsNullOrWhiteSpace(DiffuseTexture) ? null : textures[DiffuseTexture].Resource,
-                NormalMap = string.IsNullOrWhiteSpace(NormalMapTexture) ? null : textures[NormalMapTexture].Resource,
+                EmissionTexture = string.IsNullOrWhiteSpace(EmissiveTexture) ? null : textures[EmissiveTexture].Texture?.Resource,
+                AmbientTexture = string.IsNullOrWhiteSpace(AmbientTexture) ? null : textures[AmbientTexture].Texture?.Resource,
+                DiffuseTexture = string.IsNullOrWhiteSpace(DiffuseTexture) ? null : textures[DiffuseTexture].Texture?.Resource,
+                NormalMap = string.IsNullOrWhiteSpace(NormalMapTexture) ? null : textures[NormalMapTexture].Texture?.Resource,
             };
         }
         /// <inheritdoc/>

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Engine
+namespace Engine.Content
 {
     using Engine.Common;
 
@@ -40,6 +40,6 @@ namespace Engine
         /// </summary>
         /// <param name="textures">Texture dictionary</param>
         /// <returns>Returns a new mesh material</returns>
-        IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshTextureData> textures);
+        IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshImageData> textures);
     }
 }

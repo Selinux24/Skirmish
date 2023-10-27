@@ -2,6 +2,8 @@
 
 namespace Engine.Common
 {
+    using Engine.Content;
+
     /// <summary>
     /// Mesh material data
     /// </summary>
@@ -32,7 +34,7 @@ namespace Engine.Common
         /// Assign textures from texture dictionary to the mesh material
         /// </summary>
         /// <param name="textures">Texture dictionary</param>
-        public void AssignTextures(Dictionary<string, MeshTextureData> textures)
+        public void AssignTextures(Dictionary<string, MeshImageData> textures)
         {
             Material = Content.CreateMeshMaterial(textures);
         }
