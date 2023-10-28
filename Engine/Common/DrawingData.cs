@@ -231,15 +231,15 @@ namespace Engine.Common
 
             //Initilizes mesh textures
             var resourceManager = Game.ResourceManager;
-            foreach (var (Name, Data) in textures)
+            foreach (var texture in textures.GetValues())
             {
-                await Data?.RequestResource(resourceManager);
+                await texture.RequestResource(resourceManager);
             }
 
             //Initialize mesh materials
-            foreach (var (Name, Data) in materials)
+            foreach (var material in materials.GetValues())
             {
-                Data?.AssignTextures(textures);
+                material.AssignTextures(textures);
             }
 
             //Generates a task list from the materials-mesh dictionary

@@ -22,7 +22,7 @@ namespace Engine.Common
 
             Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
 
-            foreach ((_, Mesh mesh) in this)
+            foreach (var mesh in GetValues())
             {
                 mesh.Initialize(name, bufferManager, dynamicBuffers, instancingBuffer);
             }
@@ -38,11 +38,11 @@ namespace Engine.Common
                 return;
             }
 
-            foreach ((_, Mesh mesh) in this)
+            foreach (var mesh in GetValues())
             {
                 //Remove data from buffer manager
-                bufferManager?.RemoveVertexData(mesh.VertexBuffer);
-                bufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                bufferManager.RemoveVertexData(mesh.VertexBuffer);
+                bufferManager.RemoveIndexData(mesh.IndexBuffer);
 
                 mesh.Dispose();
             }
