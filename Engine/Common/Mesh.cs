@@ -148,11 +148,11 @@ namespace Engine.Common
         /// <summary>
         /// Initializes a mesh
         /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="name">Owner name</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="dynamicBuffers">Create dynamic buffers</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        public void Initialize(BufferManager bufferManager, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
+        public void Initialize(string name, BufferManager bufferManager, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             try
             {

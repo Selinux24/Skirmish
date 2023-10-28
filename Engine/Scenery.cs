@@ -256,7 +256,7 @@ namespace Engine
             /// <returns>Returns true if any material were replaced</returns>
             public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
             {
-                return DrawingData.ReplaceMaterials(meshMaterialName, material);
+                return DrawingData.ReplaceMaterial(meshMaterialName, material);
             }
 
             /// <inheritdoc/>

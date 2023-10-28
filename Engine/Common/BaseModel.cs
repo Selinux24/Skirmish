@@ -338,7 +338,7 @@ namespace Engine.Common
 
             foreach (var drawingData in meshesByLOD.Values)
             {
-                updated = drawingData.ReplaceMaterials(meshMaterialName, material) || updated;
+                updated = drawingData.ReplaceMaterial(meshMaterialName, material) || updated;
             }
 
             return updated;

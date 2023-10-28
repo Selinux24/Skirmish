@@ -1,96 +1,53 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-
+﻿
 namespace Engine.Common
 {
     /// <summary>
     /// Mesh by material collection
     /// </summary>
-    public class MeshByMaterialCollection : IEnumerable<(string MaterialName, Mesh Mesh)>
+    public class MeshByMaterialCollection : DrawingDataCollection<Mesh>
     {
         /// <summary>
-        /// Internal list
+        /// Initializes the mesh list
         /// </summary>
-        private readonly List<(string MaterialName, Mesh Mesh)> meshList = new();
-
-        /// <summary>
-        /// Gets the mesh by material name
-        /// </summary>
-        /// <param name="materialName">Material name</param>
-        public Mesh this[string materialName]
+        /// <param name="name">Owner name</param>
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        public void Initialize(string name, BufferManager bufferManager, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
-            get
-            {
-                var current = meshList.FindIndex(i => string.Equals(i.MaterialName, materialName, StringComparison.OrdinalIgnoreCase));
-                if (current < 0)
-                {
-                    return null;
-                }
-
-                return meshList[current].Mesh;
-            }
-        }
-        /// <summary>
-        /// Gets the mesh by material count
-        /// </summary>
-        public int Count
-        {
-            get
-            {
-                return meshList.Count;
-            }
-        }
-        /// <summary>
-        /// Gets the internal material name list
-        /// </summary>
-        public string[] MaterialNames
-        {
-            get
-            {
-                return meshList.Select(m => m.MaterialName).ToArray();
-            }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerator<(string MaterialName, Mesh Mesh)> GetEnumerator()
-        {
-            return meshList.GetEnumerator();
-        }
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return meshList.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Adds a new mesh to the collection
-        /// </summary>
-        /// <param name="materialName">Material name</param>
-        /// <param name="mesh">Mesh</param>
-        public void Add(string materialName, Mesh mesh)
-        {
-            if (string.IsNullOrWhiteSpace(materialName))
+            if (bufferManager == null)
             {
                 return;
             }
 
-            var current = meshList.FindIndex(i => string.Equals(i.MaterialName, materialName, StringComparison.OrdinalIgnoreCase));
-            if (current < 0)
-            {
-                meshList.Add((materialName, mesh));
+            Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
 
+            foreach ((_, Mesh mesh) in this)
+            {
+                mesh.Initialize(name, bufferManager, dynamicBuffers, instancingBuffer);
+            }
+        }
+        /// <summary>
+        /// Disposes internal meshes
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        public void DisposeResources(BufferManager bufferManager)
+        {
+            if (bufferManager == null)
+            {
                 return;
             }
 
-            meshList[current] = (materialName, mesh);
-        }
+            foreach ((_, Mesh mesh) in this)
+            {
+                //Remove data from buffer manager
+                bufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                bufferManager?.RemoveIndexData(mesh.IndexBuffer);
 
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return $"MeshesByMaterial: {MaterialNames?.Join("|")}";
+                mesh.Dispose();
+            }
+
+            Clear();
         }
     }
 }

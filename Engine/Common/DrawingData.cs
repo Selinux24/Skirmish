@@ -125,23 +125,15 @@ namespace Engine.Common
                 return;
             }
 
-            foreach (var meshCollection in meshes.Values)
-            {
-                foreach ((_, Mesh mesh) in meshCollection)
-                {
-                    //Remove data from buffer manager
-                    Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
-                    Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
-
-                    //Dispose the mesh
-                    mesh.Dispose();
-                }
-            }
+            //Dispose mesh resources and clear the mesh collection
+            var bufferManager = Game.BufferManager;
+            meshes.Values.ToList().ForEach(mCollection => mCollection.DisposeResources(bufferManager));
             meshes.Clear();
 
+            //Clear the material list
             materials.Clear();
 
-            //Don't dispose textures!
+            //Clear the texture list. Don't dispose textures!
             textures.Clear();
 
             SkinningData = null;
@@ -174,7 +166,7 @@ namespace Engine.Common
 
             foreach (var texture in modelTextures)
             {
-                textures.Add(texture.Name, MeshImageData.FromContent(texture.Content));
+                textures.SetValue(texture.Name, MeshImageData.FromContent(texture.Content));
             }
         }
         /// <summary>
@@ -191,7 +183,7 @@ namespace Engine.Common
 
             foreach (var material in modelMaterials)
             {
-                materials.Add(material.Name, MeshMaterialData.FromContent(material.Content));
+                materials.SetValue(material.Name, MeshMaterialData.FromContent(material.Content));
             }
         }
         /// <summary>
@@ -254,7 +246,7 @@ namespace Engine.Common
             var bufferManager = Game.BufferManager;
             var taskList = meshes.Values
                 .Where(mList => mList?.Any() == true)
-                .Select(mList => Task.Run(() => InitializeMeshCollection(bufferManager, name, Description.DynamicBuffers, instancingBuffer, mList)));
+                .Select(mList => Task.Run(() => mList.Initialize(name, bufferManager, Description.DynamicBuffers, instancingBuffer)));
 
             try
             {
@@ -269,23 +261,6 @@ namespace Engine.Common
 
             var afterCount = Game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
-        }
-        /// <summary>
-        /// Initializes a mesh dictionary
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="name">Owner name</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        /// <param name="meshes">Mesh dictionary</param>
-        private static void InitializeMeshCollection(BufferManager bufferManager, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, MeshByMaterialCollection meshes)
-        {
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {meshes.MaterialNames.Join("|")}");
-
-            foreach ((_, Mesh mesh) in meshes)
-            {
-                mesh.Initialize(bufferManager, name, dynamicBuffers, instancingBuffer);
-            }
         }
 
         /// <summary>
@@ -303,7 +278,7 @@ namespace Engine.Common
                         continue;
                     }
 
-                    var meshMaterial = materials.GetMaterialData(materialName).Material;
+                    var meshMaterial = materials.GetValue(materialName).Material;
 
                     yield return new(materialName, meshMaterial, meshName, mesh);
                 }
@@ -459,9 +434,9 @@ namespace Engine.Common
                 yield break;
             }
 
-            foreach (var mesh in meshes[name])
+            foreach (var value in meshes[name].GetValues())
             {
-                yield return mesh.Mesh;
+                yield return value;
             }
         }
         /// <summary>
@@ -486,7 +461,7 @@ namespace Engine.Common
                 return null;
             }
 
-            return meshes[name].First().Mesh;
+            return meshes[name].First().Value;
         }
 
         /// <summary>
@@ -514,24 +489,14 @@ namespace Engine.Common
             return materials.GetFirstMaterial(meshMaterialName);
         }
         /// <summary>
-        /// Replaces the first material
+        /// Replaces the specified material
         /// </summary>
         /// <param name="meshMaterialName">Mesh material name</param>
         /// <param name="material">Material</param>
         /// <returns>Returns true if the material is replaced</returns>
-        public bool ReplaceFirstMaterial(string meshMaterialName, IMeshMaterial material)
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             return materials.ReplaceFirstMaterial(meshMaterialName, material);
-        }
-        /// <summary>
-        /// Replaces the materials by name
-        /// </summary>
-        /// <param name="meshMaterialName">Mesh material name</param>
-        /// <param name="material">Material</param>
-        /// <returns>Returns true if the materials were replaced</returns>
-        public bool ReplaceMaterials(string meshMaterialName, IMeshMaterial material)
-        {
-            return materials.ReplaceMaterials(meshMaterialName, material);
         }
 
         /// <summary>

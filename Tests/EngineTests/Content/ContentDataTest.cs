@@ -53,7 +53,7 @@ namespace Engine.Content.Tests
             content.AddGeometryContent("default", geometryContent);
 
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
-            var points = res["default"].First().Mesh.GetPoints();
+            var points = res["default"].First().Value.GetPoints();
             var bounds = BoundingBox.FromPoints(points.ToArray());
 
             Assert.AreEqual(cubeMedium, bounds);

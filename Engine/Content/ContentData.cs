@@ -1006,7 +1006,7 @@ namespace Engine.Content
                 var nMesh = meshInfo.Value.Mesh;
                 var materialName = meshInfo.Value.MaterialName;
 
-                meshes.Add(materialName, nMesh);
+                meshes.SetValue(materialName, nMesh);
             }
 
             return meshes;
