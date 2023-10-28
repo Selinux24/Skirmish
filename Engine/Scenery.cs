@@ -134,7 +134,7 @@ namespace Engine
 
                 foreach (var matData in DrawingData.IterateMaterials())
                 {
-                    var meshMaterial = matData.Material;
+                    var meshMaterial = matData.MeshMaterial;
                     var mesh = matData.Mesh;
 
                     var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, meshMaterial.Material.IsTransparent);
@@ -163,7 +163,7 @@ namespace Engine
 
                 foreach (var matData in DrawingData.IterateMaterials())
                 {
-                    var meshMaterial = matData.Material;
+                    var meshMaterial = matData.MeshMaterial;
                     var mesh = matData.Mesh;
 
                     bool draw = context.ValidateDraw(blendMode, meshMaterial.Material.IsTransparent);

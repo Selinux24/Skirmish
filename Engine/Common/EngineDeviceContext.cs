@@ -1196,26 +1196,80 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void Draw(int vertexCount, int startVertexLocation)
         {
+            if (vertexCount <= 0)
+            {
+                return;
+            }
+
             deviceContext.Draw(vertexCount, startVertexLocation);
             UpdateDrawPrimitives(vertexCount, 1);
         }
         /// <inheritdoc/>
+        public void Draw(BufferDescriptor vertexBuffer)
+        {
+            Draw(vertexBuffer.Count, vertexBuffer.BufferOffset);
+        }
+        /// <inheritdoc/>
         public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
+            if (indexCount <= 0)
+            {
+                return;
+            }
+
             deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
             UpdateDrawPrimitives(indexCount, 1);
         }
         /// <inheritdoc/>
+        public void DrawIndexed(BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer)
+        {
+            DrawIndexed(
+                indexBuffer.Count, indexBuffer.BufferOffset,
+                vertexBuffer.BufferOffset);
+        }
+        /// <inheritdoc/>
         public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
+            if (vertexCountPerInstance <= 0)
+            {
+                return;
+            }
+
+            if (instanceCount <= 0)
+            {
+                return;
+            }
+
             deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
             UpdateDrawPrimitives(vertexCountPerInstance, instanceCount);
         }
         /// <inheritdoc/>
+        public void DrawInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor vertexBuffer)
+        {
+            DrawInstanced(vertexBuffer.Count, instanceCount, vertexBuffer.BufferOffset, startInstanceLocation);
+        }
+        /// <inheritdoc/>
         public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
+            if (indexCountPerInstance <= 0)
+            {
+                return;
+            }
+
+            if (instanceCount <= 0)
+            {
+                return;
+            }
+
             deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
             UpdateDrawPrimitives(indexCountPerInstance, instanceCount);
+        }
+        /// <inheritdoc/>
+        public void DrawIndexedInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer)
+        {
+            DrawIndexedInstanced(
+                indexBuffer.Count, instanceCount, indexBuffer.BufferOffset,
+                vertexBuffer.BufferOffset, startInstanceLocation);
         }
         /// <inheritdoc/>
         public void DrawAuto()

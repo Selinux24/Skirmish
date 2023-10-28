@@ -948,14 +948,14 @@ namespace Engine.Content
         /// <param name="loadAnimation">Load animations</param>
         /// <param name="loadNormalMaps">Load normal maps</param>
         /// <param name="constraint">Use constraint</param>
-        public async Task<Dictionary<string, Dictionary<string, Mesh>>> CreateGeometry(bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
+        public async Task<Dictionary<string, MeshByMaterialCollection>> CreateGeometry(bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
         {
             if (geometryContent?.Any() != true)
             {
                 return default;
             }
 
-            Dictionary<string, Dictionary<string, Mesh>> meshes = new();
+            Dictionary<string, MeshByMaterialCollection> meshes = new();
 
             foreach (var meshName in geometryContent.Keys)
             {
@@ -973,7 +973,7 @@ namespace Engine.Content
         /// <param name="loadAnimation">Load animations</param>
         /// <param name="loadNormalMaps">Load normal maps</param>
         /// <param name="constraint">Use constraint</param>
-        private async Task<Dictionary<string, Mesh>> CreateGeometryMesh(string meshName, bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
+        private async Task<MeshByMaterialCollection> CreateGeometryMesh(string meshName, bool loadAnimation, bool loadNormalMaps, BoundingBox? constraint)
         {
             //Extract meshes
             var submeshes = geometryContent[meshName]
@@ -988,7 +988,7 @@ namespace Engine.Content
             var skinningInfo = loadAnimation ? GetSkinningInfo(meshName) : null;
             var isSkinned = skinningInfo.HasValue;
 
-            Dictionary<string, Mesh> meshes = new();
+            MeshByMaterialCollection meshes = new();
 
             foreach (var subMesh in submeshes)
             {

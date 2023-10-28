@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Content
 {
     using Engine.Common;
@@ -40,6 +39,6 @@ namespace Engine.Content
         /// </summary>
         /// <param name="textures">Texture dictionary</param>
         /// <returns>Returns a new mesh material</returns>
-        IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshImageData> textures);
+        IMeshMaterial CreateMeshMaterial(MeshImageDataCollection textures);
     }
 }

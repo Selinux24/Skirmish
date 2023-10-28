@@ -201,7 +201,7 @@ namespace Engine
             foreach (var matData in DrawingData.IterateMaterials())
             {
                 string materialName = matData.MaterialName;
-                var meshMaterial = matData.Material;
+                var meshMaterial = matData.MeshMaterial;
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 
@@ -265,7 +265,7 @@ namespace Engine
             foreach (var matData in DrawingData.IterateMaterials())
             {
                 string materialName = matData.MaterialName;
-                var meshMaterial = matData.Material;
+                var meshMaterial = matData.MeshMaterial;
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 

@@ -148,11 +148,11 @@ namespace Engine.Common
         /// <summary>
         /// Initializes a mesh
         /// </summary>
-        /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="name">Owner name</param>
         /// <param name="dynamicBuffers">Create dynamic buffers</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        public void Initialize(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
+        public void Initialize(BufferManager bufferManager, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             try
             {
@@ -160,12 +160,12 @@ namespace Engine.Common
 
                 //Vertices
                 var trnVertices = VertexData.Transform(vertices, Transform);
-                VertexBuffer = game.BufferManager.AddVertexData($"{name}.{Name}", dynamicBuffers, trnVertices, instancingBuffer);
+                VertexBuffer = bufferManager.AddVertexData($"{name}.{Name}", dynamicBuffers, trnVertices, instancingBuffer);
 
                 if (Indexed)
                 {
                     //Indices
-                    IndexBuffer = game.BufferManager.AddIndexData($"{name}.{Name}", dynamicBuffers, indices);
+                    IndexBuffer = bufferManager.AddIndexData($"{name}.{Name}", dynamicBuffers, indices);
                 }
 
                 Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
@@ -186,55 +186,29 @@ namespace Engine.Common
         {
             if (Indexed)
             {
-                if (IndexBuffer.Count > 0)
-                {
-                    dc.DrawIndexed(
-                        IndexBuffer.Count,
-                        IndexBuffer.BufferOffset,
-                        VertexBuffer.BufferOffset);
-                }
+                dc.DrawIndexed(IndexBuffer, VertexBuffer);
+
+                return;
             }
-            else
-            {
-                if (VertexBuffer.Count > 0)
-                {
-                    dc.Draw(
-                        VertexBuffer.Count,
-                        VertexBuffer.BufferOffset);
-                }
-            }
+
+            dc.Draw(VertexBuffer);
         }
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="count">Instance count</param>
+        /// <param name="instanceCount">Instance count</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        public virtual void Draw(IEngineDeviceContext dc, int count, int startInstanceLocation)
+        public virtual void Draw(IEngineDeviceContext dc, int instanceCount, int startInstanceLocation)
         {
-            if (count <= 0)
+            if (Indexed)
             {
-                return;
-            }
-
-            if (Indexed && IndexBuffer.Count > 0)
-            {
-                dc.DrawIndexedInstanced(
-                    IndexBuffer.Count,
-                    count,
-                    IndexBuffer.BufferOffset,
-                    VertexBuffer.BufferOffset, startInstanceLocation);
+                dc.DrawIndexedInstanced(instanceCount, startInstanceLocation, IndexBuffer, VertexBuffer);
 
                 return;
             }
 
-            if (VertexBuffer.Count > 0)
-            {
-                dc.DrawInstanced(
-                    VertexBuffer.Count,
-                    count,
-                    VertexBuffer.BufferOffset, startInstanceLocation);
-            }
+            dc.DrawInstanced(instanceCount, startInstanceLocation, VertexBuffer);
         }
 
         /// <summary>

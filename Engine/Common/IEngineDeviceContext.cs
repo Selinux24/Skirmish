@@ -535,13 +535,25 @@ namespace Engine.Common
         /// <param name="startVertexLocation">Start vertex location</param>
         void Draw(int vertexCount, int startVertexLocation);
         /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="vertexBuffer">Vertex buffer descriptor</param>
+        void Draw(BufferDescriptor vertexBuffer);
+        /// <summary>
         /// Draw instanced
         /// </summary>
         /// <param name="vertexCountPerInstance">Vertex count per instance</param>
         /// <param name="instanceCount">Instance count</param>
         /// <param name="startVertexLocation">Start vertex location</param>
-        /// <param name="startInstanceLocation">Start instance count</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
         void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation);
+        /// <summary>
+        /// Draw instanced
+        /// </summary>
+        /// <param name="instanceCount">Instance count</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
+        /// <param name="vertexBuffer">Vertex buffer descriptor</param>
+        void DrawInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor vertexBuffer);
         /// <summary>
         /// Draw indexed
         /// </summary>
@@ -549,6 +561,12 @@ namespace Engine.Common
         /// <param name="startIndexLocation">Start vertex location</param>
         /// <param name="baseVertexLocation">Base vertex location</param>
         void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation);
+        /// <summary>
+        /// Draw indexed
+        /// </summary>
+        /// <param name="indexBuffer">Index buffer descriptor</param>
+        /// <param name="vertexBuffer">Vertex buffer descriptor</param>
+        void DrawIndexed(BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer);
         /// <summary>
         /// Draw indexed instanced
         /// </summary>
@@ -558,6 +576,14 @@ namespace Engine.Common
         /// <param name="baseVertexLocation">Base vertex location</param>
         /// <param name="startInstanceLocation">Start instance location</param>
         void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation);
+        /// <summary>
+        /// Draw indexed instanced
+        /// </summary>
+        /// <param name="instanceCount">Instance count</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
+        /// <param name="indexBuffer">Index buffer descriptor</param>
+        /// <param name="vertexBuffer">Vertex buffer descriptor</param>
+        void DrawIndexedInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer);
         /// <summary>
         /// Draw auto
         /// </summary>

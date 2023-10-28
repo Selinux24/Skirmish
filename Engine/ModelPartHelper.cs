@@ -86,9 +86,14 @@ namespace Engine
         /// <param name="drawData">Drawing data</param>
         public void SetTransforms(DrawingData drawData)
         {
+            if (drawData == null)
+            {
+                return;
+            }
+
             foreach (var part in modelParts)
             {
-                var mesh = drawData?.GetMeshByName(part.Name);
+                var mesh = drawData.GetMeshByName(part.Name);
                 if (mesh == null)
                 {
                     continue;

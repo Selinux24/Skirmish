@@ -1,9 +1,9 @@
-﻿using Engine.Common;
-using SharpDX;
-using System.Collections.Generic;
+﻿using SharpDX;
 
 namespace Engine.Content
 {
+    using Engine.Common;
+
     /// <summary>
     /// Material content
     /// </summary>
@@ -74,7 +74,7 @@ namespace Engine.Content
         public bool IsTransparent { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, MeshImageData> textures)
+        public IMeshMaterial CreateMeshMaterial(MeshImageDataCollection textures)
         {
             return new MeshMaterial
             {
@@ -87,10 +87,10 @@ namespace Engine.Content
                     Shininess = Shininess,
                     IsTransparent = IsTransparent,
                 },
-                EmissionTexture = string.IsNullOrWhiteSpace(EmissiveTexture) ? null : textures[EmissiveTexture].Texture?.Resource,
-                AmbientTexture = string.IsNullOrWhiteSpace(AmbientTexture) ? null : textures[AmbientTexture].Texture?.Resource,
-                DiffuseTexture = string.IsNullOrWhiteSpace(DiffuseTexture) ? null : textures[DiffuseTexture].Texture?.Resource,
-                NormalMap = string.IsNullOrWhiteSpace(NormalMapTexture) ? null : textures[NormalMapTexture].Texture?.Resource,
+                EmissionTexture = textures?.GetImage(EmissiveTexture),
+                AmbientTexture = textures?.GetImage(AmbientTexture),
+                DiffuseTexture = textures?.GetImage(DiffuseTexture),
+                NormalMap = textures?.GetImage(NormalMapTexture),
             };
         }
         /// <inheritdoc/>
