@@ -855,24 +855,18 @@ namespace Tanks
                 res.ThrowExceptions();
             }
 
+            AudioManager.MasterVolume = 0.75f;
+            AudioManager.Start();
+            PlayMusic();
+
             UpdateLayout();
 
             uiTweener.ClearTween(loadingText);
             uiTweener.Hide(loadingText, 1000);
             await Task.Delay(1500);
 
-            PlantTrees();
-            PrepareModels();
             PrepareLighting();
             UpdateCamera(true);
-
-            AudioManager.MasterVolume = 0.75f;
-            AudioManager.Start();
-            PlayMusic();
-
-            uiTweener.ClearTween(loadingBar);
-            uiTweener.Hide(loadingBar, 500);
-            await Task.Delay(1000);
 
             await StartGame();
         }
@@ -1139,14 +1133,24 @@ namespace Tanks
                 res.ThrowExceptions();
             }
 
-            PlantTrees();
-            PrepareModels();
-
             await StartGame();
         }
 
         private async Task StartGame()
         {
+            loadingBar.ProgressValue = 0;
+            loadingBar.Caption.Text = "Planting trees...";
+            uiTweener.ClearTween(loadingBar);
+            uiTweener.Show(loadingBar, 500);
+            await Task.Delay(1000);
+
+            PlantTrees();
+            PrepareModels();
+
+            uiTweener.ClearTween(loadingBar);
+            uiTweener.Hide(loadingBar, 500);
+            await Task.Delay(1000);
+
             currentTurn = 1;
             currentPlayer = 0;
 
@@ -1642,7 +1646,7 @@ You will lost all the game progress.",
         }
         private (Vector3 Position, Vector3 Direction) GetTankBarrel(ModelInstance model)
         {
-            var barrelTransform = model.GetLocalTransformByName(tankBarrelPart);
+            var barrelTransform = model.GetWorldTransformByName(tankBarrelPart);
 
             var dir = barrelTransform.Forward;
             var pos = barrelTransform.TranslationVector + (dir * 15f);
@@ -1675,7 +1679,7 @@ You will lost all the game progress.",
         private void RotateTankTurretTo(ModelInstance model, Vector3 position)
         {
             //Gets the current barrel transform
-            var barrelTransform = model.GetLocalTransformByName(tankTurretPart);
+            var barrelTransform = model.GetPartTransformByName(tankTurretPart);
 
             //Gets the position and direction of the barrel
             var barrelDir = barrelTransform.Forward;

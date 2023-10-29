@@ -106,7 +106,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Mesh name</param>
         /// <param name="topology">Topology</param>
-        /// <param name="transform">Transform</param>
+        /// <param name="transform">World transform</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         public Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)

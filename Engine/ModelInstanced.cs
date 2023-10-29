@@ -240,7 +240,7 @@ namespace Engine
                 }
 
                 var currentTransform = instancingData[instanceIndex].Local;
-                var localTransform = current.GetLocalTransformByName(meshName);
+                var localTransform = current.GetPartTransformByName(meshName);
                 if (currentTransform != localTransform)
                 {
                     instancingData[instanceIndex].Local = localTransform;

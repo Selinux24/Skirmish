@@ -81,10 +81,20 @@ namespace Engine
             return modelParts;
         }
         /// <summary>
-        /// Sets model part transforms from original meshes
+        /// Gets model part by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public IModelPart GetModelPartByName(string name)
+        {
+            return modelParts.Find(p => p.Name == name);
+        }
+
+        /// <summary>
+        /// Sets model part world transforms from original meshes
         /// </summary>
         /// <param name="drawData">Drawing data</param>
-        public void SetTransforms(DrawingData drawData)
+        /// <remarks>Mesh transforms are world transforms.</remarks>
+        public void SetWorldTransforms(DrawingData drawData)
         {
             if (drawData == null)
             {
@@ -99,16 +109,16 @@ namespace Engine
                     continue;
                 }
 
-                part.InitialTransform = mesh.Transform;
+                part.SetWorldTransform(mesh.Transform);
             }
         }
         /// <summary>
-        /// Gets model part by name
+        /// Gets the part's global transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public IModelPart GetModelPartByName(string name)
+        public Matrix? GetWorldTransformByName(string name)
         {
-            return modelParts.Find(p => p.Name == name);
+            return GetModelPartByName(name)?.GetWorldTransform();
         }
         /// <summary>
         /// Gets the part's local transform by name
@@ -119,13 +129,22 @@ namespace Engine
             return GetModelPartByName(name)?.GetLocalTransform();
         }
         /// <summary>
-        /// Gets the part's global transform by name
+        /// Gets the part's pose transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetGlobalTransformByName(string name)
+        public Matrix? GetPoseTransformByName(string name)
         {
-            return GetModelPartByName(name)?.GetGlobalTransform();
+            return GetModelPartByName(name)?.InitialWorldTransform;
         }
+        /// <summary>
+        /// Gets the part's final transform by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public Matrix? GetPartTransformByName(string name)
+        {
+            return GetModelPartByName(name)?.GetPartTransform();
+        }
+
         /// <summary>
         /// Updates internal state
         /// </summary>

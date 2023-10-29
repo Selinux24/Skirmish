@@ -137,7 +137,7 @@ namespace Engine
             var drawData = GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
             {
-                partHelper.SetTransforms(drawData);
+                partHelper.SetWorldTransforms(drawData);
 
                 Lights = drawData.GetLights();
             }
@@ -207,7 +207,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.");
 
-                var localTransform = GetLocalTransformByName(meshName);
+                var localTransform = GetPartTransformByName(meshName);
 
                 var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, meshMaterial.Material.IsTransparent);
                 if (drawer == null)
@@ -271,7 +271,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.");
 
-                var localTransform = GetLocalTransformByName(meshName);
+                var localTransform = GetPartTransformByName(meshName);
 
                 bool draw = context.ValidateDraw(BlendMode, meshMaterial.Material.IsTransparent);
                 if (!draw)
@@ -366,19 +366,29 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public IModelPart GetModelPartByName(string name)
+        {
+            return partHelper.GetModelPartByName(name);
+        }
+        /// <inheritdoc/>
         public Matrix GetLocalTransformByName(string name)
         {
             return partHelper.GetLocalTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetGlobalTransformByName(string name)
+        public Matrix GetWorldTransformByName(string name)
         {
-            return partHelper.GetGlobalTransformByName(name) ?? Manipulator.GlobalTransform;
+            return partHelper.GetWorldTransformByName(name) ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public IModelPart GetModelPartByName(string name)
+        public Matrix GetPoseTransformByName(string name)
         {
-            return partHelper.GetModelPartByName(name);
+            return partHelper.GetPoseTransformByName(name) ?? Manipulator.GlobalTransform;
+        }
+        /// <inheritdoc/>
+        public Matrix GetPartTransformByName(string name)
+        {
+            return partHelper.GetPartTransformByName(name) ?? Manipulator.GlobalTransform;
         }
 
         /// <summary>
