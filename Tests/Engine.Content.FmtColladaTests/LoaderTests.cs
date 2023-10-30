@@ -1,5 +1,6 @@
 ﻿using Engine.Content;
 using Engine.Content.FmtCollada;
+using Engine.Content.FmtColladaTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpDX;
@@ -23,6 +24,7 @@ namespace Engine.ModularSceneryTests
         private static readonly Vector3 tankHullPos = new(0, 0, 0);
         private static readonly Vector3 tankTurretPos = new(0.4481661f, 6.813155f, -0.2201393f);
         private static readonly Vector3 tankBarrelPos = new(0, 0, -3.95312f);
+        private const float tolerance = MathUtil.ZeroTolerance;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -110,7 +112,6 @@ namespace Engine.ModularSceneryTests
             bounds = bounds.SetTransform(Matrix.Scaling(2) * Matrix.RotationYawPitchRoll(1, 0, 0) * Matrix.Translation(10, 10, 10));
             Assert.AreEqual(sph, bounds);
         }
-
         [TestMethod()]
         public async Task LoadWithPartsTest()
         {
@@ -135,22 +136,24 @@ namespace Engine.ModularSceneryTests
             //Sets the transform of the current instance
             Matrix instanceTrn = Matrix.Translation(Vector3.One);
             Matrix hullTrn = Matrix.Identity;
-            Matrix turretTrn = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi));
-            Matrix barrelTrn = Matrix.Identity;
+            Matrix turretTrn = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo));
+            Matrix barrelTrn = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, MathUtil.PiOverFour));
 
             model[0].Manipulator.SetTransform(instanceTrn);
+            model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);
             model[0].GetModelPartByName(tankTurretPart).Manipulator.SetTransform(turretTrn);
+            model[0].GetModelPartByName(tankBarrelPart).Manipulator.SetTransform(barrelTrn);
 
             //Local - must return the local * parent local transform
             var trnLocalHull = model[0].GetLocalTransformByName(tankHullPart);
             var trnLocalTurret = model[0].GetLocalTransformByName(tankTurretPart);
             var trnLocalBarrel = model[0].GetLocalTransformByName(tankBarrelPart);
-            var expectedHull = hullTrn;
+            var expectedHull = hullTrn * instanceTrn;
             var expectedTurret = turretTrn * expectedHull;
             var expectedBarrel = barrelTrn * expectedTurret;
-            MatrixAreEqual(expectedHull, trnLocalHull);
-            MatrixAreEqual(expectedTurret, trnLocalTurret);
-            MatrixAreEqual(expectedBarrel, trnLocalBarrel);
+            AssertMatrix.AreEqual(expectedHull, trnLocalHull, tolerance, "Local transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnLocalTurret, tolerance, "Local transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnLocalBarrel, tolerance, "Local transform test barrel failed");
 
             //World - returns each part position, transformed with the specified instance transform
             var trnWorldHull = model[0].GetWorldTransformByName(tankHullPart);
@@ -165,9 +168,9 @@ namespace Engine.ModularSceneryTests
             expectedHull = Matrix.Translation(Vector3.Zero) * expectedHull;
             expectedTurret = Matrix.Translation(tankHullPos) * expectedTurret;
             expectedBarrel = Matrix.Translation(tankTurretPos) * expectedBarrel;
-            MatrixAreEqual(expectedHull, trnWorldHull);
-            MatrixAreEqual(expectedTurret, trnWorldTurret);
-            MatrixAreEqual(expectedBarrel, trnWorldBarrel);
+            AssertMatrix.AreEqual(expectedHull, trnWorldHull, tolerance, "World transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnWorldTurret, tolerance, "World transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnWorldBarrel, tolerance, "World transform test barrel failed");
 
             //Part - returns each part transformed with the instance transform
             var trnPartHull = model[0].GetPartTransformByName(tankHullPart);
@@ -179,40 +182,17 @@ namespace Engine.ModularSceneryTests
             expectedHull *= instanceTrn;
             expectedTurret *= expectedHull;
             expectedBarrel *= expectedTurret;
-            MatrixAreEqual(expectedHull, trnPartHull);
-            MatrixAreEqual(expectedTurret, trnPartTurret);
-            MatrixAreEqual(expectedBarrel, trnPartBarrel);
+            AssertMatrix.AreEqual(expectedHull, trnPartHull, tolerance, "Part transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnPartTurret, tolerance, "Part transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnPartBarrel, tolerance, "Part transform test barrel failed");
 
             //Pose - returns each part position
             var trnPoseHull = model[0].GetPoseTransformByName(tankHullPart);
             var trnPoseTurret = model[0].GetPoseTransformByName(tankTurretPart);
             var trnPoseBarrel = model[0].GetPoseTransformByName(tankBarrelPart);
-            MatrixAreEqual(Matrix.Translation(tankHullPos), trnPoseHull);
-            MatrixAreEqual(Matrix.Translation(tankHullPos + tankTurretPos), trnPoseTurret);
-            MatrixAreEqual(Matrix.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel);
-        }
-
-        private static void MatrixAreEqual(Matrix m1, Matrix m2)
-        {
-            Assert.AreEqual(m1.M11, m2.M11, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M12, m2.M12, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M13, m2.M13, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M14, m2.M14, MathUtil.ZeroTolerance);
-
-            Assert.AreEqual(m1.M21, m2.M21, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M22, m2.M22, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M23, m2.M23, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M24, m2.M24, MathUtil.ZeroTolerance);
-
-            Assert.AreEqual(m1.M31, m2.M31, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M32, m2.M32, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M33, m2.M33, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M34, m2.M34, MathUtil.ZeroTolerance);
-
-            Assert.AreEqual(m1.M41, m2.M41, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M42, m2.M42, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M43, m2.M43, MathUtil.ZeroTolerance);
-            Assert.AreEqual(m1.M44, m2.M44, MathUtil.ZeroTolerance);
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos), trnPoseHull, tolerance, "Pose transform test hull failed");
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos), trnPoseTurret, tolerance, "Pose transform test turret failed");
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel, tolerance, "Pose transform test barrel failed");
         }
     }
 }

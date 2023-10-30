@@ -38,7 +38,7 @@ namespace Engine
         protected DrawingData DrawingData { get; private set; }
 
         /// <inheritdoc/>
-        public Manipulator3D Manipulator { get; private set; }
+        public Manipulator3D Manipulator { get; private set; } = new();
         /// <summary>
         /// Animation controller
         /// </summary>
@@ -125,24 +125,21 @@ namespace Engine
 
             TextureIndex = Description.TextureIndex;
 
-            if (Description.TransformDependences?.Any() == true)
-            {
-                partHelper.AddModelParts(description.TransformNames, description.TransformDependences, ManipulatorUpdated);
-                Manipulator = partHelper.Root?.Manipulator;
-            }
-
-            Manipulator ??= new();
-            Manipulator.Updated += ManipulatorUpdated;
-
             var drawData = GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
             {
-                partHelper.SetWorldTransforms(drawData);
-
                 Lights = drawData.GetLights();
             }
 
-            AnimationController = new AnimationController(this);
+            if (Description.TransformDependences?.Any() == true)
+            {
+                partHelper.AddModelParts(description.TransformNames, description.TransformDependences, ManipulatorUpdated);
+                partHelper.SetWorldTransforms(drawData);
+            }
+
+            Manipulator.Updated += ManipulatorUpdated;
+
+            AnimationController = new(this);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
             boundsHelper.SetPoints(GetPoints());
@@ -373,22 +370,28 @@ namespace Engine
         /// <inheritdoc/>
         public Matrix GetLocalTransformByName(string name)
         {
-            return partHelper.GetLocalTransformByName(name) ?? Manipulator.GlobalTransform;
+            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix.Identity;
+
+            return localTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public Matrix GetWorldTransformByName(string name)
         {
-            return partHelper.GetWorldTransformByName(name) ?? Manipulator.GlobalTransform;
+            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix.Identity;
+
+            return worldTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public Matrix GetPoseTransformByName(string name)
         {
-            return partHelper.GetPoseTransformByName(name) ?? Manipulator.GlobalTransform;
+            return partHelper.GetPoseTransformByName(name) ?? Matrix.Identity;
         }
         /// <inheritdoc/>
         public Matrix GetPartTransformByName(string name)
         {
-            return partHelper.GetPartTransformByName(name) ?? Manipulator.GlobalTransform;
+            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix.Identity;
+
+            return partTransform * Manipulator.GlobalTransform;
         }
 
         /// <summary>

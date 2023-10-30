@@ -60,17 +60,8 @@ namespace Engine
         /// <inheritdoc/>
         public Matrix GetLocalTransform()
         {
-            // Get local transform from manipulator
-            var localTransform = Parent == null ? Matrix.Identity : Manipulator.LocalTransform;
-
-            // Calculate local transform
-            //localTransform = Matrix.Invert(InitialWorldTransform) * localTransform * InitialWorldTransform;
-
-            // Get the parent transform, if any
-            var parentTransform = Parent?.GetLocalTransform() ?? Matrix.Identity;
-
-            // Build transform
-            return localTransform * parentTransform;
+            // Get the parent transform
+            return Manipulator.LocalTransform * (Parent?.GetLocalTransform() ?? Matrix.Identity);
         }
         /// <inheritdoc/>
         public Matrix GetPartTransform()
