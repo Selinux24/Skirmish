@@ -18,13 +18,21 @@ namespace Engine.ModularSceneryTests
     {
         static TestContext _testContext;
 
-        private static readonly string tankBarrelPart = "Barrel-mesh";
-        private static readonly string tankTurretPart = "Turret-mesh";
-        private static readonly string tankHullPart = "Hull-mesh";
-        private static readonly Vector3 tankHullPos = new(0, 0, 0);
-        private static readonly Vector3 tankTurretPos = new(0.4481661f, 6.813155f, -0.2201393f);
-        private static readonly Vector3 tankBarrelPos = new(0, 0, -3.95312f);
         private const float tolerance = MathUtil.ZeroTolerance;
+
+        private const string resourceTree = "Resources/Tree";
+        private const string tree = "tree1.json";
+        private const string treeBacked = "tree1_baked.json";
+        private const string treeMeshName = "Tree_3-mesh";
+        private const string treeBarkName = "Bark-material";
+        private const string treeTreeName = "Tree-material";
+
+        private const string resourceTank = "Resources/Tank";
+        private const string tank = "Leopard.json";
+        private const string tankBacked = "Leopard_backed.json";
+        private const string tankBarrelPart = "Barrel-mesh";
+        private const string tankTurretPart = "Turret-mesh";
+        private const string tankHullPart = "Hull-mesh";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -41,9 +49,11 @@ namespace Engine.ModularSceneryTests
         }
 
         [TestMethod()]
-        public async Task LoadTest()
+        [DataRow(resourceTree, tree)]
+        [DataRow(resourceTree, treeBacked)]
+        public async Task LoadTest(string resource, string fileName)
         {
-            var contentDesc = ContentDescription.FromFile("Resources/Tree", "tree1.json");
+            var contentDesc = ContentDescription.FromFile(resource, fileName);
 
             var tDesc = new ModelInstancedDescription()
             {
@@ -67,8 +77,8 @@ namespace Engine.ModularSceneryTests
 
             var content = await tDesc.Content.ReadContentData();
             var res = await content.First().CreateGeometry(true, true, null);
-            var points1 = res["Tree_3-mesh"]["Bark-material"].GetPoints();
-            var points2 = res["Tree_3-mesh"]["Tree-material"].GetPoints();
+            var points1 = res[treeMeshName][treeBarkName].GetPoints();
+            var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = new();
             points.AddRange(points1);
             points.AddRange(points2);
@@ -77,47 +87,17 @@ namespace Engine.ModularSceneryTests
             Assert.AreEqual(sph, bounds);
         }
         [TestMethod()]
-        public async Task LoadBakedTest()
+        [DataRow("Default", resourceTank, tank, new[] { 0f, 0f, 0f }, new[] { 0.4481661f, 6.813155f, -0.2201393f }, new[] { 0, 0, -3.95312f })]
+        [DataRow("Backed", resourceTank, tankBacked, new[] { 0f, 0f, 0f }, new[] { 0f, 0f, 0f }, new[] { 0f, 0f, 0f })]
+        public async Task LoadWithPartsTest(string testCase, string resource, string fileName, float[] p1, float[] p2, float[] p3)
         {
-            var contentBakedDesc = ContentDescription.FromFile("Resources/Tree", "tree1_baked.json");
+            Vector3 tankHullPos = new(p1);
+            Vector3 tankTurretPos = new(p2);
+            Vector3 tankBarrelPos = new(p3);
 
             var tDesc = new ModelInstancedDescription()
             {
-                Content = contentBakedDesc,
-                Instances = 10,
-                Optimize = true,
-                PickingHull = PickingHullTypes.Hull,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot,
-                StartsVisible = false,
-            };
-
-            Mock<Scene> mockScene = new(null);
-            mockScene.SetupAllProperties();
-
-            ModelInstanced model = new(mockScene.Object, "Tets", "Test");
-            await model.ReadAssets(tDesc);
-            model[0].Manipulator.SetScale(2);
-            model[0].Manipulator.SetRotation(1, 0, 0);
-            model[0].Manipulator.SetPosition(10, 10, 10);
-            var sph = model[0].GetBoundingSphere(true);
-
-            var content = await tDesc.Content.ReadContentData();
-            var res = await content.First().CreateGeometry(true, true, null);
-            var points1 = res["Tree_3-mesh"]["Bark-material"].GetPoints();
-            var points2 = res["Tree_3-mesh"]["Tree-material"].GetPoints();
-            List<Vector3> points = new();
-            points.AddRange(points1);
-            points.AddRange(points2);
-            var bounds = BoundingSphere.FromPoints(points.Distinct().ToArray());
-            bounds = bounds.SetTransform(Matrix.Scaling(2) * Matrix.RotationYawPitchRoll(1, 0, 0) * Matrix.Translation(10, 10, 10));
-            Assert.AreEqual(sph, bounds);
-        }
-        [TestMethod()]
-        public async Task LoadWithPartsTest()
-        {
-            var tDesc = new ModelInstancedDescription()
-            {
-                Content = ContentDescription.FromFile("Resources/Tank", "Leopard.json"),
+                Content = ContentDescription.FromFile(resource, fileName),
                 Instances = 1,
                 Optimize = false,
                 PickingHull = PickingHullTypes.Hull,
@@ -151,9 +131,9 @@ namespace Engine.ModularSceneryTests
             var expectedHull = hullTrn * instanceTrn;
             var expectedTurret = turretTrn * expectedHull;
             var expectedBarrel = barrelTrn * expectedTurret;
-            AssertMatrix.AreEqual(expectedHull, trnLocalHull, tolerance, "Local transform test hull failed");
-            AssertMatrix.AreEqual(expectedTurret, trnLocalTurret, tolerance, "Local transform test turret failed");
-            AssertMatrix.AreEqual(expectedBarrel, trnLocalBarrel, tolerance, "Local transform test barrel failed");
+            AssertMatrix.AreEqual(expectedHull, trnLocalHull, tolerance, $"{testCase} => Local transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnLocalTurret, tolerance, $"{testCase} => Local transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnLocalBarrel, tolerance, $"{testCase} => Local transform test barrel failed");
 
             //World - returns each part position, transformed with the specified instance transform
             var trnWorldHull = model[0].GetWorldTransformByName(tankHullPart);
@@ -168,9 +148,9 @@ namespace Engine.ModularSceneryTests
             expectedHull = Matrix.Translation(Vector3.Zero) * expectedHull;
             expectedTurret = Matrix.Translation(tankHullPos) * expectedTurret;
             expectedBarrel = Matrix.Translation(tankTurretPos) * expectedBarrel;
-            AssertMatrix.AreEqual(expectedHull, trnWorldHull, tolerance, "World transform test hull failed");
-            AssertMatrix.AreEqual(expectedTurret, trnWorldTurret, tolerance, "World transform test turret failed");
-            AssertMatrix.AreEqual(expectedBarrel, trnWorldBarrel, tolerance, "World transform test barrel failed");
+            AssertMatrix.AreEqual(expectedHull, trnWorldHull, tolerance, $"{testCase} => World transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnWorldTurret, tolerance, $"{testCase} => World transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnWorldBarrel, tolerance, $"{testCase} => World transform test barrel failed");
 
             //Part - returns each part transformed with the instance transform
             var trnPartHull = model[0].GetPartTransformByName(tankHullPart);
@@ -182,17 +162,17 @@ namespace Engine.ModularSceneryTests
             expectedHull *= instanceTrn;
             expectedTurret *= expectedHull;
             expectedBarrel *= expectedTurret;
-            AssertMatrix.AreEqual(expectedHull, trnPartHull, tolerance, "Part transform test hull failed");
-            AssertMatrix.AreEqual(expectedTurret, trnPartTurret, tolerance, "Part transform test turret failed");
-            AssertMatrix.AreEqual(expectedBarrel, trnPartBarrel, tolerance, "Part transform test barrel failed");
+            AssertMatrix.AreEqual(expectedHull, trnPartHull, tolerance, $"{testCase} => Part transform test hull failed");
+            AssertMatrix.AreEqual(expectedTurret, trnPartTurret, tolerance, $"{testCase} => Part transform test turret failed");
+            AssertMatrix.AreEqual(expectedBarrel, trnPartBarrel, tolerance, $"{testCase} => Part transform test barrel failed");
 
             //Pose - returns each part position
             var trnPoseHull = model[0].GetPoseTransformByName(tankHullPart);
             var trnPoseTurret = model[0].GetPoseTransformByName(tankTurretPart);
             var trnPoseBarrel = model[0].GetPoseTransformByName(tankBarrelPart);
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos), trnPoseHull, tolerance, "Pose transform test hull failed");
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos), trnPoseTurret, tolerance, "Pose transform test turret failed");
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel, tolerance, "Pose transform test barrel failed");
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos), trnPoseHull, tolerance, $"{testCase} => Pose transform test hull failed");
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos), trnPoseTurret, tolerance, $"{testCase} => Pose transform test turret failed");
+            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel, tolerance, $"{testCase} => Pose transform test barrel failed");
         }
     }
 }

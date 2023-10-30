@@ -9,12 +9,16 @@
     <None Remove="Resources\Tank\Leopard.bmp" />
     <None Remove="Resources\Tank\Leopard.dae" />
     <None Remove="Resources\Tank\Leopard.json" />
+    <None Remove="Resources\Tank\Leopard_backed.json" />
     <None Remove="Resources\Tree1.dae" />
     <None Remove="Resources\tree1.json" />
     <None Remove="Resources\Tree\tree1_baked.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Resources\Tank\Leopard_backed.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Tank\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
