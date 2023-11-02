@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Volume helper
         /// </summary>
-        private readonly BoundsHelper boundsHelper = new();
+        private readonly BoundsHelper boundsHelper;
         /// <summary>
         /// Geometry helper
         /// </summary>
@@ -183,7 +183,7 @@ namespace Engine
             AnimationController = new(model);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            boundsHelper.SetPoints(GetPoints());
+            boundsHelper = new(model.BoundsHelperInitialState);
         }
 
         /// <summary>

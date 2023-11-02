@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Volume helper
         /// </summary>
-        private readonly BoundsHelper boundsHelper = new();
+        private readonly BoundsHelper boundsHelper;
         /// <summary>
         /// Geometry helper
         /// </summary>
@@ -113,7 +113,7 @@ namespace Engine
         public Model(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            boundsHelper = new(BoundsHelperInitialState);
         }
 
         /// <inheritdoc/>
@@ -142,7 +142,7 @@ namespace Engine
             AnimationController = new(this);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            boundsHelper.SetPoints(GetPoints());
+            BoundsHelperInitialState.SetPoints(GetPoints());
         }
         /// <inheritdoc/>
         public override async Task InitializeAssets()

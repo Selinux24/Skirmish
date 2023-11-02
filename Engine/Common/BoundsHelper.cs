@@ -1,6 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -10,9 +8,10 @@ namespace Engine.Common
     class BoundsHelper
     {
         /// <summary>
-        /// Initial bounding sphere
+        /// Initial state
         /// </summary>
-        private BoundingSphere initialSphere;
+        private readonly BoundsHelperInitialState initialState;
+
         /// <summary>
         /// Transformed bounding sphere
         /// </summary>
@@ -22,10 +21,6 @@ namespace Engine.Common
         /// </summary>
         private bool updateBoundingSphere = false;
 
-        /// <summary>
-        /// Initial bounding box
-        /// </summary>
-        private BoundingBox initialAabb;
         /// <summary>
         /// Transformed bounding box
         /// </summary>
@@ -47,39 +42,12 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public BoundsHelper()
+        /// <param name="initialState">Initial state</param>
+        public BoundsHelper(BoundsHelperInitialState initialState)
         {
-
+            this.initialState = initialState;
         }
 
-        /// <summary>
-        /// Sets the point list
-        /// </summary>
-        /// <param name="points">Point list</param>
-        public void SetPoints(IEnumerable<Vector3> points)
-        {
-            if (points?.Any() != true)
-            {
-                boundingSphere = initialSphere = new BoundingSphere();
-
-                boundingBox = initialAabb = new BoundingBox();
-
-                orientedBox = new OrientedBoundingBox();
-            }
-            else
-            {
-                var distinctPoints = points.Distinct().ToArray();
-
-                //Initialize the identity sphere
-                boundingSphere = initialSphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
-
-                //Initialize the identity box
-                boundingBox = initialAabb = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
-
-                //Initialize the identity obb
-                orientedBox = new OrientedBoundingBox(initialAabb);
-            }
-        }
         /// <summary>
         /// Invalidates the internal state
         /// </summary>
@@ -100,7 +68,7 @@ namespace Engine.Common
         {
             if (updateBoundingSphere || refresh)
             {
-                boundingSphere = initialSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
+                boundingSphere = initialState.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateBoundingSphere = false;
             }
@@ -134,7 +102,7 @@ namespace Engine.Common
         {
             if (updateOrientedBox || refresh)
             {
-                orientedBox = new OrientedBoundingBox(initialAabb);
+                orientedBox = new OrientedBoundingBox(initialState.BoundingBox);
                 orientedBox.Transform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateOrientedBox = false;
