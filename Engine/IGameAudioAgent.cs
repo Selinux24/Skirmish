@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine.Audio
+namespace Engine
 {
     /// <summary>
     /// Game audio agent interface

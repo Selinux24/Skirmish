@@ -1,9 +1,10 @@
-﻿using SharpDX.XAudio2.Fx;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Audio
 {
+    using SharpDX.XAudio2.Fx;
+
     /// <summary>
     /// Game audio presets
     /// </summary>
@@ -69,7 +70,7 @@ namespace Engine.Audio
         /// <param name="preset">Preset value</param>
         /// <param name="sampleRate">Sample rate</param>
         /// <returns>Returns the ReverbParameters type</returns>
-        public static ReverbParameters Convert(ReverbPresets preset, int sampleRate)
+        public static ReverbParameters Convert(GameAudioReverbPresets preset, int sampleRate)
         {
             ReverbParameters reverbSettings = presetParams[(int)preset];
 

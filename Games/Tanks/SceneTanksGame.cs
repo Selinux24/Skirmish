@@ -122,8 +122,8 @@ namespace Tanks
 
         private string music;
         private string tankMoveEffect;
-        private IAudioEffect musicEffectInstance;
-        private IAudioEffect tankMoveEffectInstance;
+        private IGameAudioEffect musicEffectInstance;
+        private IGameAudioEffect tankMoveEffectInstance;
         private string tankDestroyedEffect;
         private string tankShootingEffect;
         private string[] impactEffects;
@@ -657,7 +657,7 @@ namespace Tanks
         private async Task InitializeAudio()
         {
             float nearRadius = 1000;
-            ReverbPresets preset = ReverbPresets.Default;
+            GameAudioReverbPresets preset = GameAudioReverbPresets.Default;
 
             music = "Music";
             tankMoveEffect = "TankMove";

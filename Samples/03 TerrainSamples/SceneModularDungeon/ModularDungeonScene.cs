@@ -94,7 +94,7 @@ namespace TerrainSamples.SceneModularDungeon
 
         private string ratSoundMove = null;
         private string ratSoundTalk = null;
-        private IAudioEffect ratSoundInstance = null;
+        private IGameAudioEffect ratSoundInstance = null;
 
         private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
@@ -633,7 +633,7 @@ namespace TerrainSamples.SceneModularDungeon
                     DestroyWhenFinished = true,
                     Volume = 1f,
                     UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
+                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -646,7 +646,7 @@ namespace TerrainSamples.SceneModularDungeon
                     DestroyWhenFinished = true,
                     Volume = 1f,
                     UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
+                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -662,7 +662,7 @@ namespace TerrainSamples.SceneModularDungeon
                         SoundName = soundWinds[i],
                         Volume = 1f,
                         UseAudio3D = true,
-                        ReverbPreset = ReverbPresets.StoneRoom,
+                        ReverbPreset = GameAudioReverbPresets.StoneRoom,
                         EmitterRadius = 15,
                         ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
@@ -677,7 +677,7 @@ namespace TerrainSamples.SceneModularDungeon
                     Volume = 1f,
                     IsLooped = true,
                     UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
+                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -691,7 +691,7 @@ namespace TerrainSamples.SceneModularDungeon
                     Volume = 1f,
                     IsLooped = false,
                     UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
+                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });

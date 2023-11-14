@@ -29,7 +29,7 @@ namespace BasicSamples.SceneStart
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
-        private IAudioEffect currentMusic = null;
+        private IGameAudioEffect currentMusic = null;
 
         private bool sceneReady = false;
 

@@ -9,9 +9,9 @@ namespace Engine.Audio.Tween
     /// <summary>
     /// Audio effect tween collection
     /// </summary>
-    class AudioEffectTweenCollection : ITweenCollection<IAudioEffect>
+    class AudioEffectTweenCollection : ITweenCollection<IGameAudioEffect>
     {
-        private readonly ConcurrentDictionary<IAudioEffect, List<Func<float, bool>>> tasks = new();
+        private readonly ConcurrentDictionary<IGameAudioEffect, List<Func<float, bool>>> tasks = new();
 
         /// <summary>
         /// Updates the task list
@@ -29,7 +29,7 @@ namespace Engine.Audio.Tween
 
             foreach (var task in activeControls)
             {
-                if (task.Key.State != Audio.AudioState.Playing)
+                if (task.Key.State != Audio.GameAudioState.Playing)
                 {
                     continue;
                 }
@@ -70,7 +70,7 @@ namespace Engine.Audio.Tween
         /// </summary>
         /// <param name="item">Tween item</param>
         /// <param name="tween">Tween funcion</param>
-        public void AddTween(IAudioEffect item, Func<float, bool> tween)
+        public void AddTween(IGameAudioEffect item, Func<float, bool> tween)
         {
             var list = tasks.GetOrAdd(item, new List<Func<float, bool>>());
 
@@ -80,7 +80,7 @@ namespace Engine.Audio.Tween
         /// Clears all tweens
         /// </summary>
         /// <param name="item">Tween item</param>
-        public void ClearTween(IAudioEffect item)
+        public void ClearTween(IGameAudioEffect item)
         {
             tasks.TryRemove(item, out _);
         }

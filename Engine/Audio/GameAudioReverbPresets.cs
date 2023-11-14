@@ -4,7 +4,7 @@ namespace Engine.Audio
     /// <summary>
     /// Default reverb presets.
     /// </summary>
-    public enum ReverbPresets
+    public enum GameAudioReverbPresets
     {
         Default = 00,
         Generic = 01,

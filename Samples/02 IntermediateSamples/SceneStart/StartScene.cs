@@ -21,7 +21,7 @@ namespace IntermediateSamples.SceneStart
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
 
-        private IAudioEffect currentMusic = null;
+        private IGameAudioEffect currentMusic = null;
 
         public StartScene(Game game) : base(game)
         {

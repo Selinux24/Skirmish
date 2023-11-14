@@ -113,12 +113,12 @@ namespace TerrainSamples.SceneRts
         private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private string heliEffect;
-        private IAudioEffect heliEffectInstance;
+        private IGameAudioEffect heliEffectInstance;
         private string heliDestroyedEffect;
         private string tank1Effect;
         private string tank2Effect;
-        private IAudioEffect tank1EffectInstance;
-        private IAudioEffect tank2EffectInstance;
+        private IGameAudioEffect tank1EffectInstance;
+        private IGameAudioEffect tank2EffectInstance;
         private string tank1DestroyedEffect;
         private string tank2DestroyedEffect;
         private string tank1ShootingEffect;
@@ -842,7 +842,7 @@ namespace TerrainSamples.SceneRts
                     SoundName = forestEffect,
                     DestroyWhenFinished = false,
                     IsLooped = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -855,7 +855,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 200,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -867,7 +867,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -880,7 +880,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 150,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -893,7 +893,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 150,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -905,7 +905,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -917,7 +917,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -929,7 +929,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -941,7 +941,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -953,7 +953,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -964,7 +964,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -975,7 +975,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -986,7 +986,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 
@@ -998,7 +998,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -1009,7 +1009,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -1020,7 +1020,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -1031,7 +1031,7 @@ namespace TerrainSamples.SceneRts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = GameAudioReverbPresets.Forest,
                     Volume = 1f,
                 });
 

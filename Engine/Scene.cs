@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.Audio;
     using Engine.Common;
 
     /// <summary>

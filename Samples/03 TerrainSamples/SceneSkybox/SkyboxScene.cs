@@ -88,7 +88,7 @@ namespace TerrainSamples.SceneSkybox
 
         private int directionalLightCount = 0;
 
-        private IAudioEffect fireAudioEffect;
+        private IGameAudioEffect fireAudioEffect;
 
         private bool loadingReady = false;
         private bool gameReady = false;
@@ -764,7 +764,7 @@ namespace TerrainSamples.SceneSkybox
                     SoundName = sphereSound,
                     IsLooped = true,
                     UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
+                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
                     Volume = 0.25f,
                     EmitterRadius = 6,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,

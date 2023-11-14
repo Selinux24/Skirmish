@@ -10,13 +10,13 @@ namespace Engine.Audio
         /// <summary>
         /// Effect
         /// </summary>
-        public IAudioEffect Effect { get; private set; }
+        public IGameAudioEffect Effect { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="effect">Effect</param>
-        public GameAudioEventArgs(IAudioEffect effect)
+        public GameAudioEventArgs(IGameAudioEffect effect)
         {
             Effect = effect;
         }

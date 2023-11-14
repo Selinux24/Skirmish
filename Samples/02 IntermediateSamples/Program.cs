@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Content.FmtCollada;
 using Engine.Windows;
 using IntermediateSamples.SceneStart;
@@ -30,6 +31,7 @@ namespace IntermediateSamples
 #endif
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
                 cl.SetScene<StartScene>();
 

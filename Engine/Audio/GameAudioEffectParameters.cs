@@ -6,7 +6,7 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio effect parameters
     /// </summary>
-    public class GameAudioEffectParameters
+    public struct GameAudioEffectParameters
     {
         /// <summary>
         /// Sound name
@@ -41,7 +41,7 @@ namespace Engine.Audio
         /// <summary>
         /// Gets or sets the current reverb preset configuration
         /// </summary>
-        public ReverbPresets? ReverbPreset { get; set; } = ReverbPresets.Default;
+        public GameAudioReverbPresets? ReverbPreset { get; set; } = GameAudioReverbPresets.Default;
         /// <summary>
         /// Destroy when finished
         /// </summary>
@@ -83,5 +83,13 @@ namespace Engine.Audio
         /// Gets or sets the emitter reverb curve
         /// </summary>
         public GameAudioCurvePoint[] EmitterReverbCurve { get; set; } = GameAudioCurvePoint.DefaultReverbCurve;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GameAudioEffectParameters()
+        {
+
+        }
     }
 }

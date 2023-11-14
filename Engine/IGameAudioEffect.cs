@@ -1,11 +1,13 @@
 ﻿using System;
 
-namespace Engine.Audio
+namespace Engine
 {
+    using Engine.Audio;
+
     /// <summary>
     /// Audio effect interface
     /// </summary>
-    public interface IAudioEffect : IDisposable
+    public interface IGameAudioEffect : IDisposable
     {
         /// <summary>
         /// Gets a value indicating whether this instance is looped.
@@ -50,7 +52,7 @@ namespace Engine.Audio
         /// <summary>
         /// Gets the state of the current sound effect instance.
         /// </summary>
-        AudioState State { get; }
+        GameAudioState State { get; }
         /// <summary>
         /// The instance is due to dispose
         /// </summary>
@@ -114,12 +116,12 @@ namespace Engine.Audio
         /// <summary>
         /// Gets the reverb effect
         /// </summary>
-        ReverbPresets? GetReverb();
+        GameAudioReverbPresets? GetReverb();
         /// <summary>
         /// Set reverb to voice
         /// </summary>
         /// <param name="reverb">Reverb index</param>
-        bool SetReverb(ReverbPresets? reverb);
+        bool SetReverb(GameAudioReverbPresets? reverb);
 
         /// <summary>
         /// Gets the output matrix configuration

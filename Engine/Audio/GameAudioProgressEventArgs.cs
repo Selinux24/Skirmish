@@ -30,7 +30,7 @@ namespace Engine.Audio
         /// <param name="effect">Effect</param>
         /// <param name="duration">Duration</param>
         /// <param name="position">Current position</param>
-        public GameAudioProgressEventArgs(IAudioEffect effect, TimeSpan duration, TimeSpan position) : base(effect)
+        public GameAudioProgressEventArgs(IGameAudioEffect effect, TimeSpan duration, TimeSpan position) : base(effect)
         {
             TotalDuration = duration;
             Position = position;

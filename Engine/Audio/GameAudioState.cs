@@ -4,7 +4,7 @@ namespace Engine.Audio
     /// <summary>
     /// Audio state
     /// </summary>
-    public enum AudioState
+    public enum GameAudioState
     {
         /// <summary>
         /// Playing

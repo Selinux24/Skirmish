@@ -25,7 +25,7 @@ namespace Engine.Audio.Tween
         /// Clears all tweens
         /// </summary>
         /// <param name="control">Control</param>
-        public void ClearTween(IAudioEffect effect)
+        public void ClearTween(IGameAudioEffect effect)
         {
             collection.ClearTween(effect);
         }
@@ -36,7 +36,7 @@ namespace Engine.Audio.Tween
         /// <param name="effect">Effect</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenVolumeUp(IAudioEffect effect, long duration, ScaleFunc fnc)
+        public void TweenVolumeUp(IGameAudioEffect effect, long duration, ScaleFunc fnc)
         {
             if (effect == null)
             {
@@ -51,7 +51,7 @@ namespace Engine.Audio.Tween
         /// <param name="effect">Effect</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenVolumeDown(IAudioEffect effect, long duration, ScaleFunc fnc)
+        public void TweenVolumeDown(IGameAudioEffect effect, long duration, ScaleFunc fnc)
         {
             if (effect == null)
             {
@@ -68,7 +68,7 @@ namespace Engine.Audio.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenVolume(IAudioEffect effect, float from, float to, long duration, ScaleFunc fnc)
+        public void TweenVolume(IGameAudioEffect effect, float from, float to, long duration, ScaleFunc fnc)
         {
             if (effect == null)
             {
@@ -89,7 +89,7 @@ namespace Engine.Audio.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenVolumeBounce(IAudioEffect effect, float from, float to, long duration, ScaleFunc fnc)
+        public void TweenVolumeBounce(IGameAudioEffect effect, float from, float to, long duration, ScaleFunc fnc)
         {
             if (effect == null)
             {
@@ -108,7 +108,7 @@ namespace Engine.Audio.Tween
         /// </summary>
         /// <param name="effect">Effect</param>
         /// <param name="ftVolume">Volume tween</param>
-        public void AddVolumeTween(IAudioEffect effect, FloatTween ftVolume)
+        public void AddVolumeTween(IGameAudioEffect effect, FloatTween ftVolume)
         {
             effect.Volume = ftVolume.StartValue;
 
@@ -131,7 +131,7 @@ namespace Engine.Audio.Tween
         /// </summary>
         /// <param name="effect">Effect</param>
         /// <param name="ftVolume">Volume tween</param>
-        public void AddVolumeBounce(IAudioEffect effect, FloatTween ftVolume)
+        public void AddVolumeBounce(IGameAudioEffect effect, FloatTween ftVolume)
         {
             effect.Volume = ftVolume.StartValue;
 

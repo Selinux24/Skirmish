@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Audio\elsasong.wav" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -149,6 +145,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
+    <ProjectReference Include="..\..\Engine.Audio\Engine.Audio.csproj" />
     <ProjectReference Include="..\..\Engine.Windows\Engine.Windows.csproj" />
   </ItemGroup>
 

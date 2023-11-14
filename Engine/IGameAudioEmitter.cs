@@ -1,5 +1,6 @@
-﻿
-namespace Engine.Audio
+﻿using Engine.Audio;
+
+namespace Engine
 {
     /// <summary>
     /// Game audio emitter interface

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Content.FmtCollada;
 using Engine.Windows;
 using System;
@@ -28,6 +29,7 @@ namespace Tanks
                 using Game cl = new("Tanks!!!");
 #endif
                 GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
                 cl.SetScene<SceneTanksGame>();
 

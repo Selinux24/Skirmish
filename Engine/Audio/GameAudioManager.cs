@@ -5,9 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.Audio
 {
-    using Engine.Audio;
     using Engine.Content;
 
     /// <summary>
@@ -27,13 +26,18 @@ namespace Engine
             /// <summary>
             /// Effect instance
             /// </summary>
-            public IAudioEffect Effect { get; set; }
+            public IGameAudioEffect Effect { get; set; }
         }
+
+        /// <summary>
+        /// Game audio delegate
+        /// </summary>
+        private static Func<IGameAudio> audioDelegate;
 
         /// <summary>
         /// Game audio
         /// </summary>
-        private readonly GameAudio gameAudio;
+        private readonly IGameAudio gameAudio;
         /// <summary>
         /// Sound dictionary
         /// </summary>
@@ -78,12 +82,30 @@ namespace Engine
         }
 
         /// <summary>
+        /// Register audio
+        /// </summary>
+        /// <typeparam name="T">Type of audio loader</typeparam>
+        /// <param name="sampleRate">Sample rate</param>
+        public static void RegisterAudio<T>(int sampleRate) where T : class, IGameAudioLoader
+        {
+            T audio = Activator.CreateInstance<T>();
+
+            audioDelegate = audio.GetDelegate(sampleRate);
+        }
+        /// <summary>
+        /// Gets the audio instance
+        /// </summary>
+        public static IGameAudio GetAudio()
+        {
+            return audioDelegate?.Invoke();
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="audio">Game audio instance</param>
         public GameAudioManager()
         {
-            gameAudio = new GameAudio();
+            gameAudio = GetAudio();
         }
         /// <summary>
         /// Destructor
@@ -145,7 +167,7 @@ namespace Engine
             }
 
             var toUpdate = effectInstances
-                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == AudioState.Playing && i.Effect.UseAudio3D)
+                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == GameAudioState.Playing && i.Effect.UseAudio3D)
                 .ToArray();
 
             int effectCount = toUpdate.Length;
@@ -209,7 +231,7 @@ namespace Engine
         /// </summary>
         /// <param name="effectName">Effect name</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName)
+        public IGameAudioEffect CreateEffectInstance(string effectName)
         {
             if (!effectParamsLib.ContainsKey(effectName))
             {
@@ -217,7 +239,7 @@ namespace Engine
                 return null;
             }
 
-            if (effectInstances.Exists(i => i.Name == effectName && i.Effect.State != AudioState.Stopped))
+            if (effectInstances.Exists(i => i.Name == effectName && i.Effect.State != GameAudioState.Stopped))
             {
                 //Effect currently playing
                 return null;
@@ -232,7 +254,7 @@ namespace Engine
             }
 
             //Creates the effect
-            var instance = new GameAudioEffect(gameAudio, soundList[effectParams.SoundName], effectParams);
+            var instance = gameAudio.CreateEffect(soundList[effectParams.SoundName], effectParams);
 
             //Adds effect to "to delete" effect list
             effectInstances.Add(new EffectInstance { Name = effectName, Effect = instance });
@@ -246,7 +268,7 @@ namespace Engine
         /// <param name="emitter">Emitter fixed position</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, ITransform listener)
+        public IGameAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, ITransform listener)
         {
             var emitterManipulator = new Manipulator3D();
             emitterManipulator.SetPosition(emitter);
@@ -260,7 +282,7 @@ namespace Engine
         /// <param name="emitter">Emitter manipulator object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, ITransform emitter, ITransform listener)
+        public IGameAudioEffect CreateEffectInstance(string effectName, ITransform emitter, ITransform listener)
         {
             var instance = CreateEffectInstance(effectName);
 
@@ -277,7 +299,7 @@ namespace Engine
         /// <param name="emitter">Emitter 3D transformable object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, ITransform listener)
+        public IGameAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, ITransform listener)
         {
             var instance = CreateEffectInstance(effectName);
 

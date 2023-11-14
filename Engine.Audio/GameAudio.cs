@@ -1,18 +1,19 @@
 ﻿using SharpDX;
-using SharpDX.Multimedia;
-using SharpDX.X3DAudio;
-using SharpDX.XAudio2;
-using SharpDX.XAudio2.Fx;
 using System;
-using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
-using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
 
 namespace Engine.Audio
 {
+    using SharpDX.Multimedia;
+    using SharpDX.X3DAudio;
+    using SharpDX.XAudio2;
+    using SharpDX.XAudio2.Fx;
+    using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
+    using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
+
     /// <summary>
     /// Game audio
     /// </summary>
-    class GameAudio : IDisposable
+    public class GameAudio : IGameAudio
     {
         /// <summary>
         /// Gets or sets the distance scaling ratio. Default is 1f.
@@ -39,38 +40,29 @@ namespace Engine.Audio
         /// Mastering limiter flag
         /// </summary>
         private bool useMasteringLimiter = false;
+        /// <summary>
+        /// Audio speakers
+        /// </summary>
+        private readonly GameAudioSpeakers speakers = GameAudioSpeakers.None;
 
         /// <summary>
         /// Mastering voice
         /// </summary>
         internal MasteringVoice MasteringVoice { get; private set; }
-        /// <summary>
-        /// Input sample rate
-        /// </summary>
+        /// <inheritdoc/>
         public int InputSampleRate { get; private set; }
-        /// <summary>
-        /// Speakers configuration
-        /// </summary>
-        public Speakers Speakers { get; private set; }
-        /// <summary>
-        /// Output channels
-        /// </summary>
+        /// <inheritdoc/>
         public int InputChannelCount { get; private set; }
-        /// <summary>
-        /// Use redirect to LFE
-        /// </summary>
+        /// <inheritdoc/>
         public bool UseRedirectToLFE
         {
             get
             {
-                return Speakers.HasFlag(Speakers.LowFrequency);
+                return speakers.HasFlag(GameAudioSpeakers.LowFrequency);
             }
         }
 
-        /// <summary>
-        /// Gets or sets the master volume value
-        /// </summary>
-        /// <remarks>From 0 to 1</remarks>
+        /// <inheritdoc/>
         public float MasterVolume
         {
             get
@@ -84,9 +76,7 @@ namespace Engine.Audio
                 MasteringVoice.SetVolume(masterVolume);
             }
         }
-        /// <summary>
-        /// Gets or sets whether the master voice uses a limiter or not
-        /// </summary>
+        /// <inheritdoc/>
         public bool UseMasteringLimiter
         {
             get
@@ -111,7 +101,14 @@ namespace Engine.Audio
         /// <summary>
         /// Constructor
         /// </summary>
-        internal GameAudio(XAudio2Version version = XAudio2Version.Default, int sampleRate = 48000)
+        internal GameAudio() : this(48000)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        internal GameAudio(int sampleRate)
         {
             XAudio2Flags audio2Flags;
 #if DEBUG
@@ -119,7 +116,7 @@ namespace Engine.Audio
 #else
             audio2Flags = XAudio2Flags.None;
 #endif
-            device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
+            device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, XAudio2Version.Default);
             device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new()
@@ -138,7 +135,7 @@ namespace Engine.Audio
                 InputSampleRate = details.InputSampleRate;
                 InputChannelCount = details.InputChannelCount;
                 int channelMask = MasteringVoice.ChannelMask;
-                Speakers = (Speakers)channelMask;
+                speakers = (GameAudioSpeakers)channelMask;
             }
             else
             {
@@ -146,12 +143,12 @@ namespace Engine.Audio
                 InputSampleRate = details.InputSampleRate;
                 InputChannelCount = details.InputChannelCount;
                 MasteringVoice.GetChannelMask(out int channelMask);
-                Speakers = (Speakers)channelMask;
+                speakers = (GameAudioSpeakers)channelMask;
             }
 
-            if (Speakers == Speakers.None)
+            if (speakers == GameAudioSpeakers.None)
             {
-                Speakers = Speakers.FrontLeft | Speakers.FrontRight;
+                speakers = GameAudioSpeakers.Stereo;
             }
 
             MasteringVoice.SetVolume(1f);
@@ -203,89 +200,24 @@ namespace Engine.Audio
             }
         }
 
-        /// <summary>
-        /// Starts the audio device
-        /// </summary>
+        /// <inheritdoc/>
         public void Start()
         {
             device.StartEngine();
         }
-        /// <summary>
-        /// Stops the audio device
-        /// </summary>
+        /// <inheritdoc/>
         public void Stop()
         {
             device.StopEngine();
         }
 
-        /// <summary>
-        /// Creates a source voice
-        /// </summary>
-        /// <param name="waveFormat">Wave format</param>
-        /// <param name="useFilter">Use filters</param>
-        /// <returns>Returns the souce voice</returns>
-        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
+        /// <inheritdoc/>
+        public IGameAudioEffect CreateEffect(string fileName, GameAudioEffectParameters effectParameters)
         {
-            if (useFilter)
-            {
-                return new SourceVoice(device, waveFormat, VoiceFlags.UseFilter, XAudio2.MaximumFilterFrequency);
-            }
-            else
-            {
-                return new SourceVoice(device, waveFormat);
-            }
-        }
-        /// <summary>
-        /// Creates a reverb effect
-        /// </summary>
-        /// <param name="isUsingDebuging">Use debug</param>
-        /// <returns>Returns the reverb effect</returns>
-        internal Reverb CreateReverb(bool isUsingDebuging = false)
-        {
-            return new Reverb(device, isUsingDebuging);
-        }
-        /// <summary>
-        /// Creates a submix voice
-        /// </summary>
-        /// <param name="inputChannelCount">Input channels</param>
-        /// <param name="inputSampleRate">Input sample rate</param>
-        /// <returns>Returns the submix voice</returns>
-        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
-        {
-            return new SubmixVoice(
-                device,
-                inputChannelCount,
-                inputSampleRate);
-        }
-        /// <summary>
-        /// Creates a new reverb voice
-        /// </summary>
-        internal SubmixVoice CreateReverbVoice()
-        {
-            // Create reverb effect
-            using var reverbEffect = CreateReverb();
-
-            // Create a submix voice
-            var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
-
-            // Performance tip: you need not run global FX with the sample number
-            // of channels as the final mix.  For example, this sample runs
-            // the reverb in mono mode, thus reducing CPU overhead.
-            var desc = new EffectDescriptor(reverbEffect)
-            {
-                InitialState = true,
-                OutputChannelCount = InputChannelCount,
-            };
-            submixVoice.SetEffectChain(desc);
-
-            return submixVoice;
+            return new GameAudioEffect(this, fileName, effectParameters);
         }
 
-        /// <summary>
-        /// Sets the mastering limiter parameters
-        /// </summary>
-        /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
-        /// <param name="loudness">Threshold of the limiter</param>
+        /// <inheritdoc/>
         public void SetMasteringLimit(int release, int loudness)
         {
             if (release < MasteringLimiter.MinimumRelease || release > MasteringLimiter.MaximumRelease)
@@ -331,6 +263,73 @@ namespace Engine.Audio
         }
 
         /// <summary>
+        /// Creates a source voice
+        /// </summary>
+        /// <param name="waveFormat">Wave format</param>
+        /// <param name="useFilter">Use filters</param>
+        /// <returns>Returns the souce voice</returns>
+        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
+        {
+            if (useFilter)
+            {
+                return new SourceVoice(device, waveFormat, VoiceFlags.UseFilter, XAudio2.MaximumFilterFrequency);
+            }
+            else
+            {
+                return new SourceVoice(device, waveFormat);
+            }
+        }
+        /// <summary>
+        /// Creates a reverb effect
+        /// </summary>
+        /// <param name="isUsingDebuging">Use debug</param>
+        /// <returns>Returns the reverb effect</returns>
+        internal Reverb CreateReverb(bool isUsingDebuging = false)
+        {
+            return new Reverb(device, isUsingDebuging);
+        }
+        /// <summary>
+        /// Creates a submix voice
+        /// </summary>
+        /// <param name="inputChannelCount">Input channels</param>
+        /// <param name="inputSampleRate">Input sample rate</param>
+        /// <returns>Returns the submix voice</returns>
+        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
+        {
+            return new SubmixVoice(device, inputChannelCount, inputSampleRate);
+        }
+        /// <summary>
+        /// Creates a new reverb voice
+        /// </summary>
+        internal SubmixVoice CreateReverbVoice()
+        {
+            // Create reverb effect
+            using var reverbEffect = CreateReverb();
+
+            // Create a submix voice
+            var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
+
+            // Performance tip: you need not run global FX with the sample number
+            // of channels as the final mix.  For example, this sample runs
+            // the reverb in mono mode, thus reducing CPU overhead.
+            var desc = new EffectDescriptor(reverbEffect)
+            {
+                InitialState = true,
+                OutputChannelCount = InputChannelCount,
+            };
+            submixVoice.SetEffectChain(desc);
+
+            return submixVoice;
+        }
+
+        /// <summary>
+        /// Gets the speakers configuration
+        /// </summary>
+        internal GameAudioSpeakers GetAudioSpeakers()
+        {
+            return speakers;
+        }
+        /// <summary>
         /// Calculates the 3D audio effect
         /// </summary>
         /// <param name="listener">Listener</param>
@@ -339,7 +338,7 @@ namespace Engine.Audio
         /// <param name="dspSettings">DSP settings</param>
         internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            x3DInstance ??= new X3DAudio(Speakers, X3DAudio.SpeedOfSound);
+            x3DInstance ??= new X3DAudio((Speakers)speakers, X3DAudio.SpeedOfSound);
 
             x3DInstance.Calculate(listener, emitter, flags, dspSettings);
         }

@@ -5,7 +5,7 @@ namespace Engine.Audio
     /// <summary>
     /// Audio agent
     /// </summary>
-    class GameAudioAgent : IGameAudioAgent
+    public class GameAudioAgent : IGameAudioAgent
     {
         /// <summary>
         /// Agent transform

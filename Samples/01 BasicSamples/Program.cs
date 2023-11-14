@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Content.FmtCollada;
 using Engine.Windows;
 using System;
@@ -28,6 +29,7 @@ namespace BasicSamples
                 using Game cl = new("Basic Samples");
 #endif
                 GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
                 cl.SetScene<SceneStart.StartScene>();
 

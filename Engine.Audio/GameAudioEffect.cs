@@ -1,7 +1,4 @@
-﻿using SharpDX;
-using SharpDX.X3DAudio;
-using SharpDX.XAudio2;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -9,15 +6,19 @@ using System.Threading.Tasks;
 
 namespace Engine.Audio
 {
+    using SharpDX;
+    using SharpDX.X3DAudio;
+    using SharpDX.XAudio2;
+
     /// <summary>
     /// Game audio effect
     /// </summary>
-    class GameAudioEffect : IAudioEffect
+    class GameAudioEffect : IGameAudioEffect
     {
         private const int WaitPrecision = 1;
 
         private readonly GameAudio gameAudio;
-        private readonly IAudioFile audioFile;
+        private readonly GameAudioFile audioFile;
 
         private readonly SourceVoice sourceVoice;
         private readonly int voiceInputChannels;
@@ -27,7 +28,7 @@ namespace Engine.Audio
         private float pitch;
 
         private SubmixVoice submixVoice;
-        private ReverbPresets? reverbPreset;
+        private GameAudioReverbPresets? reverbPreset;
         private DspSettings dspSettings;
 
         private Listener listener;
@@ -140,7 +141,7 @@ namespace Engine.Audio
         /// Gets the state of this instance.
         /// </summary>
         /// <value>The state.</value>
-        public AudioState State { get; private set; } = AudioState.Stopped;
+        public GameAudioState State { get; private set; } = GameAudioState.Stopped;
         /// <summary>
         /// The instance is due to dispose
         /// </summary>
@@ -301,7 +302,7 @@ namespace Engine.Audio
                 return;
             }
 
-            if (State == AudioState.Stopped)
+            if (State == GameAudioState.Stopped)
             {
                 nextPlayPosition = start;
 
@@ -309,11 +310,11 @@ namespace Engine.Audio
 
                 playCounter++;
                 waitForPlayToOutput.Reset();
-                State = AudioState.Playing;
+                State = GameAudioState.Playing;
                 playEvent.Set();
                 waitForPlayToOutput.WaitOne();
             }
-            else if (State == AudioState.Paused)
+            else if (State == GameAudioState.Paused)
             {
                 Resume();
             }
@@ -329,7 +330,7 @@ namespace Engine.Audio
                 return;
             }
 
-            if (State != AudioState.Stopped)
+            if (State != GameAudioState.Stopped)
             {
                 sourceVoice.Stop(0);
 
@@ -338,7 +339,7 @@ namespace Engine.Audio
                 playCounter++;
 
                 clock.Stop();
-                State = AudioState.Stopped;
+                State = GameAudioState.Stopped;
                 playEvent.Reset();
             }
         }
@@ -352,12 +353,12 @@ namespace Engine.Audio
                 return;
             }
 
-            if (State == AudioState.Playing)
+            if (State == GameAudioState.Playing)
             {
                 sourceVoice.Stop();
 
                 clock.Stop();
-                State = AudioState.Paused;
+                State = GameAudioState.Paused;
                 playEvent.Reset();
             }
         }
@@ -371,12 +372,12 @@ namespace Engine.Audio
                 return;
             }
 
-            if (State == AudioState.Paused)
+            if (State == GameAudioState.Paused)
             {
                 sourceVoice.Start();
 
                 clock.Start();
-                State = AudioState.Playing;
+                State = GameAudioState.Playing;
                 playEvent.Set();
             }
         }
@@ -426,7 +427,7 @@ namespace Engine.Audio
                 PlayAllSamples(out bool endOfSong);
 
                 // If the song is not looping (by default), then stop the audio player.
-                if (State == AudioState.Playing && endOfSong)
+                if (State == GameAudioState.Playing && endOfSong)
                 {
                     if (!IsLooped)
                     {
@@ -489,7 +490,7 @@ namespace Engine.Audio
             WaitForPlay();
 
             // If the player is stopped, then break of this loop
-            if (State == AudioState.Stopped)
+            if (State == GameAudioState.Stopped)
             {
                 nextPlayPosition = TimeSpan.Zero;
                 return false;
@@ -505,7 +506,7 @@ namespace Engine.Audio
             WaitBufferEnd();
 
             // If the player is stopped or disposed, then break of this loop
-            if (State == AudioState.Stopped)
+            if (State == GameAudioState.Stopped)
             {
                 nextPlayPosition = TimeSpan.Zero;
                 return false;
@@ -551,7 +552,7 @@ namespace Engine.Audio
         /// </summary>
         private void WaitForPlay()
         {
-            while (State != AudioState.Stopped)
+            while (State != GameAudioState.Stopped)
             {
                 // While the player is not stopped, wait for the play event
                 if (playEvent.WaitOne(WaitPrecision))
@@ -566,7 +567,7 @@ namespace Engine.Audio
         /// </summary>
         private void WaitBufferEnd()
         {
-            while (State != AudioState.Stopped && !disposed && sourceVoice.State.BuffersQueued == audioFile.BufferCount)
+            while (State != GameAudioState.Stopped && !disposed && sourceVoice.State.BuffersQueued == audioFile.BufferCount)
             {
                 bufferEndEvent.WaitOne(WaitPrecision);
             }
@@ -666,9 +667,9 @@ namespace Engine.Audio
             emitter.InnerRadius = Emitter.InnerRadius;
             emitter.InnerRadiusAngle = Emitter.InnerRadiusAngle;
 
-            emitter.VolumeCurve = GameAudioCurvePoint.ConvertCurve(Emitter.VolumeCurve);
-            emitter.LfeCurve = GameAudioCurvePoint.ConvertCurve(Emitter.LfeCurve);
-            emitter.ReverbCurve = GameAudioCurvePoint.ConvertCurve(Emitter.ReverbCurve);
+            emitter.VolumeCurve = SharpDXExtensions.ConvertCurve(Emitter.VolumeCurve);
+            emitter.LfeCurve = SharpDXExtensions.ConvertCurve(Emitter.LfeCurve);
+            emitter.ReverbCurve = SharpDXExtensions.ConvertCurve(Emitter.ReverbCurve);
 
             emitter.CurveDistanceScaler = GameAudio.DistanceScale * Emitter.Radius;
             emitter.DopplerScaler = GameAudio.DopplerScale;
@@ -789,7 +790,7 @@ namespace Engine.Audio
         /// <summary>
         /// Gets the reverb effect
         /// </summary>
-        public ReverbPresets? GetReverb()
+        public GameAudioReverbPresets? GetReverb()
         {
             return reverbPreset;
         }
@@ -797,7 +798,7 @@ namespace Engine.Audio
         /// Set reverb to voice
         /// </summary>
         /// <param name="reverb">Reverb index</param>
-        public bool SetReverb(ReverbPresets? reverb)
+        public bool SetReverb(GameAudioReverbPresets? reverb)
         {
             submixVoice ??= gameAudio.CreateReverbVoice();
 
@@ -886,31 +887,31 @@ namespace Engine.Audio
             //The level sent from source channel S to destination channel D is specified in the form outputMatrix[SourceChannels × D + S]
             for (int s = 0; s < sourceChannels; s++)
             {
-                switch ((AudioSpeakers)gameAudio.Speakers)
+                switch (gameAudio.GetAudioSpeakers())
                 {
-                    case AudioSpeakers.Mono:
+                    case GameAudioSpeakers.Mono:
                         panOutputMatrix[(sourceChannels * 0) + s] = 1 * outputMatrix[s];
                         break;
 
-                    case AudioSpeakers.Stereo:
-                    case AudioSpeakers.Surround:
+                    case GameAudioSpeakers.Stereo:
+                    case GameAudioSpeakers.Surround:
                         panOutputMatrix[(sourceChannels * 0) + s] = panLeft * 2f * outputMatrix[(sourceChannels * 0) + s];
                         panOutputMatrix[(sourceChannels * 1) + s] = panRight * 2f * outputMatrix[(sourceChannels * 1) + s];
                         break;
 
-                    case AudioSpeakers.Quad:
+                    case GameAudioSpeakers.Quad:
                         panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 2) + s] = panLeft * 2f * outputMatrix[(sourceChannels * 0) + s];
                         panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 3) + s] = panRight * 2f * outputMatrix[(sourceChannels * 1) + s];
                         break;
 
-                    case AudioSpeakers.FivePointOne:
-                    case AudioSpeakers.FivePointOneSurround:
-                    case AudioSpeakers.SevenPointOne:
+                    case GameAudioSpeakers.FivePointOne:
+                    case GameAudioSpeakers.FivePointOneSurround:
+                    case GameAudioSpeakers.SevenPointOne:
                         panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 4) + s] = panLeft * 2f * outputMatrix[(sourceChannels * 0) + s];
                         panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 5) + s] = panRight * 2f * outputMatrix[(sourceChannels * 1) + s];
                         break;
 
-                    case AudioSpeakers.SevenPointOneSurround:
+                    case GameAudioSpeakers.SevenPointOneSurround:
                         panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 4) + s] = panOutputMatrix[(sourceChannels * 6) + s] = panLeft * 2f * outputMatrix[(sourceChannels * 0) + s];
                         panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 5) + s] = panOutputMatrix[(sourceChannels * 7) + s] = panRight * 2f * outputMatrix[(sourceChannels * 1) + s];
                         break;

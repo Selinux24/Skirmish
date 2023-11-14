@@ -1,14 +1,18 @@
-﻿using SharpDX;
-using SharpDX.MediaFoundation;
-using SharpDX.Multimedia;
-using SharpDX.XAudio2;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Engine.Audio
 {
-    class GameAudioFile : IAudioFile
+    using SharpDX;
+    using SharpDX.MediaFoundation;
+    using SharpDX.Multimedia;
+    using SharpDX.XAudio2;
+
+    /// <summary>
+    /// Game audio file
+    /// </summary>
+    class GameAudioFile : IDisposable
     {
         private const int DefaultBufferCount = 3;
         private const int DefaulBuffertSize = 32 * 1024; // default size 32Kb
@@ -24,7 +28,6 @@ namespace Engine.Audio
 
         private IEnumerator<DataPointer> sampleIterator = null;
         private int currentSample = 0;
-
         private readonly AudioDecoder audioDecoder;
         private readonly AudioBuffer[] audioBuffers;
         private readonly DataBuffer[] memBuffers;

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Content.FmtCollada;
 using Engine.Content.FmtObj;
 using Engine.Windows;
@@ -31,6 +32,7 @@ namespace TerrainSamples
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
                 GameResourceManager.RegisterLoader<LoaderObj>();
+                GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
                 cl.SetScene<SceneStart.StartScene>();
 
