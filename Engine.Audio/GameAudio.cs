@@ -13,7 +13,7 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio
     /// </summary>
-    public class GameAudio : IGameAudio
+    class GameAudio : IGameAudio
     {
         /// <summary>
         /// Gets or sets the distance scaling ratio. Default is 1f.
@@ -43,12 +43,12 @@ namespace Engine.Audio
         /// <summary>
         /// Audio speakers
         /// </summary>
-        private readonly GameAudioSpeakers speakers = GameAudioSpeakers.None;
+        private readonly GameAudioSpeakers speakers;
 
         /// <summary>
         /// Mastering voice
         /// </summary>
-        internal MasteringVoice MasteringVoice { get; private set; }
+        public MasteringVoice MasteringVoice { get; private set; }
         /// <inheritdoc/>
         public int InputSampleRate { get; private set; }
         /// <inheritdoc/>
@@ -101,14 +101,14 @@ namespace Engine.Audio
         /// <summary>
         /// Constructor
         /// </summary>
-        internal GameAudio() : this(48000)
+        public GameAudio() : this(48000)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        internal GameAudio(int sampleRate)
+        public GameAudio(int sampleRate)
         {
             XAudio2Flags audio2Flags;
 #if DEBUG
@@ -268,7 +268,7 @@ namespace Engine.Audio
         /// <param name="waveFormat">Wave format</param>
         /// <param name="useFilter">Use filters</param>
         /// <returns>Returns the souce voice</returns>
-        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
+        public SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
         {
             if (useFilter)
             {
@@ -284,7 +284,7 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="isUsingDebuging">Use debug</param>
         /// <returns>Returns the reverb effect</returns>
-        internal Reverb CreateReverb(bool isUsingDebuging = false)
+        private Reverb CreateReverb(bool isUsingDebuging = false)
         {
             return new Reverb(device, isUsingDebuging);
         }
@@ -294,14 +294,14 @@ namespace Engine.Audio
         /// <param name="inputChannelCount">Input channels</param>
         /// <param name="inputSampleRate">Input sample rate</param>
         /// <returns>Returns the submix voice</returns>
-        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
+        private SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
         {
             return new SubmixVoice(device, inputChannelCount, inputSampleRate);
         }
         /// <summary>
         /// Creates a new reverb voice
         /// </summary>
-        internal SubmixVoice CreateReverbVoice()
+        public SubmixVoice CreateReverbVoice()
         {
             // Create reverb effect
             using var reverbEffect = CreateReverb();
@@ -325,7 +325,7 @@ namespace Engine.Audio
         /// <summary>
         /// Gets the speakers configuration
         /// </summary>
-        internal GameAudioSpeakers GetAudioSpeakers()
+        public GameAudioSpeakers GetAudioSpeakers()
         {
             return speakers;
         }
@@ -336,7 +336,7 @@ namespace Engine.Audio
         /// <param name="emitter">Emitter</param>
         /// <param name="flags">Calculate flags</param>
         /// <param name="dspSettings">DSP settings</param>
-        internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
+        public void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
             x3DInstance ??= new X3DAudio((Speakers)speakers, X3DAudio.SpeedOfSound);
 

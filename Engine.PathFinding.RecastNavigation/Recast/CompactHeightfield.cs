@@ -1554,76 +1554,26 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, int borderSize, HeightPatch hp)
         {
-            int[] offset =
-            {
-                +0, +0,
-                -1, -1,
-                +0, -1,
-                +1, -1,
-                +1, +0,
-                +1, +1,
-                +0, +1,
-                -1, +1,
-                -1, +0,
-            };
-
             var polyIndices = poly.GetVertices();
+            var bounds = hp.Bounds;
 
-            // Find cell closest to a poly vertex
-            int startCellX = 0, startCellY = 0, startSpanIndex = -1;
-            int dmin = HeightPatch.RC_UNSET_HEIGHT;
-            for (int j = 0; j < polyIndices.Length && dmin > 0; ++j)
-            {
-                for (int k = 0; k < 9 && dmin > 0; ++k)
-                {
-                    int ax = verts[polyIndices[j]].X + offset[k * 2 + 0];
-                    int ay = verts[polyIndices[j]].Y;
-                    int az = verts[polyIndices[j]].Z + offset[k * 2 + 1];
-                    if (ax < hp.Bounds.X || ax >= hp.Bounds.X + hp.Bounds.Width ||
-                        az < hp.Bounds.Y || az >= hp.Bounds.Y + hp.Bounds.Height)
-                    {
-                        continue;
-                    }
+            var closestCell = FindClosestCellToPolyVertex2D(polyIndices, verts, borderSize, bounds);
 
-                    var c = Cells[(ax + borderSize) + (az + borderSize) * Width];
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni && dmin > 0; ++i)
-                    {
-                        var s = Spans[i];
-                        int d = Math.Abs(ay - s.Y);
-                        if (d < dmin)
-                        {
-                            startCellX = ax;
-                            startCellY = az;
-                            startSpanIndex = i;
-                            dmin = d;
-                        }
-                    }
-                }
-            }
-
-            // Find center of the polygon
-            int pcx = 0, pcy = 0;
-            for (int j = 0; j < polyIndices.Length; j++)
-            {
-                pcx += verts[polyIndices[j]].X;
-                pcy += verts[polyIndices[j]].Z;
-            }
-            pcx /= polyIndices.Length;
-            pcy /= polyIndices.Length;
+            var polyCenter = FindPolygonCenter2D(polyIndices, verts);
 
             // Use seeds array as a stack for DFS
             var array = new List<HeightDataItem>(512)
             {
                 new HeightDataItem
                 {
-                    X = startCellX,
-                    Y = startCellY,
-                    I = startSpanIndex
+                    X = closestCell.StartCellX,
+                    Y = closestCell.StartCellY,
+                    I = closestCell.StartSpanIndex
                 }
             };
 
             int[] dirs = { 0, 1, 2, 3 };
-            hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, 0);
+            hp.Data = Helper.CreateArray(bounds.Width * bounds.Height, 0);
             // DFS to move to the center. Note that we need a DFS here and can not just move
             // directly towards the center without recording intermediate nodes, even though the polygons
             // are convex. In very rare we can get stuck due to contour simplification if we do not
@@ -1639,7 +1589,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 hdItem = array.Pop();
 
-                if (hdItem.X == pcx && hdItem.Y == pcy)
+                if (hdItem.X == polyCenter.X && hdItem.Y == polyCenter.Y)
                 {
                     break;
                 }
@@ -1648,17 +1598,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // directly towards the center in the Y-axis; otherwise prefer
                 // direction in the X-axis
                 int directDir;
-                if (hdItem.X == pcx)
+                if (hdItem.X == polyCenter.X)
                 {
-                    directDir = Utils.GetDirForOffset(0, pcy > hdItem.Y ? 1 : -1);
+                    directDir = Utils.GetDirForOffset(0, polyCenter.Y > hdItem.Y ? 1 : -1);
                 }
                 else
                 {
-                    directDir = Utils.GetDirForOffset(pcx > hdItem.X ? 1 : -1, 0);
+                    directDir = Utils.GetDirForOffset(polyCenter.X > hdItem.X ? 1 : -1, 0);
                 }
 
                 // Push the direct dir last so we start with this on next iteration
-                Helper.Swap(ref dirs[directDir], ref dirs[3]);
+                (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
 
                 var cs = Spans[hdItem.I];
                 for (int i = 0; i < 4; i++)
@@ -1672,19 +1622,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int newX = hdItem.X + Utils.GetDirOffsetX(dir);
                     int newY = hdItem.Y + Utils.GetDirOffsetY(dir);
 
-                    int hpx = newX - hp.Bounds.X;
-                    int hpy = newY - hp.Bounds.Y;
-                    if (hpx < 0 || hpx >= hp.Bounds.Width || hpy < 0 || hpy >= hp.Bounds.Height)
+                    int hpx = newX - bounds.X;
+                    int hpy = newY - bounds.Y;
+                    if (hpx < 0 || hpx >= bounds.Width || hpy < 0 || hpy >= bounds.Height)
                     {
                         continue;
                     }
 
-                    if (hp.Data[hpx + hpy * hp.Bounds.Width] != 0)
+                    if (hp.Data[hpx + hpy * bounds.Width] != 0)
                     {
                         continue;
                     }
 
-                    hp.Data[hpx + hpy * hp.Bounds.Width] = 1;
+                    hp.Data[hpx + hpy * bounds.Width] = 1;
                     int index = Cells[(newX + borderSize) + (newY + borderSize) * Width].Index + cs.GetCon(dir);
                     array.Add(new HeightDataItem
                     {
@@ -1694,7 +1644,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     });
                 }
 
-                Helper.Swap(ref dirs[directDir], ref dirs[3]);
+                (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
             }
 
             array.Clear();
@@ -1707,11 +1657,91 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 I = hdItem.I,
             });
 
-            hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, SPAN_MAX_HEIGHT);
+            hp.Data = Helper.CreateArray(bounds.Width * bounds.Height, SPAN_MAX_HEIGHT);
             var chs = Spans[hdItem.I];
-            hp.Data[hdItem.X - hp.Bounds.X + (hdItem.Y - hp.Bounds.Y) * hp.Bounds.Width] = chs.Y;
+            hp.Data[(hdItem.X - bounds.X) + (hdItem.Y - bounds.Y) * bounds.Width] = chs.Y;
 
             return array.ToArray();
+        }
+        /// <summary>
+        /// Finds the closest cell to polygon vertex
+        /// </summary>
+        /// <param name="polyIndices">Polygon indices</param>
+        /// <param name="verts">Polygon vertices</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="bounds">Bounds</param>
+        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(int[] polyIndices, Int3[] verts, int borderSize, Rectangle bounds)
+        {
+            int[] offset =
+            {
+                +0, +0,
+                -1, -1,
+                +0, -1,
+                +1, -1,
+                +1, +0,
+                +1, +1,
+                +0, +1,
+                -1, +1,
+                -1, +0,
+            };
+
+            // Find cell closest to a poly vertex
+            int startCellX = 0;
+            int startCellY = 0;
+            int startSpanIndex = -1;
+            int dmin = HeightPatch.RC_UNSET_HEIGHT;
+            for (int j = 0; j < polyIndices.Length; ++j)
+            {
+                var vert = verts[polyIndices[j]];
+
+                for (int k = 0; k < 9 && dmin > 0; ++k)
+                {
+                    int ax = vert.X + offset[k * 2 + 0];
+                    int ay = vert.Y;
+                    int az = vert.Z + offset[k * 2 + 1];
+                    if (ax < bounds.X || ax >= bounds.X + bounds.Width ||
+                        az < bounds.Y || az >= bounds.Y + bounds.Height)
+                    {
+                        continue;
+                    }
+
+                    var c = Cells[(ax + borderSize + az + borderSize) * Width];
+                    for (int i = c.Index, ni = c.Index + c.Count; i < ni && dmin > 0; ++i)
+                    {
+                        var s = Spans[i];
+                        int d = Math.Abs(ay - s.Y);
+                        if (d < dmin)
+                        {
+                            startCellX = ax;
+                            startCellY = az;
+                            startSpanIndex = i;
+                            dmin = d;
+                        }
+                    }
+                }
+            }
+
+            return (startCellX, startCellY, startSpanIndex);
+        }
+        /// <summary>
+        /// Finds the polygon center
+        /// </summary>
+        /// <param name="polyIndices">Polygon indices</param>
+        /// <param name="verts">Polygon vertices</param>
+        private static (int X, int Y) FindPolygonCenter2D(int[] polyIndices, Int3[] verts)
+        {
+            // Find center of the polygon
+            int pcx = 0;
+            int pcy = 0;
+            for (int j = 0; j < polyIndices.Length; j++)
+            {
+                pcx += verts[polyIndices[j]].X;
+                pcy += verts[polyIndices[j]].Z;
+            }
+            pcx /= polyIndices.Length;
+            pcy /= polyIndices.Length;
+
+            return (pcx, pcy);
         }
 
         /// <summary>
