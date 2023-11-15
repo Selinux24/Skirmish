@@ -1699,8 +1699,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ax = vert.X + offset[k * 2 + 0];
                     int ay = vert.Y;
                     int az = vert.Z + offset[k * 2 + 1];
-                    if (ax < bounds.X || ax >= bounds.X + bounds.Width ||
-                        az < bounds.Y || az >= bounds.Y + bounds.Height)
+                    if (!bounds.Contains(ax, az))
                     {
                         continue;
                     }

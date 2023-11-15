@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding sphere flag
         /// </summary>
-        private bool updateBoundingSphere = false;
+        private bool updateBoundingSphere = true;
 
         /// <summary>
         /// Transformed bounding box
@@ -28,7 +28,7 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateBoundingBox = false;
+        private bool updateBoundingBox = true;
 
         /// <summary>
         /// Transformed bounding box
@@ -37,7 +37,7 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateOrientedBox = false;
+        private bool updateOrientedBox = true;
 
         /// <summary>
         /// Constructor
