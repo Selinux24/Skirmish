@@ -35,17 +35,13 @@ namespace TerrainSamples.SceneCrowds
         public bool HasOwner { get { return Owner != null; } }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
-        /// <summary>
-        /// Agent type
-        /// </summary>
+        /// <inheritdoc/>
         public AgentType AgentType { get; set; }
         /// <summary>
         /// Agent identifier
         /// </summary>
         public CrowdAgent CrowdAgent { get; set; }
-        /// <summary>
-        /// Gets or sets if the agent is active
-        /// </summary>
+        /// <inheritdoc/>
         public bool Active
         {
             get
@@ -71,9 +67,7 @@ namespace TerrainSamples.SceneCrowds
                 model.Visible = value;
             }
         }
-        /// <summary>
-        /// Gets if the agent has a path to follow
-        /// </summary>
+        /// <inheritdoc/>
         public bool HasPath
         {
             get
@@ -81,9 +75,7 @@ namespace TerrainSamples.SceneCrowds
                 return controller.HasPath;
             }
         }
-        /// <summary>
-        /// Gets the agent manipulator
-        /// </summary>
+        /// <inheritdoc/>
         public Manipulator3D Manipulator
         {
             get
@@ -135,51 +127,37 @@ namespace TerrainSamples.SceneCrowds
             this.controller = controller;
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Upating context</param>
+        /// <inheritdoc/>
         public void EarlyUpdate(UpdateContext context)
         {
             //Not applicable
         }
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Upating context</param>
+        /// <inheritdoc/>
         public void Update(UpdateContext context)
         {
             controller?.UpdateManipulator(context.GameTime, Manipulator);
         }
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Upating context</param>
+        /// <inheritdoc/>
         public void LateUpdate(UpdateContext context)
         {
             //Not applicable
         }
-        /// <summary>
-        /// Updates the specified manipulator
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator</param>
+        /// <inheritdoc/>
+        public void SetManipulator(Manipulator3D manipulator)
+        {
+            model?.SetManipulator(manipulator);
+        }
+        /// <inheritdoc/>
         public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
             controller.UpdateManipulator(gameTime, manipulator);
         }
-        /// <summary>
-        /// Follow the specified path
-        /// </summary>
-        /// <param name="newPath">Path to follow</param>
-        /// <param name="time">Path time</param>
+        /// <inheritdoc/>
         public void Follow(IControllerPath newPath, float time = 0)
         {
             controller.Follow(newPath, time);
         }
-        /// <summary>
-        /// Clears the path
-        /// </summary>
+        /// <inheritdoc/>
         public void Clear()
         {
             controller.Clear();

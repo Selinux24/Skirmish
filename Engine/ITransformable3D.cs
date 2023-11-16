@@ -10,5 +10,10 @@ namespace Engine
         /// Gets the manipulator of the instance
         /// </summary>
         Manipulator3D Manipulator { get; }
+        /// <summary>
+        /// Sets a new manipulator to this instance
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        void SetManipulator(Manipulator3D manipulator);
     }
 }

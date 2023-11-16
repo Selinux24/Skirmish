@@ -31,6 +31,18 @@ namespace Engine
         /// Model part helper
         /// </summary>
         private readonly ModelPartHelper partHelper = new();
+        /// <summary>
+        /// Animation palette offset
+        /// </summary>
+        private uint animationOffset;
+        /// <summary>
+        /// Transition palette offset
+        /// </summary>
+        private uint transitionOffset;
+        /// <summary>
+        /// Transition interpolation value
+        /// </summary>
+        private float transitionInterpolation;
 
         /// <summary>
         /// Current drawing data
@@ -51,18 +63,6 @@ namespace Engine
         /// Tint color
         /// </summary>
         public Color4 TintColor { get; set; } = Color4.White;
-        /// <summary>
-        /// Animation palette offset
-        /// </summary>
-        public uint AnimationOffset { get; set; }
-        /// <summary>
-        /// Transition palette offset
-        /// </summary>
-        public uint TransitionOffset { get; set; }
-        /// <summary>
-        /// Transition interpolation value
-        /// </summary>
-        public float TransitionInterpolation { get; set; }
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -159,9 +159,9 @@ namespace Engine
             SetLOD(Scene.Camera.Position);
 
             AnimationController.Update(context.GameTime.ElapsedSeconds);
-            AnimationOffset = AnimationController.AnimationOffset;
-            TransitionOffset = AnimationController.TransitionOffset;
-            TransitionInterpolation = AnimationController.TransitionInterpolationAmount;
+            animationOffset = AnimationController.AnimationOffset;
+            transitionOffset = AnimationController.TransitionOffset;
+            transitionInterpolation = AnimationController.TransitionInterpolationAmount;
 
             if (partHelper.Count > 0)
             {
@@ -217,9 +217,9 @@ namespace Engine
                 var meshState = new BuiltInDrawerMeshState
                 {
                     Local = localTransform,
-                    AnimationOffset1 = AnimationOffset,
-                    AnimationOffset2 = TransitionOffset,
-                    AnimationInterpolationAmount = TransitionInterpolation,
+                    AnimationOffset1 = animationOffset,
+                    AnimationOffset2 = transitionOffset,
+                    AnimationInterpolationAmount = transitionInterpolation,
                 };
                 drawer.UpdateMesh(dc, meshState);
 
@@ -286,9 +286,9 @@ namespace Engine
                 var meshState = new BuiltInDrawerMeshState
                 {
                     Local = localTransform,
-                    AnimationOffset1 = AnimationOffset,
-                    AnimationOffset2 = TransitionOffset,
-                    AnimationInterpolationAmount = TransitionInterpolation,
+                    AnimationOffset1 = animationOffset,
+                    AnimationOffset2 = transitionOffset,
+                    AnimationInterpolationAmount = transitionInterpolation,
                 };
                 drawer.UpdateMesh(dc, meshState);
 

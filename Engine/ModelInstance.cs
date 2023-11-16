@@ -232,10 +232,7 @@ namespace Engine
                 Manipulator.GlobalTransform);
         }
 
-        /// <summary>
-        /// Sets a new manipulator to this instance
-        /// </summary>
-        /// <param name="manipulator">Manipulator</param>
+        /// <inheritdoc/>
         public void SetManipulator(Manipulator3D manipulator)
         {
             if (manipulator == null)
