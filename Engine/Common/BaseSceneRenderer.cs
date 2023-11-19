@@ -1578,12 +1578,13 @@ namespace Engine.Common
             int assigned = 0;
             foreach (var light in pointLights)
             {
+                //Assign light parameters
                 light.ClearShadowParameters();
+                light.SetShadowParameters(camera, assigned++);
 
-                if (assigned < MaxCubicShadows)
+                if (assigned >= MaxCubicShadows)
                 {
-                    //Assign light parameters
-                    light.SetShadowParameters(camera, assigned++);
+                    break;
                 }
             }
         }
@@ -1603,12 +1604,13 @@ namespace Engine.Common
             int assigned = 0;
             foreach (var light in spotLights)
             {
+                //Assign light parameters
                 light.ClearShadowParameters();
+                light.SetShadowParameters(camera, assigned++);
 
-                if (assigned < MaxSpotShadows)
+                if (assigned >= MaxSpotShadows)
                 {
-                    //Assign light parameters
-                    light.SetShadowParameters(camera, assigned++);
+                    break;
                 }
             }
         }
