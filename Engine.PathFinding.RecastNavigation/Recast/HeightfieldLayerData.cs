@@ -287,22 +287,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < Width; ++x)
                 {
-                    var (lregs, nlregs) = AllocateRegionCell(x, y);
+                    var lregs = AllocateRegionCell(x, y);
 
                     // Update overlapping regions.
-                    UpdayeOverlappingRegions(lregs, nlregs);
+                    UpdayeOverlappingRegions(lregs);
                 }
             }
         }
         /// <summary>
         /// Allocate and init layer region cell.
         /// </summary>
-        private (int[], int) AllocateRegionCell(int x, int y)
+        private int[] AllocateRegionCell(int x, int y)
         {
             var c = Heightfield.Cells[x + y * Width];
 
-            int[] lregs = new int[LayerRegion.MaxLayers];
-            int nlregs = 0;
+            List<int> lregs = new(LayerRegion.MaxLayers);
 
             for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
             {
@@ -317,41 +316,43 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Regions[ri].YMax = Math.Max(Regions[ri].YMax, s.Y);
 
                 // Collect all region layers.
-                if (nlregs < LayerRegion.MaxLayers)
+                if (lregs.Count < LayerRegion.MaxLayers)
                 {
-                    lregs[nlregs++] = ri;
+                    lregs.Add(ri);
                 }
 
                 // Update neighbours
                 for (int dir = 0; dir < 4; ++dir)
                 {
-                    if (s.GetCon(dir) != CompactHeightfield.RC_NOT_CONNECTED)
+                    if (s.GetCon(dir) == CompactHeightfield.RC_NOT_CONNECTED)
                     {
-                        int ax = x + Utils.GetDirOffsetX(dir);
-                        int ay = y + Utils.GetDirOffsetY(dir);
-                        int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(dir);
-                        int rai = SourceRegions[ai];
-                        if (rai != 0xff && rai != ri)
-                        {
-                            // Don't check return value -- if we cannot add the neighbor
-                            // it will just cause a few more regions to be created, which
-                            // is fine.
-                            Regions[ri].AddUniqueNei(rai);
-                        }
+                        continue;
+                    }
+
+                    int ax = x + Utils.GetDirOffsetX(dir);
+                    int ay = y + Utils.GetDirOffsetY(dir);
+                    int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(dir);
+                    int rai = SourceRegions[ai];
+                    if (rai != 0xff && rai != ri)
+                    {
+                        // Don't check return value -- if we cannot add the neighbor
+                        // it will just cause a few more regions to be created, which
+                        // is fine.
+                        Regions[ri].AddUniqueNei(rai);
                     }
                 }
             }
 
-            return (lregs, nlregs);
+            return lregs.ToArray();
         }
         /// <summary>
         /// Update overlapping regions.
         /// </summary>
-        private void UpdayeOverlappingRegions(int[] lregs, int nlregs)
+        private void UpdayeOverlappingRegions(int[] lregs)
         {
-            for (int i = 0; i < nlregs - 1; ++i)
+            for (int i = 0; i < lregs.Length - 1; ++i)
             {
-                for (int j = i + 1; j < nlregs; ++j)
+                for (int j = i + 1; j < lregs.Length; ++j)
                 {
                     var li = lregs[i];
                     var lj = lregs[j];

@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace Engine.Windows
         {
             using var bitmap = System.Drawing.Image.FromStream(data) as Bitmap;
 
-            var colors = new Color4[bitmap.Width, bitmap.Height];
+            var image = new Image(bitmap.Width, bitmap.Height);
 
             for (int h = 0; h < bitmap.Height; h++)
             {
@@ -25,11 +24,11 @@ namespace Engine.Windows
                 {
                     var color = bitmap.GetPixel(w, h);
 
-                    colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
+                    image.SetPixel(w, h, new SharpDX.Color(color.R, color.G, color.B, color.A));
                 }
             }
 
-            return new Image(colors);
+            return image;
         }
         /// <inheritdoc/>
         public void SaveToFile(string fileName, Image image)

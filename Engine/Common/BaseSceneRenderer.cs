@@ -1580,13 +1580,11 @@ namespace Engine.Common
             {
                 light.ClearShadowParameters();
 
-                if (assigned >= MaxCubicShadows)
+                if (assigned < MaxCubicShadows)
                 {
-                    continue;
+                    //Assign light parameters
+                    light.SetShadowParameters(camera, assigned++);
                 }
-
-                //Assign light parameters
-                light.SetShadowParameters(camera, assigned++);
             }
         }
         /// <summary>
@@ -1607,13 +1605,11 @@ namespace Engine.Common
             {
                 light.ClearShadowParameters();
 
-                if (assigned >= MaxSpotShadows)
+                if (assigned < MaxSpotShadows)
                 {
-                    continue;
+                    //Assign light parameters
+                    light.SetShadowParameters(camera, assigned++);
                 }
-
-                //Assign light parameters
-                light.SetShadowParameters(camera, assigned++);
             }
         }
         /// <summary>

@@ -67,7 +67,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="data">Channel data</param>
-        public FoliageMap(Color4[,] data)
+        FoliageMap(Color4[,] data)
         {
             m_Data = data;
 

@@ -322,7 +322,7 @@ namespace Engine
         /// <param name="heightData">Height map data</param>
         /// <param name="colorData">Color map data</param>
         /// <param name="falloffData">Falloff map data</param>
-        public HeightMap(float[,] heightData, Color4[,] colorData, float[,] falloffData)
+        HeightMap(float[,] heightData, Color4[,] colorData, float[,] falloffData)
         {
             m_HeightData = heightData;
             m_ColorData = colorData;

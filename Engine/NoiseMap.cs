@@ -144,16 +144,17 @@ namespace Engine
             int width = Map.GetLength(0);
             int height = Map.GetLength(1);
 
-            Color4[,] colors = new Color4[width, height];
+            var image = new Image(width, height);
+
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    colors[x, y] = Color4.Lerp(Color4.White, Color4.Black, Map[x, y]);
+                    image.SetPixel(x, y, Color4.Lerp(Color4.White, Color4.Black, Map[x, y]));
                 }
             }
 
-            return new Image(colors);
+            return image;
         }
     }
 }
