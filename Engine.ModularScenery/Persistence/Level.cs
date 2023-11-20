@@ -188,14 +188,15 @@ namespace Engine.Modular.Persistence
                 {
                     var (Count, PathFinding) = assetInstances[key];
 
-                    if (!res.ContainsKey(key))
+                    if (!res.TryGetValue(key, out var value))
                     {
-                        res.Add(key, new InstanceInfo { Count = Count, PathFinding = PathFinding });
+                        value = new() { Count = Count, PathFinding = PathFinding };
+                        res.Add(key, value);
 
                         continue;
                     }
 
-                    res[key].Count += Count;
+                    value.Count += Count;
                 }
             }
 
@@ -237,12 +238,13 @@ namespace Engine.Modular.Persistence
                     continue;
                 }
 
-                if (!res.ContainsKey(item.AssetName))
+                if (!res.TryGetValue(item.AssetName, out var value))
                 {
-                    res.Add(item.AssetName, new InstanceInfo { Count = 0, PathFinding = item.PathFinding });
+                    value = new() { Count = 0, PathFinding = item.PathFinding };
+                    res.Add(item.AssetName, value);
                 }
 
-                res[item.AssetName].Count += 1;
+                value.Count += 1;
             }
 
             return res;

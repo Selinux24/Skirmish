@@ -233,7 +233,7 @@ namespace Engine.Audio
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
         public IGameAudioEffect CreateEffectInstance(string effectName)
         {
-            if (!effectParamsLib.ContainsKey(effectName))
+            if (!effectParamsLib.TryGetValue(effectName, out var effectParams))
             {
                 //Not exists
                 return null;
@@ -245,19 +245,17 @@ namespace Engine.Audio
                 return null;
             }
 
-            var effectParams = effectParamsLib[effectName];
-
-            if (!soundList.ContainsKey(effectParams.SoundName))
+            if (!soundList.TryGetValue(effectParams.SoundName, out var soundFile))
             {
                 //Sound not exists
                 return null;
             }
 
             //Creates the effect
-            var instance = gameAudio.CreateEffect(soundList[effectParams.SoundName], effectParams);
+            var instance = gameAudio.CreateEffect(soundFile, effectParams);
 
             //Adds effect to "to delete" effect list
-            effectInstances.Add(new EffectInstance { Name = effectName, Effect = instance });
+            effectInstances.Add(new() { Name = effectName, Effect = instance });
 
             return instance;
         }

@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -52,6 +53,35 @@ namespace Engine.Animation
             Parent = parent;
             LocalTransform = local;
             GlobalTransform = global;
+        }
+
+        /// <summary>
+        /// Finds a joint by name recursively
+        /// </summary>
+        /// <param name="boneName">Bone name</param>
+        /// <returns>Returns the joint with the specified name</returns>
+        public Joint FindJoint(string boneName)
+        {
+            if (string.Equals(Bone, boneName, StringComparison.Ordinal))
+            {
+                return this;
+            }
+
+            if (Childs?.Any() != true)
+            {
+                return null;
+            }
+
+            foreach (var child in Childs)
+            {
+                var j = child.FindJoint(boneName);
+                if (j != null)
+                {
+                    return j;
+                }
+            }
+
+            return null;
         }
 
         /// <inheritdoc/>

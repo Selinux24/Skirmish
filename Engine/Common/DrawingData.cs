@@ -429,12 +429,12 @@ namespace Engine.Common
                 yield break;
             }
 
-            if (!meshes.ContainsKey(name))
+            if (!meshes.TryGetValue(name, out var meshMaterials))
             {
                 yield break;
             }
 
-            foreach (var value in meshes[name].GetValues())
+            foreach (var value in meshMaterials.GetValues())
             {
                 yield return value;
             }
@@ -450,18 +450,17 @@ namespace Engine.Common
                 return null;
             }
 
-            if (!meshes.ContainsKey(name))
+            if (!meshes.TryGetValue(name, out var meshMaterial))
             {
                 return null;
             }
 
-            var meshCollection = meshes[name];
-            if (meshCollection.Count == 0)
+            if (meshMaterial.Count == 0)
             {
                 return null;
             }
 
-            return meshes[name].First().Value;
+            return meshMaterial.First().Value;
         }
 
         /// <summary>

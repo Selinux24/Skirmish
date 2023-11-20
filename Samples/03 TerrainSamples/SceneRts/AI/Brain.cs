@@ -37,12 +37,13 @@ namespace TerrainSamples.SceneRts.AI
         /// <param name="agent">Agent</param>
         public void AddAgent(int index, AIAgent agent)
         {
-            if (!groups.ContainsKey(index))
+            if (!groups.TryGetValue(index, out var group))
             {
-                groups.Add(index, new List<AIAgent>());
+                group = new();
+                groups.Add(index, group);
             }
 
-            groups[index].Add(agent);
+            group.Add(agent);
         }
         /// <summary>
         /// Gets available targets for agent

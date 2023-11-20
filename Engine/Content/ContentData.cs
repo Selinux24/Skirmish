@@ -261,12 +261,12 @@ namespace Engine.Content
                 return null;
             }
 
-            if (!imageContent.ContainsKey(name))
+            if (!imageContent.TryGetValue(name, out var image))
             {
                 return null;
             }
 
-            return imageContent[name];
+            return image;
         }
         /// <summary>
         /// Gets whether the content data contais the specified name
@@ -340,12 +340,12 @@ namespace Engine.Content
                 return null;
             }
 
-            if (!materialContent.ContainsKey(name))
+            if (!materialContent.TryGetValue(name, out var material))
             {
                 return null;
             }
 
-            return materialContent[name];
+            return material;
         }
         /// <summary>
         /// Gets whether the content data contais the specified name
@@ -419,12 +419,12 @@ namespace Engine.Content
                 return new();
             }
 
-            if (!geometryContent.ContainsKey(name))
+            if (!geometryContent.TryGetValue(name, out var geometry))
             {
                 return new();
             }
 
-            return geometryContent[name];
+            return geometry;
         }
         /// <summary>
         /// Gets whether the content data contais the specified name
@@ -540,12 +540,12 @@ namespace Engine.Content
                 return null;
             }
 
-            if (!controllerContent.ContainsKey(name))
+            if (!controllerContent.TryGetValue(name, out var controller))
             {
                 return null;
             }
 
-            return controllerContent[name];
+            return controller;
         }
         /// <summary>
         /// Gets whether the content data contais the specified name
@@ -619,12 +619,12 @@ namespace Engine.Content
                 return null;
             }
 
-            if (!skinningContent.ContainsKey(name))
+            if (!skinningContent.TryGetValue(name, out var skinning))
             {
                 return null;
             }
 
-            return skinningContent[name];
+            return skinning;
         }
         /// <summary>
         /// Gets whether the content data contais the specified name
@@ -704,12 +704,12 @@ namespace Engine.Content
                 return null;
             }
 
-            if (!lightContent.ContainsKey(id))
+            if (!lightContent.TryGetValue(id, out var light))
             {
                 return null;
             }
 
-            return lightContent[id];
+            return light;
         }
 
         /// <summary>
@@ -772,12 +772,11 @@ namespace Engine.Content
         /// <param name="meshContent">Submesh</param>
         public void ImportMaterial(string meshName, string materialName, SubMeshContent meshContent)
         {
-            if (!geometryContent.ContainsKey(meshName))
+            if (!geometryContent.TryGetValue(meshName, out var matDict))
             {
-                geometryContent.Add(meshName, new());
+                matDict = new();
+                geometryContent.Add(meshName, matDict);
             }
-
-            var matDict = geometryContent[meshName];
 
             if (string.IsNullOrEmpty(materialName) || materialName == NoMaterial)
             {
@@ -850,9 +849,9 @@ namespace Engine.Content
 
                 Matrix ibm = Matrix.Identity;
 
-                if (controller.InverseBindMatrix.ContainsKey(joint.Bone))
+                if (controller.InverseBindMatrix.TryGetValue(joint.Bone, out var trn))
                 {
-                    ibm = controller.InverseBindMatrix[joint.Bone];
+                    ibm = trn;
                 }
 
                 joint.Offset = ibm;
@@ -926,12 +925,11 @@ namespace Engine.Content
             var weights = cInfo.Weights;
 
             //Find skeleton for controller
-            if (!skinningContent.ContainsKey(cInfo.Armature))
+            if (!skinningContent.TryGetValue(cInfo.Armature, out var sInfo))
             {
                 return null;
             }
 
-            var sInfo = skinningContent[cInfo.Armature];
             var boneNames = sInfo.Skeleton.GetBoneNames();
 
             return new SkinningInfo
@@ -1197,24 +1195,22 @@ namespace Engine.Content
         /// <returns>Returns a submesh content if source mesh isn't a hull</returns>
         private SubMeshContent ComputeSubmeshContent(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string sourceMesh, string targetMesh, string material)
         {
-            if (!geometry.ContainsKey(sourceMesh))
+            if (!geometry.TryGetValue(sourceMesh, out var dict))
             {
                 return null;
             }
 
-            var dict = geometry[sourceMesh];
-
-            if (dict.ContainsKey(material))
+            if (dict.TryGetValue(material, out var mat))
             {
-                if (dict[material].IsHull)
+                if (mat.IsHull)
                 {
                     //Group into new dictionary
-                    ImportMaterial(targetMesh, material, dict[material]);
+                    ImportMaterial(targetMesh, material, mat);
                 }
                 else
                 {
                     //Return the submesh content
-                    return dict[material];
+                    return mat;
                 }
             }
 
@@ -1364,16 +1360,14 @@ namespace Engine.Content
                 return false;
             }
 
-            if (!skinningContent.ContainsKey(armatureName))
+            if (!skinningContent.TryGetValue(armatureName, out var content))
             {
                 return false;
             }
 
-            modelContent = new ContentData();
+            modelContent = new();
 
-            var controllers = skinningContent[armatureName].Controllers;
-
-            foreach (var controller in controllers)
+            foreach (var controller in content.Controllers)
             {
                 TryAddController(controller, ref modelContent);
             }

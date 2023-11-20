@@ -232,7 +232,7 @@ namespace Engine.Animation
             for (int i = 0; i < boneNames.Count; i++)
             {
                 var boneName = boneNames[i];
-                var joint = FindJoint(Root, boneName);
+                var joint = Root.FindJoint(boneName);
 
                 transforms[i] = joint.Offset * joint.GlobalTransform;
             }
@@ -255,40 +255,6 @@ namespace Engine.Animation
             return boneNames.ToArray();
         }
 
-        /// <summary>
-        /// Finds a joint by name recursively
-        /// </summary>
-        /// <param name="joint">Joint</param>
-        /// <param name="boneName">Bone name</param>
-        /// <returns>Returns the joint with the specified name</returns>
-        private Joint FindJoint(Joint joint, string boneName)
-        {
-            if (joint == null)
-            {
-                return null;
-            }
-
-            if (string.Equals(joint.Bone, boneName, StringComparison.Ordinal))
-            {
-                return joint;
-            }
-
-            if (joint.Childs?.Any() != true)
-            {
-                return null;
-            }
-
-            foreach (var child in joint.Childs)
-            {
-                var j = FindJoint(child, boneName);
-                if (j != null)
-                {
-                    return j;
-                }
-            }
-
-            return null;
-        }
         /// <inheritdoc/>
         public bool Equals(Skeleton other)
         {

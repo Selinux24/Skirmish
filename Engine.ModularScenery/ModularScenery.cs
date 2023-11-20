@@ -528,14 +528,16 @@ namespace Engine.Modular
 
             foreach (var basicAsset in assetTransforms.Keys)
             {
-                if (!transforms.ContainsKey(basicAsset))
+                if (!transforms.TryGetValue(basicAsset, out var assetTrnValues))
                 {
-                    transforms.Add(basicAsset, new List<Matrix>());
+                    assetTrnValues = new();
+                    transforms.Add(basicAsset, assetTrnValues);
                 }
 
-                if (!aMap.Assets.ContainsKey(basicAsset))
+                if (!aMap.Assets.TryGetValue(basicAsset, out var assetMapValues))
                 {
-                    aMap.Assets.Add(basicAsset, new List<int>());
+                    assetMapValues = new();
+                    aMap.Assets.Add(basicAsset, assetMapValues);
                 }
 
                 //Get basic asset type
@@ -557,8 +559,8 @@ namespace Engine.Modular
                         }
                     }
 
-                    aMap.Assets[basicAsset].Add(transforms[basicAsset].Count);
-                    transforms[basicAsset].Add(basicTrn * complexAssetTransform);
+                    assetMapValues.Add(assetTrnValues.Count);
+                    assetTrnValues.Add(basicTrn * complexAssetTransform);
                 });
             }
         }
@@ -982,12 +984,12 @@ namespace Engine.Modular
         /// <returns>Returns a list of triggers</returns>
         public IEnumerable<ItemTrigger> GetTriggersByObject(Item item)
         {
-            if (!triggers.ContainsKey(item.Instance))
+            if (!triggers.TryGetValue(item.Instance, out var triggerValue))
             {
                 return Array.Empty<ItemTrigger>();
             }
 
-            return triggers[item.Instance]
+            return triggerValue
                 .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
         }

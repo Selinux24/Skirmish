@@ -534,20 +534,16 @@ namespace Engine
         /// <returns>Returns the resource if exists</returns>
         private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(IImageContent imageContent)
         {
-            EngineShaderResourceView resource = null;
-
             string key = imageContent?.GetResourceKey();
             if (key == null)
             {
-                return await Task.FromResult((key, resource));
+                return await Task.FromResult((key, (EngineShaderResourceView)null));
             }
 
-            if (!resources.ContainsKey(key))
+            if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, resource));
+                return await Task.FromResult((key, (EngineShaderResourceView)null));
             }
-
-            resource = resources[key];
 
             return await Task.FromResult((key, resource));
         }
@@ -558,20 +554,16 @@ namespace Engine
         /// <returns>Returns the resource if exists</returns>
         private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(Guid identifier)
         {
-            EngineShaderResourceView resource = null;
-
             string key = identifier.ToByteArray().GetMd5Sum();
             if (key == null)
             {
-                return await Task.FromResult((key, resource));
+                return await Task.FromResult((key, (EngineShaderResourceView)null));
             }
 
-            if (!resources.ContainsKey(key))
+            if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, resource));
+                return await Task.FromResult((key, (EngineShaderResourceView)null));
             }
-
-            resource = resources[key];
 
             return await Task.FromResult((key, resource));
         }

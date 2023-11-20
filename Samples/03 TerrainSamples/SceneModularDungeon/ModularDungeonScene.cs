@@ -1739,24 +1739,27 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(AgentType agent)
         {
+            var nodes = GetNodes(agent).OfType<GraphNode>();
+            if (!nodes.Any())
+            {
+                return new();
+            }
+
             Dictionary<Color4, IEnumerable<Triangle>> res = new();
 
-            var nodes = GetNodes(agent).OfType<GraphNode>();
-            if (nodes.Any())
+            foreach (var node in nodes)
             {
-                foreach (var node in nodes)
-                {
-                    var color = node.Color;
-                    var tris = node.Triangles;
+                var color = node.Color;
+                var tris = node.Triangles;
 
-                    if (!res.ContainsKey(color))
-                    {
-                        res.Add(color, new List<Triangle>(tris));
-                    }
-                    else
-                    {
-                        ((List<Triangle>)res[color]).AddRange(tris);
-                    }
+                if (!res.TryGetValue(color, out var value))
+                {
+                    value = new List<Triangle>(tris);
+                    res.Add(color, value);
+                }
+                else
+                {
+                    ((List<Triangle>)value).AddRange(tris);
                 }
             }
 

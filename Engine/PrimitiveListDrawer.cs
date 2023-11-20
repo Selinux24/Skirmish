@@ -148,16 +148,17 @@ namespace Engine
         {
             if (primitives?.Count() > 0)
             {
-                if (!dictionary.ContainsKey(color))
+                if (!dictionary.TryGetValue(color, out var values))
                 {
-                    dictionary.TryAdd(color, new List<T>());
+                    values = new();
+                    dictionary.TryAdd(color, values);
                 }
                 else
                 {
-                    dictionary[color].Clear();
+                    values.Clear();
                 }
 
-                dictionary[color].AddRange(primitives);
+                values.AddRange(primitives);
 
                 dictionaryChanged = true;
             }

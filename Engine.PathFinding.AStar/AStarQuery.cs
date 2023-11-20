@@ -157,9 +157,10 @@ namespace Engine.PathFinding.AStar
             //Search every possible direction from the current node
             foreach (var nextNode in nodeConnections)
             {
-                if (!nodesData.ContainsKey(nextNode))
+                if (!nodesData.TryGetValue(nextNode, out var nodeData))
                 {
-                    nodesData.Add(nextNode, new AStarQueryData());
+                    nodeData = new();
+                    nodesData.Add(nextNode, nodeData);
                 }
 
                 if (nextNode.State == GridNodeStates.Closed)
@@ -168,7 +169,7 @@ namespace Engine.PathFinding.AStar
                     continue;
                 }
 
-                var nextNodeData = nodesData[nextNode];
+                var nextNodeData = nodeData;
                 if (nextNodeData.State == GridNodeStates.Closed)
                 {
                     //Closed node

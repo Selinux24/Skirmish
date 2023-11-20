@@ -702,14 +702,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="crowdAgent">Agent</param>
         public void EnableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
         {
-            if (!debugInfo.ContainsKey(crowd))
+            if (!debugInfo.TryGetValue(crowd, out var debugData))
             {
-                debugInfo.Add(crowd, new List<CrowdAgentDebugInfo>());
+                debugData = new();
+                debugInfo.Add(crowd, debugData);
             }
 
-            if (!debugInfo[crowd].Exists(l => l.Agent == crowdAgent))
+            if (!debugData.Exists(l => l.Agent == crowdAgent))
             {
-                debugInfo[crowd].Add(new CrowdAgentDebugInfo { Agent = crowdAgent });
+                debugData.Add(new() { Agent = crowdAgent });
             }
         }
         /// <summary>
@@ -719,12 +720,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="crowdAgent">Agent</param>
         public void DisableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
         {
-            if (!debugInfo.ContainsKey(crowd))
+            if (!debugInfo.TryGetValue(crowd, out var debugData))
             {
                 return;
             }
 
-            debugInfo[crowd].RemoveAll(l => l.Agent == crowdAgent);
+            debugData.RemoveAll(l => l.Agent == crowdAgent);
         }
     }
 }
