@@ -17,6 +17,11 @@ namespace Engine.Common
         /// Initial bounding box
         /// </summary>
         public BoundingBox BoundingBox { get; private set; }
+        /// <summary>
+        /// Salt value
+        /// </summary>
+        /// <remarks>This value increments each time the initial points changes</remarks>
+        public int Salt { get; private set; } = 0;
 
         /// <summary>
         /// Sets the point list
@@ -24,21 +29,33 @@ namespace Engine.Common
         /// <param name="points">Point list</param>
         public void SetPoints(IEnumerable<Vector3> points)
         {
+            BoundingSphere sphere;
+            BoundingBox box;
+
             if (points?.Any() != true)
             {
-                BoundingSphere = new();
+                sphere = new();
 
-                BoundingBox = new();
+                box = new();
             }
             else
             {
                 var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
-                BoundingSphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
+                sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
 
                 //Initialize the identity box
-                BoundingBox = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
+                box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
+            }
+
+            if (sphere != BoundingSphere || box != BoundingBox)
+            {
+                //Update salt value only if state changes
+                Salt++;
+
+                BoundingSphere = sphere;
+                BoundingBox = box;
             }
         }
     }

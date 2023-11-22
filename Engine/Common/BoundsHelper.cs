@@ -8,9 +8,13 @@ namespace Engine.Common
     class BoundsHelper
     {
         /// <summary>
-        /// Initial state
+        /// Bounds
         /// </summary>
-        private readonly BoundsHelperInitialState initialState;
+        private readonly BoundsHelperInitialState bounds;
+        /// <summary>
+        /// Bounds salt value
+        /// </summary>
+        private int boundsSalt = 0;
 
         /// <summary>
         /// Transformed bounding sphere
@@ -42,10 +46,12 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="initialState">Initial state</param>
-        public BoundsHelper(BoundsHelperInitialState initialState)
+        /// <param name="bounds">Initial bounds state</param>
+        public BoundsHelper(BoundsHelperInitialState bounds)
         {
-            this.initialState = initialState;
+            this.bounds = bounds;
+
+            boundsSalt = bounds.Salt;
         }
 
         /// <summary>
@@ -57,6 +63,21 @@ namespace Engine.Common
             updateBoundingSphere = true;
             updateOrientedBox = true;
         }
+        /// <summary>
+        /// Checks de initial bounds state value
+        /// </summary>
+        private void CheckBoundsState()
+        {
+            if (boundsSalt == bounds.Salt)
+            {
+                return;
+            }
+
+            //State changed, update internal state
+            boundsSalt = bounds.Salt;
+
+            Invalidate();
+        }
 
         /// <summary>
         /// Gets bounding sphere
@@ -66,9 +87,11 @@ namespace Engine.Common
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState();
+
             if (updateBoundingSphere || refresh)
             {
-                boundingSphere = initialState.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
+                boundingSphere = bounds.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateBoundingSphere = false;
             }
@@ -83,6 +106,8 @@ namespace Engine.Common
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState();
+
             if (updateBoundingBox || refresh)
             {
                 boundingBox = GetOrientedBoundingBox(manipulator, refresh).GetBoundingBox();
@@ -100,9 +125,11 @@ namespace Engine.Common
         /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
         public OrientedBoundingBox GetOrientedBoundingBox(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState();
+
             if (updateOrientedBox || refresh)
             {
-                orientedBox = new OrientedBoundingBox(initialState.BoundingBox);
+                orientedBox = new OrientedBoundingBox(bounds.BoundingBox);
                 orientedBox.Transform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateOrientedBox = false;
