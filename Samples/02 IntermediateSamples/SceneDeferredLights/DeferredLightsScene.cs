@@ -289,7 +289,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
                 if (FindTopGroundPosition<Triangle>(x, z, out var pos))
                 {
-                    trees[i].Manipulator.SetTransform(pos.Position, Quaternion.RotationYawPitchRoll(i, 0, 0), 0.5f);
+                    trees[i].Manipulator.SetTransform(pos.Position, i, 0, 0, 0.5f);
                 }
             }
 

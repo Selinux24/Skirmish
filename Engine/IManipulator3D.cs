@@ -154,9 +154,9 @@ namespace Engine
         /// <summary>
         /// Sets the rotation component
         /// </summary>
-        /// <param name="yaw">Yaw (Y)</param>
-        /// <param name="pitch">Pitch (X)</param>
-        /// <param name="roll">Roll (Z)</param>
+        /// <param name="yaw">The yaw of rotation</param>
+        /// <param name="pitch">The pitch of rotation</param>
+        /// <param name="roll">The roll of rotation</param>
         /// <param name="updateState">Update internal state</param>
         void SetRotation(float yaw, float pitch, float roll, bool updateState = false);
         /// <summary>
@@ -191,9 +191,47 @@ namespace Engine
         /// Sets the position, scaling and rotation components
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="rotationAxis">Rotation axis</param>
+        /// <param name="rotationAngle">Rotation angle</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="updateState">Updates internal state</param>
+        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scale, bool updateState = false);
+        /// <summary>
+        /// Sets the position, scaling and rotation components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="axis">Rotation axis</param>
+        /// <param name="rotationAngle">Rotation angle</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="updateState">Updates internal state</param>
+        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, bool updateState = false);
+        /// <summary>
+        /// Sets the position, scaling and rotation components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="yaw">The yaw of rotation</param>
+        /// <param name="pitch">The pitch of rotation</param>
+        /// <param name="roll">The roll of rotation</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="updateState">Updates internal state</param>
+        void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scale, bool updateState = false);
+        /// <summary>
+        /// Sets the position, scaling and rotation components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="yaw">The yaw of rotation</param>
+        /// <param name="pitch">The pitch of rotation</param>
+        /// <param name="roll">The roll of rotation</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="updateState">Updates internal state</param>
+        void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scale, bool updateState = false);
+        /// <summary>
+        /// Sets the position, scaling and rotation components
+        /// </summary>
+        /// <param name="position">Position</param>
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
-        /// <param name="updateState">Update internal state</param>
+        /// <param name="updateState">Updates internal state</param>
         void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false);
         /// <summary>
         /// Sets the position, scaling and rotation components
@@ -201,7 +239,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
-        /// <param name="updateState">Update internal state</param>
+        /// <param name="updateState">Updates internal state</param>
         void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false);
         /// <summary>
         /// Sets transform matrix and updates position, rotation and scaling components
@@ -217,7 +255,7 @@ namespace Engine
         /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        void LookAt(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void LookAt(Vector3 target, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
         /// <summary>
         /// Look at target
         /// </summary>
@@ -226,7 +264,7 @@ namespace Engine
         /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        void LookAt(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void LookAt(Vector3 target, Vector3 up, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
 
         /// <summary>
         /// Rotate to target
@@ -235,7 +273,7 @@ namespace Engine
         /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void RotateTo(Vector3 target, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
         /// <summary>
         /// Rotate to target
         /// </summary>
@@ -244,7 +282,7 @@ namespace Engine
         /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void RotateTo(Vector3 target, Vector3 up, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
 
         /// <summary>
         /// Set model aligned to normal

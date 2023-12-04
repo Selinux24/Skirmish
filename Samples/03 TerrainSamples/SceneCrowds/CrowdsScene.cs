@@ -298,7 +298,7 @@ namespace TerrainSamples.SceneCrowds
             {
                 if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
                 {
-                    trees[i].Manipulator.SetTransform(pos.Position, Quaternion.RotationAxis(Vector3.Up, i), 0.5f);
+                    trees[i].Manipulator.SetTransform(pos.Position, Vector3.Up, i, 0.5f);
                 }
             }
         }

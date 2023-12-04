@@ -144,7 +144,7 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            Vector3 prePos = localTransform.TranslationVector;
+            var prePos = localTransform.TranslationVector;
             Velocity = position - prePos;
 
             if (!transformUpdateNeeded)
@@ -152,9 +152,9 @@ namespace Engine
                 return;
             }
 
-            Matrix sca = Matrix.Scaling(scaling);
-            Matrix rot = Matrix.RotationQuaternion(rotation);
-            Matrix tra = Matrix.Translation(position);
+            var sca = Matrix.Scaling(scaling);
+            var rot = Matrix.RotationQuaternion(rotation);
+            var tra = Matrix.Translation(position);
 
             localTransform = sca * rot * tra;
 
@@ -167,7 +167,7 @@ namespace Engine
 
             transformUpdateNeeded = false;
 
-            Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new());
 
             FrameCounters.PickCounters.TransformUpdatesPerFrame++;
         }
@@ -380,18 +380,38 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scale, bool updateState = false)
+        {
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scale, updateState);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, bool updateState = false)
+        {
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scale, updateState);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scale, bool updateState = false)
+        {
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scale, updateState);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scale, bool updateState = false)
+        {
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scale, updateState);
+        }
+        /// <inheritdoc/>
         public void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false)
         {
-            SetPosition(position);
-            SetRotation(rotation);
-            SetScale(scale, updateState);
+            SetTransform(position, rotation, new Vector3(scale, scale, scale), updateState);
         }
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false)
         {
-            SetPosition(position);
-            SetRotation(rotation);
-            SetScale(scale, updateState);
+            SetPosition(position, false);
+            SetRotation(rotation, false);
+            SetScale(scale, false);
+
+            if (updateState) UpdateLocalTransform();
         }
         /// <inheritdoc/>
         public void SetTransform(Matrix transform)

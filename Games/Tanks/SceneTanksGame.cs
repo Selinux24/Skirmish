@@ -1059,7 +1059,7 @@ namespace Tanks
                 loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
                 loadingBar.Visible = true;
 
-                tree[treeCount].Manipulator.SetTransform(pos, Quaternion.RotationYawPitchRoll(rot, 0, 0), scale);
+                tree[treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
             }
 
             return count;

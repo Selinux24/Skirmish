@@ -1109,7 +1109,7 @@ namespace TerrainSamples.SceneRts
 
                 rocks[i].Manipulator.SetTransform(
                     r.Position,
-                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi)),
+                    posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi),
                     scale);
             }
             rocks.Visible = true;
@@ -1132,7 +1132,7 @@ namespace TerrainSamples.SceneRts
 
                 tree1[i].Manipulator.SetTransform(
                     r.Position,
-                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
+                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
                     posRnd.NextFloat(0.25f, 0.75f));
             }
             tree1.Visible = true;
@@ -1153,7 +1153,7 @@ namespace TerrainSamples.SceneRts
 
                 tree2[i].Manipulator.SetTransform(
                     r.Position,
-                    Quaternion.RotationYawPitchRoll(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0),
+                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
                     posRnd.NextFloat(0.25f, 0.75f));
             }
             tree2.Visible = true;
@@ -1208,10 +1208,7 @@ namespace TerrainSamples.SceneRts
 
                 obeliskInstance.Manipulator.SetPosition(r.Position);
                 obeliskInstance.Manipulator.SetScale(1.5f);
-                obeliskInstance.Manipulator.SetTransform(
-                    r.Position,
-                    Quaternion.RotationYawPitchRoll(MathUtil.PiOverFour, 0, 0),
-                    1.5f);
+                obeliskInstance.Manipulator.SetTransform(r.Position, MathUtil.PiOverFour, 0, 0, 1.5f);
             }
             obelisk.Visible = true;
         }

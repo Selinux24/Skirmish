@@ -18,10 +18,7 @@ namespace BasicSamples.SceneTest
     {
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
-
-        private readonly float xDelta = 500f;
-        private readonly float yDelta = 7f;
-        private readonly float zDelta = 0f;
+        private readonly Vector3 baseDelta = new(500, 7, 0);
 
         private readonly Color3 ambientUp = Color3.Black;
         private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f) * 0.2f;
@@ -196,9 +193,6 @@ namespace BasicSamples.SceneTest
 
             RefreshUI();
 
-            progressBar.Visible = true;
-            progressBar.ProgressValue = 0;
-
             LoadControls();
         }
 
@@ -221,6 +215,9 @@ namespace BasicSamples.SceneTest
                 InitializeDebug(),
             };
 
+            progressBar.ProgressValue = 0;
+            uiTweener.Show(progressBar, 1000);
+
             LoadResourcesAsync(
                 taskList,
                 async (res) =>
@@ -234,8 +231,9 @@ namespace BasicSamples.SceneTest
 
                     GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
-                    Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
-                    Camera.LookTo(0 + xDelta, 0 + yDelta, 0 + zDelta);
+                    Vector3 translation = new(-20, 10, -40);
+                    Camera.Goto(baseDelta + translation);
+                    Camera.LookTo(baseDelta);
 
                     uiTweener.Hide(blackPan, 4000);
                     uiTweener.Hide(progressBar, 2000);
@@ -361,19 +359,19 @@ namespace BasicSamples.SceneTest
 
             var floorAsphalt = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
 
-            floorAsphalt.Manipulator.SetPosition(xDelta, yDelta, zDelta);
+            floorAsphalt.Manipulator.SetPosition(baseDelta);
 
             var floorAsphaltI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("FloorI", "FloorI", descI);
 
-            floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, 0 + zDelta);
-            floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, 0 + zDelta);
-            floorAsphaltI[2].Manipulator.SetPosition(0 + xDelta, yDelta, (-l * 2) + zDelta);
-            floorAsphaltI[3].Manipulator.SetPosition(0 + xDelta, yDelta, (+l * 2) + zDelta);
+            floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
+            floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
+            floorAsphaltI[2].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
+            floorAsphaltI[3].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
 
-            floorAsphaltI[4].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, (-l * 2) + zDelta);
-            floorAsphaltI[5].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, (-l * 2) + zDelta);
-            floorAsphaltI[6].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, (+l * 2) + zDelta);
-            floorAsphaltI[7].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, (+l * 2) + zDelta);
+            floorAsphaltI[4].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
+            floorAsphaltI[5].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
+            floorAsphaltI[6].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
+            floorAsphaltI[7].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -400,14 +398,14 @@ namespace BasicSamples.SceneTest
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
                 });
 
-            buildingObelisk.Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, 0 + zDelta);
+            buildingObelisk.Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
             buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             buildingObelisk.Manipulator.SetScale(10);
 
-            buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + xDelta, baseHeight + yDelta, 0 + zDelta);
-            buildingObeliskI[1].Manipulator.SetPosition((+spaceSize * 2) + xDelta, baseHeight + yDelta, 0 + zDelta);
-            buildingObeliskI[2].Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, (-spaceSize * 2) + zDelta);
-            buildingObeliskI[3].Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, (+spaceSize * 2) + zDelta);
+            buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
+            buildingObeliskI[1].Manipulator.SetPosition((+spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
+            buildingObeliskI[2].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2) + baseDelta.Z);
+            buildingObeliskI[3].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2) + baseDelta.Z);
 
             buildingObeliskI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             buildingObeliskI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -447,14 +445,14 @@ namespace BasicSamples.SceneTest
             p1.AddLoop("idle1");
             animations.Add("default", new AnimationPlan(p1));
 
-            characterSoldier.Manipulator.SetPosition((+s - 10) + xDelta, baseHeight + yDelta, -s + zDelta);
+            characterSoldier.Manipulator.SetPosition((+s - 10) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
             characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             characterSoldier.AnimationController.Start(animations["default"]);
 
-            characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
-            characterSoldierI[1].Manipulator.SetPosition((+spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
-            characterSoldierI[2].Manipulator.SetPosition(+s + xDelta, baseHeight + yDelta, (-spaceSize * 2 - s) + zDelta);
-            characterSoldierI[3].Manipulator.SetPosition(+s + xDelta, baseHeight + yDelta, (+spaceSize * 2 - s) + zDelta);
+            characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
+            characterSoldierI[1].Manipulator.SetPosition((+spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
+            characterSoldierI[2].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2 - s) + baseDelta.Z);
+            characterSoldierI[3].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2 - s) + baseDelta.Z);
 
             characterSoldierI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             characterSoldierI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -491,13 +489,13 @@ namespace BasicSamples.SceneTest
 
             float s = -spaceSize / 2f;
 
-            vehicle.Manipulator.SetPosition(s + xDelta, baseHeight + yDelta, -10 + zDelta);
+            vehicle.Manipulator.SetPosition(s + baseDelta.X, baseHeight + baseDelta.Y, -10 + baseDelta.Z);
             vehicle.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
-            vehicleI[0].Manipulator.SetPosition(-spaceSize * 2 + xDelta, baseHeight + yDelta, -spaceSize * 2 + zDelta);
-            vehicleI[1].Manipulator.SetPosition(+spaceSize * 2 + xDelta, baseHeight + yDelta, -spaceSize * 2 + zDelta);
-            vehicleI[2].Manipulator.SetPosition(-spaceSize * 2 + xDelta, baseHeight + yDelta, +spaceSize * 2 + zDelta);
-            vehicleI[3].Manipulator.SetPosition(+spaceSize * 2 + xDelta, baseHeight + yDelta, +spaceSize * 2 + zDelta);
+            vehicleI[0].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
+            vehicleI[1].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
+            vehicleI[2].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
+            vehicleI[3].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
 
             vehicleI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             vehicleI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -541,13 +539,13 @@ namespace BasicSamples.SceneTest
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
 
-            lamp.Manipulator.SetPosition(0 + xDelta, spaceSize + yDelta, (-spaceSize * dist) + zDelta);
+            lamp.Manipulator.SetPosition(0 + baseDelta.X, spaceSize + baseDelta.Y, (-spaceSize * dist) + baseDelta.Z);
             lamp.Manipulator.SetRotation(0, pitch, 0);
 
-            lampI[0].Manipulator.SetPosition(-spaceSize * 2 + xDelta, spaceSize + yDelta, -spaceSize * dist + zDelta);
-            lampI[1].Manipulator.SetPosition(+spaceSize * 2 + xDelta, spaceSize + yDelta, -spaceSize * dist + zDelta);
-            lampI[2].Manipulator.SetPosition(-spaceSize * dist + xDelta, spaceSize + yDelta, -spaceSize * 2 + zDelta);
-            lampI[3].Manipulator.SetPosition(-spaceSize * dist + xDelta, spaceSize + yDelta, +spaceSize * 2 + zDelta);
+            lampI[0].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, spaceSize + baseDelta.Y, -spaceSize * dist + baseDelta.Z);
+            lampI[1].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, spaceSize + baseDelta.Y, -spaceSize * dist + baseDelta.Z);
+            lampI[2].Manipulator.SetPosition(-spaceSize * dist + baseDelta.X, spaceSize + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
+            lampI[3].Manipulator.SetPosition(-spaceSize * dist + baseDelta.X, spaceSize + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
 
             lampI[0].Manipulator.SetRotation(0, pitch, 0);
             lampI[1].Manipulator.SetRotation(0, pitch, 0);
@@ -588,18 +586,18 @@ namespace BasicSamples.SceneTest
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
                 });
 
-            streetlamp.Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
+            streetlamp.Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -2f + baseDelta.Z);
 
-            streetlampI[0].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -1f + zDelta);
-            streetlampI[1].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, 0 + zDelta);
-            streetlampI[2].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 1f + zDelta);
-            streetlampI[3].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 2f + zDelta);
+            streetlampI[0].Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -1f + baseDelta.Z);
+            streetlampI[1].Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
+            streetlampI[2].Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 1f + baseDelta.Z);
+            streetlampI[3].Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2f + baseDelta.Z);
 
-            streetlampI[4].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
-            streetlampI[5].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -1f + zDelta);
-            streetlampI[6].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, 0 + zDelta);
-            streetlampI[7].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 1f + zDelta);
-            streetlampI[8].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 2f + zDelta);
+            streetlampI[4].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -2f + baseDelta.Z);
+            streetlampI[5].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -1f + baseDelta.Z);
+            streetlampI[6].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
+            streetlampI[7].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 1f + baseDelta.Z);
+            streetlampI[8].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2f + baseDelta.Z);
 
             streetlampI[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             streetlampI[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
@@ -652,7 +650,7 @@ namespace BasicSamples.SceneTest
 
             container.Manipulator.SetScale(scale);
             var scaledOnlyBbox = container.GetBoundingBox(true);
-            container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
+            container.Manipulator.SetPosition(s + 12 + baseDelta.X, baseHeight + baseDelta.Y, 30 + baseDelta.Z);
             container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
 
             var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
@@ -686,40 +684,10 @@ namespace BasicSamples.SceneTest
             {
                 uint textureIndex = (uint)prnd.Next(0, 6) % 5;
 
-                var (position, angle) = GetP(prnd, i, gridParams);
+                var (position, angle) = gridParams.GetP(prnd, i, baseHeight, baseDelta);
 
-                containerI[i].Manipulator.SetTransform(position, Quaternion.RotationYawPitchRoll(angle, 0, 0), scale);
+                containerI[i].Manipulator.SetTransform(position, angle, 0, 0, scale);
                 containerI[i].TextureIndex = textureIndex;
-            }
-        }
-        private (Vector3 position, float angle) GetP(Random prnd, int i, GridParams gridParams)
-        {
-            float height = (i / gridParams.RowSize * gridParams.Sy) + baseHeight + yDelta - (gridParams.Sy * gridParams.BasementRows);
-
-            if ((i % gridParams.RowSize) < gridParams.ZRowCount)
-            {
-                float rx = (i % gridParams.ZRowCount < gridParams.ZCount ? -gridParams.AreaSize - (gridParams.Sx / 2f) : gridParams.AreaSize + (gridParams.Sx / 2f)) + prnd.NextFloat(-1f, 1f);
-                float dz = i % gridParams.ZRowCount < gridParams.ZCount ? -(gridParams.Sz / 2f) : (gridParams.Sz / 2f);
-
-                float x = rx + xDelta;
-                float y = height;
-                float z = (i % gridParams.ZCount * gridParams.Sz) - gridParams.AreaSize + zDelta + dz;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
-
-                return (new Vector3(x, y, z), angle);
-            }
-            else
-            {
-                int ci = i - gridParams.ZRowCount;
-                float rz = (ci % gridParams.XRowCount < gridParams.XCount ? -gridParams.AreaSize - (gridParams.Sz / 2f) : gridParams.AreaSize + (gridParams.Sz / 2f)) + prnd.NextFloat(-1f, 1f);
-                float dx = ci % gridParams.XRowCount < gridParams.XCount ? (gridParams.Sx / 2f) : -(gridParams.Sx / 2f);
-
-                float x = (ci % gridParams.XCount * gridParams.Sx) - gridParams.AreaSize + xDelta + dx;
-                float y = height;
-                float z = rz + zDelta;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
-
-                return (new Vector3(x, y, z), angle);
             }
         }
         private async Task InitializeTestCube()
@@ -728,7 +696,7 @@ namespace BasicSamples.SceneTest
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
-            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + xDelta, half + yDelta, 0 + zDelta));
+            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
             var desc = new PrimitiveListDrawerDescription<Triangle>()
             {
@@ -1197,5 +1165,36 @@ namespace BasicSamples.SceneTest
         public int XRowCount;
         public int ZRowCount;
         public int BasementRows;
+
+        public readonly (Vector3 position, float angle) GetP(Random prnd, int i, float baseHeight, Vector3 delta)
+        {
+            float height = (i / RowSize * Sy) + baseHeight + delta.Y - (Sy * BasementRows);
+
+            if ((i % RowSize) < ZRowCount)
+            {
+                float rx = (i % ZRowCount < ZCount ? -AreaSize - (Sx / 2f) : AreaSize + (Sx / 2f)) + prnd.NextFloat(-1f, 1f);
+                float dz = i % ZRowCount < ZCount ? -(Sz / 2f) : (Sz / 2f);
+
+                float x = rx + delta.X;
+                float y = height;
+                float z = (i % ZCount * Sz) - AreaSize + delta.Z + dz;
+                float angle = MathUtil.Pi * prnd.Next(0, 2);
+
+                return (new(x, y, z), angle);
+            }
+            else
+            {
+                int ci = i - ZRowCount;
+                float rz = (ci % XRowCount < XCount ? -AreaSize - (Sz / 2f) : AreaSize + (Sz / 2f)) + prnd.NextFloat(-1f, 1f);
+                float dx = ci % XRowCount < XCount ? (Sx / 2f) : -(Sx / 2f);
+
+                float x = (ci % XCount * Sx) - AreaSize + delta.X + dx;
+                float y = height;
+                float z = rz + delta.Z;
+                float angle = MathUtil.Pi * prnd.Next(0, 2);
+
+                return (new(x, y, z), angle);
+            }
+        }
     }
 }
