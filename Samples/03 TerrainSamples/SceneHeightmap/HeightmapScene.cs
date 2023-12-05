@@ -699,9 +699,9 @@ namespace TerrainSamples.SceneHeightmap
                         _ => posRnd.NextFloat(0.1f, 1f),
                     };
 
-                    rocks[i].Manipulator.SetPosition(r.Position, true);
-                    rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
-                    rocks[i].Manipulator.SetScale(scale, true);
+                    rocks[i].Manipulator.SetPosition(r.Position);
+                    rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    rocks[i].Manipulator.SetScaling(scale);
                 }
             }
 
@@ -725,9 +725,9 @@ namespace TerrainSamples.SceneHeightmap
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextFloat(1f, 5f);
 
-                    trees[i].Manipulator.SetPosition(treePosition, true);
-                    trees[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
-                    trees[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    trees[i].Manipulator.SetPosition(treePosition);
+                    trees[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0);
+                    trees[i].Manipulator.SetScaling(posRnd.NextFloat(1.5f, 2.5f));
                 }
             }
 
@@ -747,9 +747,9 @@ namespace TerrainSamples.SceneHeightmap
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextFloat(0f, 2f);
 
-                    trees2[i].Manipulator.SetPosition(treePosition, true);
-                    trees2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
-                    trees2[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    trees2[i].Manipulator.SetPosition(treePosition);
+                    trees2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0);
+                    trees2[i].Manipulator.SetScaling(posRnd.NextFloat(1.5f, 2.5f));
                 }
             }
 
@@ -759,9 +759,9 @@ namespace TerrainSamples.SceneHeightmap
         {
             if (FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
-                watchTower.Manipulator.SetPosition(r.Position, true);
-                watchTower.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
-                watchTower.Manipulator.SetScale(1.5f, true);
+                watchTower.Manipulator.SetPosition(r.Position);
+                watchTower.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0);
+                watchTower.Manipulator.SetScaling(1.5f);
             }
 
             await Task.CompletedTask;
@@ -786,7 +786,7 @@ namespace TerrainSamples.SceneHeightmap
                     var pos = res.Position;
                     pos.Y -= 0.5f;
 
-                    containers[i].Manipulator.SetScale(5);
+                    containers[i].Manipulator.SetScaling(5);
                     containers[i].Manipulator.SetPosition(pos);
                     containers[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
                     containers[i].Manipulator.SetNormal(res.Primitive.Normal);
@@ -804,8 +804,8 @@ namespace TerrainSamples.SceneHeightmap
             {
                 var position = r.Position;
 
-                torchs[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                torchs[0].Manipulator.SetPosition(position, true);
+                torchs[0].Manipulator.SetScaling(1f, 1f, 1f);
+                torchs[0].Manipulator.SetPosition(position);
                 var tbbox = torchs[0].GetBoundingBox();
 
                 position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
@@ -846,8 +846,8 @@ namespace TerrainSamples.SceneHeightmap
                 FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
                 var pos = res.Position;
-                torchs[i].Manipulator.SetScale(0.20f, true);
-                torchs[i].Manipulator.SetPosition(pos, true);
+                torchs[i].Manipulator.SetScaling(0.20f);
+                torchs[i].Manipulator.SetPosition(pos);
                 var tbbox = torchs[i].GetBoundingBox();
 
                 pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
@@ -881,9 +881,9 @@ namespace TerrainSamples.SceneHeightmap
             {
                 if (FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    helicopterI[i].Manipulator.SetScale(1.25f, true);
-                    helicopterI[i].Manipulator.SetPosition(r.Position, true);
-                    helicopterI[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
+                    helicopterI[i].Manipulator.SetScaling(1.25f);
+                    helicopterI[i].Manipulator.SetPosition(r.Position);
+                    helicopterI[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0);
                     helicopterI[i].Manipulator.SetNormal(r.Primitive.Normal);
 
                     helicopterI[i].AnimationController.TimeDelta = 0.5f * (i + 1);
@@ -913,9 +913,9 @@ namespace TerrainSamples.SceneHeightmap
             {
                 if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    bradleyI[i].Manipulator.SetScale(1.2f, true);
-                    bradleyI[i].Manipulator.SetPosition(r.Position, true);
-                    bradleyI[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
+                    bradleyI[i].Manipulator.SetScaling(1.2f);
+                    bradleyI[i].Manipulator.SetPosition(r.Position);
+                    bradleyI[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0);
                     bradleyI[i].Manipulator.SetNormal(r.Primitive.Normal);
                 }
             }
@@ -942,9 +942,9 @@ namespace TerrainSamples.SceneHeightmap
             {
                 if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    buildings[i].Manipulator.SetScale(3f, true);
-                    buildings[i].Manipulator.SetPosition(r.Position, true);
-                    buildings[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
+                    buildings[i].Manipulator.SetScaling(3f);
+                    buildings[i].Manipulator.SetPosition(r.Position);
+                    buildings[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0);
                 }
             }
 
@@ -959,8 +959,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             if (FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
-                soldier.Manipulator.SetPosition(res.Last().Position, true);
-                soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+                soldier.Manipulator.SetPosition(res.Last().Position);
+                soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             }
 
             soldier.AnimationController.Start(animations["soldier_idle"]);
@@ -981,8 +981,8 @@ namespace TerrainSamples.SceneHeightmap
             {
                 if (FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
                 {
-                    troops[i].Manipulator.SetPosition(r.Position, true);
-                    troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                    troops[i].Manipulator.SetPosition(r.Position);
+                    troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0);
                     troops[i].TextureIndex = 1;
 
                     troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
@@ -1180,7 +1180,7 @@ namespace TerrainSamples.SceneHeightmap
             {
                 float amount = Game.Input.MouseXDelta;
 
-                soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds * 0.5f, 0, 0);
+                soldier.Manipulator.Rotate(gameTime, amount * 0.5f, 0, 0);
             }
 #else
             float amount = Game.Input.MouseXDelta;

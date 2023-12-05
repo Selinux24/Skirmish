@@ -167,7 +167,7 @@ namespace IntermediateSamples.SceneInstancing
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta;
 
-                floor[i].Manipulator.SetPosition(iPos, true);
+                floor[i].Manipulator.SetPosition(iPos);
 
                 if (++x < side)
                 {
@@ -219,9 +219,9 @@ namespace IntermediateSamples.SceneInstancing
                     iPos = Vector3.Zero;
                 }
 
-                trees[i].Manipulator.SetPosition(iPos, true);
-                trees[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
-                trees[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
+                trees[i].Manipulator.SetPosition(iPos);
+                trees[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0);
+                trees[i].Manipulator.SetScaling(2 + (i % 3 * 0.2f));
                 trees[i].TextureIndex = (uint)(i % 2);
             }
         }
@@ -262,8 +262,8 @@ namespace IntermediateSamples.SceneInstancing
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta + rnd.NextVector3(vMin, vMax);
 
-                troops[i].Manipulator.SetPosition(iPos, true);
-                troops[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
+                troops[i].Manipulator.SetPosition(iPos);
+                troops[i].Manipulator.SetRotation(iPos.Z, 0, 0);
                 troops[i].TextureIndex = (uint)(i % 3);
 
                 troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));

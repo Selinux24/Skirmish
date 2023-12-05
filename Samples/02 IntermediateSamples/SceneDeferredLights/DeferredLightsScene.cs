@@ -305,8 +305,8 @@ namespace IntermediateSamples.SceneDeferredLights
             {
                 var p = hPos.Position;
                 p.Y += 10f;
-                helicopter.Manipulator.SetPosition(p, true);
-                helicopter.Manipulator.SetScale(0.15f, true);
+                helicopter.Manipulator.SetPosition(p);
+                helicopter.Manipulator.SetScaling(0.15f);
                 cameraPosition += p;
                 modelCount++;
             }
@@ -320,8 +320,8 @@ namespace IntermediateSamples.SceneDeferredLights
                 {
                     var p = r.Position;
                     p.Y += 10f;
-                    helicopters[i].Manipulator.SetPosition(p, true);
-                    helicopters[i].Manipulator.SetScale(0.15f, true);
+                    helicopters[i].Manipulator.SetPosition(p);
+                    helicopters[i].Manipulator.SetScaling(0.15f);
                     cameraPosition += p;
                     modelCount++;
                 }

@@ -70,7 +70,7 @@ namespace Engine.ModularSceneryTests
 
             ModelInstanced model = new(mockScene.Object, "Tets", "Test");
             await model.ReadAssets(tDesc);
-            model[0].Manipulator.SetScale(2);
+            model[0].Manipulator.SetScaling(2);
             model[0].Manipulator.SetRotation(1, 0, 0);
             model[0].Manipulator.SetPosition(10, 10, 10);
             var sph = model[0].GetBoundingSphere(true);

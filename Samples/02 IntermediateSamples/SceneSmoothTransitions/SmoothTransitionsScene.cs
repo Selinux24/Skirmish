@@ -168,7 +168,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             soldier.AnimationController.PathChanged += SoldierControllerPathChanged;
             soldier.AnimationController.AnimationOffsetChanged += SoldierControllerAnimationOffsetChanged;
 
-            soldier.Manipulator.SetPosition(soldierInitPosition, true);
+            soldier.Manipulator.SetPosition(soldierInitPosition);
 
             var pIdle = new AnimationPath();
             pIdle.Add("idle1");
@@ -298,7 +298,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
             if (Game.Input.KeyJustReleased(Keys.M))
             {
-                soldier.Manipulator.SetPosition(soldierInitPosition, true);
+                soldier.Manipulator.SetPosition(soldierInitPosition);
                 Vector3 to = soldierInitPosition - (Vector3.ForwardLH * 31f);
 
                 MoveSoldierTo(gameTime, to, Game.Input.KeyPressed(Keys.ShiftKey));
@@ -346,7 +346,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             var pathPosition = steeringAgent.Position;
 
             soldier.Manipulator.SetPosition(pathPosition);
-            soldier.Manipulator.LookAt(soldierPath.Last, Axis.Y, 0.5f);
+            soldier.Manipulator.RotateTo(soldierPath.Last, Axis.Y, 0.5f);
 
             float currTime = (gameTime.TotalSeconds - soldierPathStartTime) * globalTimeDelta;
             if (currTime >= pathIndex || soldierPath.Last == pathPosition)

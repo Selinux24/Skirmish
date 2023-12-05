@@ -774,11 +774,11 @@ namespace TerrainSamples.SceneGrid
 
                     var node = NavigationGraph.FindNode(soldierAgent, r.Position);
 
-                    soldier.Manipulator.SetPosition(node?.Center ?? r.Position, true);
+                    soldier.Manipulator.SetPosition(node?.Center ?? r.Position);
 
                     if (teamIndex == 0)
                     {
-                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
+                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0);
                     }
 
                     soldierModels.Add(soldierC, soldier);

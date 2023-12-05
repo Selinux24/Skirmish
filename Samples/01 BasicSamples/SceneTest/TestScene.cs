@@ -400,7 +400,7 @@ namespace BasicSamples.SceneTest
 
             buildingObelisk.Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
             buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            buildingObelisk.Manipulator.SetScale(10);
+            buildingObelisk.Manipulator.SetScaling(10);
 
             buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
             buildingObeliskI[1].Manipulator.SetPosition((+spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
@@ -412,10 +412,10 @@ namespace BasicSamples.SceneTest
             buildingObeliskI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             buildingObeliskI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            buildingObeliskI[0].Manipulator.SetScale(10);
-            buildingObeliskI[1].Manipulator.SetScale(10);
-            buildingObeliskI[2].Manipulator.SetScale(10);
-            buildingObeliskI[3].Manipulator.SetScale(10);
+            buildingObeliskI[0].Manipulator.SetScaling(10);
+            buildingObeliskI[1].Manipulator.SetScaling(10);
+            buildingObeliskI[2].Manipulator.SetScaling(10);
+            buildingObeliskI[3].Manipulator.SetScaling(10);
         }
         private async Task InitializeCharacterSoldier()
         {
@@ -648,7 +648,7 @@ namespace BasicSamples.SceneTest
             float scaleZ = areaSize * 2 / zSize / bboxTmp.Depth;
             Vector3 scale = new(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
 
-            container.Manipulator.SetScale(scale);
+            container.Manipulator.SetScaling(scale);
             var scaledOnlyBbox = container.GetBoundingBox(true);
             container.Manipulator.SetPosition(s + 12 + baseDelta.X, baseHeight + baseDelta.Y, 30 + baseDelta.Z);
             container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
@@ -788,7 +788,7 @@ namespace BasicSamples.SceneTest
             scenery.PickFirst(topDownRay, out var treePos);
 
             tree.Manipulator.SetPosition(treePos.Position + delta);
-            tree.Manipulator.SetScale(2);
+            tree.Manipulator.SetScaling(2);
 
             foreach (var t in treesI.GetInstances().Select(t => t.Manipulator))
             {
@@ -804,7 +804,7 @@ namespace BasicSamples.SceneTest
 
                 t.SetPosition(treeIPos.Position + delta);
                 t.SetRotation(r, y, y);
-                t.SetScale(s);
+                t.SetScaling(s);
             }
         }
 

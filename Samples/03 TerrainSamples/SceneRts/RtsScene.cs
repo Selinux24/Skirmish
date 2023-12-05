@@ -493,7 +493,7 @@ namespace TerrainSamples.SceneRts
                 StartsVisible = false,
             };
             helicopter = await AddComponentAgent<Model, ModelDescription>("Helicopter", "Helicopter", hDesc);
-            helicopter.Manipulator.SetScale(0.15f);
+            helicopter.Manipulator.SetScaling(0.15f);
 
             PrepareLights(helicopter.Lights);
 
@@ -521,8 +521,8 @@ namespace TerrainSamples.SceneRts
             tankP1 = await AddComponentAgent<Model, ModelDescription>("Tank1", "Tank1", tDesc);
             tankP2 = await AddComponentAgent<Model, ModelDescription>("Tank2", "Tank2", tDesc);
 
-            tankP1.Manipulator.SetScale(0.2f);
-            tankP2.Manipulator.SetScale(0.2f);
+            tankP1.Manipulator.SetScaling(0.2f);
+            tankP2.Manipulator.SetScaling(0.2f);
 
             var tankbbox = tankP1.GetBoundingBox(true);
 
@@ -1207,7 +1207,7 @@ namespace TerrainSamples.SceneRts
                 var obeliskInstance = obelisk[i];
 
                 obeliskInstance.Manipulator.SetPosition(r.Position);
-                obeliskInstance.Manipulator.SetScale(1.5f);
+                obeliskInstance.Manipulator.SetScaling(1.5f);
                 obeliskInstance.Manipulator.SetTransform(r.Position, MathUtil.PiOverFour, 0, 0, 1.5f);
             }
             obelisk.Visible = true;

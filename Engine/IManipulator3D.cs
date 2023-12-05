@@ -17,124 +17,123 @@ namespace Engine
         /// </summary>
         /// <param name="force">If true, local transforms were forced to update</param>
         void UpdateInternals(bool force);
+        /// <summary>
+        /// Resets the manipulator internal state
+        /// </summary>
+        void Reset();
 
         /// <summary>
-        /// Increments position component using the specified delta vector
-        /// </summary>
-        /// <param name="delta">Delta vector</param>
-        void Move(Vector3 delta);
-        /// <summary>
-        /// Increments position component delta length along v vector
+        /// Increments position component velocity along direction vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="v">Direction vector</param>
-        /// <param name="delta">Delta distance</param>
-        void Move(GameTime gameTime, Vector3 v, float delta = 1f);
+        /// <param name="direction">Direction vector</param>
+        /// <param name="velocity">Velocity</param>
+        void Move(GameTime gameTime, Vector3 direction, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along forward vector
+        /// Increments position component velocity along forward vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveForward(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveForward(GameTime gameTime, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along backward vector
+        /// Increments position component velocity along backward vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveBackward(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveBackward(GameTime gameTime, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along left vector
+        /// Increments position component velocity along left vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveLeft(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveLeft(GameTime gameTime, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along right vector
+        /// Increments position component velocity along right vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveRight(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveRight(GameTime gameTime, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along up vector
+        /// Increments position component velocity along up vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveUp(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveUp(GameTime gameTime, float velocity = 1f);
         /// <summary>
-        /// Increments position component d distance along down vector
+        /// Increments position component velocity along down vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="delta">Delta distance</param>
-        void MoveDown(GameTime gameTime, float delta = 1f);
+        /// <param name="velocity">Velocity</param>
+        void MoveDown(GameTime gameTime, float velocity = 1f);
 
         /// <summary>
-        /// Increments rotation component by axis
+        /// Increments rotation component
         /// </summary>
-        /// <param name="deltaYaw">Yaw (Y) amount (radians)</param>
-        /// <param name="deltaPitch">Pitch (X) amount (radians)</param>
-        /// <param name="deltaRoll">Roll (Z) amount (radians)</param>
-        void Rotate(float deltaYaw, float deltaPitch, float deltaRoll);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="yaw">Yaw (Y) amount (radians)</param>
+        /// <param name="pitch">Pitch (X) amount (radians)</param>
+        /// <param name="roll">Roll (Z) amount (radians)</param>
+        void Rotate(GameTime gameTime, float yaw, float pitch, float roll);
         /// <summary>
         /// Increments rotation yaw (Y) to the left
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void YawLeft(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="yaw">Yaw (radians)</param>
+        void YawLeft(GameTime gameTime, float yaw = 1f);
         /// <summary>
         /// Increments rotation yaw (Y) to the right
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void YawRight(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="delta">Yaw (radians)</param>
+        void YawRight(GameTime gameTime, float yaw = 1f);
         /// <summary>
         /// Increments rotation pitch (X) up
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void PitchUp(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="pitch">Pitch (radians)</param>
+        void PitchUp(GameTime gameTime, float pitch = 1f);
         /// <summary>
         /// Increments rotation pitch (X) down
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void PitchDown(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="pitch">Pitch (radians)</param>
+        void PitchDown(GameTime gameTime, float pitch = 1f);
         /// <summary>
         /// Increments rotation roll (Z) left
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void RollLeft(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="roll">Roll (radians)</param>
+        void RollLeft(GameTime gameTime, float roll = 1f);
         /// <summary>
         /// Increments rotation roll (Z) right
         /// </summary>
-        /// <param name="delta">Delta (radians)</param>
-        void RollRight(GameTime gameTime, float delta = Helper.Radian);
+        /// <param name="gameTime">Game time</param>
+        /// <param name="roll">Roll (radians)</param>
+        void RollRight(GameTime gameTime, float roll = 1f);
 
         /// <summary>
-        /// Increments scaling the specified scale delta value
+        /// Increments scaling the specified scaling value
         /// </summary>
-        /// <param name="delta">Scale delta</param>
+        /// <param name="scaling">Scaling</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(Vector3 delta, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(GameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null);
         /// <summary>
-        /// Increments scaling the specified scale delta value
+        /// Increments scaling the specified scaling value
         /// </summary>
-        /// <param name="delta">Scale delta (percent 0 to x)</param>
+        /// <param name="scalingX">X axis scaling (percent 0 to x)</param>
+        /// <param name="scalingY">Y axis scaling (percent 0 to x)</param>
+        /// <param name="scalingZ">Z axis scaling (percent 0 to x)</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, float delta, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(GameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null);
         /// <summary>
-        /// Increments scaling the specified scale delta value
+        /// Increments scaling the specified scaling value
         /// </summary>
-        /// <param name="deltaScaleX">X axis scale delta (percent 0 to x)</param>
-        /// <param name="deltaScaleY">Y axis scale delta (percent 0 to x)</param>
-        /// <param name="deltaScaleZ">Z axis scale delta (percent 0 to x)</param>
+        /// <param name="scaling">Scaling</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, float deltaScaleX, float deltaScaleY, float deltaScaleZ, Vector3? minSize = null, Vector3? maxSize = null);
-        /// <summary>
-        /// Increments scaling the specified scale delta value
-        /// </summary>
-        /// <param name="delta">Scale delta</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, Vector3 delta, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(GameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null);
 
         /// <summary>
         /// Sets the position component
@@ -142,50 +141,49 @@ namespace Engine
         /// <param name="x">X component of position</param>
         /// <param name="y">Y component of position</param>
         /// <param name="z">Z component of position</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetPosition(float x, float y, float z, bool updateState = false);
+        void SetPosition(float x, float y, float z);
         /// <summary>
         /// Sets the position component
         /// </summary>
         /// <param name="position">Position component</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetPosition(Vector3 position, bool updateState = false);
+        void SetPosition(Vector3 position);
 
+        /// <summary>
+        /// Sets the rotation component
+        /// </summary>
+        /// <param name="rotationAxis">Rotation axis</param>
+        /// <param name="rotationAngle">Rotation angle</param>
+        void SetRotation(Vector3 rotationAxis, float rotationAngle);
         /// <summary>
         /// Sets the rotation component
         /// </summary>
         /// <param name="yaw">The yaw of rotation</param>
         /// <param name="pitch">The pitch of rotation</param>
         /// <param name="roll">The roll of rotation</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetRotation(float yaw, float pitch, float roll, bool updateState = false);
+        void SetRotation(float yaw, float pitch, float roll);
         /// <summary>
         /// Sets the rotation component
         /// </summary>
         /// <param name="rotation">Rotation component</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetRotation(Quaternion rotation, bool updateState = false);
+        void SetRotation(Quaternion rotation);
 
         /// <summary>
         /// Sets the scaling component
         /// </summary>
-        /// <param name="scale">Scale amount (0 to x)</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetScale(float scale, bool updateState = false);
+        /// <param name="scaling">Scale amount (0 to x)</param>
+        void SetScaling(float scaling);
         /// <summary>
         /// Sets the scaling component
         /// </summary>
-        /// <param name="scaleX">Scale along X axis</param>
-        /// <param name="scaleY">Scale along Y axis</param>
-        /// <param name="scaleZ">Scale along Z axis</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetScale(float scaleX, float scaleY, float scaleZ, bool updateState = false);
+        /// <param name="scalingX">Scale along X axis</param>
+        /// <param name="scalingY">Scale along Y axis</param>
+        /// <param name="scalingZ">Scale along Z axis</param>
+        void SetScaling(float scalingX, float scalingY, float scalingZ);
         /// <summary>
         /// Sets the scaling component
         /// </summary>
-        /// <param name="scale">Scale vector</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetScale(Vector3 scale, bool updateState = false);
+        /// <param name="scaling">Scale vector</param>
+        void SetScaling(Vector3 scaling);
 
         /// <summary>
         /// Sets the position, scaling and rotation components
@@ -193,18 +191,16 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="rotationAxis">Rotation axis</param>
         /// <param name="rotationAngle">Rotation angle</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scaling);
         /// <summary>
         /// Sets the position, scaling and rotation components
         /// </summary>
         /// <param name="position">Position</param>
-        /// <param name="axis">Rotation axis</param>
+        /// <param name="rotationAxis">Rotation axis</param>
         /// <param name="rotationAngle">Rotation angle</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scaling);
         /// <summary>
         /// Sets the position, scaling and rotation components
         /// </summary>
@@ -212,9 +208,8 @@ namespace Engine
         /// <param name="yaw">The yaw of rotation</param>
         /// <param name="pitch">The pitch of rotation</param>
         /// <param name="roll">The roll of rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scaling);
         /// <summary>
         /// Sets the position, scaling and rotation components
         /// </summary>
@@ -222,25 +217,22 @@ namespace Engine
         /// <param name="yaw">The yaw of rotation</param>
         /// <param name="pitch">The pitch of rotation</param>
         /// <param name="roll">The roll of rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scaling);
         /// <summary>
         /// Sets the position, scaling and rotation components
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="rotation">Rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, Quaternion rotation, float scaling);
         /// <summary>
         /// Sets the position, scaling and rotation components
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="rotation">Rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="updateState">Updates internal state</param>
-        void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false);
+        /// <param name="scaling">Scaling</param>
+        void SetTransform(Vector3 position, Quaternion rotation, Vector3 scaling);
         /// <summary>
         /// Sets transform matrix and updates position, rotation and scaling components
         /// </summary>
@@ -249,47 +241,38 @@ namespace Engine
         void SetTransform(Matrix transform);
 
         /// <summary>
-        /// Look at target
+        /// Looks at target
         /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        void LookAt(Vector3 target, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        /// <param name="target">Target position</param>
+        void LookAt(Vector3 target);
         /// <summary>
-        /// Look at target
+        /// Looks at target
         /// </summary>
-        /// <param name="target">Target</param>
+        /// <param name="target">Target position</param>
         /// <param name="up">Up vector</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        void LookAt(Vector3 target, Vector3 up, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void LookAt(Vector3 target, Vector3 up);
 
         /// <summary>
-        /// Rotate to target
+        /// Rotates to target
         /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="axis">Relative rotation axis</param>
+        /// <param name="target">Target position</param>
+        /// <param name="axis">Rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        void RotateTo(Vector3 target, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0);
         /// <summary>
-        /// Rotate to target
+        /// Rotates to target
         /// </summary>
-        /// <param name="target">Target</param>
+        /// <param name="target">Target position</param>
         /// <param name="up">Up vector</param>
-        /// <param name="axis">Relative rotation axis</param>
+        /// <param name="axis">Rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        void RotateTo(Vector3 target, Vector3 up, Axis rotationAxis = Axis.Y, float interpolationAmount = 0, bool updateState = false);
+        void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0);
 
         /// <summary>
         /// Set model aligned to normal
         /// </summary>
         /// <param name="normal">Normal</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        void SetNormal(Vector3 normal, float interpolationAmount = 0, bool updateState = false);
+        void SetNormal(Vector3 normal, float interpolationAmount = 0);
     }
 }

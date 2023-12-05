@@ -1339,24 +1339,24 @@ You will lost all the game progress.",
         {
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Shooter.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                Shooter.Manipulator.YawLeft(gameTime);
 
                 PlayEffectMove(Shooter);
             }
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Shooter.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                Shooter.Manipulator.YawRight(gameTime);
 
                 PlayEffectMove(Shooter);
             }
 
             if (Game.Input.KeyPressed(Keys.Q))
             {
-                RotateTankBarrel(Shooter, gameTime.ElapsedSeconds);
+                RotateTankBarrel(gameTime, Shooter, 1);
             }
             if (Game.Input.KeyPressed(Keys.Z))
             {
-                RotateTankBarrel(Shooter, -gameTime.ElapsedSeconds);
+                RotateTankBarrel(gameTime, Shooter, -1);
             }
 
             if (ShooterStatus.CurrentMove <= 0)
@@ -1653,7 +1653,7 @@ You will lost all the game progress.",
 
             return (pos, dir);
         }
-        private void RotateTankBarrel(ModelInstance model, float pitch)
+        private void RotateTankBarrel(GameTime gameTime, ModelInstance model, float pitch)
         {
             var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
 
@@ -1664,17 +1664,18 @@ You will lost all the game progress.",
                 sAngle *= -1f;
             }
 
-            if (sAngle + pitch >= maxBarrelPitch)
+            float delta = gameTime.ElapsedSeconds;
+            if (sAngle + delta >= maxBarrelPitch)
             {
                 return;
             }
 
-            if (sAngle + pitch <= minBarrelPitch)
+            if (sAngle + delta <= minBarrelPitch)
             {
                 return;
             }
 
-            barrelManipulator.Rotate(0, pitch, 0);
+            barrelManipulator.Rotate(gameTime, 0, pitch, 0);
         }
         private void RotateTankTurretTo(ModelInstance model, Vector3 position)
         {
@@ -1769,7 +1770,7 @@ You will lost all the game progress.",
             Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
 
             // Set projectile position
-            projectile.Manipulator.SetPosition(barrelPosition + shotPos, true);
+            projectile.Manipulator.SetPosition(barrelPosition + shotPos);
             var projVolume = projectile.GetBoundingSphere(true);
             projectile.Visible = true;
 
@@ -1802,7 +1803,7 @@ You will lost all the game progress.",
             shooting = false;
 
             Vector3 outPosition = Vector3.Up * (terrainTop + 1);
-            projectile.Manipulator.SetPosition(outPosition, true);
+            projectile.Manipulator.SetPosition(outPosition);
             projectile.Visible = false;
 
             if (impact)

@@ -567,8 +567,8 @@ namespace TerrainSamples.SceneModularDungeon
                 VelocitySlow = 1f,
             };
 
-            rat.Manipulator.SetScale(0.5f, true);
-            rat.Manipulator.SetPosition(0, 0, 0, true);
+            rat.Manipulator.SetScaling(0.5f);
+            rat.Manipulator.SetPosition(0, 0, 0);
             rat.Visible = false;
 
             var ratPaths = new Dictionary<string, AnimationPlan>();
@@ -1550,8 +1550,8 @@ namespace TerrainSamples.SceneModularDungeon
 
             for (int i = 0; i < human.InstanceCount; i++)
             {
-                human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
-                human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
+                human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29);
+                human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0);
 
                 human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
@@ -1771,7 +1771,7 @@ namespace TerrainSamples.SceneModularDungeon
             int duration = 100;
 
             Manipulator3D man = new();
-            man.SetPosition(windPosition, true);
+            man.SetPosition(windPosition);
 
             var soundEffect = soundWinds[index];
 

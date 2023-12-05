@@ -147,9 +147,7 @@ namespace IntermediateSamples.SceneMixamo
                     Content = ContentDescription.FromFile("SceneMixamo/resources/TestModel", "TestModel.json"),
                 });
 
-            model.Manipulator.SetPosition(modelInitPosition, true);
-            model.Manipulator.SetRotation(0, MathUtil.DegreesToRadians(-90), 0, true);
-            model.Manipulator.SetScale(0.1f, true);
+            model.Manipulator.SetTransform(modelInitPosition, 0, MathUtil.DegreesToRadians(-90), 0, 0.1f);
 
             var pDefault = new AnimationPath();
             pDefault.AddLoop("rumba");

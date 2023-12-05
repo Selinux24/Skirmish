@@ -137,7 +137,7 @@ namespace TerrainSamples.SceneCrowds
             };
             var tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
 
-            tanks[0].Manipulator.SetScale(0.2f, true);
+            tanks[0].Manipulator.SetScaling(0.2f);
             var tankbbox = tanks[0].GetBoundingBox();
 
             tankAgentType = new Agent()
@@ -154,7 +154,7 @@ namespace TerrainSamples.SceneCrowds
         }
         private void InitializeTank(ModelInstance tank)
         {
-            tank.Manipulator.SetScale(0.2f, true);
+            tank.Manipulator.SetScaling(0.2f);
 
             var tankController = new SteerManipulatorController()
             {

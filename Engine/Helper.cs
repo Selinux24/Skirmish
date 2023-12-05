@@ -20,6 +20,10 @@ namespace Engine
         /// One radian
         /// </summary>
         public const float Radian = 0.0174532924f;
+        /// <summary>
+        /// Zero tolerance vector
+        /// </summary>
+        public static readonly Vector3 ZeroToleranceVector = new(MathUtil.ZeroTolerance);
 
         #region Random
 
@@ -838,7 +842,7 @@ namespace Engine
         /// <returns>Gets the quaternion between from and to quaternions traveling maxDelta radians</returns>
         public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
         {
-            float angle = Helper.Angle(from, to);
+            float angle = Angle(from, to);
             if (angle == 0f)
             {
                 return to;

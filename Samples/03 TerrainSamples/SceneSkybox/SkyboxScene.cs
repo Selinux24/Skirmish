@@ -390,7 +390,7 @@ namespace TerrainSamples.SceneSkybox
                 obelisks[i].Manipulator.SetTransform(obeliskPositions[i], obeliskRotations[i], 10f);
             });
 
-            fountain.Manipulator.SetScale(2.3f);
+            fountain.Manipulator.SetScaling(2.3f);
         }
         private void StartPathFinding()
         {

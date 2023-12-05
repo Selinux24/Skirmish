@@ -215,7 +215,7 @@ namespace IntermediateSamples.SceneStart
             currentMusic?.Play();
             audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
 
-            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 
             UpdateLayout();
         }

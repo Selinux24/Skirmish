@@ -183,7 +183,7 @@ namespace BasicSamples.SceneStart
             currentMusic?.Play();
             audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
 
-            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 
             var shadow = new Color4(0, 0, 0, 0.5f);
             title.Text = $"{Color.Red}|{shadow}B{Color.Cyan}a{Color.Red}s{Color.Cyan}i{Color.Red}c {Color.Green}S{Color.Orange}a{Color.Green}m{Color.Orange}p{Color.Green}l{Color.Orange}e{Color.Green}s";

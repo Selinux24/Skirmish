@@ -94,8 +94,8 @@ namespace Engine
             var newPosition = path.GetPosition(pathTime);
             var newNormal = path.GetNormal(pathTime);
 
-            manipulator.SetPosition(newPosition, true);
-            manipulator.LookAt(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
+            manipulator.SetPosition(newPosition);
+            manipulator.RotateTo(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
         }
 
         /// <inheritdoc/>

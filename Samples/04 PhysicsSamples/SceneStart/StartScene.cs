@@ -164,7 +164,7 @@ namespace PhysicsSamples.SceneStart
 
             UpdateLayout();
 
-            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 
             sceneReady = true;
         }

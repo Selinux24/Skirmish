@@ -542,7 +542,7 @@ namespace Engine
 
                     if (i < positions.Count())
                     {
-                        instance.Manipulator.SetPosition(positions.ElementAt(i), true);
+                        instance.Manipulator.SetPosition(positions.ElementAt(i));
                         instance.Active = true;
                         instance.Visible = true;
                     }

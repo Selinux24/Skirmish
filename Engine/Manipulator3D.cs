@@ -171,156 +171,138 @@ namespace Engine
 
             FrameCounters.PickCounters.TransformUpdatesPerFrame++;
         }
+        /// <inheritdoc/>
+        public virtual void Reset()
+        {
+            SetTransform(Matrix.Identity);
+        }
 
         /// <inheritdoc/>
-        public void Move(Vector3 delta)
+        public void Move(GameTime gameTime, Vector3 direction, float velocity = 1f)
         {
+            var delta = direction * velocity * gameTime.ElapsedSeconds;
             if (delta == Vector3.Zero)
             {
                 return;
             }
 
             var newPosition = position + delta;
-            if (newPosition == Vector3.Zero)
-            {
-                return;
-            }
 
             SetPosition(newPosition);
         }
         /// <inheritdoc/>
-        public void Move(GameTime gameTime, Vector3 v, float delta = 1f)
+        public void MoveForward(GameTime gameTime, float velocity = 1f)
         {
-            Move(v * delta * gameTime.ElapsedSeconds);
+            Move(gameTime, Forward, velocity);
         }
         /// <inheritdoc/>
-        public void MoveForward(GameTime gameTime, float delta = 1f)
+        public void MoveBackward(GameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Forward, delta);
+            Move(gameTime, Backward, velocity);
         }
         /// <inheritdoc/>
-        public void MoveBackward(GameTime gameTime, float delta = 1f)
+        public void MoveLeft(GameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Backward, delta);
+            Move(gameTime, Left, -velocity);
         }
         /// <inheritdoc/>
-        public void MoveLeft(GameTime gameTime, float delta = 1f)
+        public void MoveRight(GameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Left, -delta);
+            Move(gameTime, Right, -velocity);
         }
         /// <inheritdoc/>
-        public void MoveRight(GameTime gameTime, float delta = 1f)
+        public void MoveUp(GameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Right, -delta);
+            Move(gameTime, Up, velocity);
         }
         /// <inheritdoc/>
-        public void MoveUp(GameTime gameTime, float delta = 1f)
+        public void MoveDown(GameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Up, delta);
-        }
-        /// <inheritdoc/>
-        public void MoveDown(GameTime gameTime, float delta = 1f)
-        {
-            Move(gameTime, Down, delta);
+            Move(gameTime, Down, velocity);
         }
 
         /// <inheritdoc/>
-        public void Rotate(float deltaYaw, float deltaPitch, float deltaRoll)
+        public void Rotate(GameTime gameTime, float yaw, float pitch, float roll)
         {
+            float time = gameTime.ElapsedSeconds;
+            float deltaYaw = yaw * time;
+            float deltaPitch = pitch * time;
+            float deltaRoll = roll * time;
             if (deltaYaw == 0f && deltaPitch == 0f && deltaRoll == 0f)
             {
                 return;
             }
 
             var newRotation = rotation * Quaternion.RotationYawPitchRoll(deltaYaw, deltaPitch, deltaRoll);
-            if (newRotation.IsIdentity)
-            {
-                return;
-            }
 
             SetRotation(newRotation);
         }
         /// <inheritdoc/>
-        public void YawLeft(GameTime gameTime, float delta = Helper.Radian)
+        public void YawLeft(GameTime gameTime, float yaw = 1f)
         {
-            Rotate(-delta * gameTime.ElapsedSeconds, 0, 0);
+            Rotate(gameTime, -yaw, 0, 0);
         }
         /// <inheritdoc/>
-        public void YawRight(GameTime gameTime, float delta = Helper.Radian)
+        public void YawRight(GameTime gameTime, float yaw = 1f)
         {
-            Rotate(delta * gameTime.ElapsedSeconds, 0, 0);
+            Rotate(gameTime, yaw, 0, 0);
         }
         /// <inheritdoc/>
-        public void PitchUp(GameTime gameTime, float delta = Helper.Radian)
+        public void PitchUp(GameTime gameTime, float pitch = 1f)
         {
-            Rotate(0, delta * gameTime.ElapsedSeconds, 0);
+            Rotate(gameTime, 0, pitch, 0);
         }
         /// <inheritdoc/>
-        public void PitchDown(GameTime gameTime, float delta = Helper.Radian)
+        public void PitchDown(GameTime gameTime, float pitch = 1f)
         {
-            Rotate(0, -delta * gameTime.ElapsedSeconds, 0);
+            Rotate(gameTime, 0, -pitch, 0);
         }
         /// <inheritdoc/>
-        public void RollLeft(GameTime gameTime, float delta = Helper.Radian)
+        public void RollLeft(GameTime gameTime, float roll = 1f)
         {
-            Rotate(0, 0, -delta * gameTime.ElapsedSeconds);
+            Rotate(gameTime, 0, 0, -roll);
         }
         /// <inheritdoc/>
-        public void RollRight(GameTime gameTime, float delta = Helper.Radian)
+        public void RollRight(GameTime gameTime, float roll = 1f)
         {
-            Rotate(0, 0, delta * gameTime.ElapsedSeconds);
+            Rotate(gameTime, 0, 0, roll);
         }
 
         /// <inheritdoc/>
-        public void Scale(Vector3 delta, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(GameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null)
         {
+            Scale(gameTime, new Vector3(scaling), minSize, maxSize);
+        }
+        /// <inheritdoc/>
+        public void Scale(GameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null)
+        {
+            Scale(gameTime, new Vector3(scalingX, scalingY, scalingZ), minSize, maxSize);
+        }
+        /// <inheritdoc/>
+        public void Scale(GameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null)
+        {
+            var delta = scaling * gameTime.ElapsedSeconds;
             if (delta == Vector3.Zero)
             {
                 return;
             }
 
-            var newScale = scaling + delta;
+            var newScale = this.scaling + delta;
 
-            if (maxSize.HasValue && newScale.LengthSquared() > maxSize.Value.LengthSquared())
-            {
-                newScale = maxSize.Value;
-            }
+            var min = minSize ?? newScale;
+            var max = maxSize ?? newScale;
+            newScale = Vector3.Clamp(newScale, min, max);
 
-            if (minSize.HasValue && newScale.LengthSquared() < minSize.Value.LengthSquared())
-            {
-                newScale = minSize.Value;
-            }
-
-            if (newScale == Vector3.Zero)
-            {
-                return;
-            }
-
-            SetScale(newScale);
+            SetScaling(newScale);
         }
+
         /// <inheritdoc/>
-        public void Scale(GameTime gameTime, float delta, Vector3? minSize = null, Vector3? maxSize = null)
+        public void SetPosition(float x, float y, float z)
         {
-            Scale(gameTime, new Vector3(delta), minSize, maxSize);
+            SetPosition(new Vector3(x, y, z));
         }
         /// <inheritdoc/>
-        public void Scale(GameTime gameTime, float deltaScaleX, float deltaScaleY, float deltaScaleZ, Vector3? minSize = null, Vector3? maxSize = null)
-        {
-            Scale(gameTime, new Vector3(deltaScaleX, deltaScaleY, deltaScaleZ), minSize, maxSize);
-        }
-        /// <inheritdoc/>
-        public void Scale(GameTime gameTime, Vector3 delta, Vector3? minSize = null, Vector3? maxSize = null)
-        {
-            Scale(delta * gameTime.ElapsedSeconds, minSize, maxSize);
-        }
-
-        /// <inheritdoc/>
-        public void SetPosition(float x, float y, float z, bool updateState = false)
-        {
-            SetPosition(new Vector3(x, y, z), updateState);
-        }
-        /// <inheritdoc/>
-        public void SetPosition(Vector3 position, bool updateState = false)
+        public void SetPosition(Vector3 position)
         {
             if (this.position == position)
             {
@@ -331,16 +313,21 @@ namespace Engine
 
             transformUpdateNeeded = true;
 
-            if (updateState) UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <inheritdoc/>
-        public void SetRotation(float yaw, float pitch, float roll, bool updateState = false)
+        public void SetRotation(Vector3 rotationAxis, float rotationAngle)
         {
-            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll), updateState);
+            SetRotation(Quaternion.RotationAxis(rotationAxis, rotationAngle));
         }
         /// <inheritdoc/>
-        public void SetRotation(Quaternion rotation, bool updateState = false)
+        public void SetRotation(float yaw, float pitch, float roll)
+        {
+            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll));
+        }
+        /// <inheritdoc/>
+        public void SetRotation(Quaternion rotation)
         {
             if (this.rotation == rotation)
             {
@@ -351,67 +338,69 @@ namespace Engine
 
             transformUpdateNeeded = true;
 
-            if (updateState) UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <inheritdoc/>
-        public void SetScale(float scale, bool updateState = false)
+        public void SetScaling(float scaling)
         {
-            SetScale(new Vector3(scale), updateState);
+            SetScaling(new Vector3(scaling));
         }
         /// <inheritdoc/>
-        public void SetScale(float scaleX, float scaleY, float scaleZ, bool updateState = false)
+        public void SetScaling(float scalingX, float scalingY, float scalingZ)
         {
-            SetScale(new Vector3(scaleX, scaleY, scaleZ), updateState);
+            SetScaling(new Vector3(scalingX, scalingY, scalingZ));
         }
         /// <inheritdoc/>
-        public void SetScale(Vector3 scale, bool updateState = false)
+        public void SetScaling(Vector3 scaling)
         {
-            if (scaling == scale)
+            if (this.scaling == scaling)
             {
                 return;
             }
 
-            scaling = scale;
+            this.scaling = scaling;
 
             transformUpdateNeeded = true;
 
-            if (updateState) UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scale, bool updateState = false)
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scaling)
         {
-            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scale, updateState);
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
         }
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, bool updateState = false)
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scaling)
         {
-            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scale, updateState);
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
         }
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scale, bool updateState = false)
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scaling)
         {
-            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scale, updateState);
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
         }
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scale, bool updateState = false)
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scaling)
         {
-            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scale, updateState);
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
         }
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false)
+        public void SetTransform(Vector3 position, Quaternion rotation, float scaling)
         {
-            SetTransform(position, rotation, new Vector3(scale, scale, scale), updateState);
+            SetTransform(position, rotation, new Vector3(scaling, scaling, scaling));
         }
         /// <inheritdoc/>
-        public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false)
+        public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scaling)
         {
-            SetPosition(position, false);
-            SetRotation(rotation, false);
-            SetScale(scale, false);
+            this.scaling = scaling;
+            this.rotation = rotation;
+            this.position = position;
 
-            if (updateState) UpdateLocalTransform();
+            transformUpdateNeeded = true;
+
+            UpdateLocalTransform();
         }
         /// <inheritdoc/>
         public void SetTransform(Matrix transform)
@@ -431,12 +420,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public void LookAt(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+        public void LookAt(Vector3 target)
         {
-            LookAt(target, Vector3.Up, axis, interpolationAmount, updateState);
+            LookAt(target, Vector3.Up);
         }
         /// <inheritdoc/>
-        public void LookAt(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+        public void LookAt(Vector3 target, Vector3 up)
         {
             if (Parent != null)
             {
@@ -446,28 +435,23 @@ namespace Engine
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
+            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
             {
                 return;
             }
 
-            var newRotation = Helper.LookAt(position, target, up, axis);
+            var newRotation = Helper.LookAt(position, target, up, Axis.None);
 
-            if (interpolationAmount > 0)
-            {
-                newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
-            }
-
-            SetRotation(newRotation, updateState);
+            SetRotation(newRotation);
         }
 
         /// <inheritdoc/>
-        public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+        public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0)
         {
-            RotateTo(target, Vector3.Up, axis, interpolationAmount, updateState);
+            RotateTo(target, Vector3.Up, axis, interpolationAmount);
         }
         /// <inheritdoc/>
-        public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+        public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0)
         {
             if (Parent != null)
             {
@@ -477,7 +461,7 @@ namespace Engine
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
+            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
             {
                 return;
             }
@@ -489,15 +473,15 @@ namespace Engine
                 newRotation = Helper.RotateTowards(rotation, newRotation, interpolationAmount);
             }
 
-            SetRotation(newRotation, updateState);
+            SetRotation(newRotation);
         }
 
         /// <inheritdoc/>
-        public void SetNormal(Vector3 normal, float interpolationAmount = 0, bool updateState = false)
+        public void SetNormal(Vector3 normal, float interpolationAmount = 0)
         {
-            float angle = Helper.Angle(Up, normal);
+            float angle = Helper.AngleSigned(Up, normal);
 
-            var axis = angle != 0 ? Vector3.Cross(Up, normal) : Vector3.Left;
+            var axis = angle % MathUtil.Pi != 0 ? Vector3.Cross(Up, normal) : Vector3.Left;
 
             var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 
@@ -506,7 +490,7 @@ namespace Engine
                 newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
             }
 
-            SetRotation(newRotation, updateState);
+            SetRotation(newRotation);
         }
 
         /// <inheritdoc/>

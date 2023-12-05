@@ -61,7 +61,7 @@ namespace TerrainSamples.SceneRts.Controllers
 
             if (lookPos != pos)
             {
-                manipulator.LookAt(lookPos, Axis.None, 0.1f, true);
+                manipulator.RotateTo(lookPos, Axis.None, 0.1f);
             }
         }
     }

@@ -114,7 +114,7 @@ namespace IntermediateSamples.SceneAnimationParts
             };
 
             tank = await AddComponentAgent<Model, ModelDescription>("Tanks", "Tanks", tDesc);
-            tank.Manipulator.SetScale(0.5f);
+            tank.Manipulator.SetScaling(0.5f);
         }
         private async Task InitializeFloor()
         {
@@ -275,11 +275,11 @@ namespace IntermediateSamples.SceneAnimationParts
         {
             if (Game.Input.KeyPressed(Keys.J))
             {
-                tank.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                tank.Manipulator.YawLeft(gameTime);
             }
             if (Game.Input.KeyPressed(Keys.L))
             {
-                tank.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                tank.Manipulator.YawRight(gameTime);
             }
 
             if (Game.Input.KeyPressed(Keys.I))
@@ -295,20 +295,20 @@ namespace IntermediateSamples.SceneAnimationParts
         {
             if (Game.Input.KeyPressed(Keys.J))
             {
-                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.YawLeft(gameTime);
             }
             if (Game.Input.KeyPressed(Keys.L))
             {
-                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.YawRight(gameTime);
             }
 
             if (Game.Input.KeyPressed(Keys.I))
             {
-                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.PitchUp(gameTime);
             }
             if (Game.Input.KeyPressed(Keys.K))
             {
-                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.PitchDown(gameTime);
             }
         }
         private void UpdateInputDebug()

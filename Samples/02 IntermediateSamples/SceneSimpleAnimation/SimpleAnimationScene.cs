@@ -219,8 +219,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.json"),
                 });
 
-            ladder[0].Manipulator.SetPosition(-4f, 1, 0, true);
-            ladder[1].Manipulator.SetPosition(-4.5f, 1, 5, true);
+            ladder[0].Manipulator.SetPosition(-4f, 1, 0);
+            ladder[1].Manipulator.SetPosition(-4.5f, 1, 5);
 
             ladder[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
@@ -268,14 +268,14 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.json"),
                 });
 
-            ladder[0].Manipulator.SetPosition(-3f, 1, 0, true);
-            ladder[1].Manipulator.SetPosition(-3.5f, 1, 5, true);
+            ladder[0].Manipulator.SetPosition(-3f, 1, 0);
+            ladder[1].Manipulator.SetPosition(-3.5f, 1, 5);
 
             ladder[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
-            ladder2[0].Manipulator.SetPosition(-2f, 1, 0, true);
-            ladder2[1].Manipulator.SetPosition(-2.5f, 1, 5, true);
+            ladder2[0].Manipulator.SetPosition(-2f, 1, 0);
+            ladder2[1].Manipulator.SetPosition(-2.5f, 1, 5);
 
             ladder2[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             ladder2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
@@ -316,8 +316,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Soldier", "soldier_anim2.json"),
                 });
 
-            soldier[0].Manipulator.SetPosition(0, 0, 0, true);
-            soldier[1].Manipulator.SetPosition(0.5f, 0, 5, true);
+            soldier[0].Manipulator.SetPosition(0, 0, 0);
+            soldier[1].Manipulator.SetPosition(0.5f, 0, 5);
 
             soldier[0].AnimationController.PlanEnding += SoldierControllerPathEnding;
             soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
@@ -361,8 +361,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Rat", "rat.json"),
                 });
 
-            rat[0].Manipulator.SetPosition(2, 0, 0, true);
-            rat[1].Manipulator.SetPosition(2.5f, 0, 5, true);
+            rat[0].Manipulator.SetPosition(2, 0, 0);
+            rat[1].Manipulator.SetPosition(2.5f, 0, 5);
 
             var p0 = new AnimationPath();
             p0.AddLoop("walk");
@@ -398,13 +398,13 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Wall1.json"),
                 });
 
-            doors[0].Manipulator.SetPosition(-10, 0, 8, true);
+            doors[0].Manipulator.SetPosition(-10, 0, 8);
             doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            doors[0].Manipulator.SetScale(2.5f);
+            doors[0].Manipulator.SetScaling(2.5f);
 
-            walls[0].Manipulator.SetPosition(-10, 0, 8, true);
+            walls[0].Manipulator.SetPosition(-10, 0, 8);
             walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            walls[0].Manipulator.SetScale(2.5f);
+            walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
             def.Add("default");
@@ -441,9 +441,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Wall2.json"),
                 });
 
-            walls[0].Manipulator.SetPosition(10, 0, 8, true);
+            walls[0].Manipulator.SetPosition(10, 0, 8);
             walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            walls[0].Manipulator.SetScale(2.5f);
+            walls[0].Manipulator.SetScaling(2.5f);
 
             var doors = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Jails",
@@ -456,9 +456,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Dn_Jails.json"),
                 });
 
-            doors[0].Manipulator.SetPosition(10, 0, 8, true);
+            doors[0].Manipulator.SetPosition(10, 0, 8);
             doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            doors[0].Manipulator.SetScale(2.5f);
+            doors[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
             def.Add("default");
