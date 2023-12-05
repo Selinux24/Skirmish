@@ -1180,12 +1180,12 @@ namespace TerrainSamples.SceneHeightmap
             {
                 float amount = Game.Input.MouseXDelta;
 
-                soldier.Manipulator.Rotate(gameTime, amount * 0.5f, 0, 0);
+                soldier.Manipulator.Rotate(gameTime, amount, 0, 0);
             }
 #else
             float amount = Game.Input.MouseXDelta;
 
-            soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds, 0, 0);
+            soldier.Manipulator.Rotate(gameTime, amount, 0, 0);
 #endif
 
             float delta = Game.Input.ShiftPressed ? 24 : 12;
