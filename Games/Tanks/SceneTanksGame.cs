@@ -1664,13 +1664,13 @@ You will lost all the game progress.",
                 sAngle *= -1f;
             }
 
-            float delta = gameTime.ElapsedSeconds;
-            if (sAngle + delta >= maxBarrelPitch)
+            float delta = sAngle + (pitch * gameTime.ElapsedSeconds);
+            if (delta >= maxBarrelPitch)
             {
                 return;
             }
 
-            if (sAngle + delta <= minBarrelPitch)
+            if (delta <= minBarrelPitch)
             {
                 return;
             }
