@@ -128,7 +128,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(IGameTime gameTime)
         {
             UpdateLocalTransform();
         }
@@ -178,108 +178,128 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public void Move(GameTime gameTime, Vector3 direction, float velocity = 1f)
+        public void Move(IGameTime gameTime, Vector3 direction, float velocity = 1f)
         {
-            var delta = direction * velocity * gameTime.ElapsedSeconds;
-            if (delta == Vector3.Zero)
+            float time = gameTime.ElapsedSeconds;
+
+            if (MathUtil.IsZero(time))
             {
                 return;
             }
+
+            if (MathUtil.IsZero(velocity))
+            {
+                return;
+            }
+
+            if (Vector3.NearEqual(direction, Vector3.Zero, Helper.ZeroToleranceVector))
+            {
+                return;
+            }
+
+            var delta = Vector3.Normalize(direction) * velocity * time;
 
             var newPosition = position + delta;
 
             SetPosition(newPosition);
         }
         /// <inheritdoc/>
-        public void MoveForward(GameTime gameTime, float velocity = 1f)
+        public void MoveForward(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Forward, velocity);
         }
         /// <inheritdoc/>
-        public void MoveBackward(GameTime gameTime, float velocity = 1f)
+        public void MoveBackward(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Backward, velocity);
         }
         /// <inheritdoc/>
-        public void MoveLeft(GameTime gameTime, float velocity = 1f)
+        public void MoveLeft(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Left, -velocity);
         }
         /// <inheritdoc/>
-        public void MoveRight(GameTime gameTime, float velocity = 1f)
+        public void MoveRight(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Right, -velocity);
         }
         /// <inheritdoc/>
-        public void MoveUp(GameTime gameTime, float velocity = 1f)
+        public void MoveUp(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Up, velocity);
         }
         /// <inheritdoc/>
-        public void MoveDown(GameTime gameTime, float velocity = 1f)
+        public void MoveDown(IGameTime gameTime, float velocity = 1f)
         {
             Move(gameTime, Down, velocity);
         }
 
         /// <inheritdoc/>
-        public void Rotate(GameTime gameTime, float yaw, float pitch, float roll)
+        public void Rotate(IGameTime gameTime, float yaw, float pitch, float roll)
         {
             float time = gameTime.ElapsedSeconds;
-            float deltaYaw = yaw * time;
-            float deltaPitch = pitch * time;
-            float deltaRoll = roll * time;
-            if (deltaYaw == 0f && deltaPitch == 0f && deltaRoll == 0f)
+
+            if (MathUtil.IsZero(time))
             {
                 return;
             }
+
+            if (yaw == 0f && pitch == 0f && roll == 0f)
+            {
+                return;
+            }
+
+            float deltaYaw = yaw * time;
+            float deltaPitch = pitch * time;
+            float deltaRoll = roll * time;
 
             var newRotation = rotation * Quaternion.RotationYawPitchRoll(deltaYaw, deltaPitch, deltaRoll);
 
             SetRotation(newRotation);
         }
         /// <inheritdoc/>
-        public void YawLeft(GameTime gameTime, float yaw = 1f)
+        public void YawLeft(IGameTime gameTime, float yaw = 1f)
         {
             Rotate(gameTime, -yaw, 0, 0);
         }
         /// <inheritdoc/>
-        public void YawRight(GameTime gameTime, float yaw = 1f)
+        public void YawRight(IGameTime gameTime, float yaw = 1f)
         {
             Rotate(gameTime, yaw, 0, 0);
         }
         /// <inheritdoc/>
-        public void PitchUp(GameTime gameTime, float pitch = 1f)
+        public void PitchUp(IGameTime gameTime, float pitch = 1f)
         {
             Rotate(gameTime, 0, pitch, 0);
         }
         /// <inheritdoc/>
-        public void PitchDown(GameTime gameTime, float pitch = 1f)
+        public void PitchDown(IGameTime gameTime, float pitch = 1f)
         {
             Rotate(gameTime, 0, -pitch, 0);
         }
         /// <inheritdoc/>
-        public void RollLeft(GameTime gameTime, float roll = 1f)
+        public void RollLeft(IGameTime gameTime, float roll = 1f)
         {
             Rotate(gameTime, 0, 0, -roll);
         }
         /// <inheritdoc/>
-        public void RollRight(GameTime gameTime, float roll = 1f)
+        public void RollRight(IGameTime gameTime, float roll = 1f)
         {
             Rotate(gameTime, 0, 0, roll);
         }
 
         /// <inheritdoc/>
-        public void Scale(GameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null)
         {
             Scale(gameTime, new Vector3(scaling), minSize, maxSize);
         }
         /// <inheritdoc/>
-        public void Scale(GameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null)
         {
             Scale(gameTime, new Vector3(scalingX, scalingY, scalingZ), minSize, maxSize);
         }
         /// <inheritdoc/>
-        public void Scale(GameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null)
         {
             var delta = scaling * gameTime.ElapsedSeconds;
             if (delta == Vector3.Zero)

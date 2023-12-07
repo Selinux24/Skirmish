@@ -11,7 +11,7 @@ namespace Engine
         /// Update internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Update internal state
         /// </summary>
@@ -28,43 +28,43 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="direction">Direction vector</param>
         /// <param name="velocity">Velocity</param>
-        void Move(GameTime gameTime, Vector3 direction, float velocity = 1f);
+        void Move(IGameTime gameTime, Vector3 direction, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along forward vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveForward(GameTime gameTime, float velocity = 1f);
+        void MoveForward(IGameTime gameTime, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along backward vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveBackward(GameTime gameTime, float velocity = 1f);
+        void MoveBackward(IGameTime gameTime, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along left vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveLeft(GameTime gameTime, float velocity = 1f);
+        void MoveLeft(IGameTime gameTime, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along right vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveRight(GameTime gameTime, float velocity = 1f);
+        void MoveRight(IGameTime gameTime, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along up vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveUp(GameTime gameTime, float velocity = 1f);
+        void MoveUp(IGameTime gameTime, float velocity = 1f);
         /// <summary>
         /// Increments position component velocity along down vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="velocity">Velocity</param>
-        void MoveDown(GameTime gameTime, float velocity = 1f);
+        void MoveDown(IGameTime gameTime, float velocity = 1f);
 
         /// <summary>
         /// Increments rotation component
@@ -73,43 +73,43 @@ namespace Engine
         /// <param name="yaw">Yaw (Y) amount (radians)</param>
         /// <param name="pitch">Pitch (X) amount (radians)</param>
         /// <param name="roll">Roll (Z) amount (radians)</param>
-        void Rotate(GameTime gameTime, float yaw, float pitch, float roll);
+        void Rotate(IGameTime gameTime, float yaw, float pitch, float roll);
         /// <summary>
         /// Increments rotation yaw (Y) to the left
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="yaw">Yaw (radians)</param>
-        void YawLeft(GameTime gameTime, float yaw = 1f);
+        void YawLeft(IGameTime gameTime, float yaw = 1f);
         /// <summary>
         /// Increments rotation yaw (Y) to the right
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="delta">Yaw (radians)</param>
-        void YawRight(GameTime gameTime, float yaw = 1f);
+        void YawRight(IGameTime gameTime, float yaw = 1f);
         /// <summary>
         /// Increments rotation pitch (X) up
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="pitch">Pitch (radians)</param>
-        void PitchUp(GameTime gameTime, float pitch = 1f);
+        void PitchUp(IGameTime gameTime, float pitch = 1f);
         /// <summary>
         /// Increments rotation pitch (X) down
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="pitch">Pitch (radians)</param>
-        void PitchDown(GameTime gameTime, float pitch = 1f);
+        void PitchDown(IGameTime gameTime, float pitch = 1f);
         /// <summary>
         /// Increments rotation roll (Z) left
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="roll">Roll (radians)</param>
-        void RollLeft(GameTime gameTime, float roll = 1f);
+        void RollLeft(IGameTime gameTime, float roll = 1f);
         /// <summary>
         /// Increments rotation roll (Z) right
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="roll">Roll (radians)</param>
-        void RollRight(GameTime gameTime, float roll = 1f);
+        void RollRight(IGameTime gameTime, float roll = 1f);
 
         /// <summary>
         /// Increments scaling the specified scaling value
@@ -117,7 +117,7 @@ namespace Engine
         /// <param name="scaling">Scaling</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null);
         /// <summary>
         /// Increments scaling the specified scaling value
         /// </summary>
@@ -126,14 +126,14 @@ namespace Engine
         /// <param name="scalingZ">Z axis scaling (percent 0 to x)</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null);
         /// <summary>
         /// Increments scaling the specified scaling value
         /// </summary>
         /// <param name="scaling">Scaling</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        void Scale(GameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null);
 
         /// <summary>
         /// Sets the position component

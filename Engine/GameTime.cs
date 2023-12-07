@@ -7,16 +7,14 @@ namespace Engine
     /// <summary>
     /// Game time
     /// </summary>
-    public class GameTime
+    public class GameTime : IGameTime
     {
         /// <summary>
         /// Stop watch
         /// </summary>
         private readonly TimerTick watch = new();
 
-        /// <summary>
-        /// Elapsed time since last frame
-        /// </summary>
+        /// <inheritdoc/>
         public TimeSpan ElapsedTime
         {
             get
@@ -24,9 +22,7 @@ namespace Engine
                 return watch.ElapsedAdjustedTime;
             }
         }
-        /// <summary>
-        /// Total time
-        /// </summary>
+        /// <inheritdoc/>
         public TimeSpan TotalTime
         {
             get
@@ -34,9 +30,7 @@ namespace Engine
                 return watch.TotalTime;
             }
         }
-        /// <summary>
-        /// Elapsed seconds since last frame
-        /// </summary>
+        /// <inheritdoc/>
         public float ElapsedSeconds
         {
             get
@@ -44,9 +38,7 @@ namespace Engine
                 return (float)ElapsedTime.TotalSeconds;
             }
         }
-        /// <summary>
-        /// Total seconds
-        /// </summary>
+        /// <inheritdoc/>
         public float TotalSeconds
         {
             get
@@ -54,9 +46,7 @@ namespace Engine
                 return (float)TotalTime.TotalSeconds;
             }
         }
-        /// <summary>
-        /// Elapsed seconds since last frame
-        /// </summary>
+        /// <inheritdoc/>
         public float ElapsedMilliseconds
         {
             get
@@ -64,9 +54,7 @@ namespace Engine
                 return (float)ElapsedTime.TotalMilliseconds;
             }
         }
-        /// <summary>
-        /// Total seconds
-        /// </summary>
+        /// <inheritdoc/>
         public float TotalMilliseconds
         {
             get
@@ -74,9 +62,7 @@ namespace Engine
                 return (float)TotalTime.TotalMilliseconds;
             }
         }
-        /// <summary>
-        /// Total ticks
-        /// </summary>
+        /// <inheritdoc/>
         public long Ticks
         {
             get
@@ -84,9 +70,7 @@ namespace Engine
                 return TotalTime.Ticks;
             }
         }
-        /// <summary>
-        /// Game time paused
-        /// </summary>
+        /// <inheritdoc/>
         public bool Paused
         {
             get
@@ -103,24 +87,17 @@ namespace Engine
             watch.Reset();
         }
 
-        /// <summary>
-        /// Starts the stop watch
-        /// </summary>
+        /// <inheritdoc/>
         public void Start()
         {
             watch.Reset();
         }
-        /// <summary>
-        /// Resets the stop watch
-        /// </summary>
-        /// <param name="ticks">Ticks to add</param>
+        /// <inheritdoc/>
         public void Reset(long ticks = 0)
         {
             watch.Reset(ticks);
         }
-        /// <summary>
-        /// Pauses the stop watch
-        /// </summary>
+        /// <inheritdoc/>
         public void Pause()
         {
             while (!watch.IsPaused)
@@ -128,9 +105,7 @@ namespace Engine
                 watch.Pause();
             }
         }
-        /// <summary>
-        /// Resumes the stop watch
-        /// </summary>
+        /// <inheritdoc/>
         public void Resume()
         {
             while (watch.IsPaused)
@@ -138,9 +113,7 @@ namespace Engine
                 watch.Resume();
             }
         }
-        /// <summary>
-        /// Updates the stop watch counters
-        /// </summary>
+        /// <inheritdoc/>
         public void Update()
         {
             watch.Tick();
