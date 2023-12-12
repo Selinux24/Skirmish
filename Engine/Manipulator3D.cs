@@ -158,8 +158,8 @@ namespace Engine
 
             localTransform = sca * rot * tra;
 
-            Forward = rot.Forward;
-            Backward = rot.Backward;
+            Forward = -rot.Forward;
+            Backward = -rot.Backward;
             Left = rot.Left;
             Right = rot.Right;
             Up = rot.Up;
@@ -206,12 +206,12 @@ namespace Engine
         /// <inheritdoc/>
         public void MoveForward(IGameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Forward, velocity);
+            Move(gameTime, Forward, -velocity);
         }
         /// <inheritdoc/>
         public void MoveBackward(IGameTime gameTime, float velocity = 1f)
         {
-            Move(gameTime, Backward, velocity);
+            Move(gameTime, Backward, -velocity);
         }
         /// <inheritdoc/>
         public void MoveLeft(IGameTime gameTime, float velocity = 1f)
@@ -289,29 +289,33 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public void Scale(IGameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, float scaling)
         {
-            Scale(gameTime, new Vector3(scaling), minSize, maxSize);
+            Scale(gameTime, new Vector3(scaling));
         }
         /// <inheritdoc/>
-        public void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ)
         {
-            Scale(gameTime, new Vector3(scalingX, scalingY, scalingZ), minSize, maxSize);
+            Scale(gameTime, new Vector3(scalingX, scalingY, scalingZ));
         }
         /// <inheritdoc/>
-        public void Scale(IGameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(IGameTime gameTime, Vector3 scaling)
         {
-            var delta = scaling * gameTime.ElapsedSeconds;
-            if (delta == Vector3.Zero)
+            float time = gameTime.ElapsedSeconds;
+
+            if (MathUtil.IsZero(time))
             {
                 return;
             }
 
-            var newScale = this.scaling + delta;
+            if (scaling.X == 0f && scaling.Y == 0f && scaling.Z == 0f)
+            {
+                return;
+            }
 
-            var min = minSize ?? newScale;
-            var max = maxSize ?? newScale;
-            newScale = Vector3.Clamp(newScale, min, max);
+            var deltaScaling = scaling * time;
+
+            var newScale = this.scaling + deltaScaling;
 
             SetScaling(newScale);
         }

@@ -404,7 +404,7 @@ namespace TerrainSamples.SceneRts.AI
             var p1 = Manipulator.Position;
             var p2 = target.Manipulator.Position;
 
-            var s = p2 - p1;
+            var s = p1 - p2;
             if (s.Length() < Stats.SightDistance)
             {
                 float a = Helper.Angle(s, Manipulator.Forward);

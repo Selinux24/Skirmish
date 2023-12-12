@@ -66,15 +66,17 @@ namespace Engine.Windows.Helpers
 
             prevKeyState = (byte[])keyState.Clone();
 
-            if (GetKeyboardState(keyState))
+            if (!GetKeyboardState(keyState))
             {
-                for (int i = 0; i < keyState.Length; i++)
+                return pressedKeys.ToArray();
+            }
+
+            for (int i = 0; i < keyState.Length; i++)
+            {
+                if ((keyState[i] & 0x80) != 0)
                 {
-                    if ((keyState[i] & 0x80) != 0)
-                    {
-                        //Pressed
-                        pressedKeys.Add((Keys)i);
-                    }
+                    //Pressed
+                    pressedKeys.Add((Keys)i);
                 }
             }
 

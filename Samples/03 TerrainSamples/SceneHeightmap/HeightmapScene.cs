@@ -971,10 +971,10 @@ namespace TerrainSamples.SceneHeightmap
         {
             Vector3[] iPos = new Vector3[]
             {
-                new Vector3(4, -2, MathUtil.PiOverFour),
-                new Vector3(5, -5, MathUtil.PiOverTwo),
-                new Vector3(-4, -2, -MathUtil.PiOverFour),
-                new Vector3(-5, -5, -MathUtil.PiOverTwo),
+                new (4, -2, MathUtil.PiOverFour),
+                new (5, -5, MathUtil.PiOverTwo),
+                new (-4, -2, -MathUtil.PiOverFour),
+                new (-5, -5, -MathUtil.PiOverTwo),
             };
 
             for (int i = 0; i < 4; i++)

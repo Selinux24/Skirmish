@@ -139,7 +139,7 @@ namespace Engine.Windows
         /// Get keyboard pressed keys
         /// </summary>
         /// <returns>Return pressed keys collection</returns>
-        private static Keys[] GetPressedKeys()
+        private static Keys[] GetNativePressedKeys()
         {
             return NativeMethods.GetPressedKeys();
         }
@@ -232,7 +232,7 @@ namespace Engine.Windows
             lastKeyboardKeys.AddRange(currentKeyboardKeys);
             currentKeyboardKeys.Clear();
 
-            Keys[] keyboard = GetPressedKeys();
+            Keys[] keyboard = GetNativePressedKeys();
             if (keyboard.Length > 0)
             {
                 currentKeyboardKeys.AddRange(keyboard);
@@ -375,6 +375,12 @@ namespace Engine.Windows
             currentStrokes = string.Empty;
 
             #endregion
+        }
+
+        /// <inheritdoc/>
+        public Keys[] GetPressedKeys()
+        {
+            return GetNativePressedKeys();
         }
         /// <inheritdoc/>
         public Keys[] GetJustPressedKeys()

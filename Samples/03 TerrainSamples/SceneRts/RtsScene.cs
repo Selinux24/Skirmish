@@ -1670,7 +1670,7 @@ namespace TerrainSamples.SceneRts
             {
                 var sph = pickable.GetBoundingSphere();
                 Camera.LookTo(sph.Center);
-                Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                Camera.Goto(sph.Center + (transform.Manipulator.Forward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
             }
         }
         private void UpdateInputHelicopterTexture()

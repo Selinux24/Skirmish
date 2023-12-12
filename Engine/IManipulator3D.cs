@@ -115,25 +115,19 @@ namespace Engine
         /// Increments scaling the specified scaling value
         /// </summary>
         /// <param name="scaling">Scaling</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        void Scale(IGameTime gameTime, float scaling, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, float scaling);
         /// <summary>
         /// Increments scaling the specified scaling value
         /// </summary>
         /// <param name="scalingX">X axis scaling (percent 0 to x)</param>
         /// <param name="scalingY">Y axis scaling (percent 0 to x)</param>
         /// <param name="scalingZ">Z axis scaling (percent 0 to x)</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ);
         /// <summary>
         /// Increments scaling the specified scaling value
         /// </summary>
         /// <param name="scaling">Scaling</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        void Scale(IGameTime gameTime, Vector3 scaling, Vector3? minSize = null, Vector3? maxSize = null);
+        void Scale(IGameTime gameTime, Vector3 scaling);
 
         /// <summary>
         /// Sets the position component

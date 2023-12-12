@@ -1687,7 +1687,7 @@ You will lost all the game progress.",
             var barrelPos = barrelTransform.TranslationVector;
 
             //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
-            var newDir = Vector3.Normalize(position - barrelPos);
+            var newDir = Vector3.Normalize(barrelPos - position);
 
             var angle = Helper.AngleSigned(barrelDir, newDir);
             if (MathUtil.IsZero(angle))

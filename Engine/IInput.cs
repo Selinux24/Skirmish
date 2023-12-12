@@ -70,6 +70,10 @@ namespace Engine
         bool VisibleMouse { get; set; }
 
         /// <summary>
+        /// Gets the pressed key list
+        /// </summary>
+        Keys[] GetPressedKeys();
+        /// <summary>
         /// Gets the just pressed key list
         /// </summary>
         /// <returns>Returns an array of just pressed keys</returns>

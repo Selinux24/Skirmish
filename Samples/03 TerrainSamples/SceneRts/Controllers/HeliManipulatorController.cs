@@ -56,7 +56,7 @@ namespace TerrainSamples.SceneRts.Controllers
 
             float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
 
-            var lookPos = pos + dir;
+            var lookPos = pos - dir;
             lookPos.Y = pos.Y - (curSpeed / (maxSpeed == 0 ? 1 : maxSpeed));
 
             if (lookPos != pos)
