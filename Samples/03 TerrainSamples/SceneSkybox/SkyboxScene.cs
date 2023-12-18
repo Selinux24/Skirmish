@@ -411,7 +411,7 @@ namespace TerrainSamples.SceneSkybox
             EnqueueNavigationGraphUpdate((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -592,7 +592,7 @@ namespace TerrainSamples.SceneSkybox
                 DEBUGUpdateGraphDrawer();
             }
         }
-        private void UpdateState(GameTime gameTime)
+        private void UpdateState(IGameTime gameTime)
         {
             if (!gameReady)
             {
@@ -604,7 +604,7 @@ namespace TerrainSamples.SceneSkybox
 
             DEBUGUpdateMovingVolumesDrawer();
         }
-        private void UpdateMovingLights(GameTime gameTime)
+        private void UpdateMovingLights(IGameTime gameTime)
         {
             float r = 5.5f;
             float h = 1.25f;

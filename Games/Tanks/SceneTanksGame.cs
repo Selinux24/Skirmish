@@ -1237,7 +1237,7 @@ namespace Tanks
             UpdateLayout();
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -1335,7 +1335,7 @@ You will lost all the game progress.",
                 Game.LockMouse = false;
             }
         }
-        private void UpdateInputPlayer(GameTime gameTime)
+        private void UpdateInputPlayer(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.A))
             {
@@ -1384,7 +1384,7 @@ You will lost all the game progress.",
             ShooterStatus.CurrentMove -= Vector3.Distance(prevPosition, position);
             ShooterStatus.CurrentMove = Math.Max(0, ShooterStatus.CurrentMove);
         }
-        private void UpdateInputShooting(GameTime gameTime)
+        private void UpdateInputShooting(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.Space))
             {
@@ -1415,7 +1415,7 @@ You will lost all the game progress.",
                 LoadNewGame();
             }
         }
-        private void UpdateInputFree(GameTime gameTime)
+        private void UpdateInputFree(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -1653,7 +1653,7 @@ You will lost all the game progress.",
 
             return (pos, dir);
         }
-        private void RotateTankBarrel(GameTime gameTime, ModelInstance model, float pitch)
+        private void RotateTankBarrel(IGameTime gameTime, ModelInstance model, float pitch)
         {
             var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
 
@@ -1761,7 +1761,7 @@ You will lost all the game progress.",
 
             _ = AddShotSystem(barrelPosition, shotDirection);
         }
-        private async Task IntegrateShot(GameTime gameTime)
+        private async Task IntegrateShot(IGameTime gameTime)
         {
             // Get barrel position
             var (barrelPosition, _) = GetTankBarrel(Shooter);

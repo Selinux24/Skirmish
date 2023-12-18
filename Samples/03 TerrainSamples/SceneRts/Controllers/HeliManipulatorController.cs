@@ -25,12 +25,8 @@ namespace TerrainSamples.SceneRts.Controllers
 
         }
 
-        /// <summary>
-        /// Updates the manipulator's view and position
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator</param>
-        public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
             var prevPos = manipulator.Position;
 

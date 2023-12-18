@@ -16,11 +16,8 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> taskList = new();
 
-        /// <summary>
-        /// Updates the task list
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <inheritdoc/>
+        public void Update(IGameTime gameTime)
         {
             if (!taskList.Any())
             {
@@ -62,28 +59,19 @@ namespace Engine.BuiltIn.PostProcess
             }
         }
 
-        /// <summary>
-        /// Adds a new tween to the specified item
-        /// </summary>
-        /// <param name="item">Tween item</param>
-        /// <param name="tween">Tween funcion</param>
+        /// <inheritdoc/>
         public void AddTween(BuiltInPostProcessState item, Func<float, bool> tween)
         {
             var list = taskList.GetOrAdd(item, new List<Func<float, bool>>());
 
             list.Add(tween);
         }
-        /// <summary>
-        /// Clears all tweens
-        /// </summary>
-        /// <param name="item">Tween item</param>
+        /// <inheritdoc/>
         public void ClearTween(BuiltInPostProcessState item)
         {
             taskList.TryRemove(item, out _);
         }
-        /// <summary>
-        /// Clears all the tween tasks
-        /// </summary>
+        /// <inheritdoc/>
         public void Clear()
         {
             taskList.Clear();

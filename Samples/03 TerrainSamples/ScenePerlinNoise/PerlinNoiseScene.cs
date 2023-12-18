@@ -204,7 +204,7 @@ namespace TerrainSamples.ScenePerlinNoise
             perlinRenderer.Texture = texture;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -230,7 +230,7 @@ namespace TerrainSamples.ScenePerlinNoise
                 GenerateMap();
             }
         }
-        private bool UpdateInput(GameTime gameTime)
+        private bool UpdateInput(IGameTime gameTime)
         {
             bool updateMap = false;
 

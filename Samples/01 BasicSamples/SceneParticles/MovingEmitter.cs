@@ -11,7 +11,8 @@ namespace BasicSamples.SceneParticles
 
         public MovingEmitter() : base() { }
 
-        public override void Update(GameTime gameTime, Vector3 pointOfView)
+        /// <inheritdoc/>
+        public override void Update(IGameTime gameTime, Vector3 pointOfView)
         {
             base.Update(gameTime, pointOfView);
 

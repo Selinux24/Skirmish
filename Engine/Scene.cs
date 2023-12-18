@@ -193,7 +193,7 @@ namespace Engine
         /// Update scene objects
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(IGameTime gameTime)
         {
             try
             {
@@ -223,7 +223,7 @@ namespace Engine
         /// Draw scene objects
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void Draw(GameTime gameTime)
+        public virtual void Draw(IGameTime gameTime)
         {
             try
             {

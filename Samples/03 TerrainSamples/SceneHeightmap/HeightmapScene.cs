@@ -1063,7 +1063,7 @@ namespace TerrainSamples.SceneHeightmap
             EnqueueNavigationGraphUpdate();
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -1089,7 +1089,7 @@ namespace TerrainSamples.SceneHeightmap
             UpdateState(gameTime);
         }
 
-        private void UpdateInput(GameTime gameTime)
+        private void UpdateInput(IGameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.R))
             {
@@ -1103,7 +1103,7 @@ namespace TerrainSamples.SceneHeightmap
             UpdateInputDebugInfo(gameTime);
             UpdateInputBuffers();
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
             Vector3 position;
             if (playerFlying)
@@ -1133,7 +1133,7 @@ namespace TerrainSamples.SceneHeightmap
                 });
             }
         }
-        private Vector3 UpdateFlyingCamera(GameTime gameTime)
+        private Vector3 UpdateFlyingCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -1172,7 +1172,7 @@ namespace TerrainSamples.SceneHeightmap
 
             return Camera.Position;
         }
-        private Vector3 UpdateWalkingCamera(GameTime gameTime)
+        private Vector3 UpdateWalkingCamera(IGameTime gameTime)
         {
             var prevPosition = soldier.Manipulator.Position;
 #if DEBUG
@@ -1261,7 +1261,7 @@ namespace TerrainSamples.SceneHeightmap
                 }
             }
         }
-        private void UpdateInputDebugInfo(GameTime gameTime)
+        private void UpdateInputDebugInfo(IGameTime gameTime)
         {
             UpdateInputWind();
 
@@ -1346,7 +1346,7 @@ namespace TerrainSamples.SceneHeightmap
                 ToggleFog();
             }
         }
-        private void UpdateInputTimeOfDay(GameTime gameTime)
+        private void UpdateInputTimeOfDay(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.Left))
             {
@@ -1388,7 +1388,7 @@ namespace TerrainSamples.SceneHeightmap
             }
         }
 
-        private void UpdateState(GameTime gameTime)
+        private void UpdateState(IGameTime gameTime)
         {
             stats.Text = Game.RuntimeText;
 
@@ -1431,7 +1431,7 @@ namespace TerrainSamples.SceneHeightmap
                 lantern.Direction = Camera.Direction;
             }
         }
-        private void UpdateWind(GameTime gameTime)
+        private void UpdateWind(IGameTime gameTime)
         {
             windDuration += gameTime.ElapsedSeconds;
             if (windDuration > 10)
@@ -1457,7 +1457,7 @@ namespace TerrainSamples.SceneHeightmap
             gardener?.SetWind(windDirection, windStrength);
             gardener2?.SetWind(windDirection, windStrength);
         }
-        private void UpdateDust(GameTime gameTime)
+        private void UpdateDust(IGameTime gameTime)
         {
             nextDust -= gameTime.ElapsedSeconds;
 

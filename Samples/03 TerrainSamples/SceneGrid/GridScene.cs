@@ -387,7 +387,7 @@ namespace TerrainSamples.SceneGrid
             EnqueueNavigationGraphUpdate();
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -479,7 +479,7 @@ namespace TerrainSamples.SceneGrid
                 NextPhase();
             }
         }
-        private void Update3D(GameTime gameTime)
+        private void Update3D(IGameTime gameTime)
         {
             foreach (var soldierC in soldierControllers.Keys)
             {
@@ -515,7 +515,7 @@ namespace TerrainSamples.SceneGrid
 
             return PointerStates.HUD;
         }
-        private void UpdateInput3D(GameTime gameTime, PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
+        private void UpdateInput3D(IGameTime gameTime, PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
         {
             if (picked)
             {
@@ -1056,8 +1056,8 @@ namespace TerrainSamples.SceneGrid
             var passiveModel = soldierModels[passive];
             var activeModel = soldierModels[active];
 
-            Manipulator3D passiveMan = passiveModel.Manipulator;
-            Manipulator3D activeMan = activeModel.Manipulator;
+            var passiveMan = passiveModel.Manipulator;
+            var activeMan = activeModel.Manipulator;
 
             float distance = Vector3.Distance(passiveMan.Position, activeMan.Position);
 

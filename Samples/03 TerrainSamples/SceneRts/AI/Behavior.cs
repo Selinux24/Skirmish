@@ -31,11 +31,11 @@ namespace TerrainSamples.SceneRts.AI
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <returns>Returns true if the behavior can be executed</returns>
-        public abstract bool Test(GameTime gameTime);
+        public abstract bool Test(IGameTime gameTime);
         /// <summary>
         /// Executes the behavior task
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public abstract void Task(GameTime gameTime);
+        public abstract void Task(IGameTime gameTime);
     }
 }

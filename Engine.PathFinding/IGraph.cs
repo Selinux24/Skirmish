@@ -151,7 +151,7 @@ namespace Engine.PathFinding
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
 
         /// <summary>
         /// On graph updating event

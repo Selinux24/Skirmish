@@ -24,6 +24,6 @@ namespace Engine
         /// Updates the follower position and interest
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
     }
 }

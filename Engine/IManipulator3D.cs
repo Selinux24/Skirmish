@@ -1,12 +1,18 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
     /// <summary>
     /// 3D manipulator interface
     /// </summary>
-    public interface IManipulator3D : ITransform
+    public interface IManipulator3D : ITransform, IHasGameState
     {
+        /// <summary>
+        /// State updated event
+        /// </summary>
+        event EventHandler Updated;
+
         /// <summary>
         /// Update internal state
         /// </summary>

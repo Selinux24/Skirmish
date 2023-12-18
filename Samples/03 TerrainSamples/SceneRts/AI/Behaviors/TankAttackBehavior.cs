@@ -17,12 +17,8 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
 
         }
 
-        /// <summary>
-        /// Attack task
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <remarks>Rotate turret towards target</remarks>
-        public override void Task(GameTime gameTime)
+        /// <inheritdoc/>
+        public override void Task(IGameTime gameTime)
         {
             if (Target.HasValue)
             {

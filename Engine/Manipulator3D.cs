@@ -8,11 +8,9 @@ namespace Engine
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D : IManipulator3D, IHasGameState
+    public class Manipulator3D : IManipulator3D
     {
-        /// <summary>
-        /// State updated event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler Updated;
 
         /// <summary>
@@ -109,7 +107,7 @@ namespace Engine
         /// <summary>
         /// Parent manipulator
         /// </summary>
-        public Manipulator3D Parent { get; set; }
+        public IManipulator3D Parent { get; set; }
 
         /// <summary>
         /// Constructor
@@ -122,7 +120,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="parent">Parent manipulator</param>
-        public Manipulator3D(Manipulator3D parent) : this()
+        public Manipulator3D(IManipulator3D parent) : this()
         {
             Parent = parent;
         }

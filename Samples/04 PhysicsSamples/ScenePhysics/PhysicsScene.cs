@@ -479,7 +479,7 @@ namespace PhysicsSamples.ScenePhysics
             gameReady = true;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -507,7 +507,7 @@ namespace PhysicsSamples.ScenePhysics
 
             UpdateText();
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
@@ -591,7 +591,7 @@ namespace PhysicsSamples.ScenePhysics
                 colliders.ElementAtOrDefault(5)?.Reset();
             }
         }
-        private void UpdateStateBodies(GameTime gameTime)
+        private void UpdateStateBodies(IGameTime gameTime)
         {
             lineDrawer.Clear();
 

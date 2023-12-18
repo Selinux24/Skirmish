@@ -221,7 +221,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             Camera.LookTo(0, 5 * 0.6f, 0);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -254,7 +254,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
             runtime.Text = Game.RuntimeText;
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
@@ -284,7 +284,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateInputAnimation(GameTime gameTime)
+        private void UpdateInputAnimation(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
@@ -335,7 +335,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             }
         }
 
-        private void UpdateSoldier(GameTime gameTime)
+        private void UpdateSoldier(IGameTime gameTime)
         {
             if (soldierPath == null)
             {
@@ -400,7 +400,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         /// <param name="gameTime">Game time</param>
         /// <param name="to">Position</param>
         /// <param name="slow">Slow motion</param>
-        private void MoveSoldierTo(GameTime gameTime, Vector3 to, bool slow)
+        private void MoveSoldierTo(IGameTime gameTime, Vector3 to, bool slow)
         {
             globalTimeDelta = slow ? 0.1f : 1f;
 

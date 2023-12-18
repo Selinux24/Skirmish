@@ -210,25 +210,25 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveLeft(GameTime gameTime, float distance = 1f);
+        void MoveLeft(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along right vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveRight(GameTime gameTime, float distance = 1f);
+        void MoveRight(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along up vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveUp(GameTime gameTime, float distance = 1f);
+        void MoveUp(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along down vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveDown(GameTime gameTime, float distance = 1f);
+        void MoveDown(IGameTime gameTime, float distance = 1f);
 
         /// <summary>
         /// Sets the control left-top position

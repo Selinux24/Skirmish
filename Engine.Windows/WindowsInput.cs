@@ -183,7 +183,7 @@ namespace Engine.Windows
         }
 
         /// <inheritdoc/>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             Elapsed += gameTime.ElapsedSeconds;
 

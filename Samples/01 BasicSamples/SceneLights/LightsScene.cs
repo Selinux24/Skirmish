@@ -220,7 +220,7 @@ namespace BasicSamples.SceneLights
             buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -249,7 +249,7 @@ namespace BasicSamples.SceneLights
             UpdateBufferDrawer();
         }
 
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))

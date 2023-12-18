@@ -13,12 +13,8 @@ namespace Engine
         /// </summary>
         public float ArrivingThreshold { get; set; } = 0.01f;
 
-        /// <summary>
-        /// Computes current position and orientation in the curve
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator to update</param>
-        public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
             if (!HasPath)
             {

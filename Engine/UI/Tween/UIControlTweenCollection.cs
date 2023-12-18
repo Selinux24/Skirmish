@@ -16,11 +16,8 @@ namespace Engine.UI.Tween
         /// </summary>
         private readonly ConcurrentDictionary<IUIControl, List<Func<float, bool>>> tasks = new();
 
-        /// <summary>
-        /// Updates the task list
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <inheritdoc/>
+        public void Update(IGameTime gameTime)
         {
             if (!tasks.Any())
             {
@@ -68,28 +65,19 @@ namespace Engine.UI.Tween
             }
         }
 
-        /// <summary>
-        /// Adds a new tween to the specified item
-        /// </summary>
-        /// <param name="item">Tween item</param>
-        /// <param name="tween">Tween funcion</param>
+        /// <inheritdoc/>
         public void AddTween(IUIControl item, Func<float, bool> tween)
         {
             var list = tasks.GetOrAdd(item, new List<Func<float, bool>>());
 
             list.Add(tween);
         }
-        /// <summary>
-        /// Clears all tweens
-        /// </summary>
-        /// <param name="item">Tween item</param>
+        /// <inheritdoc/>
         public void ClearTween(IUIControl item)
         {
             tasks.TryRemove(item, out _);
         }
-        /// <summary>
-        /// Clears all the tween tasks
-        /// </summary>
+        /// <inheritdoc/>
         public void Clear()
         {
             tasks.Clear();

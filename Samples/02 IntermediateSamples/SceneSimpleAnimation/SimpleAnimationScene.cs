@@ -534,7 +534,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             Camera.LookTo(0, playerHeight * 0.6f, 0);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -569,7 +569,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             runtime.Text = Game.RuntimeText;
             animText.Text = $"Paths: {itemController}";
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))

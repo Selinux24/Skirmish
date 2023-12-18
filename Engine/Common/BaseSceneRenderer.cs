@@ -499,7 +499,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(IGameTime gameTime)
         {
             //Get the update context
             var updateContext = GetUpdateContext(gameTime);
@@ -533,7 +533,7 @@ namespace Engine.Common
         /// Updates the update context
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        protected virtual UpdateContext GetUpdateContext(GameTime gameTime)
+        protected virtual UpdateContext GetUpdateContext(IGameTime gameTime)
         {
             return new UpdateContext
             {
@@ -542,7 +542,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public abstract void Draw(GameTime gameTime);
+        public abstract void Draw(IGameTime gameTime);
         /// <summary>
         /// Gets the immediate draw context
         /// </summary>

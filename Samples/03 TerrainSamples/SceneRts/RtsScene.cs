@@ -1482,7 +1482,7 @@ namespace TerrainSamples.SceneRts
             });
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -1554,7 +1554,7 @@ namespace TerrainSamples.SceneRts
                 }
             }
         }
-        private void UpdateInputCamera(GameTime gameTime, PickingRay pickingRay)
+        private void UpdateInputCamera(IGameTime gameTime, PickingRay pickingRay)
         {
             if (walkMode)
             {
@@ -1565,7 +1565,7 @@ namespace TerrainSamples.SceneRts
                 UpdateInputFree(gameTime, pickingRay);
             }
         }
-        private void UpdateInputWalker(GameTime gameTime)
+        private void UpdateInputWalker(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -1611,7 +1611,7 @@ namespace TerrainSamples.SceneRts
                 Camera.Goto(Camera.Position);
             }
         }
-        private void UpdateInputFree(GameTime gameTime, PickingRay pickingRay)
+        private void UpdateInputFree(IGameTime gameTime, PickingRay pickingRay)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -1969,7 +1969,7 @@ namespace TerrainSamples.SceneRts
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(IGameTime gameTime)
         {
             base.Draw(gameTime);
 

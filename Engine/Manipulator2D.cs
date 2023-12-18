@@ -97,7 +97,7 @@ namespace Engine
         /// Increments position component d distance along left vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveLeft(GameTime gameTime, float d = 1f)
+        public void MoveLeft(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitX * -d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -107,7 +107,7 @@ namespace Engine
         /// Increments position component d distance along right vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveRight(GameTime gameTime, float d = 1f)
+        public void MoveRight(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitX * d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -117,7 +117,7 @@ namespace Engine
         /// Increments position component d distance along up vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveUp(GameTime gameTime, float d = 1f)
+        public void MoveUp(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitY * d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -127,7 +127,7 @@ namespace Engine
         /// Increments position component d distance along down vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveDown(GameTime gameTime, float d = 1f)
+        public void MoveDown(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitY * -d * LinearVelocity * gameTime.ElapsedSeconds;
 

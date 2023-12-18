@@ -340,7 +340,7 @@ namespace IntermediateSamples.SceneInstancing
             gameReady = true;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -381,7 +381,7 @@ namespace IntermediateSamples.SceneInstancing
 
             runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {postProcessState.ToneMappingTone}.";
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))

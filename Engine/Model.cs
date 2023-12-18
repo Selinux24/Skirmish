@@ -50,7 +50,7 @@ namespace Engine
         protected DrawingData DrawingData { get; private set; }
 
         /// <inheritdoc/>
-        public Manipulator3D Manipulator { get; private set; } = new();
+        public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
         /// <summary>
         /// Animation controller
         /// </summary>
@@ -329,11 +329,8 @@ namespace Engine
                 Manipulator.GlobalTransform);
         }
 
-        /// <summary>
-        /// Sets a new manipulator to this instance
-        /// </summary>
-        /// <param name="manipulator">Manipulator</param>
-        public void SetManipulator(Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public void SetManipulator(IManipulator3D manipulator)
         {
             if (manipulator == null)
             {

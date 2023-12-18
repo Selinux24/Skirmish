@@ -68,7 +68,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             PrimaryWeapon?.Update(gameTime);
             SecondaryWeapon?.Update(gameTime);

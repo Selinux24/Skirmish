@@ -26,7 +26,7 @@ namespace Engine
         /// <inheritdoc/>
         public IModelPart Parent { get; private set; }
         /// <inheritdoc/>
-        public Manipulator3D Manipulator { get; private set; } = new();
+        public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
 
         /// <summary>
         /// Constructor

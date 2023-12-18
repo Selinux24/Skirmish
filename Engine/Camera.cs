@@ -651,7 +651,7 @@ namespace Engine
         /// <summary>
         /// Updates camera state
         /// </summary>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             if (Following != null)
             {
@@ -681,7 +681,7 @@ namespace Engine
         /// Performs translation to target
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        private void UpdateTranslations(GameTime gameTime)
+        private void UpdateTranslations(IGameTime gameTime)
         {
             if (translationMode == CameraTranslations.None)
             {
@@ -812,7 +812,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveForward(GameTime gameTime, bool slow)
+        public Vector3 MoveForward(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Forward, slow);
         }
@@ -821,7 +821,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveBackward(GameTime gameTime, bool slow)
+        public Vector3 MoveBackward(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Backward, slow);
         }
@@ -830,7 +830,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveLeft(GameTime gameTime, bool slow)
+        public Vector3 MoveLeft(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Left, slow);
         }
@@ -839,7 +839,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveRight(GameTime gameTime, bool slow)
+        public Vector3 MoveRight(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Right, slow);
         }
@@ -848,7 +848,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveUp(GameTime gameTime, bool slow)
+        public Vector3 MoveUp(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Up, slow);
         }
@@ -857,7 +857,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 MoveDown(GameTime gameTime, bool slow)
+        public Vector3 MoveDown(IGameTime gameTime, bool slow)
         {
             return Move(gameTime, Down, slow);
         }
@@ -867,7 +867,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="vector">Movement vector</param>
         /// <param name="slow">Slow movement</param>
-        public Vector3 Move(GameTime gameTime, Vector3 vector, bool slow)
+        public Vector3 Move(IGameTime gameTime, Vector3 vector, bool slow)
         {
             StopTranslations();
 
@@ -889,7 +889,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Quaternion RotateUp(GameTime gameTime, bool slow)
+        public Quaternion RotateUp(IGameTime gameTime, bool slow)
         {
             return Rotate(gameTime, Left, slow);
         }
@@ -898,7 +898,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Quaternion RotateDown(GameTime gameTime, bool slow)
+        public Quaternion RotateDown(IGameTime gameTime, bool slow)
         {
             return Rotate(gameTime, Right, slow);
         }
@@ -907,7 +907,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Quaternion RotateLeft(GameTime gameTime, bool slow)
+        public Quaternion RotateLeft(IGameTime gameTime, bool slow)
         {
             return Rotate(gameTime, Down, slow);
         }
@@ -916,7 +916,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public Quaternion RotateRight(GameTime gameTime, bool slow)
+        public Quaternion RotateRight(IGameTime gameTime, bool slow)
         {
             return Rotate(gameTime, Up, slow);
         }
@@ -926,7 +926,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="deltaX">X mouse delta</param>
         /// <param name="deltaY">Y mouse delta</param>
-        public Quaternion RotateMouse(GameTime gameTime, float deltaX, float deltaY)
+        public Quaternion RotateMouse(IGameTime gameTime, float deltaX, float deltaY)
         {
             Quaternion r = Quaternion.Identity;
 
@@ -944,7 +944,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="axis">Rotation axis</param>
         /// <param name="slow">Slow movement</param>
-        private Quaternion Rotate(GameTime gameTime, Vector3 axis, bool slow)
+        private Quaternion Rotate(IGameTime gameTime, Vector3 axis, bool slow)
         {
             float degrees = slow ? SlowRotationDelta : RotationDelta;
 
@@ -993,7 +993,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public float ZoomIn(GameTime gameTime, bool slow)
+        public float ZoomIn(IGameTime gameTime, bool slow)
         {
             return Zoom(gameTime, true, slow);
         }
@@ -1002,7 +1002,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="slow">Slow movement</param>
-        public float ZoomOut(GameTime gameTime, bool slow)
+        public float ZoomOut(IGameTime gameTime, bool slow)
         {
             return Zoom(gameTime, false, slow);
         }
@@ -1012,7 +1012,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="zoomIn">True if camera goes in. False otherwise</param>
         /// <param name="slow">Slow movement</param>
-        private float Zoom(GameTime gameTime, bool zoomIn, bool slow)
+        private float Zoom(IGameTime gameTime, bool zoomIn, bool slow)
         {
             StopTranslations();
 

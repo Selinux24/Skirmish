@@ -69,7 +69,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates brain state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             var agents = groups.Values.SelectMany(a => a.ToList()).ToList();
             if (!agents.Any())

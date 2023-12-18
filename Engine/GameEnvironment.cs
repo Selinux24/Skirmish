@@ -249,7 +249,7 @@ namespace Engine
         /// Updates the task list
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public bool Update(GameTime gameTime)
+        public bool Update(IGameTime gameTime)
         {
             TimeOfDay.Update(gameTime);
 

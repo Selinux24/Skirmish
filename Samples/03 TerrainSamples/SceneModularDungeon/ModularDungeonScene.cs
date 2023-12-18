@@ -209,7 +209,7 @@ namespace TerrainSamples.SceneModularDungeon
             UpdateGraphDebug(CurrentAgent);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -255,7 +255,7 @@ namespace TerrainSamples.SceneModularDungeon
                 UpdateStateMap();
             }
         }
-        private void UpdateStatePlayer(GameTime gameTime)
+        private void UpdateStatePlayer(IGameTime gameTime)
         {
             UpdateSceneInput();
 
@@ -896,7 +896,7 @@ namespace TerrainSamples.SceneModularDungeon
                 torch.Enabled = !torch.Enabled;
             }
         }
-        private void UpdateDebugInput(GameTime gameTime)
+        private void UpdateDebugInput(IGameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
@@ -1007,7 +1007,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
         }
 
-        private void UpdatePlayerState(GameTime gameTime)
+        private void UpdatePlayerState(IGameTime gameTime)
         {
             postProcessingState.VignetteInner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
         }
@@ -1030,7 +1030,7 @@ namespace TerrainSamples.SceneModularDungeon
                 selectedItemDrawer.Visible = true;
             }
         }
-        private void UpdateRatController(GameTime gameTime)
+        private void UpdateRatController(IGameTime gameTime)
         {
             ratTime -= gameTime.ElapsedSeconds;
 

@@ -11,7 +11,7 @@ namespace TerrainSamples.SceneRts.Emitters
         /// <summary>
         /// Manipulator to follow
         /// </summary>
-        private readonly Manipulator3D manipulator;
+        private readonly IManipulator3D manipulator;
         /// <summary>
         /// Relative delta position from manipulator position
         /// </summary>
@@ -22,17 +22,14 @@ namespace TerrainSamples.SceneRts.Emitters
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
         /// <param name="delta">Relative delta position from manipulator position</param>
-        public MovingEmitter(Manipulator3D manipulator, Vector3 delta) : base()
+        public MovingEmitter(IManipulator3D manipulator, Vector3 delta) : base()
         {
             this.manipulator = manipulator;
             this.delta = delta;
         }
 
-        /// <summary>
-        /// Updates the emitter state
-        /// </summary>
-        /// <param name="context">Updating context</param>
-        public override void Update(GameTime gameTime, Vector3 pointOfView)
+        /// <inheritdoc/>
+        public override void Update(IGameTime gameTime, Vector3 pointOfView)
         {
             Vector3 rDelta = Vector3.Transform(delta, manipulator.Rotation);
 

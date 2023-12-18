@@ -160,7 +160,7 @@ namespace Engine
         /// Updates input state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Gets the keyboard key strokes
         /// </summary>

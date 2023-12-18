@@ -48,7 +48,7 @@ namespace Tanks
         /// <summary>
         /// Updates the internal state
         /// </summary>
-        public static void Update(GameTime gameTime)
+        public static void Update(IGameTime gameTime)
         {
             if (!trees.Any())
             {
@@ -88,7 +88,7 @@ namespace Tanks
             /// Updates the controller
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            void UpdateController(GameTime gameTime);
+            void UpdateController(IGameTime gameTime);
         }
 
         /// <summary>
@@ -104,16 +104,11 @@ namespace Tanks
             /// Collision vector
             /// </summary>
             public Vector3 CollisionVector { get; set; }
-            /// <summary>
-            /// Active
-            /// </summary>
+            /// <inheritdoc/>
             public bool Active { get; set; }
 
-            /// <summary>
-            /// Updates the controller
-            /// </summary>
-            /// <param name="gameTime">Game time</param>
-            public void UpdateController(GameTime gameTime)
+            /// <inheritdoc/>
+            public void UpdateController(IGameTime gameTime)
             {
                 if (!Active)
                 {
@@ -144,16 +139,11 @@ namespace Tanks
             /// Disappearing duration
             /// </summary>
             public float DurationSeconds { get; set; }
-            /// <summary>
-            /// Active
-            /// </summary>
+            /// <inheritdoc/>
             public bool Active { get; set; }
 
-            /// <summary>
-            /// Updates the controller
-            /// </summary>
-            /// <param name="gameTime">Game time</param>
-            public void UpdateController(GameTime gameTime)
+            /// <inheritdoc/>
+            public void UpdateController(IGameTime gameTime)
             {
                 if (!Active)
                 {

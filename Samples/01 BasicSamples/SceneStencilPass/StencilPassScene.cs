@@ -141,7 +141,7 @@ namespace BasicSamples.SceneStencilPass
             lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -172,7 +172,7 @@ namespace BasicSamples.SceneStencilPass
             UpdateDebug();
         }
 
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))

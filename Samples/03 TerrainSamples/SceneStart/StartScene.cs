@@ -349,7 +349,7 @@ namespace TerrainSamples.SceneStart
             exitButton.Visible = true;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 

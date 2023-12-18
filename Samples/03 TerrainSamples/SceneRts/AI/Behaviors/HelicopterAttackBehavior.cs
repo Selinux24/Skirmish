@@ -17,11 +17,8 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
 
         }
 
-        /// <summary>
-        /// Executes the behavior task
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Task(GameTime gameTime)
+        /// <inheritdoc/>
+        public override void Task(IGameTime gameTime)
         {
             if (Target != null)
             {

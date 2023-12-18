@@ -996,22 +996,22 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual void MoveLeft(GameTime gameTime, float distance = 1f)
+        public virtual void MoveLeft(IGameTime gameTime, float distance = 1f)
         {
             Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveRight(GameTime gameTime, float distance = 1f)
+        public virtual void MoveRight(IGameTime gameTime, float distance = 1f)
         {
             Left += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveUp(GameTime gameTime, float distance = 1f)
+        public virtual void MoveUp(IGameTime gameTime, float distance = 1f)
         {
             Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveDown(GameTime gameTime, float distance = 1f)
+        public virtual void MoveDown(IGameTime gameTime, float distance = 1f)
         {
             Top += (int)(1f * distance * gameTime.ElapsedSeconds);
         }

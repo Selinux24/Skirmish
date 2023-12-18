@@ -76,7 +76,7 @@ namespace TerrainSamples.SceneCrowds
             }
         }
         /// <inheritdoc/>
-        public Manipulator3D Manipulator
+        public IManipulator3D Manipulator
         {
             get
             {
@@ -143,12 +143,12 @@ namespace TerrainSamples.SceneCrowds
             //Not applicable
         }
         /// <inheritdoc/>
-        public void SetManipulator(Manipulator3D manipulator)
+        public void SetManipulator(IManipulator3D manipulator)
         {
             model?.SetManipulator(manipulator);
         }
         /// <inheritdoc/>
-        public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        public void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
             controller.UpdateManipulator(gameTime, manipulator);
         }

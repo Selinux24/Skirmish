@@ -11,7 +11,7 @@ namespace Engine.Tween
         /// Updates the task list
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Clears all the tween tasks
         /// </summary>

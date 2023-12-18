@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        Manipulator3D Manipulator { get; }
+        IManipulator3D Manipulator { get; }
 
         /// <summary>
         /// Sets the parent model part

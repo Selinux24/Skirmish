@@ -414,7 +414,7 @@ namespace BasicSamples.SceneMaterials
             Lights.Add(movingLight2);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -442,7 +442,7 @@ namespace BasicSamples.SceneMaterials
             runtime.Text = Game.RuntimeText;
         }
 
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -491,7 +491,7 @@ namespace BasicSamples.SceneMaterials
                 Camera.MoveDown(gameTime, shift);
             }
         }
-        private void UpdateLight(GameTime gameTime)
+        private void UpdateLight(IGameTime gameTime)
         {
             float totalSeconds = gameTime.TotalSeconds;
 

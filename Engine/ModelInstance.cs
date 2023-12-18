@@ -52,7 +52,7 @@ namespace Engine
         /// </summary>
         public int Id { get; private set; }
         /// <inheritdoc/>
-        public Manipulator3D Manipulator { get; private set; } = new();
+        public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
         /// <summary>
         /// Animation controller
         /// </summary>
@@ -233,7 +233,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public void SetManipulator(Manipulator3D manipulator)
+        public void SetManipulator(IManipulator3D manipulator)
         {
             if (manipulator == null)
             {

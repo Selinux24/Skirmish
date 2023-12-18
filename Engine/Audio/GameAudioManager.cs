@@ -146,7 +146,7 @@ namespace Engine.Audio
         /// Updates the internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             //Extract a remove the effects due to dispose
             var toDispose = effectInstances

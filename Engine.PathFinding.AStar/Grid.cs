@@ -351,7 +351,7 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             //Updates the internal state
         }

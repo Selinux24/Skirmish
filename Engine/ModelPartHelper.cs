@@ -149,7 +149,7 @@ namespace Engine
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             modelParts.ForEach(p => p.Manipulator.Update(gameTime));
         }

@@ -334,7 +334,7 @@ namespace IntermediateSamples.SceneDeferredLights
             helicopters.Visible = true;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -359,7 +359,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
             UpdateState(gameTime);
         }
-        private void UpdateInput(GameTime gameTime)
+        private void UpdateInput(IGameTime gameTime)
         {
             UpdateInputCamera(gameTime);
             UpdayeInputLights();
@@ -367,7 +367,7 @@ namespace IntermediateSamples.SceneDeferredLights
             UpdateInputSpotlight(gameTime);
             UpdateInputDeferredMap();
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -501,7 +501,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 helicopters.Active = helicopters.Visible = !helicopters.Visible;
             }
         }
-        private void UpdateInputSpotlight(GameTime gameTime)
+        private void UpdateInputSpotlight(IGameTime gameTime)
         {
             if (spotLight == null)
             {
@@ -563,11 +563,11 @@ namespace IntermediateSamples.SceneDeferredLights
             }
         }
 
-        private void UpdateState(GameTime gameTime)
+        private void UpdateState(IGameTime gameTime)
         {
             UpdateLights(gameTime);
         }
-        private void UpdateLights(GameTime gameTime)
+        private void UpdateLights(IGameTime gameTime)
         {
             if (spotLight != null)
             {
@@ -583,7 +583,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 UpdatePointLightsAnimation(gameTime);
             }
         }
-        private void UpdatePointLightsAnimation(GameTime gameTime)
+        private void UpdatePointLightsAnimation(IGameTime gameTime)
         {
             for (int i = 1; i < Lights.PointLights.Length; i++)
             {
@@ -747,7 +747,7 @@ namespace IntermediateSamples.SceneDeferredLights
             UpdateLayout();
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(IGameTime gameTime)
         {
             base.Draw(gameTime);
 

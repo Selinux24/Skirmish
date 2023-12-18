@@ -193,7 +193,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Camera.LookTo(0, playerHeight * 0.6f, 0);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -223,7 +223,7 @@ namespace IntermediateSamples.SceneAnimationParts
 
             UpdateDebugData();
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -260,7 +260,7 @@ namespace IntermediateSamples.SceneAnimationParts
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateInputTank(GameTime gameTime)
+        private void UpdateInputTank(IGameTime gameTime)
         {
             if (Game.Input.ShiftPressed)
             {
@@ -271,7 +271,7 @@ namespace IntermediateSamples.SceneAnimationParts
                 UpdateInputTurret(gameTime);
             }
         }
-        private void UpdateInputHull(GameTime gameTime)
+        private void UpdateInputHull(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.J))
             {
@@ -291,7 +291,7 @@ namespace IntermediateSamples.SceneAnimationParts
                 tank.Manipulator.MoveBackward(gameTime, 10);
             }
         }
-        private void UpdateInputTurret(GameTime gameTime)
+        private void UpdateInputTurret(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.J))
             {

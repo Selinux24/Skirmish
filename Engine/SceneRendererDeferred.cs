@@ -500,7 +500,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(GameTime gameTime)
+        public override void Draw(IGameTime gameTime)
         {
             if (!Updated)
             {

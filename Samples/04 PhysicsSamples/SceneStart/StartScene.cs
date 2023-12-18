@@ -213,7 +213,7 @@ namespace PhysicsSamples.SceneStart
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 

@@ -83,7 +83,7 @@ namespace Engine.Physics
         /// Update physics
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             int iterations = Math.Clamp(SimulationIterations, 1, MaximumSimulationIterations);
 

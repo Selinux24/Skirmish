@@ -39,12 +39,12 @@ namespace Engine
         /// Updates scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Draw(GameTime gameTime);
+        void Draw(IGameTime gameTime);
 
         /// <summary>
         /// Clears the post-processing effect

@@ -578,7 +578,7 @@ namespace Engine.Audio
         /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             if (!UseAudio3D)
             {

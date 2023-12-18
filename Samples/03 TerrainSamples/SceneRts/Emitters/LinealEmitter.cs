@@ -31,7 +31,7 @@ namespace TerrainSamples.SceneRts.Emitters
         }
 
         /// <inheritdoc/>
-        public override void Update(GameTime gameTime, Vector3 pointOfView)
+        public override void Update(IGameTime gameTime, Vector3 pointOfView)
         {
             float distance = Vector3.Distance(to, Position);
 

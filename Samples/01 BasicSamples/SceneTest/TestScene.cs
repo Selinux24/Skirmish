@@ -819,7 +819,7 @@ namespace BasicSamples.SceneTest
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -871,7 +871,7 @@ namespace BasicSamples.SceneTest
                 skyPlane.Visible = true;
             }
         }
-        private void UpdateInputCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(IGameTime gameTime, bool shift)
         {
             if (!cursor.Visible)
             {
@@ -950,7 +950,7 @@ namespace BasicSamples.SceneTest
             }
         }
 
-        private void UpdateWind(GameTime gameTime)
+        private void UpdateWind(IGameTime gameTime)
         {
             if (nextWindChange <= 0)
             {

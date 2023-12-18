@@ -3,7 +3,6 @@ using System;
 
 namespace Engine
 {
-    using Engine.Common;
     using Engine.Content.Persistence;
 
     /// <summary>
@@ -243,7 +242,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="pointOfView">Point of view</param>
-        public virtual void Update(GameTime gameTime, Vector3 pointOfView)
+        public virtual void Update(IGameTime gameTime, Vector3 pointOfView)
         {
             ElapsedTime = gameTime.ElapsedSeconds;
 

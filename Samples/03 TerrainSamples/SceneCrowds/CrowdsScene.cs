@@ -319,7 +319,7 @@ namespace TerrainSamples.SceneCrowds
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -353,7 +353,7 @@ namespace TerrainSamples.SceneCrowds
             UpdateAgents(gameTime);
             UpdateDebugProximityGridDrawer();
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -437,7 +437,7 @@ namespace TerrainSamples.SceneCrowds
             }
         }
 
-        private void UpdateAgents(GameTime gameTime)
+        private void UpdateAgents(IGameTime gameTime)
         {
             tankAgents.ForEach(a => a.Update(new UpdateContext() { GameTime = gameTime }));
 

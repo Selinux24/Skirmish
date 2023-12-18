@@ -50,7 +50,7 @@ namespace TerrainSamples.SceneRts.AI
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator3D Manipulator
+        public IManipulator3D Manipulator
         {
             get
             {
@@ -193,7 +193,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates agent state
         /// </summary>
         /// <param name="context">Updating context</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             Stats.Update(gameTime);
 
@@ -235,7 +235,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates agent state when on idle state
         /// </summary>
         /// <param name="context">Updating context</param>
-        private void UpdateIdle(GameTime gameTime)
+        private void UpdateIdle(IGameTime gameTime)
         {
             if (AttackBehavior.Test(gameTime))
             {
@@ -258,7 +258,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates agent state when on patrolling state
         /// </summary>
         /// <param name="context">Updating context</param>
-        private void UpdatePatrolling(GameTime gameTime)
+        private void UpdatePatrolling(IGameTime gameTime)
         {
             if (AttackBehavior.Test(gameTime))
             {
@@ -281,7 +281,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates agent state when on attacking state state
         /// </summary>
         /// <param name="context">Updating context</param>
-        private void UpdateAttacking(GameTime gameTime)
+        private void UpdateAttacking(IGameTime gameTime)
         {
             if (AttackBehavior.Test(gameTime))
             {
@@ -304,7 +304,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates agent state when on retreating state
         /// </summary>
         /// <param name="context">Updating context</param>
-        private void UpdateRetreating(GameTime gameTime)
+        private void UpdateRetreating(IGameTime gameTime)
         {
             if (RetreatBehavior.Test(gameTime))
             {
@@ -323,7 +323,7 @@ namespace TerrainSamples.SceneRts.AI
         /// Updates model controller
         /// </summary>
         /// <param name="context">Updating context</param>
-        private void UpdateController(GameTime gameTime)
+        private void UpdateController(IGameTime gameTime)
         {
             var lastPosition = Manipulator.Position;
 

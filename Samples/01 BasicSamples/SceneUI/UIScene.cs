@@ -335,7 +335,7 @@ namespace BasicSamples.SceneUI
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -350,7 +350,7 @@ namespace BasicSamples.SceneUI
             UpdateLorem(gameTime);
             UpdateSprite(gameTime);
         }
-        private void UpdateDebugInfo(GameTime gameTime)
+        private void UpdateDebugInfo(IGameTime gameTime)
         {
             var mousePos = Game.Input.MousePosition;
             var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
@@ -366,7 +366,7 @@ Progress: {(int)(progressValue * 100f)}%";
         }
 
         bool paused = false;
-        private void UpdateInput(GameTime gameTime)
+        private void UpdateInput(IGameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
@@ -397,7 +397,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 scrollTextArea.ScrollVerticalPosition -= Game.Input.MouseWheelDelta * gameTime.ElapsedSeconds * 0.01f;
             }
         }
-        private void UpdateSprite(GameTime gameTime)
+        private void UpdateSprite(IGameTime gameTime)
         {
             if (Game.Input.KeyPressed(Keys.A))
             {
@@ -424,7 +424,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 uiTweener.ClearTween(spriteSmiley);
             }
         }
-        private void UpdateLorem(GameTime gameTime)
+        private void UpdateLorem(IGameTime gameTime)
         {
             if (textInterval == 0)
             {

@@ -9,12 +9,8 @@ namespace TerrainSamples.SceneRts.Controllers
     /// </summary>
     public class TankManipulatorController : SteerManipulatorController
     {
-        /// <summary>
-        /// Updates the manipulator's view and position
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator</param>
-        public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
             if (HasPath)
             {
@@ -38,7 +34,7 @@ namespace TerrainSamples.SceneRts.Controllers
         /// <param name="gameTime">Game time</param>
         /// <param name="manipulator">Manipulator</param>
         /// <param name="distanceToTarget">Distance to target</param>
-        private void MoveToTarget(GameTime gameTime, Manipulator3D manipulator, float distanceToTarget)
+        private void MoveToTarget(IGameTime gameTime, IManipulator3D manipulator, float distanceToTarget)
         {
             var position = manipulator.Position;
             var rotation = manipulator.Rotation;

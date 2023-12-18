@@ -184,7 +184,7 @@ namespace IntermediateSamples.SceneMixamo
             Camera.LookTo(0, 10, 0);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -212,7 +212,7 @@ namespace IntermediateSamples.SceneMixamo
 
             runtime.Text = Game.RuntimeText;
         }
-        private void UpdateInputCamera(GameTime gameTime)
+        private void UpdateInputCamera(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {

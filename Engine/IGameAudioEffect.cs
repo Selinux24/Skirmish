@@ -111,7 +111,7 @@ namespace Engine
         /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
 
         /// <summary>
         /// Gets the reverb effect

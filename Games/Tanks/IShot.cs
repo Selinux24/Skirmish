@@ -16,7 +16,7 @@ namespace Tanks
         /// <param name="shotForce">Shot force</param>
         /// <param name="windDirection">Wind direction</param>
         /// <param name="windForce">Wind force</param>
-        void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce);
+        void Configure(IGameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce);
 
         /// <summary>
         /// Gets the horizontal shot distance at the specified time
@@ -74,6 +74,6 @@ namespace Tanks
         /// <param name="shooter">Shooter position</param>
         /// <param name="target">Target position</param>
         /// <returns>Returns the current parabolic shot position (relative to shooter position)</returns>
-        Vector3 Integrate(GameTime gameTime, Vector3 shooter, Vector3 target);
+        Vector3 Integrate(IGameTime gameTime, Vector3 shooter, Vector3 target);
     }
 }

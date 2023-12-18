@@ -180,7 +180,7 @@ namespace BasicSamples.SceneParticles
             gameReady = true;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -220,7 +220,7 @@ namespace BasicSamples.SceneParticles
                 DrawVolumes();
             }
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -489,7 +489,7 @@ namespace BasicSamples.SceneParticles
             pManagerLineDrawer.SetPrimitives(Color.Red, lines.ToArray());
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(IGameTime gameTime)
         {
             base.Draw(gameTime);
 

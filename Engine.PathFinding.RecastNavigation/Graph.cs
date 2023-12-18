@@ -596,7 +596,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             var tcs = agentQuerieFactories
                 .Where(a => a.NavMesh?.TileCache != null)

@@ -980,7 +980,7 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         /// <param name="transparent">Specifies whether the billboards are transparent or not</param>
         /// <remarks>Sorts nodes every second</remarks>
-        private void SortVisibleNodes(GameTime gameTime, Vector3 eyePosition, bool transparent)
+        private void SortVisibleNodes(IGameTime gameTime, Vector3 eyePosition, bool transparent)
         {
             lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
 

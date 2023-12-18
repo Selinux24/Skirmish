@@ -122,7 +122,7 @@ namespace Engine.PathFinding
         }
 
         /// <inheritdoc/>
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             NavigationGraph?.Update(gameTime);
 

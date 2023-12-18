@@ -85,7 +85,7 @@ namespace Engine
         /// <summary>
         /// Game time
         /// </summary>
-        public GameTime GameTime { get; private set; }
+        public IGameTime GameTime { get; private set; }
         /// <summary>
         /// Input helper
         /// </summary>

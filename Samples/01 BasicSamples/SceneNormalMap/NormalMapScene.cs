@@ -142,7 +142,7 @@ namespace BasicSamples.SceneNormalMap
             Lights.Add(pointLight);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(IGameTime gameTime)
         {
             base.Update(gameTime);
 
@@ -206,7 +206,7 @@ namespace BasicSamples.SceneNormalMap
                 Game.Input.MouseYDelta);
 #endif
         }
-        private void UpdateLight(GameTime gameTime)
+        private void UpdateLight(IGameTime gameTime)
         {
             var pos = pointLight.Position;
 
