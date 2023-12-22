@@ -319,6 +319,24 @@ namespace Engine.PathFinding.RecastNavigation
 
             return nv;
         }
+        /// <summary>
+        /// Gets whether the collection contains the specified index
+        /// </summary>
+        /// <param name="index">Vertex index</param>
+        public bool Contains(int index)
+        {
+            int nv = CountPolyVerts();
+
+            for (int j = 0; j < nv; ++j)
+            {
+                if (Vertices[j] == index)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <inheritdoc/>
         public override string ToString()
