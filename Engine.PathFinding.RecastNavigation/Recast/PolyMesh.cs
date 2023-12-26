@@ -593,12 +593,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     numOpenEdges++;
                 }
             }
-            if (numOpenEdges > 2)
-            {
-                return false;
-            }
-
-            return true;
+            return numOpenEdges <= 2;
         }
         /// <summary>
         /// Counts the number of touched edges, and the remaining edges
