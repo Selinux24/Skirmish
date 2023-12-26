@@ -71,14 +71,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not ContourVertex)
+            if (obj is not ContourVertex)
             {
                 return false;
             }
 
-            ContourVertex other = (ContourVertex)value;
+            ContourVertex other = (ContourVertex)obj;
             return Equals(ref other);
         }
         /// <inheritdoc/>

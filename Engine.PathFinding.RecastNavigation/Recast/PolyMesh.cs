@@ -958,20 +958,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // http://www.terathon.com/code/edges.php
 
             int maxEdgeCount = npolys * vertsPerPoly;
-            int[] firstEdge = new int[nverts];
-            int[] nextEdge = new int[maxEdgeCount];
+            int[] firstEdge = Helper.CreateArray(nverts, IndexedPolygon.RC_MESH_NULL_IDX);
+            int[] nextEdge = Helper.CreateArray(maxEdgeCount, IndexedPolygon.RC_MESH_NULL_IDX);
             int edgeCount = 0;
 
             Edge[] edges = new Edge[maxEdgeCount];
-
-            for (int i = 0; i < nverts; i++)
-            {
-                firstEdge[i] = IndexedPolygon.RC_MESH_NULL_IDX;
-            }
-            for (int i = 0; i < maxEdgeCount; i++)
-            {
-                nextEdge[i] = IndexedPolygon.RC_MESH_NULL_IDX;
-            }
 
             for (int i = 0; i < npolys; ++i)
             {
