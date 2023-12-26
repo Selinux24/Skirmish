@@ -502,12 +502,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the geometry configuration of the contour set
         /// </summary>
         /// <param name="maxVertices">Maximum vertices</param>
-        /// <param name="maxTris">Maximum triangles</param>
+        /// <param name="maxPolys">Maximum polygons</param>
         /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
-        public void GetGeometryConfiguration(out int maxVertices, out int maxTris, out int maxVertsPerCont)
+        public void GetGeometryConfiguration(out int maxVertices, out int maxPolys, out int maxVertsPerCont)
         {
             maxVertices = 0;
-            maxTris = 0;
+            maxPolys = 0;
             maxVertsPerCont = 0;
 
             for (int i = 0; i < NConts; ++i)
@@ -521,7 +521,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 maxVertices += nverts;
-                maxTris += nverts - 2;
+                maxPolys += nverts - 2;
                 maxVertsPerCont = Math.Max(maxVertsPerCont, nverts);
             }
         }

@@ -337,6 +337,18 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
+        /// <summary>
+        /// Copy the other polygon vertices
+        /// </summary>
+        /// <param name="p">Indexed polygon</param>
+        /// <param name="nvp">Number of vertex to copy</param>
+        public void CopyVertices(IndexedPolygon p, int nvp)
+        {
+            for (int i = 0; i < nvp; ++i)
+            {
+                Vertices[i] = p[i];
+            }
+        }
 
         /// <inheritdoc/>
         public override string ToString()

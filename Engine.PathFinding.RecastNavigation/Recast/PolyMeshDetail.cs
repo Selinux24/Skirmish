@@ -63,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var poly = mesh.BuildPolyVertices(iPoly);
 
                 // Get the height data from the area of the polygon.
-                hp.Bounds = new Rectangle(b.X, b.Z, b.Y - b.X, b.W - b.Z);
+                hp.Bounds = b.GetRectangle();
 
                 chf.GetHeightData(iPoly, mesh.Verts, hp, borderSize, region);
 
