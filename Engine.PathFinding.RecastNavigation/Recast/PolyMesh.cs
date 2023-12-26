@@ -232,13 +232,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public SamplePolyAreas[] Areas { get; set; }
         /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
+        /// The bounds in world space.
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
@@ -274,8 +270,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var mesh = new PolyMesh
             {
-                BMin = cset.BMin,
-                BMax = cset.BMax,
+                Bounds = new(cset.BMin, cset.BMax),
                 CS = cset.CellSize,
                 CH = cset.CellHeight,
                 BorderSize = cset.BorderSize,
@@ -313,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     var v = cont.Vertices[j];
                     indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
-                    if ((v.W & ContourSet.RC_BORDER_VERTEX) != 0)
+                    if ((v.Flag & ContourSet.RC_BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -370,8 +365,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 NVP = first.NVP,
                 CS = first.CS,
                 CH = first.CH,
-                BMin = first.BMin,
-                BMax = first.BMax
+                Bounds = first.Bounds,
             };
 
             var r = UpdateBounds(meshes);
@@ -394,15 +388,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var pmesh in meshes)
             {
-                int ox = (int)Math.Floor((pmesh.BMin.X - res.BMin.X) / res.CS + 0.5f);
-                int oz = (int)Math.Floor((pmesh.BMin.X - res.BMin.Z) / res.CS + 0.5f);
+                int ox = (int)Math.Floor((pmesh.Bounds.Minimum.X - res.Bounds.Minimum.X) / res.CS + 0.5f);
+                int oz = (int)Math.Floor((pmesh.Bounds.Minimum.X - res.Bounds.Minimum.Z) / res.CS + 0.5f);
 
                 RemapParams remapParams = new()
                 {
                     IsMinX = ox == 0,
                     IsMinZ = oz == 0,
-                    IsMaxX = ((int)Math.Floor((res.BMax.X - pmesh.BMax.X) / res.CS + 0.5f)) == 0,
-                    IsMaxZ = ((int)Math.Floor((res.BMax.Z - pmesh.BMax.Z) / res.CS + 0.5f)) == 0,
+                    IsMaxX = ((int)Math.Floor((res.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / res.CS + 0.5f)) == 0,
+                    IsMaxZ = ((int)Math.Floor((res.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / res.CS + 0.5f)) == 0,
                 };
 
                 for (int j = 0; j < pmesh.NVerts; ++j)
@@ -435,13 +429,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="meshes">Mesh list</param>
         private static (int MaxVerts, int MaxPolys, int MaxVersPerMesh) UpdateBounds(PolyMesh[] meshes)
         {
+            var first = meshes[0];
+
             int maxVerts = 0;
             int maxPolys = 0;
             int maxVertsPerMesh = 0;
             foreach (var mesh in meshes)
             {
-                mesh.BMin = Vector3.Min(mesh.BMin, mesh.BMin);
-                mesh.BMax = Vector3.Max(mesh.BMax, mesh.BMax);
+                var bmin = Vector3.Min(first.Bounds.Minimum, mesh.Bounds.Minimum);
+                var bmax = Vector3.Max(first.Bounds.Maximum, mesh.Bounds.Maximum);
+                mesh.Bounds = new(bmin, bmax);
                 maxVertsPerMesh = Math.Max(maxVertsPerMesh, mesh.NVerts);
                 maxVerts += mesh.NVerts;
                 maxPolys += mesh.NPolys;
@@ -877,7 +874,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hreg">Hole regions</param>
         /// <param name="harea">Hole areas</param>
         /// <returns>Retusn the triangulated vertices and the triangulated hole</returns>
-        private (Int4[] TriVerts, int[] TriHole) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int[] hole, int[] hreg, SamplePolyAreas[] harea)
+        private (Int3[] TriVerts, int[] TriHole) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int[] hole, int[] hreg, SamplePolyAreas[] harea)
         {
             int nhole = 0;
             int nhreg = 0;
@@ -932,7 +929,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            var tverts = new Int4[nhole];
+            var tverts = new Int3[nhole];
             var thole = new int[nhole];
 
             // Generate temp vertex array for triangulation.
@@ -942,7 +939,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 tverts[i].X = Verts[pi].X;
                 tverts[i].Y = Verts[pi].Y;
                 tverts[i].Z = Verts[pi].Z;
-                tverts[i].W = 0;
                 thole[i] = i;
             }
 
@@ -1065,8 +1061,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 NPolys = NPolys,
                 MaxPolys = NPolys,
                 NVP = NVP,
-                BMin = BMin,
-                BMax = BMax,
+                Bounds = Bounds,
                 CS = CS,
                 CH = CH,
                 BorderSize = BorderSize,

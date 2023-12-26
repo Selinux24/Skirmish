@@ -15,7 +15,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         const int REM_REMOVABLE_INDEX = 0x7fff;
 
-        public static int Triangulate(Int4[] verts, ref int[] indices, out Int3[] tris)
+        public static int Triangulate(Int3[] verts, ref int[] indices, out Int3[] tris)
         {
             var dst = new List<Int3>();
 
@@ -88,7 +88,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return dst.Count;
         }
-        private static int[] SetRemovableIndices(Int4[] verts, int[] indices)
+        private static int[] SetRemovableIndices(Int3[] verts, int[] indices)
         {
             var res = indices.ToArray();
 
@@ -111,7 +111,7 @@ namespace Engine.PathFinding.RecastNavigation
             return (index & SET_REMOVABLE_INDEX) == 0;
         }
 
-        private static int FindMinIndex2D(int n, Int4[] verts, int[] indices)
+        private static int FindMinIndex2D(int n, Int3[] verts, int[] indices)
         {
             int minLen = -1;
             int mini = -1;
@@ -140,11 +140,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             return mini;
         }
-        private static bool Diagonal2D(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool Diagonal2D(int i, int j, int n, Int3[] verts, int[] indices)
         {
             return InCone2D(i, j, n, verts, indices) && Diagonalie2D(i, j, n, verts, indices);
         }
-        private static bool InCone2D(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool InCone2D(int i, int j, int n, Int3[] verts, int[] indices)
         {
             var pi = verts[indices[i] & REM_REMOVABLE_INDEX];
             var pj = verts[indices[j] & REM_REMOVABLE_INDEX];
@@ -161,7 +161,7 @@ namespace Engine.PathFinding.RecastNavigation
             // else P[i] is reflex.
             return !(LeftOn2D(pi, pj, pi1) && LeftOn2D(pj, pi, pin1));
         }
-        private static bool Diagonalie2D(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool Diagonalie2D(int i, int j, int n, Int3[] verts, int[] indices)
         {
             var d0 = verts[indices[i] & REM_REMOVABLE_INDEX];
             var d1 = verts[indices[j] & REM_REMOVABLE_INDEX];
@@ -200,7 +200,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="b">Segment ab Point b</param>
         /// <param name="c">Segment cd Point c</param>
         /// <param name="d">Segment cd Point d</param>
-        public static bool Intersect2D(Int4 a, Int4 b, Int4 c, Int4 d)
+        public static bool Intersect2D(Int3 a, Int3 b, Int3 c, Int3 d)
         {
             if (IntersectProp2D(a, b, c, d))
             {
@@ -224,7 +224,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Segment cd Point c</param>
         /// <param name="d">Segment cd Point d</param>
         /// <returns>Returns true iff ab properly intersects cd</returns>
-        private static bool IntersectProp2D(Int4 a, Int4 b, Int4 c, Int4 d)
+        private static bool IntersectProp2D(Int3 a, Int3 b, Int3 c, Int3 d)
         {
             // Eliminate improper cases.
             if (Collinear2D(a, b, c) || Collinear2D(a, b, d) || Collinear2D(c, d, a) || Collinear2D(c, d, b))
@@ -242,7 +242,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Point C</param>
         /// <returns>Returns true if collinear</returns>
         /// <remarks>Three points of a triangle are collinear if the its area is zero</remarks>
-        private static bool Collinear2D(Int4 a, Int4 b, Int4 c)
+        private static bool Collinear2D(Int3 a, Int3 b, Int3 c)
         {
             return Utils.TriArea2D(a, b, c) == 0;
         }
@@ -252,7 +252,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point A</param>
         /// <param name="b">Point B</param>
         /// <param name="c">Point C</param>
-        private static bool Between2D(Int4 a, Int4 b, Int4 c)
+        private static bool Between2D(Int3 a, Int3 b, Int3 c)
         {
             if (!Collinear2D(a, b, c))
             {
@@ -270,17 +270,17 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
-        private static bool Left2D(Int4 a, Int4 b, Int4 c)
+        private static bool Left2D(Int3 a, Int3 b, Int3 c)
         {
             return Utils.TriArea2D(a, b, c) > 0;
         }
 
-        private static bool LeftOn2D(Int4 a, Int4 b, Int4 c)
+        private static bool LeftOn2D(Int3 a, Int3 b, Int3 c)
         {
             return Utils.TriArea2D(a, b, c) >= 0;
         }
 
-        public static bool InCone2D(int i, int n, Int4[] verts, Int4 pj)
+        public static bool InCone2D(int i, int n, Int3[] verts, Int3 pj)
         {
             var pi = verts[i];
             var pi1 = verts[Utils.Next(i, n)];

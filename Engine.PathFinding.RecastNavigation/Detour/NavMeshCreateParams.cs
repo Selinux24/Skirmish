@@ -111,13 +111,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int TileLayer { get; set; }
         /// <summary>
-        /// The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
+        /// The bounds of the tile. [Unit: wu]
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
 
         #endregion
 
@@ -176,15 +172,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < VertCount; ++i)
                 {
                     var iv = Verts[i];
-                    float h = BMin.Y + iv.Y * CellHeight;
+                    float h = Bounds.Minimum.Y + iv.Y * CellHeight;
                     hmin = Math.Min(hmin, h);
                     hmax = Math.Max(hmax, h);
                 }
             }
             hmin -= WalkableClimb;
             hmax += WalkableClimb;
-            Vector3 bmin = BMin;
-            Vector3 bmax = BMax;
+            var bmin = Bounds.Minimum;
+            var bmax = Bounds.Maximum;
             bmin.Y = hmin;
             bmax.Y = hmax;
 

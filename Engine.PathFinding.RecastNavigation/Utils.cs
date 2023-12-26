@@ -243,7 +243,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Vertex C. [(x, y, z)]</param>
         /// <returns>The signed xz-plane area of the triangle</returns>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static int TriArea2D(Int4 a, Int4 b, Int4 c)
+        public static int TriArea2D(Int3 a, Int3 b, Int3 c)
         {
             return (c.X - a.X) * (b.Z - a.Z) - (b.X - a.X) * (c.Z - a.Z);
         }
@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point A</param>
         /// <param name="b">Point B</param>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool VEqual2D(Int4 a, Int4 b)
+        public static bool VEqual2D(Int3 a, Int3 b)
         {
             return a.X == b.X && a.Z == b.Z;
         }

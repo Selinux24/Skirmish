@@ -1557,18 +1557,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var polyIndices = poly.GetVertices();
             var bounds = hp.Bounds;
 
-            var closestCell = FindClosestCellToPolyVertex2D(polyIndices, verts, borderSize, bounds);
+            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(polyIndices, verts, borderSize, bounds);
 
-            var polyCenter = FindPolygonCenter2D(polyIndices, verts);
+            var (centerX, centerY) = FindPolygonCenter2D(polyIndices, verts);
 
             // Use seeds array as a stack for DFS
             var array = new List<HeightDataItem>(512)
             {
                 new HeightDataItem
                 {
-                    X = closestCell.StartCellX,
-                    Y = closestCell.StartCellY,
-                    I = closestCell.StartSpanIndex
+                    X = startCellX,
+                    Y = startCellY,
+                    I = startSpanIndex
                 }
             };
 
@@ -1589,7 +1589,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 hdItem = array.Pop();
 
-                if (hdItem.X == polyCenter.X && hdItem.Y == polyCenter.Y)
+                if (hdItem.X == centerX && hdItem.Y == centerY)
                 {
                     break;
                 }
@@ -1598,13 +1598,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // directly towards the center in the Y-axis; otherwise prefer
                 // direction in the X-axis
                 int directDir;
-                if (hdItem.X == polyCenter.X)
+                if (hdItem.X == centerX)
                 {
-                    directDir = Utils.GetDirForOffset(0, polyCenter.Y > hdItem.Y ? 1 : -1);
+                    directDir = Utils.GetDirForOffset(0, centerY > hdItem.Y ? 1 : -1);
                 }
                 else
                 {
-                    directDir = Utils.GetDirForOffset(polyCenter.X > hdItem.X ? 1 : -1, 0);
+                    directDir = Utils.GetDirForOffset(centerX > hdItem.X ? 1 : -1, 0);
                 }
 
                 // Push the direct dir last so we start with this on next iteration
@@ -3237,9 +3237,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="x">X cell coordinate</param>
         /// <param name="y">Y cell coordinate</param>
         /// <param name="flags">Flags to update</param>
-        public (int Reg, AreaTypes Area, Int4[] RawVerts)[] BuildCompactCells(int x, int y, int[] flags)
+        public (int Reg, AreaTypes Area, ContourVertex[] RawVerts)[] BuildCompactCells(int x, int y, int[] flags)
         {
-            List<(int Reg, AreaTypes Area, Int4[] RawVerts)> res = new();
+            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> res = new();
 
             int w = Width;
 
@@ -3357,9 +3357,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="i">Index</param>
         /// <param name="flags">Edge flags</param>
         /// <returns>Returns the edge contour list</returns>
-        private Int4[] WalkContour(int x, int y, int i, int[] flags)
+        private ContourVertex[] WalkContour(int x, int y, int i, int[] flags)
         {
-            var points = new List<Int4>();
+            var points = new List<ContourVertex>();
 
             // Choose the first non-connected edge
             int dir = 0;
@@ -3399,7 +3399,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (ni == -1)
                     {
                         // Should not happen.
-                        return Array.Empty<Int4>();
+                        return Array.Empty<ContourVertex>();
                     }
                     x = nx;
                     y = ny;
@@ -3423,7 +3423,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="i">Index</param>
         /// <param name="dir">Direction</param>
         /// <param name="area">Area type</param>
-        private Int4 GetEdgeCorner(int x, int y, int i, int dir, AreaTypes area)
+        private ContourVertex GetEdgeCorner(int x, int y, int i, int dir, AreaTypes area)
         {
             bool isAreaBorder = false;
             int px = x;

@@ -31,7 +31,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="verts">Vertex list</param>
         /// <param name="n">Number of vertices</param>
         /// <returns></returns>
-        private static bool IntersectSegCountour(Int4 d0, Int4 d1, int i, Int4[] verts, int n)
+        private static bool IntersectSegCountour(ContourVertex d0, ContourVertex d1, int i, ContourVertex[] verts, int n)
         {
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                if (TriangulationHelper.Intersect2D(d0, d1, p0, p1))
+                if (TriangulationHelper.Intersect2D(d0.Coords, d1.Coords, p0.Coords, p1.Coords))
                 {
                     return true;
                 }
@@ -65,13 +65,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="corner">Corner</param>
         /// <param name="outline">Contour</param>
         /// <returns>Returns a list of potential diagonals</returns>
-        private static PotentialDiagonal[] FindPotentialDiagonals(Int4 corner, Contour outline)
+        private static PotentialDiagonal[] FindPotentialDiagonals(ContourVertex corner, Contour outline)
         {
             var diags = new List<PotentialDiagonal>();
 
             for (int j = 0; j < outline.NVertices; j++)
             {
-                if (TriangulationHelper.InCone2D(j, outline.NVertices, outline.Vertices, corner))
+                if (TriangulationHelper.InCone2D(j, outline.NVertices, ContourVertex.ToInt3List(outline.Vertices), corner.Coords))
                 {
                     int dx = outline.Vertices[j].X - corner.X;
                     int dz = outline.Vertices[j].Z - corner.Z;
@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="corner">Corner</param>
         /// <param name="outline">Contour</param>
         /// <param name="diags">List of potential diagonals</param>
-        private int FindBestIndex(int i, Int4 corner, Contour outline, PotentialDiagonal[] diags)
+        private int FindBestIndex(int i, ContourVertex corner, Contour outline, PotentialDiagonal[] diags)
         {
             int bestIndex = -1;
 

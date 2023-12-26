@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return null;
             }
 
-            Vector3 orig = mesh.BMin;
+            var orig = mesh.Bounds.Minimum;
             int borderSize = mesh.BorderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 

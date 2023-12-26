@@ -94,7 +94,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     PolyCount = totPolyCount,
                     VertCount = totVertCount,
                     MaxLinkCount = maxLinkCount,
-                    Bounds = new BoundingBox(param.BMin, param.BMax),
+                    Bounds = param.Bounds,
                     DetailMeshCount = param.PolyCount,
                     DetailVertCount = uniqueDetailVertCount,
                     DetailTriCount = detailTriCount,
@@ -259,7 +259,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Calc polygon bounds. Use detail meshes if available.
                 if (param.DetailMeshes != null)
                 {
-                    it.CalcDetailBounds(param.DetailMeshes[i], param.DetailVerts, param.BMin, quantFactor);
+                    it.CalcDetailBounds(param.DetailMeshes[i], param.DetailVerts, param.Bounds.Minimum, quantFactor);
                 }
                 else
                 {
@@ -447,9 +447,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var iv = param.Verts[i];
                 var v = new Vector3
                 {
-                    X = param.BMin.X + iv.X * param.CellSize,
-                    Y = param.BMin.Y + iv.Y * param.CellHeight,
-                    Z = param.BMin.Z + iv.Z * param.CellSize
+                    X = param.Bounds.Minimum.X + iv.X * param.CellSize,
+                    Y = param.Bounds.Minimum.Y + iv.Y * param.CellHeight,
+                    Z = param.Bounds.Minimum.Z + iv.Z * param.CellSize
                 };
                 NavVerts.Add(v);
             }

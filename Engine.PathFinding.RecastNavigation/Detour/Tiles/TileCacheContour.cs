@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using Engine.PathFinding.RecastNavigation.Recast;
+using SharpDX;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -15,7 +15,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Vertex list
         /// </summary>
-        public Int4[] Verts { get; set; }
+        public ContourVertex[] Verts { get; set; }
         /// <summary>
         /// Region id
         /// </summary>
@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 indices[j] = j;
             }
 
-            int ntris = TriangulationHelper.Triangulate(Verts, ref indices, out tris);
+            int ntris = TriangulationHelper.Triangulate(ContourVertex.ToInt3List(Verts), ref indices, out tris);
             if (ntris <= 0)
             {
                 Logger.WriteWarning(nameof(TileCacheContourSet), $"Polygon contour triangulation error: Reg {Reg}");

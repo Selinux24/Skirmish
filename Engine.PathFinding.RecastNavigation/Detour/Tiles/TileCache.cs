@@ -625,7 +625,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return Status.DT_SUCCESS;
         }
-
+        /// <summary>
+        /// Returns whether the tile cache is updating or not
+        /// </summary>
         public bool Updating()
         {
             return (m_update.Count + m_reqs.Count) > 0;
@@ -935,8 +937,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 WalkableHeight = m_params.WalkableHeight,
                 WalkableRadius = m_params.WalkableRadius,
                 WalkableClimb = m_params.WalkableClimb,
-                BMin = tile.Header.BBox.Minimum,
-                BMax = tile.Header.BBox.Maximum,
+                Bounds = tile.Header.BBox,
                 CellSize = m_params.CellSize,
                 CellHeight = m_params.CellHeight,
                 BuildBvTree = false,

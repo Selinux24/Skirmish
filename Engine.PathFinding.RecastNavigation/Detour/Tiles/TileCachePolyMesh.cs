@@ -94,7 +94,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var v = cont.Verts[j];
                     indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
-                    if ((v.W & 0x80) != 0)
+                    if ((v.Flag & 0x80) != 0)
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -416,7 +416,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
-            var tverts = new Int4[nhole];
+            var tverts = new Int3[nhole];
             var thole = new int[nhole];
 
             // Generate temp vertex array for triangulation.
@@ -426,7 +426,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 tverts[i].X = Verts[pi].X;
                 tverts[i].Y = Verts[pi].Y;
                 tverts[i].Z = Verts[pi].Z;
-                tverts[i].W = 0;
                 thole[i] = i;
             }
 
@@ -649,7 +648,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var va = cont.Verts[k];
                     var vb = cont.Verts[j];
-                    int dir = va.W & 0xf;
+                    int dir = va.Flag & 0xf;
                     if (dir == 0xf)
                     {
                         continue;

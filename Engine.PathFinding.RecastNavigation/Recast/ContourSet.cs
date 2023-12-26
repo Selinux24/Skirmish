@@ -117,7 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int[] flags = chf.InitializeFlags();
 
-            List<(int Reg, AreaTypes Area, Int4[] RawVerts)> cells = new();
+            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> cells = new();
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
@@ -151,7 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxEdgeLen">Max edge length</param>
         /// <param name="buildFlags">Build flags</param>
         /// <returns>Returns the simplified contour</returns>
-        public static Int4[] SimplifyContour(Int4[] points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        public static ContourVertex[] SimplifyContour(ContourVertex[] points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             // Add initial points.
             var simplified = Initialize(points);
@@ -172,9 +172,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Add initial points.
         /// </summary>
-        private static Int4[] Initialize(Int4[] points)
+        private static ContourVertex[] Initialize(ContourVertex[] points)
         {
-            var simplified = new List<Int4>();
+            var simplified = new List<ContourVertex>();
 
             bool hasConnections = PointsHasConnections(points);
             if (hasConnections)
@@ -200,12 +200,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets whether at least, one of the point of the list has connections
         /// </summary>
         /// <param name="points">Point list</param>
-        private static bool PointsHasConnections(Int4[] points)
+        private static bool PointsHasConnections(ContourVertex[] points)
         {
             bool hasConnections = false;
             for (int i = 0; i < points.Length; i++)
             {
-                if ((points[i].W & RC_CONTOUR_REG_MASK) != 0)
+                if ((points[i].Flag & RC_CONTOUR_REG_MASK) != 0)
                 {
                     hasConnections = true;
                     break;
@@ -216,9 +216,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Add a new point to every location where the region changes.
         /// </summary>
-        private static Int4[] GetChangePoints(Int4[] points)
+        private static ContourVertex[] GetChangePoints(ContourVertex[] points)
         {
-            var changes = new List<Int4>();
+            var changes = new List<ContourVertex>();
 
             for (int i = 0, ni = points.Length; i < ni; ++i)
             {
@@ -226,8 +226,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var pi = points[i];
                 var pii = points[ii];
 
-                bool differentRegs = (pi.W & RC_CONTOUR_REG_MASK) != (pii.W & RC_CONTOUR_REG_MASK);
-                bool areaBorders = (pi.W & RC_AREA_BORDER) != (pii.W & RC_AREA_BORDER);
+                bool differentRegs = (pi.Flag & RC_CONTOUR_REG_MASK) != (pii.Flag & RC_CONTOUR_REG_MASK);
+                bool areaBorders = (pi.Flag & RC_AREA_BORDER) != (pii.Flag & RC_AREA_BORDER);
                 if (differentRegs || areaBorders)
                 {
                     changes.Add(new(pi.X, pi.Y, pi.Z, i));
@@ -239,9 +239,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Find lower-left and upper-right vertices of the contour.
         /// </summary>
-        private static Int4[] CreateInitialPoints(Int4[] points)
+        private static ContourVertex[] CreateInitialPoints(ContourVertex[] points)
         {
-            var initialPoints = new List<Int4>();
+            var initialPoints = new List<ContourVertex>();
 
             int llx = points[0].X;
             int lly = points[0].Y;
@@ -283,9 +283,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="list">Point list</param>
         /// <param name="maxError">Max error</param>
         /// <returns>Returns the updated list</returns>
-        private static Int4[] AddPoints(Int4[] points, Int4[] list, float maxError)
+        private static ContourVertex[] AddPoints(ContourVertex[] points, ContourVertex[] list, float maxError)
         {
-            var simplified = new List<Int4>(list);
+            var simplified = new List<ContourVertex>(list);
 
             int pn = points.Length;
             for (int i = 0; i < simplified.Count;)
@@ -294,11 +294,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 int ax = simplified[i].X;
                 int az = simplified[i].Z;
-                int ai = simplified[i].W;
+                int ai = simplified[i].Flag;
 
                 int bx = simplified[ii].X;
                 int bz = simplified[ii].Z;
-                int bi = simplified[ii].W;
+                int bi = simplified[ii].Flag;
 
                 // Find maximum deviation from the segment.
                 float maxd = 0;
@@ -324,8 +324,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Tessellate only outer edges or edges between areas.
-                if ((points[ci].W & RC_CONTOUR_REG_MASK) == 0 ||
-                    (points[ci].W & RC_AREA_BORDER) != 0)
+                if ((points[ci].Flag & RC_CONTOUR_REG_MASK) == 0 ||
+                    (points[ci].Flag & RC_AREA_BORDER) != 0)
                 {
                     while (ci != endi)
                     {
@@ -362,7 +362,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxEdgeLen">Max edge length</param>
         /// <param name="buildFlags">Build flags</param>
         /// <returns>Returns the updated list</returns>
-        private static Int4[] SplitLongEdges(Int4[] points, Int4[] list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        private static ContourVertex[] SplitLongEdges(ContourVertex[] points, ContourVertex[] list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             bool tesselate = maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0;
             if (!tesselate)
@@ -370,7 +370,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return list.ToArray();
             }
 
-            var simplified = new List<Int4>(list);
+            var simplified = new List<ContourVertex>(list);
 
             int pn = points.Length;
             for (int i = 0; i < simplified.Count;)
@@ -379,11 +379,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 int ax = simplified[i].X;
                 int az = simplified[i].Z;
-                int ai = simplified[i].W;
+                int ai = simplified[i].Flag;
 
                 int bx = simplified[ii].X;
                 int bz = simplified[ii].Z;
-                int bi = simplified[ii].W;
+                int bi = simplified[ii].Flag;
 
                 // Find maximum deviation from the segment.
                 int maxi = -1;
@@ -394,14 +394,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Wall edges.
                 if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
-                    (points[ci].W & RC_CONTOUR_REG_MASK) == 0)
+                    (points[ci].Flag & RC_CONTOUR_REG_MASK) == 0)
                 {
                     tess = true;
                 }
 
                 // Edges between areas.
                 if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
-                    (points[ci].W & RC_AREA_BORDER) != 0)
+                    (points[ci].Flag & RC_AREA_BORDER) != 0)
                 {
                     tess = true;
                 }
@@ -451,9 +451,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="points">Point list to add</param>
         /// <param name="list">Point list</param>
         /// <returns>Returns the updated list</returns>
-        private static Int4[] UpdateNeighbors(Int4[] points, Int4[] list)
+        private static ContourVertex[] UpdateNeighbors(ContourVertex[] points, ContourVertex[] list)
         {
-            var simplified = new List<Int4>(list);
+            var simplified = new List<ContourVertex>(list);
 
             int pn = points.Length;
             for (int i = 0; i < simplified.Count; ++i)
@@ -461,9 +461,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // The edge vertex flag is take from the current raw point,
                 // and the neighbour region is take from the next raw point.
                 var sv = simplified[i];
-                int ai = (sv.W + 1) % pn;
-                int bi = sv.W;
-                sv.W = (points[ai].W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points[bi].W & RC_BORDER_VERTEX);
+                int ai = (sv.Flag + 1) % pn;
+                int bi = sv.Flag;
+                sv.Flag = (points[ai].Flag & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points[bi].Flag & RC_BORDER_VERTEX);
                 simplified[i] = sv;
             }
 
@@ -474,9 +474,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="list">Point list</param>
         /// <returns>Returns the updated list</returns>
-        private static Int4[] RemoveDegenerateSegments(Int4[] list)
+        private static ContourVertex[] RemoveDegenerateSegments(ContourVertex[] list)
         {
-            var simplified = new List<Int4>(list);
+            var simplified = new List<ContourVertex>(list);
 
             // Remove adjacent vertices which are equal on xz-plane,
             // or else the triangulator will get confused.
@@ -485,7 +485,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int ni = Utils.Next(i, npts);
 
-                if (!Utils.VEqual2D(simplified[i], simplified[ni]))
+                if (!Utils.VEqual2D(simplified[i].Coords, simplified[ni].Coords))
                 {
                     continue;
                 }
@@ -534,7 +534,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="verts">Contour vertices</param>
         /// <param name="maxContours">Maximum number of contours</param>
         /// <param name="borderSize">Border size</param>
-        public void AddContour(int reg, AreaTypes area, Int4[] rawVerts, Int4[] verts, int maxContours, int borderSize)
+        public void AddContour(int reg, AreaTypes area, ContourVertex[] rawVerts, ContourVertex[] verts, int maxContours, int borderSize)
         {
             if (NConts >= maxContours)
             {

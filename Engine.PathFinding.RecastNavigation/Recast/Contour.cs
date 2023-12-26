@@ -10,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
         /// </summary>
-        public Int4[] Vertices { get; set; }
+        public ContourVertex[] Vertices { get; set; }
         /// <summary>
         /// The number of vertices in the simplified contour. 
         /// </summary>
@@ -18,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Raw contour vertex and connection data. [Size: 4 * #nrverts]
         /// </summary>
-        public Int4[] RawVertices { get; set; }
+        public ContourVertex[] RawVertices { get; set; }
         /// <summary>
         /// The number of vertices in the raw contour. 
         /// </summary>
@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public static void Merge(Contour ca, Contour cb, int ia, int ib)
         {
             int maxVerts = ca.NVertices + cb.NVertices + 2;
-            Int4[] verts = new Int4[maxVerts];
+            ContourVertex[] verts = new ContourVertex[maxVerts];
 
             int nv = 0;
 
@@ -121,7 +121,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 indices[j] = j;
             }
 
-            int ntris = TriangulationHelper.Triangulate(Vertices, ref indices, out tris);
+            int ntris = TriangulationHelper.Triangulate(ContourVertex.ToInt3List(Vertices), ref indices, out tris);
             if (ntris <= 0)
             {
                 // Bad triangulation, should not happen.

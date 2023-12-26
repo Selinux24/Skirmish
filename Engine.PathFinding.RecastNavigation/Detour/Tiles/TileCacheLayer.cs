@@ -353,7 +353,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     cont.NVerts = nverts;
                     if (cont.NVerts > 0)
                     {
-                        cont.Verts = new Int4[nverts];
+                        cont.Verts = new ContourVertex[nverts];
 
                         for (int i = 0, j = nverts - 1; i < nverts; j = i++)
                         {
@@ -363,22 +363,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                             bool shouldRemove = false;
                             int lh = GetCornerHeight(v.X, v.Y, v.Z, walkableClimb, ref shouldRemove);
 
-                            var dst = new Int4()
+                            var dst = new ContourVertex()
                             {
                                 X = v.X,
                                 Y = lh,
                                 Z = v.Z,
-                                W = 0x0f,
+                                Flag = 0x0f,
                             };
 
                             // Store portal direction and remove status to the fourth component.
                             if (nei != 0xff && nei >= 0xf8)
                             {
-                                dst.W = nei - 0xf8;
+                                dst.Flag = nei - 0xf8;
                             }
                             if (shouldRemove)
                             {
-                                dst.W |= 0x80;
+                                dst.Flag |= 0x80;
                             }
 
                             cont.Verts[j] = dst;
