@@ -84,6 +84,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
 
         /// <summary>
+        /// Calculates the tile header bounds
+        /// </summary>
+        /// <param name="cs">Cell size</param>
+        public readonly BoundingBox GetTightTileBounds(float cs)
+        {
+            var bmin = new Vector3();
+            var bmax = new Vector3();
+
+            bmin.X = BBox.Minimum.X + MinX * cs;
+            bmin.Y = BBox.Minimum.Y;
+            bmin.Z = BBox.Minimum.Z + MinY * cs;
+            bmax.X = BBox.Minimum.X + (MaxX + 1) * cs;
+            bmax.Y = BBox.Maximum.Y;
+            bmax.Z = BBox.Minimum.Z + (MaxY + 1) * cs;
+
+            return new(bmin, bmax);
+        }
+        /// <summary>
         /// Validates the header magic number and version
         /// </summary>
         public readonly bool IsValid()

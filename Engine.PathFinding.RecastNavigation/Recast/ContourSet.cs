@@ -42,13 +42,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int NConts { get; set; }
         /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
+        /// The bounds in world space.
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
@@ -87,29 +83,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int w = chf.Width;
             int h = chf.Height;
             int borderSize = chf.BorderSize;
-            int maxContours = Math.Max(chf.MaxRegions, 8);
-
-            var bmin = chf.BoundingBox.Minimum;
-            var bmax = chf.BoundingBox.Maximum;
-            if (borderSize > 0)
-            {
-                // If the heightfield was build with bordersize, remove the offset.
-                float pad = borderSize * chf.CellSize;
-                bmin.X += pad;
-                bmin.Z += pad;
-                bmax.X -= pad;
-                bmax.Z -= pad;
-            }
+            float cellSize = chf.CellSize;
+            float cellHeight = chf.CellHeight;
+            int maxRegions = chf.MaxRegions;
+            int maxContours = Math.Max(maxRegions, 8);
+            var bounds = chf.GetBoundsWithBorder();
 
             var cset = new ContourSet
             {
-                BMin = bmin,
-                BMax = bmax,
-                CellSize = chf.CellSize,
-                CellHeight = chf.CellHeight,
-                Width = chf.Width - chf.BorderSize * 2,
-                Height = chf.Height - chf.BorderSize * 2,
-                BorderSize = chf.BorderSize,
+                Bounds = bounds,
+                CellSize = cellSize,
+                CellHeight = cellHeight,
+                Width = w - borderSize * 2,
+                Height = h - borderSize * 2,
+                BorderSize = borderSize,
                 MaxError = maxError,
                 Conts = new Contour[maxContours],
                 NConts = 0
@@ -139,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Merge holes if needed.
-            cset.MergeHoles(chf.MaxRegions + 1);
+            cset.MergeHoles(maxRegions + 1);
 
             return cset;
         }

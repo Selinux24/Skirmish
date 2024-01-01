@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -11,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Vertices buffer
         /// </summary>
-        private readonly Int4[] verts;
+        private readonly VertexWithNeigbour[] verts;
         /// <summary>
         /// Number of vertices in the buffer
         /// </summary>
@@ -35,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="verts">Polygon vertices</param>
         /// <param name="cverts">Number of vertices</param>
         /// <param name="poly">Indexed polygon definition</param>
-        public TempContour(Int4[] verts, int cverts, IndexedPolygon poly)
+        public TempContour(VertexWithNeigbour[] verts, int cverts, IndexedPolygon poly)
         {
             this.verts = verts;
             nverts = 0;
@@ -77,7 +76,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var pa = verts[nverts - 2];
             var pb = verts[nverts - 1];
-            if (pb.W == r)
+            if (pb.Nei == r)
             {
                 if (pa.X == pb.X && pb.X == x)
                 {
@@ -103,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Simplifies the contour
         /// </summary>
         /// <param name="maxError">Max error value</param>
-        public Int4[] SimplifyContour(float maxError)
+        public VertexWithNeigbour[] SimplifyContour(float maxError)
         {
             CheckWallSegment();
 
@@ -136,8 +135,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int j = (i + 1) % nverts;
 
                 // Check for start of a wall segment.
-                int ra = verts[j].W;
-                int rb = verts[i].W;
+                int ra = verts[j].Nei;
+                int rb = verts[i].Nei;
                 if (ra != rb)
                 {
                     poly[npoly++] = i;
@@ -286,7 +285,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var pa = verts[nverts - 1];
             var pb = verts[0];
-            if (pa[0] == pb[0] && pa[2] == pb[2])
+            if (pa.X == pb.X && pa.Z == pb.Z)
             {
                 nverts--;
             }

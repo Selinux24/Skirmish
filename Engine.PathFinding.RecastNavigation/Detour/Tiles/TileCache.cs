@@ -799,6 +799,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var results = new List<CompressedTile>();
 
+            float cs = m_params.CellSize;
             float tw = m_params.Width * m_params.CellSize;
             float th = m_params.Height * m_params.CellSize;
             int tx0 = (int)Math.Floor((bbox.Minimum.X - m_params.Origin.X) / tw);
@@ -814,9 +815,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                     foreach (var tile in tiles)
                     {
-                        CalcTightTileBounds(tile.Header, out Vector3 tbmin, out Vector3 tbmax);
+                        var tbounds = tile.Header.GetTightTileBounds(cs);
 
-                        if (Utils.OverlapBounds(bbox.Minimum, bbox.Maximum, tbmin, tbmax) && results.Count < maxResults)
+                        if (Utils.OverlapBounds(bbox.Minimum, bbox.Maximum, tbounds.Minimum, tbounds.Maximum) && results.Count < maxResults)
                         {
                             results.Add(tile);
                         }
@@ -825,25 +826,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             return results.ToArray();
-        }
-        /// <summary>
-        /// Calculates the tile header bounds
-        /// </summary>
-        /// <param name="header">Header</param>
-        /// <param name="bmin">Resulting the minimum bounding box point</param>
-        /// <param name="bmax">Resulting the maximum bounding box point</param>
-        private void CalcTightTileBounds(TileCacheLayerHeader header, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = new Vector3();
-            bmax = new Vector3();
-
-            float cs = m_params.CellSize;
-            bmin.X = header.BBox.Minimum.X + header.MinX * cs;
-            bmin.Y = header.BBox.Minimum.Y;
-            bmin.Z = header.BBox.Minimum.Z + header.MinY * cs;
-            bmax.X = header.BBox.Minimum.X + (header.MaxX + 1) * cs;
-            bmax.Y = header.BBox.Maximum.Y;
-            bmax.Z = header.BBox.Minimum.Z + (header.MaxY + 1) * cs;
         }
 
         /// <summary>
@@ -895,19 +877,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!bc.Layer.BuildTileCacheRegions(walkableClimbVx, out var layerRegs, out var regId))
+            if (!TileCacheContourSet.BuildRegions(bc.Layer, walkableClimbVx, out var layerRegs, out var regId))
             {
                 return false;
             }
             bc.SetLayerRegs(layerRegs, regId);
 
-            if (!bc.Layer.BuildTileCacheContours(walkableClimbVx, m_params.MaxSimplificationError, out var lcset))
+            if (!TileCacheContourSet.Build(bc.Layer, walkableClimbVx, m_params.MaxSimplificationError, out var lscet))
             {
                 return false;
             }
-            bc.LCSet = lcset;
+            bc.LCSet = lscet;
 
-            bc.LMesh = TileCachePolyMesh.Build(bc.LCSet);
+            bc.LMesh = TileCachePolyMesh.Build(bc.LCSet, IndexedPolygon.DT_VERTS_PER_POLYGON);
 
             // Early out if the mesh tile is empty.
             if (bc.LMesh.NPolys == 0)

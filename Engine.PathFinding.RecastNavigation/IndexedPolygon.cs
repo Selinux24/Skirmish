@@ -219,6 +219,103 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Counts the number of touched edges, and the remaining edges
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="nPolys">Number of polygons in the list</param>
+        /// <param name="rem">Vertex to remove</param>
+        public static (int NumTouchedVerts, int NumRemainingEdges) CountVertexToRemove(IndexedPolygon[] polys, int nPolys, int rem)
+        {
+            // Count number of polygons to remove.
+            int numRemovedVerts = 0;
+            int numTouchedVerts = 0;
+            int numRemainingEdges = 0;
+            for (int i = 0; i < nPolys; ++i)
+            {
+                var p = polys[i];
+                int nv = p.CountPolyVerts();
+                int numRemoved = 0;
+                int numVerts = 0;
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem)
+                    {
+                        numTouchedVerts++;
+                        numRemoved++;
+                    }
+                    numVerts++;
+                }
+                if (numRemoved != 0)
+                {
+                    numRemovedVerts += numRemoved;
+                    numRemainingEdges += numVerts - (numRemoved + 1);
+                }
+            }
+
+            return (numTouchedVerts, numRemainingEdges);
+        }
+        /// <summary>
+        /// Count the number of polygons to remove
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="nPolys">Number of polygons in the list</param>
+        /// <param name="rem">Vertex to remove</param>
+        public static int CountPolygonsToRemove(IndexedPolygon[] polys, int nPolys, int rem)
+        {
+            int numRemovedVerts = 0;
+            for (int i = 0; i < nPolys; i++)
+            {
+                var p = polys[i];
+                int nv = p.CountPolyVerts();
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem)
+                    {
+                        numRemovedVerts++;
+                    }
+                }
+            }
+
+            return numRemovedVerts;
+        }
+        /// <summary>
+        /// Gets the best merge polygon indexes
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="nPolys">Number of polygons in the list</param>
+        /// <param name="verts">Vertices</param>
+        /// <returns>Returns the best merge value, and the polygon and edge indexes</returns>
+        public static (int BestMergeValue, int BestPa, int BestPb, int BestEa, int BestEb) GetBestMergePolygon(IndexedPolygon[] polys, int nPolys, Int3[] verts)
+        {
+            // Find best polygons to merge.
+            int bestMergeVal = 0;
+            int bestPa = 0;
+            int bestPb = 0;
+            int bestEa = 0;
+            int bestEb = 0;
+
+            for (int j = 0; j < nPolys - 1; ++j)
+            {
+                var pj = polys[j];
+                for (int k = j + 1; k < nPolys; ++k)
+                {
+                    var pk = polys[k];
+                    int v = GetMergeValue(pj, pk, verts, out int ea, out int eb);
+                    if (v > bestMergeVal)
+                    {
+                        bestMergeVal = v;
+                        bestPa = j;
+                        bestPb = k;
+                        bestEa = ea;
+                        bestEb = eb;
+                    }
+                }
+            }
+
+            return (bestMergeVal, bestPa, bestPb, bestEa, bestEb);
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public IndexedPolygon() : this(10)

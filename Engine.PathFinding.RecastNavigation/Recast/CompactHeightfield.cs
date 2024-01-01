@@ -372,6 +372,28 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Remove the border size to the heightfield bounds
+        /// </summary>
+        public BoundingBox GetBoundsWithBorder()
+        {
+            var bmin = BoundingBox.Minimum;
+            var bmax = BoundingBox.Maximum;
+            if (BorderSize <= 0)
+            {
+                return new(bmin, bmax);
+            }
+
+            // If the heightfield was build with bordersize, remove the offset.
+            float pad = BorderSize * CellSize;
+            bmin.X += pad;
+            bmin.Z += pad;
+            bmax.X -= pad;
+            bmax.Z -= pad;
+
+            return new(bmin, bmax);
+        }
+
+        /// <summary>
         /// Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
         /// </summary>
         /// <param name="cfg">Configuration</param>
@@ -1564,7 +1586,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Use seeds array as a stack for DFS
             var array = new List<HeightDataItem>(512)
             {
-                new HeightDataItem
+                new()
                 {
                     X = startCellX,
                     Y = startCellY,
