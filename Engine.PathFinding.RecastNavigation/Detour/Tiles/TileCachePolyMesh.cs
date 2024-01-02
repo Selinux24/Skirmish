@@ -1,7 +1,5 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -64,7 +62,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var mesh = new TileCachePolyMesh
             {
                 NPolys = 0,
-              
+
                 NVerts = 0,
                 Verts = new Int3[maxVertices],
                 Polys = new IndexedPolygon[maxPolys],
@@ -110,11 +108,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                // Merge polygons.
-                var (mergedPolys, mergedNpolys) = mesh.MergePolygons(polys, npolys);
+                if (nvp > 3)
+                {
+                    // Merge polygons.
+                    var (mergedPolys, mergedNpolys) = IndexedPolygon.MergePolygons(polys, npolys, mesh.Verts);
+                    polys = mergedPolys;
+                    npolys = mergedNpolys;
+                }
 
                 // Store polygons.
-                if (!mesh.StorePolygons(mergedPolys, mergedNpolys, cont, maxPolys))
+                if (!mesh.StorePolygons(polys, npolys, cont, maxPolys))
                 {
                     throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.NPolys} (max:{maxPolys}).");
                 }
@@ -262,17 +265,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // There should be no more than 2 open edges.
             // This catches the case that two non-adjacent polygons
             // share the removed vertex. In that case, do not remove the vertex.
-            int numOpenEdges = 0;
-            for (int i = 0; i < nedges; ++i)
-            {
-                if (edges[i].ShareCount < 2)
-                {
-                    numOpenEdges++;
-                }
-            }
+            int numOpenEdges = IndexedEdge.CountOpenEdges(edges, nedges);
+
             return numOpenEdges <= 2;
         }
-      
+
         /// <summary>
         /// Removes the specified vertex
         /// </summary>
@@ -299,15 +296,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Start with one vertex, keep appending connected
             // segments to the start and end of the hole.
-            var hole = new int[numRemovedVerts * NVP];
-            var harea = new SamplePolyAreas[numRemovedVerts * NVP];
-            if (!GetTriangulateHole(edges, ref nedges, hole, harea, out var triList))
+            var (result, triVerts, triHole, hole, harea) = GetTriangulateHole(edges, ref nedges, numRemovedVerts);
+            if (!result)
             {
                 return false;
             }
 
             // Triangulate the hole.
-            int ntris = TriangulationHelper.Triangulate(triList.TriVerts, ref triList.TriHole, out var tris);
+            int ntris = TriangulationHelper.Triangulate(triVerts, ref triHole, out var tris);
             if (ntris < 0)
             {
                 Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
@@ -320,17 +316,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Merge the hole triangles back to polygons.
-            var (polys, pareas, npolys) = BuildRemoveInitialPolygons(tris, ntris, hole, harea);
+            var (polys, npolys, pareas, _) = IndexedPolygon.BuildRemoveInitialPolygons(tris, ntris, hole, harea, null);
             if (npolys == 0)
             {
                 return true;
             }
 
-            // Merge polygons.
-            var (mergedPolys, mergedNPolys, mergedAreas) = MergePolygons(polys, npolys, pareas);
+            if (NVP > 3)
+            {
+                // Merge polygons.
+                var (mergedPolys, mergedNPolys, mergedAreas, _) = IndexedPolygon.MergePolygons(polys, npolys, pareas, null, Verts);
+                polys = mergedPolys;
+                npolys = mergedNPolys;
+                pareas = mergedAreas;
+            }
 
             // Store polygons.
-            if (!StorePolygons(mergedPolys, mergedNPolys, mergedAreas, maxPolys))
+            if (!StorePolygons(polys, npolys, pareas, maxPolys))
             {
                 Logger.WriteWarning(this, $"removeVertex: Too many polygons {NPolys} (max:{maxPolys}).");
 
@@ -353,8 +355,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 var p = Polys[i];
 
-                bool hasRem = p.Contains(rem);
-                if (!hasRem)
+                if (!p.Contains(rem))
                 {
                     continue;
                 }
@@ -379,14 +380,44 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Remove the polygon.
-                Polys[i] = Polys[NPolys - 1];
-                Polys[NPolys - 1] = null;
-                Areas[i] = Areas[NPolys - 1];
-                NPolys--;
+                RemovePolygon(i);
+
                 --i;
             }
 
             // Remove vertex.
+            RemoveVertex(rem);
+
+            for (int i = 0; i < nedges; ++i)
+            {
+                if (edges[i].EdgeIndexA > rem) edges[i].EdgeIndexA--;
+                if (edges[i].EdgeIndexB > rem) edges[i].EdgeIndexB--;
+            }
+
+            edgeList = (edges, nedges);
+
+            return true;
+        }
+        /// <summary>
+        /// Removes the specified polygon by index
+        /// </summary>
+        /// <param name="rem">Index to remove</param>
+        private void RemovePolygon(int rem)
+        {
+            Polys[rem] = Polys[NPolys - 1];
+            Areas[rem] = Areas[NPolys - 1];
+
+            Polys[NPolys - 1] = null;
+            Areas[NPolys - 1] = SamplePolyAreas.None;
+
+            NPolys--;
+        }
+        /// <summary>
+        /// Removes the specified vertex by index, and adjusts the indexed polygon layout
+        /// </summary>
+        /// <param name="rem">Index to remove</param>
+        private void RemoveVertex(int rem)
+        {
             for (int i = rem; i < NVerts - 1; ++i)
             {
                 Verts[i] = Verts[i + 1];
@@ -403,26 +434,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     if (p[j] > rem) p[j]--;
                 }
             }
-            for (int i = 0; i < nedges; ++i)
-            {
-                if (edges[i].EdgeIndexA > rem) edges[i].EdgeIndexA--;
-                if (edges[i].EdgeIndexB > rem) edges[i].EdgeIndexB--;
-            }
-
-            edgeList = (edges, nedges);
-
-            return true;
         }
         /// <summary>
         /// Gets the triangulated hole
         /// </summary>
         /// <param name="edges">Edge list</param>
         /// <param name="nedges">Number of edges</param>
-        /// <param name="hole">Hole indices</param>
-        /// <param name="harea">Hole areas</param>
-        /// <param name="tris">Return the triangulated vertices and the triangulated hole</param>
-        private readonly bool GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int[] hole, SamplePolyAreas[] harea, out (Int3[] TriVerts, int[] TriHole) tris)
+        /// <param name="numRemovedVerts">Number of removed vertices</param>
+        /// <returns>Returns the triangulated vertices and the triangulated hole</returns>
+        private readonly (bool Result, Int3[] TriVerts, int[] TriHole, int[] Hole, SamplePolyAreas[] HArea) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
         {
+            var hole = new int[numRemovedVerts * NVP];
+            var harea = new SamplePolyAreas[numRemovedVerts * NVP];
+
             int nhole = 0;
             int nharea = 0;
 
@@ -445,8 +469,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         // The segment matches the beginning of the hole boundary.
                         if (nhole >= MAX_REM_EDGES)
                         {
-                            tris = (Array.Empty<Int3>(), Array.Empty<int>());
-                            return false;
+                            return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
                         }
                         Utils.PushFront(ea, hole, ref nhole);
                         Utils.PushFront(a, harea, ref nharea);
@@ -457,8 +480,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         // The segment matches the end of the hole boundary.
                         if (nhole >= MAX_REM_EDGES)
                         {
-                            tris = (Array.Empty<Int3>(), Array.Empty<int>());
-                            return false;
+                            return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
                         }
                         Utils.PushBack(eb, hole, ref nhole);
                         Utils.PushBack(a, harea, ref nharea);
@@ -494,48 +516,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 thole[i] = i;
             }
 
-            tris = (tverts, thole);
-            return true;
-        }
-        /// <summary>
-        /// Build initial polygons for the remove operation
-        /// </summary>
-        /// <param name="tris">Triangle list</param>
-        /// <param name="ntris">Number of triangles</param>
-        /// <param name="hole">Hole indices</param>
-        /// <param name="harea">Area list</param>
-        /// <returns>Returns the indexed polygons, regions and areas</returns>
-        private static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int NPolys) BuildRemoveInitialPolygons(Int3[] tris, int ntris, int[] hole, SamplePolyAreas[] harea)
-        {
-            // Merge the hole triangles back to polygons.
-            var polys = new IndexedPolygon[(ntris + 1)];
-            var pareas = new SamplePolyAreas[ntris];
-
-            // Build initial polygons.
-            int npolys = 0;
-            for (int j = 0; j < ntris; ++j)
-            {
-                var t = tris[j];
-                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
-                {
-                    polys[npolys] = new IndexedPolygon();
-                    polys[npolys][0] = hole[t.X];
-                    polys[npolys][1] = hole[t.Y];
-                    polys[npolys][2] = hole[t.Z];
-
-                    pareas[npolys] = harea[t.X];
-                    npolys++;
-                }
-            }
-
-            return (polys, pareas, npolys);
+            return (true, tverts, thole, hole, harea);
         }
 
         /// <summary>
         /// Builds the mesh adjacency
         /// </summary>
         /// <param name="lcset">Contour set</param>
-        public void BuildMeshAdjacency(TileCacheContourSet lcset)
+        public readonly void BuildMeshAdjacency(TileCacheContourSet lcset)
         {
             var polys = Polys;
             int npolys = NPolys;
@@ -545,135 +533,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            int maxEdgeCount = NPolys * vertsPerPoly;
-            int[] firstEdge = Helper.CreateArray(nverts, IndexedPolygon.RC_MESH_NULL_IDX);
-            int[] nextEdge = Helper.CreateArray(maxEdgeCount, IndexedPolygon.RC_MESH_NULL_IDX);
-            int edgeCount = 0;
-
-            Edge[] edges = new Edge[maxEdgeCount];
-
-            for (int i = 0; i < npolys; ++i)
-            {
-                var t = polys[i];
-                for (int j = 0; j < vertsPerPoly; ++j)
-                {
-                    if (IndexedPolygon.IndexIsNull(t[j]))
-                    {
-                        break;
-                    }
-
-                    int v0 = t[j];
-                    int v1 = (j + 1 >= vertsPerPoly || IndexedPolygon.IndexIsNull(t[j + 1])) ? t[0] : t[j + 1];
-                    if (v0 < v1)
-                    {
-                        var edge = new Edge()
-                        {
-                            Vert = new int[2],
-                            PolyEdge = new int[2],
-                            Poly = new int[2],
-                        };
-                        edge.Vert[0] = v0;
-                        edge.Vert[1] = v1;
-                        edge.Poly[0] = i;
-                        edge.PolyEdge[0] = j;
-                        edge.Poly[1] = i;
-                        edge.PolyEdge[1] = 0xff;
-                        edges[edgeCount] = edge;
-                        // Insert edge
-                        nextEdge[edgeCount] = firstEdge[v0];
-                        firstEdge[v0] = edgeCount;
-                        edgeCount++;
-                    }
-                }
-            }
-
-            for (int i = 0; i < npolys; ++i)
-            {
-                var t = polys[i];
-                for (int j = 0; j < vertsPerPoly; ++j)
-                {
-                    if (IndexedPolygon.IndexIsNull(t[j]))
-                    {
-                        break;
-                    }
-
-                    int v0 = t[j];
-                    int v1 = (j + 1 >= vertsPerPoly || IndexedPolygon.IndexIsNull(t[j + 1])) ? t[0] : t[j + 1];
-                    if (v0 <= v1)
-                    {
-                        continue;
-                    }
-
-                    bool found = false;
-                    for (int e = firstEdge[v1]; !IndexedPolygon.IndexIsNull(e); e = nextEdge[e])
-                    {
-                        var edge = edges[e];
-                        if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
-                        {
-                            edge.Poly[1] = i;
-                            edge.PolyEdge[1] = j;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found)
-                    {
-                        continue;
-                    }
-
-                    // Matching edge not found, it is an open edge, add it.
-                    var nedge = new Edge()
-                    {
-                        Vert = new int[2],
-                        PolyEdge = new int[2],
-                        Poly = new int[2],
-                    };
-                    nedge.Vert[0] = v1;
-                    nedge.Vert[1] = v0;
-                    nedge.Poly[0] = i;
-                    nedge.PolyEdge[0] = j;
-                    nedge.Poly[1] = i;
-                    nedge.PolyEdge[1] = 0xff;
-                    edges[edgeCount] = nedge;
-
-                    // Insert edge
-                    nextEdge[edgeCount] = firstEdge[v1];
-                    firstEdge[v1] = edgeCount;
-                    edgeCount++;
-                }
-            }
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, vertsPerPoly, nverts, true, 0xff);
 
             // Mark portal edges.
             FindPortalEdges(lcset, edges, edgeCount);
 
             // Store adjacency
-            StoreAdjacency(polys, vertsPerPoly, edges, edgeCount);
-        }
-        /// <summary>
-        /// Stores the adjacency data
-        /// </summary>
-        /// <param name="polys">Polygon list to update</param>
-        /// <param name="vertsPerPoly">Vertices per polygon</param>
-        /// <param name="edges">Edge list</param>
-        /// <param name="edgeCount">Number of edges in the list</param>
-        private static void StoreAdjacency(IndexedPolygon[] polys, int vertsPerPoly, Edge[] edges, int edgeCount)
-        {
-            for (int i = 0; i < edgeCount; ++i)
-            {
-                var e = edges[i];
-                if (e.Poly[0] != e.Poly[1])
-                {
-                    var p0 = polys[e.Poly[0]];
-                    var p1 = polys[e.Poly[1]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = e.Poly[1];
-                    p1[vertsPerPoly + e.PolyEdge[1]] = e.Poly[0];
-                }
-                else if (e.PolyEdge[1] != 0xff)
-                {
-                    var p0 = polys[e.Poly[0]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = 0x8000 | e.PolyEdge[1];
-                }
-            }
+            IndexedPolygon.StoreAdjacency(polys, vertsPerPoly, edges, edgeCount, true, 0xff);
         }
         /// <summary>
         /// Finds edges between portals
@@ -694,171 +560,124 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var va = cont.Vertices[k];
                     var vb = cont.Vertices[j];
-                    int dir = va.Flag & 0xf;
-                    if (dir == 0xf)
+                    if (!va.HasDirection())
                     {
                         continue;
                     }
 
+                    int dir = va.Dir;
                     if (dir == 0 || dir == 2)
                     {
-                        // Find matching vertical edge
-                        int x = va.X;
-                        int zmin = va.Z;
-                        int zmax = vb.Z;
-                        if (zmin > zmax)
-                        {
-                            Helper.Swap(ref zmin, ref zmax);
-                        }
-
-                        for (int m = 0; m < edgeCount; ++m)
-                        {
-                            var e = edges[m];
-                            // Skip connected edges.
-                            if (e.Poly[0] != e.Poly[1])
-                            {
-                                continue;
-                            }
-                            var eva = Verts[e.Vert[0]];
-                            var evb = Verts[e.Vert[1]];
-                            if (eva.X == x && evb.X == x)
-                            {
-                                int ezmin = eva.Z;
-                                int ezmax = evb.Z;
-                                if (ezmin > ezmax)
-                                {
-                                    Helper.Swap(ref ezmin, ref ezmax);
-                                }
-                                if (Utils.OverlapRange(zmin, zmax, ezmin, ezmax))
-                                {
-                                    // Reuse the other polyedge to store dir.
-                                    e.PolyEdge[1] = dir;
-                                }
-                            }
-                        }
+                        // Find matching horizontal edge
+                        FindMatchingHorizontalEdge(va, vb, edges, edgeCount, dir);
                     }
                     else
                     {
                         // Find matching vertical edge
-                        int z = va.Z;
-                        int xmin = va.X;
-                        int xmax = vb.X;
-                        if (xmin > xmax)
-                        {
-                            Helper.Swap(ref xmin, ref xmax);
-                        }
-                        for (int m = 0; m < edgeCount; ++m)
-                        {
-                            var e = edges[m];
-                            // Skip connected edges.
-                            if (e.Poly[0] != e.Poly[1])
-                            {
-                                continue;
-                            }
-                            var eva = Verts[e.Vert[0]];
-                            var evb = Verts[e.Vert[1]];
-                            if (eva.Z == z && evb.Z == z)
-                            {
-                                int exmin = eva.X;
-                                int exmax = evb.X;
-                                if (exmin > exmax)
-                                {
-                                    Helper.Swap(ref exmin, ref exmax);
-                                }
-                                if (Utils.OverlapRange(xmin, xmax, exmin, exmax))
-                                {
-                                    // Reuse the other polyedge to store dir.
-                                    e.PolyEdge[1] = dir;
-                                }
-                            }
-                        }
+                        FindMatchingVerticalEdge(va, vb, edges, edgeCount, dir);
                     }
                 }
             }
         }
-
         /// <summary>
-        /// Merges the polygon list with their regions and areas
+        /// Finds matching vertical edge
         /// </summary>
-        /// <param name="polys">Polygon list</param>
-        /// <param name="npolys">Number of polygons</param>
-        /// <param name="pareas">Area list</param>
-        /// <returns>Returns the resulting merged polygon</returns>
-        private readonly (IndexedPolygon[] MergedPolys, int MergedNPolys, SamplePolyAreas[] MergedAreas) MergePolygons(IndexedPolygon[] polys, int npolys, SamplePolyAreas[] pareas)
+        /// <param name="va">First vertex</param>
+        /// <param name="vb">Second vertex</param>
+        /// <param name="edges">Edge list</param>
+        /// <param name="edgeCount">Number of edges in the list</param>
+        /// <param name="dir">Search direction</param>
+        private readonly void FindMatchingVerticalEdge(ContourVertex va, ContourVertex vb, Edge[] edges, int edgeCount, int dir)
         {
-            var mergedPolys = polys.ToArray();
-            var mergedNpolys = npolys;
-            var mergedareas = pareas?.ToArray() ?? Array.Empty<SamplePolyAreas>();
-
-            int nvp = NVP;
-            if (nvp <= 3)
+            int x = va.X;
+            int zmin = va.Z;
+            int zmax = vb.Z;
+            if (zmin > zmax)
             {
-                return (mergedPolys, mergedNpolys, mergedareas);
+                Helper.Swap(ref zmin, ref zmax);
             }
 
-            while (true)
+            for (int m = 0; m < edgeCount; ++m)
             {
-                // Find best polygons to merge.
-                int bestMergeVal = 0;
-                int bestPa = 0;
-                int bestPb = 0;
-                int bestEa = 0;
-                int bestEb = 0;
+                var e = edges[m];
 
-                for (int j = 0; j < mergedNpolys - 1; ++j)
+                // Skip connected edges.
+                if (e.Poly[0] != e.Poly[1])
                 {
-                    var pj = mergedPolys[j];
-                    for (int k = j + 1; k < mergedNpolys; ++k)
-                    {
-                        var pk = mergedPolys[k];
-                        int v = IndexedPolygon.GetMergeValue(pj, pk, Verts, out int ea, out int eb);
-                        if (v > bestMergeVal)
-                        {
-                            bestMergeVal = v;
-                            bestPa = j;
-                            bestPb = k;
-                            bestEa = ea;
-                            bestEb = eb;
-                        }
-                    }
+                    continue;
                 }
 
-                if (bestMergeVal <= 0)
+                var eva = Verts[e.Vert[0]];
+                var evb = Verts[e.Vert[1]];
+                if (eva.X != x || evb.X != x)
                 {
-                    // Could not merge any polygons, stop.
-                    break;
+                    continue;
                 }
 
-                // Found best, merge.
-                mergedPolys[bestPa] = IndexedPolygon.Merge(mergedPolys[bestPa], mergedPolys[bestPb], bestEa, bestEb);
-                mergedPolys[bestPb] = mergedPolys[mergedNpolys - 1].Copy();
-
-                if (mergedareas.Any())
+                int ezmin = eva.Z;
+                int ezmax = evb.Z;
+                if (ezmin > ezmax)
                 {
-                    mergedareas[bestPb] = mergedareas[mergedNpolys - 1];
+                    Helper.Swap(ref ezmin, ref ezmax);
                 }
 
-                mergedNpolys--;
+                if (Utils.OverlapRange(zmin, zmax, ezmin, ezmax))
+                {
+                    // Reuse the other polyedge to store dir.
+                    e.PolyEdge[1] = dir;
+                }
             }
-
-            // Cut to mergedNpolys
-            mergedPolys = mergedPolys.Take(mergedNpolys).ToArray();
-            if (mergedareas.Any()) mergedareas = mergedareas.Take(mergedNpolys).ToArray();
-
-            return (mergedPolys, mergedNpolys, mergedareas);
         }
         /// <summary>
-        /// Merges the polygon list
+        /// Finds matching horizontal edge
         /// </summary>
-        /// <param name="polys">Polygon list</param>
-        /// <param name="npolys">Number of polygons</param>
-        /// <returns>Returns the resulting merged polygon</returns>
-        public readonly (IndexedPolygon[] MergedPolys, int MergedNPolys) MergePolygons(IndexedPolygon[] polys, int npolys)
+        /// <param name="va">First vertex</param>
+        /// <param name="vb">Second vertex</param>
+        /// <param name="edges">Edge list</param>
+        /// <param name="edgeCount">Number of edges in the list</param>
+        /// <param name="dir">Search direction</param>
+        private readonly void FindMatchingHorizontalEdge(ContourVertex va, ContourVertex vb, Edge[] edges, int edgeCount, int dir)
         {
-            var (mergedPolys, mergedNpolys, _) = MergePolygons(polys, npolys, null);
+            int z = va.Z;
+            int xmin = va.X;
+            int xmax = vb.X;
+            if (xmin > xmax)
+            {
+                Helper.Swap(ref xmin, ref xmax);
+            }
 
-            return (mergedPolys, mergedNpolys);
+            for (int m = 0; m < edgeCount; ++m)
+            {
+                var e = edges[m];
+
+                // Skip connected edges.
+                if (e.Poly[0] != e.Poly[1])
+                {
+                    continue;
+                }
+
+                var eva = Verts[e.Vert[0]];
+                var evb = Verts[e.Vert[1]];
+                if (eva.Z != z || evb.Z != z)
+                {
+                    continue;
+                }
+
+                int exmin = eva.X;
+                int exmax = evb.X;
+                if (exmin > exmax)
+                {
+                    Helper.Swap(ref exmin, ref exmax);
+                }
+
+                if (Utils.OverlapRange(xmin, xmax, exmin, exmax))
+                {
+                    // Reuse the other polyedge to store dir.
+                    e.PolyEdge[1] = dir;
+                }
+            }
         }
+
         /// <summary>
         /// Stores the polygon list into the mesh
         /// </summary>

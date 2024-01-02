@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {

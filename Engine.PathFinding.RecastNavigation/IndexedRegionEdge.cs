@@ -1,5 +1,4 @@
-﻿
-namespace Engine.PathFinding.RecastNavigation.Recast
+﻿namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Edge with region and area definition of a PolyMesh

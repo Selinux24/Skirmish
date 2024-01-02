@@ -21,7 +21,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     bc.LMesh.Areas[i] = SamplePolyAreas.Ground;
                 }
 
-                bc.LMesh.Flags[i] = QueryFilter.EvaluateArea(bc.LMesh.Areas[i]);
+                bc.LMesh.Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(bc.LMesh.Areas[i]);
             }
 
             // Pass in off-mesh connections.

@@ -10,12 +10,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class Poly
     {
         /// <summary>
-        /// A flag that indicates that an entity links to an external entity.
-        /// (E.g. A polygon edge is a portal that links to another polygon.)
-        /// </summary>
-        const int DT_EXT_LINK = 0x8000;
-
-        /// <summary>
         /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
         /// </summary>
         public int FirstLink { get; set; }
@@ -102,29 +96,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if ((n & DT_EXT_LINK) != 0)
+            if ((n & IndexedPolygon.DT_EXT_LINK) != 0)
             {
                 // Border or portal edge.
-                var dir = n & 0xf;
-                if (dir == 0xf) // Border
+                var dir = n & IndexedPolygon.PORTAL_FLAG;
+                if (dir == IndexedPolygon.PORTAL_FLAG) // Border
                 {
                     return 0;
                 }
                 else if (dir == 0) // Portal x-
                 {
-                    return DT_EXT_LINK | 4;
+                    return IndexedPolygon.DT_EXT_LINK | 4;
                 }
                 else if (dir == 1) // Portal z+
                 {
-                    return DT_EXT_LINK | 2;
+                    return IndexedPolygon.DT_EXT_LINK | 2;
                 }
                 else if (dir == 2) // Portal x+
                 {
-                    return DT_EXT_LINK;
+                    return IndexedPolygon.DT_EXT_LINK;
                 }
                 else if (dir == 3) // Portal z-
                 {
-                    return DT_EXT_LINK | 6;
+                    return IndexedPolygon.DT_EXT_LINK | 6;
                 }
             }
             else
@@ -141,7 +135,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="side">Side</param>
         public static int PointToSide(int side)
         {
-            return DT_EXT_LINK | side;
+            return IndexedPolygon.DT_EXT_LINK | side;
         }
 
         /// <summary>
@@ -159,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nei">Neighbour index</param>
         public bool NeighbourIsExternalLink(int nei)
         {
-            return (Neis[nei] & DT_EXT_LINK) != 0;
+            return (Neis[nei] & IndexedPolygon.DT_EXT_LINK) != 0;
         }
 
         /// <inheritdoc/>

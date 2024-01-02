@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = Header.Width;
             int ia = ax + ay * w;
 
-            int con = Cons[ia] & 0xf;
+            int con = Cons[ia] & IndexedPolygon.PORTAL_FLAG;
             int portal = Cons[ia] >> 4;
             int mask = 1 << dir;
 
@@ -161,7 +161,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             int n = 0;
 
-            int portal = 0xf;
+            int portal = IndexedPolygon.PORTAL_FLAG;
             int height = 0;
             int preg = 0xff;
             bool allSameReg = true;

@@ -104,30 +104,5 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="flags">The new flags.</param>
         public void SetExcludeFlags(SamplePolyFlagTypes flags) { ExcludeFlags = flags; }
-
-        /// <summary>
-        /// Evaluates area type and returns spected flag type
-        /// </summary>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns the flag type</returns>
-        public static SamplePolyFlagTypes EvaluateArea(SamplePolyAreas area)
-        {
-            if (area == SamplePolyAreas.Ground ||
-                area == SamplePolyAreas.Grass ||
-                area == SamplePolyAreas.Road)
-            {
-                return SamplePolyFlagTypes.Walk;
-            }
-            else if (area == SamplePolyAreas.Water)
-            {
-                return SamplePolyFlagTypes.Swim;
-            }
-            else if (area == SamplePolyAreas.Door)
-            {
-                return SamplePolyFlagTypes.Walk | SamplePolyFlagTypes.Door;
-            }
-
-            return SamplePolyFlagTypes.None;
-        }
     }
 }

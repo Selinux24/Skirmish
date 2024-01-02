@@ -3268,7 +3268,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var c = Cells[x + y * w];
             for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
-                if (flags[i] == 0 || flags[i] == 0xf)
+                if (flags[i] == 0 || flags[i] == IndexedPolygon.PORTAL_FLAG)
                 {
                     flags[i] = 0;
                     continue;

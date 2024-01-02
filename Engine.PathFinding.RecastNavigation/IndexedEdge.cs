@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Indexed edge of PolyMesh
@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets whether the specified edge index, exist in the edge definition
         /// </summary>
-        /// <param name="edges">Index list</param>
+        /// <param name="edges">Indexed edge list</param>
         /// <param name="nedges">Number of edges</param>
         /// <param name="edgeIndex">Edge index</param>
         /// <remarks>Increments the edge share count</remarks>
@@ -45,6 +45,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return false;
+        }
+        /// <summary>
+        /// Gets the number of open edges in the specified collection
+        /// </summary>
+        /// <param name="edges">Indexed edge list</param>
+        /// <param name="nedges">Number of edges</param>
+        /// <returns>Returns the number of edges with a ShareCount smaller than 2</returns>
+        public static int CountOpenEdges(IndexedEdge[] edges, int nedges)
+        {
+            int numOpenEdges = 0;
+            for (int i = 0; i < nedges; ++i)
+            {
+                if (edges[i].ShareCount < 2)
+                {
+                    numOpenEdges++;
+                }
+            }
+            return numOpenEdges;
         }
     }
 }

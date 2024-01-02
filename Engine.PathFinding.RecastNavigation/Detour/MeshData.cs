@@ -355,13 +355,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     edgeCount++;
 
-                    if ((p[nvp + j] & 0x8000) != 0)
+                    if (p.IsExternalLink(nvp + j) && p.HasDirection(nvp + j))
                     {
-                        var dir = p[nvp + j] & 0xf;
-                        if (dir != 0xf)
-                        {
-                            portalCount++;
-                        }
+                        portalCount++;
                     }
                 }
             }

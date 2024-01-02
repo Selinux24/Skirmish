@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Edge
@@ -7,22 +7,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public struct Edge
     {
         /// <summary>
+        /// Polygon
+        /// </summary>
+        public int[] Poly { get; set; }
+        /// <summary>
         /// Vertices
         /// </summary>
         public int[] Vert { get; set; }
         /// <summary>
-        /// Polygon edgest
+        /// Polygon edges
         /// </summary>
         public int[] PolyEdge { get; set; }
-        /// <summary>
-        /// Polygon
-        /// </summary>
-        public int[] Poly { get; set; }
 
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Vert {Vert?.Join(",")}; PolyEdge {PolyEdge?.Join(",")}; Poly {Poly?.Join(",")};";
+            return $"Poly {Poly?.Join(",")}; Vert {Vert?.Join(",")}; PolyEdge {PolyEdge?.Join(",")};";
         }
     };
 }

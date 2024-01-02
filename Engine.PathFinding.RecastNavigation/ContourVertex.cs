@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Contour vertex
@@ -30,10 +30,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int Z { get; set; }
         /// <summary>
-        /// Contour flag
-        /// </summary>
-        public int Flag { get; set; }
-        /// <summary>
         /// Gets the x, y and z coordinates
         /// </summary>
         public readonly Int3 Coords
@@ -41,6 +37,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             get
             {
                 return new Int3(X, Y, Z);
+            }
+        }
+
+        /// <summary>
+        /// Contour flag
+        /// </summary>
+        public int Flag { get; set; }
+        /// <summary>
+        /// Gets the flag's stored direction
+        /// </summary>
+        public readonly int Dir
+        {
+            get
+            {
+                return Flag & IndexedPolygon.PORTAL_FLAG;
             }
         }
 
@@ -53,6 +64,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             Y = y;
             Z = z;
             Flag = flag;
+        }
+
+        /// <summary>
+        /// Gets whether the vertex has stored a direction in the flag or not
+        /// </summary>
+        public readonly bool HasDirection()
+        {
+            return Dir != IndexedPolygon.PORTAL_FLAG;
         }
 
         /// <inheritdoc/>
@@ -84,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
-            return (((((X * 397) ^ Y) * 397) ^ Z) * 397) ^ Flag;
+            return ((X * 397 ^ Y) * 397 ^ Z) * 397 ^ Flag;
         }
 
         public static bool operator ==(ContourVertex left, ContourVertex right)

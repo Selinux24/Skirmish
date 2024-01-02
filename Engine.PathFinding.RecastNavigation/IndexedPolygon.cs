@@ -26,6 +26,38 @@ namespace Engine.PathFinding.RecastNavigation
         /// An value which indicates an invalid index within a mesh.
         /// </summary>
         public const int RC_MESH_NULL_IDX = -1;
+        /// <summary>
+        /// A flag that indicates that an entity links to an external entity.
+        /// (E.g. A polygon edge is a portal that links to another polygon.)
+        /// </summary>
+        public const int DT_EXT_LINK = 0x8000;
+        /// <summary>
+        /// Portal flag mask
+        /// </summary>
+        public const int PORTAL_FLAG = 0xf;
+
+        /// <summary>
+        /// Adjacency edge list helper struct
+        /// </summary>
+        struct AdjacencyEdgeHelper
+        {
+            /// <summary>
+            /// Edge list
+            /// </summary>
+            public Edge[] Edges;
+            /// <summary>
+            /// Number of edges in the list
+            /// </summary>
+            public int EdgeCount;
+            /// <summary>
+            /// First edge index list
+            /// </summary>
+            public int[] FirstEdge;
+            /// <summary>
+            /// Next edge index list
+            /// </summary>
+            public int[] NextEdge;
+        }
 
         /// <summary>
         /// Vertex indices
@@ -159,6 +191,128 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
+
+        /// <summary>
+        /// Merges the polygon list with their regions and areas
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons</param>
+        /// <param name="pregs">Region list</param>
+        /// <param name="pareas">Area list</param>
+        /// <returns>Returns the resulting merged polygon</returns>
+        public static (IndexedPolygon[] MergedPolys, int MergedNPolys, SamplePolyAreas[] MergedAreas, int[] MergedRegs) MergePolygons(IndexedPolygon[] polys, int npolys, SamplePolyAreas[] pareas, int[] pregs, Int3[] verts)
+        {
+            var mergedPolys = polys.ToArray();
+            var mergedNpolys = npolys;
+            var mergedareas = pareas?.ToArray() ?? Array.Empty<SamplePolyAreas>();
+            var mergedregs = pregs?.ToArray() ?? Array.Empty<int>();
+
+            while (true)
+            {
+                // Find best polygons to merge.
+                var (bestMergeVal, bestPa, bestPb, bestEa, bestEb) = GetBestMergePolygon(mergedPolys, mergedNpolys, verts);
+                if (bestMergeVal <= 0)
+                {
+                    // Could not merge any polygons, stop.
+                    break;
+                }
+
+                // Found best, merge.
+                mergedPolys[bestPa] = Merge(mergedPolys[bestPa], mergedPolys[bestPb], bestEa, bestEb);
+                mergedPolys[bestPb] = mergedPolys[mergedNpolys - 1].Copy();
+
+                if (mergedareas.Any())
+                {
+                    mergedareas[bestPb] = mergedareas[mergedNpolys - 1];
+                }
+
+                if (mergedregs.Any())
+                {
+                    if (mergedregs[bestPa] != mergedregs[bestPb])
+                    {
+                        mergedregs[bestPa] = RC_MULTIPLE_REGS;
+                    }
+                    mergedregs[bestPb] = mergedregs[mergedNpolys - 1];
+                }
+
+                mergedNpolys--;
+            }
+
+            // Cut to mergedNpolys
+            mergedPolys = mergedPolys.Take(mergedNpolys).ToArray();
+            if (mergedareas.Any()) mergedareas = mergedareas.Take(mergedNpolys).ToArray();
+            if (mergedregs.Any()) mergedregs = mergedregs.Take(mergedNpolys).ToArray();
+
+            return (mergedPolys, mergedNpolys, mergedareas, mergedregs);
+        }
+        /// <summary>
+        /// Merges the polygon list
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons</param>
+        /// <returns>Returns the resulting merged polygon</returns>
+        public static (IndexedPolygon[] MergedPolys, int MergedNPolys) MergePolygons(IndexedPolygon[] polys, int npolys, Int3[] verts)
+        {
+            var (mergedPolys, mergedNpolys, _, _) = MergePolygons(polys, npolys, null, null, verts);
+
+            return (mergedPolys, mergedNpolys);
+        }
+        /// <summary>
+        /// Build initial polygons for the remove operation
+        /// </summary>
+        /// <param name="tris">Triangle list</param>
+        /// <param name="ntris">Number of triangles</param>
+        /// <param name="hole">Hole indices</param>
+        /// <param name="hreg">Region id list</param>
+        /// <param name="harea">Area list</param>
+        /// <returns>Returns the indexed polygons, regions and areas</returns>
+        public static (IndexedPolygon[] Polys, int NPolys, SamplePolyAreas[] PAreas, int[] PRegs) BuildRemoveInitialPolygons(Int3[] tris, int ntris, int[] hole, SamplePolyAreas[] harea, int[] hreg)
+        {
+            bool procAreas = harea?.Any() ?? false;
+            bool procRegs = hreg?.Any() ?? false;
+
+            // Merge the hole triangles back to polygons.
+            var polys = new IndexedPolygon[ntris + 1];
+            var pareas = new SamplePolyAreas[ntris];
+            var pregs = new int[ntris];
+
+            // Build initial polygons.
+            int npolys = 0;
+            for (int j = 0; j < ntris; ++j)
+            {
+                var t = tris[j];
+
+                if (t.X == t.Y || t.X == t.Z || t.Y == t.Z)
+                {
+                    continue;
+                }
+
+                polys[npolys] = new();
+                polys[npolys][0] = hole[t.X];
+                polys[npolys][1] = hole[t.Y];
+                polys[npolys][2] = hole[t.Z];
+
+                if (procAreas) pareas[npolys] = harea[t.X];
+
+                if (procRegs)
+                {
+                    // If this polygon covers multiple region types then mark it as such
+                    if (hreg[t.X] != hreg[t.Y] || hreg[t.Y] != hreg[t.Z])
+                    {
+                        pregs[npolys] = RC_MULTIPLE_REGS;
+                    }
+                    else
+                    {
+                        pregs[npolys] = hreg[t.X];
+                    }
+                }
+
+                npolys++;
+            }
+
+            return (polys, npolys, pareas, pregs);
+        }
+
         /// <summary>
         /// Merges two polygons
         /// </summary>
@@ -445,6 +599,224 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 Vertices[i] = p[i];
             }
+        }
+
+        /// <summary>
+        /// Builds a edge list from the specified polygon list
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons in the list</param>
+        /// <param name="vertsPerPoly">Vertices per each polygon</param>
+        /// <param name="nverts">Number of total vertices in the referenced vertex list</param>
+        /// <param name="addOpenEdges">Sets whether not matching edges must be connected by creating new edges</param>
+        /// <param name="openPolyEdgeValue">Value to set in an open edge</param>
+        /// <returns>Returns the edge list</returns>
+        public static (Edge[] Edges, int EdgeCount) BuildAdjacencyEdges(IndexedPolygon[] polys, int npolys, int vertsPerPoly, int nverts, bool addOpenEdges, int openPolyEdgeValue)
+        {
+            int maxEdgeCount = npolys * vertsPerPoly;
+            int[] firstEdge = Helper.CreateArray(nverts, RC_MESH_NULL_IDX);
+            int[] nextEdge = Helper.CreateArray(maxEdgeCount, RC_MESH_NULL_IDX);
+            int edgeCount = 0;
+
+            Edge[] edges = new Edge[maxEdgeCount];
+
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+                for (int j = 0; j < vertsPerPoly; ++j)
+                {
+                    if (IndexIsNull(p[j]))
+                    {
+                        break;
+                    }
+
+                    int v0 = p[j];
+                    int v1 = (j + 1 >= vertsPerPoly || IndexIsNull(p[j + 1])) ? p[0] : p[j + 1];
+                    if (v0 < v1)
+                    {
+                        edges[edgeCount] = new()
+                        {
+                            Vert = new int[] { v0, v1 },
+                            Poly = new int[] { i, i },
+                            PolyEdge = new int[] { j, openPolyEdgeValue },
+                        };
+
+                        // Insert edge
+                        nextEdge[edgeCount] = firstEdge[v0];
+                        firstEdge[v0] = edgeCount++;
+                    }
+                }
+            }
+
+            AdjacencyEdgeHelper adjEdges = new()
+            {
+                Edges = edges,
+                EdgeCount = edgeCount,
+                FirstEdge = firstEdge,
+                NextEdge = nextEdge,
+            };
+
+            return ConnectAdjacencyEdges(polys, npolys, vertsPerPoly, adjEdges, addOpenEdges, openPolyEdgeValue);
+        }
+        /// <summary>
+        /// Connects the adjacency edges
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons in the list</param>
+        /// <param name="vertsPerPoly">Vertices per each polygon</param>
+        /// <param name="edgeList">Adjacency edge list helper</param>
+        /// <param name="addOpenEdges">Sets whether not matching edges must be connected by creating new edges</param>
+        /// <param name="openPolyEdgeValue">Value to set in an open edge</param>
+        /// <returns>Returns the edge list</returns>
+        private static (Edge[] Edges, int EdgeCount) ConnectAdjacencyEdges(IndexedPolygon[] polys, int npolys, int vertsPerPoly, AdjacencyEdgeHelper edgeList, bool addOpenEdges, int openPolyEdgeValue)
+        {
+            var edges = edgeList.Edges;
+            var edgeCount = edgeList.EdgeCount;
+            var firstEdge = edgeList.FirstEdge;
+            var nextEdge = edgeList.NextEdge;
+
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+
+                for (int j = 0; j < vertsPerPoly; ++j)
+                {
+                    if (IndexIsNull(p[j]))
+                    {
+                        break;
+                    }
+
+                    int v0 = p[j];
+                    int v1 = (j + 1 >= vertsPerPoly || IndexIsNull(p[j + 1])) ? p[0] : p[j + 1];
+                    if (v0 <= v1)
+                    {
+                        continue;
+                    }
+
+                    bool found = false;
+                    for (int e = firstEdge[v1]; !IndexIsNull(e); e = nextEdge[e])
+                    {
+                        var edge = edges[e];
+                        if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
+                        {
+                            edge.Poly[1] = i;
+                            edge.PolyEdge[1] = j;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!addOpenEdges || found)
+                    {
+                        continue;
+                    }
+
+                    // Matching edge not found, it is an open edge, add it.
+                    edges[edgeCount] = new()
+                    {
+                        Vert = new int[] { v0, v1 },
+                        Poly = new int[] { i, i },
+                        PolyEdge = new int[] { j, openPolyEdgeValue },
+                    };
+
+                    // Insert edge
+                    nextEdge[edgeCount] = firstEdge[v1];
+                    firstEdge[v1] = edgeCount++;
+                }
+            }
+
+            return (edges, edgeCount);
+        }
+        /// <summary>
+        /// Stores the adjacency data
+        /// </summary>
+        /// <param name="polys">Polygon list to update</param>
+        /// <param name="vertsPerPoly">Vertices per polygon</param>
+        /// <param name="edges">Edge list</param>
+        /// <param name="edgeCount">Number of edges in the list</param>
+        public static void StoreAdjacency(IndexedPolygon[] polys, int vertsPerPoly, Edge[] edges, int edgeCount, bool addOpenEdges, int openPolyEdgeValue)
+        {
+            for (int i = 0; i < edgeCount; ++i)
+            {
+                var e = edges[i];
+                if (e.Poly[0] != e.Poly[1])
+                {
+                    var p0 = polys[e.Poly[0]];
+                    var p1 = polys[e.Poly[1]];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = e.Poly[1];
+                    p1[vertsPerPoly + e.PolyEdge[1]] = e.Poly[0];
+                }
+
+                if (!addOpenEdges)
+                {
+                    continue;
+                }
+
+                if (e.PolyEdge[1] != openPolyEdgeValue)
+                {
+                    var p0 = polys[e.Poly[0]];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = DT_EXT_LINK | e.PolyEdge[1];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the vertex has stored a external link or not
+        /// </summary>
+        /// <param name="adjIndex">Adjacency index</param>
+        /// <returns></returns>
+        public bool IsExternalLink(int adjIndex)
+        {
+            return (Vertices[adjIndex] & DT_EXT_LINK) != 0;
+        }
+        /// <summary>
+        /// Gets whether the vertex has stored a direction or not
+        /// </summary>
+        /// <param name="adjIndex">Adjacency index</param>
+        public bool HasDirection(int adjIndex)
+        {
+            var dir = Vertices[adjIndex] & PORTAL_FLAG;
+
+            return dir != PORTAL_FLAG;
+        }
+        /// <summary>
+        /// Returns the portal value, if any
+        /// </summary>
+        /// <param name="va">First vertex</param>
+        /// <param name="vb">Second vertex</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <param name="portalValue">Returns the portal value</param>
+        /// <returns>Returns true if found</returns>
+        public static bool IsPortal(Int3 va, Int3 vb, int w, int h, out int portalValue)
+        {
+            if (va.X == 0 && vb.X == 0)
+            {
+                portalValue = DT_EXT_LINK;
+
+                return true;
+            }
+            else if (va.Z == h && vb.Z == h)
+            {
+                portalValue = DT_EXT_LINK | 1;
+
+                return true;
+            }
+            else if (va.X == w && vb.X == w)
+            {
+                portalValue = DT_EXT_LINK | 2;
+
+                return true;
+            }
+            else if (va.Z == 0 && vb.Z == 0)
+            {
+                portalValue = DT_EXT_LINK | 3;
+
+                return true;
+            }
+
+            portalValue = -1;
+
+            return false;
         }
 
         /// <inheritdoc/>
