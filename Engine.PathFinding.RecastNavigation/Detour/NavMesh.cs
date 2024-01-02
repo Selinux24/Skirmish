@@ -1344,7 +1344,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float apos = GetSlabCoord(va, side);
 
             // Remove links pointing to 'side' and compact the links array. 
-            int m = Poly.PointToSide(side);
+            int m = IndexedPolygon.PointToSide(side);
             int bse = GetTileRef(tile);
             var polys = tile.GetPolys();
 

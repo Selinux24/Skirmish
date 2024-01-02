@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return Flag & IndexedPolygon.PORTAL_FLAG;
+                return IndexedPolygon.GetVertexDirection(Flag);
             }
         }
 
@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public readonly bool HasDirection()
         {
-            return Dir != IndexedPolygon.PORTAL_FLAG;
+            return IndexedPolygon.VertexHasDirection(Flag);
         }
 
         /// <inheritdoc/>

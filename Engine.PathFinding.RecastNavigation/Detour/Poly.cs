@@ -96,46 +96,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if ((n & IndexedPolygon.DT_EXT_LINK) != 0)
+            if (IndexedPolygon.VertexIsExternalLink(n))
             {
                 // Border or portal edge.
-                var dir = n & IndexedPolygon.PORTAL_FLAG;
-                if (dir == IndexedPolygon.PORTAL_FLAG) // Border
-                {
-                    return 0;
-                }
-                else if (dir == 0) // Portal x-
-                {
-                    return IndexedPolygon.DT_EXT_LINK | 4;
-                }
-                else if (dir == 1) // Portal z+
-                {
-                    return IndexedPolygon.DT_EXT_LINK | 2;
-                }
-                else if (dir == 2) // Portal x+
-                {
-                    return IndexedPolygon.DT_EXT_LINK;
-                }
-                else if (dir == 3) // Portal z-
-                {
-                    return IndexedPolygon.DT_EXT_LINK | 6;
-                }
+                return IndexedPolygon.CalculateVertexPortalFlag(n);
             }
             else
             {
                 // Normal connection
                 return n + 1;
             }
-
-            return n;
-        }
-        /// <summary>
-        /// Gets the point to side index
-        /// </summary>
-        /// <param name="side">Side</param>
-        public static int PointToSide(int side)
-        {
-            return IndexedPolygon.DT_EXT_LINK | side;
         }
 
         /// <summary>
@@ -153,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nei">Neighbour index</param>
         public bool NeighbourIsExternalLink(int nei)
         {
-            return (Neis[nei] & IndexedPolygon.DT_EXT_LINK) != 0;
+            return IndexedPolygon.VertexIsExternalLink(Neis[nei]);
         }
 
         /// <inheritdoc/>

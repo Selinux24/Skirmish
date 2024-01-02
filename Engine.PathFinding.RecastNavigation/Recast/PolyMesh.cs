@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int k = 0; k < vertexCount; ++k)
                 {
-                    if (IndexedPolygon.IndexIsNull(src[k]))
+                    if (src.IsNull(k))
                     {
                         break;
                     }
@@ -80,12 +80,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 for (int k = vertexCount; k < vertexCount * 2; ++k)
                 {
-                    if ((src[k] & IndexedPolygon.DT_EXT_LINK) == 0 || src[k] == 0xffff)
+                    if (!src.IsExternalLink(k) || src[k] == 0xffff)
                     {
                         continue;
                     }
 
-                    int dir = src[k] & IndexedPolygon.PORTAL_FLAG;
+                    int dir = src.GetDirection(k);
                     if (RemapDirection(dir))
                     {
                         tgt[k] = src[k];
@@ -238,7 +238,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Build initial polygons.
-                IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont, out var polys, out var npolys);
+                var (polys, npolys) = IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont);
                 if (npolys == 0)
                 {
                     continue;
@@ -374,7 +374,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < NVP; ++j)
             {
-                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                if (p.IsNull(j))
                 {
                     break;
                 }
@@ -436,7 +436,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < NVP; ++j)
             {
-                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                if (p.IsNull(j))
                 {
                     break;
                 }
@@ -685,7 +685,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Remove vertex.
-            RemoveVertex(rem);
+            RemoveVertexIndex(rem);
 
             for (int i = 0; i < nedges; ++i)
             {
@@ -715,7 +715,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Removes the specified vertex by index, and adjusts the indexed polygon layout
         /// </summary>
         /// <param name="rem">Index to remove</param>
-        private void RemoveVertex(int rem)
+        private void RemoveVertexIndex(int rem)
         {
             for (int i = rem; i < NVerts - 1; ++i)
             {
@@ -834,8 +834,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, vertsPerPoly, nverts, false, 0);
 
-            // Find portal edges
-            FindPortalEdges(cset);
+            if (BorderSize > 0)
+            {
+                // Find portal edges
+                FindPortalEdges(cset);
+            }
 
             // Store adjacency
             IndexedPolygon.StoreAdjacency(polys, vertsPerPoly, edges, edgeCount, false, 0);
@@ -846,44 +849,34 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="cset">Contour set</param>
         private void FindPortalEdges(ContourSet cset)
         {
-            if (BorderSize <= 0)
-            {
-                return;
-            }
-
             int w = cset.Width;
             int h = cset.Height;
 
-            for (int i = 0; i < NPolys; ++i)
+            foreach (var (p, _, _, j) in IndexedPolygon.Iterate(Polys, NPolys, NVP))
             {
-                var p = Polys[i];
-
-                for (int j = 0; j < NVP; ++j)
+                if (p.IsNull(j))
                 {
-                    if (IndexedPolygon.IndexIsNull(p[j]))
-                    {
-                        break;
-                    }
+                    break;
+                }
 
-                    // Skip connected edges.
-                    if (!IndexedPolygon.IndexIsNull(p[NVP + j]))
-                    {
-                        continue;
-                    }
+                // Skip connected edges.
+                if (!p.IsNull(NVP + j))
+                {
+                    continue;
+                }
 
-                    int nj = j + 1;
-                    if (nj >= NVP || IndexedPolygon.IndexIsNull(p[nj]))
-                    {
-                        nj = 0;
-                    }
+                int nj = j + 1;
+                if (nj >= NVP || p.IsNull(nj))
+                {
+                    nj = 0;
+                }
 
-                    var va = Verts[p[j]];
-                    var vb = Verts[p[nj]];
+                var va = Verts[p[j]];
+                var vb = Verts[p[nj]];
 
-                    if (IndexedPolygon.IsPortal(va, vb, w, h, out int v))
-                    {
-                        p[NVP + j] = v;
-                    }
+                if (IndexedPolygon.IsPortal(va, vb, w, h, out int v))
+                {
+                    p[NVP + j] = v;
                 }
             }
         }

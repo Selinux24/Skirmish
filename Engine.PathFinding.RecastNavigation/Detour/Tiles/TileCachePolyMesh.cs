@@ -102,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Build initial polygons.
-                IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont, out var polys, out var npolys);
+                var (polys, npolys) = IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont);
                 if (npolys == 0)
                 {
                     continue;

@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -21,16 +22,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// build step that removes redundant border vertices. 
         /// (Used during the polymesh and detail polymesh build processes)
         /// </summary>
-        public const int RC_MULTIPLE_REGS = 0;
+        const int RC_MULTIPLE_REGS = 0;
         /// <summary>
         /// An value which indicates an invalid index within a mesh.
         /// </summary>
-        public const int RC_MESH_NULL_IDX = -1;
+        const int RC_MESH_NULL_IDX = -1;
         /// <summary>
         /// A flag that indicates that an entity links to an external entity.
         /// (E.g. A polygon edge is a portal that links to another polygon.)
         /// </summary>
-        public const int DT_EXT_LINK = 0x8000;
+        const int DT_EXT_LINK = 0x8000;
         /// <summary>
         /// Portal flag mask
         /// </summary>
@@ -62,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Vertex indices
         /// </summary>
-        private int[] Vertices = null;
+        private int[] vertices = null;
         /// <summary>
         /// Gets the polygon vertex index by index
         /// </summary>
@@ -72,11 +73,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return Vertices[index];
+                return vertices[index];
             }
             set
             {
-                Vertices[index] = value;
+                vertices[index] = value;
             }
         }
 
@@ -353,13 +354,31 @@ namespace Engine.PathFinding.RecastNavigation
             return index == RC_MULTIPLE_REGS;
         }
         /// <summary>
-        /// Gets whether the index is null or not
+        /// Gets whether the vertex is null or not
         /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns true if the index is null</returns>
-        public static bool IndexIsNull(int index)
+        /// <param name="v">Vertex</param>
+        /// <returns>Returns true if the vertex is null</returns>
+        public static bool VertexIsNull(int v)
         {
-            return index == RC_MESH_NULL_IDX;
+            return v == RC_MESH_NULL_IDX;
+        }
+        /// <summary>
+        /// Gets whether the vertex is external link or not
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <returns>Returns true if the vertex is external link</returns>
+        public static bool VertexIsExternalLink(int v)
+        {
+            return (v & DT_EXT_LINK) != 0;
+        }
+        /// <summary>
+        /// Gets whether the vertex has stored a direction in the flag or not
+        /// </summary>
+        public static bool VertexHasDirection(int v)
+        {
+            var dir = GetVertexDirection(v);
+
+            return dir != PORTAL_FLAG;
         }
         /// <summary>
         /// Gets whether the specified points are sorted counter-clockwise in the xz plane
@@ -470,138 +489,6 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public IndexedPolygon() : this(10)
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="capacity">Polygon capacity</param>
-        public IndexedPolygon(int capacity)
-        {
-            Vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
-        }
-
-        /// <summary>
-        /// Creates the initial polygon list
-        /// </summary>
-        /// <param name="indices">Triangle indices</param>
-        /// <param name="tris">Triangle list</param>
-        /// <param name="ntris">Number of triangles</param>
-        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
-        /// <param name="polys">Resulting indexed polygon list</param>
-        /// <param name="npolys">Resulting number of polygons in the list</param>
-        public static void CreateInitialPolygons(int[] indices, Int3[] tris, int ntris, int maxVertsPerCont, out IndexedPolygon[] polys, out int npolys)
-        {
-            npolys = 0;
-            polys = new IndexedPolygon[maxVertsPerCont];
-
-            for (int j = 0; j < ntris; ++j)
-            {
-                var t = tris[j];
-                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
-                {
-                    var poly = new IndexedPolygon(DT_VERTS_PER_POLYGON);
-                    poly[0] = indices[t.X];
-                    poly[1] = indices[t.Y];
-                    poly[2] = indices[t.Z];
-
-                    polys[npolys++] = poly;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the vertex count
-        /// </summary>
-        /// <returns>Returns the vertex count</returns>
-        public int CountPolyVerts()
-        {
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
-            {
-                if (Vertices[i] == RC_MESH_NULL_IDX)
-                {
-                    return i;
-                }
-            }
-
-            return DT_VERTS_PER_POLYGON;
-        }
-        /// <summary>
-        /// Gets the vertices list
-        /// </summary>
-        public int[] GetVertices()
-        {
-            //Copy array
-            return Vertices.ToArray();
-        }
-        /// <summary>
-        /// Copy the current polygon to another instance
-        /// </summary>
-        /// <returns>Returns the new instance</returns>
-        public IndexedPolygon Copy()
-        {
-            return new IndexedPolygon(Vertices.Length)
-            {
-                //Copy array
-                Vertices = Vertices.ToArray(),
-            };
-        }
-        /// <summary>
-        /// Gets the first free index (<see cref="RC_MESH_NULL_IDX"/> value)
-        /// </summary>
-        /// <param name="nvp">Vertex per polygon</param>
-        /// <returns>Returns the first free index</returns>
-        public int FindFirstFreeIndex(int nvp)
-        {
-            int nv = 0;
-
-            for (int j = 0; j < nvp; ++j)
-            {
-                if (Vertices[j] == RC_MESH_NULL_IDX)
-                {
-                    break;
-                }
-                nv++;
-            }
-
-            return nv;
-        }
-        /// <summary>
-        /// Gets whether the collection contains the specified index
-        /// </summary>
-        /// <param name="index">Vertex index</param>
-        public bool Contains(int index)
-        {
-            int nv = CountPolyVerts();
-
-            for (int j = 0; j < nv; ++j)
-            {
-                if (Vertices[j] == index)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Copy the other polygon vertices
-        /// </summary>
-        /// <param name="p">Indexed polygon</param>
-        /// <param name="nvp">Number of vertex to copy</param>
-        public void CopyVertices(IndexedPolygon p, int nvp)
-        {
-            for (int i = 0; i < nvp; ++i)
-            {
-                Vertices[i] = p[i];
-            }
-        }
-
-        /// <summary>
         /// Builds a edge list from the specified polygon list
         /// </summary>
         /// <param name="polys">Polygon list</param>
@@ -625,13 +512,13 @@ namespace Engine.PathFinding.RecastNavigation
                 var p = polys[i];
                 for (int j = 0; j < vertsPerPoly; ++j)
                 {
-                    if (IndexIsNull(p[j]))
+                    if (p.IsNull(j))
                     {
                         break;
                     }
 
                     int v0 = p[j];
-                    int v1 = (j + 1 >= vertsPerPoly || IndexIsNull(p[j + 1])) ? p[0] : p[j + 1];
+                    int v1 = (j + 1 >= vertsPerPoly || p.IsNull(j + 1)) ? p[0] : p[j + 1];
                     if (v0 < v1)
                     {
                         edges[edgeCount] = new()
@@ -681,20 +568,19 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int j = 0; j < vertsPerPoly; ++j)
                 {
-                    if (IndexIsNull(p[j]))
+                    if (p.IsNull(j))
                     {
                         break;
                     }
 
-                    int v0 = p[j];
-                    int v1 = (j + 1 >= vertsPerPoly || IndexIsNull(p[j + 1])) ? p[0] : p[j + 1];
+                    var (v0, v1) = p.GetSegmentIndices(j, vertsPerPoly);
                     if (v0 <= v1)
                     {
                         continue;
                     }
 
                     bool found = false;
-                    for (int e = firstEdge[v1]; !IndexIsNull(e); e = nextEdge[e])
+                    for (int e = firstEdge[v1]; !VertexIsNull(e); e = nextEdge[e])
                     {
                         var edge = edges[e];
                         if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
@@ -760,23 +646,59 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Gets whether the vertex has stored a external link or not
+        /// Creates the initial polygon list from a triangle definition
         /// </summary>
-        /// <param name="adjIndex">Adjacency index</param>
-        /// <returns></returns>
-        public bool IsExternalLink(int adjIndex)
+        /// <param name="indices">Triangle indices</param>
+        /// <param name="tris">Triangle list</param>
+        /// <param name="ntris">Number of triangles in the triangle list</param>
+        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
+        /// <returns>Returns the indexed polygon list and the number o polygons in the list</returns>
+        public static (IndexedPolygon[] Polys, int NPolys) CreateInitialPolygons(int[] indices, Int3[] tris, int ntris, int maxVertsPerCont)
         {
-            return (Vertices[adjIndex] & DT_EXT_LINK) != 0;
-        }
-        /// <summary>
-        /// Gets whether the vertex has stored a direction or not
-        /// </summary>
-        /// <param name="adjIndex">Adjacency index</param>
-        public bool HasDirection(int adjIndex)
-        {
-            var dir = Vertices[adjIndex] & PORTAL_FLAG;
+            int npolys = 0;
+            var polys = new IndexedPolygon[maxVertsPerCont];
 
-            return dir != PORTAL_FLAG;
+            for (int j = 0; j < ntris; ++j)
+            {
+                var t = tris[j];
+
+                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
+                {
+                    var poly = new IndexedPolygon(DT_VERTS_PER_POLYGON);
+                    poly[0] = indices[t.X];
+                    poly[1] = indices[t.Y];
+                    poly[2] = indices[t.Z];
+
+                    polys[npolys++] = poly;
+                }
+            }
+
+            return (polys, npolys);
+        }
+
+        /// <summary>
+        /// Iterates over the polygon vertices of each polygon in the collection
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons in the list</param>
+        /// <param name="nvp">Number of vertes per polygon</param>
+        /// <returns>Returns the polygon, the polygon index in the polygon list, the vertex and the vertex index in the polygon vertex list</returns>
+        public static IEnumerable<(IndexedPolygon Poly, int pIndex, int vertex, int vIndex)> Iterate(IndexedPolygon[] polys, int npolys, int nvp)
+        {
+            if (npolys <= 0)
+            {
+                yield break;
+            }
+
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+
+                for (int j = 0; j < nvp; ++j)
+                {
+                    yield return (p, i, p[j], j);
+                }
+            }
         }
         /// <summary>
         /// Returns the portal value, if any
@@ -818,11 +740,209 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
+        /// <summary>
+        /// Calculates the vertex portal flag direction value
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <returns>Returns the vertex portal flag direction value</returns>
+        public static int CalculateVertexPortalFlag(int v)
+        {
+            var dir = v & PORTAL_FLAG;
+
+            if (dir == PORTAL_FLAG) // Border
+            {
+                return 0;
+            }
+            else if (dir == 0) // Portal x-
+            {
+                return DT_EXT_LINK | 4;
+            }
+            else if (dir == 1) // Portal z+
+            {
+                return DT_EXT_LINK | 2;
+            }
+            else if (dir == 2) // Portal x+
+            {
+                return DT_EXT_LINK;
+            }
+            else if (dir == 3) // Portal z-
+            {
+                return DT_EXT_LINK | 6;
+            }
+
+            return v;
+        }
+        /// <summary>
+        /// Gets the stored vertex direction
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        public static int GetVertexDirection(int v)
+        {
+            return v & PORTAL_FLAG;
+        }
+        /// <summary>
+        /// Gets the point to side index
+        /// </summary>
+        /// <param name="side">Side</param>
+        public static int PointToSide(int side)
+        {
+            return DT_EXT_LINK | side;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public IndexedPolygon() : this(10)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="capacity">Polygon capacity</param>
+        public IndexedPolygon(int capacity)
+        {
+            vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
+        }
+
+        /// <summary>
+        /// Gets the vertex count
+        /// </summary>
+        /// <returns>Returns the vertex count</returns>
+        public int CountPolyVerts()
+        {
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            {
+                if (vertices[i] == RC_MESH_NULL_IDX)
+                {
+                    return i;
+                }
+            }
+
+            return DT_VERTS_PER_POLYGON;
+        }
+        /// <summary>
+        /// Gets the vertices list
+        /// </summary>
+        public int[] GetVertices()
+        {
+            //Copy array
+            return vertices.ToArray();
+        }
+        /// <summary>
+        /// Copy the current polygon to another instance
+        /// </summary>
+        /// <returns>Returns the new instance</returns>
+        public IndexedPolygon Copy()
+        {
+            return new IndexedPolygon(vertices.Length)
+            {
+                //Copy array
+                vertices = vertices.ToArray(),
+            };
+        }
+        /// <summary>
+        /// Gets the first free index (<see cref="RC_MESH_NULL_IDX"/> value)
+        /// </summary>
+        /// <param name="nvp">Vertex per polygon</param>
+        /// <returns>Returns the first free index</returns>
+        public int FindFirstFreeIndex(int nvp)
+        {
+            int nv = 0;
+
+            for (int j = 0; j < nvp; ++j)
+            {
+                if (vertices[j] == RC_MESH_NULL_IDX)
+                {
+                    break;
+                }
+                nv++;
+            }
+
+            return nv;
+        }
+        /// <summary>
+        /// Gets whether the collection contains the specified index
+        /// </summary>
+        /// <param name="index">Vertex index</param>
+        public bool Contains(int index)
+        {
+            int nv = CountPolyVerts();
+
+            for (int j = 0; j < nv; ++j)
+            {
+                if (vertices[j] == index)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Copy the other polygon vertices
+        /// </summary>
+        /// <param name="p">Indexed polygon</param>
+        /// <param name="nvp">Number of vertex to copy</param>
+        public void CopyVertices(IndexedPolygon p, int nvp)
+        {
+            for (int i = 0; i < nvp; ++i)
+            {
+                vertices[i] = p[i];
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the vertex at the specified index is null
+        /// </summary>
+        /// <param name="index">Vertex index</param>
+        public bool IsNull(int index)
+        {
+            return VertexIsNull(vertices[index]);
+        }
+        /// <summary>
+        /// Gets whether the vertex has stored a external link or not
+        /// </summary>
+        /// <param name="adjIndex">Adjacency index</param>
+        /// <returns></returns>
+        public bool IsExternalLink(int adjIndex)
+        {
+            return VertexIsExternalLink(vertices[adjIndex]);
+        }
+        /// <summary>
+        /// Gets whether the vertex has stored a direction or not
+        /// </summary>
+        /// <param name="adjIndex">Adjacency index</param>
+        public bool HasDirection(int adjIndex)
+        {
+            return VertexHasDirection(vertices[adjIndex]);
+        }
+        /// <summary>
+        /// Gets the stored direction at the specified adjacency index
+        /// </summary>
+        /// <param name="adjIndex">Adjacency index</param>
+        public int GetDirection(int adjIndex)
+        {
+            return GetVertexDirection(vertices[adjIndex]);
+        }
+        /// <summary>
+        /// Gets the segment indices from the specified index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="vertsPerPoly">Number of vertices in the polygon</param>
+        /// <returns>Returns the vertex at the specified index, and the next vertex in the polygon</returns>
+        private (int V0, int V1) GetSegmentIndices(int index, int vertsPerPoly)
+        {
+            int v0 = vertices[index];
+            int v1 = (index + 1 >= vertsPerPoly || IsNull(index + 1)) ? vertices[0] : vertices[index + 1];
+
+            return (v0, v1);
+        }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Indices: {Vertices?.Join(",")}";
+            return $"Indices: {vertices?.Join(",")}";
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = Header.Width;
             int ia = ax + ay * w;
 
-            int con = Cons[ia] & IndexedPolygon.PORTAL_FLAG;
+            int con = IndexedPolygon.GetVertexDirection(Cons[ia]);
             int portal = Cons[ia] >> 4;
             int mask = 1 << dir;
 
