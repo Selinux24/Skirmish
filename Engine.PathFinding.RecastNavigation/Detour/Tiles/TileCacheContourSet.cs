@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -105,8 +104,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="tcl">Tile cache layer</param>
         /// <param name="walkableClimb">Walkable climb value</param>
         /// <param name="layerRegs">Resulting layer regions</param>
-        /// <param name="regId">Last region id</param>
-        public static bool BuildRegions(TileCacheLayer tcl, int walkableClimb, out int[] layerRegs, out int regId)
+        /// <param name="nregs">Region count</param>
+        public static bool BuildRegions(TileCacheLayer tcl, int walkableClimb, out int[] layerRegs, out int nregs)
+        {
+            if (!BuildMonotoneRegions(tcl, walkableClimb, out layerRegs, out nregs))
+            {
+                layerRegs = Array.Empty<int>();
+                nregs = -1;
+
+                return false;
+            }
+
+            // Allocate and init layer regions.
+            var regs = AllocateLayerRegions(tcl, walkableClimb, layerRegs, nregs);
+
+            // Compact ids.
+            CompactIds(tcl, regs, layerRegs, nregs);
+
+            return true;
+        }
+        /// <summary>
+        /// Partition walkable area into monotone regions.
+        /// </summary>
+        /// <param name="tcl">Tile cache layer</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Resulting layer regions</param>
+        /// <param name="nregs">Region count</param>
+        private static bool BuildMonotoneRegions(TileCacheLayer tcl, int walkableClimb, out int[] layerRegs, out int nregs)
         {
             int w = tcl.Header.Width;
             int h = tcl.Header.Height;
@@ -118,13 +142,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Partition walkable area into monotone regions.
             int[] prevCount = new int[256];
-            regId = 0;
+            nregs = 0;
 
             for (int y = 0; y < h; ++y)
             {
-                if (regId > 0)
+                if (nregs > 0)
                 {
-                    for (int i = 0; i < regId; i++)
+                    for (int i = 0; i < nregs; i++)
                     {
                         prevCount[i] = 0;
                     }
@@ -201,12 +225,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     }
                     else
                     {
-                        if (regId == 255)
+                        if (nregs == 255)
                         {
                             // Region ID's overflow.
                             return false;
                         }
-                        sweeps[i].Id = regId++;
+                        sweeps[i].Id = nregs++;
                     }
                 }
 
@@ -221,8 +245,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
+            return true;
+        }
+        /// <summary>
+        /// Allocate and init layer regions.
+        /// </summary>
+        /// <param name="tcl">Tile cache layer</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Layer regions</param>
+        /// <param name="nregs">Region count</param>
+        /// <returns>Returns the allocated region list</returns>
+        private static LayerMonotoneRegion[] AllocateLayerRegions(TileCacheLayer tcl, int walkableClimb, int[] layerRegs, int nregs)
+        {
+            int w = tcl.Header.Width;
+            int h = tcl.Header.Height;
+
             // Allocate and init layer regions.
-            int nregs = regId;
             LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, () =>
             {
                 return new LayerMonotoneRegion()
@@ -253,14 +291,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                     // Update neighbours
                     int ymi = x + (y - 1) * w;
-                    if (y > 0 && tcl.IsConnected(idx, ymi, walkableClimb))
+                    if (y <= 0 || !tcl.IsConnected(idx, ymi, walkableClimb))
                     {
-                        int rai = layerRegs[ymi];
-                        if (rai != 0xff && rai != ri)
-                        {
-                            regs[ri].AddUniqueLast(rai);
-                            regs[rai].AddUniqueLast(ri);
-                        }
+                        continue;
+                    }
+
+                    int rai = layerRegs[ymi];
+                    if (rai != 0xff && rai != ri)
+                    {
+                        regs[ri].AddUniqueLast(rai);
+                        regs[rai].AddUniqueLast(ri);
                     }
                 }
             }
@@ -308,36 +348,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
-            // Compact ids.
-            int[] remap = Helper.CreateArray(256, 0);
-            // Find number of unique regions.
-            regId = 0;
-            for (int i = 0; i < nregs; ++i)
-            {
-                remap[regs[i].RegId] = 1;
-            }
-            for (int i = 0; i < 256; ++i)
-            {
-                if (remap[i] != 0x00)
-                {
-                    remap[i] = regId++;
-                }
-            }
-            // Remap ids.
-            for (int i = 0; i < nregs; ++i)
-            {
-                regs[i].RegId = remap[regs[i].RegId];
-            }
-
-            for (int i = 0; i < w * h; ++i)
-            {
-                if (layerRegs[i] != 0xff)
-                {
-                    layerRegs[i] = regs[layerRegs[i]].RegId;
-                }
-            }
-
-            return true;
+            return regs;
         }
         /// <summary>
         /// Gets whether two regions can merge or not
@@ -366,6 +377,47 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
             return count == 1;
+        }
+        /// <summary>
+        /// Compact ids.
+        /// </summary>
+        /// <param name="tcl">Tile cache layer</param>
+        /// <param name="regs">Region list</param>
+        /// <param name="layerRegs">Layer regions</param>
+        /// <param name="nregs">Region count</param>
+        private static void CompactIds(TileCacheLayer tcl, LayerMonotoneRegion[] regs, int[] layerRegs, int nregs)
+        {
+            int w = tcl.Header.Width;
+            int h = tcl.Header.Height;
+
+            int[] remap = Helper.CreateArray(256, 0);
+
+            // Find number of unique regions.
+            int regId = 0;
+            for (int i = 0; i < nregs; ++i)
+            {
+                remap[regs[i].RegId] = 1;
+            }
+            for (int i = 0; i < 256; ++i)
+            {
+                if (remap[i] != 0x00)
+                {
+                    remap[i] = regId++;
+                }
+            }
+
+            // Remap ids.
+            for (int i = 0; i < nregs; ++i)
+            {
+                regs[i].RegId = remap[regs[i].RegId];
+            }
+            for (int i = 0; i < w * h; ++i)
+            {
+                if (layerRegs[i] != 0xff)
+                {
+                    layerRegs[i] = regs[layerRegs[i]].RegId;
+                }
+            }
         }
 
         /// <summary>

@@ -877,11 +877,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!TileCacheContourSet.BuildRegions(bc.Layer, walkableClimbVx, out var layerRegs, out var regId))
+            if (!TileCacheContourSet.BuildRegions(bc.Layer, walkableClimbVx, out var layerRegs, out var nRegs))
             {
                 return false;
             }
-            bc.SetLayerRegs(layerRegs, regId);
+            bc.SetLayerRegs(layerRegs, nRegs);
 
             if (!TileCacheContourSet.Build(bc.Layer, walkableClimbVx, m_params.MaxSimplificationError, out var lscet))
             {
