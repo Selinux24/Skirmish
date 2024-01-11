@@ -27,15 +27,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// An value which indicates an invalid index within a mesh.
         /// </summary>
         const int RC_MESH_NULL_IDX = -1;
-        /// <summary>
-        /// A flag that indicates that an entity links to an external entity.
-        /// (E.g. A polygon edge is a portal that links to another polygon.)
-        /// </summary>
-        const int DT_EXT_LINK = 0x8000;
-        /// <summary>
-        /// Portal flag mask
-        /// </summary>
-        public const int PORTAL_FLAG = 0xf;
 
         /// <summary>
         /// Adjacency edge list helper struct
@@ -363,24 +354,6 @@ namespace Engine.PathFinding.RecastNavigation
             return v == RC_MESH_NULL_IDX;
         }
         /// <summary>
-        /// Gets whether the vertex is external link or not
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        /// <returns>Returns true if the vertex is external link</returns>
-        public static bool VertexIsExternalLink(int v)
-        {
-            return (v & DT_EXT_LINK) != 0;
-        }
-        /// <summary>
-        /// Gets whether the vertex has stored a direction in the flag or not
-        /// </summary>
-        public static bool VertexHasDirection(int v)
-        {
-            var dir = GetVertexDirection(v);
-
-            return dir != PORTAL_FLAG;
-        }
-        /// <summary>
         /// Gets whether the specified points are sorted counter-clockwise in the xz plane
         /// </summary>
         /// <param name="a">Point a</param>
@@ -640,7 +613,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (e.PolyEdge[1] != openPolyEdgeValue)
                 {
                     var p0 = polys[e.Poly[0]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = DT_EXT_LINK | e.PolyEdge[1];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = VertexFlags.DT_EXT_LINK | e.PolyEdge[1];
                 }
             }
         }
@@ -713,25 +686,25 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (va.X == 0 && vb.X == 0)
             {
-                portalValue = DT_EXT_LINK;
+                portalValue = VertexFlags.DT_EXT_LINK;
 
                 return true;
             }
             else if (va.Z == h && vb.Z == h)
             {
-                portalValue = DT_EXT_LINK | 1;
+                portalValue = VertexFlags.DT_EXT_LINK | 1;
 
                 return true;
             }
             else if (va.X == w && vb.X == w)
             {
-                portalValue = DT_EXT_LINK | 2;
+                portalValue = VertexFlags.DT_EXT_LINK | 2;
 
                 return true;
             }
             else if (va.Z == 0 && vb.Z == 0)
             {
-                portalValue = DT_EXT_LINK | 3;
+                portalValue = VertexFlags.DT_EXT_LINK | 3;
 
                 return true;
             }
@@ -747,38 +720,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the vertex portal flag direction value</returns>
         public static int CalculateVertexPortalFlag(int v)
         {
-            var dir = v & PORTAL_FLAG;
+            var dir = v & VertexFlags.PORTAL_FLAG;
 
-            if (dir == PORTAL_FLAG) // Border
+            if (dir == VertexFlags.PORTAL_FLAG) // Border
             {
                 return 0;
             }
             else if (dir == 0) // Portal x-
             {
-                return DT_EXT_LINK | 4;
+                return VertexFlags.DT_EXT_LINK | 4;
             }
             else if (dir == 1) // Portal z+
             {
-                return DT_EXT_LINK | 2;
+                return VertexFlags.DT_EXT_LINK | 2;
             }
             else if (dir == 2) // Portal x+
             {
-                return DT_EXT_LINK;
+                return VertexFlags.DT_EXT_LINK;
             }
             else if (dir == 3) // Portal z-
             {
-                return DT_EXT_LINK | 6;
+                return VertexFlags.DT_EXT_LINK | 6;
             }
 
             return v;
-        }
-        /// <summary>
-        /// Gets the stored vertex direction
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        public static int GetVertexDirection(int v)
-        {
-            return v & PORTAL_FLAG;
         }
         /// <summary>
         /// Gets the point to side index
@@ -786,7 +751,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="side">Side</param>
         public static int PointToSide(int side)
         {
-            return DT_EXT_LINK | side;
+            return VertexFlags.DT_EXT_LINK | side;
         }
 
         /// <summary>
@@ -907,7 +872,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public bool IsExternalLink(int adjIndex)
         {
-            return VertexIsExternalLink(vertices[adjIndex]);
+            return VertexFlags.IsExternalLink(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets whether the vertex has stored a direction or not
@@ -915,7 +880,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public bool HasDirection(int adjIndex)
         {
-            return VertexHasDirection(vertices[adjIndex]);
+            return VertexFlags.HasDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the stored direction at the specified adjacency index
@@ -923,7 +888,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public int GetDirection(int adjIndex)
         {
-            return GetVertexDirection(vertices[adjIndex]);
+            return VertexFlags.GetVertexDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the segment indices from the specified index

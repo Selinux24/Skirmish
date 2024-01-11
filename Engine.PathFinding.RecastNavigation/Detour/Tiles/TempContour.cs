@@ -50,10 +50,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="y">Y value</param>
         /// <param name="z">Z value</param>
         /// <param name="r">Neighbour reference</param>
-        public bool AppendVertex(int x, int y, int z, int r)
+        public bool AppendVertex(VertexWithNeigbour v)
         {
             // Try to merge with existing segments.
-            if (nverts > 1 && MergeVertex(x, y, z, r))
+            if (nverts > 1 && MergeVertex(v))
             {
                 return true;
             }
@@ -65,32 +65,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Add new point.
-            verts[nverts++] = new(x, y, z, r);
+            verts[nverts++] = v;
 
             return true;
         }
         /// <summary>
         /// Try to merge with existing segments.
         /// </summary>
-        private bool MergeVertex(int x, int y, int z, int r)
+        private bool MergeVertex(VertexWithNeigbour v)
         {
             var pa = verts[nverts - 2];
             var pb = verts[nverts - 1];
-            if (pb.Nei == r)
+            if (pb.Nei == v.Nei)
             {
-                if (pa.X == pb.X && pb.X == x)
+                if (pa.X == pb.X && pb.X == v.X)
                 {
                     // The verts are aligned aling x-axis, update z.
-                    pb.Y = y;
-                    pb.Z = z;
+                    pb.Y = v.Y;
+                    pb.Z = v.Z;
                     verts[nverts - 1] = pb;
                     return true;
                 }
-                else if (pa.Z == pb.Z && pb.Z == z)
+                else if (pa.Z == pb.Z && pb.Z == v.Z)
                 {
                     // The verts are aligned aling z-axis, update x.
-                    pb.X = x;
-                    pb.Y = y;
+                    pb.X = v.X;
+                    pb.Y = v.Y;
                     verts[nverts - 1] = pb;
                     return true;
                 }

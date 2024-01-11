@@ -20,15 +20,23 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static int GetDirOffsetX(int dir)
         {
-            return OffsetsX[dir & 0x03];
+            return OffsetsX[dir & 3];
         }
         public static int GetDirOffsetY(int dir)
         {
-            return OffsetsY[dir & 0x03];
+            return OffsetsY[dir & 3];
         }
         public static int GetDirForOffset(int x, int y)
         {
             return OffsetsDir[((y + 1) << 1) + x];
+        }
+        public static int RotateCW(int dir)
+        {
+            return (dir + 1) & 3;
+        }
+        public static int RotateCCW(int dir)
+        {
+            return (dir + 3) & 3;
         }
 
         public static float GetJitterX(int i)
@@ -146,6 +154,42 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return res;
+        }
+        /// <summary>
+        /// Resets the array values
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="array">Array to reset</param>
+        /// <param name="count">Number of items to reset in the array</param>
+        /// <param name="value">Value to set</param>
+        public static void ResetArray<T>(T[] array, int count, T value)
+        {
+            ResetArray(array, 0, count, value);
+        }
+        /// <summary>
+        /// Resets the array values
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="array">Array to reset</param>
+        /// <param name="start">Start index</param>
+        /// <param name="count">Number of items to reset in the array</param>
+        /// <param name="value">Value to set</param>
+        public static void ResetArray<T>(T[] array, int start, int count, T value)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            if ((array?.Length ?? 0) > start + count)
+            {
+                return;
+            }
+
+            for (int i = start; i < count; i++)
+            {
+                array[i] = value;
+            }
         }
 
         /// <summary>

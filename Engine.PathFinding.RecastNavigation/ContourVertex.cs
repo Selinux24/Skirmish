@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return IndexedPolygon.GetVertexDirection(Flag);
+                return VertexFlags.GetVertexDirection(Flag);
             }
         }
 
@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public readonly bool HasDirection()
         {
-            return IndexedPolygon.VertexHasDirection(Flag);
+            return VertexFlags.HasDirection(Flag);
         }
 
         /// <inheritdoc/>
@@ -103,13 +103,20 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
-            return ((X * 397 ^ Y) * 397 ^ Z) * 397 ^ Flag;
+            return HashCode.Combine(X, Y, Z, Flag);
+        }
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"X: {X}; Y: {Y}; Z: {Z}; Flag: {Flag}; Dir: {Dir};";
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(ContourVertex left, ContourVertex right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(ContourVertex left, ContourVertex right)
         {
             return !left.Equals(ref right);

@@ -10,7 +10,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class HeightfieldLayerData
     {
+        /// <summary>
+        /// Maximum stack count
+        /// </summary>
         const int MaxStack = 64;
+        /// <summary>
+        /// Null id
+        /// </summary>
+        const int NULL_ID = 0xff;
 
         /// <summary>
         /// Compact heighfield
@@ -133,9 +140,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 // If the neighbour is set and there is only one continuous connection to it,
                 // the sweep will be merged with the previous one, else new region is created.
-                if (res[i].Nei != 0xff && prevCount[res[i].Nei] == res[i].NS)
+                if (res[i].NeiRegId != NULL_ID && prevCount[res[i].NeiRegId] == res[i].SampleCount)
                 {
-                    res[i].Id = res[i].Nei;
+                    res[i].RegId = res[i].NeiRegId;
 
                     continue;
                 }
@@ -145,7 +152,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     throw new EngineException("rcBuildHeightfieldLayers: Region ID overflow.");
                 }
 
-                res[i].Id = id++;
+                res[i].RegId = id++;
             }
 
             return res;
@@ -156,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private int GenerateRegions()
         {
-            SourceRegions = Helper.CreateArray(Heightfield.SpanCount, 0xff);
+            SourceRegions = Helper.CreateArray(Heightfield.SpanCount, NULL_ID);
 
             LayerSweepSpan[] sweeps = Helper.CreateArray(Heightfield.Width, new LayerSweepSpan());
 
@@ -201,52 +208,38 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int sid = 0xff;
+                int sid = NULL_ID;
 
                 // -x
-                if (s.GetCon(0) != CompactHeightfield.RC_NOT_CONNECTED)
+                if (s.GetCon(0, out int con))
                 {
                     int ax = x + Utils.GetDirOffsetX(0);
                     int ay = y + Utils.GetDirOffsetY(0);
-                    int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(0);
-                    if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && SourceRegions[ai] != 0xff)
+                    int ai = Heightfield.Cells[ax + ay * Width].Index + con;
+                    if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && SourceRegions[ai] != NULL_ID)
                     {
                         sid = SourceRegions[ai];
                     }
                 }
 
-                if (sid == 0xff)
+                if (sid == NULL_ID)
                 {
                     sid = id++;
-                    resSweeps[sid].Nei = 0xff;
-                    resSweeps[sid].NS = 0;
+                    resSweeps[sid].NeiRegId = NULL_ID;
+                    resSweeps[sid].SampleCount = 0;
                 }
 
                 // -y
-                if (s.GetCon(3) != CompactHeightfield.RC_NOT_CONNECTED)
+                if (s.GetCon(3, out con))
                 {
                     int ax = x + Utils.GetDirOffsetX(3);
                     int ay = y + Utils.GetDirOffsetY(3);
-                    int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(3);
+                    int ai = Heightfield.Cells[ax + ay * Width].Index + con;
                     int nr = SourceRegions[ai];
-                    if (nr != 0xff)
+                    if (nr != NULL_ID)
                     {
-                        // Set neighbour when first valid neighbour is encoutered.
-                        if (resSweeps[sid].NS == 0)
-                            resSweeps[sid].Nei = nr;
-
-                        if (resSweeps[sid].Nei == nr)
-                        {
-                            // Update existing neighbour
-                            resSweeps[sid].NS++;
-                            resCount[nr]++;
-                        }
-                        else
-                        {
-                            // This is hit if there is nore than one neighbour.
-                            // Invalidate the neighbour.
-                            resSweeps[sid].Nei = 0xff;
-                        }
+                        // Set neighbour when first valid neighbour is enconutered.
+                        resSweeps[sid].Update(nr, resCount);
                     }
                 }
 
@@ -266,9 +259,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                 {
-                    if (SourceRegions[i] != 0xff)
+                    if (SourceRegions[i] != NULL_ID)
                     {
-                        SourceRegions[i] = sweeps[SourceRegions[i]].Id;
+                        SourceRegions[i] = sweeps[SourceRegions[i]].RegId;
                     }
                 }
             }
@@ -307,7 +300,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var s = Heightfield.Spans[i];
                 int ri = SourceRegions[i];
-                if (ri == 0xff)
+                if (ri == NULL_ID)
                 {
                     continue;
                 }
@@ -322,18 +315,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Update neighbours
-                for (int dir = 0; dir < 4; ++dir)
+                foreach (var item in Heightfield.IterateSpanConnections(s, x, y, Width))
                 {
-                    if (s.GetCon(dir) == CompactHeightfield.RC_NOT_CONNECTED)
-                    {
-                        continue;
-                    }
-
-                    int ax = x + Utils.GetDirOffsetX(dir);
-                    int ay = y + Utils.GetDirOffsetY(dir);
-                    int ai = Heightfield.Cells[ax + ay * Width].Index + s.GetCon(dir);
-                    int rai = SourceRegions[ai];
-                    if (rai != 0xff && rai != ri)
+                    int rai = SourceRegions[item.ai];
+                    if (rai != NULL_ID && rai != ri)
                     {
                         // Don't check return value -- if we cannot add the neighbor
                         // it will just cause a few more regions to be created, which
@@ -390,7 +375,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var root = Regions[i];
 
                 // Skip already visited.
-                if (root.LayerId != 0xff)
+                if (root.LayerId != NULL_ID)
                 {
                     continue;
                 }
@@ -436,7 +421,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var regn = Regions[nei];
 
                 // Skip already visited.
-                if (regn.LayerId != 0xff)
+                if (regn.LayerId != NULL_ID)
                 {
                     continue;
                 }
@@ -505,7 +490,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int oldId = FindOverlapLayerRegion(ri, i, mergeHeight);
 
                     // Could not find anything to merge with, stop.
-                    if (oldId == 0xff)
+                    if (oldId == NULL_ID)
                     {
                         break;
                     }
@@ -522,7 +507,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private int FindOverlapLayerRegion(LayerRegion region, int layerIndex, int mergeHeight)
         {
-            int oldId = 0xff;
+            int oldId = NULL_ID;
 
             for (int j = 0; j < NRegions; ++j)
             {
@@ -649,7 +634,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
                 else
                 {
-                    remap[i] = 0xff;
+                    remap[i] = NULL_ID;
                 }
             }
 
@@ -680,6 +665,60 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return (hmin, hmax);
+        }
+
+        /// <summary>
+        /// Checks the connection
+        /// </summary>
+        /// <param name="s">Compact span</param>
+        /// <param name="cx">X position</param>
+        /// <param name="cy">Y position</param>
+        /// <param name="layerId">Layer id</param>
+        /// <param name="layerIndex">Layer index</param>
+        /// <param name="hmin">Minimum height value</param>
+        /// <param name="heights">Height map</param>
+        /// <returns>Returns the connection value</returns>
+        public int CheckConnection(CompactSpan s, int cx, int cy, int layerId, int layerIndex, int hmin, int[] heights)
+        {
+            var sourceRegs = SourceRegions;
+            var regs = Regions;
+            int borderSize = BorderSize;
+            int w = Width;
+            int lw = LayerWidth;
+            int lh = LayerHeight;
+
+            int portal = 0;
+            int con = 0;
+
+            foreach (var (dir, ax, ay, ai, area, ass) in Heightfield.IterateSpanConnections(s, cx, cy, w))
+            {
+                int alid = sourceRegs[ai] != NULL_ID ? regs[sourceRegs[ai]].LayerId : NULL_ID;
+
+                // Portal mask
+                if (area != AreaTypes.RC_NULL_AREA && layerId != alid)
+                {
+                    portal |= 1 << dir;
+
+                    // Update height so that it matches on both sides of the portal.
+                    if (ass.Y > hmin)
+                    {
+                        heights[layerIndex] = Math.Max(heights[layerIndex], ass.Y - hmin);
+                    }
+                }
+
+                // Valid connection mask
+                if (area != AreaTypes.RC_NULL_AREA && layerId == alid)
+                {
+                    int nx = ax - borderSize;
+                    int ny = ay - borderSize;
+                    if (nx >= 0 && ny >= 0 && nx < lw && ny < lh)
+                    {
+                        con |= 1 << dir;
+                    }
+                }
+            }
+
+            return (portal << 4) | con;
         }
     }
 }

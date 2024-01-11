@@ -10,6 +10,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     struct HeightfieldLayer
     {
         /// <summary>
+        /// Null Id
+        /// </summary>
+        const int NULL_ID = 0xff;
+
+        /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
         public float CS { get; set; }
@@ -129,7 +134,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int gridSize = data.LayerWidth * data.LayerHeight;
 
-            Heights = Helper.CreateArray(gridSize, 0xff);
+            Heights = Helper.CreateArray(gridSize, NULL_ID);
             Areas = Helper.CreateArray(gridSize, AreaTypes.RC_NULL_AREA);
             Cons = Helper.CreateArray(gridSize, 0x00);
 
@@ -187,7 +192,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var s = data.Heightfield.Spans[j];
 
                 // Skip unassigned regions.
-                if (data.SourceRegions[j] == 0xff)
+                if (data.SourceRegions[j] == NULL_ID)
                 {
                     continue;
                 }
@@ -211,56 +216,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Areas[idx] = data.Heightfield.Areas[j];
 
                 // Check connection.
-                CheckConnection(s, cx, cy, lid, idx, hmin, data);
+                Cons[idx] = data.CheckConnection(s, cx, cy, lid, idx, hmin, Heights);
             }
-        }
-        /// <summary>
-        /// Check connection.
-        /// </summary>
-        private readonly void CheckConnection(CompactSpan s, int cx, int cy, int layerId, int layerIndex, int hmin, HeightfieldLayerData data)
-        {
-            int portal = 0;
-            int con = 0;
-
-            for (int dir = 0; dir < 4; ++dir)
-            {
-                int d = s.GetCon(dir);
-                if (d == CompactHeightfield.RC_NOT_CONNECTED)
-                {
-                    continue;
-                }
-
-                int ax = cx + Utils.GetDirOffsetX(dir);
-                int ay = cy + Utils.GetDirOffsetY(dir);
-                int ai = data.Heightfield.Cells[ax + ay * data.Width].Index + d;
-                int alid = data.SourceRegions[ai] != 0xff ? data.Regions[data.SourceRegions[ai]].LayerId : 0xff;
-
-                // Portal mask
-                if (data.Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && layerId != alid)
-                {
-                    portal |= 1 << dir;
-
-                    // Update height so that it matches on both sides of the portal.
-                    var ass = data.Heightfield.Spans[ai];
-                    if (ass.Y > hmin)
-                    {
-                        Heights[layerIndex] = Math.Max(Heights[layerIndex], ass.Y - hmin);
-                    }
-                }
-
-                // Valid connection mask
-                if (data.Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && layerId == alid)
-                {
-                    int nx = ax - data.BorderSize;
-                    int ny = ay - data.BorderSize;
-                    if (nx >= 0 && ny >= 0 && nx < data.LayerWidth && ny < data.LayerHeight)
-                    {
-                        con |= 1 << dir;
-                    }
-                }
-            }
-
-            Cons[layerIndex] = (portal << 4) | con;
         }
     }
 }

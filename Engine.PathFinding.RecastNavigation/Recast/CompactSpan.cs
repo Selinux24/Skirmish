@@ -7,6 +7,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public struct CompactSpan
     {
         /// <summary>
+        /// The value returned by #rcGetCon if the specified direction is not connected
+        /// to another span. (Has no neighbor.)
+        /// </summary>
+        const int RC_NOT_CONNECTED = 0x3f;
+        /// <summary>
+        /// Maximum connectio layers
+        /// </summary>
+        public const int MaxLayers = RC_NOT_CONNECTED - 1;
+
+        /// <summary>
         /// Default compact span
         /// </summary>
         public static CompactSpan Default
@@ -39,6 +49,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int H { get; set; }
 
         /// <summary>
+        /// Gets the connection index in the specified direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        /// <param name="con">Returns the connection index</param>
+        /// <returns>Returns true if connected</returns>
+        public readonly bool GetCon(int dir, out int con)
+        {
+            int shift = dir * 6;
+            con = (Con >> shift) & RC_NOT_CONNECTED;
+            return con != RC_NOT_CONNECTED;
+        }
+        /// <summary>
         /// Sets a connection in the specified direction
         /// </summary>
         /// <param name="dir">Direction</param>
@@ -46,18 +68,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public void SetCon(int dir, int i)
         {
             int shift = dir * 6;
-            int con = Con;
-            Con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
+            Con = (Con & ~(RC_NOT_CONNECTED << shift)) | ((i & RC_NOT_CONNECTED) << shift);
         }
         /// <summary>
-        /// Gets the connection index in the specified direction
+        /// Disconnects the span in the specified direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        /// <returns>Returns the connection index</returns>
-        public readonly int GetCon(int dir)
+        public void Disconnect(int dir)
         {
-            int shift = dir * 6;
-            return (Con >> shift) & 0x3f;
+            SetCon(dir, RC_NOT_CONNECTED);
         }
 
         /// <inheritdoc/>

@@ -96,7 +96,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if (IndexedPolygon.VertexIsExternalLink(n))
+            if (VertexFlags.IsExternalLink(n))
             {
                 // Border or portal edge.
                 return IndexedPolygon.CalculateVertexPortalFlag(n);
@@ -123,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nei">Neighbour index</param>
         public bool NeighbourIsExternalLink(int nei)
         {
-            return IndexedPolygon.VertexIsExternalLink(Neis[nei]);
+            return VertexFlags.IsExternalLink(Neis[nei]);
         }
 
         /// <inheritdoc/>

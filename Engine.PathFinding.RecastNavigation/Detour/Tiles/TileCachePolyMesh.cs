@@ -87,14 +87,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Triangulate contour
-                int ntris = cont.Triangulate(maxVertsPerCont, out var indices, out var tris);
+                var (indices, tris, ntris) = cont.Triangulate(maxVertsPerCont);
 
                 // Add and merge vertices.
                 for (int j = 0; j < cont.NVertices; ++j)
                 {
-                    var v = cont.Vertices[j];
-                    indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
-                    if ((v.Flag & TileCacheContourSet.BORDER_VERTEX) != 0)
+                    var cv = cont.Vertices[j];
+
+                    indices[j] = mesh.AddVertex(cv, firstVert, nextVert);
+                    if ((cv.Flag & VertexFlags.BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -135,14 +136,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Adds a new vertex to the polygon mesh
         /// </summary>
-        /// <param name="x">X value</param>
-        /// <param name="y">Y value</param>
-        /// <param name="z">Z value</param>
+        /// <param name="cv">Contour vertex</param>
         /// <param name="firstVert">First vertex</param>
         /// <param name="nextVert">Next vertex</param>
         /// <returns>Returns the added index</returns>
-        private int AddVertex(int x, int y, int z, int[] firstVert, int[] nextVert)
+        private int AddVertex(ContourVertex cv, int[] firstVert, int[] nextVert)
         {
+            int x = cv.X;
+            int y = cv.Y;
+            int z = cv.Z;
+
             int bucket = Utils.ComputeVertexHash(x, 0, z, VERTEX_BUCKET_COUNT - 1);
             int i = firstVert[bucket];
 

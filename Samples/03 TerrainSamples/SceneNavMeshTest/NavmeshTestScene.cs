@@ -33,6 +33,9 @@ namespace TerrainSamples.SceneNavmeshTest
         private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
+        private TimeSpan enqueueTime = TimeSpan.Zero;
+        private TimeSpan mapTime = TimeSpan.Zero;
+        private string loadState = null;
 
         private bool gameReady = false;
 
@@ -148,8 +151,8 @@ Space: Finds random over navmesh";
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
             //Rasterization
-            nmsettings.CellSize = 0.20f;
-            nmsettings.CellHeight = 0.15f;
+            nmsettings.CellSize = 0.1f;
+            nmsettings.CellHeight = 0.1f;
 
             //Agents
             nmsettings.Agents = new[] { agent };
@@ -196,10 +199,15 @@ Space: Finds random over navmesh";
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1, 0.8f, -1) * maxD * 0.8f);
 
-            EnqueueNavigationGraphUpdate();
+            EnqueueGraph();
         }
         public override void NavigationGraphLoaded()
         {
+            mapTime = DateTime.Now.TimeOfDay;
+            loadState = null;
+
+            lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;
+
             DrawGraphNodes(agent);
 
             gameReady = true;
@@ -358,10 +366,11 @@ Space: Finds random over navmesh";
 
             if (updateGraph)
             {
-                EnqueueNavigationGraphUpdate();
+                EnqueueGraph();
             }
 
-            debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+            var loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds";
+            debug.Text = $"Build Mode: {nmsettings.BuildMode}; Partition Type: {nmsettings.PartitionType}; {loading}";
         }
         private void DrawContact(Vector3 position, Triangle triangle)
         {
@@ -435,8 +444,19 @@ Space: Finds random over navmesh";
             }
         }
 
+        private void EnqueueGraph()
+        {
+            lastElapsedSeconds = null;
+            loadState = "Updating navigation graph.";
+
+            enqueueTime = DateTime.Now.TimeOfDay;
+            EnqueueNavigationGraphUpdate();
+        }
         private void ToggleTile(Vector3 tilePosition)
         {
+            lastElapsedSeconds = null;
+            loadState = $"Updating tile at {tilePosition}.";
+
             bool remove = Game.Input.ShiftPressed;
             bool create = Game.Input.ControlPressed;
 
@@ -461,6 +481,9 @@ Space: Finds random over navmesh";
             {
                 sw.Stop();
                 lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+                loadState = null;
+
+                DrawGraphNodes(agent);
             }
         }
 

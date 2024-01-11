@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.PathFinding.RecastNavigation.Recast;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -7,6 +8,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public struct TileCacheLayer
     {
+        /// <summary>
+        /// Maximum neighbours
+        /// </summary>
+        const int MAX_NEIS = 16;
+        /// <summary>
+        /// Null id value
+        /// </summary>
+        const int NULL_ID = 0xff;
+
         /// <summary>
         /// Header
         /// </summary>
@@ -32,68 +42,378 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int[] Regs { get; set; }
 
-        public readonly bool IsConnected(int ia, int ib, int walkableClimb)
+        /// <summary>
+        /// Builds the region id list
+        /// </summary>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Resulting layer regions</param>
+        /// <param name="nregs">Region count</param>
+        public bool BuildRegions(int walkableClimb, out int[] layerRegs, out int nregs)
+        {
+            if (!BuildMonotoneRegions(walkableClimb, out layerRegs, out nregs))
+            {
+                layerRegs = Array.Empty<int>();
+                nregs = -1;
+
+                return false;
+            }
+
+            // Allocate and init layer regions.
+            var regs = AllocateLayerRegions(walkableClimb, layerRegs, nregs);
+
+            // Compact ids.
+            CompactIds(regs, layerRegs, nregs);
+
+            return true;
+        }
+        /// <summary>
+        /// Partition walkable area into monotone regions.
+        /// </summary>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Resulting layer regions</param>
+        /// <param name="nregs">Region count</param>
+        private bool BuildMonotoneRegions(int walkableClimb, out int[] layerRegs, out int nregs)
+        {
+            int w = Header.Width;
+            int h = Header.Height;
+
+            layerRegs = Helper.CreateArray(w * h, NULL_ID);
+
+            int nsweeps = w;
+            LayerSweepSpan[] sweeps = new LayerSweepSpan[nsweeps];
+
+            // Partition walkable area into monotone regions.
+            int[] samples = new int[256];
+            nregs = 0;
+
+            for (int row = 0; row < h; ++row)
+            {
+                Utils.ResetArray(samples, nregs, 0);
+                int sweepCount = 0;
+
+                for (int col = 0; col < w; ++col)
+                {
+                    int idx = col + row * w;
+                    if (Areas[idx] == AreaTypes.RC_NULL_AREA)
+                    {
+                        continue;
+                    }
+
+                    // -x
+                    int sid = GetLayerRegX(col, row, w, walkableClimb, layerRegs);
+                    if (sid == NULL_ID)
+                    {
+                        sid = sweepCount++;
+                        sweeps[sid] = new()
+                        {
+                            NeiRegId = NULL_ID,
+                            SampleCount = 0,
+                        };
+                    }
+
+                    // -y
+                    int layerReg = GetLayerRegY(col, row, w, walkableClimb, layerRegs);
+                    if (layerReg != NULL_ID)
+                    {
+                        sweeps[sid].Update(layerReg, samples);
+                    }
+
+                    layerRegs[idx] = sid;
+                }
+
+                // Create unique ID.
+                if (!LayerSweepSpan.CreateUniqueIds(sweeps, sweepCount, samples, ref nregs))
+                {
+                    return false;
+                }
+
+                // Remap local sweep ids to region ids.
+                RemapRowRegionIds(row, w, layerRegs, sweeps);
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Remaps row region ids
+        /// </summary>
+        /// <param name="row">Row index</param>
+        /// <param name="w">Row width</param>
+        /// <param name="layerRegs">Layer regions</param>
+        /// <param name="sweeps">Layer sweep spans</param>
+        private static void RemapRowRegionIds(int row, int w, int[] layerRegs, LayerSweepSpan[] sweeps)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                int idx = x + row * w;
+
+                if (layerRegs[idx] != NULL_ID)
+                {
+                    layerRegs[idx] = sweeps[layerRegs[idx]].RegId;
+                }
+            }
+        }
+        /// <summary>
+        /// Allocate and init layer regions.
+        /// </summary>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Layer regions</param>
+        /// <param name="nregs">Region count</param>
+        /// <returns>Returns the allocated region list</returns>
+        private LayerMonotoneRegion[] AllocateLayerRegions(int walkableClimb, int[] layerRegs, int nregs)
+        {
+            int w = Header.Width;
+            int h = Header.Height;
+
+            // Allocate and init layer regions.
+            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, () =>
+            {
+                return new LayerMonotoneRegion()
+                {
+                    AreaId = 0,
+                    Neis = new int[MAX_NEIS],
+                    NNeis = 0,
+                    RegId = NULL_ID,
+                    Area = AreaTypes.RC_NULL_AREA,
+                };
+            });
+
+            // Find region neighbours.
+            for (int row = 0; row < h; ++row)
+            {
+                for (int col = 0; col < w; ++col)
+                {
+                    int idx = col + row * w;
+                    int ri = layerRegs[idx];
+                    if (ri == NULL_ID)
+                    {
+                        continue;
+                    }
+
+                    // Update area.
+                    regs[ri].AreaId++;
+                    regs[ri].Area = Areas[idx];
+
+                    // Update neighbours
+                    int ymi = col + (row - 1) * w;
+                    if (row <= 0 || !IsConnected(idx, ymi, walkableClimb))
+                    {
+                        continue;
+                    }
+
+                    int rai = layerRegs[ymi];
+                    if (rai != NULL_ID && rai != ri)
+                    {
+                        regs[ri].AddUniqueLast(rai);
+                        regs[rai].AddUniqueLast(ri);
+                    }
+                }
+            }
+
+            LayerMonotoneRegion.InitializeIds(regs, nregs);
+
+            LayerMonotoneRegion.Merge(regs, nregs);
+
+            return regs;
+        }
+        /// <summary>
+        /// Gets whether the specified areas were connected
+        /// </summary>
+        /// <param name="ia">A index</param>
+        /// <param name="ib">B index</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        private readonly bool IsConnected(int ia, int ib, int walkableClimb)
         {
             if (Areas[ia] != Areas[ib])
             {
+                //Different areas
                 return false;
             }
 
             if (Math.Abs(Heights[ia] - Heights[ib]) > walkableClimb)
             {
+                //Too height
                 return false;
             }
 
             return true;
         }
-        public readonly int GetNeighbourReg(int ax, int ay, int dir)
+        /// <summary>
+        /// Compact ids.
+        /// </summary>
+        /// <param name="regs">Region list</param>
+        /// <param name="layerRegs">Layer regions</param>
+        /// <param name="nregs">Region count</param>
+        private readonly void CompactIds(LayerMonotoneRegion[] regs, int[] layerRegs, int nregs)
         {
             int w = Header.Width;
-            int ia = ax + ay * w;
+            int h = Header.Height;
 
-            int con = IndexedPolygon.GetVertexDirection(Cons[ia]);
-            int portal = Cons[ia] >> 4;
-            int mask = 1 << dir;
+            int[] remap = Helper.CreateArray(256, 0);
 
-            if ((con & mask) == 0)
+            // Find number of unique regions.
+            int regId = 0;
+            for (int i = 0; i < nregs; ++i)
             {
-                // No connection, return portal or hard edge.
-                if ((portal & mask) != 0)
+                remap[regs[i].RegId] = 1;
+            }
+            for (int i = 0; i < 256; ++i)
+            {
+                if (remap[i] != 0x00)
                 {
-                    return 0xf8 + dir;
+                    remap[i] = regId++;
                 }
-                return 0xff;
             }
 
-            int bx = ax + Utils.GetDirOffsetX(dir);
-            int by = ay + Utils.GetDirOffsetY(dir);
-            int ib = bx + by * w;
-
-            return Regs[ib];
+            // Remap ids.
+            for (int i = 0; i < nregs; ++i)
+            {
+                regs[i].RegId = remap[regs[i].RegId];
+            }
+            for (int i = 0; i < w * h; ++i)
+            {
+                if (layerRegs[i] != NULL_ID)
+                {
+                    layerRegs[i] = regs[layerRegs[i]].RegId;
+                }
+            }
         }
-        public readonly bool WalkContour(int x, int y, TempContour cont)
+        /// <summary>
+        /// Gets the layer id on the left of current cell
+        /// </summary>
+        /// <param name="col">Column index</param>
+        /// <param name="row">Row index</param>
+        /// <param name="w">Row width</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Layer regions</param>
+        private readonly int GetLayerRegX(int col, int row, int w, int walkableClimb, int[] layerRegs)
+        {
+            if (col <= 0)
+            {
+                return NULL_ID;
+            }
+
+            int idx = col + row * w;
+            int xidx = (col - 1) + row * w;
+
+            if (!IsConnected(idx, xidx, walkableClimb))
+            {
+                return NULL_ID;
+            }
+
+            return layerRegs[xidx];
+        }
+        /// <summary>
+        /// Gets the layer id on top of current cell
+        /// </summary>
+        /// <param name="col">Column index</param>
+        /// <param name="row">Row index</param>
+        /// <param name="w">Row width</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="layerRegs">Layer regions</param>
+        private readonly int GetLayerRegY(int col, int row, int w, int walkableClimb, int[] layerRegs)
+        {
+            if (row <= 0)
+            {
+                return NULL_ID;
+            }
+
+            int idx = col + row * w;
+            int yidx = col + (row - 1) * w;
+
+            if (!IsConnected(idx, yidx, walkableClimb))
+            {
+                return NULL_ID;
+            }
+
+            return layerRegs[yidx];
+        }
+
+        /// <summary>
+        /// Builds a new contour set
+        /// </summary>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="maxError">Maximum error value</param>
+        /// <param name="cset">Resulting contour set</param>
+        public bool BuildContourSet(int walkableClimb, float maxError, out TileCacheContourSet cset)
+        {
+            int w = Header.Width;
+            int h = Header.Height;
+
+            var lcset = new TileCacheContourSet
+            {
+                NConts = RegCount,
+                Conts = new TileCacheContour[RegCount],
+            };
+
+            // Allocate temp buffer for contour tracing.
+            int maxTempVerts = (w + h) * 2 * 2; // Twice around the layer.
+
+            var tempVerts = new VertexWithNeigbour[maxTempVerts];
+            var tempPoly = new IndexedPolygon(maxTempVerts);
+
+            var temp = new TempContour(tempVerts, maxTempVerts, tempPoly);
+
+            // Find contours.
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    int idx = x + y * w;
+                    int ri = Regs[idx];
+                    if (ri == NULL_ID)
+                    {
+                        continue;
+                    }
+
+                    var cont = lcset.Conts[ri];
+                    if (cont.NVertices > 0)
+                    {
+                        continue;
+                    }
+
+                    cont.Reg = ri;
+                    cont.Area = Areas[idx];
+
+                    if (!WalkContour(temp, x, y, maxError, out var verts))
+                    {
+                        // Too complex contour.
+                        // Note: If you hit here often, try increasing 'maxTempVerts'.
+                        cset = new();
+                        return false;
+                    }
+
+                    // Store contour.
+                    cont.StoreVerts(verts, verts.Length, this, walkableClimb);
+
+                    lcset.Conts[ri] = cont;
+                }
+            }
+
+            cset = lcset;
+            return true;
+        }
+        /// <summary>
+        /// Walks the contour
+        /// </summary>
+        /// <param name="cont">Temporal contour helper</param>
+        /// <param name="col">Column index</param>
+        /// <param name="row">Row index</param>
+        /// <param name="maxError">Max error</param>
+        /// <param name="verts">Resulting vertext list</param>
+        private readonly bool WalkContour(TempContour cont, int col, int row, float maxError, out VertexWithNeigbour[] verts)
         {
             int w = Header.Width;
             int h = Header.Height;
 
             cont.Reset();
 
-            int startX = x;
-            int startY = y;
-            int startDir = -1;
-
-            for (int i = 0; i < 4; ++i)
-            {
-                int dr = (i + 3) & 3;
-                int rn = GetNeighbourReg(x, y, dr);
-                if (rn != Regs[x + y * w])
-                {
-                    startDir = dr;
-                    break;
-                }
-            }
+            int startCol = col;
+            int startRow = row;
+            int startDir = GetStartWalkDirection(col, row, Regs[col + row * w]);
             if (startDir == -1)
             {
+                verts = cont.SimplifyContour(maxError);
+
                 return true;
             }
 
@@ -103,47 +423,44 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int iter = 0;
             while (iter < maxIter)
             {
-                int rn = GetNeighbourReg(x, y, dir);
+                int rn = GetNeighbourRegionId(col, row, dir);
 
-                int nx = x;
-                int ny = y;
+                int nCol = col;
+                int nRow = row;
                 int ndir;
+                int idx = col + row * w;
 
-                if (rn != Regs[x + y * w])
+                if (rn != Regs[idx])
                 {
                     // Solid edge.
-                    int px = x;
-                    int pz = y;
-                    switch (dir)
-                    {
-                        case 0: pz++; break;
-                        case 1: px++; pz++; break;
-                        case 2: px++; break;
-                    }
+                    var se = CreateSolidEdge(col, Heights[idx], row, rn, dir);
 
                     // Try to merge with previous vertex.
-                    if (!cont.AppendVertex(px, Heights[x + y * w], pz, rn))
+                    if (!cont.AppendVertex(se))
                     {
+                        verts = Array.Empty<VertexWithNeigbour>();
+
                         return false;
                     }
 
-                    ndir = (dir + 1) & 0x3;  // Rotate CW
+                    ndir = Utils.RotateCW(dir);  // Rotate CW
                 }
                 else
                 {
                     // Move to next.
-                    nx = x + Utils.GetDirOffsetX(dir);
-                    ny = y + Utils.GetDirOffsetY(dir);
-                    ndir = (dir + 3) & 0x3; // Rotate CCW
+                    nCol = col + Utils.GetDirOffsetX(dir);
+                    nRow = row + Utils.GetDirOffsetY(dir);
+
+                    ndir = Utils.RotateCCW(dir); // Rotate CCW
                 }
 
-                if (iter > 0 && x == startX && y == startY && dir == startDir)
+                if (iter > 0 && col == startCol && row == startRow && dir == startDir)
                 {
                     break;
                 }
 
-                x = nx;
-                y = ny;
+                col = nCol;
+                row = nRow;
                 dir = ndir;
 
                 iter++;
@@ -152,18 +469,108 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Remove last vertex if it is duplicate of the first one.
             cont.RemoveLast();
 
+            verts = cont.SimplifyContour(maxError);
+
             return true;
         }
-        public readonly int GetCornerHeight(int x, int y, int z, int walkableClimb, ref bool shouldRemove)
+        /// <summary>
+        /// Gets the starting direction for the walk contour operation
+        /// </summary>
+        /// <param name="col">Column</param>
+        /// <param name="row">Row</param>
+        /// <param name="idReg">Region id</param>
+        /// <returns>Returns the direction value</returns>
+        private readonly int GetStartWalkDirection(int col, int row, int idReg)
         {
+            for (int i = 0; i < 4; ++i)
+            {
+                int dr = Utils.RotateCCW(i);
+                int rn = GetNeighbourRegionId(col, row, dr);
+                if (rn != idReg)
+                {
+                    return dr;
+                }
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Creates a solid edge from parameters
+        /// </summary>
+        /// <param name="x">X value</param>
+        /// <param name="y">Y value</param>
+        /// <param name="z">Z value</param>
+        /// <param name="rn">Region id</param>
+        /// <param name="dir">Direction</param>
+        private static VertexWithNeigbour CreateSolidEdge(int x, int y, int z, int rn, int dir)
+        {
+            int px = x;
+            int py = y;
+            int pz = z;
+            switch (dir)
+            {
+                case 0: pz++; break;
+                case 1: px++; pz++; break;
+                case 2: px++; break;
+            }
+
+            return new(px, py, pz, rn);
+        }
+        /// <summary>
+        /// Gets the neighbour region id
+        /// </summary>
+        /// <param name="col">Column index</param>
+        /// <param name="row">Row index</param>
+        /// <param name="dir">Neighbour at direction</param>
+        /// <returns>Returns the neighbour region id</returns>
+        private readonly int GetNeighbourRegionId(int col, int row, int dir)
+        {
+            int w = Header.Width;
+            int ia = col + row * w;
+            int con = Cons[ia];
+
+            int mask = 1 << dir;
+
+            int conDir = VertexFlags.GetVertexDirection(con);
+            int portal = con >> 4;
+
+            if ((conDir & mask) == 0)
+            {
+                // No connection, return portal or hard edge.
+                if ((portal & mask) != 0)
+                {
+                    return VertexFlags.DIR_MASK + dir;
+                }
+                return NULL_ID;
+            }
+
+            int bx = col + Utils.GetDirOffsetX(dir);
+            int by = row + Utils.GetDirOffsetY(dir);
+            int ib = bx + by * w;
+
+            return Regs[ib];
+        }
+        /// <summary>
+        /// Gets the corner height
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <param name="walkableClimb">Walkable climb value</param>
+        /// <param name="shouldRemove">Should remove vertex</param>
+        /// <returns>Returns the corner height from height-map</returns>
+        public readonly int GetCornerHeight(VertexWithNeigbour v, int walkableClimb, out bool shouldRemove)
+        {
+            int x = v.X;
+            int y = v.Y;
+            int z = v.Z;
+
             int w = Header.Width;
             int h = Header.Height;
 
             int n = 0;
 
-            int portal = IndexedPolygon.PORTAL_FLAG;
+            int portal = VertexFlags.PORTAL_FLAG;
             int height = 0;
-            int preg = 0xff;
+            int preg = NULL_ID;
             bool allSameReg = true;
 
             for (int dz = -1; dz <= 0; ++dz)
@@ -186,7 +593,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                     height = Math.Max(height, lh);
                     portal &= Cons[idx] >> 4;
-                    if (preg != 0xff && preg != Regs[idx])
+                    if (preg != NULL_ID && preg != Regs[idx])
                     {
                         allSameReg = false;
                     }

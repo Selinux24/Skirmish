@@ -43,5 +43,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             Z = z;
             Nei = nei;
         }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"X: {X}; Y: {Y}; Z: {Z}; Nei: {Nei}";
+        }
     }
 }
