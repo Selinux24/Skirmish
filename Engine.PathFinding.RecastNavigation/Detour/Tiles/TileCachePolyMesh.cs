@@ -447,46 +447,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             while (nedges != 0)
             {
-                bool match = false;
+                bool match = MatchEdge(edges, ref nedges, hole, ref nhole, harea, ref nharea);
 
-                for (int i = 0; i < nedges; ++i)
+                if (nhole >= MAX_REM_EDGES)
                 {
-                    int ea = edges[i].EdgeIndexA;
-                    int eb = edges[i].EdgeIndexB;
-                    var a = edges[i].Area;
-
-                    bool add = false;
-                    if (hole[0] == eb)
-                    {
-                        // The segment matches the beginning of the hole boundary.
-                        if (nhole >= MAX_REM_EDGES)
-                        {
-                            return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
-                        }
-                        Utils.PushFront(ea, hole, ref nhole);
-                        Utils.PushFront(a, harea, ref nharea);
-                        add = true;
-                    }
-                    else if (hole[nhole - 1] == ea)
-                    {
-                        // The segment matches the end of the hole boundary.
-                        if (nhole >= MAX_REM_EDGES)
-                        {
-                            return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
-                        }
-                        Utils.PushBack(eb, hole, ref nhole);
-                        Utils.PushBack(a, harea, ref nharea);
-                        add = true;
-                    }
-
-                    if (add)
-                    {
-                        // The edge segment was added, remove it.
-                        edges[i] = edges[nedges - 1];
-                        nedges--;
-                        match = true;
-                        i--;
-                    }
+                    return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
                 }
 
                 if (!match)
@@ -501,14 +466,66 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Generate temp vertex array for triangulation.
             for (int i = 0; i < nhole; ++i)
             {
-                int pi = hole[i];
-                tverts[i].X = Verts[pi].X;
-                tverts[i].Y = Verts[pi].Y;
-                tverts[i].Z = Verts[pi].Z;
+                tverts[i] = Verts[hole[i]];
                 thole[i] = i;
             }
 
             return (true, tverts, thole, hole, harea);
+        }
+        /// <summary>
+        /// Gets whether the edges segment matches the hole boundary
+        /// </summary>
+        /// <param name="edges">Edges list</param>
+        /// <param name="nedges">Number of edges</param>
+        /// <param name="hole">Hole indices</param>
+        /// <param name="nhole">Number of indices in the hole</param>
+        /// <param name="harea">Hole areas</param>
+        /// <param name="nharea">Number of areas in the hole</param>
+        private static bool MatchEdge(IndexedRegionEdge[] edges, ref int nedges, int[] hole, ref int nhole, SamplePolyAreas[] harea, ref int nharea)
+        {
+            bool match = false;
+
+            for (int i = 0; i < nedges; ++i)
+            {
+                int ea = edges[i].EdgeIndexA;
+                int eb = edges[i].EdgeIndexB;
+                var a = edges[i].Area;
+
+                bool added = false;
+                if (hole[0] == eb)
+                {
+                    // The segment matches the beginning of the hole boundary.
+                    if (nhole >= MAX_REM_EDGES)
+                    {
+                        return false;
+                    }
+                    Utils.PushFront(ea, hole, ref nhole);
+                    Utils.PushFront(a, harea, ref nharea);
+                    added = true;
+                }
+                else if (hole[nhole - 1] == ea)
+                {
+                    // The segment matches the end of the hole boundary.
+                    if (nhole >= MAX_REM_EDGES)
+                    {
+                        return false;
+                    }
+                    Utils.PushBack(eb, hole, ref nhole);
+                    Utils.PushBack(a, harea, ref nharea);
+                    added = true;
+                }
+
+                if (added)
+                {
+                    // The edge segment was added, remove it.
+                    edges[i] = edges[nedges - 1];
+                    nedges--;
+                    match = true;
+                    i--;
+                }
+            }
+
+            return match;
         }
 
         /// <summary>
