@@ -34,7 +34,6 @@ namespace TerrainSamples.SceneNavmeshTest
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
-        private TimeSpan mapTime = TimeSpan.Zero;
         private string loadState = null;
 
         private bool gameReady = false;
@@ -203,7 +202,7 @@ Space: Finds random over navmesh";
         }
         public override void NavigationGraphLoaded()
         {
-            mapTime = DateTime.Now.TimeOfDay;
+            var mapTime = DateTime.Now.TimeOfDay;
             loadState = null;
 
             lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;

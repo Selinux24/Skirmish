@@ -181,7 +181,12 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            if ((array?.Length ?? 0) > start + count)
+            if (array?.Any() != true)
+            {
+                return;
+            }
+
+            if (array.Length > start + count)
             {
                 return;
             }
