@@ -63,20 +63,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int nx = ix + x;
                 int nz = iz + z;
-
-                if (nx >= 0 && nz >= 0 && nx < Bounds.Width && nz < Bounds.Height)
-                {
-                    int nh = Data[nx + nz * Bounds.Width];
-                    if (nh != RC_UNSET_HEIGHT)
-                    {
-                        float d = Math.Abs(nh * ch - p.Y);
-                        if (d < dmin)
-                        {
-                            h = nh;
-                            dmin = d;
-                        }
-                    }
-                }
+                GetMinDistance(nx, nz, ch, p.Y, ref h, ref dmin);
 
                 // We are searching in a grid which looks approximately like this:
                 //  __________
@@ -112,6 +99,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     dx = -dz;
                     dz = tmp;
                 }
+
                 x += dx;
                 z += dz;
             }
@@ -119,18 +107,50 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return h;
         }
         /// <summary>
+        /// Updates the minimum distance
+        /// </summary>
+        /// <param name="x">Heightpatch x coordinate</param>
+        /// <param name="z">Heightpatch z coordinate</param>
+        /// <param name="ch">Cell height</param>
+        /// <param name="pY">Point height</param>
+        /// <param name="h">Height value</param>
+        /// <param name="dmin">Minimum distance value</param>
+        /// <remarks>Only updates the height and distance if it is less</remarks>
+        private void GetMinDistance(int x, int z, float ch, float pY, ref int h, ref float dmin)
+        {
+            Bounds.Contains(x, z);
+
+            if (x < 0 || z < 0 || x >= Bounds.Width || z >= Bounds.Height)
+            {
+                return;
+            }
+
+            int nh = Data[x + z * Bounds.Width];
+            if (nh == RC_UNSET_HEIGHT)
+            {
+                return;
+            }
+
+            float d = Math.Abs(nh * ch - pY);
+            if (d < dmin)
+            {
+                h = nh;
+                dmin = d;
+            }
+        }
+        /// <summary>
         /// Gets whether the specified magnitudes were into the heightpatch or not
         /// </summary>
-        /// <param name="hx">X height</param>
-        /// <param name="hy">Y height</param>
-        public bool CompareBounds(int hx, int hy)
+        /// <param name="x">X height</param>
+        /// <param name="z">Y height</param>
+        public bool CompareBounds(int x, int z)
         {
-            if (hx < 0 || hy < 0 || hx >= Bounds.Width || hy >= Bounds.Height)
+            if (x < 0 || z < 0 || x >= Bounds.Width || z >= Bounds.Height)
             {
                 return false;
             }
 
-            if (Data[hx + hy * Bounds.Width] != RC_UNSET_HEIGHT)
+            if (Data[x + z * Bounds.Width] != RC_UNSET_HEIGHT)
             {
                 return false;
             }
