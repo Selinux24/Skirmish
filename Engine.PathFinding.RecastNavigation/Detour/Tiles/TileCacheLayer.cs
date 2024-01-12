@@ -529,15 +529,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int ia = col + row * w;
             int con = Cons[ia];
 
-            int mask = 1 << dir;
-
             int conDir = VertexFlags.GetVertexDirection(con);
             int portal = con >> 4;
 
-            if ((conDir & mask) == 0)
+            if (!IsPortalAtDirection(conDir, dir))
             {
                 // No connection, return portal or hard edge.
-                if ((portal & mask) != 0)
+                if (IsPortalAtDirection(portal, dir))
                 {
                     return VertexFlags.DIR_MASK + dir;
                 }
@@ -602,22 +600,59 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
+            shouldRemove = ShouldRemove(n, allSameReg, portal);
+
+            return height;
+        }
+        /// <summary>
+        /// Gets whether the vertex should be removed or not
+        /// </summary>
+        /// <param name="n">Number of detected vertices</param>
+        /// <param name="allSameReg">All detected vertices are from the same region</param>
+        /// <param name="con">Connecion</param>
+        private static bool ShouldRemove(int n, bool allSameReg, int con)
+        {
+            if (n <= 1)
+            {
+                return false;
+            }
+
+            if (!allSameReg)
+            {
+                return false;
+            }
+
+            int portalCount = GetPortalCount(con);
+
+            return portalCount == 1;
+        }
+        /// <summary>
+        /// Gets the portal count from the specified connection
+        /// </summary>
+        /// <param name="con">Connection</param>
+        public static int GetPortalCount(int con)
+        {
             int portalCount = 0;
             for (int dir = 0; dir < 4; ++dir)
             {
-                if ((portal & (1 << dir)) != 0)
+                if (IsPortalAtDirection(con, dir))
                 {
                     portalCount++;
                 }
             }
 
-            shouldRemove = false;
-            if (n > 1 && portalCount == 1 && allSameReg)
-            {
-                shouldRemove = true;
-            }
+            return portalCount;
+        }
+        /// <summary>
+        /// Gets whether the especified connection has a portal at the speficied direction
+        /// </summary>
+        /// <param name="con">Connection</param>
+        /// <param name="dir">Direction</param>
+        public static bool IsPortalAtDirection(int con, int dir)
+        {
+            int mask = 1 << dir;
 
-            return height;
+            return (con & mask) != 0;
         }
     }
 }

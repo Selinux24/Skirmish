@@ -285,16 +285,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int numRemovedVerts = IndexedPolygon.CountPolygonsToRemove(Polys, NPolys, rem);
             numRemovedVerts = Math.Min(numRemovedVerts, MAX_REM_EDGES);
 
-            if (!GenerateRemoveEdges(numRemovedVerts, rem, out var edgeList))
+            var (edges, nedges) = RemoveEdges(rem, numRemovedVerts);
+            if (nedges <= 0)
             {
-                return false;
-            }
-
-            var edges = edgeList.Edges;
-            var nedges = edges.Length;
-            if (nedges == 0)
-            {
-                return true;
+                return nedges == 0;
             }
 
             // Start with one vertex, keep appending connected
@@ -345,12 +339,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return true;
         }
         /// <summary>
-        /// Generates remove edges
+        /// Remove edges
         /// </summary>
-        /// <param name="numRemovedVerts">Number of removed vertices</param>
         /// <param name="rem">Index to remove</param>
-        /// <param name="edgeList">Returns the edge list</param>
-        private bool GenerateRemoveEdges(int numRemovedVerts, int rem, out (IndexedRegionEdge[] Edges, int NEdges) edgeList)
+        /// <param name="numRemovedVerts">Number of removed vertices</param>
+        /// <returns>Returns the edge list</returns>
+        private (IndexedRegionEdge[] Edges, int NEdges) RemoveEdges(int rem, int numRemovedVerts)
         {
             var edges = new IndexedRegionEdge[numRemovedVerts];
             int nedges = 0;
@@ -374,9 +368,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                     if (nedges >= numRemovedVerts)
                     {
-                        edgeList = (Array.Empty<IndexedRegionEdge>(), 0);
-
-                        return false;
+                        return (Array.Empty<IndexedRegionEdge>(), -1);
                     }
 
                     edges[nedges++] = new(p[k], p[j], -1, Areas[i]);
@@ -391,15 +383,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Remove vertex.
             RemoveVertex(rem);
 
-            for (int i = 0; i < nedges; ++i)
-            {
-                if (edges[i].EdgeIndexA > rem) edges[i].EdgeIndexA--;
-                if (edges[i].EdgeIndexB > rem) edges[i].EdgeIndexB--;
-            }
+            IndexedRegionEdge.RemoveIndex(edges, nedges, rem);
 
-            edgeList = (edges, nedges);
-
-            return true;
+            return (edges, nedges);
         }
         /// <summary>
         /// Removes the specified polygon by index
@@ -434,7 +420,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int nv = p.CountPolyVerts();
                 for (int j = 0; j < nv; ++j)
                 {
-                    if (p[j] > rem) p[j]--;
+                    if (p[j] > rem)
+                    {
+                        p[j]--;
+                    }
                 }
             }
         }

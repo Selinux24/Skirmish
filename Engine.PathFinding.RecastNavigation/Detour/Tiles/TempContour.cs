@@ -190,63 +190,71 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 int ii = (i + 1) % npoly;
 
-                int ai = poly[i];
-                int ax = verts[ai].X;
-                int az = verts[ai].Z;
-
-                int bi = poly[ii];
-                int bx = verts[bi].X;
-                int bz = verts[bi].Z;
-
                 // Find maximum deviation from the segment.
-                float maxd = 0;
-                int maxi = -1;
-                int ci, cinc, endi;
-
-                // Traverse the segment in lexilogical order so that the
-                // max deviation is calculated similarly when traversing
-                // opposite segments.
-                if (bx > ax || (bx == ax && bz > az))
-                {
-                    cinc = 1;
-                    ci = (ai + cinc) % nverts;
-                    endi = bi;
-                }
-                else
-                {
-                    cinc = nverts - 1;
-                    ci = (bi + cinc) % nverts;
-                    endi = ai;
-                }
-
-                // Tessellate only outer edges or edges between areas.
-                while (ci != endi)
-                {
-                    float d = Utils.DistancePtSegSqr2D(verts[ci].X, verts[ci].Z, ax, az, bx, bz);
-                    if (d > maxd)
-                    {
-                        maxd = d;
-                        maxi = ci;
-                    }
-                    ci = (ci + cinc) % nverts;
-                }
+                var (maxi, maxd) = FindMaximumDeviation2D(i, ii);
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
                 if (maxi != -1 && maxd > maxErrorSqr)
                 {
-                    npoly++;
-                    for (int j = npoly - 1; j > i; --j)
-                    {
-                        poly[j] = poly[j - 1];
-                    }
-                    poly[i + 1] = maxi;
+                    InsertPointAtPosition(i, maxi);
                 }
                 else
                 {
                     i++;
                 }
             }
+        }
+        /// <summary>
+        /// Finds the maximum deviation of the segment
+        /// </summary>
+        /// <param name="a">Point A index</param>
+        /// <param name="b">Point B index</param>
+        private (int maxi, float maxd) FindMaximumDeviation2D(int a, int b)
+        {
+            int maxi = -1;
+            float maxd = 0;
+
+            int ai = poly[a];
+            int ax = verts[ai].X;
+            int az = verts[ai].Z;
+
+            int bi = poly[b];
+            int bx = verts[bi].X;
+            int bz = verts[bi].Z;
+
+            // Traverse the segment in lexilogical order so that the
+            // max deviation is calculated similarly when traversing
+            // opposite segments.
+            int cinc;
+            int ci;
+            int endi;
+            if (bx > ax || (bx == ax && bz > az))
+            {
+                cinc = 1;
+                ci = (ai + cinc) % nverts;
+                endi = bi;
+            }
+            else
+            {
+                cinc = nverts - 1;
+                ci = (bi + cinc) % nverts;
+                endi = ai;
+            }
+
+            // Tessellate only outer edges or edges between areas.
+            while (ci != endi)
+            {
+                float d = Utils.DistancePtSegSqr2D(verts[ci].X, verts[ci].Z, ax, az, bx, bz);
+                if (d > maxd)
+                {
+                    maxd = d;
+                    maxi = ci;
+                }
+                ci = (ci + cinc) % nverts;
+            }
+
+            return (maxi, maxd);
         }
         /// <summary>
         /// Remap vertices
@@ -277,6 +285,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public void Reset()
         {
             nverts = 0;
+        }
+        /// <summary>
+        /// Inserts the specified index value at the position index
+        /// </summary>
+        /// <param name="position">Position in the vertex list</param>
+        /// <param name="indexValue">Value</param>
+        public void InsertPointAtPosition(int position, int indexValue)
+        {
+            npoly++;
+            for (int j = npoly - 1; j > position; --j)
+            {
+                poly[j] = poly[j - 1];
+            }
+            poly[position + 1] = indexValue;
         }
         /// <summary>
         /// Remove last vertex

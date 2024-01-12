@@ -50,27 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 var reg = regs[i];
 
-                int merge = -1;
-                int mergea = 0;
-                for (int j = 0; j < reg.NNeis; ++j)
-                {
-                    int nei = reg.Neis[j];
-                    var regn = regs[nei];
-                    if (reg.RegId == regn.RegId)
-                    {
-                        continue;
-                    }
-                    if (reg.Area != regn.Area)
-                    {
-                        continue;
-                    }
-                    if (regn.AreaId > mergea && CanMerge(regs, nregs, reg.RegId, regn.RegId))
-                    {
-                        mergea = regn.AreaId;
-                        merge = nei;
-                    }
-                }
-
+                int merge = FindMergeValue(reg, regs, nregs);
                 if (merge == -1)
                 {
                     continue;
@@ -86,6 +66,37 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Finds the merge index
+        /// </summary>
+        /// <param name="reg">Region</param>
+        /// <param name="regs">Region list</param>
+        /// <param name="nregs">Number of regions</param>
+        private static int FindMergeValue(LayerMonotoneRegion reg, LayerMonotoneRegion[] regs, int nregs)
+        {
+            int merge = -1;
+            int mergea = 0;
+            for (int j = 0; j < reg.NNeis; ++j)
+            {
+                int nei = reg.Neis[j];
+                var regn = regs[nei];
+                if (reg.RegId == regn.RegId)
+                {
+                    continue;
+                }
+                if (reg.Area != regn.Area)
+                {
+                    continue;
+                }
+                if (regn.AreaId > mergea && CanMerge(regs, nregs, reg.RegId, regn.RegId))
+                {
+                    mergea = regn.AreaId;
+                    merge = nei;
+                }
+            }
+
+            return merge;
         }
         /// <summary>
         /// Gets whether two regions can merge or not
