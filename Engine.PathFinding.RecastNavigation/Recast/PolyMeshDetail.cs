@@ -38,7 +38,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             var orig = mesh.Bounds.Minimum;
-            int borderSize = mesh.BorderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
             var (Bounds, MaxHWidth, MaxHHeight) = mesh.FindBounds(chf);
@@ -65,7 +64,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Get the height data from the area of the polygon.
                 hp.Bounds = b.GetRectangle();
 
-                chf.GetHeightData(iPoly, mesh.Verts, hp, borderSize, region);
+                chf.GetHeightData(iPoly, mesh.Verts, hp, region);
 
                 // Build detail mesh.
                 var param = new BuildPolyDetailParams

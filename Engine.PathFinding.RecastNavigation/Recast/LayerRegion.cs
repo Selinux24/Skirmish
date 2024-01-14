@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -128,6 +129,37 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public readonly bool ContainsNei(int v)
         {
             return Neis?.Take(NNeis)?.Contains(v) ?? false;
+        }
+        /// <summary>
+        /// Merges the specified region layers into current
+        /// </summary>
+        /// <param name="reg">Layer region to merge in</param>
+        public bool Merge(LayerRegion reg)
+        {
+            for (int k = 0; k < reg.NLayers; ++k)
+            {
+                if (!AddUniqueLayer(reg.Layers[k]))
+                {
+                    return false;
+                }
+            }
+
+            YMin = Math.Min(YMin, reg.YMin);
+            YMax = Math.Max(YMax, reg.YMax);
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the height range between to layer regions
+        /// </summary>
+        /// <param name="reg1">Layer region 1</param>
+        /// <param name="reg2">Layer region 2</param>
+        public static int GetHeightRange(LayerRegion reg1, LayerRegion reg2)
+        {
+            // Skip if the height range would become too large.
+            int ymin = Math.Min(reg1.YMin, reg2.YMin);
+            int ymax = Math.Max(reg1.YMax, reg2.YMax);
+            return ymax - ymin;
         }
 
         /// <inheritdoc/>

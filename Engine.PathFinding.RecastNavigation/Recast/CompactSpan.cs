@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
     /// <summary>
@@ -47,6 +48,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The height of the span.  (Measured from #y.)
         /// </summary>
         public int H { get; set; }
+
+        /// <summary>
+        /// Iterates over the specified span connections
+        /// </summary>
+        /// <param name="cs">Compact span</param>
+        public readonly IEnumerable<(int dir, int con)> IterateSpanConnections()
+        {
+            for (int dir = 0; dir < 4; dir++)
+            {
+                if (!GetCon(dir, out int con))
+                {
+                    continue;
+                }
+
+                yield return (dir, con);
+            }
+        }
 
         /// <summary>
         /// Gets the connection index in the specified direction

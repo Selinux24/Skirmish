@@ -127,35 +127,36 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return ldata;
         }
         /// <summary>
-        /// Creates an unique ID.
+        /// Creates an unique region id.
         /// </summary>
-        private static LayerSweepSpan[] CreateUniqueId(int[] prevCount, int regId, LayerSweepSpan[] sweeps, int nsweeps, out int id)
+        /// <param name="sweeps">Sweep list</param>
+        /// <param name="nsweeps">Number of sweeps in the list</param>
+        /// <param name="lastId">Last region id</param>
+        /// <param name="samples">Number of samples</param>
+        private static int CreateUniqueId(LayerSweepSpan[] sweeps, int nsweeps, int lastId, int[] samples)
         {
-            id = regId;
-
-            // Copy array
-            var res = sweeps.ToArray();
+            int id = lastId;
 
             for (int i = 0; i < nsweeps; ++i)
             {
-                // If the neighbour is set and there is only one continuous connection to it,
-                // the sweep will be merged with the previous one, else new region is created.
-                if (res[i].NeiRegId != NULL_ID && prevCount[res[i].NeiRegId] == res[i].SampleCount)
-                {
-                    res[i].RegId = res[i].NeiRegId;
-
-                    continue;
-                }
-
                 if (id == 255)
                 {
                     throw new EngineException("rcBuildHeightfieldLayers: Region ID overflow.");
                 }
 
-                res[i].RegId = id++;
+                // If the neighbour is set and there is only one continuous connection to it,
+                // the sweep will be merged with the previous one, else new region is created.
+                if (sweeps[i].NeiRegId != NULL_ID && samples[sweeps[i].NeiRegId] == sweeps[i].SampleCount)
+                {
+                    sweeps[i].RegId = sweeps[i].NeiRegId;
+
+                    continue;
+                }
+
+                sweeps[i].RegId = id++;
             }
 
-            return res;
+            return id;
         }
 
         /// <summary>
@@ -165,22 +166,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             SourceRegions = Helper.CreateArray(Heightfield.SpanCount, NULL_ID);
 
-            LayerSweepSpan[] sweeps = Helper.CreateArray(Heightfield.Width, new LayerSweepSpan());
+            var sweeps = Helper.CreateArray(Heightfield.Width, () => LayerSweepSpan.Empty);
 
             int regId = 0;
 
             for (int y = BorderSize; y < Height - BorderSize; ++y)
             {
-                int[] prevCount = Helper.CreateArray(256, 0);
                 int sweepId = 0;
+                int[] samples = Helper.CreateArray(256, 0);
 
                 for (int x = BorderSize; x < Width - BorderSize; ++x)
                 {
-                    (prevCount, sweeps) = GenerateRegionCell(x, y, sweepId, prevCount, sweeps, out sweepId);
+                    GenerateRegionCell(x, y, sweepId, samples, sweeps, out sweepId);
                 }
 
                 // Create unique ID.
-                sweeps = CreateUniqueId(prevCount, regId, sweeps, sweepId, out regId);
+                regId = CreateUniqueId(sweeps, sweepId, regId, samples);
 
                 // Remap local sweep ids to region ids.
                 RemapRegionIds(y, sweeps);
@@ -191,62 +192,89 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Generates a region cell
         /// </summary>
-        private (int[], LayerSweepSpan[]) GenerateRegionCell(int x, int y, int sweepId, int[] prevCount, LayerSweepSpan[] sweeps, out int id)
+        private void GenerateRegionCell(int x, int y, int sweepId, int[] samples, LayerSweepSpan[] sweeps, out int id)
         {
             id = sweepId;
 
-            var resCount = prevCount.ToArray();
-            var resSweeps = sweeps.ToArray();
-
-            var c = Heightfield.Cells[x + y * Width];
-
-            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+            foreach (var (s, i) in Heightfield.IterateCellSpans(x, y))
             {
-                var s = Heightfield.Spans[i];
                 if (Heightfield.Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
                     continue;
                 }
 
-                int sid = NULL_ID;
-
                 // -x
-                if (s.GetCon(0, out int con))
+                if (!TestX(s, x, y, out int sid))
                 {
-                    int ax = x + Utils.GetDirOffsetX(0);
-                    int ay = y + Utils.GetDirOffsetY(0);
-                    int ai = Heightfield.Cells[ax + ay * Width].Index + con;
-                    if (Heightfield.Areas[ai] != AreaTypes.RC_NULL_AREA && SourceRegions[ai] != NULL_ID)
-                    {
-                        sid = SourceRegions[ai];
-                    }
-                }
-
-                if (sid == NULL_ID)
-                {
+                    // Add sweep
                     sid = id++;
-                    resSweeps[sid].NeiRegId = NULL_ID;
-                    resSweeps[sid].SampleCount = 0;
+                    sweeps[sid].Reset();
                 }
 
                 // -y
-                if (s.GetCon(3, out con))
+                if (TestY(s, x, y, out int nr))
                 {
-                    int ax = x + Utils.GetDirOffsetX(3);
-                    int ay = y + Utils.GetDirOffsetY(3);
-                    int ai = Heightfield.Cells[ax + ay * Width].Index + con;
-                    int nr = SourceRegions[ai];
-                    if (nr != NULL_ID)
-                    {
-                        // Set neighbour when first valid neighbour is enconutered.
-                        resSweeps[sid].Update(nr, resCount);
-                    }
+                    // Set neighbour when first valid neighbour is enconutered.
+                    sweeps[sid].Update(nr, samples);
                 }
 
+                // Store source region
                 SourceRegions[i] = sid;
             }
+        }
+        /// <summary>
+        /// Tests -X neighbour
+        /// </summary>
+        /// <param name="s">Span</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="regionId">Resulting region id</param>
+        private bool TestX(CompactSpan s, int x, int y, out int regionId)
+        {
+            regionId = NULL_ID;
 
-            return (resCount, resSweeps);
+            if (!s.GetCon(0, out int con))
+            {
+                return false;
+            }
+
+            int ai = Heightfield.GetNeighbourCellIndex(x, y, 0, con);
+            int nr = SourceRegions[ai];
+            if (nr == NULL_ID || Heightfield.Areas[ai] == AreaTypes.RC_NULL_AREA)
+            {
+                return false;
+            }
+
+            regionId = nr;
+
+            return true;
+        }
+        /// <summary>
+        /// Tests -Y neighbour
+        /// </summary>
+        /// <param name="s">Span</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="regionId">Resulting region id</param>
+        private bool TestY(CompactSpan s, int x, int y, out int regionId)
+        {
+            regionId = NULL_ID;
+
+            if (!s.GetCon(3, out int con))
+            {
+                return false;
+            }
+
+            int ai = Heightfield.GetNeighbourCellIndex(x, y, 3, con);
+            int nr = SourceRegions[ai];
+            if (nr == NULL_ID)
+            {
+                return false;
+            }
+
+            regionId = nr;
+
+            return true;
         }
         /// <summary>
         /// Remap local sweep ids to region ids.
@@ -292,13 +320,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private int[] AllocateRegionCell(int x, int y)
         {
-            var c = Heightfield.Cells[x + y * Width];
-
             List<int> lregs = new(LayerRegion.MaxLayers);
 
-            for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+            foreach (var (s, i) in Heightfield.IterateCellSpans(x, y))
             {
-                var s = Heightfield.Spans[i];
                 int ri = SourceRegions[i];
                 if (ri == NULL_ID)
                 {
@@ -315,16 +340,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Update neighbours
-                foreach (var item in Heightfield.IterateSpanConnections(s, x, y, Width))
+                foreach (var item in Heightfield.IterateSpanConnections(s, x, y))
                 {
                     int rai = SourceRegions[item.ai];
-                    if (rai != NULL_ID && rai != ri)
+                    if (rai == NULL_ID || rai == ri)
                     {
-                        // Don't check return value -- if we cannot add the neighbor
-                        // it will just cause a few more regions to be created, which
-                        // is fine.
-                        Regions[ri].AddUniqueNei(rai);
+                        continue;
                     }
+
+                    // Don't check return value -- if we cannot add the neighbor
+                    // it will just cause a few more regions to be created, which
+                    // is fine.
+                    Regions[ri].AddUniqueNei(rai);
                 }
             }
 
@@ -333,30 +360,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Update overlapping regions.
         /// </summary>
+        /// <param name="lregs">Layer region list</param>
         private void UpdayeOverlappingRegions(int[] lregs)
         {
             for (int i = 0; i < lregs.Length - 1; ++i)
             {
                 for (int j = i + 1; j < lregs.Length; ++j)
                 {
-                    var li = lregs[i];
-                    var lj = lregs[j];
-
-                    if (li == lj)
+                    if (lregs[i] == lregs[j])
                     {
                         continue;
                     }
 
-                    var ri = Regions[li];
-                    var rj = Regions[lj];
-
-                    if (!ri.AddUniqueLayer(lj) || !rj.AddUniqueLayer(li))
+                    if (!Regions[lregs[i]].AddUniqueLayer(lregs[j]) || !Regions[lregs[j]].AddUniqueLayer(lregs[i]))
                     {
                         throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                     }
-
-                    Regions[li] = ri;
-                    Regions[lj] = rj;
                 }
             }
         }
@@ -390,8 +409,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 while (stack.Any())
                 {
                     // Pop front
-                    var reg = Regions[stack[0]];
-                    stack.RemoveAt(0);
+                    var reg = Regions[stack.PopFirst()];
 
                     root = ProcessNeigbors(reg, layerId, root, stack);
                 }
@@ -418,13 +436,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int j = 0; j < nneis; ++j)
             {
                 int nei = reg.Neis[j];
-                var regn = Regions[nei];
-
-                // Skip already visited.
-                if (regn.LayerId != NULL_ID)
-                {
-                    continue;
-                }
 
                 // Skip if the neighbour is overlapping root region.
                 if (res.ContainsLayer(nei))
@@ -432,36 +443,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                // Skip if the height range would become too large.
-                int ymin = Math.Min(res.YMin, regn.YMin);
-                int ymax = Math.Max(res.YMax, regn.YMax);
-                if ((ymax - ymin) >= 255)
+                // Skip already visited.
+                if (Regions[nei].LayerId != NULL_ID)
                 {
                     continue;
                 }
 
-                if (stack.Count < MaxStack)
+                // Skip if the height range would become too large.
+                int h = LayerRegion.GetHeightRange(res, Regions[nei]);
+                if (h >= 255)
                 {
-                    // Deepen
-                    stack.Add(nei);
-
-                    // Mark layer id
-                    regn.LayerId = layerId;
-
-                    // Merge current layers to root.
-                    for (int k = 0; k < regn.NLayers; ++k)
-                    {
-                        if (!res.AddUniqueLayer(regn.Layers[k]))
-                        {
-                            throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
-                        }
-                    }
-
-                    res.YMin = Math.Min(res.YMin, regn.YMin);
-                    res.YMax = Math.Max(res.YMax, regn.YMax);
+                    continue;
                 }
 
-                Regions[nei] = regn;
+                if (stack.Count >= MaxStack)
+                {
+                    continue;
+                }
+
+                // Deepen
+                stack.Add(nei);
+
+                // Mark layer id
+                Regions[nei].LayerId = layerId;
+
+                // Merge current layers to root.
+                if (!res.Merge(Regions[nei]))
+                {
+                    throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
+                }
             }
 
             return res;
@@ -529,9 +539,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Skip if the height range would become too large.
-                int ymin = Math.Min(region.YMin, rj.YMin);
-                int ymax = Math.Max(region.YMax, rj.YMax);
-                if ((ymax - ymin) >= 255)
+                int h = LayerRegion.GetHeightRange(region, rj);
+                if (h >= 255)
                 {
                     continue;
                 }
@@ -593,20 +602,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 rj.IsBase = false;
+
                 // Remap layerIds.
                 rj.LayerId = newId;
-                // Add overlaid layers from 'rj' to 'ri'.
-                for (int k = 0; k < rj.NLayers; ++k)
-                {
-                    if (!ri.AddUniqueLayer(rj.Layers[k]))
-                    {
-                        throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
-                    }
-                }
 
-                // Update height bounds.
-                ri.YMin = Math.Min(ri.YMin, rj.YMin);
-                ri.YMax = Math.Max(ri.YMax, rj.YMax);
+                // Add overlaid layers from 'rj' to 'ri'.
+                if (!ri.Merge(rj))
+                {
+                    throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
+                }
 
                 Regions[j] = rj;
             }
@@ -671,28 +675,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Checks the connection
         /// </summary>
         /// <param name="s">Compact span</param>
-        /// <param name="cx">X position</param>
-        /// <param name="cy">Y position</param>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
         /// <param name="layerId">Layer id</param>
         /// <param name="layerIndex">Layer index</param>
         /// <param name="hmin">Minimum height value</param>
         /// <param name="heights">Height map</param>
         /// <returns>Returns the connection value</returns>
-        public int CheckConnection(CompactSpan s, int cx, int cy, int layerId, int layerIndex, int hmin, int[] heights)
+        public int CheckConnection(CompactSpan s, int x, int y, int layerId, int layerIndex, int hmin, int[] heights)
         {
-            var sourceRegs = SourceRegions;
-            var regs = Regions;
-            int borderSize = BorderSize;
-            int w = Width;
-            int lw = LayerWidth;
-            int lh = LayerHeight;
-
             int portal = 0;
             int con = 0;
 
-            foreach (var (dir, ax, ay, ai, area, ass) in Heightfield.IterateSpanConnections(s, cx, cy, w))
+            foreach (var (dir, ax, ay, ai, area, ass) in Heightfield.IterateSpanConnections(s, x, y))
             {
-                int alid = sourceRegs[ai] != NULL_ID ? regs[sourceRegs[ai]].LayerId : NULL_ID;
+                int alid = SourceRegions[ai] != NULL_ID ? Regions[SourceRegions[ai]].LayerId : NULL_ID;
 
                 // Portal mask
                 if (area != AreaTypes.RC_NULL_AREA && layerId != alid)
@@ -709,9 +706,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Valid connection mask
                 if (area != AreaTypes.RC_NULL_AREA && layerId == alid)
                 {
-                    int nx = ax - borderSize;
-                    int ny = ay - borderSize;
-                    if (nx >= 0 && ny >= 0 && nx < lw && ny < lh)
+                    int nx = ax - BorderSize;
+                    int ny = ay - BorderSize;
+                    if (nx >= 0 && ny >= 0 && nx < LayerWidth && ny < LayerHeight)
                     {
                         con |= 1 << dir;
                     }

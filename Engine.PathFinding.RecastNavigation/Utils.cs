@@ -725,7 +725,7 @@ namespace Engine.PathFinding.RecastNavigation
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            List<int> areas = new();
+            List<float> areas = new();
 
             // Calc triangle areas
             float areasum = 0.0f;
@@ -733,6 +733,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var area = TriArea2D(polygon[0], polygon[i - 1], polygon[i]);
                 areasum += Math.Max(0.001f, area);
+                areas.Add(area);
             }
 
             // Find sub triangle weighted by area.
@@ -742,7 +743,7 @@ namespace Engine.PathFinding.RecastNavigation
             int tri = polygon.Length - 1;
             for (int i = 2; i < polygon.Length; i++)
             {
-                float dacc = areas[i];
+                float dacc = areas[i - 2];
                 if (thr >= acc && thr < (acc + dacc))
                 {
                     u = (thr - acc) / dacc;

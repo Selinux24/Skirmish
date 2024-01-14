@@ -282,6 +282,29 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Iterates over the specified span list
+        /// </summary>
+        /// <param name="spans">Span list</param>
+        public IEnumerable<(int x, int y, Span span)> IterateSpans()
+        {
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    var span = Spans[x + y * Width];
+
+                    // If there are no spans at this cell, just leave the data to index=0, count=0.
+                    if (span == null)
+                    {
+                        continue;
+                    }
+
+                    yield return (x, y, span);
+                }
+            }
+        }
+
+        /// <summary>
         /// Builds a new compact heightfield
         /// </summary>
         /// <param name="walkableHeight">Walkable height</param>
@@ -289,7 +312,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new compact heightfield</returns>
         public CompactHeightfield Build(int walkableHeight, int walkableClimb)
         {
-            int spanCount = GetSpanCount();
             var bbox = BoundingBox;
             bbox.Maximum.Y += walkableHeight * CellHeight;
 
@@ -298,7 +320,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 Width = Width,
                 Height = Height,
-                SpanCount = spanCount,
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 MaxRegions = 0,
@@ -308,7 +329,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             };
 
             // Fill in cells and spans.
-            chf.FillCellsAndSpans(Spans, spanCount);
+            chf.FillCellsAndSpans(this);
 
             // Find neighbour connections.
             chf.FindNeighbourConnections();
@@ -429,7 +450,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the span count
         /// </summary>
         /// <returns>Returns the span count</returns>
-        private int GetSpanCount()
+        public int GetSpanCount()
         {
             int w = Width;
             int h = Height;

@@ -17,6 +17,11 @@ namespace TerrainSamples
             tweener.TweenHide(ctrl, milliseconds, ScaleFuncs.Linear);
         }
 
+        public static void FadeOff(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
+        {
+            tweener.TweenHide(ctrl, milliseconds, ScaleFuncs.CubicEaseIn);
+        }
+
         public static void Roll(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
         {
             tweener.TweenRotate(ctrl, MathUtil.TwoPi, milliseconds, ScaleFuncs.Linear);

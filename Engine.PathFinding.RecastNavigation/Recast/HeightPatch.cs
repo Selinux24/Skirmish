@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -8,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class HeightPatch
     {
-        public const int RC_UNSET_HEIGHT = -1;
+        const int RC_UNSET_HEIGHT = -1;
 
         /// <summary>
         /// Data
@@ -28,6 +29,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             Bounds = new Rectangle(0, 0, 0, 0);
         }
 
+        /// <summary>
+        /// Iterates over the height patch bounds
+        /// </summary>
+        /// <param name="borderSize">Border size</param>
+        /// <returns>Returns the height patch coordinates, and the related cell coordinates</returns>
+        public IEnumerable<(int hx, int hy, int x, int y)> IterateBounds(int borderSize)
+        {
+            for (int hy = 0; hy < Bounds.Height; hy++)
+            {
+                int y = Bounds.Y + hy + borderSize;
+
+                for (int hx = 0; hx < Bounds.Width; hx++)
+                {
+                    int x = Bounds.X + hx + borderSize;
+
+                    yield return (hx, hy, x, y);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes patch data to <see cref="RC_UNSET_HEIGHT"/>
+        /// </summary>
+        /// <param name="size">Data array size</param>
+        public void InitializeData(int size)
+        {
+            // Set all heights to RC_UNSET_HEIGHT.
+            Data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
+        }
         /// <summary>
         /// Gets the patch height at the specified point
         /// </summary>
@@ -156,6 +186,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return true;
+        }
+        /// <summary>
+        /// Sets the height data at coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="value">Hight value</param>
+        public void SetHeight(int x, int z, int value)
+        {
+            Data[x + z * Bounds.Width] = value;
         }
     }
 }

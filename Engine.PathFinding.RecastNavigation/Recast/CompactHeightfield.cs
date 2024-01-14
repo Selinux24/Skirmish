@@ -129,22 +129,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public AreaTypes[] Areas { get; set; }
 
-        #region Iterators
-
         /// <summary>
         /// Enumerates the specified compact cell list
         /// </summary>
-        /// <param name="cells">Compact cell list</param>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
         /// <returns>Returns each compact cell to evaulate</returns>
-        private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells(IEnumerable<CompactCell> cells, int w, int h)
+        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells()
         {
-            for (int y = 0; y < h; ++y)
+            for (int y = 0; y < Height; ++y)
             {
-                for (int x = 0; x < w; ++x)
+                for (int x = 0; x < Width; ++x)
                 {
-                    var c = cells.ElementAt(x + y * w);
+                    var c = Cells[x + y * Width];
 
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                     {
@@ -156,17 +151,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Enumerates the specified compact cell list in reverse order
         /// </summary>
-        /// <param name="cells">Compact cell list</param>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
         /// <returns>Returns each compact cell to evaulate</returns>
-        private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsReverse(IEnumerable<CompactCell> cells, int w, int h)
+        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsReverse()
         {
-            for (int y = h - 1; y >= 0; --y)
+            for (int y = Height - 1; y >= 0; --y)
             {
-                for (int x = w - 1; x >= 0; --x)
+                for (int x = Width - 1; x >= 0; --x)
                 {
-                    var c = cells.ElementAt(x + y * w);
+                    var c = Cells[x + y * Width];
 
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                     {
@@ -178,20 +170,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Enumerates the specified compact cell list, if is contained into the bounds
         /// </summary>
-        /// <param name="cells">Compact cell list</param>
-        /// <param name="w">Width</param>
         /// <param name="minx">Minimum x bound's coordinate</param>
         /// <param name="miny">Minimum y bound's coordinate</param>
         /// <param name="maxx">Maximum x bound's coordinate</param>
         /// <param name="maxy">Maximum y bound's coordinate</param>
         /// <returns>Returns each compact cell to evaulate</returns>
-        private static IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsBounds(IEnumerable<CompactCell> cells, int w, int minx, int miny, int maxx, int maxy)
+        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsBounds(int minx, int miny, int maxx, int maxy)
         {
             for (int y = miny; y < maxy; ++y)
             {
                 for (int x = minx; x < maxx; ++x)
                 {
-                    var c = cells.ElementAt(x + y * w);
+                    var c = Cells[x + y * Width];
 
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                     {
@@ -201,65 +191,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
         /// <summary>
-        /// Enumerates the specified compact cell list
+        /// Iterates the spans of the cell at coordinates
         /// </summary>
-        /// <param name="cells">Compact cell list</param>
-        /// <param name="w">Width</param>
-        /// <param name="hp">Height patch</param>
-        /// <param name="borderSize">Border size</param>
-        /// <returns>Returns each compact cell to evaulate</returns>
-        private static IEnumerable<(int x, int y, CompactCell cell, int hx, int hy)> IterateHeightPatch(IEnumerable<CompactCell> cells, int w, HeightPatch hp, int borderSize)
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <returns>Returns the span and the span index</returns>
+        public IEnumerable<(CompactSpan Span, int CellIndex)> IterateCellSpans(int x, int y)
         {
-            for (int hy = 0; hy < hp.Bounds.Height; hy++)
+            var c = Cells[x + y * Width];
+
+            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
-                int y = hp.Bounds.Y + hy + borderSize;
-                for (int hx = 0; hx < hp.Bounds.Width; hx++)
-                {
-                    int x = hp.Bounds.X + hx + borderSize;
-                    var c = cells.ElementAt(x + y * w);
-
-                    yield return (x, y, c, hx, hy);
-                }
-            }
-        }
-        /// <summary>
-        /// Iterates over the specified span list
-        /// </summary>
-        /// <param name="spans">Span list</param>
-        /// <param name="w">With</param>
-        /// <param name="h">Height</param>
-        private static IEnumerable<(int x, int y, Span span)> IterateSpans(Span[] spans, int w, int h)
-        {
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    var span = spans[x + y * w];
-
-                    // If there are no spans at this cell, just leave the data to index=0, count=0.
-                    if (span == null)
-                    {
-                        continue;
-                    }
-
-                    yield return (x, y, span);
-                }
-            }
-        }
-        /// <summary>
-        /// Iterates over the specified span connections
-        /// </summary>
-        /// <param name="cs">Compact span</param>
-        private static IEnumerable<(int dir, int con)> IterateSpanConnections(CompactSpan cs)
-        {
-            for (int dir = 0; dir < 4; dir++)
-            {
-                if (!cs.GetCon(dir, out int con))
-                {
-                    continue;
-                }
-
-                yield return (dir, con);
+                yield return (Spans[i], i);
             }
         }
         /// <summary>
@@ -268,8 +211,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="cs">Compact span</param>
         /// <param name="x">X position</param>
         /// <param name="y">Y position</param>
-        /// <param name="w">Width</param>
-        public IEnumerable<(int dir, int ax, int ay, int ai, AreaTypes area, CompactSpan s)> IterateSpanConnections(CompactSpan cs, int x, int y, int w)
+        public IEnumerable<(int dir, int ax, int ay, int ai, AreaTypes area, CompactSpan s)> IterateSpanConnections(CompactSpan cs, int x, int y)
         {
             for (int dir = 0; dir < 4; ++dir)
             {
@@ -280,15 +222,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 int ax = x + Utils.GetDirOffsetX(dir);
                 int ay = y + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * w].Index + d;
+                int ai = Cells[ax + ay * Width].Index + d;
                 var area = Areas[ai];
                 var s = Spans[ai];
 
                 yield return (dir, ax, ay, ai, area, s);
             }
         }
-
-        #endregion
 
         /// <summary>
         /// Inserts an element into the array, maintaining their order
@@ -430,6 +370,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return idx.Take(nidx).ToArray();
         }
+        /// <summary>
+        /// Gets whether the specified value has the border flag or not
+        /// </summary>
+        /// <param name="value">Value</param>
+        public static bool IsBorder(int value)
+        {
+            return (value & RC_BORDER_REG) != 0;
+        }
 
         /// <summary>
         /// Remove the border size to the heightfield bounds
@@ -518,17 +466,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Fill in cells and spans.
         /// </summary>
-        /// <param name="spans">Heightfield span list</param>
-        /// <param name="spanCount">Heightfield span count</param>
-        public void FillCellsAndSpans(Span[] spans, int spanCount)
+        /// <param name="hf">Heightfield</param>
+        public void FillCellsAndSpans(Heightfield hf)
         {
+            int spanCount = hf.GetSpanCount();
+
             Cells = new CompactCell[Width * Height];
             Spans = new CompactSpan[spanCount];
             Areas = new AreaTypes[spanCount];
+            SpanCount = spanCount;
 
             // Fill in cells and spans.
             int idx = 0;
-            foreach (var (x, y, span) in IterateSpans(spans, Width, Height))
+            foreach (var (x, y, span) in hf.IterateSpans())
             {
                 var c = new CompactCell
                 {
@@ -566,7 +516,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Find neighbour connections.
             int maxLayers = CompactSpan.MaxLayers;
             int tooHighNeighbour = 0;
-            foreach (var (x, y, i, _) in IterateCells(Cells, Width, Height))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 Spans[i] = FindConnections(x, y, Spans[i], maxLayers, ref tooHighNeighbour);
             }
@@ -719,7 +669,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            foreach (var (_, _, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
+            foreach (var (_, _, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -752,7 +702,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            foreach (var (x, z, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
+            foreach (var (x, z, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -760,19 +710,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var sy = Spans[i].Y;
-                if (sy >= min.Y && sy <= max.Y)
+                if (sy < min.Y || sy > max.Y)
                 {
-                    var p = new Vector3
-                    {
-                        X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
-                        Y = 0,
-                        Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
-                    };
+                    continue;
+                }
 
-                    if (Utils.PointInPolygon2D(p, polygon))
-                    {
-                        Areas[i] = areaId;
-                    }
+                var p = new Vector3
+                {
+                    X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
+                    Y = 0,
+                    Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
+                };
+
+                if (Utils.PointInPolygon2D(p, polygon))
+                {
+                    Areas[i] = areaId;
                 }
             }
         }
@@ -794,7 +746,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            foreach (var (x, z, i, _) in IterateCellsBounds(Cells, Width, min.X, min.Z, max.X, max.Z))
+            foreach (var (x, z, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -802,17 +754,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var sy = Spans[i].Y;
-                if (sy >= min.Y && sy <= max.Y)
+                if (sy < min.Y || sy > max.Y)
                 {
-                    float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
-                    float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
-                    float dx = sx - pos.X;
-                    float dz = sz - pos.Z;
+                    continue;
+                }
 
-                    if (dx * dx + dz * dz < r2)
-                    {
-                        Areas[i] = areaId;
-                    }
+                float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
+                float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
+                float dx = sx - pos.X;
+                float dz = sz - pos.Z;
+
+                if (dx * dx + dz * dz < r2)
+                {
+                    Areas[i] = areaId;
                 }
             }
         }
@@ -822,13 +776,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns always true</returns>
         private void MedianFilterWalkableArea()
         {
-            int w = Width;
-            int h = Height;
-
             // Init distance.
             var areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
 
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -840,7 +791,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var s = Spans[i];
 
-                foreach (var (dir, ax, ay, _, area, a) in IterateSpanConnections(s, x, y, w))
+                foreach (var (dir, ax, ay, _, area, a) in IterateSpanConnections(s, x, y))
                 {
                     if (area != AreaTypes.RC_NULL_AREA)
                     {
@@ -853,9 +804,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax2 = ax + Utils.GetDirOffsetX(dir2);
-                    int ay2 = ay + Utils.GetDirOffsetY(dir2);
-                    int ai2 = Cells[ax2 + ay2 * w].Index + con2;
+                    int ai2 = GetNeighbourCellIndex(ax, ay, dir2, con2);
                     if (Areas[ai2] != AreaTypes.RC_NULL_AREA)
                     {
                         nei[dir * 2 + 1] = Areas[ai2];
@@ -878,14 +827,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         public void ErodeWalkableArea(int radius)
         {
-            int w = Width;
-            int h = Height;
-
             // Init distance.
             int[] dist = MarkBoundaryCellsNotNullAreas();
 
             // Pass 1
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 // (0,-1) & (1,-1)
                 if (CalculateDistance(x, y, i, dist, 0, 3, out int newD1))
@@ -901,7 +847,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Pass 2
-            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCellsReverse())
             {
                 // (1,0) & (1,1)
                 if (CalculateDistance(x, y, i, dist, 2, 1, out int newD1))
@@ -987,7 +933,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int[] dist = Helper.CreateArray(SpanCount, SPAN_MAX_HEIGHT);
 
             // Mark boundary cells.
-            foreach (var (x, y, i, _) in IterateCells(Cells, Width, Height))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -996,9 +942,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 int nc = 0;
-                foreach (var item in IterateSpanConnections(Spans[i], x, y, Width))
+                foreach (var (_, _, _, _, area, _) in IterateSpanConnections(Spans[i], x, y))
                 {
-                    if (item.area != AreaTypes.RC_NULL_AREA)
+                    if (area != AreaTypes.RC_NULL_AREA)
                     {
                         nc++;
                     }
@@ -1112,8 +1058,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // The vertex is a border vertex there are two same exterior cells in a row,
                 // followed by two interior cells and none of the regions are out of bounds.
-                bool twoSameExts = (regs[a] & regs[b] & RC_BORDER_REG) != 0 && regs[a] == regs[b];
-                bool twoInts = ((regs[c] | regs[d]) & RC_BORDER_REG) == 0;
+                bool twoSameExts = IsBorder(regs[a] & regs[b]) && regs[a] == regs[b];
+                bool twoInts = !IsBorder(regs[c] | regs[d]);
                 bool intsSameArea = (regs[c] >> 16) == (regs[d] >> 16);
                 bool noZeros = regs[a] != 0 && regs[b] != 0 && regs[c] != 0 && regs[d] != 0;
                 if (twoSameExts && twoInts && intsSameArea && noZeros)
@@ -1131,18 +1077,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <param name="verts">Vertex indices</param>
-        /// <param name="borderSize">Border size</param>
         /// <param name="hp">Height patch</param>
         /// <param name="region">Region index</param>
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int borderSize, int region)
+        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int region)
         {
             var queue = new List<HeightDataItem>(512);
 
-            // Set all heights to RC_UNSET_HEIGHT.
-            hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, HeightPatch.RC_UNSET_HEIGHT);
+            hp.InitializeData(hp.Bounds.Width * hp.Bounds.Height);
 
             bool empty = true;
 
@@ -1151,7 +1095,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // with polys of that region and the heights sampled here could be wrong.
             if (!IndexedPolygon.HasMultipleRegions(region))
             {
-                empty = GetHeightDataFromMultipleRegions(hp, borderSize, region, out var qItems);
+                empty = GetHeightDataFromMultipleRegions(hp, region, out var qItems);
 
                 queue.AddRange(qItems);
             }
@@ -1161,20 +1105,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // then use the center as the seed point.
             if (empty)
             {
-                queue.AddRange(SeedArrayWithPolyCenter(poly, verts, borderSize, hp));
+                queue.AddRange(SeedArrayWithPolyCenter(poly, verts, hp));
             }
 
-            ProcessHeightDataQueue(hp, borderSize, queue);
+            ProcessHeightDataQueue(hp, queue);
         }
         /// <summary>
         /// Gets the heigth data of the specified region
         /// </summary>
         /// <param name="hp">Height patch</param>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="region">Region id</param>
+        /// <param name="regionId">Region id</param>
         /// <param name="dataItems">Resulting data item list</param>
         /// <returns>Returns true if the resulting heigth data is empty</returns>
-        private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int borderSize, int region, out HeightDataItem[] dataItems)
+        private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int regionId, out HeightDataItem[] dataItems)
         {
             bool empty = true;
 
@@ -1182,26 +1125,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Copy the height from the same region, and mark region borders
             // as seed points to fill the rest.
-            foreach (var (x, y, cell, hx, hy) in IterateHeightPatch(Cells, Width, hp, borderSize))
+            foreach (var (hx, hy, x, y) in hp.IterateBounds(BorderSize))
             {
-                for (int i = cell.Index, ni = cell.Index + cell.Count; i < ni; ++i)
+                foreach (var (s, i) in IterateCellSpans(x, y))
                 {
-                    var s = Spans[i];
-                    if (s.Reg != region)
+                    if (s.Reg != regionId)
                     {
                         continue;
                     }
 
                     // Store height
-                    hp.Data[hx + hy * hp.Bounds.Width] = s.Y;
+                    hp.SetHeight(hx, hy, s.Y);
                     empty = false;
 
                     // If any of the neighbours is not in same region,
                     // add the current location as flood fill start
-                    bool border = DetectBorder(x, y, region, s);
+                    bool border = DetectBorder(x, y, regionId, s);
                     if (border)
                     {
-                        queue.Add(new HeightDataItem { X = x, Y = y, I = i });
+                        queue.Add(new() { X = x, Y = y, I = i });
                     }
 
                     break;
@@ -1221,7 +1163,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="s">Compact span</param>
         private bool DetectBorder(int x, int y, int region, CompactSpan s)
         {
-            foreach (var item in IterateSpanConnections(s, x, y, Width))
+            foreach (var item in IterateSpanConnections(s, x, y))
             {
                 if (item.s.Reg != region)
                 {
@@ -1235,9 +1177,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Process height data item queue
         /// </summary>
         /// <param name="hp">Height patch</param>
-        /// <param name="borderSize">Border size</param>
         /// <param name="queue">Data item queue to process</param>
-        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, List<HeightDataItem> queue)
+        private void ProcessHeightDataQueue(HeightPatch hp, List<HeightDataItem> queue)
         {
             const int RETRACT_SIZE = 256;
             int head = 0;
@@ -1260,12 +1201,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var cs = Spans[c.I];
-                foreach (var (dir, con) in IterateSpanConnections(cs))
+                foreach (var (dir, con) in cs.IterateSpanConnections())
                 {
                     int ax = c.X + Utils.GetDirOffsetX(dir);
                     int ay = c.Y + Utils.GetDirOffsetY(dir);
-                    int hx = ax - hp.Bounds.X - borderSize;
-                    int hy = ay - hp.Bounds.Y - borderSize;
+                    int hx = ax - hp.Bounds.X - BorderSize;
+                    int hy = ay - hp.Bounds.Y - BorderSize;
 
                     if (!hp.CompareBounds(hx, hy))
                     {
@@ -1604,18 +1545,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <param name="verts">Vertex indices</param>
-        /// <param name="borderSize">Border size</param>
         /// <param name="hp">Height patch</param>
         /// <returns>Returns a height data item array</returns>
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, int borderSize, HeightPatch hp)
+        private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, HeightPatch hp)
         {
             var polyIndices = poly.GetVertices();
             var bounds = hp.Bounds;
 
-            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(polyIndices, verts, borderSize, bounds);
+            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(polyIndices, verts, bounds);
 
             var (centerX, centerY) = FindPolygonCenter2D(polyIndices, verts);
 
@@ -1645,7 +1585,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     break;
                 }
 
-                hdItem = array.Pop();
+                hdItem = array.PopLast();
 
                 if (hdItem.X == centerX && hdItem.Y == centerY)
                 {
@@ -1693,7 +1633,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
 
                     hp.Data[hpx + hpy * bounds.Width] = 1;
-                    int index = Cells[(newX + borderSize) + (newY + borderSize) * Width].Index + con;
+                    int index = Cells[(newX + BorderSize) + (newY + BorderSize) * Width].Index + con;
                     array.Add(new HeightDataItem
                     {
                         X = newX,
@@ -1710,8 +1650,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // getHeightData seeds are given in coordinates with borders
             array.Add(new HeightDataItem
             {
-                X = hdItem.X + borderSize,
-                Y = hdItem.Y + borderSize,
+                X = hdItem.X + BorderSize,
+                Y = hdItem.Y + BorderSize,
                 I = hdItem.I,
             });
 
@@ -1726,9 +1666,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="polyIndices">Polygon indices</param>
         /// <param name="verts">Polygon vertices</param>
-        /// <param name="borderSize">Border size</param>
         /// <param name="bounds">Bounds</param>
-        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(int[] polyIndices, Int3[] verts, int borderSize, Rectangle bounds)
+        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(int[] polyIndices, Int3[] verts, Rectangle bounds)
         {
             int[] offset =
             {
@@ -1747,7 +1686,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int startCellX = 0;
             int startCellY = 0;
             int startSpanIndex = -1;
-            int dmin = HeightPatch.RC_UNSET_HEIGHT;
+            int dmin = -1;
             for (int j = 0; j < polyIndices.Length; ++j)
             {
                 var vert = verts[polyIndices[j]];
@@ -1762,7 +1701,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    var c = Cells[(ax + borderSize + az + borderSize) * Width];
+                    var c = Cells[(ax + BorderSize + az + BorderSize) * Width];
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni && dmin > 0; ++i)
                     {
                         var s = Spans[i];
@@ -1802,20 +1741,57 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// Paint rectangle region
+        /// Paint rectangle region borders
         /// </summary>
-        private void PaintRectRegion(int minx, int maxx, int miny, int maxy, int regId, int[] srcReg)
+        /// <returns>Returns the region id list and the number of allocated regions</returns>
+        private (int[] srcReg, int regionId) PaintRectRegionsBorders()
         {
-            int w = Width;
+            int[] srcReg = new int[SpanCount];
 
-            foreach (var (_, _, i, _) in IterateCellsBounds(Cells, w, minx, miny, maxx, maxy))
+            int regionId = 1;
+
+            if (BorderSize <= 0)
             {
-                if (Areas[i] != AreaTypes.RC_NULL_AREA)
+                return (srcReg, regionId);
+            }
+
+            int w = Width;
+            int h = Height;
+
+            // Make sure border will not overflow.
+            int bw = Math.Min(w, BorderSize);
+            int bh = Math.Min(h, BorderSize);
+
+            // Paint regions
+            PaintRectRegionBorders(srcReg, regionId, 0, bw, 0, h); regionId++;
+            PaintRectRegionBorders(srcReg, regionId, w - bw, w, 0, h); regionId++;
+            PaintRectRegionBorders(srcReg, regionId, 0, w, 0, bh); regionId++;
+            PaintRectRegionBorders(srcReg, regionId, 0, w, h - bh, h); regionId++;
+
+            return (srcReg, regionId);
+        }
+        /// <summary>
+        /// Paint rectangle region setting borders
+        /// </summary>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="regId">Region id to set</param>
+        /// <param name="minx">Min area X</param>
+        /// <param name="maxx">Max area X</param>
+        /// <param name="miny">Min area Y</param>
+        /// <param name="maxy">Max area Y</param>
+        private void PaintRectRegionBorders(int[] srcReg, int regId, int minx, int maxx, int miny, int maxy)
+        {
+            foreach (var (_, _, i, _) in IterateCellsBounds(minx, miny, maxx, maxy))
+            {
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
-                    srcReg[i] = regId;
+                    continue;
                 }
+
+                srcReg[i] = regId | RC_BORDER_REG;
             }
         }
+
         /// <summary>
         /// Sorts cells by level
         /// </summary>
@@ -1826,8 +1802,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="loglevelsPerStack">The levels per stack (2 in our case) as a bit shift</param>
         private void SortCellsByLevel(int startLevel, int[] srcReg, int nbStacks, List<LevelStackEntry>[] stacks, int loglevelsPerStack)
         {
-            int w = Width;
-            int h = Height;
             startLevel >>= loglevelsPerStack;
 
             for (int j = 0; j < nbStacks; j++)
@@ -1836,7 +1810,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // put all cells in the level range into the appropriate stacks
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA || srcReg[i] != 0)
                 {
@@ -1854,7 +1828,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     sId = 0;
                 }
 
-                stacks[sId].Add(new LevelStackEntry { X = x, Y = y, Index = i });
+                stacks[sId].Add(new() { X = x, Y = y, Index = i });
             }
         }
         /// <summary>
@@ -1864,13 +1838,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="srcReg">Source regions</param>
         private List<LevelStackEntry> ExpandRegionsFillStack(int level, int[] srcReg)
         {
-            int w = Width;
-            int h = Height;
-
             // Find cells revealed by the raised level.
             List<LevelStackEntry> stack = new();
 
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -1918,8 +1889,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxIter">Max iterations</param>
         private void ProcessRegionsStack(List<LevelStackEntry> stack, int[] srcReg, int[] srcDist, int level, int maxIter)
         {
-            int w = Width;
-
             var dirtyEntries = new List<RecastRegionDirtyEntry>();
             int iter = 0;
             while (stack.Count > 0)
@@ -1944,7 +1913,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int d2 = int.MaxValue;
                     var area = Areas[i];
                     var s = Spans[i];
-                    foreach (var item in IterateSpanConnections(s, x, y, w))
+                    foreach (var item in IterateSpanConnections(s, x, y))
                     {
                         if (item.area != area)
                         {
@@ -1954,7 +1923,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int sr = srcReg[item.ai];
                         int sd = srcDist[item.ai];
 
-                        if (sr > 0 && (sr & RC_BORDER_REG) == 0 && sd + 2 < d2)
+                        if (sr > 0 && !IsBorder(sr) && sd + 2 < d2)
                         {
                             r = sr;
                             d2 = sd + 2;
@@ -2001,8 +1970,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private bool FloodRegion(LevelStackEntry entry, int level, int r, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
-            int w = Width;
-
             var area = Areas[entry.Index];
 
             // Flood fill mark region.
@@ -2016,7 +1983,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             while (stack.Count > 0)
             {
-                var back = stack.Pop();
+                var back = stack.PopLast();
 
                 int cx = back.X;
                 int cy = back.Y;
@@ -2026,7 +1993,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Check if any of the neighbours already have a valid region set.
                 int ar = 0;
-                foreach (var item in IterateSpanConnections(cs, cx, cy, w))
+                foreach (var item in IterateSpanConnections(cs, cx, cy))
                 {
                     if (item.area != area)
                     {
@@ -2034,7 +2001,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
 
                     int nr = srcReg[item.ai];
-                    if ((nr & RC_BORDER_REG) != 0) // Do not take borders into account.
+                    if (IsBorder(nr)) // Do not take borders into account.
                     {
                         continue;
                     }
@@ -2053,9 +2020,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax2 = item.ax + Utils.GetDirOffsetX(dir2);
-                    int ay2 = item.ay + Utils.GetDirOffsetY(dir2);
-                    int ai2 = Cells[ax2 + ay2 * w].Index + con2;
+                    int ai2 = GetNeighbourCellIndex(item.ax, item.ay, dir2, con2);
                     if (Areas[ai2] != area)
                     {
                         continue;
@@ -2078,7 +2043,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 count++;
 
                 // Expand neighbours.
-                foreach (var item in IterateSpanConnections(cs, cx, cy, w))
+                foreach (var item in IterateSpanConnections(cs, cx, cy))
                 {
                     if (item.area != area)
                     {
@@ -2102,26 +2067,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="borderSize">Border size</param>
         private (int[] regs, int count) BuildSourceRegionsWatershed(int borderSize)
         {
+            BorderSize = borderSize;
+
             // Prepare for region partitioning, by calculating distance field along the walkable surface.
             BuildDistanceField();
 
-            int w = Width;
-            int h = Height;
-
             int LOG_NB_STACKS = 3;
             int NB_STACKS = 1 << LOG_NB_STACKS;
-            var lvlStacks = new List<LevelStackEntry>[NB_STACKS];
-            for (int i = 0; i < NB_STACKS; i++)
-            {
-                lvlStacks[i] = new List<LevelStackEntry>();
-            }
-
+            var lvlStacks = Helper.CreateArray(NB_STACKS, () => new List<LevelStackEntry>());
             var stack = new List<LevelStackEntry>();
 
-            int[] srcReg = new int[SpanCount];
-            int[] srcDist = new int[SpanCount];
+            // Mark border regions.
+            var (srcReg, regionId) = PaintRectRegionsBorders();
 
-            int regionId = 1;
+            int[] srcDist = new int[SpanCount];
             int level = (MaxDistance + 1) & ~1;
 
             // Figure better formula, expandIters defines how much the 
@@ -2129,21 +2088,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // agent radius was usually good indication how greedy it could be.
             //	const int expandIters = 4 + walkableRadius * 2
             const int expandIters = 8;
-
-            if (borderSize > 0)
-            {
-                // Make sure border will not overflow.
-                int bw = Math.Min(w, borderSize);
-                int bh = Math.Min(h, borderSize);
-
-                // Paint regions
-                PaintRectRegion(0, bw, 0, h, (regionId | RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(w - bw, w, 0, h, (regionId | RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(0, w, 0, bh, (regionId | RC_BORDER_REG), srcReg); regionId++;
-                PaintRectRegion(0, w, h - bh, h, (regionId | RC_BORDER_REG), srcReg); regionId++;
-            }
-
-            BorderSize = borderSize;
 
             int sId = -1;
             while (level > 0)
@@ -2207,35 +2151,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="borderSize">Border size</param>
         private (int[] regs, int count) BuildSourceRegions(int borderSize)
         {
+            BorderSize = borderSize;
+
             int w = Width;
             int h = Height;
-            int id = 1;
-
-            int[] srcReg = new int[SpanCount];
-
-            int nsweeps = Math.Max(Width, Height);
-            SweepSpan[] sweeps = Helper.CreateArray(nsweeps, new SweepSpan());
 
             // Mark border regions.
-            if (borderSize > 0)
-            {
-                // Make sure border will not overflow.
-                int bw = Math.Min(w, borderSize);
-                int bh = Math.Min(h, borderSize);
-                // Paint regions
-                PaintRectRegion(0, bw, 0, h, id | RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(w - bw, w, 0, h, id | RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, 0, bh, id | RC_BORDER_REG, srcReg); id++;
-                PaintRectRegion(0, w, h - bh, h, id | RC_BORDER_REG, srcReg); id++;
-            }
+            var (srcReg, regionId) = PaintRectRegionsBorders();
 
-            BorderSize = borderSize;
+            int nsweeps = Math.Max(Width, Height);
+            var sweeps = Helper.CreateArray(nsweeps, () => SweepSpan.Empty);
 
             // Sweep one line at a time.
             for (int y = borderSize; y < h - borderSize; ++y)
             {
                 // Collect spans from this row.
-                int[] prev = new int[id + 1];
+                int[] prev = new int[regionId + 1];
                 int rid = 1;
 
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -2255,30 +2186,26 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -x
                         if (s.GetCon(0, out int con))
                         {
-                            int ax = x + Utils.GetDirOffsetX(0);
-                            int ay = y + Utils.GetDirOffsetY(0);
-                            int ai = Cells[ax + ay * w].Index + con;
-                            if ((srcReg[ai] & RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            int ai = GetNeighbourCellIndex(x, y, 0, con);
+                            int nr = srcReg[ai];
+                            if (!IsBorder(nr) && Areas[i] == Areas[ai])
                             {
-                                previd = srcReg[ai];
+                                previd = nr;
                             }
                         }
 
                         if (previd == 0)
                         {
                             previd = rid++;
-                            sweeps[previd].SampleCount = 0;
-                            sweeps[previd].NeiRegId = 0;
+                            sweeps[previd].Reset();
                         }
 
                         // -y
                         if (s.GetCon(3, out con))
                         {
-                            int ax = x + Utils.GetDirOffsetX(3);
-                            int ay = y + Utils.GetDirOffsetY(3);
-                            int ai = Cells[ax + ay * w].Index + con;
+                            int ai = GetNeighbourCellIndex(x, y, 3, con);
                             int nr = srcReg[ai];
-                            if (nr != 0 && (nr & RC_BORDER_REG) == 0 && Areas[i] == Areas[ai])
+                            if (nr != 0 && !IsBorder(nr) && Areas[i] == Areas[ai])
                             {
                                 sweeps[previd].Update(nr, prev);
                             }
@@ -2289,7 +2216,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Create unique ID.
-                SweepSpan.CreateUniqueIds(sweeps, rid, prev, ref id);
+                SweepSpan.CreateUniqueIds(sweeps, rid, prev, ref regionId);
 
                 // Remap IDs
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -2306,7 +2233,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return (srcReg, id);
+            return (srcReg, regionId);
         }
 
         /// <summary>
@@ -2364,24 +2291,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return Array.Empty<int>();
             }
 
-            int w = Width;
-            int h = Height;
-
             // Mark boundary cells.
-            int[] res = MarkBoundaryCells(w, h);
+            int[] res = MarkBoundaryCells();
 
             // Pass 1
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
-                res = TestConn(x, y, i, w, 0, 3, res);
-                res = TestConn(x, y, i, w, 3, 2, res);
+                res = TestConn(x, y, i, 0, 3, res);
+                res = TestConn(x, y, i, 3, 2, res);
             }
 
             // Pass 2
-            foreach (var (x, y, i, _) in IterateCellsReverse(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCellsReverse())
             {
-                res = TestConn(x, y, i, w, 2, 1, res);
-                res = TestConn(x, y, i, w, 1, 0, res);
+                res = TestConn(x, y, i, 2, 1, res);
+                res = TestConn(x, y, i, 1, 0, res);
             }
 
             MaxDistance = res.Max();
@@ -2391,21 +2315,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Marks boundary cells
         /// </summary>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
-        private int[] MarkBoundaryCells(int w, int h)
+        private int[] MarkBoundaryCells()
         {
             // Init distance and points.
             int[] res = Helper.CreateArray(SpanCount, int.MaxValue);
 
             // Mark boundary cells.
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 var s = Spans[i];
                 var area = Areas[i];
 
                 int nc = 0;
-                foreach (var item in IterateSpanConnections(s, x, y, w))
+                foreach (var item in IterateSpanConnections(s, x, y))
                 {
                     if (area == item.area)
                     {
@@ -2432,11 +2354,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int[] dst = new int[SpanCount];
 
             int w = Width;
-            int h = Height;
 
             thr *= 2;
 
-            foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, _) in IterateCells())
             {
                 var cd = src[i];
                 if (cd <= thr)
@@ -2485,7 +2406,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Test connections
         /// </summary>
-        private int[] TestConn(int x, int y, int i, int w, int id1, int id2, int[] arr)
+        private int[] TestConn(int x, int y, int i, int id1, int id2, int[] arr)
         {
             int[] res = arr.ToArray();
 
@@ -2497,7 +2418,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int ax = x + Utils.GetDirOffsetX(id1);
             int ay = y + Utils.GetDirOffsetY(id1);
-            int ai = Cells[ax + ay * w].Index + con1;
+            int ai = Cells[ax + ay * Width].Index + con1;
             if (res[ai] + 2 < res[i])
             {
                 res[i] = res[ai] + 2;
@@ -2509,9 +2430,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return res;
             }
 
-            int aax = ax + Utils.GetDirOffsetX(id2);
-            int aay = ay + Utils.GetDirOffsetY(id2);
-            int aai = Cells[aax + aay * w].Index + con2;
+            int aai = GetNeighbourCellIndex(ax, ay, id2, con2);
             if (res[aai] + 3 < res[i])
             {
                 res[i] = res[aai] + 3;
@@ -2556,9 +2475,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, int maxRegionId, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
         {
-            int w = Width;
-            int h = Height;
-
             int nreg = maxRegionId + 1;
             var regions = new List<Region>(nreg);
 
@@ -2569,7 +2485,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Find edge of a region and find connections around the contour.
-            foreach (var (x, y, i, c) in IterateCells(Cells, w, h))
+            foreach (var (x, y, i, c) in IterateCells())
             {
                 int r = srcReg[i];
                 if (r == 0 || r >= nreg)
@@ -2633,7 +2549,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < nreg; ++i)
             {
                 var reg = regions[i];
-                if (reg.Id == 0 || (reg.Id & RC_BORDER_REG) != 0)
+                if (reg.Id == 0 || IsBorder(reg.Id))
                 {
                     continue;
                 }
@@ -2659,7 +2575,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 while (stack.Count > 0)
                 {
                     // Pop
-                    int ri = stack.Pop();
+                    int ri = stack.PopLast();
 
                     var creg = regions[ri];
 
@@ -2669,7 +2585,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var connections = creg.GetConnections();
                     foreach (var connection in connections)
                     {
-                        if ((connection & RC_BORDER_REG) != 0)
+                        if (IsBorder(connection))
                         {
                             connectsToBorder = true;
                             continue;
@@ -2679,7 +2595,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             continue;
                         }
-                        if (neireg.Id == 0 || (neireg.Id & RC_BORDER_REG) != 0)
+                        if (neireg.Id == 0 || IsBorder(neireg.Id))
                         {
                             continue;
                         }
@@ -2712,7 +2628,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int i = 0; i < nreg; ++i)
                 {
                     var reg = regions[i];
-                    if (reg.Id == 0 || (reg.Id & RC_BORDER_REG) != 0)
+                    if (reg.Id == 0 || IsBorder(reg.Id))
                     {
                         continue;
                     }
@@ -2739,13 +2655,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var connections = reg.GetConnections();
                     foreach (var connection in connections)
                     {
-                        if ((connection & RC_BORDER_REG) != 0)
+                        if (IsBorder(connection))
                         {
                             continue;
                         }
 
                         var mreg = regions[connection];
-                        if (mreg.Id == 0 || (mreg.Id & RC_BORDER_REG) != 0 || mreg.Overlap)
+                        if (mreg.Id == 0 || IsBorder(mreg.Id) || mreg.Overlap)
                         {
                             continue;
                         }
@@ -2776,7 +2692,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // Fixup regions pointing to current region.
                     for (int j = 0; j < nreg; ++j)
                     {
-                        if (regions[j].Id == 0 || (regions[j].Id & RC_BORDER_REG) != 0)
+                        if (regions[j].Id == 0 || IsBorder(regions[j].Id))
                         {
                             continue;
                         }
@@ -2807,7 +2723,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // Skip nil regions.
                     continue;
                 }
-                if ((regions[i].Id & RC_BORDER_REG) != 0)
+                if (IsBorder(regions[i].Id))
                 {
                     // Skip external regions.
                     continue;
@@ -2838,7 +2754,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Remap regions.
             for (int i = 0; i < SpanCount; ++i)
             {
-                if ((srcReg[i] & RC_BORDER_REG) == 0)
+                if (!IsBorder(srcReg[i]))
                 {
                     srcReg[i] = regions[srcReg[i]].Id;
                 }
@@ -2895,31 +2811,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private bool MergeAndFilterLayerRegions(int minRegionArea, int maxRegionId, int[] srcReg, out int maxRegionIdResult)
         {
-            int w = Width;
-            int h = Height;
-
             int nreg = maxRegionId + 1;
-            var regions = new List<Region>(nreg);
-
-            // Construct regions
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions.Add(new Region(i));
-            }
+            var regions = Region.InitializeRegionList(nreg);
 
             // Find region neighbours and overlapping regions.
             var lregs = new List<int>(32);
-            for (int y = 0; y < h; ++y)
+            for (int y = 0; y < Height; ++y)
             {
-                for (int x = 0; x < w; ++x)
+                for (int x = 0; x < Width; ++x)
                 {
-                    var c = Cells[x + y * w];
-
                     lregs.Clear();
 
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    foreach (var (s, i) in IterateCellSpans(x, y))
                     {
-                        var s = Spans[i];
                         int ri = srcReg[i];
                         if (ri == 0 || ri >= nreg)
                         {
@@ -2936,14 +2840,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         lregs.Add(ri);
 
                         // Update neighbours
-                        foreach (var item in IterateSpanConnections(s, x, y, w))
+                        foreach (var item in IterateSpanConnections(s, x, y))
                         {
                             int rai = srcReg[item.ai];
                             if (rai > 0 && rai < nreg && rai != ri)
                             {
                                 reg.AddUniqueConnection(rai);
                             }
-                            if ((rai & RC_BORDER_REG) != 0)
+                            if (IsBorder(rai))
                             {
                                 reg.ConnectsToBorder = true;
                             }
@@ -2951,33 +2855,46 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
 
                     // Update overlapping regions.
-                    for (int i = 0; i < lregs.Count - 1; ++i)
-                    {
-                        for (int j = i + 1; j < lregs.Count; ++j)
-                        {
-                            if (lregs[i] != lregs[j])
-                            {
-                                var ri = regions[lregs[i]];
-                                var rj = regions[lregs[j]];
-                                ri.AddUniqueFloorRegion(lregs[j]);
-                                rj.AddUniqueFloorRegion(lregs[i]);
-                            }
-                        }
-                    }
+                    UpdateOverlappingRegionFloors(regions, lregs);
                 }
             }
 
-            // Create 2D layers from regions.
+            // Merges montone regions to create non-overlapping areas.
+            MergeMonotoneRegions(regions);
+
+            // Remove small regions
+            Region.RemoveSmallRegions(regions, minRegionArea);
+
+            // Compress region Ids.
+            maxRegionIdResult = Region.CompressRegionIds(regions);
+
+            // Remap regions.
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                if (!IsBorder(srcReg[i]))
+                {
+                    srcReg[i] = regions[srcReg[i]].Id;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Merges montone regions to create non-overlapping areas.
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        private static void MergeMonotoneRegions(List<Region> regions)
+        {
             int layerId = 1;
 
-            for (int i = 0; i < nreg; ++i)
+            for (int i = 0; i < regions.Count; ++i)
             {
                 regions[i].Id = 0;
             }
 
             // Merge montone regions to create non-overlapping areas.
             var stack = new List<int>(32);
-            for (int i = 1; i < nreg; ++i)
+            for (int i = 1; i < regions.Count; ++i)
             {
                 var root = regions[i];
                 // Skip already visited.
@@ -2995,12 +2912,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 while (stack.Count > 0)
                 {
                     // Pop front
-                    var reg = regions[stack[0]];
-                    for (int j = 0; j < stack.Count - 1; ++j)
-                    {
-                        stack[j] = stack[j + 1];
-                    }
-                    stack.Clear();
+                    var reg = regions[stack.PopFirst()];
 
                     var cons = reg.GetConnections();
                     foreach (var nei in cons)
@@ -3011,17 +2923,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             continue;
                         }
+
                         // Skip if the neighbour is overlapping root region.
-                        bool overlap = false;
-                        var rootFloors = root.GetFloors();
-                        foreach (var floor in rootFloors)
-                        {
-                            if (floor == nei)
-                            {
-                                overlap = true;
-                                break;
-                            }
-                        }
+                        bool overlap = root.OverlapWithNeighbour(nei);
                         if (overlap)
                         {
                             continue;
@@ -3032,93 +2936,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                         // Mark layer id
                         regn.Id = layerId;
+
                         // Merge current layers to root.
-                        var regnFloors = regn.GetFloors();
-                        foreach (var floor in regnFloors)
-                        {
-                            root.AddUniqueFloorRegion(floor);
-                        }
-                        root.YMin = Math.Min(root.YMin, regn.YMin);
-                        root.YMax = Math.Max(root.YMax, regn.YMax);
-                        root.SpanCount += regn.SpanCount;
-                        regn.SpanCount = 0;
-                        root.ConnectsToBorder = root.ConnectsToBorder || regn.ConnectsToBorder;
+                        root.MergeFloors(regn);
                     }
                 }
 
                 layerId++;
             }
-
-            // Remove small regions
-            for (int i = 0; i < nreg; ++i)
+        }
+        /// <summary>
+        /// Updates overlapping region floors
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="lregs">Floors</param>
+        private static void UpdateOverlappingRegionFloors(List<Region> regions, List<int> lregs)
+        {
+            for (int i = 0; i < lregs.Count - 1; ++i)
             {
-                if (regions[i].SpanCount <= 0 || regions[i].SpanCount >= minRegionArea || regions[i].ConnectsToBorder)
+                for (int j = i + 1; j < lregs.Count; ++j)
                 {
-                    continue;
-                }
-
-                int reg = regions[i].Id;
-                for (int j = 0; j < nreg; ++j)
-                {
-                    if (regions[j].Id == reg)
+                    if (lregs[i] != lregs[j])
                     {
-                        regions[j].Id = 0;
+                        var ri = regions[lregs[i]];
+                        var rj = regions[lregs[j]];
+                        ri.AddUniqueFloorRegion(lregs[j]);
+                        rj.AddUniqueFloorRegion(lregs[i]);
                     }
                 }
             }
-
-            // Compress region Ids.
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions[i].Remap = false;
-                if (regions[i].Id == 0)
-                {
-                    // Skip nil regions.
-                    continue;
-                }
-                if ((regions[i].Id & RC_BORDER_REG) != 0)
-                {
-                    // Skip external regions.
-                    continue;
-                }
-                regions[i].Remap = true;
-            }
-
-            int regIdGen = 0;
-            for (int i = 0; i < nreg; ++i)
-            {
-                if (!regions[i].Remap)
-                {
-                    continue;
-                }
-                int oldId = regions[i].Id;
-                int newId = ++regIdGen;
-                for (int j = i; j < nreg; ++j)
-                {
-                    if (regions[j].Id == oldId)
-                    {
-                        regions[j].Id = newId;
-                        regions[j].Remap = false;
-                    }
-                }
-            }
-            maxRegionIdResult = regIdGen;
-
-            // Remap regions.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                if ((srcReg[i] & RC_BORDER_REG) == 0)
-                {
-                    srcReg[i] = regions[srcReg[i]].Id;
-                }
-            }
-
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions[i] = null;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -3155,7 +3001,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var c = Cells[x + y * w];
             for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
-                if (Spans[i].Reg == 0 || (Spans[i].Reg & RC_BORDER_REG) != 0)
+                if (Spans[i].Reg == 0 || IsBorder(Spans[i].Reg))
                 {
                     flags[i] = 0;
                     continue;
@@ -3204,7 +3050,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 int reg = Spans[i].Reg;
-                if (reg == 0 || (reg & RC_BORDER_REG) != 0)
+                if (reg == 0 || IsBorder(reg))
                 {
                     continue;
                 }
@@ -3409,6 +3255,33 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return new(px, py, pz, r);
+        }
+
+        /// <summary>
+        /// Gets the neighbour cell index in the cells array, in the specified direction and connection
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="dir">Direction</param>
+        /// <param name="con">Connection</param>
+        public int GetNeighbourCellIndex(int x, int y, int dir, int con)
+        {
+            return GetNeighbourCellIndex(x, y, dir, con, out _, out _);
+        }
+        /// <summary>
+        /// Gets the neighbour cell index in the cells array, in the specified direction and connection
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="dir">Direction</param>
+        /// <param name="con">Connection</param>
+        /// <param name="ax">Neighbour cell x coordinate</param>
+        /// <param name="ay">Neighbour cell y coordinate</param>
+        public int GetNeighbourCellIndex(int x, int y, int dir, int con, out int ax, out int ay)
+        {
+            ax = x + Utils.GetDirOffsetX(dir);
+            ay = y + Utils.GetDirOffsetY(dir);
+            return Cells[ax + ay * Width].Index + con;
         }
     }
 }

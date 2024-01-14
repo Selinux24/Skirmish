@@ -2,7 +2,9 @@
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.Tween;
 using Engine.UI;
+using Engine.UI.Tween;
 using SharpDX;
 using System;
 using System.Diagnostics;
@@ -19,12 +21,32 @@ namespace TerrainSamples.SceneNavmeshTest
     {
         private readonly string resourcesFolder = "SceneNavmeshTest/resources";
 
+        public MouseButtons GameWindowedLook { get; set; } = MouseButtons.Right;
+        public Keys GameExit { get; set; } = Keys.Escape;
+        public Keys GameHelp { get; set; } = Keys.F1;
+        public Keys CamLeft { get; set; } = Keys.A;
+        public Keys CamRight { get; set; } = Keys.D;
+        public Keys CamFwd { get; set; } = Keys.W;
+        public Keys CamBwd { get; set; } = Keys.S;
+        public Keys CamUp { get; set; } = Keys.Space;
+        public Keys CamDown { get; set; } = Keys.C;
+        public MouseButtons NmRndPointCircle { get; set; } = MouseButtons.Middle;
+        public Keys NmRndPoint { get; set; } = Keys.R;
+        public MouseButtons GContacPoint { get; set; } = MouseButtons.Left;
+        public Keys GBuild { get; set; } = Keys.B;
+        public Keys GPartition { get; set; } = Keys.P;
+        public Keys GTileCache { get; set; } = Keys.T;
+        public Keys GSave { get; set; } = Keys.F5;
+        public Keys GLoad { get; set; } = Keys.F6;
+
         private Player agent = null;
 
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea debug = null;
         private UITextArea help = null;
+        private UITextArea message = null;
+        private UIControlTweener uiTweener;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
@@ -36,6 +58,7 @@ namespace TerrainSamples.SceneNavmeshTest
         private TimeSpan enqueueTime = TimeSpan.Zero;
         private string loadState = null;
 
+        private bool uiReady = false;
         private bool gameReady = false;
 
         public NavmeshTestScene(Game game) : base(game)
@@ -58,8 +81,18 @@ namespace TerrainSamples.SceneNavmeshTest
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                InitializeText(),
+                new[]
+                {
+                    InitializeTweener(),
+                    InitializeText(),
+                },
                 InitializeComponentsCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeText()
         {
@@ -75,16 +108,12 @@ namespace TerrainSamples.SceneNavmeshTest
             debug.Text = null;
 
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
-B: Change Build Mode (SHIFT reverse).
-P: Change Partition Type (SHIFT reverse).
-T: Toggle using Tile Cache.
-F5: Saves the graph to a file.
-F6: Loads the graph from a file.
-Left Mouse: Update current tile (SHIFT remove, CTRL add).
-Middle Mouse: Finds random point around circle (5 units).
-Space: Finds random over navmesh";
+            help.Text = GetHelpText();
             help.Visible = false;
+
+            message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Orange });
+            message.Text = null;
+            message.Visible = false;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
@@ -99,6 +128,8 @@ Space: Finds random over navmesh";
             UpdateLayout();
             InitializeLights();
             InitializeAgent();
+
+            uiReady = true;
 
             InitializeMapData();
         }
@@ -216,59 +247,66 @@ Space: Finds random over navmesh";
         {
             base.Update(gameTime);
 
-            if (!gameReady)
+            if (!uiReady)
             {
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.Escape))
-            {
-                Game.SetScene<StartScene>();
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(GameHelp))
             {
                 help.Visible = !help.Visible;
             }
 
             UpdateCameraInput();
+
+            UpdateLoadingText();
+
+            if (!gameReady)
+            {
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(GameExit))
+            {
+                Game.SetScene<StartScene>();
+            }
+
             UpdateNavmeshInput();
             UpdateGraphInput();
-            UpdateFilesInput();
         }
         private void UpdateCameraInput()
         {
-            if (Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(CamLeft))
             {
                 Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(CamRight))
             {
                 Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(CamFwd))
             {
                 Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(CamBwd))
             {
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(Keys.Space))
+            if (Game.Input.KeyPressed(CamUp))
             {
                 Camera.MoveUp(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(Keys.C))
+            if (Game.Input.KeyPressed(CamDown))
             {
                 Camera.MoveDown(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
+            if (Game.Input.MouseButtonPressed(GameWindowedLook))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -278,98 +316,222 @@ Space: Finds random over navmesh";
         }
         private void UpdateNavmeshInput()
         {
-            if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
+            if (Game.Input.MouseButtonJustReleased(NmRndPointCircle))
             {
-                var pRay = GetPickingRay(PickingHullTypes.Perfect);
-
-                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-                {
-                    DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
-                    DrawTriangle(r.PickingResult.Primitive, Color.White);
-
-                    float radius = 5;
-
-                    DrawCircle(r.PickingResult.Position, radius, Color.Orange);
-
-                    var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
-                    if (pt.HasValue)
-                    {
-                        float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
-                        Color color = dist < radius ? Color.LightGreen : Color.Pink;
-                        DrawPoint(pt.Value, 2.5f, color);
-                    }
-                }
+                UpdateFindRandomPointCircleInput();
             }
 
-            if (Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(NmRndPoint))
             {
-                var pt = NavigationGraph.FindRandomPoint(agent);
+                UpdateFindRandomPointInput();
+            }
+        }
+        private void UpdateFindRandomPointCircleInput()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+
+            if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+                DrawTriangle(r.PickingResult.Primitive, Color.White);
+
+                float radius = 5;
+
+                DrawCircle(r.PickingResult.Position, radius, Color.Orange);
+
+                var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
                 if (pt.HasValue)
                 {
-                    DrawPoint(pt.Value, 2.5f, Color.LightGreen);
+                    float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
+                    Color color = dist < radius ? Color.LightGreen : Color.Pink;
+                    DrawPoint(pt.Value, 2.5f, color);
                 }
+            }
+        }
+        private void UpdateFindRandomPointInput()
+        {
+            var pt = NavigationGraph.FindRandomPoint(agent);
+            if (pt.HasValue)
+            {
+                DrawPoint(pt.Value, 2.5f, Color.LightGreen);
             }
         }
         private void UpdateGraphInput()
         {
             bool updateGraph = false;
 
-            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            if (Game.Input.KeyJustReleased(GSave))
             {
-                var pRay = GetPickingRay(PickingHullTypes.Perfect);
+                UpdateGraphSaveInput();
 
-                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-                {
-                    DrawContact(r.PickingResult.Position, r.PickingResult.Primitive);
-
-                    ToggleTile(r.PickingResult.Position);
-                }
+                return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.B))
+            if (Game.Input.KeyJustReleased(GLoad))
             {
-                var buildModes = Enum.GetNames(typeof(BuildModes)).Length;
+                UpdateGraphLoadInput();
 
-                if (!Game.Input.ShiftPressed)
-                {
-                    nmsettings.BuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, buildModes);
-                }
-                else
-                {
-                    nmsettings.BuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, buildModes);
-                }
-                updateGraph = true;
+                return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.P))
+            if (Game.Input.MouseButtonJustReleased(GContacPoint))
             {
-                var sampleTypes = Enum.GetNames(typeof(SamplePartitionTypes)).Length;
+                UpdateContactInput();
 
-                if (!Game.Input.ShiftPressed)
-                {
-                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, sampleTypes);
-                }
-                else
-                {
-                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, sampleTypes);
-                }
-                updateGraph = true;
+                return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.T))
+            if (Game.Input.KeyJustReleased(GBuild))
             {
-                nmsettings.UseTileCache = !nmsettings.UseTileCache;
+                updateGraph = ChangeBuilMode(!Game.Input.ShiftPressed);
+            }
 
-                updateGraph = true;
+            if (Game.Input.KeyJustReleased(GPartition))
+            {
+                updateGraph = ChangePartitionType(!Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyJustReleased(GTileCache))
+            {
+                updateGraph = ChangeUseTileCache(!nmsettings.UseTileCache);
             }
 
             if (updateGraph)
             {
                 EnqueueGraph();
             }
+        }
+        private void UpdateGraphSaveInput()
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
 
-            var loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds";
-            debug.Text = $"Build Mode: {nmsettings.BuildMode}; Partition Type: {nmsettings.PartitionType}; {loading}";
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.SaveFileDialog();
+            dlg.FileName = @"test.grf";
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
+            }
+        }
+        private void UpdateGraphLoadInput()
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.OpenFileDialog();
+            dlg.FileName = @"test.grf";
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                LoadNavigationGraphFromFile(dlg.FileName);
+            }
+        }
+        private void UpdateContactInput()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+
+            if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                DrawContact(r.PickingResult.Position, r.PickingResult.Primitive);
+
+                ToggleTile(r.PickingResult.Position);
+            }
+        }
+        private bool ChangeBuilMode(bool next)
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return false;
+            }
+
+            var buildModes = Enum.GetNames(typeof(BuildModes)).Length;
+            BuildModes newBuildMode;
+            if (next)
+            {
+                newBuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, buildModes);
+            }
+            else
+            {
+                newBuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, buildModes);
+            }
+
+            nmsettings.BuildMode = newBuildMode;
+
+            if (nmsettings.BuildMode == BuildModes.Solo && nmsettings.UseTileCache)
+            {
+                ShowMessage($"TileCache disabled due to change to Build {newBuildMode}.");
+
+                nmsettings.UseTileCache = false;
+            }
+
+            return true;
+        }
+        private bool ChangePartitionType(bool next)
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return false;
+            }
+
+            var sampleTypes = Enum.GetNames(typeof(SamplePartitionTypes)).Length;
+            SamplePartitionTypes newPartitionType;
+            if (next)
+            {
+                newPartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, sampleTypes);
+            }
+            else
+            {
+                newPartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, sampleTypes);
+            }
+
+            if (nmsettings.UseTileCache)
+            {
+                ShowMessage("Partition type cannot be changed with TileCache Enabled.");
+
+                return false;
+            }
+
+            nmsettings.PartitionType = newPartitionType;
+
+            return true;
+        }
+        private bool ChangeUseTileCache(bool useTileCache)
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return false;
+            }
+
+            if (nmsettings.UseTileCache == useTileCache)
+            {
+                return false;
+            }
+
+            if (nmsettings.BuildMode == BuildModes.Solo)
+            {
+                ShowMessage($"TileCache cannot be activated with Build mode {nmsettings.BuildMode} Enabled.");
+
+                return false;
+            }
+
+            nmsettings.UseTileCache = useTileCache;
+
+            return true;
         }
         private void DrawContact(Vector3 position, Triangle triangle)
         {
@@ -389,29 +551,11 @@ Space: Finds random over navmesh";
             DrawPoint(position, 0.25f, pColor);
             DrawTriangle(triangle, Color.White);
         }
-        private void UpdateFilesInput()
+        private void UpdateLoadingText()
         {
-            if (Game.Input.KeyJustReleased(Keys.F5))
-            {
-                using var dlg = new System.Windows.Forms.SaveFileDialog();
-                dlg.FileName = @"test.grf";
-
-                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
-                }
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F6))
-            {
-                using var dlg = new System.Windows.Forms.OpenFileDialog();
-                dlg.FileName = @"test.grf";
-
-                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    LoadNavigationGraphFromFile(dlg.FileName);
-                }
-            }
+            var loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds.";
+            var tileCache = nmsettings.UseTileCache ? "| Using TileCache. " : "";
+            debug.Text = $"Build {nmsettings.BuildMode} | Partition {nmsettings.PartitionType} {tileCache}| {loading}";
         }
 
         private void DrawPoint(Vector3 position, float size, Color color)
@@ -485,6 +629,28 @@ Space: Finds random over navmesh";
                 DrawGraphNodes(agent);
             }
         }
+        private void ShowMessage(string text)
+        {
+            message.Text = text;
+            message.Visible = true;
+            uiTweener.FadeOff(message, 5000);
+        }
+        private void ShowOnGraphLoadingMessage()
+        {
+            ShowMessage("Graph already loading. Please wait for results.");
+        }
+        private string GetHelpText()
+        {
+            return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move, Mouse To look (Press {GameWindowedLook} mouse in windowed mode). 
+{GBuild}: Change Build Mode (SHIFT reverse).
+{GPartition}: Change Partition Type (SHIFT reverse).
+{GTileCache}: Toggle using Tile Cache.
+{GSave}: Saves the graph to a file.
+{GLoad}: Loads the graph from a file.
+{GContacPoint}: Update current tile (SHIFT remove, CTRL add).
+{NmRndPointCircle}: Finds random point around circle (5 units).
+{NmRndPoint}: Finds random over navmesh";
+        }
 
         public override void GameGraphicsResized()
         {
@@ -498,6 +664,8 @@ Space: Finds random over navmesh";
             help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
             panel.Width = Game.Form.RenderWidth;
             panel.Height = debug.Top + debug.Height + 3;
+            message.Width = Game.Form.RenderWidth;
+            message.Anchor = Anchors.BottomRight;
         }
     }
 }

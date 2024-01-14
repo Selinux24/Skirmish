@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -70,6 +72,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             YMax = 0;
         }
 
+        /// <summary>
+        /// Initializes a region list
+        /// </summary>
+        /// <param name="nreg">Number of regions in the list</param>
+        /// <returns></returns>
+        public static List<Region> InitializeRegionList(int nreg)
+        {
+            var regions = new List<Region>(nreg);
+
+            // Construct regions
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions.Add(new(i));
+            }
+
+            return regions;
+        }
         /// <summary>
         /// Gets whether a region can merge with another
         /// </summary>
@@ -175,6 +194,74 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             regb.connections.Clear();
 
             return true;
+        }
+        /// <summary>
+        /// Removes all the regions smaller than the specified area
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        public static void RemoveSmallRegions(List<Region> regions, int minRegionArea)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                if (regions[i].SpanCount <= 0 || regions[i].SpanCount >= minRegionArea || regions[i].ConnectsToBorder)
+                {
+                    continue;
+                }
+
+                int reg = regions[i].Id;
+                for (int j = 0; j < regions.Count; ++j)
+                {
+                    if (regions[j].Id == reg)
+                    {
+                        regions[j].Id = 0;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Compress region ids
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <returns>Returns the last region id</returns>
+        public static int CompressRegionIds(List<Region> regions)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                regions[i].Remap = false;
+                if (regions[i].Id == 0)
+                {
+                    // Skip nil regions.
+                    continue;
+                }
+                if (CompactHeightfield.IsBorder(regions[i].Id))
+                {
+                    // Skip external regions.
+                    continue;
+                }
+                regions[i].Remap = true;
+            }
+
+            int regIdGen = 0;
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                if (!regions[i].Remap)
+                {
+                    continue;
+                }
+                int oldId = regions[i].Id;
+                int newId = ++regIdGen;
+                for (int j = i; j < regions.Count; ++j)
+                {
+                    if (regions[j].Id == oldId)
+                    {
+                        regions[j].Id = newId;
+                        regions[j].Remap = false;
+                    }
+                }
+            }
+
+            return regIdGen;
         }
 
         /// <summary>
@@ -311,6 +398,41 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int GetFloorCount()
         {
             return floors.Count;
+        }
+        /// <summary>
+        /// Gets whether the region overlaps with the specified neighbour
+        /// </summary>
+        /// <param name="nei">Neighbour index</param>
+        public bool OverlapWithNeighbour(int nei)
+        {
+            return floors.Any(f => f == nei);
+        }
+        /// <summary>
+        /// Merges the specified region floors with current
+        /// </summary>
+        /// <param name="regn">Region</param>
+        public void MergeFloors(Region regn)
+        {
+            if (regn == null)
+            {
+                return;
+            }
+
+            foreach (var floor in regn.floors)
+            {
+                AddUniqueFloorRegion(floor);
+            }
+
+            // Update bounds
+            YMin = Math.Min(YMin, regn.YMin);
+            YMax = Math.Max(YMax, regn.YMax);
+
+            // Move the span count to current instance, and clears the other instace
+            SpanCount += regn.SpanCount;
+            regn.SpanCount = 0;
+
+            // Updates border connection
+            ConnectsToBorder = ConnectsToBorder || regn.ConnectsToBorder;
         }
     }
 }

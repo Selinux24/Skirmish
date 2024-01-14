@@ -12,13 +12,29 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         const int RC_NULL_NEI = 0xff;
 
         /// <summary>
-        /// Number of samples
+        /// Empty instance
         /// </summary>
-        public int SampleCount { get; set; }
+        public static LayerSweepSpan Empty
+        {
+            get
+            {
+                return new()
+                {
+                    RegId = -1,
+                    SampleCount = 0,
+                    NeiRegId = RC_NULL_NEI,
+                };
+            }
+        }
+
         /// <summary>
         /// Region id
         /// </summary>
         public int RegId { get; set; }
+        /// <summary>
+        /// Number of samples
+        /// </summary>
+        public int SampleCount { get; set; }
         /// <summary>
         /// Neighbour region id
         /// </summary>
@@ -82,13 +98,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 NeiRegId = RC_NULL_NEI;
             }
         }
+        /// <summary>
+        /// Resets the sweep
+        /// </summary>
+        public void Reset()
+        {
+            var empty = Empty;
+
+            SampleCount = empty.SampleCount;
+            NeiRegId = empty.NeiRegId;
+        }
 
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            if (SampleCount != 0 || RegId != 0 || NeiRegId != 0)
+            var empty = Empty;
+
+            if (RegId != empty.RegId || SampleCount != empty.SampleCount || NeiRegId != empty.NeiRegId)
             {
-                return $"Samples: {SampleCount}; Region Id: {RegId}; Neighbor Id: {NeiRegId};";
+                return $"Region Id: {RegId}; Samples: {SampleCount}; Neighbor Id: {NeiRegId};";
             }
             else
             {

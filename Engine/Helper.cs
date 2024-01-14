@@ -481,12 +481,24 @@ namespace Engine
             return string.Join(separator, res);
         }
         /// <summary>
+        /// Removes the first item of the list
+        /// </summary>
+        /// <typeparam name="T">List type</typeparam>
+        /// <param name="list">The list</param>
+        /// <returns>Returns the removed item</returns>
+        public static T PopFirst<T>(this List<T> list)
+        {
+            T value = list[0];
+            list.RemoveAt(0);
+            return value;
+        }
+        /// <summary>
         /// Removes the last item of the list
         /// </summary>
         /// <typeparam name="T">List type</typeparam>
         /// <param name="list">The list</param>
         /// <returns>Returns the removed item</returns>
-        public static T Pop<T>(this List<T> list)
+        public static T PopLast<T>(this List<T> list)
         {
             int index = list.Count - 1;
             T value = list[index];
