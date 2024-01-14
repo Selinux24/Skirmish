@@ -80,53 +80,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             };
         }
         /// <summary>
-        /// Finds the minimum height
-        /// </summary>
-        private static (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
-        {
-            int minh = minHeight;
-            int asmin = minimumAccessibleNeigbor;
-            int asmax = maximumAccessibleNeigbor;
-
-            int bot = span.SMax;
-            int top = span.Next != null ? span.Next.SMin : int.MaxValue;
-
-            // From minus infinity to the first span.
-            int nbot = -walkableClimb;
-            int ntop = nSpan != null ? nSpan.SMin : int.MaxValue;
-
-            // Skip neightbour if the gap between the spans is too small.
-            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-            {
-                minh = Math.Min(minh, nbot - bot);
-            }
-
-            var ns = nSpan;
-            while (ns != null)
-            {
-                nbot = ns.SMax;
-                ntop = ns.Next != null ? ns.Next.SMin : int.MaxValue;
-
-                // Skip neightbour if the gap between the spans is too small.
-                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-                {
-                    minh = Math.Min(minh, nbot - bot);
-
-                    // Find min/max accessible neighbour height. 
-                    if (Math.Abs(nbot - bot) <= walkableClimb)
-                    {
-                        if (nbot < asmin) asmin = nbot;
-                        if (nbot > asmax) asmax = nbot;
-                    }
-
-                }
-
-                ns = ns.Next;
-            }
-
-            return (minh, asmin, asmax);
-        }
-        /// <summary>
         /// Marks a walkable triangle list
         /// </summary>
         /// <param name="walkableSlopeAngle">Slope angle</param>
@@ -543,44 +496,32 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // Current span is further than the new span, break.
                     break;
                 }
-                else if (cur.SMax < s.SMin)
+
+                if (cur.SMax < s.SMin)
                 {
                     // Current span is before the new span advance.
                     prev = cur;
                     cur = cur.Next;
+
+                    continue;
+                }
+
+                // Merge spans.
+                s.MergeSpans(cur, flagMergeThr);
+
+                // Remove current span.
+                var next = cur.Next;
+                FreeSpan(cur);
+                if (prev != null)
+                {
+                    prev.Next = next;
                 }
                 else
                 {
-                    // Merge spans.
-                    if (cur.SMin < s.SMin)
-                    {
-                        s.SMin = cur.SMin;
-                    }
-                    if (cur.SMax > s.SMax)
-                    {
-                        s.SMax = cur.SMax;
-                    }
-
-                    // Merge flags.
-                    if (Math.Abs(s.SMax - cur.SMax) <= flagMergeThr)
-                    {
-                        s.Area = (AreaTypes)Math.Max((int)s.Area, (int)cur.Area);
-                    }
-
-                    // Remove current span.
-                    Span next = cur.Next;
-                    FreeSpan(cur);
-                    if (prev != null)
-                    {
-                        prev.Next = next;
-                    }
-                    else
-                    {
-                        Spans[idx] = next;
-                    }
-
-                    cur = next;
+                    Spans[idx] = next;
                 }
+
+                cur = next;
             }
 
             // Insert new span.
@@ -709,7 +650,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var ns = Spans[dx + dy * width];
-                var (MinHeight, AsMin, AsMax) = FindMinimumHeight(ns, span, walkableHeight, walkableClimb, minh, asmin, asmax);
+                var (MinHeight, AsMin, AsMax) = span.FindMinimumHeight(ns, walkableHeight, walkableClimb, minh, asmin, asmax);
                 minh = MinHeight;
                 asmin = AsMin;
                 asmax = AsMax;

@@ -553,9 +553,9 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void UpdateLoadingText()
         {
-            var loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds.";
-            var tileCache = nmsettings.UseTileCache ? "| Using TileCache. " : "";
-            debug.Text = $"Build {nmsettings.BuildMode} | Partition {nmsettings.PartitionType} {tileCache}| {loading}";
+            string partition = nmsettings.UseTileCache ? "Using TileCache" : $"Partition {nmsettings.PartitionType}";
+            string loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds.";
+            debug.Text = $"Build {nmsettings.BuildMode} | {partition} => {loading}";
         }
 
         private void DrawPoint(Vector3 position, float size, Color color)

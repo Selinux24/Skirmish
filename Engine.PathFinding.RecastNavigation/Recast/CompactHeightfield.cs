@@ -2906,7 +2906,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Start search.
                 root.Id = layerId;
 
-                stack.Clear();
                 stack.Add(i);
 
                 while (stack.Count > 0)

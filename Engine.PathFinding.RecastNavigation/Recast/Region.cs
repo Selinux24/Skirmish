@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -405,7 +404,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="nei">Neighbour index</param>
         public bool OverlapWithNeighbour(int nei)
         {
-            return floors.Any(f => f == nei);
+            return floors.Contains(nei);
         }
         /// <summary>
         /// Merges the specified region floors with current
