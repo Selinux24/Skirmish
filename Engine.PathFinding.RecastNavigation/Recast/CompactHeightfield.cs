@@ -69,6 +69,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Dirty entries list
+        /// </summary>
+        private readonly List<RecastRegionDirtyEntry> dirtyEntries = new();
+
+        /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
         /// </summary>
         public int Width { get; set; }
@@ -1608,39 +1613,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Push the direct dir last so we start with this on next iteration
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
 
-                var cs = Spans[hdItem.I];
-                for (int i = 0; i < 4; i++)
-                {
-                    int dir = dirs[i];
-                    if (!cs.GetCon(dir, out int con))
-                    {
-                        continue;
-                    }
+                var items = BuildHeightDataItems(hdItem, bounds, dirs, hp);
 
-                    int newX = hdItem.X + Utils.GetDirOffsetX(dir);
-                    int newY = hdItem.Y + Utils.GetDirOffsetY(dir);
-
-                    int hpx = newX - bounds.X;
-                    int hpy = newY - bounds.Y;
-                    if (hpx < 0 || hpx >= bounds.Width || hpy < 0 || hpy >= bounds.Height)
-                    {
-                        continue;
-                    }
-
-                    if (hp.Data[hpx + hpy * bounds.Width] != 0)
-                    {
-                        continue;
-                    }
-
-                    hp.Data[hpx + hpy * bounds.Width] = 1;
-                    int index = Cells[(newX + BorderSize) + (newY + BorderSize) * Width].Index + con;
-                    array.Add(new HeightDataItem
-                    {
-                        X = newX,
-                        Y = newY,
-                        I = index
-                    });
-                }
+                array.AddRange(items);
 
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
             }
@@ -1660,6 +1635,51 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             hp.Data[(hdItem.X - bounds.X) + (hdItem.Y - bounds.Y) * bounds.Width] = chs.Y;
 
             return array.ToArray();
+        }
+        /// <summary>
+        /// Build the neighbour's item list of the specified height data item
+        /// </summary>
+        /// <param name="hdItem">Height data item</param>
+        /// <param name="bounds">Bounds</param>
+        /// <param name="dirs">Direction list</param>
+        /// <param name="hp">Height path to store data</param>
+        private IEnumerable<HeightDataItem> BuildHeightDataItems(HeightDataItem hdItem, Rectangle bounds, int[] dirs, HeightPatch hp)
+        {
+            var cs = Spans[hdItem.I];
+
+            for (int i = 0; i < 4; i++)
+            {
+                int dir = dirs[i];
+                if (!cs.GetCon(dir, out int con))
+                {
+                    continue;
+                }
+
+                int newX = hdItem.X + Utils.GetDirOffsetX(dir);
+                int newY = hdItem.Y + Utils.GetDirOffsetY(dir);
+
+                int hpx = newX - bounds.X;
+                int hpy = newY - bounds.Y;
+                if (hpx < 0 || hpx >= bounds.Width || hpy < 0 || hpy >= bounds.Height)
+                {
+                    continue;
+                }
+
+                if (hp.Data[hpx + hpy * bounds.Width] != 0)
+                {
+                    continue;
+                }
+
+                hp.Data[hpx + hpy * bounds.Width] = 1;
+                int index = Cells[(newX + BorderSize) + (newY + BorderSize) * Width].Index + con;
+
+                yield return new HeightDataItem
+                {
+                    X = newX,
+                    Y = newY,
+                    I = index
+                };
+            }
         }
         /// <summary>
         /// Finds the closest cell to polygon vertex
@@ -1889,81 +1909,108 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxIter">Max iterations</param>
         private void ProcessRegionsStack(List<LevelStackEntry> stack, int[] srcReg, int[] srcDist, int level, int maxIter)
         {
-            var dirtyEntries = new List<RecastRegionDirtyEntry>();
             int iter = 0;
+
             while (stack.Count > 0)
             {
-                int failed = 0;
-                dirtyEntries.Clear();
-
-                for (int j = 0; j < stack.Count; j++)
-                {
-                    var current = stack[j];
-
-                    int x = current.X;
-                    int y = current.Y;
-                    int i = current.Index;
-                    if (i < 0)
-                    {
-                        failed++;
-                        continue;
-                    }
-
-                    int r = srcReg[i];
-                    int d2 = int.MaxValue;
-                    var area = Areas[i];
-                    var s = Spans[i];
-                    foreach (var item in IterateSpanConnections(s, x, y))
-                    {
-                        if (item.area != area)
-                        {
-                            continue;
-                        }
-
-                        int sr = srcReg[item.ai];
-                        int sd = srcDist[item.ai];
-
-                        if (sr > 0 && !IsBorder(sr) && sd + 2 < d2)
-                        {
-                            r = sr;
-                            d2 = sd + 2;
-                        }
-                    }
-
-                    if (r != 0)
-                    {
-                        current.Index = -1; // mark as used
-                        stack[j] = current;
-
-                        dirtyEntries.Add(new RecastRegionDirtyEntry { Index = i, Region = r, Distance2 = d2 });
-                    }
-                    else
-                    {
-                        failed++;
-                    }
-                }
-
-                for (int i = 0; i < dirtyEntries.Count; i++)
-                {
-                    int idx = dirtyEntries[i].Index;
-                    srcReg[idx] = dirtyEntries[i].Region;
-                    srcDist[idx] = dirtyEntries[i].Distance2;
-                }
-
+                int failed = BuildDirtyEntries(stack, srcReg, srcDist);
                 if (failed == stack.Count)
                 {
                     break;
                 }
 
-                if (level > 0)
+                if (level <= 0)
                 {
-                    ++iter;
-                    if (iter >= maxIter)
-                    {
-                        break;
-                    }
+                    continue;
+                }
+
+                ++iter;
+
+                if (iter >= maxIter)
+                {
+                    break;
                 }
             }
+        }
+        /// <summary>
+        /// Finds the nearest region of the span
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="i">Span index</param>
+        /// <param name="srcReg">Source regions</param>
+        /// <param name="srcDist">Source distances</param>
+        private (int RegId, int Distance) FindNearestRegion(int x, int y, int i, int[] srcReg, int[] srcDist)
+        {
+            int r = srcReg[i];
+            int d = int.MaxValue;
+            var area = Areas[i];
+            var s = Spans[i];
+            foreach (var item in IterateSpanConnections(s, x, y))
+            {
+                if (item.area != area)
+                {
+                    continue;
+                }
+
+                int sr = srcReg[item.ai];
+                int sd = srcDist[item.ai];
+
+                if (sr > 0 && !IsBorder(sr) && sd + 2 < d)
+                {
+                    r = sr;
+                    d = sd + 2;
+                }
+            }
+
+            return (r, d);
+        }
+        /// <summary>
+        /// Builds the dirty entries list of the stack elements
+        /// </summary>
+        /// <param name="stack">Stack</param>
+        /// <param name="srcReg">Source regions</param>
+        /// <param name="srcDist">Source distances</param>
+        /// <returns>Returns the failed counter</returns>
+        private int BuildDirtyEntries(List<LevelStackEntry> stack, int[] srcReg, int[] srcDist)
+        {
+            int failed = 0;
+            dirtyEntries.Clear();
+
+            for (int j = 0; j < stack.Count; j++)
+            {
+                var current = stack[j];
+
+                int x = current.X;
+                int y = current.Y;
+                int i = current.Index;
+                if (i < 0)
+                {
+                    failed++;
+                    continue;
+                }
+
+                var (r, d2) = FindNearestRegion(x, y, i, srcReg, srcDist);
+                if (r == 0)
+                {
+                    failed++;
+                    continue;
+                }
+
+                current.Index = -1; // mark as used
+                stack[j] = current;
+
+                dirtyEntries.Add(new() { Index = i, Region = r, Distance2 = d2 });
+            }
+
+            for (int i = 0; i < dirtyEntries.Count; i++)
+            {
+                int idx = dirtyEntries[i].Index;
+                srcReg[idx] = dirtyEntries[i].Region;
+                srcDist[idx] = dirtyEntries[i].Distance2;
+            }
+
+            return failed;
         }
         /// <summary>
         /// Flood region

@@ -520,6 +520,30 @@ namespace Engine.PathFinding.RecastNavigation
             return ConnectAdjacencyEdges(polys, npolys, vertsPerPoly, adjEdges, addOpenEdges, openPolyEdgeValue);
         }
         /// <summary>
+        /// Iterates the vertices of each polygon in the specified list
+        /// </summary>
+        /// <param name="polys">Polygon list</param>
+        /// <param name="npolys">Number of polygons in the list</param>
+        /// <param name="vertsPerPoly">Vertices per polygon</param>
+        /// <returns>Returns the polygon, the index of the polygon, and the index of de vertex</returns>
+        private static IEnumerable<(IndexedPolygon p, int i, int j)> IteratePolygonVertices(IndexedPolygon[] polys, int npolys, int vertsPerPoly)
+        {
+            for (int i = 0; i < npolys; ++i)
+            {
+                var p = polys[i];
+
+                for (int j = 0; j < vertsPerPoly; ++j)
+                {
+                    if (p.IsNull(j))
+                    {
+                        break;
+                    }
+
+                    yield return (p, i, j);
+                }
+            }
+        }
+        /// <summary>
         /// Connects the adjacency edges
         /// </summary>
         /// <param name="polys">Polygon list</param>
@@ -536,52 +560,42 @@ namespace Engine.PathFinding.RecastNavigation
             var firstEdge = edgeList.FirstEdge;
             var nextEdge = edgeList.NextEdge;
 
-            for (int i = 0; i < npolys; ++i)
+            foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys, vertsPerPoly))
             {
-                var p = polys[i];
-
-                for (int j = 0; j < vertsPerPoly; ++j)
+                var (v0, v1) = p.GetSegmentIndices(j, vertsPerPoly);
+                if (v0 <= v1)
                 {
-                    if (p.IsNull(j))
+                    continue;
+                }
+
+                bool found = false;
+                for (int e = firstEdge[v1]; !VertexIsNull(e); e = nextEdge[e])
+                {
+                    var edge = edges[e];
+                    if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
                     {
+                        edge.Poly[1] = i;
+                        edge.PolyEdge[1] = j;
+                        found = true;
                         break;
                     }
-
-                    var (v0, v1) = p.GetSegmentIndices(j, vertsPerPoly);
-                    if (v0 <= v1)
-                    {
-                        continue;
-                    }
-
-                    bool found = false;
-                    for (int e = firstEdge[v1]; !VertexIsNull(e); e = nextEdge[e])
-                    {
-                        var edge = edges[e];
-                        if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
-                        {
-                            edge.Poly[1] = i;
-                            edge.PolyEdge[1] = j;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!addOpenEdges || found)
-                    {
-                        continue;
-                    }
-
-                    // Matching edge not found, it is an open edge, add it.
-                    edges[edgeCount] = new()
-                    {
-                        Vert = new int[] { v0, v1 },
-                        Poly = new int[] { i, i },
-                        PolyEdge = new int[] { j, openPolyEdgeValue },
-                    };
-
-                    // Insert edge
-                    nextEdge[edgeCount] = firstEdge[v1];
-                    firstEdge[v1] = edgeCount++;
                 }
+                if (!addOpenEdges || found)
+                {
+                    continue;
+                }
+
+                // Matching edge not found, it is an open edge, add it.
+                edges[edgeCount] = new()
+                {
+                    Vert = new int[] { v0, v1 },
+                    Poly = new int[] { i, i },
+                    PolyEdge = new int[] { j, openPolyEdgeValue },
+                };
+
+                // Insert edge
+                nextEdge[edgeCount] = firstEdge[v1];
+                firstEdge[v1] = edgeCount++;
             }
 
             return (edges, edgeCount);
