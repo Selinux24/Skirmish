@@ -95,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     var cv = cont.Vertices[j];
 
                     indices[j] = mesh.AddVertex(cv, firstVert, nextVert);
-                    if ((cv.Flag & VertexFlags.BORDER_VERTEX) != 0)
+                    if ((cv.Flag & TileCacheContour.DT_BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -569,12 +569,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var va = cont.Vertices[k];
                     var vb = cont.Vertices[j];
-                    if (!va.HasDirection())
+                    if (!TileCacheContour.HasDirection(va.Flag))
                     {
                         continue;
                     }
 
-                    int dir = va.Dir;
+                    int dir = TileCacheContour.GetVertexDirection(va.Flag);
                     if (dir == 0 || dir == 2)
                     {
                         // Find matching horizontal edge

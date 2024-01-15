@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -613,7 +614,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (e.PolyEdge[1] != openPolyEdgeValue)
                 {
                     var p0 = polys[e.Poly[0]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = VertexFlags.DT_EXT_LINK | e.PolyEdge[1];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = TileCacheContour.DT_EXT_LINK | e.PolyEdge[1];
                 }
             }
         }
@@ -672,86 +673,6 @@ namespace Engine.PathFinding.RecastNavigation
                     yield return (p, i, p[j], j);
                 }
             }
-        }
-        /// <summary>
-        /// Returns the portal value, if any
-        /// </summary>
-        /// <param name="va">First vertex</param>
-        /// <param name="vb">Second vertex</param>
-        /// <param name="w">Width</param>
-        /// <param name="h">Height</param>
-        /// <param name="portalValue">Returns the portal value</param>
-        /// <returns>Returns true if found</returns>
-        public static bool IsPortal(Int3 va, Int3 vb, int w, int h, out int portalValue)
-        {
-            if (va.X == 0 && vb.X == 0)
-            {
-                portalValue = VertexFlags.DT_EXT_LINK;
-
-                return true;
-            }
-            else if (va.Z == h && vb.Z == h)
-            {
-                portalValue = VertexFlags.DT_EXT_LINK | 1;
-
-                return true;
-            }
-            else if (va.X == w && vb.X == w)
-            {
-                portalValue = VertexFlags.DT_EXT_LINK | 2;
-
-                return true;
-            }
-            else if (va.Z == 0 && vb.Z == 0)
-            {
-                portalValue = VertexFlags.DT_EXT_LINK | 3;
-
-                return true;
-            }
-
-            portalValue = -1;
-
-            return false;
-        }
-        /// <summary>
-        /// Calculates the vertex portal flag direction value
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        /// <returns>Returns the vertex portal flag direction value</returns>
-        public static int CalculateVertexPortalFlag(int v)
-        {
-            var dir = v & VertexFlags.PORTAL_FLAG;
-
-            if (dir == VertexFlags.PORTAL_FLAG) // Border
-            {
-                return 0;
-            }
-            else if (dir == 0) // Portal x-
-            {
-                return VertexFlags.DT_EXT_LINK | 4;
-            }
-            else if (dir == 1) // Portal z+
-            {
-                return VertexFlags.DT_EXT_LINK | 2;
-            }
-            else if (dir == 2) // Portal x+
-            {
-                return VertexFlags.DT_EXT_LINK;
-            }
-            else if (dir == 3) // Portal z-
-            {
-                return VertexFlags.DT_EXT_LINK | 6;
-            }
-
-            return v;
-        }
-        /// <summary>
-        /// Gets the point to side index
-        /// </summary>
-        /// <param name="side">Side</param>
-        public static int PointToSide(int side)
-        {
-            return VertexFlags.DT_EXT_LINK | side;
         }
 
         /// <summary>
@@ -872,7 +793,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public bool IsExternalLink(int adjIndex)
         {
-            return VertexFlags.IsExternalLink(vertices[adjIndex]);
+            return TileCacheContour.IsExternalLink(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets whether the vertex has stored a direction or not
@@ -880,7 +801,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public bool HasDirection(int adjIndex)
         {
-            return VertexFlags.HasDirection(vertices[adjIndex]);
+            return TileCacheContour.HasDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the stored direction at the specified adjacency index
@@ -888,7 +809,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public int GetDirection(int adjIndex)
         {
-            return VertexFlags.GetVertexDirection(vertices[adjIndex]);
+            return TileCacheContour.GetVertexDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the segment indices from the specified index

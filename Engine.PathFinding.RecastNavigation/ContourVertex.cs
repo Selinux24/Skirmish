@@ -39,21 +39,10 @@ namespace Engine.PathFinding.RecastNavigation
                 return new Int3(X, Y, Z);
             }
         }
-
         /// <summary>
         /// Contour flag
         /// </summary>
         public int Flag { get; set; }
-        /// <summary>
-        /// Gets the flag's stored direction
-        /// </summary>
-        public readonly int Dir
-        {
-            get
-            {
-                return VertexFlags.GetVertexDirection(Flag);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -64,14 +53,6 @@ namespace Engine.PathFinding.RecastNavigation
             Y = y;
             Z = z;
             Flag = flag;
-        }
-
-        /// <summary>
-        /// Gets whether the vertex has stored a direction in the flag or not
-        /// </summary>
-        public readonly bool HasDirection()
-        {
-            return VertexFlags.HasDirection(Flag);
         }
 
         /// <inheritdoc/>
@@ -108,7 +89,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"X: {X}; Y: {Y}; Z: {Z}; Flag: {Flag}; Dir: {Dir};";
+            return $"X: {X}; Y: {Y}; Z: {Z}; Flag: {Flag};";
         }
 
         /// <inheritdoc/>

@@ -11,29 +11,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class ContourSet
     {
         /// <summary>
-        /// Applied to the region id field of contour vertices in order to extract the region id.
-        /// The region id field of a vertex may have several flags applied to it.  So the
-        /// fields value can't be used directly.
-        /// </summary>
-        const int RC_CONTOUR_REG_MASK = 0xffff;
-        /// <summary>
-        /// Area border flag.
-        /// If a region ID has this bit set, then the associated element lies on
-        /// the border of an area.
-        /// (Used during the region and contour build process.)
-        /// </summary>
-        public const int RC_AREA_BORDER = 0x20000;
-        /// <summary>
-        /// Border vertex flag.
-        /// If a region ID has this bit set, then the associated element lies on
-        /// a tile border. If a contour vertex's region ID has this bit set, the 
-        /// vertex will later be removed in order to match the segments and vertices 
-        /// at tile boundaries.
-        /// (Used during the build process.)
-        /// </summary>
-        public const int RC_BORDER_VERTEX = 0x10000;
-
-        /// <summary>
         /// An array of the contours in the set. [Size: #nconts]
         /// </summary>
         public Contour[] Conts { get; set; }
@@ -192,7 +169,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bool hasConnections = false;
             for (int i = 0; i < points.Length; i++)
             {
-                if ((points[i].Flag & RC_CONTOUR_REG_MASK) != 0)
+                if (Contour.IsRegion(points[i].Flag))
                 {
                     hasConnections = true;
                     break;
@@ -213,8 +190,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var pi = points[i];
                 var pii = points[ii];
 
-                bool differentRegs = (pi.Flag & RC_CONTOUR_REG_MASK) != (pii.Flag & RC_CONTOUR_REG_MASK);
-                bool areaBorders = (pi.Flag & RC_AREA_BORDER) != (pii.Flag & RC_AREA_BORDER);
+                bool differentRegs = (pi.Flag & Contour.RC_CONTOUR_REG_MASK) != (pii.Flag & Contour.RC_CONTOUR_REG_MASK);
+                bool areaBorders = (pi.Flag & Contour.RC_AREA_BORDER) != (pii.Flag & Contour.RC_AREA_BORDER);
                 if (differentRegs || areaBorders)
                 {
                     changes.Add(new(pi.X, pi.Y, pi.Z, i));
@@ -274,64 +251,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var simplified = new List<ContourVertex>(list);
 
+            float error = maxError * maxError;
+
             int pn = points.Length;
             for (int i = 0; i < simplified.Count;)
             {
                 int ii = (i + 1) % simplified.Count;
 
-                int ax = simplified[i].X;
-                int az = simplified[i].Z;
-                int ai = simplified[i].Flag;
-
-                int bx = simplified[ii].X;
-                int bz = simplified[ii].Z;
-                int bi = simplified[ii].Flag;
-
                 // Find maximum deviation from the segment.
-                float maxd = 0;
-                int maxi = -1;
-                int ci, cinc, endi;
-
-                // Traverse the segment in lexilogical order so that the
-                // max deviation is calculated similarly when traversing
-                // opposite segments.
-                if (bx > ax || (bx == ax && bz > az))
-                {
-                    cinc = 1;
-                    ci = (ai + cinc) % pn;
-                    endi = bi;
-                }
-                else
-                {
-                    cinc = pn - 1;
-                    ci = (bi + cinc) % pn;
-                    endi = ai;
-                    Helper.Swap(ref ax, ref bx);
-                    Helper.Swap(ref az, ref bz);
-                }
-
-                // Tessellate only outer edges or edges between areas.
-                if ((points[ci].Flag & RC_CONTOUR_REG_MASK) == 0 ||
-                    (points[ci].Flag & RC_AREA_BORDER) != 0)
-                {
-                    while (ci != endi)
-                    {
-                        float d = Utils.DistancePtSegSqr2D(points[ci].X, points[ci].Z, ax, az, bx, bz);
-                        if (d > maxd)
-                        {
-                            maxd = d;
-                            maxi = ci;
-                        }
-                        ci = (ci + cinc) % pn;
-                    }
-                }
+                var (maxd, maxi) = FindMaximumDeviationFromSegment(simplified[i], simplified[ii], points, pn);
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (maxError * maxError))
+                if (maxi != -1 && maxd > error)
                 {
                     // Add the point.
-                    simplified.Insert(i + 1, new(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
+                    var maxPoint = points[maxi];
+
+                    simplified.Insert(i + 1, new(maxPoint.X, maxPoint.Y, maxPoint.Z, maxi));
                 }
                 else
                 {
@@ -364,65 +301,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int ii = (i + 1) % simplified.Count;
 
-                int ax = simplified[i].X;
-                int az = simplified[i].Z;
-                int ai = simplified[i].Flag;
-
-                int bx = simplified[ii].X;
-                int bz = simplified[ii].Z;
-                int bi = simplified[ii].Flag;
-
                 // Find maximum deviation from the segment.
-                int maxi = -1;
-                int ci = (ai + 1) % pn;
-
-                // Tessellate only outer edges or edges between areas.
-                bool tess = false;
-
-                // Wall edges.
-                if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
-                    (points[ci].Flag & RC_CONTOUR_REG_MASK) == 0)
-                {
-                    tess = true;
-                }
-
-                // Edges between areas.
-                if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
-                    (points[ci].Flag & RC_AREA_BORDER) != 0)
-                {
-                    tess = true;
-                }
-
-                if (tess)
-                {
-                    int dx = bx - ax;
-                    int dz = bz - az;
-                    if (dx * dx + dz * dz > maxEdgeLen * maxEdgeLen)
-                    {
-                        // Round based on the segments in lexilogical order so that the
-                        // max tesselation is consistent regardles in which direction
-                        // segments are traversed.
-                        int n = bi < ai ? (bi + pn - ai) : (bi - ai);
-                        if (n > 1)
-                        {
-                            if (bx > ax || (bx == ax && bz > az))
-                            {
-                                maxi = (ai + n / 2) % pn;
-                            }
-                            else
-                            {
-                                maxi = (ai + (n + 1) / 2) % pn;
-                            }
-                        }
-                    }
-                }
+                int maxi = FindMaximumDeviationFromSegment(simplified[i], simplified[ii], maxEdgeLen, buildFlags, points, pn);
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
                 if (maxi != -1)
                 {
                     // Add the point.
-                    simplified.Insert(i + 1, new(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
+                    var maxPoint = points[maxi];
+
+                    simplified.Insert(i + 1, new(maxPoint.X, maxPoint.Y, maxPoint.Z, maxi));
                 }
                 else
                 {
@@ -431,6 +320,130 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return simplified.ToArray();
+        }
+        /// <summary>
+        /// Finds the maximum deviation distance point from segment
+        /// </summary>
+        /// <param name="pA">Segment point A</param>
+        /// <param name="pB">Segment point B</param>
+        /// <param name="points">Point list to test</param>
+        /// <param name="npoints">Number of points in the list</param>
+        /// <returns>Returns the maximum distance and the point index</returns>
+        private static (float MaxD, int MaxI) FindMaximumDeviationFromSegment(ContourVertex pA, ContourVertex pB, ContourVertex[] points, int npoints)
+        {
+            int ax = pA.X;
+            int az = pA.Z;
+            int ai = pA.Flag;
+
+            int bx = pB.X;
+            int bz = pB.Z;
+            int bi = pB.Flag;
+
+            int ci;
+            int cinc;
+            int endi;
+
+            // Traverse the segment in lexilogical order so that the
+            // max deviation is calculated similarly when traversing
+            // opposite segments.
+            if (bx > ax || (bx == ax && bz > az))
+            {
+                cinc = 1;
+                ci = (ai + cinc) % npoints;
+                endi = bi;
+            }
+            else
+            {
+                cinc = npoints - 1;
+                ci = (bi + cinc) % npoints;
+                endi = ai;
+                Helper.Swap(ref ax, ref bx);
+                Helper.Swap(ref az, ref bz);
+            }
+
+            // Tessellate only outer edges or edges between areas.
+            if (Contour.IsRegion(points[ci].Flag) && !Contour.IsAreaBorder(points[ci].Flag))
+            {
+                return (0, -1);
+            }
+
+            float maxd = 0;
+            int maxi = -1;
+
+            while (ci != endi)
+            {
+                var p = points[ci];
+
+                float d = Utils.DistancePtSegSqr2D(p.X, p.Z, ax, az, bx, bz);
+                if (d > maxd)
+                {
+                    maxd = d;
+                    maxi = ci;
+                }
+                ci = (ci + cinc) % npoints;
+            }
+
+            return (maxd, maxi);
+        }
+        /// <summary>
+        /// Finds the maximum deviation distance point from segment
+        /// </summary>
+        /// <param name="pA">Segment point A</param>
+        /// <param name="pB">Segment point B</param>
+        /// <param name="maxEdgeLen">Maximum edge length</param>
+        /// <param name="buildFlags">Build flags</param>
+        /// <param name="points">Point list to test</param>
+        /// <param name="npoints">Number of points in the list</param>
+        /// <returns>Returns the point index</returns>
+        private static int FindMaximumDeviationFromSegment(ContourVertex pA, ContourVertex pB, float maxEdgeLen, BuildContoursFlagTypes buildFlags, ContourVertex[] points, int npoints)
+        {
+            int ai = pA.Flag;
+            int bi = pB.Flag;
+            int ci = (ai + 1) % npoints;
+
+            // Tessellate only outer edges or edges between areas.
+
+            // Wall edges.
+            if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) == 0 || Contour.IsRegion(points[ci].Flag))
+            {
+                return -1;
+            }
+
+            // Edges between areas.
+            if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) == 0 || !Contour.IsBorderVertex(points[ci].Flag))
+            {
+                return -1;
+            }
+
+            int ax = pA.X;
+            int az = pA.Z;
+            int bx = pB.X;
+            int bz = pB.Z;
+
+            int dx = bx - ax;
+            int dz = bz - az;
+            if (dx * dx + dz * dz <= maxEdgeLen * maxEdgeLen)
+            {
+                return -1;
+            }
+
+            int n = bi < ai ? (bi + npoints - ai) : (bi - ai);
+            if (n <= 1)
+            {
+                return -1;
+            }
+
+            // Round based on the segments in lexilogical order so that the
+            // max tesselation is consistent regardles in which direction
+            // segments are traversed.
+            if (bx > ax || (bx == ax && bz > az))
+            {
+                return (ai + n / 2) % npoints;
+            }
+            else
+            {
+                return (ai + (n + 1) / 2) % npoints;
+            }
         }
         /// <summary>
         /// Update neighbors
@@ -450,7 +463,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var sv = simplified[i];
                 int ai = (sv.Flag + 1) % pn;
                 int bi = sv.Flag;
-                sv.Flag = (points[ai].Flag & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points[bi].Flag & RC_BORDER_VERTEX);
+                sv.Flag = (points[ai].Flag & (Contour.RC_CONTOUR_REG_MASK | Contour.RC_AREA_BORDER)) | (points[bi].Flag & Contour.RC_BORDER_VERTEX);
                 simplified[i] = sv;
             }
 
@@ -587,50 +600,78 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Collect outline contour and holes contours per region.
             // We assume that there is one outline and multiple holes.
+            var regions = CollectOutlinesAndHolesPerRegion(nregions, winding);
+
+            // Finally merge each regions holes into the outline.
+            MergeIntoOutline(regions, nregions);
+        }
+        /// <summary>
+        /// Collect outline contour and holes contours per region
+        /// </summary>
+        /// <param name="nregions">Number of regions</param>
+        /// <param name="winding">Winding of all polygons</param>
+        /// <returns>Returns the contour per region list</returns>
+        /// <remarks>We assume that there is one outline and multiple holes</remarks>
+        private ContourRegion[] CollectOutlinesAndHolesPerRegion(int nregions, int[] winding)
+        {
             var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
             var holes = Helper.CreateArray(NConts, () => { return new ContourHole(); });
 
             for (int i = 0; i < NConts; ++i)
             {
                 var cont = Conts[i];
+
                 // Positively would contours are outlines, negative holes.
-                if (winding[i] > 0)
-                {
-                    if (regions[cont.RegionId].Outline != null)
-                    {
-                        Logger.WriteWarning(nameof(ContourSet), $"Multiple outlines for region {cont.RegionId}");
-                    }
-                    regions[cont.RegionId].Outline = cont;
-                }
-                else
+                if (winding[i] <= 0)
                 {
                     regions[cont.RegionId].NHoles++;
+
+                    continue;
                 }
+
+                if (regions[cont.RegionId].Outline != null)
+                {
+                    Logger.WriteWarning(this, $"Multiple outlines for region {cont.RegionId}");
+                }
+
+                regions[cont.RegionId].Outline = cont;
             }
 
             int index = 0;
             for (int i = 0; i < nregions; i++)
             {
-                if (regions[i].NHoles > 0)
+                if (regions[i].NHoles <= 0)
                 {
-                    regions[i].Holes = new ContourHole[regions[i].NHoles];
-                    Array.Copy(holes, index, regions[i].Holes, 0, regions[i].NHoles);
-                    index += regions[i].NHoles;
-                    regions[i].NHoles = 0;
+                    continue;
                 }
+
+                regions[i].Holes = new ContourHole[regions[i].NHoles];
+                Array.Copy(holes, index, regions[i].Holes, 0, regions[i].NHoles);
+                index += regions[i].NHoles;
+                regions[i].NHoles = 0;
             }
 
             for (int i = 0; i < NConts; ++i)
             {
+                if (winding[i] >= 0)
+                {
+                    continue;
+                }
+
                 var cont = Conts[i];
                 var reg = regions[cont.RegionId];
-                if (winding[i] < 0)
-                {
-                    reg.Holes[reg.NHoles++].Contour = cont;
-                }
+                reg.Holes[reg.NHoles++].Contour = cont;
             }
 
-            // Finally merge each regions holes into the outline.
+            return regions;
+        }
+        /// <summary>
+        /// Merges each region hole into the outline
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="nregions">Number of regions in the list</param>
+        private void MergeIntoOutline(ContourRegion[] regions, int nregions)
+        {
             for (int i = 0; i < nregions; i++)
             {
                 var reg = regions[i];
@@ -647,7 +688,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     // The region does not have an outline.
                     // This can happen if the contour becames selfoverlapping because of too aggressive simplification settings.
-                    Logger.WriteWarning(nameof(ContourSet), $"Bad outline for region {i}, contour simplification is likely too aggressive.");
+                    Logger.WriteWarning(this, $"Bad outline for region {i}, contour simplification is likely too aggressive.");
                 }
             }
         }

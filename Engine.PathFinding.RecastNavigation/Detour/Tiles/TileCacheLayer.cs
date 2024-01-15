@@ -529,7 +529,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int ia = col + row * w;
             int con = Cons[ia];
 
-            int conDir = VertexFlags.GetVertexDirection(con);
+            int conDir = TileCacheContour.GetVertexDirection(con);
             int portal = con >> 4;
 
             if (!IsPortalAtDirection(conDir, dir))
@@ -537,7 +537,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // No connection, return portal or hard edge.
                 if (IsPortalAtDirection(portal, dir))
                 {
-                    return VertexFlags.DIR_MASK + dir;
+                    return TileCacheContour.DT_DIR_MASK + dir;
                 }
                 return NULL_ID;
             }
@@ -566,7 +566,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             int n = 0;
 
-            int portal = VertexFlags.PORTAL_FLAG;
+            int portal = TileCacheContour.DT_PORTAL_FLAG;
             int height = 0;
             int preg = NULL_ID;
             bool allSameReg = true;

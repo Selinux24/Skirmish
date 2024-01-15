@@ -3023,7 +3023,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         res |= 1 << dir;
                     }
                 }
-                flags[i] = res ^ 0xf; // Inverse, mark non connected edges.
+                flags[i] = res ^ Contour.RC_PORTAL_FLAG; // Inverse, mark non connected edges.
             }
         }
 
@@ -3042,7 +3042,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var c = Cells[x + y * w];
             for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
-                if (flags[i] == 0 || flags[i] == VertexFlags.PORTAL_FLAG)
+                if (flags[i] == 0 || flags[i] == Contour.RC_PORTAL_FLAG)
                 {
                     flags[i] = 0;
                     continue;
@@ -3231,26 +3231,26 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 case 1: px++; pz++; break;
                 case 2: px++; break;
             }
+
             int r = 0;
-            var s = Spans[i];
-            if (s.GetCon(dir, out int con))
+
+            if (Spans[i].GetCon(dir, out int con))
             {
-                int ax = x + Utils.GetDirOffsetX(dir);
-                int ay = y + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + con;
+                int ai = GetNeighbourCellIndex(x, y, dir, con);
                 r = Spans[ai].Reg;
                 if (area != Areas[ai])
                 {
                     isAreaBorder = true;
                 }
             }
+
             if (isBorderVertex)
             {
-                r |= ContourSet.RC_BORDER_VERTEX;
+                r |= Contour.RC_BORDER_VERTEX;
             }
             if (isAreaBorder)
             {
-                r |= ContourSet.RC_AREA_BORDER;
+                r |= Contour.RC_AREA_BORDER;
             }
 
             return new(px, py, pz, r);

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -230,7 +231,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     var v = cont.Vertices[j];
                     indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
-                    if ((v.Flag & ContourSet.RC_BORDER_VERTEX) != 0)
+                    if (Contour.IsBorderVertex(v.Flag))
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -874,7 +875,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var va = Verts[p[j]];
                 var vb = Verts[p[nj]];
 
-                if (IndexedPolygon.IsPortal(va, vb, w, h, out int v))
+                if (TileCacheContour.IsPortal(va, vb, w, h, out int v))
                 {
                     p[NVP + j] = v;
                 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -96,10 +97,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if (VertexFlags.IsExternalLink(n))
+            if (TileCacheContour.IsExternalLink(n))
             {
                 // Border or portal edge.
-                return IndexedPolygon.CalculateVertexPortalFlag(n);
+                return TileCacheContour.CalculateVertexPortalFlag(n);
             }
             else
             {
@@ -123,7 +124,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nei">Neighbour index</param>
         public bool NeighbourIsExternalLink(int nei)
         {
-            return VertexFlags.IsExternalLink(Neis[nei]);
+            return TileCacheContour.IsExternalLink(Neis[nei]);
         }
 
         /// <inheritdoc/>

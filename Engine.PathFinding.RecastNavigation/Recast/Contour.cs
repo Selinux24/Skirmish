@@ -8,6 +8,55 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public class Contour
     {
         /// <summary>
+        /// Border vertex flag.
+        /// If a region ID has this bit set, then the associated element lies on
+        /// a tile border. If a contour vertex's region ID has this bit set, the 
+        /// vertex will later be removed in order to match the segments and vertices 
+        /// at tile boundaries.
+        /// (Used during the build process.)
+        /// </summary>
+        public const int RC_BORDER_VERTEX = 0x10000;
+        /// <summary>
+        /// Area border flag.
+        /// If a region ID has this bit set, then the associated element lies on
+        /// the border of an area.
+        /// (Used during the region and contour build process.)
+        /// </summary>
+        public const int RC_AREA_BORDER = 0x20000;
+        /// <summary>
+        /// Applied to the region id field of contour vertices in order to extract the region id.
+        /// The region id field of a vertex may have several flags applied to it.  So the
+        /// fields value can't be used directly.
+        /// </summary>
+        public const int RC_CONTOUR_REG_MASK = 0xffff;
+        /// <summary>
+        /// Portal flag mask
+        /// </summary>
+        public const int RC_PORTAL_FLAG = 0x0f;
+
+        /// <summary>
+        /// Gets whether the vertex has the <see cref="RC_BORDER_VERTEX"/> flag
+        /// </summary>
+        public static bool IsBorderVertex(int flag)
+        {
+            return (flag & RC_BORDER_VERTEX) != 0;
+        }
+        /// <summary>
+        /// Gets whether the vertex has the <see cref="RC_AREA_BORDER"/> flag
+        /// </summary>
+        public static bool IsAreaBorder(int flag)
+        {
+            return (flag & RC_AREA_BORDER) != 0;
+        }
+        /// <summary>
+        /// Gets whether the vertex has the <see cref="RC_CONTOUR_REG_MASK"/> flag
+        /// </summary>
+        public static bool IsRegion(int flag)
+        {
+            return (flag & RC_CONTOUR_REG_MASK) != 0;
+        }
+
+        /// <summary>
         /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
         /// </summary>
         public ContourVertex[] Vertices { get; set; }
