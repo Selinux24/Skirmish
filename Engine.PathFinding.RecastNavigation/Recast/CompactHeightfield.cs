@@ -215,6 +215,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
         /// <summary>
+        /// Iterates over row cell spans
+        /// </summary>
+        /// <param name="row">Row index</param>
+        /// <returns>Returns the span, the span index and the column index</returns>
+        public IEnumerable<(CompactSpan Span, int SpanIndex, int Column)> IterateRowSpans(int row)
+        {
+            for (int col = BorderSize; col < Width - BorderSize; ++col)
+            {
+                var c = Cells[col + row * Width];
+
+                for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+                {
+                    yield return (Spans[i], i, col);
+                }
+            }
+        }
+        /// <summary>
         /// Iterates over the specified span connections
         /// </summary>
         /// <param name="cs">Compact span</param>
@@ -2187,49 +2204,64 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Expand current regions until no empty connected cells found.
                 ExpandRegionsWithCells(srcReg, lvlStacks[sId]);
 
+                // Process the level stack
                 ProcessRegionsStack(lvlStacks[sId], srcReg, srcDist, level, expandIters);
 
                 // Mark new regions with IDs.
-                for (int j = 0; j < lvlStacks[sId].Count; j++)
-                {
-                    var current = lvlStacks[sId][j];
-
-                    int i = current.Index;
-                    if (i < 0 || srcReg[i] != 0)
-                    {
-                        continue;
-                    }
-
-                    int x = current.X;
-                    int y = current.Y;
-                    var area = Areas[i];
-
-                    stack.Clear();
-                    stack.Add(new() { X = x, Y = y, Index = i });
-                    srcReg[i] = regionId;
-                    srcDist[i] = 0;
-
-                    var floodRes = FloodRegion(level, regionId, area, srcReg, srcDist, stack);
-                    if (!floodRes)
-                    {
-                        continue;
-                    }
-
-                    if (regionId == int.MaxValue)
-                    {
-                        throw new EngineException("rcBuildRegions: Region ID overflow");
-                    }
-
-                    regionId++;
-                }
+                MarkRegionIds(regionId, level, lvlStacks[sId], srcReg, srcDist, stack);
             }
 
             // Expand current regions until no empty connected cells found.
-            stack = ExpandRegionsFillStack(0, srcReg);
+            var expStack = ExpandRegionsFillStack(0, srcReg);
+
             // Process the stack
-            ProcessRegionsStack(stack, srcReg, srcDist, level, expandIters * 8);
+            ProcessRegionsStack(expStack, srcReg, srcDist, level, expandIters * 8);
 
             return (srcReg, regionId);
+        }
+        /// <summary>
+        /// Marks new regions with IDs.
+        /// </summary>
+        /// <param name="regionId">Region id</param>
+        /// <param name="level">Level</param>
+        /// <param name="lvStack">Level stack</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="srcDist">Distance list</param>
+        /// <param name="stack">Stack</param>
+        private void MarkRegionIds(int regionId, int level, List<LevelStackEntry> lvStack, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
+        {
+            for (int j = 0; j < lvStack.Count; j++)
+            {
+                var current = lvStack[j];
+
+                int i = current.Index;
+                if (i < 0 || srcReg[i] != 0)
+                {
+                    continue;
+                }
+
+                int x = current.X;
+                int y = current.Y;
+                var area = Areas[i];
+
+                stack.Clear();
+                stack.Add(new() { X = x, Y = y, Index = i });
+                srcReg[i] = regionId;
+                srcDist[i] = 0;
+
+                var floodRes = FloodRegion(level, regionId, area, srcReg, srcDist, stack);
+                if (!floodRes)
+                {
+                    continue;
+                }
+
+                if (regionId == int.MaxValue)
+                {
+                    throw new EngineException("rcBuildRegions: Region ID overflow");
+                }
+
+                regionId++;
+            }
         }
         /// <summary>
         /// Builds the source region list
@@ -2239,87 +2271,98 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             BorderSize = borderSize;
 
-            int w = Width;
-            int h = Height;
-
             // Mark border regions.
-            var (srcReg, regionId) = PaintRectRegionsBorders();
+            var (srcReg, nregions) = PaintRectRegionsBorders();
 
             int nsweeps = Math.Max(Width, Height);
             var sweeps = Helper.CreateArray(nsweeps, () => SweepSpan.Empty);
 
             // Sweep one line at a time.
-            for (int y = borderSize; y < h - borderSize; ++y)
+            for (int row = borderSize; row < Height - borderSize; ++row)
             {
                 // Collect spans from this row.
-                int[] prev = new int[regionId + 1];
-                int rid = 1;
-
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
-                    {
-                        var s = Spans[i];
-                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                        {
-                            continue;
-                        }
-
-                        int previd = 0;
-
-                        // -x
-                        if (s.GetCon(0, out int con))
-                        {
-                            int ai = GetNeighbourCellIndex(x, y, 0, con);
-                            int nr = srcReg[ai];
-                            if (!IsBorder(nr) && Areas[i] == Areas[ai])
-                            {
-                                previd = nr;
-                            }
-                        }
-
-                        if (previd == 0)
-                        {
-                            previd = rid++;
-                            sweeps[previd].Reset();
-                        }
-
-                        // -y
-                        if (s.GetCon(3, out con))
-                        {
-                            int ai = GetNeighbourCellIndex(x, y, 3, con);
-                            int nr = srcReg[ai];
-                            if (nr != 0 && !IsBorder(nr) && Areas[i] == Areas[ai])
-                            {
-                                sweeps[previd].Update(nr, prev);
-                            }
-                        }
-
-                        srcReg[i] = previd;
-                    }
-                }
+                var (samples, sweepCount) = CollectRowSpans(row, srcReg, nregions, sweeps);
 
                 // Create unique ID.
-                SweepSpan.CreateUniqueIds(sweeps, rid, prev, ref regionId);
+                SweepSpan.CreateUniqueIds(sweeps, sweepCount, samples, ref nregions);
 
                 // Remap IDs
-                for (int x = borderSize; x < w - borderSize; ++x)
-                {
-                    var c = Cells[x + y * w];
-
-                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
-                    {
-                        if (srcReg[i] > 0 && srcReg[i] < rid)
-                        {
-                            srcReg[i] = sweeps[srcReg[i]].RegId;
-                        }
-                    }
-                }
+                RemapRowIDs(row, srcReg, sweeps, sweepCount);
             }
 
-            return (srcReg, regionId);
+            return (srcReg, nregions);
+        }
+        /// <summary>
+        /// Collects spans for this row
+        /// </summary>
+        /// <param name="row">Row index</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="nregions">Number of region ids in the list</param>
+        /// <param name="sweeps">Sweep list</param>
+        /// <returns>Returns the sample list and the number of sweeps</returns>
+        private (int[] samples, int count) CollectRowSpans(int row, int[] srcReg, int nregions, SweepSpan[] sweeps)
+        {
+            int[] samples = new int[nregions + 1];
+            int rid = 1;
+
+            foreach (var (s, i, col) in IterateRowSpans(row))
+            {
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                int previd = 0;
+
+                // -x
+                if (s.GetCon(0, out int con))
+                {
+                    int ai = GetNeighbourCellIndex(col, row, 0, con);
+                    int nr = srcReg[ai];
+                    if (!IsBorder(nr) && Areas[i] == Areas[ai])
+                    {
+                        previd = nr;
+                    }
+                }
+
+                if (previd == 0)
+                {
+                    previd = rid++;
+                    sweeps[previd].Reset();
+                }
+
+                // -y
+                if (s.GetCon(3, out con))
+                {
+                    int ai = GetNeighbourCellIndex(col, row, 3, con);
+                    int nr = srcReg[ai];
+                    if (nr != 0 && !IsBorder(nr) && Areas[i] == Areas[ai])
+                    {
+                        sweeps[previd].Update(nr, samples);
+                    }
+                }
+
+                srcReg[i] = previd;
+            }
+
+            return (samples, rid);
+        }
+        /// <summary>
+        /// Remaps row ids
+        /// </summary>
+        /// <param name="row">Row index</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="sweeps">Sweeps</param>
+        /// <param name="sweepCount">Number of sweeps in the list</param>
+        private void RemapRowIDs(int row, int[] srcReg, SweepSpan[] sweeps, int sweepCount)
+        {
+            foreach (var (_, i, _) in IterateRowSpans(row))
+            {
+                if (srcReg[i] > 0 && srcReg[i] < sweepCount)
+                {
+                    srcReg[i] = sweeps[srcReg[i]].RegId;
+                }
+            }
         }
 
         /// <summary>
