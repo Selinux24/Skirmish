@@ -69,6 +69,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
+        /// Direction values
+        /// </summary>
+        private readonly int[] dirs = { 0, 1, 2, 3 };
+        /// <summary>
         /// Dirty entries list
         /// </summary>
         private readonly List<RecastRegionDirtyEntry> dirtyEntries = new();
@@ -1565,17 +1569,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var (centerX, centerY) = FindPolygonCenter2D(polyIndices, verts);
 
             // Use seeds array as a stack for DFS
-            var array = new List<HeightDataItem>(512)
+            var stack = new Stack<HeightDataItem>(512);
+            stack.Push(new()
             {
-                new()
-                {
-                    X = startCellX,
-                    Y = startCellY,
-                    I = startSpanIndex
-                }
-            };
+                X = startCellX,
+                Y = startCellY,
+                I = startSpanIndex
+            });
 
-            int[] dirs = { 0, 1, 2, 3 };
             hp.Data = Helper.CreateArray(bounds.Width * bounds.Height, 0);
             // DFS to move to the center. Note that we need a DFS here and can not just move
             // directly towards the center without recording intermediate nodes, even though the polygons
@@ -1584,13 +1585,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var hdItem = new HeightDataItem();
             while (true)
             {
-                if (array.Count < 1)
+                if (stack.Count < 1)
                 {
                     Logger.WriteWarning(this, "Walk towards polygon center failed to reach center");
                     break;
                 }
 
-                hdItem = array.PopLast();
+                hdItem = stack.Pop();
 
                 if (hdItem.X == centerX && hdItem.Y == centerY)
                 {
@@ -1613,17 +1614,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Push the direct dir last so we start with this on next iteration
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
 
-                var items = BuildHeightDataItems(hdItem, bounds, dirs, hp);
-
-                array.AddRange(items);
+                stack.PushRange(BuildHeightDataItems(hdItem, bounds, dirs, hp));
 
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
             }
 
-            array.Clear();
+            stack.Clear();
 
             // getHeightData seeds are given in coordinates with borders
-            array.Add(new HeightDataItem
+            stack.Push(new HeightDataItem
             {
                 X = hdItem.X + BorderSize,
                 Y = hdItem.Y + BorderSize,
@@ -1634,7 +1633,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var chs = Spans[hdItem.I];
             hp.Data[(hdItem.X - bounds.X) + (hdItem.Y - bounds.Y) * bounds.Width] = chs.Y;
 
-            return array.ToArray();
+            return stack.ToArray();
         }
         /// <summary>
         /// Build the neighbour's item list of the specified height data item

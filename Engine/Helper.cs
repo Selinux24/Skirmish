@@ -604,6 +604,29 @@ namespace Engine
 
         #endregion
 
+        #region Stacks
+
+        /// <summary>
+        /// Pushes an array of items to the top of the stack
+        /// </summary>
+        /// <typeparam name="T">Type of item</typeparam>
+        /// <param name="stack">Stack</param>
+        /// <param name="values">List of items</param>
+        public static void PushRange<T>(this Stack<T> stack, IEnumerable<T> values)
+        {
+            if (values?.Any() == false)
+            {
+                return;
+            }
+
+            foreach (var item in values)
+            {
+                stack.Push(item);
+            }
+        }
+
+        #endregion
+
         #region Concurrent Utils
 
         /// <summary>
