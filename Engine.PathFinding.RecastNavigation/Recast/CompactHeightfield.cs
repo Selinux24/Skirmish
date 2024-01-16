@@ -2014,16 +2014,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Flood region
         /// </summary>
-        private bool FloodRegion(LevelStackEntry entry, int level, int r, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
+        /// <param name="level">Level value</param>
+        /// <param name="regId">Region id</param>
+        /// <param name="area">Area type</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="srcDist">Distance list</param>
+        /// <param name="stack">Stack list</param>
+        private bool FloodRegion(int level, int regId, AreaTypes area, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
-            var area = Areas[entry.Index];
-
             // Flood fill mark region.
-            stack.Clear();
-            stack.Add(entry);
-            srcReg[entry.Index] = r;
-            srcDist[entry.Index] = 0;
-
             int lev = level >= 2 ? level - 2 : 0;
             int count = 0;
 
@@ -2031,81 +2030,115 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var back = stack.PopLast();
 
-                int cx = back.X;
-                int cy = back.Y;
-                int ci = back.Index;
-
-                var cs = Spans[ci];
-
                 // Check if any of the neighbours already have a valid region set.
-                int ar = 0;
-                foreach (var item in IterateSpanConnections(cs, cx, cy))
+                if (FindValidRegionSet(back, area, regId, srcReg))
                 {
-                    if (item.area != area)
-                    {
-                        continue;
-                    }
-
-                    int nr = srcReg[item.ai];
-                    if (IsBorder(nr)) // Do not take borders into account.
-                    {
-                        continue;
-                    }
-
-                    if (nr != 0 && nr != r)
-                    {
-                        ar = nr;
-                        break;
-                    }
-
-                    var a = item.s;
-
-                    int dir2 = Utils.RotateCW(item.dir);
-                    if (!a.GetCon(dir2, out int con2))
-                    {
-                        continue;
-                    }
-
-                    int ai2 = GetNeighbourCellIndex(item.ax, item.ay, dir2, con2);
-                    if (Areas[ai2] != area)
-                    {
-                        continue;
-                    }
-
-                    int nr2 = srcReg[ai2];
-                    if (nr2 != 0 && nr2 != r)
-                    {
-                        ar = nr2;
-                        break;
-                    }
-                }
-
-                if (ar != 0)
-                {
-                    srcReg[ci] = 0;
                     continue;
                 }
 
                 count++;
 
                 // Expand neighbours.
-                foreach (var item in IterateSpanConnections(cs, cx, cy))
-                {
-                    if (item.area != area)
-                    {
-                        continue;
-                    }
-
-                    if (BorderDistances[item.ai] >= lev && srcReg[item.ai] == 0)
-                    {
-                        srcReg[item.ai] = r;
-                        srcDist[item.ai] = 0;
-                        stack.Add(new() { X = item.ax, Y = item.ay, Index = item.ai });
-                    }
-                }
+                stack.AddRange(ExpandNeighbours(back, area, regId, lev, srcReg, srcDist));
             }
 
             return count > 0;
+        }
+        /// <summary>
+        /// Checks if any of the neighbours already have a valid region set.
+        /// </summary>
+        /// <param name="entry">Stack entry</param>
+        /// <param name="area">Area type</param>
+        /// <param name="regId">Region Id</param>
+        /// <param name="srcReg">Source region id list</param>
+        private bool FindValidRegionSet(LevelStackEntry entry, AreaTypes area, int regId, int[] srcReg)
+        {
+            int cx = entry.X;
+            int cy = entry.Y;
+            int ci = entry.Index;
+            var cs = Spans[ci];
+
+            int ar = 0;
+            foreach (var item in IterateSpanConnections(cs, cx, cy))
+            {
+                if (item.area != area)
+                {
+                    continue;
+                }
+
+                int nr = srcReg[item.ai];
+                if (IsBorder(nr)) // Do not take borders into account.
+                {
+                    continue;
+                }
+
+                if (nr != 0 && nr != regId)
+                {
+                    ar = nr;
+                    break;
+                }
+
+                var a = item.s;
+
+                int dir2 = Utils.RotateCW(item.dir);
+                if (!a.GetCon(dir2, out int con2))
+                {
+                    continue;
+                }
+
+                int ai2 = GetNeighbourCellIndex(item.ax, item.ay, dir2, con2);
+                if (Areas[ai2] != area)
+                {
+                    continue;
+                }
+
+                int nr2 = srcReg[ai2];
+                if (nr2 != 0 && nr2 != regId)
+                {
+                    ar = nr2;
+                    break;
+                }
+            }
+
+            if (ar != 0)
+            {
+                srcReg[ci] = 0;
+
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Expands neighbours
+        /// </summary>
+        /// <param name="entry">Stack entry</param>
+        /// <param name="area">Area</param>
+        /// <param name="regId">Region id</param>
+        /// <param name="lev">Level</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="srcDist">Distance list</param>
+        private IEnumerable<LevelStackEntry> ExpandNeighbours(LevelStackEntry entry, AreaTypes area, int regId, int lev, int[] srcReg, int[] srcDist)
+        {
+            int cx = entry.X;
+            int cy = entry.Y;
+            int ci = entry.Index;
+            var cs = Spans[ci];
+
+            foreach (var item in IterateSpanConnections(cs, cx, cy))
+            {
+                if (item.area != area)
+                {
+                    continue;
+                }
+
+                if (BorderDistances[item.ai] >= lev && srcReg[item.ai] == 0)
+                {
+                    srcReg[item.ai] = regId;
+                    srcDist[item.ai] = 0;
+                    yield return new() { X = item.ax, Y = item.ay, Index = item.ai };
+                }
+            }
         }
         /// <summary>
         /// Builds the source region list
@@ -2160,16 +2193,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int j = 0; j < lvlStacks[sId].Count; j++)
                 {
                     var current = lvlStacks[sId][j];
-                    int x = current.X;
-                    int y = current.Y;
+
                     int i = current.Index;
                     if (i < 0 || srcReg[i] != 0)
                     {
                         continue;
                     }
 
-                    var entry = new LevelStackEntry { X = x, Y = y, Index = i };
-                    var floodRes = FloodRegion(entry, level, regionId, srcReg, srcDist, stack);
+                    int x = current.X;
+                    int y = current.Y;
+                    var area = Areas[i];
+
+                    stack.Clear();
+                    stack.Add(new() { X = x, Y = y, Index = i });
+                    srcReg[i] = regionId;
+                    srcDist[i] = 0;
+
+                    var floodRes = FloodRegion(level, regionId, area, srcReg, srcDist, stack);
                     if (!floodRes)
                     {
                         continue;

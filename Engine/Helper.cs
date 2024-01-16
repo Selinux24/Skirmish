@@ -614,7 +614,7 @@ namespace Engine
         /// <param name="values">List of items</param>
         public static void PushRange<T>(this Stack<T> stack, IEnumerable<T> values)
         {
-            if (values?.Any() == false)
+            if (values?.Any() != true)
             {
                 return;
             }
