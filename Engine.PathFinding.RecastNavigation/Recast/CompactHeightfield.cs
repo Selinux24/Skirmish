@@ -2208,7 +2208,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 ProcessRegionsStack(lvlStacks[sId], srcReg, srcDist, level, expandIters);
 
                 // Mark new regions with IDs.
-                MarkRegionIds(regionId, level, lvlStacks[sId], srcReg, srcDist, stack);
+                regionId = MarkRegionIds(regionId, level, lvlStacks[sId], srcReg, srcDist, stack);
             }
 
             // Expand current regions until no empty connected cells found.
@@ -2222,13 +2222,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Marks new regions with IDs.
         /// </summary>
-        /// <param name="regionId">Region id</param>
+        /// <param name="regionId">Last region id</param>
         /// <param name="level">Level</param>
         /// <param name="lvStack">Level stack</param>
         /// <param name="srcReg">Region id list</param>
         /// <param name="srcDist">Distance list</param>
         /// <param name="stack">Stack</param>
-        private void MarkRegionIds(int regionId, int level, List<LevelStackEntry> lvStack, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
+        /// <returns>Returns the new last region id</returns>
+        private int MarkRegionIds(int regionId, int level, List<LevelStackEntry> lvStack, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
             for (int j = 0; j < lvStack.Count; j++)
             {
@@ -2262,6 +2263,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 regionId++;
             }
+
+            return regionId;
         }
         /// <summary>
         /// Builds the source region list
