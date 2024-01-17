@@ -2948,47 +2948,27 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Find region neighbours and overlapping regions.
             var lregs = new List<int>(32);
-            for (int y = 0; y < Height; ++y)
+            foreach (var (x, y) in Helper.IterateGrid(Width, Height))
             {
-                for (int x = 0; x < Width; ++x)
+                lregs.Clear();
+
+                foreach (var (s, i) in IterateCellSpans(x, y))
                 {
-                    lregs.Clear();
-
-                    foreach (var (s, i) in IterateCellSpans(x, y))
+                    int ri = srcReg[i];
+                    if (ri == 0 || ri >= nreg)
                     {
-                        int ri = srcReg[i];
-                        if (ri == 0 || ri >= nreg)
-                        {
-                            continue;
-                        }
-                        var reg = regions[ri];
-
-                        reg.SpanCount++;
-
-                        reg.YMin = Math.Min(reg.YMin, s.Y);
-                        reg.YMax = Math.Max(reg.YMax, s.Y);
-
-                        // Collect all region layers.
-                        lregs.Add(ri);
-
-                        // Update neighbours
-                        foreach (var item in IterateSpanConnections(s, x, y))
-                        {
-                            int rai = srcReg[item.ai];
-                            if (rai > 0 && rai < nreg && rai != ri)
-                            {
-                                reg.AddUniqueConnection(rai);
-                            }
-                            if (IsBorder(rai))
-                            {
-                                reg.ConnectsToBorder = true;
-                            }
-                        }
+                        continue;
                     }
 
-                    // Update overlapping regions.
-                    UpdateOverlappingRegionFloors(regions, lregs);
+                    // Collect all region layers.
+                    lregs.Add(ri);
+
+                    // Update neighbours
+                    UpdateSpanNeighbours(s, x, y, regions, nreg, ri, srcReg);
                 }
+
+                // Update overlapping regions.
+                UpdateOverlappingRegionFloors(regions, lregs);
             }
 
             // Merges montone regions to create non-overlapping areas.
@@ -3001,13 +2981,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             maxRegionIdResult = Region.CompressRegionIds(regions);
 
             // Remap regions.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                if (!IsBorder(srcReg[i]))
-                {
-                    srcReg[i] = regions[srcReg[i]].Id;
-                }
-            }
+            RemapRegions(srcReg, regions);
 
             return true;
         }
@@ -3094,6 +3068,53 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         ri.AddUniqueFloorRegion(lregs[j]);
                         rj.AddUniqueFloorRegion(lregs[i]);
                     }
+                }
+            }
+        }
+        /// <summary>
+        /// Remap region ids
+        /// </summary>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="regions">Region data list</param>
+        private void RemapRegions(int[] srcReg, List<Region> regions)
+        {
+            for (int i = 0; i < SpanCount; ++i)
+            {
+                if (!IsBorder(srcReg[i]))
+                {
+                    srcReg[i] = regions[srcReg[i]].Id;
+                }
+            }
+        }
+        /// <summary>
+        /// Updates span neighbours
+        /// </summary>
+        /// <param name="s">Span</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="regions">Region list</param>
+        /// <param name="maxRegions">Maximum number of regions in the list</param>
+        /// <param name="regionId">Region id</param>
+        /// <param name="srcReg">Region id list</param>
+        private void UpdateSpanNeighbours(CompactSpan s, int x, int y, List<Region> regions, int maxRegions, int regionId, int[] srcReg)
+        {
+            var reg = regions[regionId];
+            reg.SpanCount++;
+            reg.YMin = Math.Min(reg.YMin, s.Y);
+            reg.YMax = Math.Max(reg.YMax, s.Y);
+
+            foreach (var item in IterateSpanConnections(s, x, y))
+            {
+                int r = srcReg[item.ai];
+
+                if (r > 0 && r < maxRegions && r != regionId)
+                {
+                    reg.AddUniqueConnection(r);
+                }
+
+                if (IsBorder(r))
+                {
+                    reg.ConnectsToBorder = true;
                 }
             }
         }

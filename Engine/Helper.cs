@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -622,6 +623,27 @@ namespace Engine
             foreach (var item in values)
             {
                 stack.Push(item);
+            }
+        }
+
+        #endregion
+
+        #region Iterators
+
+        /// <summary>
+        /// Iterates over a grid
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns x and y coordinates</returns>
+        public static IEnumerable<(int x, int y)> IterateGrid(int width, int height)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    yield return (x, y);
+                }
             }
         }
 
