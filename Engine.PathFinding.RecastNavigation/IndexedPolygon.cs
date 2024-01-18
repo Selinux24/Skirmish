@@ -839,6 +839,26 @@ namespace Engine.PathFinding.RecastNavigation
             return (v0, v1);
         }
 
+        /// <summary>
+        /// Gets the polygon center
+        /// </summary>
+        /// <param name="verts">Polygon vertices</param>
+        public (int X, int Y) GetCenter2D(Int3[] verts)
+        {
+            // Find center of the polygon
+            int pcx = 0;
+            int pcy = 0;
+            for (int j = 0; j < vertices.Length; j++)
+            {
+                pcx += verts[vertices[j]].X;
+                pcy += verts[vertices[j]].Z;
+            }
+            pcx /= vertices.Length;
+            pcy /= vertices.Length;
+
+            return (pcx, pcy);
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {

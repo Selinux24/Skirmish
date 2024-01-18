@@ -246,13 +246,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int ax = x + Utils.GetDirOffsetX(dir);
-                int ay = y + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + d;
-                var area = Areas[ai];
-                var s = Spans[ai];
+                int ai = GetNeighbourCellIndex(x, y, dir, d, out int ax, out int ay);
 
-                yield return (dir, ax, ay, ai, area, s);
+                yield return (dir, ax, ay, ai, Areas[ai], Spans[ai]);
             }
         }
 
@@ -351,7 +347,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the sample indices</returns>
         private static int[] SimplifySamples(Vector3[] edgeSamples, int nn, BuildPolyDetailParams param)
         {
-            float sampleMaxError = param.SampleMaxError;
+            float sampleMaxError = param.SampleMaxError * param.SampleMaxError;
 
             int[] idx = new int[MAX_VERTS_PER_EDGE];
             idx[0] = 0;
@@ -361,25 +357,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int a = idx[k];
                 int b = idx[k + 1];
-                var va = edgeSamples[a];
-                var vb = edgeSamples[b];
 
                 // Find maximum deviation along the segment.
-                float maxd = 0;
-                int maxi = -1;
-                for (int m = a + 1; m < b; ++m)
-                {
-                    float dev = Utils.DistancePtSeg(edgeSamples[m], va, vb);
-                    if (dev > maxd)
-                    {
-                        maxd = dev;
-                        maxi = m;
-                    }
-                }
+                var (maxi, maxd) = FindMaximumDeviationAlongSegment(a, b, edgeSamples);
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
+                if (maxi != -1 && maxd > sampleMaxError)
                 {
                     for (int m = nidx; m > k; --m)
                     {
@@ -387,14 +371,36 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
                     idx[k + 1] = maxi;
                     nidx++;
+
+                    continue;
                 }
-                else
-                {
-                    ++k;
-                }
+
+                ++k;
             }
 
             return idx.Take(nidx).ToArray();
+        }
+        /// <summary>
+        /// Finds maximum deviation along the segment
+        /// </summary>
+        private static (int maxi, float maxd) FindMaximumDeviationAlongSegment(int a, int b, Vector3[] edgeSamples)
+        {
+            var va = edgeSamples[a];
+            var vb = edgeSamples[b];
+
+            float maxd = 0;
+            int maxi = -1;
+            for (int m = a + 1; m < b; ++m)
+            {
+                float dev = Utils.DistancePtSeg(edgeSamples[m], va, vb);
+                if (dev > maxd)
+                {
+                    maxd = dev;
+                    maxi = m;
+                }
+            }
+
+            return (maxi, maxd);
         }
         /// <summary>
         /// Gets whether the specified value has the border flag or not
@@ -911,35 +917,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private bool CalculateDistance(int x, int y, int i, int[] dist, int dir1, int dir2, out int d)
         {
             d = dist[i];
-            var s = Spans[i];
 
+            var s = Spans[i];
             if (!s.GetCon(dir1, out int con1))
             {
                 return false;
             }
 
             bool updated = false;
-            int nd;
 
-            int ax = x + Utils.GetDirOffsetX(dir1);
-            int ay = y + Utils.GetDirOffsetY(dir1);
-            int ai = Cells[ax + ay * Width].Index + con1;
-            var asp = Spans[ai];
-            nd = Math.Min(dist[ai] + 2, 255);
+            int ai = GetNeighbourCellIndex(x, y, dir1, con1, out int ax, out int ay);
+            int nd = Math.Min(dist[ai] + 2, 255);
             if (nd < d)
             {
                 d = nd;
                 updated = true;
             }
 
+            var asp = Spans[ai];
             if (!asp.GetCon(dir2, out int con2))
             {
                 return updated;
             }
 
-            int aax = ax + Utils.GetDirOffsetX(dir2);
-            int aay = ay + Utils.GetDirOffsetY(dir2);
-            int aai = Cells[aax + aay * Width].Index + con2;
+            int aai = GetNeighbourCellIndex(ax, ay, dir2, con2);
             nd = Math.Min(dist[aai] + 3, 255);
             if (nd < d)
             {
@@ -1000,9 +1001,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int r = 0;
             if (s.GetCon(dir, out int con))
             {
-                int ax = col + Utils.GetDirOffsetX(dir);
-                int ay = row + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + con;
+                int ai = GetNeighbourCellIndex(col, row, dir, con);
                 r = srcReg[ai];
             }
 
@@ -1579,12 +1578,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, HeightPatch hp)
         {
-            var polyIndices = poly.GetVertices();
             var bounds = hp.Bounds;
 
-            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(polyIndices, verts, bounds);
+            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(poly, verts, bounds);
 
-            var (centerX, centerY) = FindPolygonCenter2D(polyIndices, verts);
+            var (centerX, centerY) = poly.GetCenter2D(verts);
 
             // Use seeds array as a stack for DFS
             var stack = new Stack<HeightDataItem>(512);
@@ -1701,10 +1699,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Finds the closest cell to polygon vertex
         /// </summary>
-        /// <param name="polyIndices">Polygon indices</param>
+        /// <param name="poly">Polygon</param>
         /// <param name="verts">Polygon vertices</param>
         /// <param name="bounds">Bounds</param>
-        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(int[] polyIndices, Int3[] verts, Rectangle bounds)
+        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Int3[] verts, Rectangle bounds)
         {
             int[] offset =
             {
@@ -1720,6 +1718,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             };
 
             // Find cell closest to a poly vertex
+            var polyIndices = poly.GetVertices();
             int startCellX = 0;
             int startCellY = 0;
             int startSpanIndex = -1;
@@ -1755,26 +1754,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return (startCellX, startCellY, startSpanIndex);
-        }
-        /// <summary>
-        /// Finds the polygon center
-        /// </summary>
-        /// <param name="polyIndices">Polygon indices</param>
-        /// <param name="verts">Polygon vertices</param>
-        private static (int X, int Y) FindPolygonCenter2D(int[] polyIndices, Int3[] verts)
-        {
-            // Find center of the polygon
-            int pcx = 0;
-            int pcy = 0;
-            for (int j = 0; j < polyIndices.Length; j++)
-            {
-                pcx += verts[polyIndices[j]].X;
-                pcy += verts[polyIndices[j]].Z;
-            }
-            pcx /= polyIndices.Length;
-            pcy /= polyIndices.Length;
-
-            return (pcx, pcy);
         }
 
         /// <summary>
@@ -2481,8 +2460,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int[] dst = new int[SpanCount];
 
-            int w = Width;
-
             thr *= 2;
 
             foreach (var (x, y, i, _) in IterateCells())
@@ -2506,9 +2483,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax = x + Utils.GetDirOffsetX(dir);
-                    int ay = y + Utils.GetDirOffsetY(dir);
-                    int ai = Cells[ax + ay * w].Index + con;
+                    int ai = GetNeighbourCellIndex(x, y, dir, con, out int ax, out int ay);
                     d += src[ai];
 
                     var a = Spans[ai];
@@ -2520,9 +2495,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax2 = ax + Utils.GetDirOffsetX(dir2);
-                    int ay2 = ay + Utils.GetDirOffsetY(dir2);
-                    int ai2 = Cells[ax2 + ay2 * w].Index + con2;
+                    int ai2 = GetNeighbourCellIndex(ax, ay, dir2, con2);
                     d += src[ai2];
                 }
 
@@ -2544,9 +2517,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return res;
             }
 
-            int ax = x + Utils.GetDirOffsetX(id1);
-            int ay = y + Utils.GetDirOffsetY(id1);
-            int ai = Cells[ax + ay * Width].Index + con1;
+            int ai = GetNeighbourCellIndex(x, y, id1, con1, out int ax, out int ay);
             if (res[ai] + 2 < res[i])
             {
                 res[i] = res[ai] + 2;
@@ -2634,7 +2605,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // The cell is at border.
                 // Walk around the contour to find all the neighbours.
-                reg.AddConnections(WalkContour(col, row, spanIndex, ndir, srcReg));
+                reg.AddConnections(FindNeighbours(col, row, spanIndex, ndir, srcReg));
             }
 
             // Remove too small regions.
@@ -2857,34 +2828,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="flags">Flags to update</param>
         private void InitializeCellFlags(int x, int y, int[] flags)
         {
-            int w = Width;
-
-            var c = Cells[x + y * w];
-            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+            foreach (var (s, i) in IterateCellSpans(x, y))
             {
-                if (Spans[i].Reg == 0 || IsBorder(Spans[i].Reg))
+                if (s.Reg == 0 || IsBorder(s.Reg))
                 {
                     flags[i] = 0;
                     continue;
                 }
 
                 int res = 0;
-                var s = Spans[i];
                 for (int dir = 0; dir < 4; ++dir)
                 {
                     int r = 0;
                     if (s.GetCon(dir, out int con))
                     {
-                        int ax = x + Utils.GetDirOffsetX(dir);
-                        int ay = y + Utils.GetDirOffsetY(dir);
-                        int ai = Cells[ax + ay * w].Index + con;
+                        int ai = GetNeighbourCellIndex(x, y, dir, con);
                         r = Spans[ai].Reg;
                     }
-                    if (r == Spans[i].Reg)
+
+                    if (r == s.Reg)
                     {
                         res |= 1 << dir;
                     }
                 }
+
                 flags[i] = res ^ Contour.RC_PORTAL_FLAG; // Inverse, mark non connected edges.
             }
         }
@@ -2899,10 +2866,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> res = new();
 
-            int w = Width;
-
-            var c = Cells[x + y * w];
-            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+            foreach (var (s, i) in IterateCellSpans(x, y))
             {
                 if (flags[i] == 0 || flags[i] == Contour.RC_PORTAL_FLAG)
                 {
@@ -2910,7 +2874,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int reg = Spans[i].Reg;
+                int reg = s.Reg;
                 if (reg == 0 || IsBorder(reg))
                 {
                     continue;
@@ -2925,15 +2889,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return res.ToArray();
         }
         /// <summary>
-        /// Walks the contour
+        /// Walks the contour to find neighbours
         /// </summary>
         /// <param name="col">X coordinate</param>
         /// <param name="row">Y coordinate</param>
         /// <param name="spanIndex">Span index</param>
         /// <param name="dir">Direction</param>
         /// <param name="srcReg">Region list</param>
-        /// <returns>Returns the contour list</returns>
-        private int[] WalkContour(int col, int row, int spanIndex, int dir, int[] srcReg)
+        /// <returns>Returns the neighbour list</returns>
+        private int[] FindNeighbours(int col, int row, int spanIndex, int dir, int[] srcReg)
         {
             var cont = new List<int>();
 
@@ -2953,7 +2917,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int iterDir = dir;
             while (++iter < 40000)
             {
-                var (iterateNext, newReg) = IterateSpan(ref iterIdx, ref iterDir, ref col, ref row, curReg, srcReg);
+                var (iterateNext, newReg) = IterateSpan(ref iterIdx, ref iterDir, ref col, ref row, srcReg);
                 if (!iterateNext)
                 {
                     // Should not happen.
@@ -2983,10 +2947,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="iterDir">Span direction</param>
         /// <param name="col">Column</param>
         /// <param name="row">Row</param>
-        /// <param name="curReg">Current region id</param>
         /// <param name="srcReg">Region id list</param>
         /// <returns>Returns whether the iteration must continue and the new region id</returns>
-        private (bool Continue, int NewReg) IterateSpan(ref int iterIdx, ref int iterDir, ref int col, ref int row, int curReg, int[] srcReg)
+        private (bool Continue, int NewReg) IterateSpan(ref int iterIdx, ref int iterDir, ref int col, ref int row, int[] srcReg)
         {
             var s = Spans[iterIdx];
 
@@ -3000,14 +2963,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     r = srcReg[ai];
                 }
 
-                if (r != curReg)
-                {
-                    curReg = r;
-                }
-
                 iterDir = Utils.RotateCW(iterDir);  // Rotate CW
 
-                return (true, curReg);
+                return (true, r);
             }
             else
             {
@@ -3046,46 +3004,44 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 dir++;
             }
 
-            int startDir = dir;
-            int starti = spanIndex;
-
             var area = Areas[spanIndex];
 
+            int startDir = dir;
+            int startIdx = spanIndex;
+
             int iter = 0;
+            int iterDir = dir;
+            int iterIdx = spanIndex;
             while (++iter < 40000)
             {
-                if ((flags[spanIndex] & (1 << dir)) != 0)
+                if ((flags[iterIdx] & (1 << iterDir)) != 0)
                 {
                     // Choose the edge corner
-                    var pt = GetEdgeCorner(col, row, spanIndex, dir, area);
+                    var pt = GetEdgeCorner(col, row, iterIdx, iterDir, area);
                     points.Add(pt);
 
-                    flags[spanIndex] &= ~(1 << dir); // Remove visited edges
-                    dir = Utils.RotateCW(dir);  // Rotate CW
+                    flags[iterIdx] &= ~(1 << iterDir); // Remove visited edges
+
+                    iterDir = Utils.RotateCW(iterDir);  // Rotate CW
                 }
                 else
                 {
-                    int ni = -1;
-                    int nx = col + Utils.GetDirOffsetX(dir);
-                    int ny = row + Utils.GetDirOffsetY(dir);
-                    var s = Spans[spanIndex];
-                    if (s.GetCon(dir, out int con))
-                    {
-                        var nc = Cells[nx + ny * Width];
-                        ni = nc.Index + con;
-                    }
+                    var s = Spans[iterIdx];
+                    int ni = GetNeighbourCellIndex(s, col, row, iterDir, out int nx, out int ny);
                     if (ni == -1)
                     {
                         // Should not happen.
                         return Array.Empty<ContourVertex>();
                     }
+
                     col = nx;
                     row = ny;
-                    spanIndex = ni;
-                    dir = Utils.RotateCCW(dir);  // Rotate CCW
+                    iterIdx = ni;
+
+                    iterDir = Utils.RotateCCW(iterDir);  // Rotate CCW
                 }
 
-                if (starti == spanIndex && startDir == dir)
+                if (startIdx == iterIdx && startDir == iterDir)
                 {
                     break;
                 }
