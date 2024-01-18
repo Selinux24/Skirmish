@@ -90,6 +90,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return regions;
         }
         /// <summary>
+        /// Resets region ids
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        public static void ResetIds(List<Region> regions)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                regions[i].Id = 0;
+            }
+        }
+        /// <summary>
         /// Removes all the regions smaller than the specified area
         /// </summary>
         /// <param name="regions">Region list</param>
@@ -147,7 +158,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Count the total size of all the connected regions.
                 // Also keep track of the regions connects to a tile border.
-                var (spanCount, connectsToBorder) = ProcessRegions(regions, stack, trace);
+                var (spanCount, connectsToBorder) = Region.ProcessRegions(regions, stack, trace);
 
                 // If the accumulated regions size is too small, remove it.
                 // Do not remove areas which connect to tile borders
@@ -166,6 +177,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        /// <summary>
+        /// Process regions
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="stack">Stack</param>
+        /// <param name="trace">Trace</param>
         private static (int spanCount, bool connectsToBorder) ProcessRegions(List<Region> regions, List<int> stack, List<int> trace)
         {
             bool connectsToBorder = false;
@@ -250,6 +267,103 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return regIdGen;
+        }
+        /// <summary>
+        /// Merges montone regions to create non-overlapping areas.
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        public static void MergeMonotoneRegions(List<Region> regions)
+        {
+            int layerId = 1;
+            var stack = new Stack<int>(32);
+
+            Region.ResetIds(regions);
+
+            // Merge montone regions to create non-overlapping areas.
+            for (int i = 1; i < regions.Count; ++i)
+            {
+                var root = regions[i];
+
+                // Skip already visited.
+                if (root.Id != 0)
+                {
+                    continue;
+                }
+
+                // Start search.
+                root.Id = layerId;
+
+                stack.Push(i);
+
+                Region.ProcessMergeMonotoneStack(stack, root, regions, layerId);
+
+                layerId++;
+            }
+        }
+        /// <summary>
+        /// Process the monotone region stack
+        /// </summary>
+        /// <param name="stack">Stack to process</param>
+        /// <param name="root">Root region</param>
+        /// <param name="regions">Region list</param>
+        /// <param name="layerId">Layer id</param>
+        private static void ProcessMergeMonotoneStack(Stack<int> stack, Region root, List<Region> regions, int layerId)
+        {
+            while (stack.Count > 0)
+            {
+                // Pop front
+                var reg = regions[stack.Pop()];
+
+                foreach (var nei in reg.GetConnections())
+                {
+                    var regn = regions[nei];
+
+                    // Skip already visited.
+                    if (regn.Id != 0)
+                    {
+                        continue;
+                    }
+
+                    // Skip if the neighbour is overlapping root region.
+                    bool overlap = root.OverlapWithNeighbour(nei);
+                    if (overlap)
+                    {
+                        continue;
+                    }
+
+                    // Deepen
+                    stack.Push(nei);
+
+                    // Mark layer id
+                    regn.Id = layerId;
+
+                    // Merge current layers to root.
+                    root.MergeFloors(regn);
+                }
+            }
+        }
+        /// <summary>
+        /// Updates overlapping region floors
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="regs">Floor region id list</param>
+        public static void UpdateOverlappingRegionFloors(List<Region> regions, List<int> regs)
+        {
+            for (int i = 0; i < regs.Count - 1; ++i)
+            {
+                for (int j = i + 1; j < regs.Count; ++j)
+                {
+                    if (regs[i] == regs[j])
+                    {
+                        continue;
+                    }
+
+                    var ri = regions[regs[i]];
+                    var rj = regions[regs[j]];
+                    ri.AddUniqueFloorRegion(regs[j]);
+                    rj.AddUniqueFloorRegion(regs[i]);
+                }
+            }
         }
 
         /// <summary>
@@ -604,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Fixup regions pointing to current region.
-            FixupRegions(regions, mergeId, oldId);
+            Region.FixupRegions(regions, mergeId, oldId);
 
             return true;
         }

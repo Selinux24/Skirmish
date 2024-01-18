@@ -1024,8 +1024,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the corner height</returns>
         private int GetCornerHeight(int x, int y, int i, int dir, out bool isBorderVertex)
         {
-            isBorderVertex = false;
-
             var s = Spans[i];
             int ch = s.Y;
             int dirp = Utils.RotateCW(dir);
@@ -1039,35 +1037,28 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             if (s.GetCon(dir, out int con))
             {
-                int ax = x + Utils.GetDirOffsetX(dir);
-                int ay = y + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + con;
+                int ai = GetNeighbourCellIndex(x, y, dir, con, out int ax, out int ay);
                 var a = Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[1] = Spans[ai].Reg | ((int)Areas[ai] << 16);
                 if (a.GetCon(dirp, out conp))
                 {
-                    int ax2 = ax + Utils.GetDirOffsetX(dirp);
-                    int ay2 = ay + Utils.GetDirOffsetY(dirp);
-                    int ai2 = Cells[ax2 + ay2 * Width].Index + conp;
+                    int ai2 = GetNeighbourCellIndex(ax, ay, dirp, conp);
                     var as2 = Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
                     regs[2] = Spans[ai2].Reg | ((int)Areas[ai2] << 16);
                 }
             }
+
             if (s.GetCon(dirp, out conp))
             {
-                int ax = x + Utils.GetDirOffsetX(dirp);
-                int ay = y + Utils.GetDirOffsetY(dirp);
-                int ai = Cells[ax + ay * Width].Index + conp;
+                int ai = GetNeighbourCellIndex(x, y, dirp, conp, out int ax, out int ay);
                 var a = Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[3] = Spans[ai].Reg | ((int)Areas[ai] << 16);
                 if (a.GetCon(dir, out con))
                 {
-                    int ax2 = ax + Utils.GetDirOffsetX(dir);
-                    int ay2 = ay + Utils.GetDirOffsetY(dir);
-                    int ai2 = Cells[ax2 + ay2 * Width].Index + con;
+                    int ai2 = GetNeighbourCellIndex(ax, ay, dir, con);
                     var as2 = Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
                     regs[2] = Spans[ai2].Reg | ((int)Areas[ai2] << 16);
@@ -1075,12 +1066,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Check if the vertex is special edge vertex, these vertices will be removed later.
+            isBorderVertex = IsBorderVertex(regs);
+
+            return ch;
+        }
+        /// <summary>
+        /// Checks whether the vertex is special edge vertex
+        /// </summary>
+        /// <param name="regs">Regions</param>
+        private static bool IsBorderVertex(int[] regs)
+        {
+            // Check if the vertex is special edge vertex, these vertices will be removed later.
             for (int j = 0; j < 4; ++j)
             {
                 int a = j;
-                int b = (j + 1) & 0x3;
-                int c = (j + 2) & 0x3;
-                int d = (j + 3) & 0x3;
+                int b = Utils.Rotate(j, 1);
+                int c = Utils.Rotate(j, 2);
+                int d = Utils.Rotate(j, 3);
 
                 // The vertex is a border vertex there are two same exterior cells in a row,
                 // followed by two interior cells and none of the regions are out of bounds.
@@ -1090,12 +1092,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 bool noZeros = regs[a] != 0 && regs[b] != 0 && regs[c] != 0 && regs[d] != 0;
                 if (twoSameExts && twoInts && intsSameArea && noZeros)
                 {
-                    isBorderVertex = true;
-                    break;
+                    return true;
                 }
             }
 
-            return ch;
+            return false;
         }
 
         /// <summary>
@@ -2048,8 +2049,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var back = stack.PopLast();
 
                 // Check if any of the neighbours already have a valid region set.
-                if (FindValidRegionSet(back, area, regId, srcReg))
+                int ar = FindValidRegionSet(back, area, regId, srcReg);
+                if (ar != 0)
                 {
+                    srcReg[back.Index] = 0;
+
                     continue;
                 }
 
@@ -2068,12 +2072,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="area">Area type</param>
         /// <param name="regId">Region Id</param>
         /// <param name="srcReg">Source region id list</param>
-        private bool FindValidRegionSet(LevelStackEntry entry, AreaTypes area, int regId, int[] srcReg)
+        private int FindValidRegionSet(LevelStackEntry entry, AreaTypes area, int regId, int[] srcReg)
         {
             int cx = entry.X;
             int cy = entry.Y;
-            int ci = entry.Index;
-            var cs = Spans[ci];
+            var cs = Spans[entry.Index];
 
             int ar = 0;
             foreach (var item in IterateSpanConnections(cs, cx, cy))
@@ -2117,14 +2120,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            if (ar != 0)
-            {
-                srcReg[ci] = 0;
-
-                return true;
-            }
-
-            return false;
+            return ar;
         }
         /// <summary>
         /// Expands neighbours
@@ -2761,10 +2757,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var regions = Region.InitializeRegionList(nreg);
 
             // Find region neighbours and overlapping regions.
-            var lregs = new List<int>(32);
+            var regs = new List<int>(32);
             foreach (var (x, y) in Helper.IterateGrid(Width, Height))
             {
-                lregs.Clear();
+                regs.Clear();
 
                 foreach (var (s, i) in IterateCellSpans(x, y))
                 {
@@ -2775,18 +2771,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
 
                     // Collect all region layers.
-                    lregs.Add(ri);
+                    regs.Add(ri);
 
                     // Update neighbours
                     UpdateSpanNeighbours(s, x, y, regions, nreg, ri, srcReg);
                 }
 
                 // Update overlapping regions.
-                UpdateOverlappingRegionFloors(regions, lregs);
+                Region.UpdateOverlappingRegionFloors(regions, regs);
             }
 
             // Merges montone regions to create non-overlapping areas.
-            MergeMonotoneRegions(regions);
+            Region.MergeMonotoneRegions(regions);
 
             // Remove small regions
             Region.RemoveSmallRegions(regions, minRegionArea);
@@ -2800,109 +2796,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return true;
         }
         /// <summary>
-        /// Merges montone regions to create non-overlapping areas.
-        /// </summary>
-        /// <param name="regions">Region list</param>
-        private static void MergeMonotoneRegions(List<Region> regions)
-        {
-            int layerId = 1;
-
-            for (int i = 0; i < regions.Count; ++i)
-            {
-                regions[i].Id = 0;
-            }
-
-            // Merge montone regions to create non-overlapping areas.
-            var stack = new List<int>(32);
-            for (int i = 1; i < regions.Count; ++i)
-            {
-                var root = regions[i];
-                // Skip already visited.
-                if (root.Id != 0)
-                {
-                    continue;
-                }
-
-                // Start search.
-                root.Id = layerId;
-
-                stack.Add(i);
-
-                while (stack.Count > 0)
-                {
-                    // Pop front
-                    var reg = regions[stack.PopFirst()];
-
-                    var cons = reg.GetConnections();
-                    foreach (var nei in cons)
-                    {
-                        var regn = regions[nei];
-                        // Skip already visited.
-                        if (regn.Id != 0)
-                        {
-                            continue;
-                        }
-
-                        // Skip if the neighbour is overlapping root region.
-                        bool overlap = root.OverlapWithNeighbour(nei);
-                        if (overlap)
-                        {
-                            continue;
-                        }
-
-                        // Deepen
-                        stack.Add(nei);
-
-                        // Mark layer id
-                        regn.Id = layerId;
-
-                        // Merge current layers to root.
-                        root.MergeFloors(regn);
-                    }
-                }
-
-                layerId++;
-            }
-        }
-        /// <summary>
-        /// Updates overlapping region floors
-        /// </summary>
-        /// <param name="regions">Region list</param>
-        /// <param name="lregs">Floors</param>
-        private static void UpdateOverlappingRegionFloors(List<Region> regions, List<int> lregs)
-        {
-            for (int i = 0; i < lregs.Count - 1; ++i)
-            {
-                for (int j = i + 1; j < lregs.Count; ++j)
-                {
-                    if (lregs[i] != lregs[j])
-                    {
-                        var ri = regions[lregs[i]];
-                        var rj = regions[lregs[j]];
-                        ri.AddUniqueFloorRegion(lregs[j]);
-                        rj.AddUniqueFloorRegion(lregs[i]);
-                    }
-                }
-            }
-        }
-        /// <summary>
         /// Updates span neighbours
         /// </summary>
         /// <param name="s">Span</param>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
         /// <param name="regions">Region list</param>
         /// <param name="maxRegions">Maximum number of regions in the list</param>
         /// <param name="regionId">Region id</param>
         /// <param name="srcReg">Region id list</param>
-        private void UpdateSpanNeighbours(CompactSpan s, int x, int y, List<Region> regions, int maxRegions, int regionId, int[] srcReg)
+        private void UpdateSpanNeighbours(CompactSpan s, int col, int row, List<Region> regions, int maxRegions, int regionId, int[] srcReg)
         {
             var reg = regions[regionId];
             reg.SpanCount++;
             reg.YMin = Math.Min(reg.YMin, s.Y);
             reg.YMax = Math.Max(reg.YMax, s.Y);
 
-            foreach (var item in IterateSpanConnections(s, x, y))
+            foreach (var item in IterateSpanConnections(s, col, row))
             {
                 int r = srcReg[item.ai];
 
@@ -3027,64 +2937,95 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var cont = new List<int>();
 
+            int startIdx = spanIndex;
             int startDir = dir;
-            int starti = spanIndex;
 
-            var ss = Spans[spanIndex];
             int curReg = 0;
-            if (ss.GetCon(dir, out int con))
+            int ai = GetNeighbourCellIndex(Spans[spanIndex], col, row, dir);
+            if (ai != -1)
             {
-                int ai = GetNeighbourCellIndex(col, row, dir, con);
                 curReg = srcReg[ai];
             }
             cont.Add(curReg);
 
             int iter = 0;
+            int iterIdx = spanIndex;
+            int iterDir = dir;
             while (++iter < 40000)
             {
-                var s = Spans[spanIndex];
-
-                if (IsSolidEdge(col, row, spanIndex, dir, srcReg))
+                var (iterateNext, newReg) = IterateSpan(ref iterIdx, ref iterDir, ref col, ref row, curReg, srcReg);
+                if (!iterateNext)
                 {
-                    // Choose the edge corner
-                    int r = 0;
-                    int ai = GetNeighbourCellIndex(s, col, row, dir);
-                    if (ai != -1)
-                    {
-                        r = srcReg[ai];
-                    }
-
-                    if (r != curReg)
-                    {
-                        curReg = r;
-                        cont.Add(curReg);
-                    }
-
-                    dir = Utils.RotateCW(dir);  // Rotate CW
-                }
-                else
-                {
-                    int ai = GetNeighbourCellIndex(s, col, row, dir, out int ax, out int ay);
-                    if (ai == -1)
-                    {
-                        // Should not happen.
-                        return Array.Empty<int>();
-                    }
-
-                    col = ax;
-                    row = ay;
-                    spanIndex = ai;
-
-                    dir = Utils.RotateCCW(dir);  // Rotate CCW
+                    // Should not happen.
+                    return Array.Empty<int>();
                 }
 
-                if (starti == spanIndex && startDir == dir)
+                if (newReg == -1)
+                {
+                    continue;
+                }
+
+                curReg = newReg;
+                cont.Add(curReg);
+
+                if (startIdx == iterIdx && startDir == iterDir)
                 {
                     break;
                 }
             }
 
             return cont.ToArray();
+        }
+        /// <summary>
+        /// Iterates over the specified span
+        /// </summary>
+        /// <param name="iterIdx">Span index</param>
+        /// <param name="iterDir">Span direction</param>
+        /// <param name="col">Column</param>
+        /// <param name="row">Row</param>
+        /// <param name="curReg">Current region id</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <returns>Returns whether the iteration must continue and the new region id</returns>
+        private (bool Continue, int NewReg) IterateSpan(ref int iterIdx, ref int iterDir, ref int col, ref int row, int curReg, int[] srcReg)
+        {
+            var s = Spans[iterIdx];
+
+            if (IsSolidEdge(col, row, iterIdx, iterDir, srcReg))
+            {
+                // Choose the edge corner
+                int r = 0;
+                int ai = GetNeighbourCellIndex(s, col, row, iterDir);
+                if (ai != -1)
+                {
+                    r = srcReg[ai];
+                }
+
+                if (r != curReg)
+                {
+                    curReg = r;
+                }
+
+                iterDir = Utils.RotateCW(iterDir);  // Rotate CW
+
+                return (true, curReg);
+            }
+            else
+            {
+                int ai = GetNeighbourCellIndex(s, col, row, iterDir, out int ax, out int ay);
+                if (ai == -1)
+                {
+                    // Should not happen.
+                    return (false, -1);
+                }
+
+                col = ax;
+                row = ay;
+                iterIdx = ai;
+
+                iterDir = Utils.RotateCCW(iterDir);  // Rotate CCW
+
+                return (true, -1);
+            }
         }
         /// <summary>
         /// Walks the edge contour
@@ -3208,10 +3149,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return GetNeighbourCellIndex(col, row, dir, con, out _, out _);
         }
-        public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir)
-        {
-            return GetNeighbourCellIndex(s, col, row, dir, out _, out _);
-        }
         /// <summary>
         /// Gets the neighbour cell index in the cells array, in the specified direction and connection
         /// </summary>
@@ -3227,6 +3164,26 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             ay = row + Utils.GetDirOffsetY(dir);
             return Cells[ax + ay * Width].Index + con;
         }
+        /// <summary>
+        /// Gets the neighbour cell index in the cells array in the specified direction
+        /// </summary>
+        /// <param name="s">Compact span</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="dir">Direction</param>
+        public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir)
+        {
+            return GetNeighbourCellIndex(s, col, row, dir, out _, out _);
+        }
+        /// <summary>
+        /// Gets the neighbour cell index in the cells array in the specified direction
+        /// </summary>
+        /// <param name="s">Compact span</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="dir">Direction</param>
+        /// <param name="ax">Neighbour cell x coordinate</param>
+        /// <param name="ay">Neighbour cell y coordinate</param>
         public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir, out int ax, out int ay)
         {
             ax = col + Utils.GetDirOffsetX(dir);

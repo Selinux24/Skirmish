@@ -30,6 +30,10 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return OffsetsDir[((y + 1) << 1) + x];
         }
+        public static int Rotate(int dir, int amount)
+        {
+            return (dir + amount) & 3;
+        }
         public static int RotateCW(int dir)
         {
             return (dir + 1) & 3;
