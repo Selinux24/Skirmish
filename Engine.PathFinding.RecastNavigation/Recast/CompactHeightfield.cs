@@ -988,25 +988,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Returns whether the specified edge is solid
         /// </summary>
-        /// <param name="srcReg">Region list</param>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="spanIndex">Index</param>
         /// <param name="dir">Direction</param>
+        /// <param name="srcReg">Region list</param>
         /// <returns>Returns true if the specified edge is solid</returns>
-        private bool IsSolidEdge(int[] srcReg, int x, int y, int i, int dir)
+        private bool IsSolidEdge(int col, int row, int spanIndex, int dir, int[] srcReg)
         {
-            var s = Spans[i];
+            var s = Spans[spanIndex];
             int r = 0;
             if (s.GetCon(dir, out int con))
             {
-                int ax = x + Utils.GetDirOffsetX(dir);
-                int ay = y + Utils.GetDirOffsetY(dir);
+                int ax = col + Utils.GetDirOffsetX(dir);
+                int ay = row + Utils.GetDirOffsetY(dir);
                 int ai = Cells[ax + ay * Width].Index + con;
                 r = srcReg[ai];
             }
 
-            if (r == srcReg[i])
+            if (r == srcReg[spanIndex])
             {
                 return false;
             }
@@ -2607,308 +2607,122 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, int maxRegionId, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
         {
-            int nreg = maxRegionId + 1;
-            var regions = new List<Region>(nreg);
-
             // Construct regions
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions.Add(new Region(i));
-            }
+            int nreg = maxRegionId + 1;
+            var regions = Region.InitializeRegionList(nreg);
 
             // Find edge of a region and find connections around the contour.
-            foreach (var (x, y, i, c) in IterateCells())
+            foreach (var (col, row, spanIndex, c) in IterateCells())
             {
-                int r = srcReg[i];
+                int r = srcReg[spanIndex];
                 if (r == 0 || r >= nreg)
                 {
                     continue;
                 }
 
                 var reg = regions[r];
-                reg.SpanCount++;
 
                 // Update floors.
-                for (int j = c.Index; j < c.Index + c.Count; ++j)
-                {
-                    if (i == j) continue;
-                    int floorId = srcReg[j];
-                    if (floorId == 0 || floorId >= nreg)
-                    {
-                        continue;
-                    }
-                    if (floorId == r)
-                    {
-                        reg.Overlap = true;
-                    }
-                    reg.AddUniqueFloorRegion(floorId);
-                }
-
-                // Have found contour
-                if (reg.GetConnectionCount() > 0)
+                bool foundContour = UpdateFloors(c, spanIndex, r, reg, nreg, srcReg);
+                if (foundContour)
                 {
                     continue;
                 }
 
-                reg.AreaType = Areas[i];
-
                 // Check if this cell is next to a border.
-                int ndir = -1;
-                for (int dir = 0; dir < 4; ++dir)
+                int ndir = GetCellBorderDirection(col, row, spanIndex, srcReg);
+                if (ndir == -1)
                 {
-                    if (IsSolidEdge(srcReg, x, y, i, dir))
-                    {
-                        ndir = dir;
-                        break;
-                    }
+                    continue;
                 }
 
-                if (ndir != -1)
-                {
-                    // The cell is at border.
-                    // Walk around the contour to find all the neighbours.
-                    var neighbours = WalkContour(x, y, i, ndir, srcReg);
-                    if (neighbours.Any())
-                    {
-                        reg.AddConnections(neighbours);
-                    }
-                }
+                // The cell is at border.
+                // Walk around the contour to find all the neighbours.
+                reg.AddConnections(WalkContour(col, row, spanIndex, ndir, srcReg));
             }
 
             // Remove too small regions.
-            var stack = new List<int>();
-            var trace = new List<int>();
-            for (int i = 0; i < nreg; ++i)
-            {
-                var reg = regions[i];
-                if (reg.Id == 0 || IsBorder(reg.Id))
-                {
-                    continue;
-                }
-                if (reg.SpanCount == 0)
-                {
-                    continue;
-                }
-                if (reg.Visited)
-                {
-                    continue;
-                }
-
-                // Count the total size of all the connected regions.
-                // Also keep track of the regions connects to a tile border.
-                bool connectsToBorder = false;
-                int spanCount = 0;
-                stack.Clear();
-                trace.Clear();
-
-                reg.Visited = true;
-                stack.Add(i);
-
-                while (stack.Count > 0)
-                {
-                    // Pop
-                    int ri = stack.PopLast();
-
-                    var creg = regions[ri];
-
-                    spanCount += creg.SpanCount;
-                    trace.Add(ri);
-
-                    var connections = creg.GetConnections();
-                    foreach (var connection in connections)
-                    {
-                        if (IsBorder(connection))
-                        {
-                            connectsToBorder = true;
-                            continue;
-                        }
-                        var neireg = regions[connection];
-                        if (neireg.Visited)
-                        {
-                            continue;
-                        }
-                        if (neireg.Id == 0 || IsBorder(neireg.Id))
-                        {
-                            continue;
-                        }
-                        // Visit
-                        stack.Add(neireg.Id);
-                        neireg.Visited = true;
-                    }
-                }
-
-                // If the accumulated regions size is too small, remove it.
-                // Do not remove areas which connect to tile borders
-                // as their size cannot be estimated correctly and removing them
-                // can potentially remove necessary areas.
-                if (spanCount < minRegionArea && !connectsToBorder)
-                {
-                    // Kill all visited regions.
-                    for (int j = 0; j < trace.Count; ++j)
-                    {
-                        regions[trace[j]].SpanCount = 0;
-                        regions[trace[j]].Id = 0;
-                    }
-                }
-            }
+            Region.RemoveSmallestRegions(regions, minRegionArea);
 
             // Merge too small regions to neighbour regions.
-            int mergeCount;
-            do
-            {
-                mergeCount = 0;
-                for (int i = 0; i < nreg; ++i)
-                {
-                    var reg = regions[i];
-                    if (reg.Id == 0 || IsBorder(reg.Id))
-                    {
-                        continue;
-                    }
-                    if (reg.Overlap)
-                    {
-                        continue;
-                    }
-                    if (reg.SpanCount == 0)
-                    {
-                        continue;
-                    }
-
-                    // Check to see if the region should be merged.
-                    if (reg.SpanCount > mergeRegionSize && reg.IsRegionConnectedToBorder())
-                    {
-                        continue;
-                    }
-
-                    // Small region with more than 1 connection.
-                    // Or region which is not connected to a border at all.
-                    // Find smallest neighbour region that connects to this one.
-                    int smallest = int.MaxValue;
-                    int mergeId = reg.Id;
-                    var connections = reg.GetConnections();
-                    foreach (var connection in connections)
-                    {
-                        if (IsBorder(connection))
-                        {
-                            continue;
-                        }
-
-                        var mreg = regions[connection];
-                        if (mreg.Id == 0 || IsBorder(mreg.Id) || mreg.Overlap)
-                        {
-                            continue;
-                        }
-
-                        if (mreg.SpanCount < smallest &&
-                            Region.CanMergeWithRegion(reg, mreg) &&
-                            Region.CanMergeWithRegion(mreg, reg))
-                        {
-                            smallest = mreg.SpanCount;
-                            mergeId = mreg.Id;
-                        }
-                    }
-                    // Found new id.
-                    if (mergeId == reg.Id)
-                    {
-                        continue;
-                    }
-
-                    int oldId = reg.Id;
-                    var target = regions[mergeId];
-
-                    // Merge neighbours.
-                    if (!Region.MergeRegions(target, reg))
-                    {
-                        continue;
-                    }
-
-                    // Fixup regions pointing to current region.
-                    for (int j = 0; j < nreg; ++j)
-                    {
-                        if (regions[j].Id == 0 || IsBorder(regions[j].Id))
-                        {
-                            continue;
-                        }
-
-                        // If another region was already merged into current region
-                        // change the nid of the previous region too.
-                        if (regions[j].Id == oldId)
-                        {
-                            regions[j].Id = mergeId;
-                        }
-
-                        // Replace the current region with the new one if the
-                        // current regions is neighbour.
-                        regions[j].ReplaceNeighbour(oldId, mergeId);
-                    }
-
-                    mergeCount++;
-                }
-            }
-            while (mergeCount > 0);
+            Region.MergeSmallRegionsToNeighbours(regions, mergeRegionSize);
 
             // Compress region Ids.
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions[i].Remap = false;
-                if (regions[i].Id == 0)
-                {
-                    // Skip nil regions.
-                    continue;
-                }
-                if (IsBorder(regions[i].Id))
-                {
-                    // Skip external regions.
-                    continue;
-                }
-                regions[i].Remap = true;
-            }
-
-            int regIdGen = 0;
-            for (int i = 0; i < nreg; ++i)
-            {
-                if (!regions[i].Remap)
-                {
-                    continue;
-                }
-                int oldId = regions[i].Id;
-                int newId = ++regIdGen;
-                for (int j = i; j < nreg; ++j)
-                {
-                    if (regions[j].Id == oldId)
-                    {
-                        regions[j].Id = newId;
-                        regions[j].Remap = false;
-                    }
-                }
-            }
-            maxRegionIdResult = regIdGen;
+            maxRegionIdResult = Region.CompressRegionIds(regions);
 
             // Remap regions.
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                if (!IsBorder(srcReg[i]))
-                {
-                    srcReg[i] = regions[srcReg[i]].Id;
-                }
-            }
+            Region.RemapRegions(regions, srcReg, SpanCount);
 
             // Return regions that we found to be overlapping.
-            var lOverlaps = new List<int>();
-            for (int i = 0; i < nreg; ++i)
-            {
-                if (regions[i].Overlap)
-                {
-                    lOverlaps.Add(regions[i].Id);
-                }
-            }
-            overlaps = lOverlaps.ToArray();
-
-            for (int i = 0; i < nreg; ++i)
-            {
-                regions[i] = null;
-            }
+            overlaps = Region.GetOverlapingRegions(regions);
 
             return true;
+        }
+        /// <summary>
+        /// Updates the region floors with specified cell spans
+        /// </summary>
+        /// <param name="c">Compact cell</param>
+        /// <param name="spanIndex">Current span index</param>
+        /// <param name="spanRegionId">Span region id</param>
+        /// <param name="reg">Region update</param>
+        /// <param name="regionCount">Total region count</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <returns>Returns whether have found contour or not</returns>
+        private bool UpdateFloors(CompactCell c, int spanIndex, int spanRegionId, Region reg, int regionCount, int[] srcReg)
+        {
+            reg.SpanCount++;
+
+            // Update floors.
+            for (int i = c.Index; i < c.Index + c.Count; ++i)
+            {
+                if (spanIndex == i)
+                {
+                    continue;
+                }
+
+                int floorId = srcReg[i];
+                if (floorId == 0 || floorId >= regionCount)
+                {
+                    continue;
+                }
+
+                if (floorId == spanRegionId)
+                {
+                    reg.Overlap = true;
+                }
+
+                reg.AddUniqueFloorRegion(floorId);
+            }
+
+            // Have found contour
+            if (reg.GetConnectionCount() > 0)
+            {
+                return true;
+            }
+
+            reg.AreaType = Areas[spanIndex];
+
+            return false;
+        }
+        /// <summary>
+        /// Checks if this cell is next to a border. 
+        /// </summary>
+        /// <param name="col">Column</param>
+        /// <param name="row">Row</param>
+        /// <param name="spanIndex">Span index</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <returns>Returns the border direction</returns>
+        private int GetCellBorderDirection(int col, int row, int spanIndex, int[] srcReg)
+        {
+            for (int dir = 0; dir < 4; ++dir)
+            {
+                if (IsSolidEdge(col, row, spanIndex, dir, srcReg))
+                {
+                    return dir;
+                }
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -2981,7 +2795,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             maxRegionIdResult = Region.CompressRegionIds(regions);
 
             // Remap regions.
-            RemapRegions(srcReg, regions);
+            Region.RemapRegions(regions, srcReg, SpanCount);
 
             return true;
         }
@@ -3068,21 +2882,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         ri.AddUniqueFloorRegion(lregs[j]);
                         rj.AddUniqueFloorRegion(lregs[i]);
                     }
-                }
-            }
-        }
-        /// <summary>
-        /// Remap region ids
-        /// </summary>
-        /// <param name="srcReg">Region id list</param>
-        /// <param name="regions">Region data list</param>
-        private void RemapRegions(int[] srcReg, List<Region> regions)
-        {
-            for (int i = 0; i < SpanCount; ++i)
-            {
-                if (!IsBorder(srcReg[i]))
-                {
-                    srcReg[i] = regions[srcReg[i]].Id;
                 }
             }
         }
@@ -3218,25 +3017,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Walks the contour
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="spanIndex">Span index</param>
         /// <param name="dir">Direction</param>
         /// <param name="srcReg">Region list</param>
         /// <returns>Returns the contour list</returns>
-        private int[] WalkContour(int x, int y, int i, int dir, int[] srcReg)
+        private int[] WalkContour(int col, int row, int spanIndex, int dir, int[] srcReg)
         {
             var cont = new List<int>();
 
             int startDir = dir;
-            int starti = i;
+            int starti = spanIndex;
 
-            var ss = Spans[i];
+            var ss = Spans[spanIndex];
             int curReg = 0;
             if (ss.GetCon(dir, out int con))
             {
-                int ax = x + Utils.GetDirOffsetX(dir);
-                int ay = y + Utils.GetDirOffsetY(dir);
+                int ax = col + Utils.GetDirOffsetX(dir);
+                int ay = row + Utils.GetDirOffsetY(dir);
                 int ai = Cells[ax + ay * Width].Index + con;
                 curReg = srcReg[ai];
             }
@@ -3245,16 +3044,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int iter = 0;
             while (++iter < 40000)
             {
-                var s = Spans[i];
+                var s = Spans[spanIndex];
 
-                if (IsSolidEdge(srcReg, x, y, i, dir))
+                if (IsSolidEdge(col, row, spanIndex, dir, srcReg))
                 {
                     // Choose the edge corner
                     int r = 0;
                     if (s.GetCon(dir, out con))
                     {
-                        int ax = x + Utils.GetDirOffsetX(dir);
-                        int ay = y + Utils.GetDirOffsetY(dir);
+                        int ax = col + Utils.GetDirOffsetX(dir);
+                        int ay = row + Utils.GetDirOffsetY(dir);
                         int ai = Cells[ax + ay * Width].Index + con;
                         r = srcReg[ai];
                     }
@@ -3270,8 +3069,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 else
                 {
                     int ni = -1;
-                    int nx = x + Utils.GetDirOffsetX(dir);
-                    int ny = y + Utils.GetDirOffsetY(dir);
+                    int nx = col + Utils.GetDirOffsetX(dir);
+                    int ny = row + Utils.GetDirOffsetY(dir);
                     if (s.GetCon(dir, out con))
                     {
                         var nc = Cells[nx + ny * Width];
@@ -3284,13 +3083,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         return Array.Empty<int>();
                     }
 
-                    x = nx;
-                    y = ny;
-                    i = ni;
+                    col = nx;
+                    row = ny;
+                    spanIndex = ni;
                     dir = Utils.RotateCCW(dir);  // Rotate CCW
                 }
 
-                if (starti == i && startDir == dir)
+                if (starti == spanIndex && startDir == dir)
                 {
                     break;
                 }
@@ -3301,45 +3100,45 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Walks the edge contour
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="spanIndex">Span index</param>
         /// <param name="flags">Edge flags</param>
         /// <returns>Returns the edge contour list</returns>
-        private ContourVertex[] WalkContour(int x, int y, int i, int[] flags)
+        private ContourVertex[] WalkContour(int col, int row, int spanIndex, int[] flags)
         {
             var points = new List<ContourVertex>();
 
             // Choose the first non-connected edge
             int dir = 0;
-            while ((flags[i] & (1 << dir)) == 0)
+            while ((flags[spanIndex] & (1 << dir)) == 0)
             {
                 dir++;
             }
 
             int startDir = dir;
-            int starti = i;
+            int starti = spanIndex;
 
-            var area = Areas[i];
+            var area = Areas[spanIndex];
 
             int iter = 0;
             while (++iter < 40000)
             {
-                if ((flags[i] & (1 << dir)) != 0)
+                if ((flags[spanIndex] & (1 << dir)) != 0)
                 {
                     // Choose the edge corner
-                    var pt = GetEdgeCorner(x, y, i, dir, area);
+                    var pt = GetEdgeCorner(col, row, spanIndex, dir, area);
                     points.Add(pt);
 
-                    flags[i] &= ~(1 << dir); // Remove visited edges
+                    flags[spanIndex] &= ~(1 << dir); // Remove visited edges
                     dir = Utils.RotateCW(dir);  // Rotate CW
                 }
                 else
                 {
                     int ni = -1;
-                    int nx = x + Utils.GetDirOffsetX(dir);
-                    int ny = y + Utils.GetDirOffsetY(dir);
-                    var s = Spans[i];
+                    int nx = col + Utils.GetDirOffsetX(dir);
+                    int ny = row + Utils.GetDirOffsetY(dir);
+                    var s = Spans[spanIndex];
                     if (s.GetCon(dir, out int con))
                     {
                         var nc = Cells[nx + ny * Width];
@@ -3350,13 +3149,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // Should not happen.
                         return Array.Empty<ContourVertex>();
                     }
-                    x = nx;
-                    y = ny;
-                    i = ni;
+                    col = nx;
+                    row = ny;
+                    spanIndex = ni;
                     dir = Utils.RotateCCW(dir);  // Rotate CCW
                 }
 
-                if (starti == i && startDir == dir)
+                if (starti == spanIndex && startDir == dir)
                 {
                     break;
                 }
@@ -3367,17 +3166,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the corner edge
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="i">Index</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
+        /// <param name="spanIndex">Span index</param>
         /// <param name="dir">Direction</param>
         /// <param name="area">Area type</param>
-        private ContourVertex GetEdgeCorner(int x, int y, int i, int dir, AreaTypes area)
+        private ContourVertex GetEdgeCorner(int col, int row, int spanIndex, int dir, AreaTypes area)
         {
             bool isAreaBorder = false;
-            int px = x;
-            int py = GetCornerHeight(x, y, i, dir, out bool isBorderVertex);
-            int pz = y;
+            int px = col;
+            int py = GetCornerHeight(col, row, spanIndex, dir, out bool isBorderVertex);
+            int pz = row;
             switch (dir)
             {
                 case 0: pz++; break;
@@ -3387,9 +3186,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int r = 0;
 
-            if (Spans[i].GetCon(dir, out int con))
+            if (Spans[spanIndex].GetCon(dir, out int con))
             {
-                int ai = GetNeighbourCellIndex(x, y, dir, con);
+                int ai = GetNeighbourCellIndex(col, row, dir, con);
                 r = Spans[ai].Reg;
                 if (area != Areas[ai])
                 {
@@ -3412,27 +3211,27 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the neighbour cell index in the cells array, in the specified direction and connection
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
         /// <param name="dir">Direction</param>
         /// <param name="con">Connection</param>
-        public int GetNeighbourCellIndex(int x, int y, int dir, int con)
+        public int GetNeighbourCellIndex(int col, int row, int dir, int con)
         {
-            return GetNeighbourCellIndex(x, y, dir, con, out _, out _);
+            return GetNeighbourCellIndex(col, row, dir, con, out _, out _);
         }
         /// <summary>
         /// Gets the neighbour cell index in the cells array, in the specified direction and connection
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
         /// <param name="dir">Direction</param>
         /// <param name="con">Connection</param>
         /// <param name="ax">Neighbour cell x coordinate</param>
         /// <param name="ay">Neighbour cell y coordinate</param>
-        public int GetNeighbourCellIndex(int x, int y, int dir, int con, out int ax, out int ay)
+        public int GetNeighbourCellIndex(int col, int row, int dir, int con, out int ax, out int ay)
         {
-            ax = x + Utils.GetDirOffsetX(dir);
-            ay = y + Utils.GetDirOffsetY(dir);
+            ax = col + Utils.GetDirOffsetX(dir);
+            ay = row + Utils.GetDirOffsetY(dir);
             return Cells[ax + ay * Width].Index + con;
         }
     }
