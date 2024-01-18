@@ -3034,9 +3034,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int curReg = 0;
             if (ss.GetCon(dir, out int con))
             {
-                int ax = col + Utils.GetDirOffsetX(dir);
-                int ay = row + Utils.GetDirOffsetY(dir);
-                int ai = Cells[ax + ay * Width].Index + con;
+                int ai = GetNeighbourCellIndex(col, row, dir, con);
                 curReg = srcReg[ai];
             }
             cont.Add(curReg);
@@ -3050,11 +3048,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     // Choose the edge corner
                     int r = 0;
-                    if (s.GetCon(dir, out con))
+                    int ai = GetNeighbourCellIndex(s, col, row, dir);
+                    if (ai != -1)
                     {
-                        int ax = col + Utils.GetDirOffsetX(dir);
-                        int ay = row + Utils.GetDirOffsetY(dir);
-                        int ai = Cells[ax + ay * Width].Index + con;
                         r = srcReg[ai];
                     }
 
@@ -3068,24 +3064,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
                 else
                 {
-                    int ni = -1;
-                    int nx = col + Utils.GetDirOffsetX(dir);
-                    int ny = row + Utils.GetDirOffsetY(dir);
-                    if (s.GetCon(dir, out con))
-                    {
-                        var nc = Cells[nx + ny * Width];
-                        ni = nc.Index + con;
-                    }
-
-                    if (ni == -1)
+                    int ai = GetNeighbourCellIndex(s, col, row, dir, out int ax, out int ay);
+                    if (ai == -1)
                     {
                         // Should not happen.
                         return Array.Empty<int>();
                     }
 
-                    col = nx;
-                    row = ny;
-                    spanIndex = ni;
+                    col = ax;
+                    row = ay;
+                    spanIndex = ai;
+
                     dir = Utils.RotateCCW(dir);  // Rotate CCW
                 }
 
@@ -3219,6 +3208,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return GetNeighbourCellIndex(col, row, dir, con, out _, out _);
         }
+        public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir)
+        {
+            return GetNeighbourCellIndex(s, col, row, dir, out _, out _);
+        }
         /// <summary>
         /// Gets the neighbour cell index in the cells array, in the specified direction and connection
         /// </summary>
@@ -3233,6 +3226,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             ax = col + Utils.GetDirOffsetX(dir);
             ay = row + Utils.GetDirOffsetY(dir);
             return Cells[ax + ay * Width].Index + con;
+        }
+        public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir, out int ax, out int ay)
+        {
+            ax = col + Utils.GetDirOffsetX(dir);
+            ay = row + Utils.GetDirOffsetY(dir);
+
+            if (s.GetCon(dir, out int con))
+            {
+                return Cells[ax + ay * Width].Index + con;
+            }
+
+            return -1;
         }
     }
 }

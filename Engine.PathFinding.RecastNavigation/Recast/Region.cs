@@ -617,8 +617,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int smallest = int.MaxValue;
             int mergeId = Id;
-            var connections = GetConnections();
-            foreach (var connection in connections)
+            foreach (var connection in GetConnections())
             {
                 if (CompactHeightfield.IsBorder(connection))
                 {
@@ -631,9 +630,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                if (mreg.SpanCount < smallest &&
-                    CanMergeWithRegion(mreg) &&
-                    mreg.CanMergeWithRegion(this))
+                if (mreg.SpanCount < smallest && CanMergeWithRegion(mreg) && mreg.CanMergeWithRegion(this))
                 {
                     smallest = mreg.SpanCount;
                     mergeId = mreg.Id;
