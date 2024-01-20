@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Mapping;
 using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneNavmeshTest
@@ -21,23 +22,25 @@ namespace TerrainSamples.SceneNavmeshTest
     {
         private readonly string resourcesFolder = "SceneNavmeshTest/resources";
 
-        public MouseButtons GameWindowedLook { get; set; } = MouseButtons.Right;
-        public Keys GameExit { get; set; } = Keys.Escape;
-        public Keys GameHelp { get; set; } = Keys.F1;
-        public Keys CamLeft { get; set; } = Keys.A;
-        public Keys CamRight { get; set; } = Keys.D;
-        public Keys CamFwd { get; set; } = Keys.W;
-        public Keys CamBwd { get; set; } = Keys.S;
-        public Keys CamUp { get; set; } = Keys.Space;
-        public Keys CamDown { get; set; } = Keys.C;
-        public MouseButtons NmRndPointCircle { get; set; } = MouseButtons.Middle;
-        public Keys NmRndPoint { get; set; } = Keys.R;
-        public MouseButtons GContacPoint { get; set; } = MouseButtons.Left;
-        public Keys GBuild { get; set; } = Keys.B;
-        public Keys GPartition { get; set; } = Keys.P;
-        public Keys GTileCache { get; set; } = Keys.T;
-        public Keys GSave { get; set; } = Keys.F5;
-        public Keys GLoad { get; set; } = Keys.F6;
+        private readonly InputMapper inputMapper;
+
+        public InputEntry GameWindowedLook { get; set; }
+        public InputEntry GameExit { get; set; }
+        public InputEntry GameHelp { get; set; }
+        public InputEntry CamLeft { get; set; }
+        public InputEntry CamRight { get; set; }
+        public InputEntry CamFwd { get; set; }
+        public InputEntry CamBwd { get; set; }
+        public InputEntry CamUp { get; set; }
+        public InputEntry CamDown { get; set; }
+        public InputEntry NmRndPointCircle { get; set; }
+        public InputEntry NmRndPoint { get; set; }
+        public InputEntry GContacPoint { get; set; }
+        public InputEntry GBuild { get; set; }
+        public InputEntry GPartition { get; set; }
+        public InputEntry GTileCache { get; set; }
+        public InputEntry GSave { get; set; }
+        public InputEntry GLoad { get; set; }
 
         private Player agent = null;
 
@@ -63,6 +66,8 @@ namespace TerrainSamples.SceneNavmeshTest
 
         public NavmeshTestScene(Game game) : base(game)
         {
+            inputMapper = new InputMapper(Game);
+
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
             Game.VisibleMouse = true;
@@ -126,12 +131,66 @@ namespace TerrainSamples.SceneNavmeshTest
             }
 
             UpdateLayout();
+            InitializeInputMapping();
             InitializeLights();
             InitializeAgent();
 
             uiReady = true;
 
             InitializeMapData();
+        }
+        private void InitializeInputMapping()
+        {
+            InputMapperDescription mapperDescription = new()
+            {
+                InputEntries = new InputEntryDescription[]
+                {
+                    new("GameWindowedLook", MouseButtons.Right),
+                    new("GameExit", Keys.Escape),
+                    new("GameHelp", Keys.F1),
+                    new("CamLeft", Keys.A),
+                    new("CamRight", Keys.D),
+                    new("CamFwd", Keys.W),
+                    new("CamBwd", Keys.S),
+                    new("CamUp", Keys.Space),
+                    new("CamDown", Keys.C),
+                    new("NmRndPointCircle", MouseButtons.Middle),
+                    new("NmRndPoint", Keys.R),
+                    new("GContacPoint", MouseButtons.Left),
+                    new("GBuild", Keys.B),
+                    new("GPartition", Keys.P),
+                    new("GTileCache", Keys.T),
+                    new("GSave", Keys.F5),
+                    new("GLoad", Keys.F6),
+                }
+            };
+
+            if (!inputMapper.LoadMapping(mapperDescription, out string errorMessage))
+            {
+                ShowMessage($"Error configuring key mapping: {errorMessage}. Press Escape to exit.", 15000);
+
+                GameExit = new(Game, Keys.Escape);
+
+                return;
+            }
+
+            GameWindowedLook = inputMapper.Get("GameWindowedLook");
+            GameExit = inputMapper.Get("GameExit");
+            GameHelp = inputMapper.Get("GameHelp");
+            CamLeft = inputMapper.Get("CamLeft");
+            CamRight = inputMapper.Get("CamRight");
+            CamFwd = inputMapper.Get("CamFwd");
+            CamBwd = inputMapper.Get("CamBwd");
+            CamUp = inputMapper.Get("CamUp");
+            CamDown = inputMapper.Get("CamDown");
+            NmRndPointCircle = inputMapper.Get("NmRndPointCircle");
+            NmRndPoint = inputMapper.Get("NmRndPoint");
+            GContacPoint = inputMapper.Get("GContacPoint");
+            GBuild = inputMapper.Get("GBuild");
+            GPartition = inputMapper.Get("GPartition");
+            GTileCache = inputMapper.Get("GTileCache");
+            GSave = inputMapper.Get("GSave");
+            GLoad = inputMapper.Get("GLoad");
         }
         private void InitializeLights()
         {
@@ -252,7 +311,7 @@ namespace TerrainSamples.SceneNavmeshTest
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(GameHelp))
+            if (GameHelp.JustReleased)
             {
                 help.Visible = !help.Visible;
             }
@@ -266,7 +325,7 @@ namespace TerrainSamples.SceneNavmeshTest
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(GameExit))
+            if (GameExit.JustReleased)
             {
                 Game.SetScene<StartScene>();
             }
@@ -276,37 +335,37 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void UpdateCameraInput()
         {
-            if (Game.Input.KeyPressed(CamLeft))
+            if (CamLeft.Pressed)
             {
                 Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(CamRight))
+            if (CamRight.Pressed)
             {
                 Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(CamFwd))
+            if (CamFwd.Pressed)
             {
                 Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(CamBwd))
+            if (CamBwd.Pressed)
             {
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(CamUp))
+            if (CamUp.Pressed)
             {
                 Camera.MoveUp(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyPressed(CamDown))
+            if (CamDown.Pressed)
             {
                 Camera.MoveDown(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.MouseButtonPressed(GameWindowedLook))
+            if (GameWindowedLook.Pressed)
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -316,12 +375,12 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void UpdateNavmeshInput()
         {
-            if (Game.Input.MouseButtonJustReleased(NmRndPointCircle))
+            if (NmRndPointCircle.JustReleased)
             {
                 UpdateFindRandomPointCircleInput();
             }
 
-            if (Game.Input.KeyJustReleased(NmRndPoint))
+            if (NmRndPoint.JustReleased)
             {
                 UpdateFindRandomPointInput();
             }
@@ -360,38 +419,38 @@ namespace TerrainSamples.SceneNavmeshTest
         {
             bool updateGraph = false;
 
-            if (Game.Input.KeyJustReleased(GSave))
+            if (GSave.JustReleased)
             {
                 UpdateGraphSaveInput();
 
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(GLoad))
+            if (GLoad.JustReleased)
             {
                 UpdateGraphLoadInput();
 
                 return;
             }
 
-            if (Game.Input.MouseButtonJustReleased(GContacPoint))
+            if (GContacPoint.JustReleased)
             {
                 UpdateContactInput();
 
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(GBuild))
+            if (GBuild.JustReleased)
             {
                 updateGraph = ChangeBuilMode(!Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyJustReleased(GPartition))
+            if (GPartition.JustReleased)
             {
                 updateGraph = ChangePartitionType(!Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.KeyJustReleased(GTileCache))
+            if (GTileCache.JustReleased)
             {
                 updateGraph = ChangeUseTileCache(!nmsettings.UseTileCache);
             }
@@ -629,11 +688,11 @@ namespace TerrainSamples.SceneNavmeshTest
                 DrawGraphNodes(agent);
             }
         }
-        private void ShowMessage(string text)
+        private void ShowMessage(string text, long duration = 5000)
         {
             message.Text = text;
             message.Visible = true;
-            uiTweener.FadeOff(message, 5000);
+            uiTweener.FadeOff(message, duration);
         }
         private void ShowOnGraphLoadingMessage()
         {
