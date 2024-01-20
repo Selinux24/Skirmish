@@ -52,6 +52,10 @@ namespace TerrainSamples.Mapping
 
                     continue;
                 }
+
+                errorMessage = $"Input entry {entry.InputEntry} is not a valid entry. Try {nameof(Keys)}, {nameof(MouseButtons)}";
+
+                return false;
             }
 
             return true;

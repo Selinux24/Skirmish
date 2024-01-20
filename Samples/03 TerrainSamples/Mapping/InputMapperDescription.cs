@@ -10,7 +10,7 @@ namespace TerrainSamples.Mapping
         /// <summary>
         /// Input entry list
         /// </summary>
-        public InputEntryDescription[] InputEntries;
+        public InputEntryDescription[] InputEntries { get; set; }
 
         /// <summary>
         /// Validates the entry list
