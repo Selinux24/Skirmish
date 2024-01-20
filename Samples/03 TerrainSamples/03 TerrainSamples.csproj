@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SceneNavMeshTest\Resources\buttons.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="SceneCrowds\Resources\Leopard.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1378,6 +1382,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\UMRP\Window_Open_Double.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\buttons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\dungeon.json">

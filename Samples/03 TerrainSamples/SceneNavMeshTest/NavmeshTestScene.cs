@@ -44,12 +44,18 @@ namespace TerrainSamples.SceneNavmeshTest
 
         private Player agent = null;
 
+        private UIControlTweener uiTweener;
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea debug = null;
         private UITextArea help = null;
         private UITextArea message = null;
-        private UIControlTweener uiTweener;
+
+        private UIPanel mainPanel = null;
+        private UIButton btnObstacle = null;
+
+        private readonly string buttonFonts = "Verdana, Consolas";
+        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
@@ -63,6 +69,15 @@ namespace TerrainSamples.SceneNavmeshTest
 
         private bool uiReady = false;
         private bool gameReady = false;
+        enum States
+        {
+            Default,
+            AddObstacle,
+            AddArea,
+            AddConnection,
+            PathFinding,
+        }
+        private States gameState = States.Default;
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -90,6 +105,7 @@ namespace TerrainSamples.SceneNavmeshTest
                 {
                     InitializeTweener(),
                     InitializeText(),
+                    InitializeUI(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -113,7 +129,7 @@ namespace TerrainSamples.SceneNavmeshTest
             debug.Text = null;
 
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            help.Text = GetHelpText();
+            help.Text = null;
             help.Visible = false;
 
             message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Orange });
@@ -122,6 +138,47 @@ namespace TerrainSamples.SceneNavmeshTest
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
+        }
+        private async Task InitializeUI()
+        {
+            var panDesc = UIPanelDescription.Default(Color.Transparent);
+            mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
+            mainPanel.Spacing = 10;
+            mainPanel.Padding = 15;
+            mainPanel.SetGridLayout(GridLayout.FixedColumns(6));
+            mainPanel.Visible = false;
+
+            var btnFont = TextDrawerDescription.FromFamily(buttonFonts, 10, FontMapStyles.Bold, true);
+            btnFont.ContentPath = resourcesFolder;
+
+            var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            btnDesc.ContentPath = resourcesFolder;
+            btnDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
+            btnDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            btnDesc.TextForeColor = Color.Gold;
+            btnDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            btnDesc.StartsVisible = false;
+
+            var emptyDesc = SpriteDescription.Default();
+            emptyDesc.BaseColor = new Color4(sceneButtonColor.RGB(), 0.5f);
+
+            btnObstacle = await InitializeButton(nameof(btnObstacle), "Obstacles", btnDesc);
+
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty2", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", "Empty", emptyDesc), false);
+            mainPanel.AddChild(btnObstacle, false);
+        }
+        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
+        {
+            var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, LayerUI);
+            button.MouseClick += SceneButtonClick;
+            button.Caption.Text = caption;
+
+            return button;
         }
         private void InitializeComponentsCompleted(LoadResourcesResult resUi)
         {
@@ -191,6 +248,8 @@ namespace TerrainSamples.SceneNavmeshTest
             GTileCache = inputMapper.Get("GTileCache");
             GSave = inputMapper.Get("GSave");
             GLoad = inputMapper.Get("GLoad");
+
+            help.Text = GetHelpText();
         }
         private void InitializeLights()
         {
@@ -297,9 +356,15 @@ namespace TerrainSamples.SceneNavmeshTest
 
             lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;
 
+            mainPanel.Visible = true;
+
             DrawGraphNodes(agent);
 
             gameReady = true;
+        }
+        public override void NavigationGraphUpdated()
+        {
+            DrawGraphNodes(agent);
         }
 
         public override void Update(IGameTime gameTime)
@@ -330,8 +395,7 @@ namespace TerrainSamples.SceneNavmeshTest
                 Game.SetScene<StartScene>();
             }
 
-            UpdateNavmeshInput();
-            UpdateGraphInput();
+            UpdateGameState();
         }
         private void UpdateCameraInput()
         {
@@ -389,23 +453,27 @@ namespace TerrainSamples.SceneNavmeshTest
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
-                DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
-                DrawTriangle(r.PickingResult.Primitive, Color.White);
-
-                float radius = 5;
-
-                DrawCircle(r.PickingResult.Position, radius, Color.Orange);
-
-                var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
-                if (pt.HasValue)
-                {
-                    float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
-                    Color color = dist < radius ? Color.LightGreen : Color.Pink;
-                    DrawPoint(pt.Value, 2.5f, color);
-                }
+                return;
             }
+
+            DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+            DrawTriangle(r.PickingResult.Primitive, Color.White);
+
+            float radius = 5;
+
+            DrawCircle(r.PickingResult.Position, radius, Color.Orange);
+
+            var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
+            if (!pt.HasValue)
+            {
+                return;
+            }
+
+            float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
+            Color color = dist < radius ? Color.LightGreen : Color.Pink;
+            DrawPoint(pt.Value, 2.5f, color);
         }
         private void UpdateFindRandomPointInput()
         {
@@ -648,6 +716,8 @@ namespace TerrainSamples.SceneNavmeshTest
 
         private void EnqueueGraph()
         {
+            mainPanel.Visible = false;
+
             lastElapsedSeconds = null;
             loadState = "Updating navigation graph.";
 
@@ -700,7 +770,7 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private string GetHelpText()
         {
-            return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move, Mouse To look (Press {GameWindowedLook} mouse in windowed mode). 
+            return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move, Mouse To look (Press {GameWindowedLook} in windowed mode). 
 {GBuild}: Change Build Mode (SHIFT reverse).
 {GPartition}: Change Partition Type (SHIFT reverse).
 {GTileCache}: Toggle using Tile Cache.
@@ -709,6 +779,90 @@ namespace TerrainSamples.SceneNavmeshTest
 {GContacPoint}: Update current tile (SHIFT remove, CTRL add).
 {NmRndPointCircle}: Finds random point around circle (5 units).
 {NmRndPoint}: Finds random over navmesh";
+        }
+
+        private async void SceneButtonClick(IUIControl sender, MouseEventArgs e)
+        {
+            if (!gameReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            await Task.Delay(100);
+
+            if (sender == btnObstacle) StartAddObstacleState();
+        }
+        private void StartAddObstacleState()
+        {
+            if (gameState != States.Default)
+            {
+                return;
+            }
+
+            if (!nmsettings.UseTileCache)
+            {
+                ShowMessage("Tile cache must be enabled.");
+
+                return;
+            }
+
+            gameState = States.AddObstacle;
+
+            mainPanel.Visible = false;
+
+            ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
+        }
+        private void EndAddObstacleState()
+        {
+            if (gameState != States.AddObstacle)
+            {
+                return;
+            }
+
+            gameState = States.Default;
+
+            mainPanel.Visible = true;
+        }
+
+        private void UpdateGameState()
+        {
+            if (gameState == States.Default)
+            {
+                UpdateGameStateDefault();
+                return;
+            }
+
+            if (gameState == States.AddObstacle)
+            {
+                UpdateGameStateAddObstacle();
+            }
+        }
+        private void UpdateGameStateDefault()
+        {
+            UpdateNavmeshInput();
+            UpdateGraphInput();
+        }
+        private void UpdateGameStateAddObstacle()
+        {
+            if (GContacPoint.JustReleased)
+            {
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
+                if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+                {
+                    return;
+                }
+
+                var p = r.PickingResult.Position;
+                NavigationGraph.AddObstacle(new BoundingCylinder(p, 0.5f, 1));
+                NavigationGraph.UpdateAt(p);
+
+                EndAddObstacleState();
+            }
         }
 
         public override void GameGraphicsResized()
@@ -725,6 +879,11 @@ namespace TerrainSamples.SceneNavmeshTest
             panel.Height = debug.Top + debug.Height + 3;
             message.Width = Game.Form.RenderWidth;
             message.Anchor = Anchors.BottomRight;
+
+            mainPanel.Height = Game.Form.RenderHeight * 0.0666f;
+            mainPanel.Width = Game.Form.RenderWidth * 0.5f;
+            mainPanel.Top = panel.Top + panel.Height;
+            mainPanel.Anchor = Anchors.Right;
         }
     }
 }

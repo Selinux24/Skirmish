@@ -13,6 +13,10 @@ namespace TerrainSamples.Mapping
         /// </summary>
         private readonly Game game;
         /// <summary>
+        /// Entry
+        /// </summary>
+        private readonly object entry;
+        /// <summary>
         /// Pressed function
         /// </summary>
         private readonly Func<IInput, bool> pressedFnc;
@@ -74,6 +78,7 @@ namespace TerrainSamples.Mapping
         public InputEntry(Game game, Keys key)
         {
             this.game = game;
+            entry = key;
             pressedFnc = (input) => input?.KeyPressed(key) ?? false;
             justPressedFnc = (input) => input?.KeyJustPressed(key) ?? false;
             justReleasedFnc = (input) => input?.KeyJustReleased(key) ?? false;
@@ -86,9 +91,21 @@ namespace TerrainSamples.Mapping
         public InputEntry(Game game, MouseButtons btn)
         {
             this.game = game;
+            entry = btn;
             pressedFnc = (input) => input?.MouseButtonPressed(btn) ?? false;
             justPressedFnc = (input) => input?.MouseButtonJustPressed(btn) ?? false;
             justReleasedFnc = (input) => input?.MouseButtonJustReleased(btn) ?? false;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if(entry is MouseButtons)
+            {
+                return $"Mouse {entry}";
+            }
+
+            return $"{entry ?? "Unspecified"}";
         }
     }
 }
