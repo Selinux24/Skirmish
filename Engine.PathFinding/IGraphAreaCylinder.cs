@@ -8,9 +8,9 @@ namespace Engine.PathFinding
     public interface IGraphAreaCylinder : IGraphArea
     {
         /// <summary>
-        /// Position
+        /// Center
         /// </summary>
-        Vector3 Position { get; set; }
+        Vector3 Center { get; set; }
         /// <summary>
         /// Radius
         /// </summary>

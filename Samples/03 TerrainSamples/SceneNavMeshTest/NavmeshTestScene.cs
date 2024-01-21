@@ -375,7 +375,6 @@ namespace TerrainSamples.SceneNavmeshTest
             DrawGraphNodes(agent);
 
             obstacles.Clear();
-            areas.Clear();
             DrawMarkers();
 
             gameReady = true;
@@ -1002,15 +1001,9 @@ namespace TerrainSamples.SceneNavmeshTest
             }
 
             var center = r.PickingResult.Position;
-            float radius = 5f;
-            var circle = Line3D.CreateCircle(center, radius, 12);
-            int id = PathFinderDescription.Input.AddArea(new GraphArea()
-            {
-                AreaType = GraphAreaTypes.Walkable,
-                Vertices = circle.Select(c => c.Point1),
-                MinHeight = center.Y - 0.5f,
-                MaxHeight = center.Y + 0.5f,
-            });
+            float radius = 2.5f;
+            var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
+            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, center.Y - 0.5f, center.Y + 0.5f) { AreaType = GraphAreaTypes.Walkable, });
             var area = new AreaMarker()
             {
                 Id = id,
@@ -1019,6 +1012,7 @@ namespace TerrainSamples.SceneNavmeshTest
             };
             areas.Add(area);
             DrawMarkers();
+            EnqueueGraph();
 
             EndAddAreaState();
         }
@@ -1044,6 +1038,7 @@ namespace TerrainSamples.SceneNavmeshTest
                 PathFinderDescription.Input.RemoveArea(area.Id);
                 areas.Remove(area);
                 DrawMarkers();
+                EnqueueGraph();
 
                 EndAddAreaState();
                 break;

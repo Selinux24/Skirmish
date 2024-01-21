@@ -1945,20 +1945,21 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
         {
-            float[] dir = new float[stackCount * 2];
-
-            for (int i = 0; i < stackCount; ++i)
+            if (stackCount < 3)
             {
-                float a = i / (float)stackCount * MathUtil.TwoPi;
-                dir[i * 2 + 0] = (float)Math.Cos(a);
-                dir[i * 2 + 1] = (float)Math.Sin(a);
+                throw new ArgumentOutOfRangeException(nameof(stackCount));
             }
 
             var verts = new List<Vector3>();
 
             for (int i = 0; i < stackCount; i++)
             {
-                verts.Add(new Vector3(center.X + dir[i * 2 + 0] * radius, center.Y, center.Z + dir[i * 2 + 1] * radius));
+                float a = i / (float)stackCount * MathUtil.TwoPi;
+                float x = (float)Math.Cos(a) * radius;
+                float z = (float)Math.Sin(a) * radius;
+                Vector3 v = new(x, 0, z);
+
+                verts.Add(v + center);
             }
 
             if (topology == Topology.LineList)
@@ -1981,11 +1982,11 @@ namespace Engine.Common
             {
                 var indexList = new List<uint>();
 
-                for (int i = 1; i < stackCount - 1; i++)
+                for (int i = 0; i < stackCount - 2; i++)
                 {
                     indexList.Add(0);
+                    indexList.Add((uint)i + 2);
                     indexList.Add((uint)i + 1);
-                    indexList.Add((uint)i);
                 }
 
                 return new GeometryDescriptor()
@@ -2010,10 +2011,10 @@ namespace Engine.Common
         {
             Vector3[] vertices = new Vector3[]
             {
-                new Vector3(-size*0.5f, +height, -size*0.5f),
-                new Vector3(-size*0.5f, +height, +size*0.5f),
-                new Vector3(+size*0.5f, +height, -size*0.5f),
-                new Vector3(+size*0.5f, +height, +size*0.5f),
+                new (-size*0.5f, +height, -size*0.5f),
+                new (-size*0.5f, +height, +size*0.5f),
+                new (+size*0.5f, +height, -size*0.5f),
+                new (+size*0.5f, +height, +size*0.5f),
             };
 
             Vector3[] normals = new Vector3[]
@@ -2026,10 +2027,10 @@ namespace Engine.Common
 
             Vector2[] uvs = new Vector2[]
             {
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, size),
-                new Vector2(size, 0.0f),
-                new Vector2(size, size),
+                new (0.0f, 0.0f),
+                new (0.0f, size),
+                new (size, 0.0f),
+                new (size, size),
             };
 
             uint[] indices = new uint[]

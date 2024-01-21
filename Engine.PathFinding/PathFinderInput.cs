@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
@@ -100,24 +99,6 @@ namespace Engine.PathFinding
             areas.Add(graphArea);
 
             return graphArea.Id;
-        }
-        /// <summary>
-        /// Adds a new area to input
-        /// </summary>
-        /// <param name="verts">Area polygon vertices</param>
-        /// <param name="minh">Minimum height</param>
-        /// <param name="maxh">Maximum height</param>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns the area id</returns>
-        public int AddArea(IEnumerable<Vector3> verts, float minh, float maxh, GraphAreaTypes area)
-        {
-            return AddArea(new GraphArea
-            {
-                Vertices = verts?.ToArray(),
-                MinHeight = minh,
-                MaxHeight = maxh,
-                AreaType = area,
-            });
         }
         /// <summary>
         /// Gets an area by id

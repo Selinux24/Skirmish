@@ -642,7 +642,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 else if (vol is IGraphAreaCylinder cylinderArea)
                 {
                     MarkCylinderArea(
-                        cylinderArea.Position,
+                        cylinderArea.Center,
                         cylinderArea.Radius,
                         cylinderArea.Height,
                         (AreaTypes)cylinderArea.AreaType);
