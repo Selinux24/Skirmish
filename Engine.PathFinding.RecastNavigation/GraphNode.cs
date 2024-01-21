@@ -80,7 +80,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var tris = tile.GetDetailTris(p);
 
-                nodes.Add(new GraphNode()
+                nodes.Add(new()
                 {
                     Triangles = tris.ToArray(),
                     TotalCost = 1,
@@ -163,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int tileNum = mesh.DecodePolyIdTile(bse);
                 var tileColor = Helper.IntToCol(tileNum, 128);
 
-                return new GraphNode()
+                return new()
                 {
                     Triangles = tris,
                     TotalCost = 1,

@@ -91,6 +91,19 @@ namespace Engine.PathFinding
         /// <summary>
         /// Adds a new area to input
         /// </summary>
+        /// <param name="graphArea">Area</param>
+        /// <returns>Returns the area id</returns>
+        public int AddArea(IGraphArea graphArea)
+        {
+            if (areas.Count >= MaxAreas) return -1;
+
+            areas.Add(graphArea);
+
+            return graphArea.Id;
+        }
+        /// <summary>
+        /// Adds a new area to input
+        /// </summary>
         /// <param name="verts">Area polygon vertices</param>
         /// <param name="minh">Minimum height</param>
         /// <param name="maxh">Maximum height</param>
@@ -98,19 +111,13 @@ namespace Engine.PathFinding
         /// <returns>Returns the area id</returns>
         public int AddArea(IEnumerable<Vector3> verts, float minh, float maxh, GraphAreaTypes area)
         {
-            if (areas.Count >= MaxAreas) return -1;
-
-            var graphArea = new GraphArea
+            return AddArea(new GraphArea
             {
                 Vertices = verts?.ToArray(),
                 MinHeight = minh,
                 MaxHeight = maxh,
                 AreaType = area,
-            };
-
-            areas.Add(graphArea);
-
-            return graphArea.Id;
+            });
         }
         /// <summary>
         /// Gets an area by id
@@ -122,10 +129,10 @@ namespace Engine.PathFinding
             return areas.Find(a => a.Id == id);
         }
         /// <summary>
-        /// Deletes area by id
+        /// Removes area by id
         /// </summary>
         /// <param name="id">Area id</param>
-        public void DeleteArea(int id)
+        public void RemoveArea(int id)
         {
             areas.RemoveAll(a => a.Id == id);
         }

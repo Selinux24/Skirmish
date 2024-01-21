@@ -1925,6 +1925,82 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount)
+        {
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount);
+        }
+        /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
+        {
+            float[] dir = new float[stackCount * 2];
+
+            for (int i = 0; i < stackCount; ++i)
+            {
+                float a = i / (float)stackCount * MathUtil.TwoPi;
+                dir[i * 2 + 0] = (float)Math.Cos(a);
+                dir[i * 2 + 1] = (float)Math.Sin(a);
+            }
+
+            var verts = new List<Vector3>();
+
+            for (int i = 0; i < stackCount; i++)
+            {
+                verts.Add(new Vector3(center.X + dir[i * 2 + 0] * radius, center.Y, center.Z + dir[i * 2 + 1] * radius));
+            }
+
+            if (topology == Topology.LineList)
+            {
+                var indexList = new List<uint>();
+
+                for (int i = 0, j = stackCount - 1; i < stackCount; j = i++)
+                {
+                    indexList.Add((uint)i);
+                    indexList.Add((uint)j);
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Indices = indexList,
+                };
+            }
+            else if (topology == Topology.TriangleList)
+            {
+                var indexList = new List<uint>();
+
+                for (int i = 1; i < stackCount - 1; i++)
+                {
+                    indexList.Add(0);
+                    indexList.Add((uint)i + 1);
+                    indexList.Add((uint)i);
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Indices = indexList,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
         /// Creates a XZ plane
         /// </summary>
         /// <param name="size">Plane size</param>

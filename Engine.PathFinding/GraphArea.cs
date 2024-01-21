@@ -26,25 +26,15 @@ namespace Engine.PathFinding
         /// </summary>
         public const int MaxPoints = 12;
 
-        /// <summary>
-        /// Area id
-        /// </summary>
+        /// <inheritdoc/>
         public int Id { get; private set; }
-        /// <summary>
-        /// Vertices (convex polygon)
-        /// </summary>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> Vertices { get; set; }
-        /// <summary>
-        /// Minimum height
-        /// </summary>
+        /// <inheritdoc/>
         public float MinHeight { get; set; }
-        /// <summary>
-        /// Maximum height
-        /// </summary>
+        /// <inheritdoc/>
         public float MaxHeight { get; set; }
-        /// <summary>
-        /// Area type
-        /// </summary>
+        /// <inheritdoc/>
         public GraphAreaTypes AreaType { get; set; }
 
         /// <summary>

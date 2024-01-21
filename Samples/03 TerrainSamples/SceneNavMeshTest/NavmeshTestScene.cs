@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
@@ -7,6 +8,7 @@ using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,12 +55,14 @@ namespace TerrainSamples.SceneNavmeshTest
 
         private UIPanel mainPanel = null;
         private UIButton btnObstacle = null;
+        private UIButton btnArea = null;
 
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
+        private PrimitiveListDrawer<Triangle> markDrawer = null;
 
         private Model inputGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
@@ -78,6 +82,9 @@ namespace TerrainSamples.SceneNavmeshTest
             PathFinding,
         }
         private States gameState = States.Default;
+
+        private readonly List<ObstacleMarker> obstacles = new();
+        private readonly List<AreaMarker> areas = new();
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -164,12 +171,13 @@ namespace TerrainSamples.SceneNavmeshTest
             emptyDesc.BaseColor = new Color4(sceneButtonColor.RGB(), 0.5f);
 
             btnObstacle = await InitializeButton(nameof(btnObstacle), "Obstacles", btnDesc);
+            btnArea = await InitializeButton(nameof(btnArea), "Areas", btnDesc);
 
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", "Empty", emptyDesc), false);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty2", "Empty", emptyDesc), false);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", "Empty", emptyDesc), false);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", "Empty", emptyDesc), false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", "Empty", emptyDesc), false);
+            mainPanel.AddChild(btnArea, false);
             mainPanel.AddChild(btnObstacle, false);
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
@@ -332,6 +340,12 @@ namespace TerrainSamples.SceneNavmeshTest
                 Count = 10000
             };
             volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+
+            var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = 50000,
+            };
+            markDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
         }
         private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
@@ -359,6 +373,10 @@ namespace TerrainSamples.SceneNavmeshTest
             mainPanel.Visible = true;
 
             DrawGraphNodes(agent);
+
+            obstacles.Clear();
+            areas.Clear();
+            DrawMarkers();
 
             gameReady = true;
         }
@@ -713,6 +731,24 @@ namespace TerrainSamples.SceneNavmeshTest
                 }
             }
         }
+        private void DrawMarkers()
+        {
+            markDrawer.Clear();
+
+            var obsColor = new Color4(Color.Yellow.RGB(), 0.2f);
+
+            foreach (var obs in obstacles)
+            {
+                markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, obs.Obstacle, 12));
+            }
+
+            foreach (var area in areas)
+            {
+                var g = GeometryUtil.CreateCircle(Topology.TriangleList, area.Center, area.Radius, 12);
+
+                markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
+            }
+        }
 
         private void EnqueueGraph()
         {
@@ -796,6 +832,7 @@ namespace TerrainSamples.SceneNavmeshTest
             await Task.Delay(100);
 
             if (sender == btnObstacle) StartAddObstacleState();
+            if (sender == btnArea) StartAddAreaState();
         }
         private void StartAddObstacleState()
         {
@@ -817,9 +854,33 @@ namespace TerrainSamples.SceneNavmeshTest
 
             ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
         }
+        private void StartAddAreaState()
+        {
+            if (gameState != States.Default)
+            {
+                return;
+            }
+
+            gameState = States.AddArea;
+
+            mainPanel.Visible = false;
+
+            ShowMessage($"Press {GContacPoint} to add area. SHIFT {GContacPoint} to remove.");
+        }
         private void EndAddObstacleState()
         {
             if (gameState != States.AddObstacle)
+            {
+                return;
+            }
+
+            gameState = States.Default;
+
+            mainPanel.Visible = true;
+        }
+        private void EndAddAreaState()
+        {
+            if (gameState != States.AddArea)
             {
                 return;
             }
@@ -840,6 +901,12 @@ namespace TerrainSamples.SceneNavmeshTest
             if (gameState == States.AddObstacle)
             {
                 UpdateGameStateAddObstacle();
+                return;
+            }
+
+            if (gameState == States.AddArea)
+            {
+                UpdateGameStateAddArea();
             }
         }
         private void UpdateGameStateDefault()
@@ -849,19 +916,137 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void UpdateGameStateAddObstacle()
         {
-            if (GContacPoint.JustReleased)
+            if (!GContacPoint.JustReleased)
             {
-                var pRay = GetPickingRay(PickingHullTypes.Perfect);
-                if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateObstacleRemove();
+            }
+            else
+            {
+                UpdateObstacleAdd();
+            }
+        }
+        private void UpdateObstacleAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            var p = r.PickingResult.Position;
+            float h = 1f;
+            var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
+            var cy = new BoundingCylinder(center, 0.5f, h);
+            int id = NavigationGraph.AddObstacle(cy);
+            var obs = new ObstacleMarker()
+            {
+                Id = id,
+                Obstacle = cy,
+            };
+            obstacles.Add(obs);
+            DrawMarkers();
+
+            NavigationGraph.UpdateAt(p);
+
+            EndAddObstacleState();
+        }
+        private void UpdateObstacleRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var obs in obstacles)
+            {
+                if (obs.Bbox.Intersects(ref ray))
                 {
-                    return;
+                    NavigationGraph.RemoveObstacle(obs.Id);
+                    obstacles.Remove(obs);
+                    DrawMarkers();
+
+                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
+
+                    EndAddObstacleState();
+                    break;
+                }
+            }
+        }
+        private void UpdateGameStateAddArea()
+        {
+            if (!GContacPoint.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateAreaRemove();
+            }
+            else
+            {
+                UpdateAreaAdd();
+            }
+        }
+        private void UpdateAreaAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            var center = r.PickingResult.Position;
+            float radius = 5f;
+            var circle = Line3D.CreateCircle(center, radius, 12);
+            int id = PathFinderDescription.Input.AddArea(new GraphArea()
+            {
+                AreaType = GraphAreaTypes.Walkable,
+                Vertices = circle.Select(c => c.Point1),
+                MinHeight = center.Y - 0.5f,
+                MaxHeight = center.Y + 0.5f,
+            });
+            var area = new AreaMarker()
+            {
+                Id = id,
+                Center = center,
+                Radius = radius,
+            };
+            areas.Add(area);
+            DrawMarkers();
+
+            EndAddAreaState();
+        }
+        private void UpdateAreaRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var area in areas)
+            {
+                var center = area.Center;
+                var radius = area.Radius;
+                var plane = new Plane(center, Vector3.Up);
+                if (!plane.Intersects(ref ray, out Vector3 p))
+                {
+                    continue;
+                }
+                if (Vector3.Distance(p, center) > radius)
+                {
+                    continue;
                 }
 
-                var p = r.PickingResult.Position;
-                NavigationGraph.AddObstacle(new BoundingCylinder(p, 0.5f, 1));
-                NavigationGraph.UpdateAt(p);
+                PathFinderDescription.Input.RemoveArea(area.Id);
+                areas.Remove(area);
+                DrawMarkers();
 
-                EndAddObstacleState();
+                EndAddAreaState();
+                break;
             }
         }
 
@@ -885,5 +1070,27 @@ namespace TerrainSamples.SceneNavmeshTest
             mainPanel.Top = panel.Top + panel.Height;
             mainPanel.Anchor = Anchors.Right;
         }
+    }
+
+    struct ObstacleMarker
+    {
+        public int Id { get; set; }
+        public BoundingCylinder Obstacle { get; set; }
+        public readonly BoundingBox Bbox
+        {
+            get
+            {
+                var center = Obstacle.Center;
+                var extents = new Vector3(Obstacle.Radius, Obstacle.Height * 0.5f, Obstacle.Radius);
+                return new(-extents + center, extents + center);
+            }
+        }
+    }
+
+    struct AreaMarker
+    {
+        public int Id { get; set; }
+        public Vector3 Center { get; set; }
+        public float Radius { get; set; }
     }
 }

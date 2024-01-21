@@ -15,7 +15,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
         /// </summary>
-        public const int EXPECTED_LAYERS_PER_TILE = 4;
+        const int EXPECTED_LAYERS_PER_TILE = 4;
 
         /// <summary>
         /// Calculates the grid size
@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="cellSize">Cell size</param>
         /// <param name="width">Resulting width</param>
         /// <param name="height">Resulting height</param>
-        public static void CalcGridSize(BoundingBox bounds, float cellSize, out int width, out int height)
+        private static void CalcGridSize(BoundingBox bounds, float cellSize, out int width, out int height)
         {
             width = (int)((bounds.Maximum.X - bounds.Minimum.X) / cellSize + 0.5f);
             height = (int)((bounds.Maximum.Z - bounds.Minimum.Z) / cellSize + 0.5f);
