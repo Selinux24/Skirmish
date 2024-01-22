@@ -673,9 +673,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             min.X = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
             min.Y = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
             min.Z = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            max.X = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            max.Y = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            max.Z = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+            max.X = (int)((bmax.X - BoundingBox.Maximum.X) / CellSize);
+            max.Y = (int)((bmax.Y - BoundingBox.Maximum.Y) / CellHeight);
+            max.Z = (int)((bmax.Z - BoundingBox.Maximum.Z) / CellSize);
 
             if (max.X < 0) return;
             if (min.X >= Width) return;
@@ -731,10 +731,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             Utils.GetPolygonBounds(polygon, out var bmin, out var bmax);
             bmin.Y = hmin;
             bmax.Y = hmax;
+            var bbox = new BoundingBox(bmin, bmax);
+
+            float tw = Width * CellSize;
+            float th = Height * CellSize;
+            int tx0 = (int)Math.Floor(bbox.Minimum.X / tw);
+            int tx1 = (int)Math.Floor(bbox.Maximum.X / tw);
+            int ty0 = (int)Math.Floor(bbox.Minimum.Z / th);
+            int ty1 = (int)Math.Floor(bbox.Maximum.Z / th);
 
             GetAreaBounds(bmin, bmax, out var min, out var max);
 
-            foreach (var (x, z, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
+            foreach (var (x, z, i, _) in IterateCellsBounds(tx0, ty0, tx1, ty1))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -742,7 +750,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var sy = Spans[i].Y;
-                if (sy < min.Y || sy > max.Y)
+                if (sy < ty0 || sy > ty1)
                 {
                     continue;
                 }
