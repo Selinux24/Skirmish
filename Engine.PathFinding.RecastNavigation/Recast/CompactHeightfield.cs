@@ -673,9 +673,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             min.X = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
             min.Y = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
             min.Z = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            max.X = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
-            max.Y = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
-            max.Z = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
+            max.X = (int)((bmax.X - BoundingBox.Maximum.X) / CellSize);
+            max.Y = (int)((bmax.Y - BoundingBox.Maximum.Y) / CellHeight);
+            max.Z = (int)((bmax.Z - BoundingBox.Maximum.Z) / CellSize);
 
             if (max.X < 0) return;
             if (min.X >= Width) return;

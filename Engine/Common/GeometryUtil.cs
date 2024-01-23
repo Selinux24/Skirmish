@@ -1982,11 +1982,11 @@ namespace Engine.Common
             {
                 var indexList = new List<uint>();
 
-                for (int i = 0; i < stackCount - 2; i++)
+                for (int i = 2; i < stackCount; i++)
                 {
                     indexList.Add(0);
-                    indexList.Add((uint)i + 2);
-                    indexList.Add((uint)i + 1);
+                    indexList.Add((uint)i);
+                    indexList.Add((uint)i - 1);
                 }
 
                 return new GeometryDescriptor()
