@@ -142,17 +142,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Enumerates the specified compact cell list
         /// </summary>
         /// <returns>Returns each compact cell to evaulate</returns>
-        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCells()
+        private IEnumerable<(int Column, int Row, int SpanIndex, CompactCell Cell)> IterateCells()
         {
-            for (int y = 0; y < Height; ++y)
+            for (int row = 0; row < Height; ++row)
             {
-                for (int x = 0; x < Width; ++x)
+                for (int col = 0; col < Width; ++col)
                 {
-                    var c = Cells[x + y * Width];
+                    var cell = Cells[col + row * Width];
 
-                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+                    for (int spanIndex = cell.Index, neiIndex = cell.Index + cell.Count; spanIndex < neiIndex; ++spanIndex)
                     {
-                        yield return (x, y, i, c);
+                        yield return (col, row, spanIndex, cell);
                     }
                 }
             }
@@ -574,8 +574,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int dir = 0; dir < 4; dir++)
             {
                 s.Disconnect(dir);
-                int nx = x + Utils.GetDirOffsetX(dir);
-                int ny = y + Utils.GetDirOffsetY(dir);
+                int nx = x + GridUtils.GetDirOffsetX(dir);
+                int ny = y + GridUtils.GetDirOffsetY(dir);
 
                 // First check that the neighbour cell is in bounds.
                 if (nx < 0 || ny < 0 || nx >= Width || ny >= Height)
@@ -830,7 +830,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         nei[dir * 2 + 0] = area;
                     }
 
-                    int dir2 = Utils.RotateCW(dir);
+                    int dir2 = GridUtils.RotateCW(dir);
                     if (!a.GetCon(dir2, out int con2))
                     {
                         continue;
@@ -1025,7 +1025,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var s = Spans[i];
             int ch = s.Y;
-            int dirp = Utils.RotateCW(dir);
+            int dirp = GridUtils.RotateCW(dir);
             int conp;
 
             int[] regs = { 0, 0, 0, 0 };
@@ -1079,9 +1079,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int j = 0; j < 4; ++j)
             {
                 int a = j;
-                int b = Utils.Rotate(j, 1);
-                int c = Utils.Rotate(j, 2);
-                int d = Utils.Rotate(j, 3);
+                int b = GridUtils.Rotate(j, 1);
+                int c = GridUtils.Rotate(j, 2);
+                int d = GridUtils.Rotate(j, 3);
 
                 // The vertex is a border vertex there are two same exterior cells in a row,
                 // followed by two interior cells and none of the regions are out of bounds.
@@ -1229,8 +1229,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var cs = Spans[c.I];
                 foreach (var (dir, con) in cs.IterateSpanConnections())
                 {
-                    int ax = c.X + Utils.GetDirOffsetX(dir);
-                    int ay = c.Y + Utils.GetDirOffsetY(dir);
+                    int ax = c.X + GridUtils.GetDirOffsetX(dir);
+                    int ay = c.Y + GridUtils.GetDirOffsetY(dir);
                     int hx = ax - hp.Bounds.X - BorderSize;
                     int hy = ay - hp.Bounds.Y - BorderSize;
 
@@ -1620,11 +1620,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int directDir;
                 if (hdItem.X == centerX)
                 {
-                    directDir = Utils.GetDirForOffset(0, centerY > hdItem.Y ? 1 : -1);
+                    directDir = GridUtils.GetDirForOffset(0, centerY > hdItem.Y ? 1 : -1);
                 }
                 else
                 {
-                    directDir = Utils.GetDirForOffset(centerX > hdItem.X ? 1 : -1, 0);
+                    directDir = GridUtils.GetDirForOffset(centerX > hdItem.X ? 1 : -1, 0);
                 }
 
                 // Push the direct dir last so we start with this on next iteration
@@ -1670,8 +1670,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                int newX = hdItem.X + Utils.GetDirOffsetX(dir);
-                int newY = hdItem.Y + Utils.GetDirOffsetY(dir);
+                int newX = hdItem.X + GridUtils.GetDirOffsetX(dir);
+                int newY = hdItem.Y + GridUtils.GetDirOffsetY(dir);
 
                 int hpx = newX - bounds.X;
                 int hpy = newY - bounds.Y;
@@ -2079,7 +2079,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var a = item.s;
 
-                int dir2 = Utils.RotateCW(item.dir);
+                int dir2 = GridUtils.RotateCW(item.dir);
                 if (!a.GetCon(dir2, out int con2))
                 {
                     continue;
@@ -2487,7 +2487,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     d += src[ai];
 
                     var a = Spans[ai];
-                    int dir2 = Utils.RotateCW(dir);
+                    int dir2 = GridUtils.RotateCW(dir);
                     if (!a.GetCon(dir2, out int con2))
                     {
                         d += cd;
@@ -2729,7 +2729,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Find region neighbours and overlapping regions.
             var regs = new List<int>(32);
-            foreach (var (x, y) in Helper.IterateGrid(Width, Height))
+            foreach (var (x, y) in GridUtils.Iterate(Width, Height))
             {
                 regs.Clear();
 
@@ -2963,7 +2963,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     r = srcReg[ai];
                 }
 
-                iterDir = Utils.RotateCW(iterDir);  // Rotate CW
+                iterDir = GridUtils.RotateCW(iterDir);  // Rotate CW
 
                 return (true, r);
             }
@@ -2980,7 +2980,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 row = ay;
                 iterIdx = ai;
 
-                iterDir = Utils.RotateCCW(iterDir);  // Rotate CCW
+                iterDir = GridUtils.RotateCCW(iterDir);  // Rotate CCW
 
                 return (true, -1);
             }
@@ -3022,7 +3022,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                     flags[iterIdx] &= ~(1 << iterDir); // Remove visited edges
 
-                    iterDir = Utils.RotateCW(iterDir);  // Rotate CW
+                    iterDir = GridUtils.RotateCW(iterDir);  // Rotate CW
                 }
                 else
                 {
@@ -3038,7 +3038,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     row = ny;
                     iterIdx = ni;
 
-                    iterDir = Utils.RotateCCW(iterDir);  // Rotate CCW
+                    iterDir = GridUtils.RotateCCW(iterDir);  // Rotate CCW
                 }
 
                 if (startIdx == iterIdx && startDir == iterDir)
@@ -3116,8 +3116,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="ay">Neighbour cell y coordinate</param>
         public int GetNeighbourCellIndex(int col, int row, int dir, int con, out int ax, out int ay)
         {
-            ax = col + Utils.GetDirOffsetX(dir);
-            ay = row + Utils.GetDirOffsetY(dir);
+            ax = col + GridUtils.GetDirOffsetX(dir);
+            ay = row + GridUtils.GetDirOffsetY(dir);
             return Cells[ax + ay * Width].Index + con;
         }
         /// <summary>
@@ -3142,8 +3142,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="ay">Neighbour cell y coordinate</param>
         public int GetNeighbourCellIndex(CompactSpan s, int col, int row, int dir, out int ax, out int ay)
         {
-            ax = col + Utils.GetDirOffsetX(dir);
-            ay = row + Utils.GetDirOffsetY(dir);
+            ax = col + GridUtils.GetDirOffsetX(dir);
+            ay = row + GridUtils.GetDirOffsetY(dir);
 
             if (s.GetCon(dir, out int con))
             {

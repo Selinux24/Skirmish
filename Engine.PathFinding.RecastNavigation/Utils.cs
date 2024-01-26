@@ -10,55 +10,11 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     static class Utils
     {
+        static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
+
         const uint HDX = 0x8da6b343;
         const uint HDY = 0xd8163841;
         const uint HDZ = 0xcb1ab31f;
-        static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
-        static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
-        static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
-        static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
-
-        public static int GetDirOffsetX(int dir)
-        {
-            return OffsetsX[dir & 3];
-        }
-        public static int GetDirOffsetY(int dir)
-        {
-            return OffsetsY[dir & 3];
-        }
-        public static int GetDirForOffset(int x, int y)
-        {
-            return OffsetsDir[((y + 1) << 1) + x];
-        }
-        public static int Rotate(int dir, int amount)
-        {
-            return (dir + amount) & 3;
-        }
-        public static int RotateCW(int dir)
-        {
-            return (dir + 1) & 3;
-        }
-        public static int RotateCCW(int dir)
-        {
-            return (dir + 3) & 3;
-        }
-
-        public static float GetJitterX(int i)
-        {
-            return GetJitter(i, HDX);
-        }
-        public static float GetJitterY(int i)
-        {
-            return GetJitter(i, HDY);
-        }
-        public static float GetJitterZ(int i)
-        {
-            return GetJitter(i, HDZ);
-        }
-        public static float GetJitter(int i, uint v)
-        {
-            return (((i * v) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
 
         /// <summary>
         /// Computes a tile hash
@@ -92,113 +48,21 @@ namespace Engine.PathFinding.RecastNavigation
             return (int)(n & mask);
         }
 
-        /// <summary>
-        /// Gets the next index value in a fixed length array
-        /// </summary>
-        /// <param name="i">Current index</param>
-        /// <param name="length">Array length</param>
-        /// <returns>Returns the next index</returns>
-        public static int Next(int i, int length)
+        public static float GetJitterX(int i)
         {
-            return i + 1 < length ? i + 1 : 0;
+            return GetJitter(i, HDX);
         }
-        /// <summary>
-        /// Gets the previous index value in a fixed length array
-        /// </summary>
-        /// <param name="i">Current index</param>
-        /// <param name="length">Array length</param>
-        /// <returns>Returns the previous index</returns>
-        public static int Prev(int i, int length)
+        public static float GetJitterY(int i)
         {
-            return i - 1 >= 0 ? i - 1 : length - 1;
+            return GetJitter(i, HDY);
         }
-        /// <summary>
-        /// Pushes the specified item in front of the array
-        /// </summary>
-        /// <typeparam name="T">Type of item</typeparam>
-        /// <param name="v">Item</param>
-        /// <param name="arr">Array</param>
-        /// <param name="an">Array size</param>
-        public static void PushFront<T>(T v, T[] arr, ref int an)
+        public static float GetJitterZ(int i)
         {
-            an++;
-            for (int i = an - 1; i > 0; --i)
-            {
-                arr[i] = arr[i - 1];
-            }
-            arr[0] = v;
+            return GetJitter(i, HDZ);
         }
-        /// <summary>
-        /// Pushes the specified item int the array's back position
-        /// </summary>
-        /// <typeparam name="T">Type of item</typeparam>
-        /// <param name="v">Item</param>
-        /// <param name="arr">Array</param>
-        /// <param name="an">Array size</param>
-        public static void PushBack<T>(T v, T[] arr, ref int an)
+        public static float GetJitter(int i, uint v)
         {
-            arr[an] = v;
-            an++;
-        }
-        /// <summary>
-        /// Removes n items from index position in the specified array
-        /// </summary>
-        /// <param name="arr">Array</param>
-        /// <param name="index">Start position</param>
-        /// <param name="n">Number of items</param>
-        /// <returns>Returns the resulting array</returns>
-        public static T[] RemoveRange<T>(T[] arr, int index, int n)
-        {
-            //Copy array
-            var res = arr.ToArray();
-
-            for (int i = index; i < n; i++)
-            {
-                res[i] = res[i + 1];
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Resets the array values
-        /// </summary>
-        /// <typeparam name="T">Type of array</typeparam>
-        /// <param name="array">Array to reset</param>
-        /// <param name="count">Number of items to reset in the array</param>
-        /// <param name="value">Value to set</param>
-        public static void ResetArray<T>(T[] array, int count, T value)
-        {
-            ResetArray(array, 0, count, value);
-        }
-        /// <summary>
-        /// Resets the array values
-        /// </summary>
-        /// <typeparam name="T">Type of array</typeparam>
-        /// <param name="array">Array to reset</param>
-        /// <param name="start">Start index</param>
-        /// <param name="count">Number of items to reset in the array</param>
-        /// <param name="value">Value to set</param>
-        public static void ResetArray<T>(T[] array, int start, int count, T value)
-        {
-            if (count <= 0)
-            {
-                return;
-            }
-
-            if (array?.Any() != true)
-            {
-                return;
-            }
-
-            if (array.Length > start + count)
-            {
-                return;
-            }
-
-            for (int i = start; i < count; i++)
-            {
-                array[i] = value;
-            }
+            return (((i * v) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
 
         /// <summary>
@@ -549,6 +413,40 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
+        private static bool EvaluateSegment(int index, float n, float d, ref float tmin, ref float tmax, ref int segMin, ref int segMax)
+        {
+            float t = n / d;
+            if (d < 0)
+            {
+                // segment S is entering across this edge
+                if (t > tmin)
+                {
+                    tmin = t;
+                    segMin = index;
+                    // S enters after leaving polygon
+                    if (tmin > tmax)
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                // segment S is leaving across this edge
+                if (t < tmax)
+                {
+                    tmax = t;
+                    segMax = index;
+                    // S leaves before entering polygon
+                    if (tmax < tmin)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
         /// <summary>
         /// Gets whether the specified segments (a,b) and (c,d) intersects
         /// </summary>
@@ -599,6 +497,13 @@ namespace Engine.PathFinding.RecastNavigation
                 rmax = Math.Max(rmax, d);
             }
         }
+        /// <summary>
+        /// Gets the area between the specified points in the XZ plane
+        /// </summary>
+        /// <param name="p1">Point 1</param>
+        /// <param name="p2">Point 2</param>
+        /// <param name="p3">Point 3</param>
+        /// <returns>Returns the value of the area between the specified points in the XZ plane</returns>
         public static float VCross2D(Vector3 p1, Vector3 p2, Vector3 p3)
         {
             float u1 = p2.X - p1.X;
@@ -607,7 +512,13 @@ namespace Engine.PathFinding.RecastNavigation
             float v2 = p3.Z - p1.Z;
             return u1 * v2 - v1 * u2;
         }
-        public static float VPerp2D(Vector3 u, Vector3 v)
+        /// <summary>
+        /// Gets the Z magnitude of the cross product between the specified vectors, in the XZ plane
+        /// </summary>
+        /// <param name="u">U vector</param>
+        /// <param name="v">V vector</param>
+        /// <returns>Returns the Z magnitude of the cross product between the specified vectors, in the XZ plane</returns>
+        private static float VPerp2D(Vector3 u, Vector3 v)
         {
             return u.Z * v.X - u.X * v.Z;
         }
@@ -777,40 +688,6 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return Vector3.DistanceSquared(a, b) < EqualityTHR;
         }
-        private static bool EvaluateSegment(int index, float n, float d, ref float tmin, ref float tmax, ref int segMin, ref int segMax)
-        {
-            float t = n / d;
-            if (d < 0)
-            {
-                // segment S is entering across this edge
-                if (t > tmin)
-                {
-                    tmin = t;
-                    segMin = index;
-                    // S enters after leaving polygon
-                    if (tmin > tmax)
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                // segment S is leaving across this edge
-                if (t < tmax)
-                {
-                    tmax = t;
-                    segMax = index;
-                    // S leaves before entering polygon
-                    if (tmax < tmin)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
         /// <summary>
         /// Gets the longest axis
         /// </summary>
@@ -832,10 +709,25 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return axis;
         }
+        /// <summary>
+        /// Gets the linear interpolation of t between t0 and t1
+        /// </summary>
+        /// <param name="t">Value to interpolate</param>
+        /// <param name="t0">Minimum value</param>
+        /// <param name="t1">Maximum value</param>
+        /// <returns>Returns a value between 0 and 1</returns>
         public static float Tween(float t, float t0, float t1)
         {
             return MathUtil.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
         }
+        /// <summary>
+        /// Gets whether the point b is into the cylinder defined by the a vector, and the specified radius and height
+        /// </summary>
+        /// <param name="a">A vector</param>
+        /// <param name="b">B vector</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns true if the point b is into the cylinder defined by the a vector, and the specified radius and height</returns>
         public static bool InRange(Vector3 a, Vector3 b, float radius, float height)
         {
             float dx = b.X - a.X;

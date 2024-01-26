@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
             {
-                int k1 = Utils.Next(k, n);
+                int k1 = ArrayUtils.Next(k, n);
 
                 // Skip edges incident to i.
                 if (i == k || i == k1)

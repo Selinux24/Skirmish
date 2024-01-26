@@ -88,7 +88,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             for (int row = 0; row < h; ++row)
             {
-                Utils.ResetArray(samples, nregs, 0);
+                ArrayUtils.ResetArray(samples, nregs, 0);
                 int sweepCount = 0;
 
                 for (int col = 0; col < w; ++col)
@@ -443,15 +443,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         return false;
                     }
 
-                    ndir = Utils.RotateCW(dir);  // Rotate CW
+                    ndir = GridUtils.RotateCW(dir);  // Rotate CW
                 }
                 else
                 {
                     // Move to next.
-                    nCol = col + Utils.GetDirOffsetX(dir);
-                    nRow = row + Utils.GetDirOffsetY(dir);
+                    nCol = col + GridUtils.GetDirOffsetX(dir);
+                    nRow = row + GridUtils.GetDirOffsetY(dir);
 
-                    ndir = Utils.RotateCCW(dir); // Rotate CCW
+                    ndir = GridUtils.RotateCCW(dir); // Rotate CCW
                 }
 
                 if (iter > 0 && col == startCol && row == startRow && dir == startDir)
@@ -484,7 +484,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             for (int i = 0; i < 4; ++i)
             {
-                int dr = Utils.RotateCCW(i);
+                int dr = GridUtils.RotateCCW(i);
                 int rn = GetNeighbourRegionId(col, row, dr);
                 if (rn != idReg)
                 {
@@ -542,8 +542,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return NULL_ID;
             }
 
-            int bx = col + Utils.GetDirOffsetX(dir);
-            int by = row + Utils.GetDirOffsetY(dir);
+            int bx = col + GridUtils.GetDirOffsetX(dir);
+            int by = row + GridUtils.GetDirOffsetY(dir);
             int ib = bx + by * w;
 
             return Regs[ib];

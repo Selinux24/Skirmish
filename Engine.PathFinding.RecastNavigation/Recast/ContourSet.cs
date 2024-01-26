@@ -483,7 +483,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int npts = simplified.Count;
             for (int i = 0; i < npts; ++i)
             {
-                int ni = Utils.Next(i, npts);
+                int ni = ArrayUtils.Next(i, npts);
 
                 if (!Utils.VEqual2D(simplified[i].Coords, simplified[ni].Coords))
                 {

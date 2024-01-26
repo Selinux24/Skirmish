@@ -442,8 +442,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int nhole = 0;
             int nharea = 0;
 
-            Utils.PushBack(edges[0].EdgeIndexA, hole, ref nhole);
-            Utils.PushBack(edges[0].Area, harea, ref nharea);
+            ArrayUtils.PushBack(edges[0].EdgeIndexA, hole, ref nhole);
+            ArrayUtils.PushBack(edges[0].Area, harea, ref nharea);
 
             while (nedges != 0)
             {
@@ -499,8 +499,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     {
                         return false;
                     }
-                    Utils.PushFront(ea, hole, ref nhole);
-                    Utils.PushFront(a, harea, ref nharea);
+                    ArrayUtils.PushFront(ea, hole, ref nhole);
+                    ArrayUtils.PushFront(a, harea, ref nharea);
                     added = true;
                 }
                 else if (hole[nhole - 1] == ea)
@@ -510,8 +510,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     {
                         return false;
                     }
-                    Utils.PushBack(eb, hole, ref nhole);
-                    Utils.PushBack(a, harea, ref nharea);
+                    ArrayUtils.PushBack(eb, hole, ref nhole);
+                    ArrayUtils.PushBack(a, harea, ref nharea);
                     added = true;
                 }
 

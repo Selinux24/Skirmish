@@ -35,8 +35,8 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 int i = mini;
-                int i1 = Utils.Next(i, n);
-                int i2 = Utils.Next(i1, n);
+                int i1 = ArrayUtils.Next(i, n);
+                int i2 = ArrayUtils.Next(i1, n);
 
                 dst.Add(new Int3()
                 {
@@ -47,17 +47,17 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
                 n--;
-                indices = Utils.RemoveRange(indices, i1, n);
+                indices = ArrayUtils.RemoveRange(indices, i1, n);
 
                 if (i1 >= n)
                 {
                     i1 = 0;
                 }
 
-                i = Utils.Prev(i1, n);
+                i = ArrayUtils.Prev(i1, n);
 
                 // Update diagonal flags.
-                if (Diagonal2D(Utils.Prev(i, n), i1, n, verts, indices))
+                if (Diagonal2D(ArrayUtils.Prev(i, n), i1, n, verts, indices))
                 {
                     indices[i] |= SET_REMOVABLE_INDEX;
                 }
@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation
                     indices[i] &= REM_REMOVABLE_INDEX;
                 }
 
-                if (Diagonal2D(i, Utils.Next(i1, n), n, verts, indices))
+                if (Diagonal2D(i, ArrayUtils.Next(i1, n), n, verts, indices))
                 {
                     indices[i1] |= SET_REMOVABLE_INDEX;
                 }
@@ -96,8 +96,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < n; i++)
             {
-                int i1 = Utils.Next(i, n);
-                int i2 = Utils.Next(i1, n);
+                int i1 = ArrayUtils.Next(i, n);
+                int i2 = ArrayUtils.Next(i1, n);
                 if (Diagonal2D(i, i2, n, verts, res))
                 {
                     res[i1] |= SET_REMOVABLE_INDEX;
@@ -118,7 +118,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int ix = 0; ix < n; ix++)
             {
-                int i1x = Utils.Next(ix, n);
+                int i1x = ArrayUtils.Next(ix, n);
 
                 if (IsRemovable(indices[i1x]))
                 {
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 var p0 = verts[indices[ix] & REM_REMOVABLE_INDEX];
-                var p2 = verts[indices[Utils.Next(i1x, n)] & REM_REMOVABLE_INDEX];
+                var p2 = verts[indices[ArrayUtils.Next(i1x, n)] & REM_REMOVABLE_INDEX];
 
                 int dx = p2.X - p0.X;
                 int dz = p2.Z - p0.Z;
@@ -148,8 +148,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var pi = verts[indices[i] & REM_REMOVABLE_INDEX];
             var pj = verts[indices[j] & REM_REMOVABLE_INDEX];
-            var pi1 = verts[indices[Utils.Next(i, n)] & REM_REMOVABLE_INDEX];
-            var pin1 = verts[indices[Utils.Prev(i, n)] & REM_REMOVABLE_INDEX];
+            var pi1 = verts[indices[ArrayUtils.Next(i, n)] & REM_REMOVABLE_INDEX];
+            var pin1 = verts[indices[ArrayUtils.Prev(i, n)] & REM_REMOVABLE_INDEX];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn2D(pin1, pi, pi1))
@@ -169,7 +169,7 @@ namespace Engine.PathFinding.RecastNavigation
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
             {
-                int k1 = Utils.Next(k, n);
+                int k1 = ArrayUtils.Next(k, n);
 
                 // Skip edges incident to i or j
                 if ((k == i) || (k1 == i) || (k == j) || (k1 == j))
@@ -283,8 +283,8 @@ namespace Engine.PathFinding.RecastNavigation
         public static bool InCone2D(int i, int n, Int3[] verts, Int3 pj)
         {
             var pi = verts[i];
-            var pi1 = verts[Utils.Next(i, n)];
-            var pin1 = verts[Utils.Prev(i, n)];
+            var pi1 = verts[ArrayUtils.Next(i, n)];
+            var pin1 = verts[ArrayUtils.Prev(i, n)];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn2D(pin1, pi, pi1))
@@ -316,8 +316,8 @@ namespace Engine.PathFinding.RecastNavigation
                     continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
                 }
 
-                int pi = Utils.Prev(i, nhull);
-                int ni = Utils.Next(i, nhull);
+                int pi = ArrayUtils.Prev(i, nhull);
+                int ni = ArrayUtils.Next(i, nhull);
                 var pv = verts[hull[pi]];
                 var cv = verts[hull[i]];
                 var nv = verts[hull[ni]];
@@ -347,11 +347,11 @@ namespace Engine.PathFinding.RecastNavigation
             // depending on which triangle has shorter perimeter.
             // This heuristic was chose emprically, since it seems
             // handle tesselated straight edges well.
-            while (Utils.Next(left, nhull) != right)
+            while (ArrayUtils.Next(left, nhull) != right)
             {
                 // Check to see if se should advance left or right.
-                int nleft = Utils.Next(left, nhull);
-                int nright = Utils.Prev(right, nhull);
+                int nleft = ArrayUtils.Next(left, nhull);
+                int nright = ArrayUtils.Prev(right, nhull);
 
                 var cvleft = verts[hull[left]];
                 var nvleft = verts[hull[nleft]];
