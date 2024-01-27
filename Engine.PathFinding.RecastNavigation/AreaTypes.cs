@@ -4,6 +4,10 @@ namespace Engine.PathFinding.RecastNavigation
     public enum AreaTypes
     {
         /// <summary>
+        /// Undefined area
+        /// </summary>
+        RC_UNDEFINED = 0xff,
+        /// <summary>
         /// Represents the null area.
         /// When a data element is given this value it is considered to no longer be 
         /// assigned to a usable area.  (E.g. It is unwalkable.)

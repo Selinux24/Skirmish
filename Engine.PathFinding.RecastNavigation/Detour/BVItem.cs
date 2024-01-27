@@ -136,21 +136,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             int vb = dm.VertBase;
             int ndv = dm.VertCount;
-            Utils.GetMinMaxBounds(detailVerts, vb, ndv, out var bmin, out var bmax);
+            var bbox = Utils.GetMinMaxBounds(detailVerts, vb, ndv);
 
             // BV-tree uses cs for all dimensions
             BMin = new Int3
             {
-                X = MathUtil.Clamp((int)((bmin.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bmin.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bmin.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = MathUtil.Clamp((int)((bbox.Minimum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bbox.Minimum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bbox.Minimum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
 
             BMax = new Int3
             {
-                X = MathUtil.Clamp((int)((bmax.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bmax.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bmax.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = MathUtil.Clamp((int)((bbox.Maximum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bbox.Maximum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bbox.Maximum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
         }
         /// <summary>

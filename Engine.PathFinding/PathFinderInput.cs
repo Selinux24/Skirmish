@@ -132,14 +132,6 @@ namespace Engine.PathFinding
         {
             areas.Clear();
         }
-        /// <summary>
-        /// Gets the area count
-        /// </summary>
-        /// <returns>Returns the area count</returns>
-        public int GetAreaCount()
-        {
-            return areas.Count;
-        }
 
         /// <summary>
         /// Adds a new connection

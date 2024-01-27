@@ -12,6 +12,11 @@ namespace Engine.PathFinding.RecastNavigation
     {
         static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
 
+        /// <summary>
+        /// Zero tolerance step
+        /// </summary>
+        public const float ZeroTolerance = 1e-6f;
+
         const uint HDX = 0x8da6b343;
         const uint HDY = 0xd8163841;
         const uint HDZ = 0xcb1ab31f;
@@ -263,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation
             float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
             // If point lies inside the triangle, return interpolated y-coord.
-            const float eps = float.Epsilon;
+            const float eps = 1e-4f;
             if (u >= -eps && v >= -eps && (u + v) <= 1 + eps)
             {
                 float y = a.Y + v0.Y * u + v1.Y * v;
@@ -457,8 +462,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
         public static bool IntersectSegments2D(Vector3 a, Vector3 b, Vector3 c, Vector3 d, out float s, out float t)
         {
-            const float eps = 1e-6f;
-
             s = 0;
             t = 0;
 
@@ -467,7 +470,7 @@ namespace Engine.PathFinding.RecastNavigation
             var w = Vector3.Subtract(a, c);
 
             float z = VPerp2D(u, v);
-            if (Math.Abs(z) < eps)
+            if (Math.Abs(z) < ZeroTolerance)
             {
                 return false;
             }
@@ -569,8 +572,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if point lies inside the triangle.</returns>
         public static bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
         {
-            const float eps = 1e-6f;
-
             h = float.MaxValue;
 
             Vector3 v0 = Vector3.Subtract(c, a);
@@ -579,7 +580,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Compute scaled barycentric coordinates
             float denom = v0.X * v1.Z - v0.Z * v1.X;
-            if (Math.Abs(denom) < eps)
+            if (Math.Abs(denom) < ZeroTolerance)
             {
                 return false;
             }
@@ -813,51 +814,34 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="point">Point list</param>
         /// <param name="startIndex">Start index</param>
         /// <param name="length">Length</param>
-        /// <param name="bmin">Resulting minimum bound's position</param>
-        /// <param name="bmax">Resulting maximum bound's position</param>
-        public static void GetMinMaxBounds(Vector3[] point, int startIndex, int length, out Vector3 bmin, out Vector3 bmax)
+        public static BoundingBox GetMinMaxBounds(Vector3[] point, int startIndex, int length)
         {
-            bmin = point[startIndex];
-            bmax = point[startIndex];
+            var bmin = point[startIndex];
+            var bmax = point[startIndex];
             for (int j = 1; j < length; j++)
             {
                 bmin = Vector3.Min(bmin, point[startIndex + j]);
                 bmax = Vector3.Max(bmax, point[startIndex + j]);
             }
-        }
-        /// <summary>
-        /// Gets the cylinder bounds
-        /// </summary>
-        /// <param name="pos">Position</param>
-        /// <param name="r">Radius</param>
-        /// <param name="h">Height</param>
-        /// <param name="bmin">Resulting minimum bounding box point</param>
-        /// <param name="bmax">Resulting maximum bounding box point</param>
-        public static void GetCylinderBounds(Vector3 pos, float r, float h, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin.X = pos.X - r;
-            bmin.Y = pos.Y;
-            bmin.Z = pos.Z - r;
-            bmax.X = pos.X + r;
-            bmax.Y = pos.Y + h;
-            bmax.Z = pos.Z + r;
+
+            return new(bmin, bmax);
         }
         /// <summary>
         /// Gets the polygon bounds
         /// </summary>
         /// <param name="polygon">Polygon vertices</param>
-        /// <param name="bmin">Resulting minimum bounding box point</param>
-        /// <param name="bmax">Resulting maximum bounding box point</param>
-        public static void GetPolygonBounds(Vector3[] polygon, out Vector3 bmin, out Vector3 bmax)
+        public static BoundingBox GetPolygonBounds(Vector3[] polygon)
         {
-            bmin = polygon[0];
-            bmax = polygon[0];
+            var bmin = polygon[0];
+            var bmax = polygon[0];
 
             for (int i = 1; i < polygon.Length; ++i)
             {
                 bmin = Vector3.Min(bmin, polygon[i]);
                 bmax = Vector3.Max(bmax, polygon[i]);
             }
+
+            return new(bmin, bmax);
         }
         /// <summary>
         /// Determines if two axis-aligned bounding boxes overlap.

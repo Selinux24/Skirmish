@@ -1000,10 +1000,13 @@ namespace TerrainSamples.SceneNavmeshTest
                 return;
             }
 
+            float hmin = 0.1f;
+            float hmax = 6f;
             var center = r.PickingResult.Position;
+            center.Y = 0;
             float radius = 2.5f;
             var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
-            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, center.Y - 0.5f, center.Y + 0.5f) { AreaType = GraphAreaTypes.Walkable, });
+            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, -hmin, hmax - hmin) { AreaType = GraphAreaTypes.Walkable, });
             var area = new AreaMarker()
             {
                 Id = id,

@@ -161,17 +161,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Enumerates the specified compact cell list in reverse order
         /// </summary>
         /// <returns>Returns each compact cell to evaulate</returns>
-        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsReverse()
+        private IEnumerable<(int Column, int Row, int SpanIndex, CompactCell Cell)> IterateCellsReverse()
         {
-            for (int y = Height - 1; y >= 0; --y)
+            for (int row = Height - 1; row >= 0; --row)
             {
-                for (int x = Width - 1; x >= 0; --x)
+                for (int col = Width - 1; col >= 0; --col)
                 {
-                    var c = Cells[x + y * Width];
+                    var cell = Cells[col + row * Width];
 
-                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+                    for (int spanIndex = cell.Index, neiIndex = cell.Index + cell.Count; spanIndex < neiIndex; ++spanIndex)
                     {
-                        yield return (x, y, i, c);
+                        yield return (col, row, spanIndex, cell);
                     }
                 }
             }
@@ -179,35 +179,68 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Enumerates the specified compact cell list, if is contained into the bounds
         /// </summary>
-        /// <param name="minx">Minimum x bound's coordinate</param>
-        /// <param name="miny">Minimum y bound's coordinate</param>
-        /// <param name="maxx">Maximum x bound's coordinate</param>
-        /// <param name="maxy">Maximum y bound's coordinate</param>
-        /// <returns>Returns each compact cell to evaulate</returns>
-        private IEnumerable<(int x, int y, int i, CompactCell c)> IterateCellsBounds(int minx, int miny, int maxx, int maxy)
+        /// <param name="minColumn">Minimum x bound's coordinate</param>
+        /// <param name="minRow">Minimum y bound's coordinate</param>
+        /// <param name="maxColumn">Maximum x bound's coordinate</param>
+        /// <param name="maxRow">Maximum y bound's coordinate</param>
+        /// <returns>Returns each column, row and span index to evaluate</returns>
+        private IEnumerable<(int Column, int Row, int SpanIndex)> IterateCellsSpans(int minColumn, int minRow, int maxColumn, int maxRow)
         {
-            for (int y = miny; y < maxy; ++y)
+            for (int row = minRow; row < maxRow; ++row)
             {
-                for (int x = minx; x < maxx; ++x)
+                for (int col = minColumn; col < maxColumn; ++col)
                 {
-                    var c = Cells[x + y * Width];
+                    var c = Cells[col + row * Width];
 
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                     {
-                        yield return (x, y, i, c);
+                        yield return (col, row, i);
                     }
                 }
             }
         }
         /// <summary>
+        /// Enumerates the specified compact cell list, if is contained into the bounds
+        /// </summary>
+        /// <param name="minColumn">Minimum x bound's coordinate</param>
+        /// <param name="minRow">Minimum y bound's coordinate</param>
+        /// <param name="maxColumn">Maximum x bound's coordinate</param>
+        /// <param name="maxRow">Maximum y bound's coordinate</param>
+        /// <returns>Returns each span index and span center to evaluate</returns>
+        private IEnumerable<(int SpanIndex, Vector3 SpanCenter)> IterateCellsSpansAreas(int minColumn, int minRow, int maxColumn, int maxRow)
+        {
+            foreach (var (col, row, i) in IterateCellsSpans(minColumn, minRow, maxColumn, maxRow))
+            {
+                if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                var sy = Spans[i].Y;
+                if (sy < minRow || sy > maxRow)
+                {
+                    continue;
+                }
+
+                var center = new Vector3
+                {
+                    X = BoundingBox.Minimum.X + (col + 0.5f) * CellSize,
+                    Y = sy,
+                    Z = BoundingBox.Minimum.Z + (row + 0.5f) * CellSize
+                };
+
+                yield return (i, center);
+            }
+        }
+        /// <summary>
         /// Iterates the spans of the cell at coordinates
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
+        /// <param name="col">X coordinate</param>
+        /// <param name="row">Y coordinate</param>
         /// <returns>Returns the span and the span index</returns>
-        public IEnumerable<(CompactSpan Span, int CellIndex)> IterateCellSpans(int x, int y)
+        public IEnumerable<(CompactSpan Span, int CellIndex)> IterateCellSpans(int col, int row)
         {
-            var c = Cells[x + y * Width];
+            var c = Cells[col + row * Width];
 
             for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
             {
@@ -319,7 +352,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Make sure the segments are always handled in same order
             // using lexological sort or else there will be seams.
-            if (Math.Abs(rb.X - ra.X) < 1e-6f)
+            if (Math.Abs(rb.X - ra.X) < Utils.ZeroTolerance)
             {
                 if (rb.Z > ra.Z)
                 {
@@ -621,39 +654,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="geometry">Geometry input</param>
         public void MarkAreas(InputGeometry geometry)
         {
-            var vCount = geometry.GetAreaCount();
-            if (vCount == 0)
-            {
-                return;
-            }
+            var areas = geometry.GetAreas();
 
-            var vols = geometry.GetAreas();
-            for (int i = 0; i < vCount; i++)
+            foreach (var area in areas)
             {
-                var vol = vols[i];
+                var bbox = area.GetBounds();
 
-                if (vol is IGraphAreaPolygon polyArea)
+                if (!GetAreaBounds(bbox, out var min, out var max))
                 {
-                    MarkConvexPolyArea(
-                        polyArea.Vertices.ToArray(),
-                        polyArea.MinHeight, polyArea.MaxHeight,
-                        (AreaTypes)polyArea.AreaType);
+                    return;
                 }
-                else if (vol is IGraphAreaCylinder cylinderArea)
-                {
-                    MarkCylinderArea(
-                        cylinderArea.Center,
-                        cylinderArea.Radius,
-                        cylinderArea.Height,
-                        (AreaTypes)cylinderArea.AreaType);
-                }
-                else if (vol is IGraphAreaBox boxArea)
-                {
-                    MarkBoxArea(
-                        boxArea.BMin,
-                        boxArea.BMax,
-                        (AreaTypes)boxArea.AreaType);
-                }
+
+                MarkArea(area, min, max, (AreaTypes)area.AreaType);
             }
 
             MedianFilterWalkableArea();
@@ -661,140 +673,111 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the area bounds
         /// </summary>
-        /// <param name="bmin">Area min</param>
-        /// <param name="bmax">Area max</param>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="min">Resulting bounds min</param>
         /// <param name="max">Resulting bounds max</param>
-        private void GetAreaBounds(Vector3 bmin, Vector3 bmax, out Int3 min, out Int3 max)
+        private bool GetAreaBounds(BoundingBox bbox, out Int3 min, out Int3 max)
         {
             min = new Int3();
             max = new Int3();
 
-            min.X = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
-            min.Y = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
-            min.Z = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
-            max.X = (int)((bmax.X - BoundingBox.Maximum.X) / CellSize);
-            max.Y = (int)((bmax.Y - BoundingBox.Maximum.Y) / CellHeight);
-            max.Z = (int)((bmax.Z - BoundingBox.Maximum.Z) / CellSize);
+            min.X = (int)((bbox.Minimum.X - BoundingBox.Minimum.X) / CellSize);
+            min.Y = (int)((bbox.Minimum.Y - BoundingBox.Minimum.Y) / CellHeight);
+            min.Z = (int)((bbox.Minimum.Z - BoundingBox.Minimum.Z) / CellSize);
+            max.X = (int)((bbox.Maximum.X - BoundingBox.Minimum.X) / CellSize);
+            max.Y = (int)((bbox.Maximum.Y - BoundingBox.Minimum.Y) / CellHeight);
+            max.Z = (int)((bbox.Maximum.Z - BoundingBox.Minimum.Z) / CellSize);
 
-            if (max.X < 0) return;
-            if (min.X >= Width) return;
-            if (max.Z < 0) return;
-            if (min.Z >= Height) return;
+            if (max.X < 0) return false;
+            if (max.Z < 0) return false;
+            if (min.X >= Width) return false;
+            if (min.Z >= Height) return false;
 
             min.X = Math.Max(0, min.X);
-            max.X = Math.Min(Width, max.X);
             min.Z = Math.Max(0, min.Z);
-            max.Z = Math.Min(Height, max.Z);
+            if (max.X >= Width) max.X = Width - 1;
+            if (max.Z >= Height) max.Z = Height - 1;
+
+            return true;
         }
         /// <summary>
-        /// 
+        /// Marks the specified area
         /// </summary>
-        /// <param name="bmin"></param>
-        /// <param name="bmax"></param>
-        /// <param name="areaId"></param>
-        /// <param name="chf"></param>
-        /// <remarks>
-        /// The value of spacial parameters are in world units.
-        /// </remarks>
-        private void MarkBoxArea(Vector3 bmin, Vector3 bmax, AreaTypes areaId)
+        /// <param name="graphArea">Graph area</param>
+        /// <param name="min">Minimum bound limits</param>
+        /// <param name="max">Maximum bound limits</param>
+        /// <param name="areaId">Area value to mark</param>
+        private void MarkArea(IGraphArea graphArea, Int3 min, Int3 max, AreaTypes areaId)
         {
-            GetAreaBounds(bmin, bmax, out var min, out var max);
-
-            foreach (var (_, _, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
+            switch (graphArea)
             {
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                var sy = Spans[i].Y;
-                if (sy >= min.Y && sy <= max.Y)
-                {
-                    Areas[i] = areaId;
-                }
+                case IGraphAreaPolygon polyArea:
+                    MarkConvexPolyArea(polyArea.Vertices, min, max, areaId);
+                    return;
+                case IGraphAreaCylinder cylinderArea:
+                    MarkCylinderArea(cylinderArea.Center, cylinderArea.Radius, min, max, areaId);
+                    return;
+                case IGraphAreaBox:
+                    MarkBoxArea(min, max, areaId);
+                    return;
             }
         }
         /// <summary>
-        /// 
+        /// Marks the specified box area
         /// </summary>
-        /// <param name="polygon">Polygon vertices</param>
-        /// <param name="hmin">Minimum height</param>
-        /// <param name="hmax">Maximum height</param>
-        /// <param name="areaId">Area id</param>
+        /// <param name="min">Minimum bound limits</param>
+        /// <param name="max">Maximum bound limits</param>
+        /// <param name="areaId">Area value to mark</param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// </remarks>
+        private void MarkBoxArea(Int3 min, Int3 max, AreaTypes areaId)
+        {
+            foreach (var (i, _) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
+            {
+                Areas[i] = areaId;
+            }
+        }
+        /// <summary>
+        /// Marks the specified polygon area
+        /// </summary>
+        /// <param name="vertices">polygon vertices</param>
+        /// <param name="min">Minimum bound limits</param>
+        /// <param name="max">Maximum bound limits</param>
+        /// <param name="areaId">Area value to mark</param>
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
         /// </remarks>
-        private void MarkConvexPolyArea(Vector3[] polygon, float hmin, float hmax, AreaTypes areaId)
+        private void MarkConvexPolyArea(Vector3[] vertices, Int3 min, Int3 max, AreaTypes areaId)
         {
-            Utils.GetPolygonBounds(polygon, out var bmin, out var bmax);
-            bmin.Y = hmin;
-            bmax.Y = hmax;
-
-            GetAreaBounds(bmin, bmax, out var min, out var max);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
+            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
             {
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                var sy = Spans[i].Y;
-                if (sy < min.Y || sy > max.Y)
-                {
-                    continue;
-                }
-
-                var p = new Vector3
-                {
-                    X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
-                    Y = 0,
-                    Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
-                };
-
-                if (Utils.PointInPolygon2D(p, polygon))
+                if (Utils.PointInPolygon2D(spanCenter, vertices))
                 {
                     Areas[i] = areaId;
                 }
             }
         }
         /// <summary>
-        /// 
+        /// Marks the specified cylinder area
         /// </summary>
-        /// <param name="pos"></param>
-        /// <param name="r"></param>
-        /// <param name="h"></param>
-        /// <param name="areaId"></param>
-        /// <param name="chf"></param>
+        /// <param name="center">Cylinder center</param>
+        /// <param name="r">Radius</param>
+        /// <param name="min">Minimum bound limits</param>
+        /// <param name="max">Maximum bound limits</param>
+        /// <param name="areaId">Area value to mark</param>
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkCylinderArea(Vector3 pos, float r, float h, AreaTypes areaId)
+        private void MarkCylinderArea(Vector3 center, float r, Int3 min, Int3 max, AreaTypes areaId)
         {
-            Utils.GetCylinderBounds(pos, r, h, out var bmin, out var bmax);
             float r2 = r * r;
 
-            GetAreaBounds(bmin, bmax, out var min, out var max);
-
-            foreach (var (x, z, i, _) in IterateCellsBounds(min.X, min.Z, max.X, max.Z))
+            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
             {
-                if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                {
-                    continue;
-                }
-
-                var sy = Spans[i].Y;
-                if (sy < min.Y || sy > max.Y)
-                {
-                    continue;
-                }
-
-                float sx = BoundingBox.Minimum.X + (x + 0.5f) * CellSize;
-                float sz = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize;
-                float dx = sx - pos.X;
-                float dz = sz - pos.Z;
+                float dx = spanCenter.X - center.X;
+                float dz = spanCenter.Z - center.Z;
 
                 if (dx * dx + dz * dz < r2)
                 {
@@ -805,11 +788,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.
         /// </summary>
-        /// <returns>Returns always true</returns>
         private void MedianFilterWalkableArea()
         {
             // Init distance.
-            var areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
+            var areas = Helper.CreateArray(SpanCount, AreaTypes.RC_UNDEFINED);
 
             foreach (var (x, y, i, _) in IterateCells())
             {
@@ -1453,8 +1435,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 verts.Add(bestpt);
 
                 // Create new triangulation. Full rebuild.
-                var dhull = DelaunayHull.Build(verts.ToArray(), hull);
-                var dTris = dhull.GetTris();
+                var dTris = TriangulateDelaunay(verts.ToArray(), hull);
 
                 triList.Clear();
                 triList.AddRange(dTris);
@@ -1463,6 +1444,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             newTris = triList.ToArray();
 
             return verts.ToArray();
+        }
+        /// <summary>
+        /// Triangulate hull using delaunay
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="hull">Hull indices</param>
+        private static Int3[] TriangulateDelaunay(Vector3[] verts, int[] hull)
+        {
+            var dhull = DelaunayHull.Build(verts, hull);
+
+            return dhull.GetTris();
         }
         /// <summary>
         /// Initialize samples
@@ -1475,12 +1467,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
 
-            Utils.GetPolygonBounds(polygon, out var bmin, out var bmax);
+            var bbox = Utils.GetPolygonBounds(polygon);
 
-            int x0 = (int)Math.Floor(bmin.X / sampleDist);
-            int x1 = (int)Math.Ceiling(bmax.X / sampleDist);
-            int z0 = (int)Math.Floor(bmin.Z / sampleDist);
-            int z1 = (int)Math.Ceiling(bmax.Z / sampleDist);
+            int x0 = (int)Math.Floor(bbox.Minimum.X / sampleDist);
+            int x1 = (int)Math.Ceiling(bbox.Maximum.X / sampleDist);
+            int z0 = (int)Math.Floor(bbox.Minimum.Z / sampleDist);
+            int z1 = (int)Math.Ceiling(bbox.Maximum.Z / sampleDist);
 
             float cs = CellSize;
             float ics = 1.0f / cs;
@@ -1494,7 +1486,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var pt = new Vector3
                     {
                         X = x * sampleDist,
-                        Y = (bmax.Y + bmin.Y) * 0.5f,
+                        Y = (bbox.Maximum.Y + bbox.Minimum.Y) * 0.5f,
                         Z = z * sampleDist
                     };
 
@@ -1797,7 +1789,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxy">Max area Y</param>
         private void PaintRectRegionBorders(int[] srcReg, int regId, int minx, int maxx, int miny, int maxy)
         {
-            foreach (var (_, _, i, _) in IterateCellsBounds(minx, miny, maxx, maxy))
+            foreach (var (_, _, i) in IterateCellsSpans(minx, miny, maxx, maxy))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {

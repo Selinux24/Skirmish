@@ -37,6 +37,12 @@ namespace Engine.PathFinding
         }
 
         /// <inheritdoc/>
+        public override BoundingBox GetBounds()
+        {
+            return new(BMin, BMax);
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"{Id} => AreaType {AreaType}; BMin {BMin} BMax {BMax}";

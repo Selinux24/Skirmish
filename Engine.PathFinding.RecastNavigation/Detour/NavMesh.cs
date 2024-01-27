@@ -631,17 +631,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
             }
 
-            if (TileCache != null)
+            if (TileCache == null)
             {
-                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
-
-                foreach (var tile in tiles)
-                {
-                    TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA, false);
-                }
-
-                TileCache.BuildTilesAt(x, y);
+                return;
             }
+
+            var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
+
+            foreach (var tile in tiles)
+            {
+                TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA, false);
+            }
+
+            TileCache.BuildTilesAt(x, y);
         }
         /// <summary>
         /// Removes all tiles at specified tile coordinates

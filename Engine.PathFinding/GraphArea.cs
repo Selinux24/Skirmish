@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding
 {
     /// <summary>
@@ -31,5 +32,8 @@ namespace Engine.PathFinding
         {
             Id = GetNextId();
         }
+
+        /// <inheritdoc/>
+        public abstract BoundingBox GetBounds();
     }
 }

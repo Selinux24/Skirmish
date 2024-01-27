@@ -46,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Vector3 v = bq - bp;
             Vector3 w = ap - bp;
             float d = Vector2.Dot(u.XZ(), v.XZ());
-            if (Math.Abs(d) < 1e-6f)
+            if (Math.Abs(d) < Utils.ZeroTolerance)
             {
                 return false;
             }

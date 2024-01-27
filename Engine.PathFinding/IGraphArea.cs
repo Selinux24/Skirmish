@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding
 {
     /// <summary>
@@ -14,5 +15,10 @@ namespace Engine.PathFinding
         /// Area type
         /// </summary>
         GraphAreaTypes AreaType { get; set; }
+
+        /// <summary>
+        /// Gets the area bounds
+        /// </summary>
+        BoundingBox GetBounds();
     }
 }
