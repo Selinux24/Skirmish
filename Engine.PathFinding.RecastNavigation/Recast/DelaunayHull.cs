@@ -137,8 +137,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             /// <inheritdoc/>
             public override string ToString()
             {
-                string face0 = Face0 == EV_HULL ? "Hull" : Face0 == EV_UNDEF ? "undefined" : $"{Face0}";
-                string face1 = Face1 == EV_UNDEF ? "undefined" : $"{Face1}";
+                string face0 = Face0 switch
+                {
+                    EV_HULL => "hull",
+                    EV_UNDEF => "undefined",
+                    _ => $"{Face0}",
+                };
+
+                string face1 = Face1 switch
+                {
+                    EV_UNDEF => "undefined",
+                    _ => $"{Face1}",
+                };
+
                 return $"Point0={Point0}; Point1={Point1}; Face0={face0}; Face1={face1}";
             }
         }
