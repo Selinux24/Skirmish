@@ -61,22 +61,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Builds a new empty heightfield
         /// </summary>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="bbox">Bounds</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="cellHeight">Cell height</param>
+        /// <param name="cfg">Config</param>
         /// <returns>Returns a new heightfield</returns>
-        public static Heightfield Build(int width, int height, BoundingBox bbox, float cellSize, float cellHeight)
+        public static Heightfield Build(Config cfg)
         {
             return new Heightfield
             {
-                Width = width,
-                Height = height,
-                BoundingBox = bbox,
-                CellSize = cellSize,
-                CellHeight = cellHeight,
-                Spans = new Span[width * height],
+                Width = cfg.Width,
+                Height = cfg.Height,
+                BoundingBox = cfg.BoundingBox,
+                CellSize = cfg.CellSize,
+                CellHeight = cfg.CellHeight,
+                Spans = new Span[cfg.Width * cfg.Height],
             };
         }
         /// <summary>
@@ -302,20 +298,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var triareas = MarkWalkableTriangles(walkableSlopeAngle, tris);
 
-            return RasterizeTriangles(walkableClimb, triareas);
-        }
-        /// <summary>
-        /// Rasterizes the specified item list
-        /// </summary>
-        private bool RasterizeTriangles(int flagMergeThr, RasterizeItem[] items)
-        {
             // Rasterize triangles.
-            foreach (var item in items)
+            foreach (var item in triareas)
             {
                 // Rasterize.
-                if (!RasterizeTriangle(flagMergeThr, item))
+                if (!RasterizeTriangle(walkableClimb, item))
                 {
-                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
+                    return false;
                 }
             }
 

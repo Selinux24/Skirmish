@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             cfg.UpdateTileBounds(x, y);
 
             // Create heightfield
-            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg);
 
             var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
@@ -58,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 var tris = chunkyMesh.GetTriangles(id);
                 if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
                 {
-                    return Array.Empty<TileCacheData>();
+                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
                 }
             }
 
