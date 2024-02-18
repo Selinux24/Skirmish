@@ -220,6 +220,17 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Add primitives to list
+        /// </summary>
+        /// <param name="primitivesEnum">Primitives by color enumerable</param>
+        public void AddPrimitives(IEnumerable<(Color4, IEnumerable<T>)> primitivesEnum)
+        {
+            foreach (var primitive in primitivesEnum)
+            {
+                AddPrimitives(primitive.Item1, primitive.Item2);
+            }
+        }
+        /// <summary>
         /// Remove by color
         /// </summary>
         /// <param name="color">Color</param>

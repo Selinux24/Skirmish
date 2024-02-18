@@ -15,6 +15,20 @@ namespace Engine.PathFinding
         /// </summary>
         bool Initialized { get; }
         /// <summary>
+        /// Finds a random point over the graph
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns a valid random position over the graph</returns>
+        Vector3? FindRandomPoint(AgentType agent);
+        /// <summary>
+        /// Finds a random point around a circle
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <returns>Returns a valid random position over the graph</returns>
+        Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius);
+        /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -133,19 +147,10 @@ namespace Engine.PathFinding
         void RemoveObstacle(int obstacleId);
 
         /// <summary>
-        /// Finds a random point over the graph
+        /// Gets the debug information helper
         /// </summary>
         /// <param name="agent">Agent</param>
-        /// <returns>Returns a valid random position over the graph</returns>
-        Vector3? FindRandomPoint(AgentType agent);
-        /// <summary>
-        /// Finds a random point around a circle
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <returns>Returns a valid random position over the graph</returns>
-        Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius);
+        IGraphDebug GetDebugInfo(AgentType agent);
 
         /// <summary>
         /// Updates internal state

@@ -813,5 +813,13 @@ namespace Engine.PathFinding
         {
             return NavigationGraph?.GetNodes(agent) ?? Enumerable.Empty<IGraphNode>();
         }
+        /// <summary>
+        /// Gets the graph debug information
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        public IGraphDebug GetDebugInfo(AgentType agent)
+        {
+            return NavigationGraph?.GetDebugInfo(agent);
+        }
     }
 }

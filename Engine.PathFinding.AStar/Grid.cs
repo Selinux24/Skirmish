@@ -201,6 +201,16 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
             return nodes.Cast<IGraphNode>().ToArray();
@@ -340,12 +350,7 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent)
-        {
-            throw new NotImplementedException();
-        }
-        /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        public IGraphDebug GetDebugInfo(AgentType agent)
         {
             throw new NotImplementedException();
         }

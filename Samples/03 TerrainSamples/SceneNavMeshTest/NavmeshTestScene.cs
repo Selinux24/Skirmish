@@ -10,7 +10,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using TerrainSamples.Mapping;
 using TerrainSamples.SceneStart;
@@ -313,11 +312,26 @@ namespace TerrainSamples.SceneNavmeshTest
             //Agents
             nmsettings.Agents = new[] { agent };
 
+            //Region
+            nmsettings.RegionMinSize = 8;
+            nmsettings.RegionMergeSize = 20;
+
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Monotone;
 
+            //Filtering
+            nmsettings.FilterLedgeSpans = false;
+            nmsettings.FilterLowHangingObstacles = false;
+            nmsettings.FilterWalkableLowHeightSpans = false;
+
             //Polygonization
-            nmsettings.EdgeMaxError = 1.0f;
+            nmsettings.EdgeMaxLength = 12f;
+            nmsettings.EdgeMaxError = 1.3f;
+            nmsettings.VertsPerPoly = 6;
+
+            //Detail mesh
+            nmsettings.DetailSampleDist = 6;
+            nmsettings.DetailSampleMaxError = 1;
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
@@ -719,16 +733,17 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void DrawGraphNodes(AgentType agent)
         {
-            var nodes = GetNodes(agent).OfType<GraphNode>();
-            if (nodes.Any())
-            {
-                graphDrawer.Clear();
+            graphDrawer.Clear();
 
-                foreach (var node in nodes)
-                {
-                    graphDrawer.AddPrimitives(node.Color, node.Triangles);
-                }
+            var debugInfo = GetDebugInfo(agent);
+            if (debugInfo == null)
+            {
+                return;
             }
+
+            var nodes = debugInfo.GetInfo((int)GraphDebugTypes.Nodes);
+
+            graphDrawer.AddPrimitives(nodes);
         }
         private void DrawMarkers()
         {

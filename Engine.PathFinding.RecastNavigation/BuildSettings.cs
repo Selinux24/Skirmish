@@ -76,7 +76,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return new BuildSettings();
+                return new();
             }
         }
 
@@ -123,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Agents list
         /// </summary>
-        public Agent[] Agents { get; set; } = new Agent[] { new Agent() };
+        public Agent[] Agents { get; set; } = new Agent[] { new() };
 
         /// <summary>
         /// Navigation mesh building mode

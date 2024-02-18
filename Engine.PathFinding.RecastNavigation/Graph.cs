@@ -261,6 +261,131 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent)
+        {
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            if (query == null)
+            {
+                return null;
+            }
+
+            var status = query.FindRandomPoint(new QueryFilter(), out _, out var pt);
+            if (status == Status.DT_SUCCESS)
+            {
+                return pt;
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        {
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            if (query == null)
+            {
+                return null;
+            }
+
+            var filter = new QueryFilter();
+
+            var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
+            if (fStatus != Status.DT_SUCCESS)
+            {
+                return null;
+            }
+
+            var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
+            if (pStatus != Status.DT_SUCCESS)
+            {
+                return null;
+            }
+
+            return pt;
+        }
+        /// <inheritdoc/>
+        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
+        {
+            var graphQuery = GetAgentQueryFactory(agent);
+            if (graphQuery == null)
+            {
+                return Enumerable.Empty<IGraphNode>();
+            }
+
+            return GraphNode.FindAll(graphQuery.NavMesh);
+        }
+        /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, Vector3 point)
+        {
+            var graphQuery = GetAgentQueryFactory(agent);
+            if (graphQuery == null)
+            {
+                return null;
+            }
+
+            return GraphNode.FindNode(graphQuery.NavMesh, point);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
+        {
+            var graphQuery = GetAgentQueryFactory(agent)?.CreateQuery();
+            if (graphQuery == null)
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            var status = graphQuery.CalcPath(
+                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
+                from, to, out var result);
+
+            if (!status.HasFlag(Status.DT_SUCCESS))
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            return result;
+        }
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        {
+            return await Task.Run(() => FindPath(agent, from, to));
+        }
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
+        {
+            return IsWalkable(agent, position, distanceThreshold, out _);
+        }
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
+        {
+            nearest = null;
+
+            //Find agent query
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            if (query == null)
+            {
+                return false;
+            }
+
+            //Set extents based upon agent height
+            var agentExtents = new Vector3(agent.Height);
+
+            var status = query.FindNearestPoly(
+                position, agentExtents, new QueryFilter(),
+                out int nRef, out Vector3 nPoint);
+
+            if (nRef == 0 || status.HasFlag(Status.DT_FAILURE))
+            {
+                return false;
+            }
+
+            nearest = nPoint;
+
+            return
+                nPoint.XZ() == position.XZ() &&
+                Vector3.Distance(nPoint, position) <= distanceThreshold;
+        }
+
+        /// <inheritdoc/>
         public bool CreateAt(Vector3 position)
         {
             Updating?.Invoke(this, new EventArgs());
@@ -401,90 +526,6 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
-        {
-            var graphQuery = GetAgentQueryFactory(agent);
-            if (graphQuery == null)
-            {
-                return Enumerable.Empty<IGraphNode>();
-            }
-
-            return GraphNode.FindAll(graphQuery.NavMesh);
-        }
-        /// <inheritdoc/>
-        public IGraphNode FindNode(AgentType agent, Vector3 point)
-        {
-            var graphQuery = GetAgentQueryFactory(agent);
-            if (graphQuery == null)
-            {
-                return null;
-            }
-
-            return GraphNode.FindNode(graphQuery.NavMesh, point);
-        }
-        /// <inheritdoc/>
-        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
-        {
-            var graphQuery = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (graphQuery == null)
-            {
-                return Enumerable.Empty<Vector3>();
-            }
-
-            var status = graphQuery.CalcPath(
-                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
-                from, to, out var result);
-
-            if (!status.HasFlag(Status.DT_SUCCESS))
-            {
-                return Enumerable.Empty<Vector3>();
-            }
-
-            return result;
-        }
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
-        {
-            return await Task.Run(() => FindPath(agent, from, to));
-        }
-
-        /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
-        {
-            return IsWalkable(agent, position, distanceThreshold, out _);
-        }
-        /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
-        {
-            nearest = null;
-
-            //Find agent query
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (query == null)
-            {
-                return false;
-            }
-
-            //Set extents based upon agent height
-            var agentExtents = new Vector3(agent.Height);
-
-            var status = query.FindNearestPoly(
-                position, agentExtents, new QueryFilter(),
-                out int nRef, out Vector3 nPoint);
-
-            if (nRef == 0 || status.HasFlag(Status.DT_FAILURE))
-            {
-                return false;
-            }
-
-            nearest = nPoint;
-
-            return
-                nPoint.XZ() == position.XZ() &&
-                Vector3.Distance(nPoint, position) <= distanceThreshold;
-        }
-
-        /// <inheritdoc/>
         public int AddObstacle(IObstacle obstacle)
         {
             updated = false;
@@ -553,46 +594,9 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent)
+        public IGraphDebug GetDebugInfo(AgentType agent)
         {
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (query == null)
-            {
-                return null;
-            }
-
-            var status = query.FindRandomPoint(new QueryFilter(), out _, out var pt);
-            if (status == Status.DT_SUCCESS)
-            {
-                return pt;
-            }
-
-            return null;
-        }
-        /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
-        {
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (query == null)
-            {
-                return null;
-            }
-
-            var filter = new QueryFilter();
-
-            var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
-            if (fStatus != Status.DT_SUCCESS)
-            {
-                return null;
-            }
-
-            var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
-            if (pStatus != Status.DT_SUCCESS)
-            {
-                return null;
-            }
-
-            return pt;
+            return new GraphDebug(this, agent);
         }
 
         /// <inheritdoc/>
