@@ -380,7 +380,7 @@ namespace Engine.PathFinding.RecastNavigation
                 TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
                 TileHeight = generationBounds.Maximum.Z - generationBounds.Minimum.Z,
                 MaxTiles = 1,
-                MaxPolys = polyCount
+                MaxPolys = polyCount,
             };
         }
         /// <summary>
@@ -402,7 +402,7 @@ namespace Engine.PathFinding.RecastNavigation
             int maxTiles = 1 << tileBits;
             int maxPolysPerTile = 1 << polyBits;
 
-            return new NavMeshParams()
+            return new NavMeshParams
             {
                 Origin = generationBounds.Minimum,
                 TileWidth = tileCellSize,

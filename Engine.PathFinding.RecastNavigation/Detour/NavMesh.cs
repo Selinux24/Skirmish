@@ -53,6 +53,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Salt bits
         /// </summary>
         private readonly int m_saltBits;
+        /// <summary>
+        /// Build data
+        /// </summary>
+        private NavMeshBuildData m_buildData;
 
         /// <summary>
         /// Mesh tile list
@@ -73,6 +77,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public NavMesh(NavMeshParams nmparams)
         {
             m_params = nmparams;
+
             m_orig = m_params.Origin;
             m_tileWidth = m_params.TileWidth;
             m_tileHeight = m_params.TileHeight;
@@ -240,11 +245,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException($"Bad header. {header.Magic}-{header.Version}");
             }
 
-            NavMeshParams nvParams = BuildSettings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
+            var nvParams = BuildSettings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
             nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
             progressCallback?.Invoke(13f / passCount);
+
+            if (settings.EnableDebugInfo)
+            {
+                nm.m_buildData = new()
+                {
+                    Heightfield = solid,
+                };
+            }
+
             return nm;
         }
         /// <summary>
@@ -1983,5 +1997,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             TileCache = new TileCache(this, new TileCacheMeshProcess(geometry), cacheParams);
         }
+
+        /// <summary>
+        /// Gets the navigation mesh build data
+        /// </summary>
+        /// <returns></returns>
+        internal NavMeshBuildData GetBuildData()
+        {
+            return m_buildData;
+        }
+    }
+
+    /// <summary>
+    /// Navigation mesh build data
+    /// </summary>
+    struct NavMeshBuildData
+    {
+        /// <summary>
+        /// Height field
+        /// </summary>
+        public Heightfield Heightfield { get; set; }
     }
 }

@@ -337,6 +337,9 @@ namespace TerrainSamples.SceneNavmeshTest
             nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 64;
 
+            //Debugging
+            nmsettings.EnableDebugInfo = true;
+
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nminput);

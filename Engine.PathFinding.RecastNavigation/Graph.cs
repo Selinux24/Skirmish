@@ -42,7 +42,9 @@ namespace Engine.PathFinding.RecastNavigation
         private readonly List<Crowd> crowds = new();
 
         /// <inheritdoc/>
-        public bool Initialized { get; set; }
+        public bool Initialized { get; internal set; }
+        /// <inheritdoc/>
+        public bool EnableDebug { get; internal set; }
         /// <summary>
         /// Input geometry
         /// </summary>
@@ -144,7 +146,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = xMin; x <= xMax; x++)
                 {
-                    BoundingBox tileBounds = NavMesh.GetTileBounds(x, y, Input, Settings);
+                    var tileBounds = NavMesh.GetTileBounds(x, y, Input, Settings);
 
                     cornerTiles.Add(new UpdateTileData
                     {
@@ -596,7 +598,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IGraphDebug GetDebugInfo(AgentType agent)
         {
-            return new GraphDebug(this, agent);
+            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            if (query == null)
+            {
+                return null;
+            }
+
+            return new GraphDebug(this, agent, query.GetAttachedNavMesh().GetBuildData());
         }
 
         /// <inheritdoc/>

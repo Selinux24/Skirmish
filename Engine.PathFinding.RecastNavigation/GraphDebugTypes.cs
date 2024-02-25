@@ -4,15 +4,19 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Graph debug types
     /// </summary>
-    public enum GraphDebugTypes : int
+    public enum GraphDebugTypes
     {
         /// <summary>
         /// None selected
         /// </summary>
-        None = 0,
+        None,
         /// <summary>
         /// Nodes
         /// </summary>
-        Nodes = 1,
+        Nodes,
+        /// <summary>
+        /// Height field
+        /// </summary>
+        Heightfield,
     }
 }

@@ -15,6 +15,11 @@ namespace Engine.PathFinding
         /// </summary>
         bool Initialized { get; }
         /// <summary>
+        /// Enables debug information
+        /// </summary>
+        bool EnableDebug { get; }
+
+        /// <summary>
         /// Finds a random point over the graph
         /// </summary>
         /// <param name="agent">Agent</param>

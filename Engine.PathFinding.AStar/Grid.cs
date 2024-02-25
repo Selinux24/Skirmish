@@ -24,6 +24,8 @@ namespace Engine.PathFinding.AStar
 
         /// <inheritdoc/>
         public bool Initialized { get; set; }
+        /// <inheritdoc/>
+        public bool EnableDebug { get; set; }
         /// <summary>
         /// Geometry input
         /// </summary>
