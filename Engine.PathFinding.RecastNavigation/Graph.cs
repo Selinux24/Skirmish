@@ -122,6 +122,14 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return agentQuerieFactories.Find(a => agent.Equals(a.Agent));
         }
+        /// <summary>
+        /// Creates a new agent query
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        public NavMeshQuery CreateAgentQuery(AgentType agent)
+        {
+            return GetAgentQueryFactory(agent)?.CreateQuery();
+        }
 
         /// <summary>
         /// Look up tiles in a bounding box
@@ -265,7 +273,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent)
         {
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            var query = CreateAgentQuery(agent);
             if (query == null)
             {
                 return null;
@@ -282,7 +290,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
         {
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            var query = CreateAgentQuery(agent);
             if (query == null)
             {
                 return null;
@@ -329,13 +337,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            var graphQuery = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (graphQuery == null)
+            var query = CreateAgentQuery(agent);
+            if (query == null)
             {
                 return Enumerable.Empty<Vector3>();
             }
 
-            var status = graphQuery.CalcPath(
+            var status = query.CalcPath(
                 new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                 from, to, out var result);
 
@@ -362,7 +370,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = null;
 
             //Find agent query
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            var query = CreateAgentQuery(agent);
             if (query == null)
             {
                 return false;
@@ -598,13 +606,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IGraphDebug GetDebugInfo(AgentType agent)
         {
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
-            if (query == null)
-            {
-                return null;
-            }
-
-            return new GraphDebug(this, agent, query.GetAttachedNavMesh().GetBuildData());
+            return new GraphDebug(this, agent);
         }
 
         /// <inheritdoc/>
@@ -665,7 +667,7 @@ namespace Engine.PathFinding.RecastNavigation
         public void RequestMoveCrowd(Crowd crowd, AgentType agent, Vector3 p)
         {
             //Find agent query
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            var query = CreateAgentQuery(agent);
             if (query == null)
             {
                 return;
@@ -692,7 +694,7 @@ namespace Engine.PathFinding.RecastNavigation
         public void RequestMoveAgent(Crowd crowd, CrowdAgent crowdAgent, AgentType agent, Vector3 p)
         {
             //Find agent query
-            var query = GetAgentQueryFactory(agent)?.CreateQuery();
+            var query = CreateAgentQuery(agent);
             if (query == null)
             {
                 return;

@@ -1,11 +1,12 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Graph debug helper
     /// </summary>
@@ -27,12 +28,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="graph">Graph</param>
         /// <param name="agent">Agent</param>
         /// <param name="buildData">Build data</param>
-        internal GraphDebug(IGraph graph, AgentType agent, NavMeshBuildData buildData)
+        public GraphDebug(Graph graph, AgentType agent)
         {
-            Graph = graph;
-            Agent = agent;
+            Graph = graph ?? throw new ArgumentNullException(nameof(graph));
+            Agent = agent ?? throw new ArgumentNullException(nameof(agent));
 
-            this.buildData = buildData;
+            buildData = graph.CreateAgentQuery(agent)?.GetAttachedNavMesh()?.GetBuildData() ?? throw new ArgumentException("Invalid angent data", nameof(agent));
         }
 
         /// <inheritdoc/>
@@ -46,21 +47,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public readonly Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id)
         {
-            var debugType = (GraphDebugTypes)id;
-
-            if (debugType == GraphDebugTypes.Nodes)
+            return (GraphDebugTypes)id switch
             {
-                return GetNodes();
-            }
-
-            if (debugType == GraphDebugTypes.Heightfield)
-            {
-                return GetHeightfield();
-            }
-
-            return new();
+                GraphDebugTypes.Nodes => GetNodes(),
+                GraphDebugTypes.Heightfield => GetHeightfield(false),
+                GraphDebugTypes.WalkableHeightfield => GetHeightfield(true),
+                _ => new()
+            };
         }
 
+        /// <summary>
+        /// Gets the nodes debug information
+        /// </summary>
         private readonly Dictionary<Color4, IEnumerable<Triangle>> GetNodes()
         {
             var nodes = Graph.GetNodes(Agent).OfType<GraphNode>();
@@ -72,10 +70,11 @@ namespace Engine.PathFinding.RecastNavigation
             return nodes
                 .GroupBy(n => n.Color)
                 .ToDictionary(keySelector => keySelector.Key, elementSelector => elementSelector.SelectMany(gn => gn.Triangles).AsEnumerable());
-
         }
-
-        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetHeightfield()
+        /// <summary>
+        /// Gets the height field debug information
+        /// </summary>
+        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetHeightfield(bool walkable)
         {
             var hf = buildData.Heightfield;
             if (hf == null)
@@ -87,55 +86,55 @@ namespace Engine.PathFinding.RecastNavigation
             float cs = hf.CellSize;
             float ch = hf.CellHeight;
 
-            int w = hf.Width;
-            int h = hf.Height;
+            List<Triangle> triangles = new();
 
-            Dictionary<Color4, IEnumerable<Triangle>> result = new();
-
-            float delta = 1f / (w * 2);
-
-            for (int col = 0; col < h; ++col)
+            foreach (var (row, col, span) in hf.IterateSpans())
             {
-                for (int row = 0; row < w; ++row)
+                float fz = orig.Z + col * cs;
+                float fx = orig.X + row * cs;
+
+                var s = span;
+                do
                 {
-                    float v = 1f - (row * delta);
-                    Color4 rowColor = new(v, v, v, 0.5f);
-
-                    float fx = orig.X + row * cs;
-                    float fz = orig.Z + col * cs;
-                    var s = hf.Spans[row + col * w];
-                    while (s != null)
+                    if (walkable && s.Area != AreaTypes.RC_WALKABLE_AREA)
                     {
-                        var boxTris = AppendBox(fx, orig.Y + s.SMin * ch, fz, fx + cs, orig.Y + s.SMax * ch, fz + cs);
-
-                        if (!result.ContainsKey(rowColor))
-                        {
-                            result.Add(rowColor, boxTris);
-                        }
-                        else
-                        {
-                            result[rowColor] = result[rowColor].Concat(boxTris);
-                        }
-
                         s = s.Next;
+
+                        continue;
                     }
+
+                    var min = new Vector3(fx, orig.Y + s.SMin * ch, fz);
+                    var max = new Vector3(fx + cs, orig.Y + s.SMax * ch, fz + cs);
+
+                    var boxTris = TriangulateBox(min, max);
+                    triangles.AddRange(boxTris);
+
+                    s = s.Next;
                 }
+                while (s != null);
             }
 
-            return result;
+            return new()
+            {
+                { Color.White, triangles }
+            };
         }
-        private static IEnumerable<Triangle> AppendBox(float minx, float miny, float minz, float maxx, float maxy, float maxz)
+
+        /// <summary>
+        /// Triangulates a box from a bounding box
+        /// </summary>
+        private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max)
         {
             var boxVertices = new[]
             {
-                new Vector3(minx, miny, minz),
-                new Vector3(maxx, miny, minz),
-                new Vector3(maxx, miny, maxz),
-                new Vector3(minx, miny, maxz),
-                new Vector3(minx, maxy, minz),
-                new Vector3(maxx, maxy, minz),
-                new Vector3(maxx, maxy, maxz),
-                new Vector3(minx, maxy, maxz),
+                new Vector3(min.X, min.Y, min.Z),
+                new Vector3(max.X, min.Y, min.Z),
+                new Vector3(max.X, min.Y, max.Z),
+                new Vector3(min.X, min.Y, max.Z),
+                new Vector3(min.X, max.Y, min.Z),
+                new Vector3(max.X, max.Y, min.Z),
+                new Vector3(max.X, max.Y, max.Z),
+                new Vector3(min.X, max.Y, max.Z),
             };
 
             var boxIndices = new uint[]

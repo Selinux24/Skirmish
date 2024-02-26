@@ -9,10 +9,10 @@ namespace Engine.PathFinding
         /// <summary>
         /// Unwalkable area
         /// </summary>
-        Unwalkable = 0,
+        Unwalkable = 0b_0000_0000,
         /// <summary>
         /// Walkable area 
         /// </summary>
-        Walkable = 63,
+        Walkable = 0b_0011_1111,
     }
 }

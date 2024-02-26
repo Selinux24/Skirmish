@@ -18,5 +18,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// Height field
         /// </summary>
         Heightfield,
+        /// <summary>
+        /// Walkable height field
+        /// </summary>
+        WalkableHeightfield,
     }
 }
