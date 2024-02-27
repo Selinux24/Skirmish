@@ -419,10 +419,7 @@ namespace Engine
                 yaw = MathUtil.Mod(yaw, MathUtil.TwoPi);
             }
 
-            if (samples > 0)
-            {
-                outColor *= (1f / (float)samples);
-            }
+            outColor *= 1f / samples;
 
             return outColor;
         }
