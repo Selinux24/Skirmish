@@ -317,10 +317,10 @@ namespace Engine.Common
 
         private static bool ConstructIntersection3D(Triangle t1, Triangle t2, Vector3 n1, Vector3 n2, out Line3D? segment)
         {
-            Vector3 v1 = Vector3.Subtract(t1.Point2, t1.Point1);
-            Vector3 v2 = Vector3.Subtract(t2.Point3, t1.Point1);
-            Vector3 N = Vector3.Cross(v1, v2);
-            Vector3 v = Vector3.Subtract(t2.Point1, t1.Point1);
+            var v1 = Vector3.Subtract(t1.Point2, t1.Point1);
+            var v2 = Vector3.Subtract(t2.Point3, t1.Point1);
+            var N = Vector3.Cross(v1, v2);
+            var v = Vector3.Subtract(t2.Point1, t1.Point1);
 
             if (Vector3.Dot(v, N) > 0.0f)
             {
@@ -336,14 +336,14 @@ namespace Engine.Common
         {
             segment = null;
 
-            Vector3 v1 = Vector3.Subtract(t1.Point3, t1.Point1);
-            Vector3 N = Vector3.Cross(v1, s2);
+            var v1 = Vector3.Subtract(t1.Point3, t1.Point1);
+            var N = Vector3.Cross(v1, s2);
             if (Vector3.Dot(s1, N) > 0.0f)
             {
                 return false;
             }
 
-            Vector3 v2 = Vector3.Subtract(t2.Point2, t1.Point1);
+            var v2 = Vector3.Subtract(t2.Point2, t1.Point1);
             N = Vector3.Cross(v1, v2);
             if (Vector3.Dot(s1, N) > 0.0f)
             {
@@ -389,14 +389,14 @@ namespace Engine.Common
         {
             segment = null;
 
-            Vector3 v2 = Vector3.Subtract(t2.Point2, t1.Point1);
-            Vector3 N = Vector3.Cross(s2, v2);
+            var v2 = Vector3.Subtract(t2.Point2, t1.Point1);
+            var N = Vector3.Cross(s2, v2);
             if (Vector3.Dot(s1, N) < 0.0f)
             {
                 return false;
             }
 
-            Vector3 v1 = Vector3.Subtract(t1.Point3, t1.Point1);
+            var v1 = Vector3.Subtract(t1.Point3, t1.Point1);
             N = Vector3.Cross(v1, v2);
             if (Vector3.Dot(s1, N) >= 0.0f)
             {
@@ -491,7 +491,7 @@ namespace Engine.Common
 
         private static bool CheckMinMax(Triangle t1, Triangle t2)
         {
-            Vector3 n1 = Vector3.Cross(Vector3.Subtract(t2.Point1, t1.Point2), Vector3.Subtract(t1.Point1, t1.Point2));
+            var n1 = Vector3.Cross(Vector3.Subtract(t2.Point1, t1.Point2), Vector3.Subtract(t1.Point1, t1.Point2));
 
             if (Vector3.Dot(Vector3.Subtract(t2.Point2, t1.Point2), n1) > 0.0f)
             {
@@ -510,13 +510,13 @@ namespace Engine.Common
 
         private static bool Overlap2D(Triangle2D t1, Triangle2D t2)
         {
-            Vector2 p1 = t1.Point1;
-            Vector2 q1 = t1.Point2;
-            Vector2 r1 = t1.Point3;
+            var p1 = t1.Point1;
+            var q1 = t1.Point2;
+            var r1 = t1.Point3;
 
-            Vector2 p2 = t2.Point1;
-            Vector2 q2 = t2.Point2;
-            Vector2 r2 = t2.Point3;
+            var p2 = t2.Point1;
+            var q2 = t2.Point2;
+            var r2 = t2.Point3;
 
             if (Orient2D(new Triangle2D(p1, q1, r1)) < 0.0f)
             {
@@ -544,22 +544,22 @@ namespace Engine.Common
 
         private static float Orient2D(Triangle2D t)
         {
-            Vector2 a = t.Point1;
-            Vector2 b = t.Point2;
-            Vector2 c = t.Point3;
+            var a = t.Point1;
+            var b = t.Point2;
+            var c = t.Point3;
 
             return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
         }
 
         private static bool DetectIntersection2D(Triangle2D t1, Triangle2D t2)
         {
-            Vector2 p1 = t1.Point1;
-            Vector2 q1 = t1.Point2;
-            Vector2 r1 = t1.Point3;
+            var p1 = t1.Point1;
+            var q1 = t1.Point2;
+            var r1 = t1.Point3;
 
-            Vector2 p2 = t2.Point1;
-            Vector2 q2 = t2.Point2;
-            Vector2 r2 = t2.Point3;
+            var p2 = t2.Point1;
+            var q2 = t2.Point2;
+            var r2 = t2.Point3;
 
             if (Orient2D(new Triangle2D(p2, q2, p1)) >= 0.0f)
             {
@@ -608,13 +608,13 @@ namespace Engine.Common
 
         private static bool IntersectionVertex(Triangle2D t1, Triangle2D t2)
         {
-            Vector2 p1 = t1.Point1;
-            Vector2 q1 = t1.Point2;
-            Vector2 r1 = t1.Point3;
+            var p1 = t1.Point1;
+            var q1 = t1.Point2;
+            var r1 = t1.Point3;
 
-            Vector2 p2 = t2.Point1;
-            Vector2 q2 = t2.Point2;
-            Vector2 r2 = t2.Point3;
+            var p2 = t2.Point1;
+            var q2 = t2.Point2;
+            var r2 = t2.Point3;
 
             if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
             {
@@ -629,12 +629,9 @@ namespace Engine.Common
                         return Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f;
                     }
                 }
-                else if (Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f)
+                else if (Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f && Orient2D(new Triangle2D(r2, q2, r1)) <= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(r2, q2, r1)) <= 0.0f)
-                    {
-                        return Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f;
-                    }
+                    return Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f;
                 }
             }
             else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
@@ -654,12 +651,12 @@ namespace Engine.Common
 
         private static bool IntersectionEdge(Triangle2D t1, Triangle2D t2)
         {
-            Vector2 p1 = t1.Point1;
-            Vector2 q1 = t1.Point2;
-            Vector2 r1 = t1.Point3;
+            var p1 = t1.Point1;
+            var q1 = t1.Point2;
+            var r1 = t1.Point3;
 
-            Vector2 p2 = t2.Point1;
-            Vector2 r2 = t2.Point3;
+            var p2 = t2.Point1;
+            var r2 = t2.Point3;
 
             if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
             {
@@ -672,17 +669,14 @@ namespace Engine.Common
                     return Orient2D(new Triangle2D(r1, p1, p2)) >= 0.0f;
                 }
             }
-            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
+            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f && Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
+                if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
-                    {
-                        return true;
-                    }
-
-                    return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
+                    return true;
                 }
+
+                return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
             }
 
             return false;
