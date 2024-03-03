@@ -73,11 +73,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int i = 0; i < n; i++)
             {
-                var a = verts[i];
-                var b = verts[ArrayUtils.Next(i, n)];
-                var c = verts[ArrayUtils.Prev(i, n)];
+                var ca = verts[i];
+                var cb = verts[ArrayUtils.Next(i, n)];
+                var cc = verts[ArrayUtils.Prev(i, n)];
 
-                if (TriangulationHelper.InCone2D(a, b, c, corner.Coords))
+                if (TriangulationHelper.InCone2D(ca, cb, cc, corner.Coords))
                 {
                     int dx = verts[i].X - corner.X;
                     int dz = verts[i].Z - corner.Z;

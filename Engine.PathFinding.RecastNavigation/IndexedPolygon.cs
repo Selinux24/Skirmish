@@ -203,7 +203,6 @@ namespace Engine.PathFinding.RecastNavigation
             bool procRegs = pregs?.Any() ?? false;
 
             var mergedNpolys = polys.Length;
-
             var mergedPolys = polys.ToArray();
             var mergedareas = pareas?.ToArray() ?? Array.Empty<SamplePolyAreas>();
             var mergedregs = pregs?.ToArray() ?? Array.Empty<int>();
@@ -240,9 +239,9 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Cut to mergedNpolys
-            if (mergedPolys.Length != mergedNpolys) mergedPolys = mergedPolys.Take(mergedNpolys).ToArray();
-            if (procAreas && mergedareas.Length != mergedNpolys) mergedareas = mergedareas.Take(mergedNpolys).ToArray();
-            if (procRegs && mergedregs.Length != mergedNpolys) mergedregs = mergedregs.Take(mergedNpolys).ToArray();
+            mergedPolys = Helper.Truncate(mergedPolys, mergedNpolys);
+            mergedareas = Helper.Truncate(mergedareas, mergedNpolys);
+            mergedregs = Helper.Truncate(mergedregs, mergedNpolys);
 
             return (mergedPolys, mergedareas, mergedregs);
         }
@@ -288,7 +287,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var t = tris[j];
 
-                if (t.X == t.Y || t.X == t.Z || t.Y == t.Z)
+                if (!ValidateIndex(t))
                 {
                     continue;
                 }
@@ -306,23 +305,18 @@ namespace Engine.PathFinding.RecastNavigation
                 if (procRegs)
                 {
                     // If this polygon covers multiple region types then mark it as such
-                    if (hreg[t.X] != hreg[t.Y] || hreg[t.Y] != hreg[t.Z])
-                    {
-                        pregs[npolys] = RC_MULTIPLE_REGS;
-                    }
-                    else
-                    {
-                        pregs[npolys] = hreg[t.X];
-                    }
+                    bool multiReg = HastMultipleRegions(hreg, t);
+
+                    pregs[npolys] = multiReg ? RC_MULTIPLE_REGS : hreg[t.X];
                 }
 
                 npolys++;
             }
 
             // Cut to npolys
-            if (polys.Length != npolys) polys = polys.Take(npolys).ToArray();
-            if (procAreas && pareas.Length != npolys) pareas = pareas.Take(npolys).ToArray();
-            if (procRegs && pregs.Length != npolys) pregs = pregs.Take(npolys).ToArray();
+            polys = Helper.Truncate(polys, npolys);
+            pareas = Helper.Truncate(pareas, npolys);
+            pregs = Helper.Truncate(pregs, npolys);
 
             return (polys, pareas, pregs);
         }
@@ -337,6 +331,28 @@ namespace Engine.PathFinding.RecastNavigation
             var (polys, _, _) = CreateInitialPolygons(indices, tris, null, null);
 
             return polys;
+        }
+        /// <summary>
+        /// Gets wether the specified indexed triangle contains different indexes
+        /// </summary>
+        /// <param name="t">Indexed triangle</param>
+        private static bool ValidateIndex(Int3 t)
+        {
+            if (t.X == t.Y || t.X == t.Z || t.Y == t.Z)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Gets wether the specified indexed triangle has multiple regions
+        /// </summary>
+        /// <param name="hreg">Regions</param>
+        /// <param name="t">Indexed triangle</param>
+        private static bool HastMultipleRegions(int[] hreg, Int3 t)
+        {
+            return hreg[t.X] != hreg[t.Y] || hreg[t.Y] != hreg[t.Z];
         }
 
         /// <summary>

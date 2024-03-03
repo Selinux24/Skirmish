@@ -615,6 +615,27 @@ namespace Engine
             if (value2 > max) max = value2;
             if (value3 > max) max = value3;
         }
+        /// <summary>
+        /// Truncates the spefied array
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="array">Array</param>
+        /// <param name="count">Number of items</param>
+        public static T[] Truncate<T>(T[] array, int count)
+        {
+            if (array == null)
+            {
+                return null;
+            }
+
+            if (array.Length <= count)
+            {
+                //Copy array
+                return array.ToArray();
+            }
+
+            return array.Take(count).ToArray();
+        }
 
         #endregion
 

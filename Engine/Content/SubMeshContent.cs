@@ -94,9 +94,8 @@ namespace Engine.Content
 
             var firstMesh = meshArray.First();
 
-            string material = firstMesh.Material;
             var topology = firstMesh.Topology;
-            var vertexType = firstMesh.VertexType;
+            string material = firstMesh.Material;
             bool isTextured = firstMesh.Textured;
 
             var verts = new List<VertexData>();

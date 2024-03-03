@@ -173,21 +173,21 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets wether p is into the ab,ac cone
         /// </summary>
-        /// <param name="a">A point</param>
-        /// <param name="b">B point</param>
-        /// <param name="c">C point</param>
+        /// <param name="ca">A point</param>
+        /// <param name="cb">B point</param>
+        /// <param name="cc">C point</param>
         /// <param name="p">Point to test</param>
-        public static bool InCone2D(Int3 a, Int3 b, Int3 c, Int3 p)
+        public static bool InCone2D(Int3 ca, Int3 cb, Int3 cc, Int3 p)
         {
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
-            if (LeftOn2D(c, a, b))
+            if (LeftOn2D(cc, ca, cb))
             {
-                return Left2D(a, p, c) && Left2D(p, a, b);
+                return Left2D(ca, p, cc) && Left2D(p, ca, cb);
             }
 
             // Assume (i-1,i,i+1) not collinear.
             // else P[i] is reflex.
-            return !(LeftOn2D(a, p, b) && LeftOn2D(p, a, c));
+            return !(LeftOn2D(ca, p, cb) && LeftOn2D(p, ca, cc));
         }
         /// <summary>
         /// Gets wether j is into the i.i-1,i-i+1 cone
@@ -335,24 +335,24 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
-        /// Gets whether c is on the left of the segment ab
+        /// Gets whether p is on the left of the segment ab
         /// </summary>
-        /// <param name="a">Segment a point</param>
-        /// <param name="b">Segment b point</param>
-        /// <param name="c">Point to test</param>
-        private static bool Left2D(Int3 a, Int3 b, Int3 c)
+        /// <param name="sa">Segment a point</param>
+        /// <param name="sb">Segment b point</param>
+        /// <param name="p">Point to test</param>
+        private static bool Left2D(Int3 sa, Int3 sb, Int3 p)
         {
-            return Utils.TriArea2D(a, b, c) > 0;
+            return Utils.TriArea2D(sa, sb, p) > 0;
         }
         /// <summary>
-        /// Gets whether c is on the left of the segment ab or lies in the segment
+        /// Gets whether p is on the left of the segment ab or lies in the segment
         /// </summary>
-        /// <param name="a">Segment a point</param>
-        /// <param name="b">Segment b point</param>
-        /// <param name="c">Point to test</param>
-        private static bool LeftOn2D(Int3 a, Int3 b, Int3 c)
+        /// <param name="sa">Segment a point</param>
+        /// <param name="sb">Segment b point</param>
+        /// <param name="p">Point to test</param>
+        private static bool LeftOn2D(Int3 sa, Int3 sb, Int3 p)
         {
-            return Utils.TriArea2D(a, b, c) >= 0;
+            return Utils.TriArea2D(sa, sb, p) >= 0;
         }
 
         /// <summary>
