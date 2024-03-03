@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -69,14 +68,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var diags = new List<PotentialDiagonal>();
 
-            for (int j = 0; j < outline.NVertices; j++)
+            var verts = ContourVertex.ToInt3List(outline.Vertices);
+            int n = outline.NVertices;
+
+            for (int i = 0; i < n; i++)
             {
-                if (TriangulationHelper.InCone2D(j, outline.NVertices, ContourVertex.ToInt3List(outline.Vertices), corner.Coords))
+                var a = verts[i];
+                var b = verts[ArrayUtils.Next(i, n)];
+                var c = verts[ArrayUtils.Prev(i, n)];
+
+                if (TriangulationHelper.InCone2D(a, b, c, corner.Coords))
                 {
-                    int dx = outline.Vertices[j].X - corner.X;
-                    int dz = outline.Vertices[j].Z - corner.Z;
-                    var pd = new PotentialDiagonal { Vert = j, Dist = dx * dx + dz * dz };
-                    diags.Add(pd);
+                    int dx = verts[i].X - corner.X;
+                    int dz = verts[i].Z - corner.Z;
+                    diags.Add(new() { Vert = i, Dist = dx * dx + dz * dz });
                 }
             }
 

@@ -250,7 +250,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             bool offMeshConnection = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
             if (offMeshConnection)
             {
-                float distSq = Vector2.DistanceSquared(NPos.XZ(), Corners.EndPath.XZ());
+                float distSq = Utils.DistanceSqr2D(NPos, Corners.EndPath);
                 if (distSq < radius * radius)
                 {
                     return true;
@@ -273,7 +273,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             bool endOfPath = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
             if (endOfPath)
             {
-                return Math.Min(Vector2.Distance(NPos.XZ(), Corners.EndPath.XZ()), range);
+                return Math.Min(Utils.Distance2D(NPos, Corners.EndPath), range);
             }
 
             return range;

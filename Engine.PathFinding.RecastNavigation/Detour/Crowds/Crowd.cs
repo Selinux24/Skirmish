@@ -718,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // Update the collision boundary after certain distance has been passed or
                 // if it has become invalid.
                 float updateThr = ag.Params.CollisionQueryRange * 0.25f;
-                float distSqr = Vector2.DistanceSquared(ag.NPos.XZ(), ag.Boundary.GetCenter().XZ());
+                float distSqr = Utils.DistanceSqr2D(ag.NPos, ag.Boundary.GetCenter());
                 if (distSqr > updateThr * updateThr || !ag.Boundary.IsValid(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]))
                 {
                     ag.Boundary.Update(
@@ -781,7 +781,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     anim.PolyRef = refs[1];
                     anim.Active = true;
                     anim.T = 0.0f;
-                    anim.TMax = Vector2.Distance(anim.StartPos.XZ(), anim.EndPos.XZ()) / ag.Params.MaxSpeed * 0.5f;
+                    anim.TMax = Utils.Distance2D(anim.StartPos, anim.EndPos) / ag.Params.MaxSpeed * 0.5f;
                     anim.StartPos = startPos;
                     anim.EndPos = endPos;
 

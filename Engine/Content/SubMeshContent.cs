@@ -85,6 +85,13 @@ namespace Engine.Content
                 return true;
             }
 
+            if (meshArray.Select(m => (m.VertexType, m.Topology)).Distinct().Count() > 1)
+            {
+                optimizedMesh = null;
+
+                return false;
+            }
+
             var firstMesh = meshArray.First();
 
             string material = firstMesh.Material;
@@ -99,13 +106,6 @@ namespace Engine.Content
 
             foreach (var mesh in meshArray)
             {
-                if (mesh.VertexType != vertexType || mesh.Topology != topology)
-                {
-                    optimizedMesh = null;
-
-                    return false;
-                }
-
                 if (!mesh.Transform.IsIdentity)
                 {
                     mesh.BakeTransform(mesh.Transform);
@@ -157,14 +157,8 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
-            Vertices = Array.Empty<VertexData>();
-            VertexType = VertexTypes.Unknown;
-
-            if (vertices?.Any() == true)
-            {
-                Vertices = new List<VertexData>(vertices).ToArray();
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
-            }
+            Vertices = vertices?.ToArray() ?? Array.Empty<VertexData>();
+            VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexData.GetVertexType(Vertices[0], Textured);
         }
         /// <summary>
         /// Sets the submesh index list
@@ -172,12 +166,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         public void SetIndices(IEnumerable<uint> indices)
         {
-            Indices = Array.Empty<uint>();
-
-            if (indices?.Any() == true)
-            {
-                Indices = new List<uint>(indices).ToArray();
-            }
+            Indices = indices?.ToArray() ?? Array.Empty<uint>();
         }
         /// <summary>
         /// Sets whether the submesh is textured or not
@@ -187,7 +176,7 @@ namespace Engine.Content
         {
             Textured = isTextured;
 
-            if (Vertices?.Length > 0)
+            if (Vertices.Length > 0)
             {
                 VertexType = VertexData.GetVertexType(Vertices[0], Textured);
             }
@@ -198,61 +187,63 @@ namespace Engine.Content
         /// </summary>
         public void ComputeTangents()
         {
-            if (Vertices.Length > 0)
+            if (Vertices.Length == 0)
             {
-                if (Indices.Length > 0)
-                {
-                    for (int i = 0; i < Indices.Length; i += 3)
-                    {
-                        var v0 = Vertices[(int)Indices[i + 0]];
-                        var v1 = Vertices[(int)Indices[i + 1]];
-                        var v2 = Vertices[(int)Indices[i + 2]];
-
-                        var n = GeometryUtil.ComputeNormals(
-                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                        v0.Tangent = n.Tangent;
-                        v1.Tangent = n.Tangent;
-                        v2.Tangent = n.Tangent;
-
-                        v0.BiNormal = n.Binormal;
-                        v1.BiNormal = n.Binormal;
-                        v2.BiNormal = n.Binormal;
-
-                        Vertices[(int)Indices[i + 0]] = v0;
-                        Vertices[(int)Indices[i + 1]] = v1;
-                        Vertices[(int)Indices[i + 2]] = v2;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Vertices.Length; i += 3)
-                    {
-                        var v0 = Vertices[i + 0];
-                        var v1 = Vertices[i + 1];
-                        var v2 = Vertices[i + 2];
-
-                        var n = GeometryUtil.ComputeNormals(
-                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                        v0.Tangent = n.Tangent;
-                        v1.Tangent = n.Tangent;
-                        v2.Tangent = n.Tangent;
-
-                        v0.BiNormal = n.Binormal;
-                        v1.BiNormal = n.Binormal;
-                        v2.BiNormal = n.Binormal;
-
-                        Vertices[i + 0] = v0;
-                        Vertices[i + 1] = v1;
-                        Vertices[i + 2] = v2;
-                    }
-                }
-
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+                return;
             }
+
+            if (Indices.Length > 0)
+            {
+                for (int i = 0; i < Indices.Length; i += 3)
+                {
+                    var v0 = Vertices[(int)Indices[i + 0]];
+                    var v1 = Vertices[(int)Indices[i + 1]];
+                    var v2 = Vertices[(int)Indices[i + 2]];
+
+                    var n = GeometryUtil.ComputeNormals(
+                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
+
+                    v0.Tangent = n.Tangent;
+                    v1.Tangent = n.Tangent;
+                    v2.Tangent = n.Tangent;
+
+                    v0.BiNormal = n.Binormal;
+                    v1.BiNormal = n.Binormal;
+                    v2.BiNormal = n.Binormal;
+
+                    Vertices[(int)Indices[i + 0]] = v0;
+                    Vertices[(int)Indices[i + 1]] = v1;
+                    Vertices[(int)Indices[i + 2]] = v2;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Vertices.Length; i += 3)
+                {
+                    var v0 = Vertices[i + 0];
+                    var v1 = Vertices[i + 1];
+                    var v2 = Vertices[i + 2];
+
+                    var n = GeometryUtil.ComputeNormals(
+                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
+
+                    v0.Tangent = n.Tangent;
+                    v1.Tangent = n.Tangent;
+                    v2.Tangent = n.Tangent;
+
+                    v0.BiNormal = n.Binormal;
+                    v1.BiNormal = n.Binormal;
+                    v2.BiNormal = n.Binormal;
+
+                    Vertices[i + 0] = v0;
+                    Vertices[i + 1] = v1;
+                    Vertices[i + 2] = v2;
+                }
+            }
+
+            VertexType = VertexData.GetVertexType(Vertices[0], Textured);
         }
 
         /// <summary>
@@ -274,39 +265,37 @@ namespace Engine.Content
         /// <returns>Returns the triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            if (Topology == Topology.TriangleList)
-            {
-                var vertices = GetVertices().ToArray();
-
-                var triangles = new List<Triangle>();
-
-                if (Indices.Length > 0)
-                {
-                    for (int i = 0; i < Indices.Length; i += 3)
-                    {
-                        triangles.Add(new Triangle(
-                            vertices[(int)Indices[i + 0]].Position.Value,
-                            vertices[(int)Indices[i + 1]].Position.Value,
-                            vertices[(int)Indices[i + 2]].Position.Value));
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < vertices.Length; i += 3)
-                    {
-                        triangles.Add(new Triangle(
-                            vertices[i + 0].Position.Value,
-                            vertices[i + 1].Position.Value,
-                            vertices[i + 2].Position.Value));
-                    }
-                }
-
-                return triangles.ToArray();
-            }
-            else
+            if (Topology != Topology.TriangleList)
             {
                 throw new InvalidOperationException($"Bad source topology for triangle list: {Topology}");
             }
+
+            var vertices = GetVertices().ToArray();
+
+            var triangles = new List<Triangle>();
+
+            if (Indices.Length > 0)
+            {
+                for (int i = 0; i < Indices.Length; i += 3)
+                {
+                    triangles.Add(new Triangle(
+                        vertices[(int)Indices[i + 0]].Position.Value,
+                        vertices[(int)Indices[i + 1]].Position.Value,
+                        vertices[(int)Indices[i + 2]].Position.Value));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < vertices.Length; i += 3)
+                {
+                    triangles.Add(new Triangle(
+                        vertices[i + 0].Position.Value,
+                        vertices[i + 1].Position.Value,
+                        vertices[i + 2].Position.Value));
+                }
+            }
+
+            return triangles.ToArray();
         }
         /// <summary>
         /// Transforms the vertex data and resets de internal transform to identity
@@ -320,11 +309,7 @@ namespace Engine.Content
             }
 
             Transform = Matrix.Identity;
-
-            for (int i = 0; i < Vertices.Length; i++)
-            {
-                Vertices[i] = Vertices[i].Transform(transform);
-            }
+            Vertices = Vertices.Select(v => v.Transform(transform)).ToArray();
         }
         /// <summary>
         /// Sets the specified transform matrix

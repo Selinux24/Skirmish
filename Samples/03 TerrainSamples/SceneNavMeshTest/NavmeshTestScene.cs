@@ -10,6 +10,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using TerrainSamples.Mapping;
 using TerrainSamples.SceneStart;
@@ -59,11 +60,11 @@ namespace TerrainSamples.SceneNavmeshTest
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
         private PrimitiveListDrawer<Triangle> markDrawer = null;
 
         private Model inputGeometry = null;
+        private Model debugGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
@@ -346,12 +347,6 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private async Task InitializeDebug()
         {
-            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = 50000,
-            };
-            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
-
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
@@ -736,17 +731,9 @@ namespace TerrainSamples.SceneNavmeshTest
         }
         private void DrawGraphNodes(AgentType agent)
         {
-            graphDrawer.Clear();
+            Components.RemoveComponent(debugGeometry);
 
-            var debugInfo = GetDebugInfo(agent);
-            if (debugInfo == null)
-            {
-                return;
-            }
-
-            var nodes = debugInfo.GetInfo((int)GraphDebugTypes.Nodes);
-
-            graphDrawer.AddPrimitives(nodes);
+            LoadResourcesAsync(LoadDebugModel(agent));
         }
         private void DrawMarkers()
         {
@@ -765,6 +752,43 @@ namespace TerrainSamples.SceneNavmeshTest
 
                 markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
             }
+        }
+        private async Task LoadDebugModel(AgentType agent)
+        {
+            var debugInfo = GetDebugInfo(agent);
+            if (debugInfo == null)
+            {
+                return;
+            }
+
+            var geometry = debugInfo.GetInfo((int)GraphDebugTypes.Nodes);
+
+            List<VertexData> vertices = new();
+            foreach (var color in geometry.Keys)
+            {
+                var verts = geometry[color].SelectMany(t => t.GetVertices());
+                var vData = verts.Select(v => new VertexData() { Color = new Color4((Color3)color, 0.5f), Position = v });
+
+                vertices.AddRange(vData.ToArray());
+            }
+
+            var data = ContentData.GenerateTriangleList(vertices);
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(data),
+                CastShadow = ShadowCastingAlgorihtms.None,
+                PathFindingHull = PickingHullTypes.None,
+                CullingVolumeType = CullingVolumeTypes.None,
+                ColliderType = ColliderTypes.None,
+                PickingHull = PickingHullTypes.None,
+                TextureIndex = 0,
+                UseAnisotropicFiltering = false,
+                Optimize = false,
+                DepthEnabled = false,
+                StartsVisible = true,
+            };
+
+            debugGeometry = await AddComponentEffect<Model, ModelDescription>("debugGeometry", "debugGeometry", desc);
         }
 
         private void EnqueueGraph()

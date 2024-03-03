@@ -179,6 +179,42 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return a.X == b.X && a.Z == b.Z;
         }
+        /// <summary>
+        /// Gets the squared distance between two points in the xz plane
+        /// </summary>
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static int DistanceSqr2D(Int3 a, Int3 b)
+        {
+            int dx = b.X - a.X;
+            int dz = b.Z - a.Z;
+            return dx * dx + dz * dz;
+        }
+        /// <summary>
+        /// Gets the squared distance between two points in the xz plane
+        /// </summary>
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static float DistanceSqr2D(Vector3 a, Vector3 b)
+        {
+            float dx = b.X - a.X;
+            float dz = b.Z - a.Z;
+            return dx * dx + dz * dz;
+        }
+        /// <summary>
+        /// Gets the distance between two points in the xz plane
+        /// </summary>
+        /// <param name="a">Point A</param>
+        /// <param name="b">Point B</param>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static float Distance2D(Vector3 a, Vector3 b)
+        {
+            float dx = b.X - a.X;
+            float dz = b.Z - a.Z;
+            return (float)Math.Sqrt(dx * dx + dz * dz);
+        }
 
         /// <summary>
         /// Gets the squared minimum distance from the pt point to the (p,q) segment

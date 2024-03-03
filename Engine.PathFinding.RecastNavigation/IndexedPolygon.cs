@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -189,14 +188,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// Merges the polygon list with their regions and areas
         /// </summary>
         /// <param name="polys">Polygon list</param>
-        /// <param name="npolys">Number of polygons</param>
         /// <param name="pregs">Region list</param>
         /// <param name="pareas">Area list</param>
+        /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns the resulting merged polygon</returns>
-        public static (IndexedPolygon[] MergedPolys, int MergedNPolys, SamplePolyAreas[] MergedAreas, int[] MergedRegs) MergePolygons(IndexedPolygon[] polys, int npolys, SamplePolyAreas[] pareas, int[] pregs, Int3[] verts)
+        public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, SamplePolyAreas[] pareas, int[] pregs, Int3[] verts)
         {
+            if (polys?.Any() != true)
+            {
+                return (Array.Empty<IndexedPolygon>(), Array.Empty<SamplePolyAreas>(), Array.Empty<int>());
+            }
+
+            bool procAreas = pareas?.Any() ?? false;
+            bool procRegs = pregs?.Any() ?? false;
+
+            var mergedNpolys = polys.Length;
+
             var mergedPolys = polys.ToArray();
-            var mergedNpolys = npolys;
             var mergedareas = pareas?.ToArray() ?? Array.Empty<SamplePolyAreas>();
             var mergedregs = pregs?.ToArray() ?? Array.Empty<int>();
 
@@ -214,12 +222,12 @@ namespace Engine.PathFinding.RecastNavigation
                 mergedPolys[bestPa] = Merge(mergedPolys[bestPa], mergedPolys[bestPb], bestEa, bestEb);
                 mergedPolys[bestPb] = mergedPolys[mergedNpolys - 1].Copy();
 
-                if (mergedareas.Any())
+                if (procAreas)
                 {
                     mergedareas[bestPb] = mergedareas[mergedNpolys - 1];
                 }
 
-                if (mergedregs.Any())
+                if (procRegs)
                 {
                     if (mergedregs[bestPa] != mergedregs[bestPb])
                     {
@@ -232,40 +240,45 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Cut to mergedNpolys
-            mergedPolys = mergedPolys.Take(mergedNpolys).ToArray();
-            if (mergedareas.Any()) mergedareas = mergedareas.Take(mergedNpolys).ToArray();
-            if (mergedregs.Any()) mergedregs = mergedregs.Take(mergedNpolys).ToArray();
+            if (mergedPolys.Length != mergedNpolys) mergedPolys = mergedPolys.Take(mergedNpolys).ToArray();
+            if (procAreas && mergedareas.Length != mergedNpolys) mergedareas = mergedareas.Take(mergedNpolys).ToArray();
+            if (procRegs && mergedregs.Length != mergedNpolys) mergedregs = mergedregs.Take(mergedNpolys).ToArray();
 
-            return (mergedPolys, mergedNpolys, mergedareas, mergedregs);
+            return (mergedPolys, mergedareas, mergedregs);
         }
         /// <summary>
         /// Merges the polygon list
         /// </summary>
         /// <param name="polys">Polygon list</param>
-        /// <param name="npolys">Number of polygons</param>
+        /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns the resulting merged polygon</returns>
-        public static (IndexedPolygon[] MergedPolys, int MergedNPolys) MergePolygons(IndexedPolygon[] polys, int npolys, Int3[] verts)
+        public static IndexedPolygon[] MergePolygons(IndexedPolygon[] polys, Int3[] verts)
         {
-            var (mergedPolys, mergedNpolys, _, _) = MergePolygons(polys, npolys, null, null, verts);
+            var (mergedPolys, _, _) = MergePolygons(polys, null, null, verts);
 
-            return (mergedPolys, mergedNpolys);
+            return mergedPolys;
         }
         /// <summary>
-        /// Build initial polygons for the remove operation
+        /// Creates the initial polygon list from a triangle definition
         /// </summary>
         /// <param name="tris">Triangle list</param>
-        /// <param name="ntris">Number of triangles</param>
-        /// <param name="hole">Hole indices</param>
+        /// <param name="indices">Triangle indices</param>
         /// <param name="hreg">Region id list</param>
         /// <param name="harea">Area list</param>
         /// <returns>Returns the indexed polygons, regions and areas</returns>
-        public static (IndexedPolygon[] Polys, int NPolys, SamplePolyAreas[] PAreas, int[] PRegs) BuildRemoveInitialPolygons(Int3[] tris, int ntris, int[] hole, SamplePolyAreas[] harea, int[] hreg)
+        public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Int3[] tris, SamplePolyAreas[] harea, int[] hreg)
         {
+            if (tris?.Any() != true)
+            {
+                return (Array.Empty<IndexedPolygon>(), Array.Empty<SamplePolyAreas>(), Array.Empty<int>());
+            }
+
             bool procAreas = harea?.Any() ?? false;
             bool procRegs = hreg?.Any() ?? false;
 
             // Merge the hole triangles back to polygons.
-            var polys = new IndexedPolygon[ntris + 1];
+            int ntris = tris.Length;
+            var polys = new IndexedPolygon[ntris];
             var pareas = new SamplePolyAreas[ntris];
             var pregs = new int[ntris];
 
@@ -281,11 +294,14 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 polys[npolys] = new();
-                polys[npolys][0] = hole[t.X];
-                polys[npolys][1] = hole[t.Y];
-                polys[npolys][2] = hole[t.Z];
+                polys[npolys][0] = indices[t.X];
+                polys[npolys][1] = indices[t.Y];
+                polys[npolys][2] = indices[t.Z];
 
-                if (procAreas) pareas[npolys] = harea[t.X];
+                if (procAreas)
+                {
+                    pareas[npolys] = harea[t.X];
+                }
 
                 if (procRegs)
                 {
@@ -303,7 +319,24 @@ namespace Engine.PathFinding.RecastNavigation
                 npolys++;
             }
 
-            return (polys, npolys, pareas, pregs);
+            // Cut to npolys
+            if (polys.Length != npolys) polys = polys.Take(npolys).ToArray();
+            if (procAreas && pareas.Length != npolys) pareas = pareas.Take(npolys).ToArray();
+            if (procRegs && pregs.Length != npolys) pregs = pregs.Take(npolys).ToArray();
+
+            return (polys, pareas, pregs);
+        }
+        /// <summary>
+        /// Creates the initial polygon list from a triangle definition
+        /// </summary>
+        /// <param name="tris">Triangle list</param>
+        /// <param name="indices">Triangle indices</param>
+        /// <returns>Returns the indexed polygon list and the number o polygons in the list</returns>
+        public static IndexedPolygon[] CreateInitialPolygons(int[] indices, Int3[] tris)
+        {
+            var (polys, _, _) = CreateInitialPolygons(indices, tris, null, null);
+
+            return polys;
         }
 
         /// <summary>
@@ -628,40 +661,9 @@ namespace Engine.PathFinding.RecastNavigation
                 if (e.PolyEdge[1] != openPolyEdgeValue)
                 {
                     var p0 = polys[e.Poly[0]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = TileCacheContour.DT_EXT_LINK | e.PolyEdge[1];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = Edge.DT_EXT_LINK | e.PolyEdge[1];
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates the initial polygon list from a triangle definition
-        /// </summary>
-        /// <param name="indices">Triangle indices</param>
-        /// <param name="tris">Triangle list</param>
-        /// <param name="ntris">Number of triangles in the triangle list</param>
-        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
-        /// <returns>Returns the indexed polygon list and the number o polygons in the list</returns>
-        public static (IndexedPolygon[] Polys, int NPolys) CreateInitialPolygons(int[] indices, Int3[] tris, int ntris, int maxVertsPerCont)
-        {
-            int npolys = 0;
-            var polys = new IndexedPolygon[maxVertsPerCont];
-
-            for (int j = 0; j < ntris; ++j)
-            {
-                var t = tris[j];
-
-                if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
-                {
-                    var poly = new IndexedPolygon(DT_VERTS_PER_POLYGON);
-                    poly[0] = indices[t.X];
-                    poly[1] = indices[t.Y];
-                    poly[2] = indices[t.Z];
-
-                    polys[npolys++] = poly;
-                }
-            }
-
-            return (polys, npolys);
         }
 
         /// <summary>
@@ -807,7 +809,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public bool IsExternalLink(int adjIndex)
         {
-            return TileCacheContour.IsExternalLink(vertices[adjIndex]);
+            return Edge.IsExternalLink(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets whether the vertex has stored a direction or not
@@ -815,7 +817,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public bool HasDirection(int adjIndex)
         {
-            return TileCacheContour.HasDirection(vertices[adjIndex]);
+            return Edge.HasDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the stored direction at the specified adjacency index
@@ -823,7 +825,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public int GetDirection(int adjIndex)
         {
-            return TileCacheContour.GetVertexDirection(vertices[adjIndex]);
+            return Edge.GetVertexDirection(vertices[adjIndex]);
         }
         /// <summary>
         /// Gets the segment indices from the specified index

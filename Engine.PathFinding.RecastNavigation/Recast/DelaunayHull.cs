@@ -256,7 +256,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float cZ = (v1Sq * (v3.X - v2.X) + v2Sq * (v1.X - v3.X) + v3Sq * (v2.X - v1.X)) / (2 * cp);
             var center = new Vector3(cX, 0, cZ);
 
-            float radius = Vector2.Distance(center.XZ(), v1.XZ());
+            float radius = Utils.Distance2D(center, v1);
             center = Vector3.Add(center, p1);
 
             return (center, radius);
@@ -407,7 +407,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return true;
             }
 
-            float d = Vector2.Distance(c.XZ(), pts[u].XZ());
+            float d = Utils.Distance2D(c, pts[u]);
             if (d > r * (1 + Tolerance))
             {
                 // Outside current circumcircle, skip.

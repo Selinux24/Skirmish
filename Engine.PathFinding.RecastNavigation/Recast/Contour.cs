@@ -8,6 +8,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public class Contour
     {
         /// <summary>
+        /// Portal flag mask
+        /// </summary>
+        public const int RC_PORTAL_FLAG = 0x0f;
+        /// <summary>
         /// Border vertex flag.
         /// If a region ID has this bit set, then the associated element lies on
         /// a tile border. If a contour vertex's region ID has this bit set, the 
@@ -29,10 +33,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// fields value can't be used directly.
         /// </summary>
         public const int RC_CONTOUR_REG_MASK = 0xffff;
-        /// <summary>
-        /// Portal flag mask
-        /// </summary>
-        public const int RC_PORTAL_FLAG = 0x0f;
 
         /// <summary>
         /// Gets whether the vertex has the <see cref="RC_BORDER_VERTEX"/> flag
@@ -156,29 +156,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Triangulates the polygon's contour
         /// </summary>
-        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
-        /// <param name="indices">Resulting polygon indices</param>
-        /// <param name="tris">Resulting polygon triangles</param>
-        /// <returns>Returns the number of triangles</returns>
-        public int Triangulate(int maxVertsPerCont, out int[] indices, out Int3[] tris)
+        /// <returns>Returns the triangulated indices and vertices list</returns>
+        public Int3[] Triangulate()
         {
-            indices = new int[maxVertsPerCont];
+            var verts = ContourVertex.ToInt3List(Vertices);
 
             // Triangulate contour
-            for (int j = 0; j < NVertices; ++j)
-            {
-                indices[j] = j;
-            }
-
-            int ntris = TriangulationHelper.Triangulate(ContourVertex.ToInt3List(Vertices), ref indices, out tris);
-            if (ntris <= 0)
+            var (triRes, tris) = TriangulationHelper.Triangulate(verts);
+            if (!triRes || tris.Length <= 0)
             {
                 // Bad triangulation, should not happen.
                 Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
-                ntris = -ntris;
             }
 
-            return ntris;
+            return tris;
         }
 
         /// <inheritdoc/>

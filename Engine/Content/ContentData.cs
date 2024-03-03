@@ -112,6 +112,18 @@ namespace Engine.Content
         /// Generates a triangle list model content from scratch
         /// </summary>
         /// <param name="vertices">Vertex list</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        {
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
+
+            return Generate(Topology.TriangleList, vertices, Array.Empty<uint>(), materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>

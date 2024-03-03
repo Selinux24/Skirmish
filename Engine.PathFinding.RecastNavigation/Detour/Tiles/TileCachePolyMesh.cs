@@ -57,7 +57,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="nvp">Number of maximum vertex per polygon</param>
         public static TileCachePolyMesh Build(TileCacheContourSet cset, int nvp)
         {
-            cset.GetGeometryConfiguration(out int maxVertices, out int maxPolys, out int maxVertsPerCont);
+            cset.GetGeometryConfiguration(out int maxVertices, out int maxPolys, out _);
 
             var mesh = new TileCachePolyMesh
             {
@@ -87,15 +87,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Triangulate contour
-                var (indices, tris, ntris) = cont.Triangulate(maxVertsPerCont);
+                var tris = cont.Triangulate();
 
                 // Add and merge vertices.
+                int[] indices = new int[cont.NVertices];
                 for (int j = 0; j < cont.NVertices; ++j)
                 {
                     var cv = cont.Vertices[j];
 
                     indices[j] = mesh.AddVertex(cv, firstVert, nextVert);
-                    if ((cv.Flag & TileCacheContour.DT_BORDER_VERTEX) != 0)
+                    if (Edge.IsBorderVertex(cv.Flag))
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -103,8 +104,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Build initial polygons.
-                var (polys, npolys) = IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont);
-                if (npolys == 0)
+                var polys = IndexedPolygon.CreateInitialPolygons(indices, tris);
+                if (polys.Length == 0)
                 {
                     continue;
                 }
@@ -112,13 +113,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 if (nvp > 3)
                 {
                     // Merge polygons.
-                    var (mergedPolys, mergedNpolys) = IndexedPolygon.MergePolygons(polys, npolys, mesh.Verts);
-                    polys = mergedPolys;
-                    npolys = mergedNpolys;
+                    polys = IndexedPolygon.MergePolygons(polys, mesh.Verts);
                 }
 
                 // Store polygons.
-                if (!mesh.StorePolygons(polys, npolys, cont, maxPolys))
+                if (!mesh.StorePolygons(polys, polys.Length, cont, maxPolys))
                 {
                     throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.NPolys} (max:{maxPolys}).");
                 }
@@ -300,21 +299,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Triangulate the hole.
-            int ntris = TriangulationHelper.Triangulate(triVerts, ref triHole, out var tris);
-            if (ntris < 0)
+            var (triRes, tris) = TriangulationHelper.Triangulate(triVerts, triHole);
+            if (!triRes)
             {
                 Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
-
-                ntris = -ntris;
             }
-            if (ntris > MAX_REM_EDGES)
+
+            if (tris.Length > MAX_REM_EDGES)
             {
                 return false;
             }
 
             // Merge the hole triangles back to polygons.
-            var (polys, npolys, pareas, _) = IndexedPolygon.BuildRemoveInitialPolygons(tris, ntris, hole, harea, null);
-            if (npolys == 0)
+            var (polys, pareas, _) = IndexedPolygon.CreateInitialPolygons(hole, tris, harea, null);
+            if (polys.Length == 0)
             {
                 return true;
             }
@@ -322,14 +320,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (NVP > 3)
             {
                 // Merge polygons.
-                var (mergedPolys, mergedNPolys, mergedAreas, _) = IndexedPolygon.MergePolygons(polys, npolys, pareas, null, Verts);
+                var (mergedPolys, mergedAreas, _) = IndexedPolygon.MergePolygons(polys, pareas, null, Verts);
                 polys = mergedPolys;
-                npolys = mergedNPolys;
                 pareas = mergedAreas;
             }
 
             // Store polygons.
-            if (!StorePolygons(polys, npolys, pareas, maxPolys))
+            if (!StorePolygons(polys, polys.Length, pareas, maxPolys))
             {
                 Logger.WriteWarning(this, $"removeVertex: Too many polygons {NPolys} (max:{maxPolys}).");
 
@@ -569,12 +566,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var va = cont.Vertices[k];
                     var vb = cont.Vertices[j];
-                    if (!TileCacheContour.HasDirection(va.Flag))
+                    if (!Edge.HasDirection(va.Flag))
                     {
                         continue;
                     }
 
-                    int dir = TileCacheContour.GetVertexDirection(va.Flag);
+                    int dir = Edge.GetVertexDirection(va.Flag);
                     if (dir == 0 || dir == 2)
                     {
                         // Find matching horizontal edge

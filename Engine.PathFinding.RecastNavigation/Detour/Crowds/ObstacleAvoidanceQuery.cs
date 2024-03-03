@@ -413,8 +413,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private float ProcessSample(ObstacleAvoidanceProcessSampleRequest req)
         {
             // penalty for straying away from the desired and current velocities
-            float vpen = m_params.WeightDesVel * (Vector2.Distance(req.VCand.XZ(), req.DVel.XZ()) * m_invVmax);
-            float vcpen = m_params.WeightCurVel * (Vector2.Distance(req.VCand.XZ(), req.Vel.XZ()) * m_invVmax);
+            float vpen = m_params.WeightDesVel * (Utils.Distance2D(req.VCand, req.DVel) * m_invVmax);
+            float vcpen = m_params.WeightCurVel * (Utils.Distance2D(req.VCand, req.Vel) * m_invVmax);
 
             // find the threshold hit time to bail out based on the early out penalty
             // (see how the penalty is calculated below to understnad)

@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -183,7 +182,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh</returns>
         public static PolyMesh Build(ContourSet cset, int nvp)
         {
-            cset.GetGeometryConfiguration(out int maxVertices, out int maxPolys, out int maxVertsPerCont);
+            cset.GetGeometryConfiguration(out int maxVertices, out int maxPolys, out _);
             if (maxVertices >= MAX_VERTICES - 1)
             {
                 throw new EngineException($"rcBuildPolyMesh: Too many vertices {maxVertices}.");
@@ -224,14 +223,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Triangulate contour
-                int ntris = cont.Triangulate(maxVertsPerCont, out var indices, out var tris);
+                var tris = cont.Triangulate();
 
                 // Add and merge vertices.
+                int[] indices = new int[cont.NVertices];
                 for (int j = 0; j < cont.NVertices; ++j)
                 {
-                    var v = cont.Vertices[j];
-                    indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
-                    if (Contour.IsBorderVertex(v.Flag))
+                    var cv = cont.Vertices[j];
+
+                    indices[j] = mesh.AddVertex(cv.X, cv.Y, cv.Z, firstVert, nextVert);
+                    if (Contour.IsBorderVertex(cv.Flag))
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = true;
@@ -239,17 +240,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Build initial polygons.
-                var (polys, npolys) = IndexedPolygon.CreateInitialPolygons(indices, tris, ntris, maxVertsPerCont);
-                if (npolys == 0)
+                var polys = IndexedPolygon.CreateInitialPolygons(indices, tris);
+                if (polys.Length == 0)
                 {
                     continue;
                 }
 
                 // Merge polygons.
-                var (mergedPolys, mergedNpolys) = IndexedPolygon.MergePolygons(polys, npolys, mesh.Verts);
+                var mergedPolys = IndexedPolygon.MergePolygons(polys, mesh.Verts);
 
                 // Store polygons.
-                if (!mesh.StorePolygons(mergedPolys, mergedNpolys, cont, maxPolys))
+                if (!mesh.StorePolygons(mergedPolys, cont, maxPolys))
                 {
                     throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.NPolys} (max:{maxPolys}).");
                 }
@@ -613,17 +614,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var (tverts, thole, hole, harea, hreg) = GetTriangulateHole(edges, ref nedges, numRemovedVerts);
 
             // Triangulate the hole.
-            int ntris = TriangulationHelper.Triangulate(tverts, ref thole, out var tris);
-            if (ntris < 0)
+            var (triRes, tris) = TriangulationHelper.Triangulate(tverts, thole);
+            if (!triRes)
             {
                 Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
-
-                ntris = -ntris;
             }
 
             // Merge the hole triangles back to polygons.
-            var (polys, npolys, pareas, pregs) = IndexedPolygon.BuildRemoveInitialPolygons(tris, ntris, hole, harea, hreg);
-            if (npolys == 0)
+            var (polys, pareas, pregs) = IndexedPolygon.CreateInitialPolygons(hole, tris, harea, hreg);
+            if (polys.Length == 0)
             {
                 return true;
             }
@@ -631,15 +630,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (NVP > 3)
             {
                 // Merge polygons.
-                var (mergedPolys, mergedNPolys, mergedAreas, mergedRegs) = IndexedPolygon.MergePolygons(polys, npolys, pareas, pregs, Verts);
+                var (mergedPolys, mergedAreas, mergedRegs) = IndexedPolygon.MergePolygons(polys, pareas, pregs, Verts);
                 polys = mergedPolys;
-                npolys = mergedNPolys;
                 pareas = mergedAreas;
                 pregs = mergedRegs;
             }
 
             // Store polygons.
-            if (!StorePolygons(polys, npolys, pareas, pregs, maxPolys))
+            if (!StorePolygons(polys, polys.Length, pareas, pregs, maxPolys))
             {
                 Logger.WriteWarning(this, $"removeVertex: Too many polygons {NPolys} (max:{maxPolys}).");
 
@@ -875,7 +873,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var va = Verts[p[j]];
                 var vb = Verts[p[nj]];
 
-                if (TileCacheContour.IsPortal(va, vb, w, h, out int v))
+                if (Edge.IsPortal(va, vb, w, h, out int v))
                 {
                     p[NVP + j] = v;
                 }
@@ -912,18 +910,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Stores the polygon list into the mesh
         /// </summary>
         /// <param name="polys">Polygon index list</param>
-        /// <param name="npolys">Number of polygon indices</param>
         /// <param name="cont">Contour data</param>
         /// <param name="maxPolys">Maximum number of polygons to store</param>
-        private bool StorePolygons(IndexedPolygon[] polys, int npolys, Contour cont, int maxPolys)
+        private bool StorePolygons(IndexedPolygon[] polys, Contour cont, int maxPolys)
         {
-            for (int i = 0; i < npolys; ++i)
+            if (polys.Length > maxPolys)
             {
-                if (npolys > maxPolys)
-                {
-                    return false;
-                }
+                return false;
+            }
 
+            for (int i = 0; i < polys.Length; ++i)
+            {
                 //Polygon with adjacency
                 var p = new IndexedPolygon(NVP * 2);
                 p.CopyVertices(polys[i], NVP);

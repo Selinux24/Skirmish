@@ -61,7 +61,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             while (cornerPolys.Count > 0)
             {
                 if (cornerPolys.StartFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    Vector2.DistanceSquared(cornerPolys.StartPath.XZ(), m_pos.XZ()) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
+                    Utils.DistanceSqr2D(cornerPolys.StartPath, m_pos) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
                 {
                     break;
                 }
@@ -90,7 +90,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Clamp the ray to max distance.
             var goal = target;
-            float dist = Vector2.Distance(m_pos.XZ(), goal.XZ());
+            float dist = Utils.Distance2D(m_pos, goal);
 
             // If too close to the goal, do not try to optimize.
             if (dist < 0.01f)

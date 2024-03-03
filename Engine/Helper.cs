@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -307,6 +306,20 @@ namespace Engine
 
         #region Array Utils
 
+        /// <summary>
+        /// Creates an array initialized with sequential numbers
+        /// </summary>
+        /// <param name="n">Number of total values in the array</param>
+        /// <param name="start">Start value</param>
+        public static int[] CreateSequentialArray(int n, int start = 0)
+        {
+            int[] res = new int[n];
+            for (int j = 0; j < n; ++j)
+            {
+                res[j] = start + j;
+            }
+            return res;
+        }
         /// <summary>
         /// Generate an array initialized to defaultValue
         /// </summary>

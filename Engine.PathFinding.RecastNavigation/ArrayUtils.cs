@@ -56,23 +56,18 @@ namespace Engine.PathFinding.RecastNavigation
             an++;
         }
         /// <summary>
-        /// Removes n items from index position in the specified array
+        /// Removes the item at index position in the specified array
         /// </summary>
         /// <param name="arr">Array</param>
         /// <param name="index">Start position</param>
-        /// <param name="n">Number of items</param>
+        /// <param name="n">Number of items in the array</param>
         /// <returns>Returns the resulting array</returns>
-        public static T[] RemoveRange<T>(T[] arr, int index, int n)
+        public static void RemoveAt<T>(T[] arr, int index, int n)
         {
-            //Copy array
-            var res = arr.ToArray();
-
             for (int i = index; i < n; i++)
             {
-                res[i] = res[i + 1];
+                arr[i] = arr[i + 1];
             }
-
-            return res;
         }
         /// <summary>
         /// Resets the array values
