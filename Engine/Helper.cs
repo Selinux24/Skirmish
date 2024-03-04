@@ -625,7 +625,7 @@ namespace Engine
         {
             if (array == null)
             {
-                return null;
+                return Array.Empty<T>();
             }
 
             if (array.Length <= count)

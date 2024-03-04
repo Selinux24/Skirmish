@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using TerrainSamples.Mapping;
 using TerrainSamples.SceneStart;
 
-namespace TerrainSamples.SceneNavmeshTest
+namespace TerrainSamples.SceneNavMeshTest
 {
     /// <summary>
     /// Navigation mesh test scene
@@ -466,6 +466,175 @@ namespace TerrainSamples.SceneNavmeshTest
                     Game.Input.MouseYDelta);
             }
         }
+        private void UpdateLoadingText()
+        {
+            string partition = nmsettings.UseTileCache ? "Using TileCache" : $"Partition {nmsettings.PartitionType}";
+            string loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds.";
+            debug.Text = $"Build {nmsettings.BuildMode} | {partition} => {loading}";
+        }
+        private void UpdateGameState()
+        {
+            if (InputProcessedByUI)
+            {
+                return;
+            }
+
+            if (gameState == States.AddObstacle)
+            {
+                UpdateGameStateAddObstacle();
+                return;
+            }
+
+            if (gameState == States.AddArea)
+            {
+                UpdateGameStateAddArea();
+                return;
+            }
+
+            if (gameState == States.Default)
+            {
+                UpdateGameStateDefault();
+            }
+        }
+        private void UpdateGameStateAddObstacle()
+        {
+            if (!GContacPoint.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateObstacleRemove();
+            }
+            else
+            {
+                UpdateObstacleAdd();
+            }
+        }
+        private void UpdateObstacleAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            var p = r.PickingResult.Position;
+            float h = 1f;
+            var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
+            var cy = new BoundingCylinder(center, 0.5f, h);
+            int id = NavigationGraph.AddObstacle(cy);
+            var obs = new ObstacleMarker()
+            {
+                Id = id,
+                Obstacle = cy,
+            };
+            obstacles.Add(obs);
+            DrawMarkers();
+
+            NavigationGraph.UpdateAt(p);
+
+            EndAddObstacleState();
+        }
+        private void UpdateObstacleRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var obs in obstacles)
+            {
+                if (obs.Bbox.Intersects(ref ray))
+                {
+                    NavigationGraph.RemoveObstacle(obs.Id);
+                    obstacles.Remove(obs);
+                    DrawMarkers();
+
+                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
+
+                    EndAddObstacleState();
+                    break;
+                }
+            }
+        }
+        private void UpdateGameStateAddArea()
+        {
+            if (!GContacPoint.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateAreaRemove();
+            }
+            else
+            {
+                UpdateAreaAdd();
+            }
+        }
+        private void UpdateAreaAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            float hmin = 0.1f;
+            float hmax = 6f;
+            var center = r.PickingResult.Position;
+            center.Y = 0;
+            float radius = 2.5f;
+            var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
+            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, -hmin, hmax - hmin) { AreaType = GraphAreaTypes.Walkable, });
+            var area = new AreaMarker()
+            {
+                Id = id,
+                Center = center,
+                Radius = radius,
+            };
+            areas.Add(area);
+            DrawMarkers();
+            EnqueueGraph();
+
+            EndAddAreaState();
+        }
+        private void UpdateAreaRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var area in areas)
+            {
+                var center = area.Center;
+                var radius = area.Radius;
+                var plane = new Plane(center, Vector3.Up);
+                if (!plane.Intersects(ref ray, out Vector3 p))
+                {
+                    continue;
+                }
+                if (Vector3.Distance(p, center) > radius)
+                {
+                    continue;
+                }
+
+                PathFinderDescription.Input.RemoveArea(area.Id);
+                areas.Remove(area);
+                DrawMarkers();
+                EnqueueGraph();
+
+                EndAddAreaState();
+                break;
+            }
+        }
+        private void UpdateGameStateDefault()
+        {
+            UpdateNavmeshInput();
+            UpdateGraphInput();
+        }
         private void UpdateNavmeshInput()
         {
             if (NmRndPointCircle.JustReleased)
@@ -707,12 +876,6 @@ namespace TerrainSamples.SceneNavmeshTest
             DrawPoint(position, 0.25f, pColor);
             DrawTriangle(triangle, Color.White);
         }
-        private void UpdateLoadingText()
-        {
-            string partition = nmsettings.UseTileCache ? "Using TileCache" : $"Partition {nmsettings.PartitionType}";
-            string loading = loadState ?? $"Build Time: {lastElapsedSeconds:0.00000} seconds.";
-            debug.Text = $"Build {nmsettings.BuildMode} | {partition} => {loading}";
-        }
 
         private void DrawPoint(Vector3 position, float size, Color color)
         {
@@ -931,165 +1094,6 @@ namespace TerrainSamples.SceneNavmeshTest
             mainPanel.Visible = true;
         }
 
-        private void UpdateGameState()
-        {
-            if (gameState == States.Default)
-            {
-                UpdateGameStateDefault();
-                return;
-            }
-
-            if (gameState == States.AddObstacle)
-            {
-                UpdateGameStateAddObstacle();
-                return;
-            }
-
-            if (gameState == States.AddArea)
-            {
-                UpdateGameStateAddArea();
-            }
-        }
-        private void UpdateGameStateDefault()
-        {
-            UpdateNavmeshInput();
-            UpdateGraphInput();
-        }
-        private void UpdateGameStateAddObstacle()
-        {
-            if (!GContacPoint.JustReleased)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            if (remove)
-            {
-                UpdateObstacleRemove();
-            }
-            else
-            {
-                UpdateObstacleAdd();
-            }
-        }
-        private void UpdateObstacleAdd()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            var p = r.PickingResult.Position;
-            float h = 1f;
-            var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
-            var cy = new BoundingCylinder(center, 0.5f, h);
-            int id = NavigationGraph.AddObstacle(cy);
-            var obs = new ObstacleMarker()
-            {
-                Id = id,
-                Obstacle = cy,
-            };
-            obstacles.Add(obs);
-            DrawMarkers();
-
-            NavigationGraph.UpdateAt(p);
-
-            EndAddObstacleState();
-        }
-        private void UpdateObstacleRemove()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            var ray = (Ray)pRay;
-
-            foreach (var obs in obstacles)
-            {
-                if (obs.Bbox.Intersects(ref ray))
-                {
-                    NavigationGraph.RemoveObstacle(obs.Id);
-                    obstacles.Remove(obs);
-                    DrawMarkers();
-
-                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
-
-                    EndAddObstacleState();
-                    break;
-                }
-            }
-        }
-        private void UpdateGameStateAddArea()
-        {
-            if (!GContacPoint.JustReleased)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            if (remove)
-            {
-                UpdateAreaRemove();
-            }
-            else
-            {
-                UpdateAreaAdd();
-            }
-        }
-        private void UpdateAreaAdd()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            float hmin = 0.1f;
-            float hmax = 6f;
-            var center = r.PickingResult.Position;
-            center.Y = 0;
-            float radius = 2.5f;
-            var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
-            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, -hmin, hmax - hmin) { AreaType = GraphAreaTypes.Walkable, });
-            var area = new AreaMarker()
-            {
-                Id = id,
-                Center = center,
-                Radius = radius,
-            };
-            areas.Add(area);
-            DrawMarkers();
-            EnqueueGraph();
-
-            EndAddAreaState();
-        }
-        private void UpdateAreaRemove()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            var ray = (Ray)pRay;
-
-            foreach (var area in areas)
-            {
-                var center = area.Center;
-                var radius = area.Radius;
-                var plane = new Plane(center, Vector3.Up);
-                if (!plane.Intersects(ref ray, out Vector3 p))
-                {
-                    continue;
-                }
-                if (Vector3.Distance(p, center) > radius)
-                {
-                    continue;
-                }
-
-                PathFinderDescription.Input.RemoveArea(area.Id);
-                areas.Remove(area);
-                DrawMarkers();
-                EnqueueGraph();
-
-                EndAddAreaState();
-                break;
-            }
-        }
-
         public override void GameGraphicsResized()
         {
             base.GameGraphicsResized();
@@ -1110,27 +1114,5 @@ namespace TerrainSamples.SceneNavmeshTest
             mainPanel.Top = panel.Top + panel.Height;
             mainPanel.Anchor = Anchors.Right;
         }
-    }
-
-    struct ObstacleMarker
-    {
-        public int Id { get; set; }
-        public BoundingCylinder Obstacle { get; set; }
-        public readonly BoundingBox Bbox
-        {
-            get
-            {
-                var center = Obstacle.Center;
-                var extents = new Vector3(Obstacle.Radius, Obstacle.Height * 0.5f, Obstacle.Radius);
-                return new(-extents + center, extents + center);
-            }
-        }
-    }
-
-    struct AreaMarker
-    {
-        public int Id { get; set; }
-        public Vector3 Center { get; set; }
-        public float Radius { get; set; }
     }
 }

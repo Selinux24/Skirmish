@@ -1,7 +1,7 @@
 ﻿using Engine.PathFinding.RecastNavigation;
 using System;
 
-namespace TerrainSamples.SceneNavmeshTest
+namespace TerrainSamples.SceneNavMeshTest
 {
     [Serializable]
     public class Player : Agent

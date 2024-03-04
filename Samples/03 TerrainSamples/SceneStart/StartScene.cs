@@ -384,7 +384,7 @@ namespace TerrainSamples.SceneStart
             if (sender == sceneGridButton) Game.SetScene<SceneGrid.GridScene>();
             if (sender == sceneHeightmapButton) Game.SetScene<SceneHeightmap.HeightmapScene>();
             if (sender == sceneModularDungeonButton) ModularDungeonTabsShow();
-            if (sender == sceneNavMeshTestButton) Game.SetScene<SceneNavmeshTest.NavmeshTestScene>();
+            if (sender == sceneNavMeshTestButton) Game.SetScene<SceneNavMeshTest.NavmeshTestScene>();
             if (sender == scenePerlinNoiseButton) Game.SetScene<ScenePerlinNoise.PerlinNoiseScene>();
             if (sender == sceneRtsButton) Game.SetScene<SceneRts.RtsScene>();
             if (sender == sceneSkyboxButton) Game.SetScene<SceneSkybox.SkyboxScene>();
