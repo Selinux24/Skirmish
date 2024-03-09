@@ -115,7 +115,7 @@ namespace Engine
         /// <summary>
         /// Gets wether the input is being processed by user interface controls
         /// </summary>
-        public bool InputProcessedByUI { get { return FocusedControl != null; } }
+        public bool InputProcessedByUI { get { return FocusedControl != null && TopMostControl != null; } }
 
         /// <summary>
         /// Constructor

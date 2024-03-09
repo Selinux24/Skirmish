@@ -54,8 +54,10 @@ namespace TerrainSamples.SceneNavMeshTest
         private UITextArea message = null;
 
         private UIPanel mainPanel = null;
-        private UIButton btnObstacle = null;
+        private UIButton btnDebug = null;
+        private UIPanel debugPanel = null;
         private UIButton btnArea = null;
+        private UIButton btnObstacle = null;
 
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
@@ -73,18 +75,11 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private bool uiReady = false;
         private bool gameReady = false;
-        enum States
-        {
-            Default,
-            AddObstacle,
-            AddArea,
-            AddConnection,
-            PathFinding,
-        }
-        private States gameState = States.Default;
+        private readonly StateManager stateManager = new();
 
         private readonly List<ObstacleMarker> obstacles = new();
         private readonly List<AreaMarker> areas = new();
+        private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -170,21 +165,43 @@ namespace TerrainSamples.SceneNavMeshTest
             var emptyDesc = SpriteDescription.Default();
             emptyDesc.BaseColor = new Color4(sceneButtonColor.RGB(), 0.5f);
 
-            btnObstacle = await InitializeButton(nameof(btnObstacle), "Obstacles", btnDesc);
-            btnArea = await InitializeButton(nameof(btnArea), "Areas", btnDesc);
+            btnDebug = await InitializeButton(nameof(btnDebug), "Debug", btnDesc, SceneButtonClick);
+            btnArea = await InitializeButton(nameof(btnArea), "Areas", btnDesc, SceneButtonClick);
+            btnObstacle = await InitializeButton(nameof(btnObstacle), "Obstacles", btnDesc, SceneButtonClick);
 
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", "Empty", emptyDesc), false);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty2", "Empty", emptyDesc), false);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", "Empty", emptyDesc), false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", "Empty", emptyDesc), false);
+            mainPanel.AddChild(btnDebug, false);
             mainPanel.AddChild(btnArea, false);
             mainPanel.AddChild(btnObstacle, false);
+
+            var enumValues = Enum
+                .GetValues<GraphDebugTypes>()
+                .Except(new[] { GraphDebugTypes.None });
+
+            var debugDesc = UIPanelDescription.Default(Color.Transparent);
+            debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", debugDesc);
+            debugPanel.Spacing = 10;
+            debugPanel.Padding = 15;
+            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Count()));
+            debugPanel.Visible = false;
+
+            foreach (var e in enumValues)
+            {
+                var btn = await InitializeButton($"btnDebug{e}", $"{e}", btnDesc, (ctrl, args) => SceneButtonDebugClick(args, e));
+                debugPanel.AddChild(btn, false);
+            }
         }
-        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
+        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Action<IUIControl, MouseEventArgs> clickAction = null)
         {
             var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, LayerUI);
-            button.MouseClick += SceneButtonClick;
             button.Caption.Text = caption;
+
+            if (clickAction != null)
+            {
+                button.MouseClick += (ctrl, args) => clickAction(ctrl, args);
+            }
 
             return button;
         }
@@ -194,6 +211,11 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 resUi.ThrowExceptions();
             }
+
+            stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
+            stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
+            stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
+            stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
 
             UpdateLayout();
             InitializeInputMapping();
@@ -419,11 +441,6 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (GameExit.JustReleased)
-            {
-                Game.SetScene<StartScene>();
-            }
-
             UpdateGameState();
         }
         private void UpdateCameraInput()
@@ -479,25 +496,25 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (gameState == States.AddObstacle)
+            stateManager.UpdateState();
+        }
+        private void UpdateGameStateDefault()
+        {
+            if (GameExit.JustReleased)
             {
-                UpdateGameStateAddObstacle();
-                return;
+                Game.SetScene<StartScene>();
             }
 
-            if (gameState == States.AddArea)
-            {
-                UpdateGameStateAddArea();
-                return;
-            }
-
-            if (gameState == States.Default)
-            {
-                UpdateGameStateDefault();
-            }
+            UpdateNavmeshInput();
+            UpdateGraphInput();
         }
         private void UpdateGameStateAddObstacle()
         {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
             if (!GContacPoint.JustReleased)
             {
                 return;
@@ -536,7 +553,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             NavigationGraph.UpdateAt(p);
 
-            EndAddObstacleState();
+            stateManager.StartState(States.Default);
         }
         private void UpdateObstacleRemove()
         {
@@ -553,13 +570,18 @@ namespace TerrainSamples.SceneNavMeshTest
 
                     NavigationGraph.UpdateAt(obs.Obstacle.Center);
 
-                    EndAddObstacleState();
+                    stateManager.StartState(States.Default);
                     break;
                 }
             }
         }
         private void UpdateGameStateAddArea()
         {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
             if (!GContacPoint.JustReleased)
             {
                 return;
@@ -600,7 +622,7 @@ namespace TerrainSamples.SceneNavMeshTest
             DrawMarkers();
             EnqueueGraph();
 
-            EndAddAreaState();
+            stateManager.StartState(States.Default);
         }
         private void UpdateAreaRemove()
         {
@@ -626,14 +648,16 @@ namespace TerrainSamples.SceneNavMeshTest
                 DrawMarkers();
                 EnqueueGraph();
 
-                EndAddAreaState();
+                stateManager.StartState(States.Default);
                 break;
             }
         }
-        private void UpdateGameStateDefault()
+        private void UpdateGameStateDebug()
         {
-            UpdateNavmeshInput();
-            UpdateGraphInput();
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
         }
         private void UpdateNavmeshInput()
         {
@@ -896,7 +920,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             Components.RemoveComponent(debugGeometry);
 
-            LoadResourcesAsync(LoadDebugModel(agent));
+            LoadResourcesAsync(LoadDebugModel(agent, debugType));
         }
         private void DrawMarkers()
         {
@@ -916,7 +940,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
             }
         }
-        private async Task LoadDebugModel(AgentType agent)
+        private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
         {
             var debugInfo = GetDebugInfo(agent);
             if (debugInfo == null)
@@ -924,7 +948,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            var geometry = debugInfo.GetInfo((int)GraphDebugTypes.Nodes);
+            var geometry = debugInfo.GetInfo((int)debug);
 
             List<VertexData> vertices = new();
             foreach (var color in geometry.Keys)
@@ -1035,63 +1059,71 @@ namespace TerrainSamples.SceneNavMeshTest
 
             await Task.Delay(100);
 
-            if (sender == btnObstacle) StartAddObstacleState();
-            if (sender == btnArea) StartAddAreaState();
+            if (sender == btnDebug) stateManager.StartState(States.Debug);
+            if (sender == btnArea) stateManager.StartState(States.AddArea);
+            if (sender == btnObstacle)
+            {
+                if (!nmsettings.UseTileCache)
+                {
+                    ShowMessage("Tile cache must be enabled.");
+
+                    return;
+                }
+
+                stateManager.StartState(States.AddObstacle);
+            }
         }
-        private void StartAddObstacleState()
+        private async void SceneButtonDebugClick(MouseEventArgs e, GraphDebugTypes debug)
         {
-            if (gameState != States.Default)
+            if (!gameReady)
             {
                 return;
             }
 
-            if (!nmsettings.UseTileCache)
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
-                ShowMessage("Tile cache must be enabled.");
+                return;
+            }
+
+            if (debugType == debug)
+            {
+                stateManager.StartState(States.Default);
 
                 return;
             }
 
-            gameState = States.AddObstacle;
+            await Task.Delay(100);
 
+            debugType = debug;
+
+            DrawGraphNodes(agent);
+
+            stateManager.StartState(States.Default);
+        }
+
+        private void StartDefaultState()
+        {
+            mainPanel.Visible = true;
+            debugPanel.Visible = false;
+        }
+        private void StartDebugState()
+        {
             mainPanel.Visible = false;
-
-            ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
+            debugPanel.Visible = true;
         }
         private void StartAddAreaState()
         {
-            if (gameState != States.Default)
-            {
-                return;
-            }
-
-            gameState = States.AddArea;
-
             mainPanel.Visible = false;
+            debugPanel.Visible = false;
 
             ShowMessage($"Press {GContacPoint} to add area. SHIFT {GContacPoint} to remove.");
         }
-        private void EndAddObstacleState()
+        private void StartAddObstacleState()
         {
-            if (gameState != States.AddObstacle)
-            {
-                return;
-            }
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
 
-            gameState = States.Default;
-
-            mainPanel.Visible = true;
-        }
-        private void EndAddAreaState()
-        {
-            if (gameState != States.AddArea)
-            {
-                return;
-            }
-
-            gameState = States.Default;
-
-            mainPanel.Visible = true;
+            ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
         }
 
         public override void GameGraphicsResized()
@@ -1109,10 +1141,18 @@ namespace TerrainSamples.SceneNavMeshTest
             message.Width = Game.Form.RenderWidth;
             message.Anchor = Anchors.BottomRight;
 
-            mainPanel.Height = Game.Form.RenderHeight * 0.0666f;
-            mainPanel.Width = Game.Form.RenderWidth * 0.5f;
+            float cellH = Game.Form.RenderHeight * 0.0666f;
+            float cellW = Game.Form.RenderWidth * 0.1f;
+
+            mainPanel.Height = cellH + mainPanel.Padding.Top;
+            mainPanel.Width = cellW * mainPanel.GetGridLayout().Columns;
             mainPanel.Top = panel.Top + panel.Height;
             mainPanel.Anchor = Anchors.Right;
+
+            debugPanel.Height = cellH * debugPanel.GetGridLayout().Rows;
+            debugPanel.Width = cellW + debugPanel.Padding.Left;
+            debugPanel.Top = panel.Top + panel.Height;
+            debugPanel.Anchor = Anchors.Right;
         }
     }
 }
