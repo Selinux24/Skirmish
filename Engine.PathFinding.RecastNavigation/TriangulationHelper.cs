@@ -38,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the resulting triangle list</returns>
         public static (bool Result, Int3[] Tris) Triangulate(Int3[] verts, int[] indices)
         {
-            if ((verts?.Length ?? 0) == 0 || (indices?.Length ?? 0) != 0)
+            if ((verts?.Length ?? 0) == 0 || (indices?.Length ?? 0) == 0)
             {
                 return (false, []);
             }
