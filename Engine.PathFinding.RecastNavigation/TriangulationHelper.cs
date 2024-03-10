@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,12 +38,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the resulting triangle list</returns>
         public static (bool Result, Int3[] Tris) Triangulate(Int3[] verts, int[] indices)
         {
-            if (verts?.Any() != true || indices?.Any() != true)
+            if ((verts?.Length ?? 0) == 0 || (indices?.Length ?? 0) != 0)
             {
-                return (false, Array.Empty<Int3>());
+                return (false, []);
             }
 
-            var dst = new List<Int3>();
+            List<Int3> dst = [];
 
             // The last bit of the index is used to indicate if the vertex can be removed.
             var idx = SetRemovableIndices(verts, indices);
@@ -454,7 +453,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return tris.ToArray();
+            return [.. tris];
         }
     }
 }

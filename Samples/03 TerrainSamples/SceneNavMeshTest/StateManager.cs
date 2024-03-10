@@ -5,29 +5,21 @@ namespace TerrainSamples.SceneNavMeshTest
 {
     class StateManager
     {
-        private readonly Dictionary<States, Action> stateStartingCallbacks = new();
-        private readonly Dictionary<States, Action> stateUpdatingCallbacks = new();
+        private readonly Dictionary<States, Action> stateStartingCallbacks = [];
+        private readonly Dictionary<States, Action> stateUpdatingCallbacks = [];
 
         public States GameState { get; private set; } = States.Default;
 
         public void InitializeState(States state, Action startingAction, Action updatingAction)
         {
-            if (stateStartingCallbacks.ContainsKey(state))
+            if (!stateStartingCallbacks.TryAdd(state, startingAction))
             {
                 stateStartingCallbacks[state] = startingAction;
             }
-            else
-            {
-                stateStartingCallbacks.Add(state, startingAction);
-            }
 
-            if (stateUpdatingCallbacks.ContainsKey(state))
+            if (!stateUpdatingCallbacks.TryAdd(state, updatingAction))
             {
                 stateUpdatingCallbacks[state] = updatingAction;
-            }
-            else
-            {
-                stateUpdatingCallbacks.Add(state, updatingAction);
             }
         }
 

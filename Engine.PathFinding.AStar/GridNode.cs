@@ -11,13 +11,13 @@ namespace Engine.PathFinding.AStar
     /// <remarks>
     /// Constructor
     /// </remarks>
-    /// <param name="ne">North east point</param>
-    /// <param name="nw">North west point</param>
-    /// <param name="sw">South west point</param>
-    /// <param name="se">South east point</param>
+    /// <param name="northEast">North east point</param>
+    /// <param name="northWest">North west point</param>
+    /// <param name="southWest">South west point</param>
+    /// <param name="southEast">South east point</param>
     /// <param name="center">Center point</param>
     /// <param name="cost">Cost</param>
-    public class GridNode(Vector3 ne, Vector3 nw, Vector3 sw, Vector3 se, Vector3 center, float cost) : IGraphNode
+    public class GridNode(Vector3 northEast, Vector3 northWest, Vector3 southWest, Vector3 southEast, Vector3 center, float cost) : IGraphNode
     {
         /// <summary>
         /// Connected nodes dictionary
@@ -29,28 +29,28 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         protected List<GridNode> ConnectedNodes = [];
 
-        /// <summary>
-        /// North West point
-        /// </summary>
-        public Vector3 NorthWest { get; private set; } = nw;
-        /// <summary>
-        /// North East point
-        /// </summary>
-        public Vector3 NorthEast { get; private set; } = ne;
-        /// <summary>
-        /// South West point
-        /// </summary>
-        public Vector3 SouthWest { get; private set; } = se;
-        /// <summary>
-        /// South East point
-        /// </summary>
-        public Vector3 SouthEast { get; private set; } = sw;
         /// <inheritdoc/>
         public int Id { get; private set; }
         /// <inheritdoc/>
         public Vector3 Center { get; private set; } = center;
         /// <inheritdoc/>
         public float TotalCost { get; set; } = cost;
+        /// <summary>
+        /// North West point
+        /// </summary>
+        public Vector3 NorthWest { get; private set; } = northWest;
+        /// <summary>
+        /// North East point
+        /// </summary>
+        public Vector3 NorthEast { get; private set; } = northEast;
+        /// <summary>
+        /// South West point
+        /// </summary>
+        public Vector3 SouthWest { get; private set; } = southWest;
+        /// <summary>
+        /// South East point
+        /// </summary>
+        public Vector3 SouthEast { get; private set; } = southEast;
         /// <summary>
         /// Node state
         /// </summary>
@@ -179,11 +179,11 @@ namespace Engine.PathFinding.AStar
             var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
             var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
 
-            var center = (p0 + p1 + p2 + p3) / 4f;
+            var c = (p0 + p1 + p2 + p3) / 4f;
 
-            float cost = Helper.Angle(Vector3.Up, va);
+            float v = Helper.Angle(Vector3.Up, va);
 
-            return new GridNode(ne, nw, sw, se, center, cost);
+            return new GridNode(ne, nw, sw, se, c, v);
         }
         /// <summary>
         /// Generates a node list from multiple collision data

@@ -57,7 +57,7 @@ namespace Engine.Animation
 
             if (keyframes?.Any() != true)
             {
-                Keyframes = Array.Empty<Keyframe>();
+                Keyframes = [];
                 StartTime = 0;
                 EndTime = 0;
 
@@ -65,7 +65,7 @@ namespace Engine.Animation
             }
 
             //Pre-normalize rotations
-            var tmp = new List<Keyframe>(keyframes);
+            List<Keyframe> tmp = new(keyframes);
             for (int i = 0; i < tmp.Count; i++)
             {
                 tmp[i].Rotation.Normalize();
@@ -104,7 +104,7 @@ namespace Engine.Animation
             rotation = Quaternion.Identity;
             scale = Vector3.One;
 
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
                 return;
             }
@@ -150,7 +150,7 @@ namespace Engine.Animation
         /// <param name="keyTime">Key time</param>
         private int FindFrame(float keyTime)
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
                 return 0;
             }
@@ -205,9 +205,9 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy()
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
-                return new JointAnimation(Joint, Array.Empty<Keyframe>());
+                return new JointAnimation(Joint, []);
             }
 
             Keyframe[] kfs = new Keyframe[Keyframes.Count];
@@ -223,9 +223,9 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy(int indexFrom, int indexTo)
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
-                return new JointAnimation(Joint, Array.Empty<Keyframe>());
+                return new JointAnimation(Joint, []);
             }
 
             Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];

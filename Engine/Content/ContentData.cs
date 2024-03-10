@@ -812,7 +812,7 @@ namespace Engine.Content
             //Find keyframes for current bone
             var boneAnimation = animationContent.Values
                 .FirstOrDefault(a => a.Any(ac => ac.JointName == joint.Name))?
-                .Select(a => new JointAnimation(a.JointName, a.Keyframes))?
+                .Select(a => new JointAnimation(a.JointName, a.Keyframes))
                 .FirstOrDefault(); //Only one bone animation (for now)
             if (boneAnimation.HasValue)
             {
@@ -1146,13 +1146,15 @@ namespace Engine.Content
             foreach (string mesh in geometry.Keys)
             {
                 var skins = GetControllerSkins();
-                if (!skins.Any(s => s == mesh))
+                if (Array.Exists(skins, s => s == mesh))
                 {
-                    var submesh = ComputeSubmeshContent(geometry, mesh, StaticMesh, material);
-                    if (submesh != null)
-                    {
-                        staticM.Add(submesh);
-                    }
+                    continue;
+                }
+
+                var submesh = ComputeSubmeshContent(geometry, mesh, StaticMesh, material);
+                if (submesh != null)
+                {
+                    staticM.Add(submesh);
                 }
             }
 

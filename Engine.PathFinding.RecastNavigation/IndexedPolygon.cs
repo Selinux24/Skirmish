@@ -8,8 +8,12 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Indexed polygon
     /// </summary>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="capacity">Polygon capacity</param>
     [Serializable]
-    public class IndexedPolygon
+    public class IndexedPolygon(int capacity)
     {
         /// <summary>
         /// The maximum number of vertices per navigation polygon.
@@ -54,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Vertex indices
         /// </summary>
-        private int[] vertices = null;
+        private int[] vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
         /// <summary>
         /// Gets the polygon vertex index by index
         /// </summary>
@@ -194,18 +198,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the resulting merged polygon</returns>
         public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, SamplePolyAreas[] pareas, int[] pregs, Int3[] verts)
         {
-            if (polys?.Any() != true)
+            if ((polys?.Length ?? 0) == 0)
             {
-                return (Array.Empty<IndexedPolygon>(), Array.Empty<SamplePolyAreas>(), Array.Empty<int>());
+                return ([], [], []);
             }
 
-            bool procAreas = pareas?.Any() ?? false;
-            bool procRegs = pregs?.Any() ?? false;
+            bool procAreas = (pareas?.Length ?? 0) != 0;
+            bool procRegs = (pregs?.Length ?? 0) != 0;
 
             var mergedNpolys = polys.Length;
             var mergedPolys = polys.ToArray();
-            var mergedareas = pareas?.ToArray() ?? Array.Empty<SamplePolyAreas>();
-            var mergedregs = pregs?.ToArray() ?? Array.Empty<int>();
+            var mergedareas = pareas?.ToArray() ?? [];
+            var mergedregs = pregs?.ToArray() ?? [];
 
             while (true)
             {
@@ -267,13 +271,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the indexed polygons, regions and areas</returns>
         public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Int3[] tris, SamplePolyAreas[] harea, int[] hreg)
         {
-            if (tris?.Any() != true)
+            if ((tris?.Length ?? 0) == 0)
             {
-                return (Array.Empty<IndexedPolygon>(), Array.Empty<SamplePolyAreas>(), Array.Empty<int>());
+                return ([], [], []);
             }
 
-            bool procAreas = harea?.Any() ?? false;
-            bool procRegs = hreg?.Any() ?? false;
+            bool procAreas = (harea?.Length ?? 0) != 0;
+            bool procRegs = (hreg?.Length ?? 0) != 0;
 
             // Merge the hole triangles back to polygons.
             int ntris = tris.Length;
@@ -546,9 +550,9 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         edges[edgeCount] = new()
                         {
-                            Vert = new int[] { v0, v1 },
-                            Poly = new int[] { i, i },
-                            PolyEdge = new int[] { j, openPolyEdgeValue },
+                            Vert = [v0, v1],
+                            Poly = [i, i],
+                            PolyEdge = [j, openPolyEdgeValue],
                         };
 
                         // Insert edge
@@ -637,9 +641,9 @@ namespace Engine.PathFinding.RecastNavigation
                 // Matching edge not found, it is an open edge, add it.
                 edges[edgeCount] = new()
                 {
-                    Vert = new int[] { v0, v1 },
-                    Poly = new int[] { i, i },
-                    PolyEdge = new int[] { j, openPolyEdgeValue },
+                    Vert = [v0, v1],
+                    Poly = [i, i],
+                    PolyEdge = [j, openPolyEdgeValue],
                 };
 
                 // Insert edge
@@ -714,14 +718,6 @@ namespace Engine.PathFinding.RecastNavigation
         {
 
         }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="capacity">Polygon capacity</param>
-        public IndexedPolygon(int capacity)
-        {
-            vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
-        }
 
         /// <summary>
         /// Gets the vertex count
@@ -745,7 +741,7 @@ namespace Engine.PathFinding.RecastNavigation
         public int[] GetVertices()
         {
             //Copy array
-            return vertices.ToArray();
+            return [.. vertices];
         }
         /// <summary>
         /// Copy the current polygon to another instance
@@ -756,7 +752,7 @@ namespace Engine.PathFinding.RecastNavigation
             return new IndexedPolygon(vertices.Length)
             {
                 //Copy array
-                vertices = vertices.ToArray(),
+                vertices = [.. vertices],
             };
         }
         /// <summary>
