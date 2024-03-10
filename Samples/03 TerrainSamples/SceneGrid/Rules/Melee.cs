@@ -7,7 +7,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
     public class Melee
     {
-        private readonly List<Soldier> soldiers = new();
+        private readonly List<Soldier> soldiers = [];
 
         public string[] Factions
         {
@@ -23,7 +23,7 @@ namespace TerrainSamples.SceneGrid.Rules
                     }
                 });
 
-                return factions.ToArray();
+                return [.. factions];
             }
         }
         public bool Done
@@ -57,18 +57,15 @@ namespace TerrainSamples.SceneGrid.Rules
         }
         public void RemoveFighter(Soldier soldier)
         {
-            if (soldiers.Contains(soldier))
-            {
-                soldiers.Remove(soldier);
-            }
+            soldiers.Remove(soldier);
         }
 
         public void Resolve()
         {
             for (int i = 1; i <= 10; i++)
             {
-                Soldier[] iSoldiers = soldiers.FindAll(s => s.CurrentInitiative == i).ToArray();
-                if (iSoldiers.Length > 0)
+                var iSoldiers = soldiers.FindAll(s => s.CurrentInitiative == i);
+                if (iSoldiers.Count > 0)
                 {
                     foreach (Soldier s in iSoldiers)
                     {
@@ -98,10 +95,10 @@ namespace TerrainSamples.SceneGrid.Rules
 
         private Soldier GetRandomEnemy(Soldier soldier)
         {
-            Soldier[] enemyList = soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction).ToArray();
-            if (enemyList.Length > 0)
+            var enemyList = soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction);
+            if (enemyList.Count > 0)
             {
-                return enemyList[Helper.RandomGenerator.Next(0, enemyList.Length - 1)];
+                return enemyList[Helper.RandomGenerator.Next(0, enemyList.Count - 1)];
             }
 
             return null;

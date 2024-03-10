@@ -105,8 +105,8 @@ namespace Engine.Windows
         /// renderCallback</exception>
         public static void Run(Control form, Action renderCallback, bool useApplicationDoEvents = false)
         {
-            if (form == null) throw new ArgumentNullException(nameof(form));
-            if (renderCallback == null) throw new ArgumentNullException(nameof(renderCallback));
+            ArgumentNullException.ThrowIfNull(form);
+            ArgumentNullException.ThrowIfNull(renderCallback);
 
             form.Show();
 

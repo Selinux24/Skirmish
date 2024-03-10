@@ -8,7 +8,11 @@ namespace Engine
     /// <summary>
     /// Scene lights
     /// </summary>
-    public class SceneLights : IHasGameState
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    public class SceneLights(Scene scene) : IHasGameState
     {
         #region Preconfigured lights
 
@@ -41,23 +45,23 @@ namespace Engine
         /// <summary>
         /// Scene
         /// </summary>
-        private readonly Scene scene = null;
+        private readonly Scene scene = scene;
         /// <summary>
         /// Directional lights
         /// </summary>
-        private readonly List<ISceneLightDirectional> directionalLights = new();
+        private readonly List<ISceneLightDirectional> directionalLights = [];
         /// <summary>
         /// Point lights
         /// </summary>
-        private readonly List<ISceneLightPoint> pointLights = new();
+        private readonly List<ISceneLightPoint> pointLights = [];
         /// <summary>
         /// Spot lights
         /// </summary>
-        private readonly List<ISceneLightSpot> spotLights = new();
+        private readonly List<ISceneLightSpot> spotLights = [];
         /// <summary>
         /// Visible lights
         /// </summary>
-        private readonly List<ISceneLight> visibleLights = new();
+        private readonly List<ISceneLight> visibleLights = [];
 
         /// <summary>
         /// Gets or sets the hemispheric ambient light
@@ -70,7 +74,7 @@ namespace Engine
         {
             get
             {
-                return directionalLights.ToArray();
+                return [.. directionalLights];
             }
         }
         /// <summary>
@@ -80,7 +84,7 @@ namespace Engine
         {
             get
             {
-                return pointLights.ToArray();
+                return [.. pointLights];
             }
         }
         /// <summary>
@@ -90,7 +94,7 @@ namespace Engine
         {
             get
             {
-                return spotLights.ToArray();
+                return [.. spotLights];
             }
         }
         /// <summary>
@@ -126,11 +130,11 @@ namespace Engine
         /// <summary>
         /// Fog start value
         /// </summary>
-        public float FogStart { get; set; }
+        public float FogStart { get; set; } = 0f;
         /// <summary>
         /// Fog range value
         /// </summary>
-        public float FogRange { get; set; }
+        public float FogRange { get; set; } = 0;
         /// <summary>
         /// Base fog color
         /// </summary>
@@ -177,53 +181,35 @@ namespace Engine
         /// <summary>
         /// Far light distance definition for shadow maps
         /// </summary>
-        public float FarLightsDistance { get; set; }
+        public float FarLightsDistance { get; set; } = 1000000f;
         /// <summary>
         /// Gets or sets the color palette use flag
         /// </summary>
-        public bool UseSunColorPalette { get; set; }
+        public bool UseSunColorPalette { get; set; } = true;
         /// <summary>
         /// Sun color palette
         /// </summary>
-        public List<Tuple<float, Color3>> SunColorPalette { get; set; }
+        public List<Tuple<float, Color3>> SunColorPalette { get; set; } =
+            [
+                .. new[]
+                {
+                    new Tuple<float, Color3>(MathUtil.Pi * -1.00f, Color.Black.RGB()),
+                    new Tuple<float, Color3>(MathUtil.Pi * 0.02f, Color.Orange.RGB()),
+                    new Tuple<float, Color3>(MathUtil.Pi * 0.20f, Color.White.RGB()),
+                    new Tuple<float, Color3>(MathUtil.Pi * 0.70f, Color.White.RGB()),
+                    new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
+                    new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
+                },
+            ];
         /// <summary>
         /// Sun color
         /// </summary>
-        public Color3 SunColor { get; set; }
+        public Color3 SunColor { get; set; } = Color3.White;
         /// <summary>
         /// Gets or sets the shadow intensity value
         /// </summary>
         /// <remarks>From 0 (darker) to 1 (lighter)</remarks>
-        public float ShadowIntensity { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        public SceneLights(Scene scene)
-        {
-            this.scene = scene;
-
-            FogStart = 0f;
-            FogRange = 0;
-            FarLightsDistance = 1000000f;
-
-            SunColor = Color3.White;
-
-            UseSunColorPalette = true;
-            SunColorPalette = new List<Tuple<float, Color3>>();
-            SunColorPalette.AddRange(new[]
-            {
-                new Tuple<float, Color3>(MathUtil.Pi * -1.00f, Color.Black.RGB()),
-                new Tuple<float, Color3>(MathUtil.Pi * 0.02f, Color.Orange.RGB()),
-                new Tuple<float, Color3>(MathUtil.Pi * 0.20f, Color.White.RGB()),
-                new Tuple<float, Color3>(MathUtil.Pi * 0.70f, Color.White.RGB()),
-                new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
-                new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
-            });
-
-            ShadowIntensity = 0.5f;
-        }
+        public float ShadowIntensity { get; set; } = 0.5f;
 
         /// <summary>
         /// Gets the light count of all types
@@ -297,10 +283,7 @@ namespace Engine
         /// <param name="light">Directional light</param>
         public void Remove(ISceneLightDirectional light)
         {
-            if (directionalLights.Contains(light))
-            {
-                directionalLights.Remove(light);
-            }
+            directionalLights.Remove(light);
         }
         /// <summary>
         /// Removes the specified light
@@ -308,10 +291,7 @@ namespace Engine
         /// <param name="light">Point light</param>
         public void Remove(ISceneLightPoint light)
         {
-            if (pointLights.Contains(light))
-            {
-                pointLights.Remove(light);
-            }
+            pointLights.Remove(light);
         }
         /// <summary>
         /// Removes the specified light
@@ -319,10 +299,7 @@ namespace Engine
         /// <param name="light">Spot light</param>
         public void Remove(ISceneLightSpot light)
         {
-            if (spotLights.Contains(light))
-            {
-                spotLights.Remove(light);
-            }
+            spotLights.Remove(light);
         }
         /// <summary>
         /// Removes the specified light
@@ -385,7 +362,7 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private IEnumerable<ISceneLight> CullDirectionalLights()
+        private ISceneLight[] CullDirectionalLights()
         {
             return directionalLights.Where(l => l.Enabled).ToArray();
         }
@@ -395,7 +372,7 @@ namespace Engine
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
         /// <param name="distance">Light maximum distance</param>
-        private IEnumerable<ISceneLight> CullPointLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
+        private List<ISceneLightPoint> CullPointLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
         {
             var pLights = pointLights
                 .Where(l =>
@@ -411,7 +388,7 @@ namespace Engine
                 })
                 .ToList();
 
-            if (pLights.Any())
+            if (pLights.Count != 0)
             {
                 pLights.Sort((l1, l2) =>
                 {
@@ -433,7 +410,7 @@ namespace Engine
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
         /// <param name="distance">Light maximum distance</param>
-        private IEnumerable<ISceneLight> CullSpotLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
+        private List<ISceneLightSpot> CullSpotLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
         {
             var sLights = spotLights
                 .Where(l =>
@@ -449,7 +426,7 @@ namespace Engine
                 })
                 .ToList();
 
-            if (sLights.Any())
+            if (sLights.Count != 0)
             {
                 sLights.Sort((l1, l2) =>
                 {
@@ -525,11 +502,12 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
-            return visibleLights
+            var scLights = visibleLights
                 .OfType<ISceneLightPoint>()
                 .Where(l => l.MarkForShadowCasting(environment, eyePosition))
-                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
-                .ToArray();
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition));
+
+            return [.. scLights];
         }
         /// <summary>
         /// Gets a collection of spot lights that cast shadow
@@ -539,11 +517,12 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
-            return visibleLights
+            var scLights = visibleLights
                 .OfType<ISceneLightSpot>()
                 .Where(l => l.MarkForShadowCasting(environment, eyePosition))
-                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
-                .ToArray();
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition));
+
+            return [.. scLights];
         }
 
         /// <summary>

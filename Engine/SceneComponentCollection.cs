@@ -63,7 +63,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        private readonly ConcurrentBag<ISceneObject> internalComponents = new();
+        private readonly ConcurrentBag<ISceneObject> internalComponents = [];
 
         /// <summary>
         /// Gets the component count
@@ -153,7 +153,7 @@ namespace Engine
             }
             finally
             {
-                FireUpdated(true, new[] { component });
+                FireUpdated(true, [component]);
             }
         }
         /// <summary>
@@ -180,7 +180,7 @@ namespace Engine
             }
             finally
             {
-                FireUpdated(false, new[] { component });
+                FireUpdated(false, [component]);
             }
 
             if (component is IDisposable disposable)
@@ -249,10 +249,7 @@ namespace Engine
         /// <returns>Returns the component collection which validates the predicate</returns>
         public IEnumerable<ISceneObject> Get(Func<ISceneObject, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return internalComponents
                 .Where(predicate)
@@ -265,10 +262,7 @@ namespace Engine
         /// <returns>Returns the component collection which validates the predicate</returns>
         public IEnumerable<ISceneObject> Get(Func<ISceneObject, int, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return internalComponents
                 .Where(predicate)
@@ -298,10 +292,7 @@ namespace Engine
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
         public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             if (usage == SceneObjectUsages.None)
             {
@@ -320,10 +311,7 @@ namespace Engine
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
         public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, int, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             if (usage == SceneObjectUsages.None)
             {
@@ -354,10 +342,7 @@ namespace Engine
         /// <returns>Returns the component collection which validates the predicate</returns>
         public IEnumerable<T> Get<T>(Func<T, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return internalComponents
                 .OfType<T>()
@@ -391,10 +376,7 @@ namespace Engine
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
         public IEnumerable<T> Get<T>(SceneObjectUsages usage, Func<T, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             if (usage == SceneObjectUsages.None)
             {
@@ -424,10 +406,7 @@ namespace Engine
         /// <returns>Returns the first component in the collection which validates de predicate</returns>
         public ISceneObject First(Func<ISceneObject, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return internalComponents.FirstOrDefault(predicate);
         }
@@ -454,10 +433,7 @@ namespace Engine
         /// <returns>Returns the first component in the collection which has the specified usage flag, and validates de predicate</returns>
         public ISceneObject First(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             if (usage == SceneObjectUsages.None)
             {
@@ -487,10 +463,7 @@ namespace Engine
         /// <returns>Returns the first component of the specified type in the collection which validates de predicate</returns>
         public T First<T>(Func<T, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return internalComponents
                 .OfType<T>()
@@ -523,10 +496,7 @@ namespace Engine
         /// <returns>Returns the first component of the specified type in the collection which has the specified usage flag, and validates de predicate</returns>
         public T First<T>(SceneObjectUsages usage, Func<T, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
+            ArgumentNullException.ThrowIfNull(predicate);
 
             if (usage == SceneObjectUsages.None)
             {
@@ -578,7 +548,7 @@ namespace Engine
         {
             if (owner == null)
             {
-                return Enumerable.Empty<ISceneObject>();
+                return [];
             }
 
             return internalComponents

@@ -30,12 +30,9 @@ namespace Engine.Content
         /// </summary>
         public ContentLibrary(ContentData contentData)
         {
-            if (contentData == null)
-            {
-                throw new ArgumentNullException(nameof(contentData));
-            }
+            ArgumentNullException.ThrowIfNull(contentData);
 
-            contentDataList = new[] { contentData };
+            contentDataList = [contentData];
         }
         /// <summary>
         /// Constructor

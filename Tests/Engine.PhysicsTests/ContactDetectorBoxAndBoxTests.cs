@@ -63,15 +63,15 @@ namespace Engine.PhysicsTests
             var box3 = FromBox(Vector3.One, boxTrn2);
 
             bool intersectionWith2 = ContactDetector.BetweenObjects(box1, box2, data2);
-            Assert.AreEqual(true, intersectionWith2);
+            Assert.IsTrue(intersectionWith2);
             bool intersectionWith3 = ContactDetector.BetweenObjects(box1, box3, data3);
-            Assert.AreEqual(true, intersectionWith3);
+            Assert.IsTrue(intersectionWith3);
 
             var contactsWith2 = data2.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith2.Any());
+            Assert.IsTrue(contactsWith2.Length != 0);
 
             var contactsWith3 = data3.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith3.Any());
+            Assert.IsTrue(contactsWith3.Length != 0);
 
             var pointInBox2 = Intersection.ClosestPointInBox(contactsWith2[0].Position, box1.OrientedBoundingBox);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);

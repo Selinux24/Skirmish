@@ -21,14 +21,12 @@ namespace Engine.Common
         /// <summary>
         /// Shader constant buffers state
         /// </summary>
-        class ShaderConstantBufferState : EngineShaderStageState<IEngineConstantBuffer>
+        class ShaderConstantBufferState(EngineDeviceContext deviceContext) : EngineShaderStageState<IEngineConstantBuffer>(deviceContext)
         {
             /// <summary>
             /// Null constant buffers for shader clearing
             /// </summary>
             private static readonly Buffer[] nullBuffers = new Buffer[CommonShaderStage.ConstantBufferApiSlotCount];
-
-            public ShaderConstantBufferState(EngineDeviceContext deviceContext) : base(deviceContext) { }
 
             public void SetConstantBuffer(CommonShaderStage shaderStage, int slot, IEngineConstantBuffer buffer)
             {
@@ -59,14 +57,12 @@ namespace Engine.Common
         /// <summary>
         /// Shader resources state
         /// </summary>
-        class ShaderResourceState : EngineShaderStageState<EngineShaderResourceView>
+        class ShaderResourceState(EngineDeviceContext deviceContext) : EngineShaderStageState<EngineShaderResourceView>(deviceContext)
         {
             /// <summary>
             /// Null shader resources for shader clearing
             /// </summary>
             private static readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
-
-            public ShaderResourceState(EngineDeviceContext deviceContext) : base(deviceContext) { }
 
             public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
             {
@@ -97,14 +93,12 @@ namespace Engine.Common
         /// <summary>
         /// Shader samplers state
         /// </summary>
-        class ShaderSamplerState : EngineShaderStageState<EngineSamplerState>
+        class ShaderSamplerState(EngineDeviceContext deviceContext) : EngineShaderStageState<EngineSamplerState>(deviceContext)
         {
             /// <summary>
             /// Null samplers for shader clearing
             /// </summary>
             private static readonly SamplerState[] nullSamplers = new SamplerState[CommonShaderStage.SamplerSlotCount];
-
-            public ShaderSamplerState(EngineDeviceContext deviceContext) : base(deviceContext) { }
 
             public void SetSampler(CommonShaderStage shaderStage, int slot, EngineSamplerState samplerState)
             {
@@ -283,7 +277,7 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex buffer bindings
         /// </summary>
-        private EngineVertexBufferBinding[] currentVertexBufferBindings = null;
+        private IEnumerable<EngineVertexBufferBinding> currentVertexBufferBindings = null;
         /// <summary>
         /// Current index buffer reference
         /// </summary>
@@ -444,12 +438,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetViewport(Viewport viewport)
         {
-            SetViewPorts(new[] { (RawViewportF)viewport });
+            SetViewPorts([(RawViewportF)viewport]);
         }
         /// <inheritdoc/>
         public void SetViewport(ViewportF viewport)
         {
-            SetViewPorts(new[] { (RawViewportF)viewport });
+            SetViewPorts([(RawViewportF)viewport]);
         }
         /// <inheritdoc/>
         public void SetViewports(IEnumerable<Viewport> viewports)
@@ -497,7 +491,7 @@ namespace Engine.Common
                 ClearShaderResources();
             }
 
-            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
+            var rtv = renderTargets?.GetRenderTargets() ?? [];
             var rtvCount = rtv.Count();
 
             deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
@@ -521,10 +515,10 @@ namespace Engine.Common
             }
 
             var dsv = depthMap?.GetDepthStencil();
-            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
+            var rtv = renderTargets?.GetRenderTargets() ?? [];
             var rtvCount = rtv.Count();
 
-            deviceContext.OutputMerger.SetTargets(dsv, 0, Array.Empty<UnorderedAccessView>(), Array.Empty<int>(), rtv.ToArray());
+            deviceContext.OutputMerger.SetTargets(dsv, 0, [], [], rtv.ToArray());
             frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
@@ -595,11 +589,11 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void IASetVertexBuffers(int firstSlot, params EngineVertexBufferBinding[] vertexBufferBindings)
+        public void IASetVertexBuffers(int firstSlot, IEnumerable<EngineVertexBufferBinding> vertexBufferBindings)
         {
             if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
             {
-                var vbBindings = vertexBufferBindings?.Select(v => v.GetVertexBufferBinding()).ToArray() ?? Array.Empty<VertexBufferBinding>();
+                var vbBindings = vertexBufferBindings?.Select(v => v.GetVertexBufferBinding()).ToArray() ?? [];
 
                 deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vbBindings);
                 frameCounters.IAVertexBuffersSets++;
@@ -1167,7 +1161,7 @@ namespace Engine.Common
             var b = buffer?.GetBuffer();
             if (b == null)
             {
-                return Enumerable.Empty<T>();
+                return [];
             }
 
             T[] data = new T[length];

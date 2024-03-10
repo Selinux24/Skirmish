@@ -18,7 +18,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Cached paths
         /// </summary>
-        private static readonly List<PathCache> Cache = new();
+        private static readonly List<PathCache> Cache = [];
 
         /// <summary>
         /// Gets the path from start to end
@@ -33,7 +33,7 @@ namespace Engine.PathFinding.AStar
         {
             if (graph.FindNode(agent, startPosition) is not GridNode start || graph.FindNode(agent, endPosition) is not GridNode end)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             var cachedPath = Cache.Find(p => p.Start == start && p.End == end);
@@ -45,9 +45,9 @@ namespace Engine.PathFinding.AStar
 
             //Calculate return path
             var path = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
-            if (!path.Any())
+            if (path.Length == 0)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             //Update queue
@@ -56,7 +56,7 @@ namespace Engine.PathFinding.AStar
             //Add path to cache
             Cache.Add(new PathCache()
             {
-                Path = path.ToArray(),
+                Path = path,
                 Start = start,
                 End = end,
             });
@@ -71,7 +71,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static IEnumerable<Vector3> CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        private static Vector3[] CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
             var openPathsQueue = new PriorityDictionary<GridNode, float>();
@@ -129,12 +129,12 @@ namespace Engine.PathFinding.AStar
                     node = nodesData[node].NextNode;
                 }
 
-                return solvedList.ToArray();
+                return [.. solvedList];
             }
             else
             {
                 //If no result...
-                return Array.Empty<Vector3>();
+                return [];
             }
         }
         /// <summary>

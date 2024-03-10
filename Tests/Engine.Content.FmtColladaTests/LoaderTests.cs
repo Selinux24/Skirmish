@@ -79,9 +79,7 @@ namespace Engine.ModularSceneryTests
             var res = await content.First().CreateGeometry(true, true, null);
             var points1 = res[treeMeshName][treeBarkName].GetPoints();
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
-            List<Vector3> points = new();
-            points.AddRange(points1);
-            points.AddRange(points2);
+            List<Vector3> points = [.. points1, .. points2];
             var bounds = BoundingSphere.FromPoints(points.Distinct().ToArray());
             bounds = bounds.SetTransform(Matrix.Scaling(2) * Matrix.RotationYawPitchRoll(1, 0, 0) * Matrix.Translation(10, 10, 10));
             Assert.AreEqual(sph, bounds);
@@ -103,8 +101,8 @@ namespace Engine.ModularSceneryTests
                 PickingHull = PickingHullTypes.Hull,
                 CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot,
                 StartsVisible = false,
-                TransformNames = new[] { tankBarrelPart, tankTurretPart, tankHullPart },
-                TransformDependences = new[] { 1, 2, -1 },
+                TransformNames = [tankBarrelPart, tankTurretPart, tankHullPart],
+                TransformDependences = [1, 2, -1],
             };
 
             Mock<Scene> mockScene = new(null);

@@ -14,20 +14,26 @@ namespace Engine.Modular
     /// <summary>
     /// Terrain model
     /// </summary>
-    public sealed class ModularScenery : Ground<ModularSceneryDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class ModularScenery(Scene scene, string id, string name) : Ground<ModularSceneryDescription>(scene, id, name)
     {
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> assets = new();
+        private readonly Dictionary<string, ModelInstanced> assets = [];
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> objects = new();
+        private readonly Dictionary<string, ModelInstanced> objects = [];
         /// <summary>
         /// Particle descriptors dictionary
         /// </summary>
-        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new();
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = [];
         /// <summary>
         /// Particle manager
         /// </summary>
@@ -35,19 +41,19 @@ namespace Engine.Modular
         /// <summary>
         /// Scenery entities
         /// </summary>
-        private readonly List<Item> entities = new();
+        private readonly List<Item> entities = [];
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, IEnumerable<ItemTrigger>> triggers = new();
+        private readonly Dictionary<ModelInstance, IEnumerable<ItemTrigger>> triggers = [];
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new();
+        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = [];
         /// <summary>
         /// Active trigger callbacks
         /// </summary>
-        private readonly List<TriggerCallback> activeCallbacks = new();
+        private readonly List<TriggerCallback> activeCallbacks = [];
         /// <summary>
         /// Gets the assets description
         /// </summary>
@@ -134,18 +140,6 @@ namespace Engine.Modular
                     yield return model[i].GetBoundingBox(refresh);
                 }
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public ModularScenery(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
         }
 
         /// <inheritdoc/>
@@ -520,7 +514,7 @@ namespace Engine.Modular
                 Index = assetIndex,
                 Name = item.AssetName,
                 Transform = complexAssetTransform,
-                Assets = new Dictionary<string, List<int>>(),
+                Assets = [],
             };
 
             var asset = assetMap.Assets.ElementAt(assetIndex);
@@ -530,13 +524,13 @@ namespace Engine.Modular
             {
                 if (!transforms.TryGetValue(basicAsset, out var assetTrnValues))
                 {
-                    assetTrnValues = new();
+                    assetTrnValues = [];
                     transforms.Add(basicAsset, assetTrnValues);
                 }
 
                 if (!aMap.Assets.TryGetValue(basicAsset, out var assetMapValues))
                 {
-                    assetMapValues = new();
+                    assetMapValues = [];
                     aMap.Assets.Add(basicAsset, assetMapValues);
                 }
 
@@ -626,7 +620,7 @@ namespace Engine.Modular
         /// </summary>
         private void UpdateTriggers()
         {
-            if (activeCallbacks?.Any() != true)
+            if ((activeCallbacks?.Count ?? 0) == 0)
             {
                 return;
             }
@@ -725,7 +719,7 @@ namespace Engine.Modular
                 return sceneTriangles;
             }
 
-            List<Triangle> triangleLits = new();
+            List<Triangle> triangleLits = [];
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
@@ -739,7 +733,7 @@ namespace Engine.Modular
 
             triangleLits.AddRange(objTriangles);
 
-            sceneTriangles = triangleLits.ToArray();
+            sceneTriangles = triangleLits;
 
             return sceneTriangles;
         }
@@ -856,7 +850,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<Item> GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private List<Item> GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -886,7 +880,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Gets objects into the specified volume
@@ -896,7 +890,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<Item> GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private List<Item> GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -930,7 +924,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Gets objects into the specified volume
@@ -940,7 +934,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<Item> GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private List<Item> GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -974,7 +968,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res.ToArray();
+            return res;
         }
 
         /// <summary>
@@ -986,7 +980,7 @@ namespace Engine.Modular
         {
             if (!triggers.TryGetValue(item.Instance, out var triggerValue))
             {
-                return Array.Empty<ItemTrigger>();
+                return [];
             }
 
             return triggerValue
@@ -1088,33 +1082,37 @@ namespace Engine.Modular
             /// <summary>
             /// Individual asset indices
             /// </summary>
-            public Dictionary<string, List<int>> Assets = new();
+            public Dictionary<string, List<int>> Assets = [];
 
             /// <inheritdoc/>
             public override string ToString()
             {
-                return $"{Name}; Index: {Index}; Assets: {string.Join("|", Assets?.Select(a => a.Key) ?? Array.Empty<string>())}";
+                return $"{Name}; Index: {Index}; Assets: {string.Join("|", Assets?.Select(a => a.Key) ?? [])}";
             }
         }
         /// <summary>
         /// Trigger callback
         /// </summary>
         /// <remarks>Helper class to test when all items affected by a trigger were done with their actions</remarks>
-        class TriggerCallback
+        /// <remarks>
+        /// Constructor
+        /// </remarks>
+        /// <param name="trigger">Trigger</param>
+        class TriggerCallback(ItemTrigger trigger, Item item)
         {
             /// <summary>
             /// Starter trigger
             /// </summary>
-            public ItemTrigger Trigger { get; set; }
+            public ItemTrigger Trigger { get; set; } = trigger;
             /// <summary>
             /// Starter item
             /// </summary>
-            public Item Item { get; set; }
+            public Item Item { get; set; } = item;
 
             /// <summary>
             /// Affected items
             /// </summary>
-            public List<Item> Items { get; set; } = new List<Item>();
+            public List<Item> Items { get; set; } = [];
             /// <summary>
             /// Returns true if any item is performing actions
             /// </summary>
@@ -1124,16 +1122,6 @@ namespace Engine.Modular
                 {
                     return Items.Exists(i => i.Instance.AnimationController?.Playing == true);
                 }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="trigger">Trigger</param>
-            public TriggerCallback(ItemTrigger trigger, Item item)
-            {
-                Trigger = trigger;
-                Item = item;
             }
         }
     }

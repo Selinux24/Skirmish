@@ -24,7 +24,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a new vertex list</returns>
-        private static IEnumerable<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
+        private static List<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             //Separate lines
             var lines = SeparateLines(vertices.ToArray());
@@ -68,7 +68,7 @@ namespace Engine.UI
         /// Separate the vertex list into a list o vertex list by text line
         /// </summary>
         /// <param name="verts">Vertex list</param>
-        private static IEnumerable<VertexFont[]> SeparateLines(VertexFont[] verts)
+        private static List<VertexFont[]> SeparateLines(VertexFont[] verts)
         {
             var lines = new List<VertexFont[]>();
 
@@ -80,7 +80,7 @@ namespace Engine.UI
                 {
                     if (line.Count > 0)
                     {
-                        lines.Add(line.ToArray());
+                        lines.Add([.. line]);
                     }
 
                     line.Clear();
@@ -91,7 +91,7 @@ namespace Engine.UI
 
             if (line.Count > 0)
             {
-                lines.Add(line.ToArray());
+                lines.Add([.. line]);
             }
 
             return lines;
@@ -249,8 +249,8 @@ namespace Engine.UI
                     continue;
                 }
 
-                int leftTopIndex = charMap.IndexOf(":") + 1;
-                int rightBottomIndex = charMap.IndexOf(";", leftTopIndex) + 1;
+                int leftTopIndex = charMap.IndexOf(':') + 1;
+                int rightBottomIndex = charMap.IndexOf(';', leftTopIndex) + 1;
 
                 char c = charMap[0];
                 Vector2 topLeft = FromMap(charMap[leftTopIndex..rightBottomIndex]);
@@ -311,8 +311,8 @@ namespace Engine.UI
         /// <returns>Returns a vector</returns>
         private static Vector2 FromMap(string mapBitz)
         {
-            string[] bitz = mapBitz?.Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries);
-            if (bitz?.Any() != true || bitz.Length < 2)
+            string[] bitz = mapBitz?.Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries) ?? [];
+            if (bitz.Length < 2)
             {
                 return Vector2.Zero;
             }
@@ -337,7 +337,7 @@ namespace Engine.UI
         /// <summary>
         /// Map
         /// </summary>
-        private Dictionary<char, FontMapChar> map = new();
+        private Dictionary<char, FontMapChar> map = [];
         /// <summary>
         /// Bitmap stream
         /// </summary>
@@ -459,8 +459,8 @@ namespace Engine.UI
             {
                 return new FontMapSentenceDescriptor
                 {
-                    Vertices = Array.Empty<VertexFont>(),
-                    Indices = Array.Empty<uint>(),
+                    Vertices = [],
+                    Indices = [],
                     Size = Vector2.Zero,
                 };
             }
@@ -591,8 +591,8 @@ namespace Engine.UI
 
             return new FontMapWordDescriptor
             {
-                Vertices = vertList.ToArray(),
-                Indices = indexList.ToArray(),
+                Vertices = [.. vertList],
+                Indices = [.. indexList],
                 Height = height,
             };
         }
@@ -662,7 +662,7 @@ namespace Engine.UI
         /// </summary>
         public char[] GetKeys()
         {
-            return map.Keys.ToArray();
+            return [.. map.Keys];
         }
     }
 }

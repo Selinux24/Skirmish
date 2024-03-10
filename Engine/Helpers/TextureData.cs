@@ -75,7 +75,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            return ReadTextureArray(filename, Array.Empty<Rectangle>()).FirstOrDefault();
+            return ReadTextureArray(filename, []).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -85,7 +85,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename, Rectangle rectangle)
         {
-            return ReadTextureArray(filename, new Rectangle[] { rectangle }).FirstOrDefault();
+            return ReadTextureArray(filename, [rectangle]).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -94,7 +94,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            return ReadTextureArray(stream, Array.Empty<Rectangle>()).FirstOrDefault();
+            return ReadTextureArray(stream, []).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a stream
@@ -104,7 +104,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream, Rectangle rectangle)
         {
-            return ReadTextureArray(stream, new Rectangle[] { rectangle }).FirstOrDefault();
+            return ReadTextureArray(stream, [rectangle]).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data list from a file
@@ -280,10 +280,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static IEnumerable<TextureData> ReadTextureCubic(string filename, IEnumerable<Rectangle> faces)
         {
-            if (faces == null)
-            {
-                throw new ArgumentNullException(nameof(faces));
-            }
+            ArgumentNullException.ThrowIfNull(faces);
 
             if (faces.Count() != 6)
             {
@@ -300,10 +297,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static IEnumerable<TextureData> ReadTextureCubic(MemoryStream stream, IEnumerable<Rectangle> faces)
         {
-            if (faces == null)
-            {
-                throw new ArgumentNullException(nameof(faces));
-            }
+            ArgumentNullException.ThrowIfNull(faces);
 
             if (faces.Count() != 6)
             {
@@ -319,7 +313,7 @@ namespace Engine.Helpers
         /// <param name="filename">File name</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static IEnumerable<BitmapData> ReadBitmap(string filename, IEnumerable<Rectangle> rectangles)
+        private static BitmapData[] ReadBitmap(string filename, IEnumerable<Rectangle> rectangles)
         {
             using var factory = new ImagingFactory2();
             using var bitmapDecoder = new BitmapDecoder(factory, filename, DecodeOptions.CacheOnLoad);
@@ -331,7 +325,7 @@ namespace Engine.Helpers
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static IEnumerable<BitmapData> ReadBitmap(Stream stream, IEnumerable<Rectangle> rectangles)
+        private static BitmapData[] ReadBitmap(MemoryStream stream, IEnumerable<Rectangle> rectangles)
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -347,7 +341,7 @@ namespace Engine.Helpers
         /// <param name="format">Target format</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the readed bitmap data</returns>
-        private static IEnumerable<BitmapData> ReadBitmap(ImagingFactory factory, BitmapDecoder bitmapDecoder, Guid format, IEnumerable<Rectangle> rectangles)
+        private static BitmapData[] ReadBitmap(ImagingFactory factory, BitmapDecoder bitmapDecoder, Guid format, IEnumerable<Rectangle> rectangles)
         {
             var result = new List<BitmapData>();
 
@@ -382,7 +376,7 @@ namespace Engine.Helpers
                 using var formatConverter = new FormatConverter(factory);
                 if (!formatConverter.CanConvert(frame.PixelFormat, format))
                 {
-                    return Array.Empty<BitmapData>();
+                    return [];
                 }
 
                 formatConverter.Initialize(
@@ -417,7 +411,7 @@ namespace Engine.Helpers
                 }
             }
 
-            return result.ToArray();
+            return [.. result];
         }
 
         /// <summary>
@@ -429,7 +423,7 @@ namespace Engine.Helpers
         /// <param name="sourceRowStride">Row stride in bytes</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <returns>Returns the readed bitmap data</returns>
-        private static IEnumerable<BitmapData> CropBuffer(byte[] buffer, int sourceWidth, int sourceHeight, int sourceRowStride, IEnumerable<Rectangle> rectangles)
+        private static BitmapData[] CropBuffer(byte[] buffer, int sourceWidth, int sourceHeight, int sourceRowStride, IEnumerable<Rectangle> rectangles)
         {
             var result = new List<BitmapData>();
 
@@ -456,7 +450,7 @@ namespace Engine.Helpers
                 }
             }
 
-            return result.ToArray();
+            return [.. result];
         }
         /// <summary>
         /// Reads a rectangle from a image byte buffer

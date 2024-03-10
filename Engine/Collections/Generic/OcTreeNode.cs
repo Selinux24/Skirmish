@@ -10,28 +10,34 @@ namespace Engine.Collections.Generic
     /// OcTree node
     /// </summary>
     /// <typeparam name="T">Item type</typeparam>
-    public class OcTreeNode<T>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="boundary">Node boundary</param>
+    /// <param name="itemsPerNode">Maximum items per node</param>
+    /// <param name="root">Is root node</param>
+    public class OcTreeNode<T>(BoundingBox boundary, int itemsPerNode, bool root)
     {
         /// <summary>
         /// Node boundary
         /// </summary>
-        private readonly BoundingBox boundary;
+        private readonly BoundingBox boundary = boundary;
         /// <summary>
         /// Items per node
         /// </summary>
-        private readonly int itemsPerNode;
+        private readonly int itemsPerNode = itemsPerNode;
         /// <summary>
         /// Is the root node
         /// </summary>
-        private readonly bool root;
+        private readonly bool root = root;
         /// <summary>
         /// Node items array
         /// </summary>
-        private readonly (ICullingVolume volume, T item)[] items;
+        private readonly (ICullingVolume volume, T item)[] items = root ? [] : new (ICullingVolume, T)[itemsPerNode];
         /// <summary>
         /// Number of stored items in the array
         /// </summary>
-        private int storedItems;
+        private int storedItems = 0;
 
         /// <summary>
         /// Top left front node
@@ -65,21 +71,6 @@ namespace Engine.Collections.Generic
         /// Bottom right back node
         /// </summary>
         public OcTreeNode<T> BottomRightBack { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="boundary">Node boundary</param>
-        /// <param name="itemsPerNode">Maximum items per node</param>
-        /// <param name="root">Is root node</param>
-        public OcTreeNode(BoundingBox boundary, int itemsPerNode, bool root)
-        {
-            this.boundary = boundary;
-            this.itemsPerNode = itemsPerNode;
-            this.root = root;
-            items = root ? Array.Empty<(ICullingVolume volume, T item)>() : new (ICullingVolume, T)[itemsPerNode];
-            storedItems = 0;
-        }
 
         /// <summary>
         /// Gets the actual items in the node
@@ -215,7 +206,7 @@ namespace Engine.Collections.Generic
         /// <param name="results">Results list</param>
         public void Query(ICullingVolume queryBoundary, List<T> results)
         {
-            if (results == null) throw new ArgumentNullException(nameof(results));
+            ArgumentNullException.ThrowIfNull(results);
 
             var containmentType = queryBoundary.Contains(boundary);
 

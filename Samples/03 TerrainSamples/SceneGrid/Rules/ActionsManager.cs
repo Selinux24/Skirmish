@@ -24,16 +24,14 @@ namespace TerrainSamples.SceneGrid.Rules
         private const string ShootingActionShootString = "Shoot";
         private const string ShootingActionSupressingFireString = "Supressing Fire";
         private const string ShootingActionSupportString = "Support";
-        private const string ShootingActionUseItemString = "Use Item";
+        private const string ShootingActionUseItemString = "Use Shooting Item";
         private const string ShootingActionFirstAidString = "First Aid";
-        private const string ShootingActionLeaveCombatString = "Leave Combat";
-        private const string ShootingActionTakeControlString = "Take Control";
 
         private const string MeleeActionLeaveCombatString = "Leave Combat";
-        private const string MeleeActionUseItemString = "Use Item";
+        private const string MeleeActionUseItemString = "Use Melee Item";
 
         private const string MoraleActionTakeControlString = "Take Control";
-        private const string MoraleActionUseItemString = "Use Item";
+        private const string MoraleActionUseItemString = "Use Morale Item";
 
         public static ActionSpecification[] GetActions(Phase phase, Team team, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {

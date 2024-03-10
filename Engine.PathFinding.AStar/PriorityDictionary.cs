@@ -225,8 +225,8 @@ namespace Engine.PathFinding.AStar
         /// <param name="arrayIndex">Index from which to start copying the elements</param>
         public void CopyTo(PriorityDictionaryItem<TValue, TPriority>[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
+            ArgumentNullException.ThrowIfNull(array);
+
             if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), "arrayIndex is less than 0");
             if (array.Rank > 1)

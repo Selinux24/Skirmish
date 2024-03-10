@@ -125,9 +125,9 @@ namespace Engine.PhysicsTests
             var resolver = new ContactResolver(settings);
             float time = 1f / 60f;
 
-            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            RigidBody r1 = new(new() { Mass = 1f, InitialTransform = Matrix.Identity });
 
-            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Translation(0, 1, 0) });
+            RigidBody r2 = new(new() { Mass = 1f, InitialTransform = Matrix.Translation(0, 1, 0) });
             r2.AddLinearVelocity(new Vector3(0, -1, 0));
 
             var pos = new Vector3(0, 0, 0);

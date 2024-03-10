@@ -42,7 +42,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns a extension array list</returns>
         public IEnumerable<string> GetExtensions()
         {
-            return new string[] { ".dae" };
+            return [".dae"];
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace Engine.Content.FmtCollada
                 })
                 .ToList();
 
-            List<ContentData> res = new();
+            List<ContentData> res = [];
 
-            while (taskList.Any())
+            while (taskList.Count != 0)
             {
                 var t = await Task.WhenAny(taskList);
 
@@ -98,7 +98,7 @@ namespace Engine.Content.FmtCollada
                 model.Dispose();
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Reads the collada file into a content data instance
@@ -107,7 +107,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content data file</param>
         /// <returns>Returns a collection of content data instances</returns>
-        private static IEnumerable<ContentData> ReadContentData(Collada dae, string contentFolder, ContentDataFile content)
+        private static List<ContentData> ReadContentData(Collada dae, string contentFolder, ContentDataFile content)
         {
             ContentData modelContent = new();
 
@@ -146,7 +146,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="armatureName">Armature name</param>
         /// <param name="meshesByLOD">Level of detail meshes</param>
         /// <returns>Returns the filtered model content parts</returns>
-        private static IEnumerable<ContentData> FilterGeometry(ContentData modelContent, string armatureName, IEnumerable<string> meshesByLOD)
+        private static List<ContentData> FilterGeometry(ContentData modelContent, string armatureName, IEnumerable<string> meshesByLOD)
         {
             bool filterByArmature = !string.IsNullOrWhiteSpace(armatureName);
             bool filterByMeshes = meshesByLOD?.Any() == true;
@@ -154,10 +154,10 @@ namespace Engine.Content.FmtCollada
             if (!filterByArmature && !filterByMeshes)
             {
                 //Nothing to filter
-                return new[] { modelContent };
+                return [modelContent];
             }
 
-            List<ContentData> res = new();
+            List<ContentData> res = [];
 
             //Filter by armature name
             if (filterByArmature &&
@@ -203,14 +203,14 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryLights(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryLights?.Any() != true)
+            if ((dae.LibraryLights?.Length ?? 0) == 0)
             {
                 return;
             }
 
             foreach (var light in dae.LibraryLights)
             {
-                if (light.LightTechniqueCommon?.Any() != true)
+                if ((light.LightTechniqueCommon?.Length ?? 0) == 0)
                 {
                     continue;
                 }
@@ -304,7 +304,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         private static void ProcessLibraryImages(Collada dae, ContentData modelContent, string contentFolder)
         {
-            if (dae.LibraryImages?.Any() != true)
+            if ((dae.LibraryImages?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -328,7 +328,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryMaterial(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryMaterials?.Any() != true || dae.LibraryEffects?.Any() != true)
+            if ((dae.LibraryMaterials?.Length ?? 0) == 0 || (dae.LibraryEffects?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -371,7 +371,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="hulls">Hull mesh names</param>
         private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> hulls)
         {
-            if (dae.LibraryGeometries?.Any() != true)
+            if ((dae.LibraryGeometries?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -405,7 +405,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryControllers(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryControllers?.Any() != true)
+            if ((dae.LibraryControllers?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -427,7 +427,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="animation">Animation description</param>
         private static void ProcessLibraryAnimations(Collada dae, ContentData modelContent, AnimationFile animation)
         {
-            if (dae.LibraryAnimations?.Any() != true)
+            if ((dae.LibraryAnimations?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -469,7 +469,7 @@ namespace Engine.Content.FmtCollada
                 return ProcessConvexMesh(geometry.ConvexMesh, isHull);
             }
 
-            return Enumerable.Empty<SubMeshContent>();
+            return [];
         }
         /// <summary>
         /// Process mesh
@@ -480,36 +480,36 @@ namespace Engine.Content.FmtCollada
         private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Collada.Mesh mesh, bool isHull)
         {
             //Procesar por topología
-            if (mesh.Lines?.Any() == true)
+            if ((mesh.Lines?.Length ?? 0) != 0)
             {
                 return ProcessLines(mesh.Lines, mesh.Sources, isHull);
             }
-            else if (mesh.LineStrips?.Any() == true)
+            else if ((mesh.LineStrips?.Length ?? 0) != 0)
             {
                 return ProcessLineStrips(mesh.LineStrips, mesh.Sources, isHull);
             }
-            else if (mesh.Triangles?.Any() == true)
+            else if ((mesh.Triangles?.Length ?? 0) != 0)
             {
                 return ProcessTriangles(mesh.Triangles, mesh.Sources, isHull);
             }
-            else if (mesh.TriFans?.Any() == true)
+            else if ((mesh.TriFans?.Length ?? 0) != 0)
             {
                 return ProcessTriFans(mesh.TriFans, mesh.Sources, isHull);
             }
-            else if (mesh.TriStrips?.Any() == true)
+            else if ((mesh.TriStrips?.Length ?? 0) != 0)
             {
                 return ProcessTriStrips(mesh.TriStrips, mesh.Sources, isHull);
             }
-            else if (mesh.PolyList?.Any() == true)
+            else if ((mesh.PolyList?.Length ?? 0) != 0)
             {
                 return ProcessPolyLists(mesh.PolyList, mesh.Sources, isHull);
             }
-            else if (mesh.Polygons?.Any() == true)
+            else if ((mesh.Polygons?.Length ?? 0) != 0)
             {
                 return ProcessPolygons(mesh.Polygons, mesh.Sources, isHull);
             }
 
-            return Enumerable.Empty<SubMeshContent>();
+            return [];
         }
         /// <summary>
         /// Process spline
@@ -560,25 +560,25 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isHull)
+        private static List<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isHull)
         {
             if (triangles?.Any() != true)
             {
-                return Enumerable.Empty<SubMeshContent>();
+                return [];
             }
 
-            List<SubMeshContent> res = new();
+            List<SubMeshContent> res = [];
 
             foreach (var triangle in triangles)
             {
                 var verts = ProcessTriangle(triangle, meshSources);
-                if (!verts.Any())
+                if (verts.Count == 0)
                 {
                     continue;
                 }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count()];
+                VertexData[] data = new VertexData[verts.Count];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts.ElementAt(i + 0);
@@ -593,7 +593,7 @@ namespace Engine.Content.FmtCollada
                 res.Add(meshInfo);
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Process a single triangle
@@ -601,9 +601,9 @@ namespace Engine.Content.FmtCollada
         /// <param name="triangle">Triangle</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static IEnumerable<VertexData> ProcessTriangle(Triangles triangle, IEnumerable<Source> meshSources)
+        private static List<VertexData> ProcessTriangle(Triangles triangle, IEnumerable<Source> meshSources)
         {
-            List<VertexData> verts = new();
+            List<VertexData> verts = [];
 
             var vertexInput = triangle[EnumSemantics.Vertex];
             var normalInput = triangle[EnumSemantics.Normal];
@@ -635,7 +635,7 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return verts.ToArray();
+            return verts;
         }
         /// <summary>
         /// Process triangle fans
@@ -666,19 +666,19 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isHull)
+        private static List<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isHull)
         {
             if (polyLists?.Any() != true)
             {
-                return Enumerable.Empty<SubMeshContent>();
+                return [];
             }
 
-            List<SubMeshContent> res = new();
+            List<SubMeshContent> res = [];
 
             foreach (var polyList in polyLists)
             {
                 ProcessPolyList(polyList, meshSources, out var verts, out var indices);
-                if (!verts.Any() || !indices.Any())
+                if (verts.Count == 0 || indices.Count == 0)
                 {
                     continue;
                 }
@@ -691,7 +691,7 @@ namespace Engine.Content.FmtCollada
                 res.Add(meshInfo);
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Process polygon list
@@ -699,10 +699,10 @@ namespace Engine.Content.FmtCollada
         /// <param name="polyList">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Return vertext data</returns>
-        private static void ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        private static void ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources, out List<VertexData> vertices, out List<uint> indices)
         {
-            List<VertexData> verts = new();
-            List<uint> idx = new();
+            List<VertexData> verts = [];
+            List<uint> idx = [];
 
             var vertexInput = polyList[EnumSemantics.Vertex];
             var normalInput = polyList[EnumSemantics.Normal];
@@ -742,8 +742,8 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            vertices = verts.ToArray();
-            indices = idx.ToArray();
+            vertices = verts;
+            indices = idx;
         }
         /// <summary>
         /// Builds a poligon face
@@ -755,18 +755,18 @@ namespace Engine.Content.FmtCollada
         {
             if (vertCount == 3)
             {
-                return new uint[]
-                {
+                return
+                [
                     (uint)startIndex,
                     (uint)startIndex + 2,
                     (uint)startIndex + 1
-                };
+                ];
             }
 
             if (vertCount == 4)
             {
-                return new uint[]
-                {
+                return
+                [
                     (uint)startIndex,
                     (uint)startIndex + 2,
                     (uint)startIndex + 1,
@@ -774,10 +774,10 @@ namespace Engine.Content.FmtCollada
                     (uint)startIndex,
                     (uint)startIndex + 3,
                     (uint)startIndex + 2,
-                };
+                ];
             }
 
-            return Enumerable.Empty<uint>();
+            return [];
         }
         /// <summary>
         /// Process polygons
@@ -786,25 +786,25 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isHull)
+        private static List<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isHull)
         {
             if (polygons?.Any() != true)
             {
-                return Enumerable.Empty<SubMeshContent>();
+                return [];
             }
 
-            List<SubMeshContent> res = new();
+            List<SubMeshContent> res = [];
 
             foreach (var polygon in polygons)
             {
                 var verts = ProcessPolygon(polygon, meshSources);
-                if (!verts.Any())
+                if (verts.Count == 0)
                 {
                     continue;
                 }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count()];
+                VertexData[] data = new VertexData[verts.Count];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts.ElementAt(i + 0);
@@ -819,7 +819,7 @@ namespace Engine.Content.FmtCollada
                 res.Add(meshInfo);
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Process polygon
@@ -827,9 +827,9 @@ namespace Engine.Content.FmtCollada
         /// <param name="polygon">Polygon</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static IEnumerable<VertexData> ProcessPolygon(Polygons polygon, IEnumerable<Source> meshSources)
+        private static List<VertexData> ProcessPolygon(Polygons polygon, IEnumerable<Source> meshSources)
         {
-            List<VertexData> verts = new();
+            List<VertexData> verts = [];
 
             var vertexInput = polygon[EnumSemantics.Vertex];
             var normalInput = polygon[EnumSemantics.Normal];
@@ -864,7 +864,7 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return verts.ToArray();
+            return verts;
         }
 
         #endregion
@@ -945,7 +945,7 @@ namespace Engine.Content.FmtCollada
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances, out string target)
         {
             var mat = instances?
-                .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
+                .Where(i => (i.BindMaterial?.TechniqueCommon?.Length ?? 0) != 0)
                 .SelectMany(i => i.BindMaterial.TechniqueCommon)
                 .SelectMany(t => t.InstanceMaterial)
                 .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
@@ -958,7 +958,7 @@ namespace Engine.Content.FmtCollada
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceController> instances, out string target)
         {
             var mat = instances?
-                .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
+                .Where(i => (i.BindMaterial?.TechniqueCommon?.Length ?? 0) != 0)
                 .SelectMany(i => i.BindMaterial.TechniqueCommon)
                 .SelectMany(t => t.InstanceMaterial)
                 .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
@@ -1092,21 +1092,21 @@ namespace Engine.Content.FmtCollada
         /// <param name="weightsOffset">Weights offset</param>
         /// <param name="weights">Weight values list</param>
         /// <returns>Returns the weights list</returns>
-        private static IEnumerable<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, IEnumerable<string> joints, int weightsOffset, IEnumerable<float> weights)
+        private static List<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, IEnumerable<string> joints, int weightsOffset, IEnumerable<float> weights)
         {
             if (skin?.VertexWeights == null || skin.VertexWeights.Count <= 0)
             {
-                return Enumerable.Empty<Weight>();
+                return [];
             }
 
             if (jointsOffset < 0 || joints?.Any() != true)
             {
-                return Enumerable.Empty<Weight>();
+                return [];
             }
 
             if (weightsOffset < 0 || weights?.Any() != true)
             {
-                return Enumerable.Empty<Weight>();
+                return [];
             }
 
             var wgList = new List<Weight>();
@@ -1140,7 +1140,7 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return wgList.ToArray();
+            return wgList;
         }
         /// <summary>
         /// Creates the inverse bind matrix dictionary
@@ -1152,12 +1152,12 @@ namespace Engine.Content.FmtCollada
         {
             if (mats?.Any() != true || joints?.Any() != true)
             {
-                return new Dictionary<string, Matrix>();
+                return [];
             }
 
             if (mats.Count() != joints.Count())
             {
-                return new Dictionary<string, Matrix>();
+                return [];
             }
 
             var ibmList = new Dictionary<string, Matrix>();
@@ -1366,7 +1366,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns texture name</returns>
         private static string FindBumpMap(ProfileCommon profile, TechniqueCommon technique)
         {
-            if (technique.Extras?.Any() != true)
+            if ((technique.Extras?.Length ?? 0) == 0)
             {
                 return null;
             }
@@ -1410,19 +1410,19 @@ namespace Engine.Content.FmtCollada
 
             string sceneUrl = dae.Scene.InstanceVisualScene.Url;
 
-            if (dae.LibraryVisualScenes?.Any() != true)
+            if ((dae.LibraryVisualScenes?.Length ?? 0) == 0)
             {
                 return;
             }
 
             var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
-            if (vScene?.Nodes?.Any() != true)
+            if ((vScene?.Nodes?.Length ?? 0) == 0)
             {
                 return;
             }
 
             ProcessSceneNodesSkeleton(vScene.Nodes, out var skeletons);
-            if (skeletons.Any())
+            if (skeletons.Count != 0)
             {
                 ProcessVisualSceneSkins(vScene, modelContent, skeletons);
             }
@@ -1603,104 +1603,104 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="nodes">Node list to process</param>
         /// <param name="skeletons">Returns a skeleton list, if any</param>
-        private static void ProcessSceneNodesSkeleton(IEnumerable<Node> nodes, out IEnumerable<Skeleton> skeletons)
+        private static void ProcessSceneNodesSkeleton(IEnumerable<Node> nodes, out List<Skeleton> skeletons)
         {
             if (nodes?.Any() != true)
             {
                 //No child nodes
-                skeletons = Enumerable.Empty<Skeleton>();
+                skeletons = [];
 
                 return;
             }
 
-            List<Skeleton> res = new();
+            List<Skeleton> res = [];
 
             foreach (var node in nodes)
             {
                 ProcessSceneNodeSkeleton(node, out var nodeSkeletons);
-                if (nodeSkeletons.Any())
+                if (nodeSkeletons.Count != 0)
                 {
                     res.AddRange(nodeSkeletons);
                 }
             }
 
-            skeletons = res.ToArray();
+            skeletons = res;
         }
         /// <summary>
         /// Process the specified node, lookgin for a skeleton
         /// </summary>
         /// <param name="node">Node to process</param>
         /// <param name="skeletons">Returns a skeleton list, if any</param>
-        private static void ProcessSceneNodeSkeleton(Node node, out IEnumerable<Skeleton> skeletons)
+        private static void ProcessSceneNodeSkeleton(Node node, out List<Skeleton> skeletons)
         {
             if (!node.IsArmature)
             {
-                List<Skeleton> res = new();
+                List<Skeleton> res = [];
 
                 ProcessSceneNodesSkeleton(node.Nodes, out var childSkeletons);
-                if (childSkeletons.Any())
+                if (childSkeletons.Count != 0)
                 {
                     res.AddRange(childSkeletons);
                 }
 
-                skeletons = res.ToArray();
+                skeletons = res;
 
                 return;
             }
 
-            skeletons = new[] { CreateSkeleton(node) };
+            skeletons = [CreateSkeleton(node)];
         }
         /// <summary>
         /// Process the specified node list, looking for instance controllers
         /// </summary>
         /// <param name="nodes">Node list to process</param>
         /// <param name="instanceControllers">Returns a instance controller list, if any</param>
-        private static void ProcessSceneNodesInstanceController(IEnumerable<Node> nodes, out IEnumerable<InstanceController> instanceControllers)
+        private static void ProcessSceneNodesInstanceController(IEnumerable<Node> nodes, out List<InstanceController> instanceControllers)
         {
             if (nodes?.Any() != true)
             {
                 //No child nodes
-                instanceControllers = Enumerable.Empty<InstanceController>();
+                instanceControllers = [];
 
                 return;
             }
 
-            List<InstanceController> res = new();
+            List<InstanceController> res = [];
 
             foreach (var node in nodes)
             {
                 ProcessSceneNodeInstanceController(node, out var nodeInstanceControllers);
-                if (nodeInstanceControllers.Any())
+                if (nodeInstanceControllers.Count != 0)
                 {
                     res.AddRange(nodeInstanceControllers);
                 }
             }
 
-            instanceControllers = res.ToArray();
+            instanceControllers = res;
         }
         /// <summary>
         /// Process the specified node, lookgin for a instance controller
         /// </summary>
         /// <param name="node">Node to process</param>
         /// <param name="instanceControllers">Returns a instance controller list, if any</param>
-        private static void ProcessSceneNodeInstanceController(Node node, out IEnumerable<InstanceController> instanceControllers)
+        private static void ProcessSceneNodeInstanceController(Node node, out List<InstanceController> instanceControllers)
         {
             if (!node.HasController)
             {
-                List<InstanceController> res = new();
+                List<InstanceController> res = [];
 
                 ProcessSceneNodesInstanceController(node.Nodes, out var childInstanceControllers);
-                if (childInstanceControllers.Any())
+                if (childInstanceControllers.Count != 0)
                 {
                     res.AddRange(childInstanceControllers);
                 }
 
-                instanceControllers = res.ToArray();
+                instanceControllers = res;
 
                 return;
             }
 
-            instanceControllers = new[] { node.InstanceController[0] };
+            instanceControllers = [node.InstanceController[0]];
         }
         /// <summary>
         /// Creates a skeleton from an armature node
@@ -1737,19 +1737,19 @@ namespace Engine.Content.FmtCollada
 
             Skeleton.UpdateToWorldTransform(jt);
 
-            if (node.Nodes?.Any() != true)
+            if ((node.Nodes?.Length ?? 0) == 0)
             {
                 return jt;
             }
 
-            List<Joint> childs = new();
+            List<Joint> childs = [];
 
             foreach (var child in node.Nodes)
             {
                 childs.Add(ProcessJoints(jt, child));
             }
 
-            jt.Childs = childs.ToArray();
+            jt.Childs = [.. childs];
 
             return jt;
         }

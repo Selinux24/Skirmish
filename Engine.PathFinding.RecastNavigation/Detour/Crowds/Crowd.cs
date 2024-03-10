@@ -41,19 +41,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Agent list
         /// </summary>
-        private readonly List<CrowdAgent> m_agents = new();
+        private readonly List<CrowdAgent> m_agents = [];
         /// <summary>
         /// Agent animation dictionary
         /// </summary>
-        private readonly Dictionary<CrowdAgent, CrowdAgentAnimation> m_agentAnims = new();
+        private readonly Dictionary<CrowdAgent, CrowdAgentAnimation> m_agentAnims = [];
         /// <summary>
         /// Filter list
         /// </summary>
-        private readonly List<QueryFilter> m_filters = new();
+        private readonly List<QueryFilter> m_filters = [];
         /// <summary>
         /// Obstacle query list
         /// </summary>
-        private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = new();
+        private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = [];
         /// <summary>
         /// Path queue
         /// </summary>
@@ -241,10 +241,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            if (m_agents.Contains(ag))
-            {
-                m_agents.Remove(ag);
-            }
+            m_agents.Remove(ag);
         }
         /// <summary>
         /// Gets the agents int the agent pool.
@@ -252,7 +249,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>The collection of agents.</returns>
         public CrowdAgent[] GetAgents()
         {
-            return m_agents.ToArray();
+            return [.. m_agents];
         }
         /// <summary>
         /// Gets the active agents int the agent pool.
@@ -273,7 +270,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_velocitySampleCount = 0;
 
             var activeAgents = GetActiveAgents();
-            if (!activeAgents.Any())
+            if (activeAgents.Length == 0)
             {
                 return;
             }
@@ -494,12 +491,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 queue.Sort((a1, a2) => -a1.TargetReplanTime.CompareTo(a2.TargetReplanTime));
             }
 
-            return queue.ToArray();
+            return [.. queue];
         }
         private void FireNewRequest(CrowdAgent ag)
         {
             var path = ag.Corridor.GetPath();
-            if (!path.Any())
+            if (path.Length == 0)
             {
                 Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
@@ -599,7 +596,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private void ProcessPathResults(CrowdAgent ag)
         {
             var path = ag.Corridor.GetPath();
-            if (!path.Any())
+            if (path.Length == 0)
             {
                 Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }

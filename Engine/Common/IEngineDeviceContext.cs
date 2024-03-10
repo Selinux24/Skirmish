@@ -118,7 +118,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="firstSlot">The first input slot for binding</param>
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
-        void IASetVertexBuffers(int firstSlot, params EngineVertexBufferBinding[] vertexBufferBindings);
+        void IASetVertexBuffers(int firstSlot, IEnumerable<EngineVertexBufferBinding> vertexBufferBindings);
         /// <summary>
         /// Bind an index buffer to the input-assembler stage.
         /// </summary>

@@ -16,10 +16,7 @@ namespace Engine
         /// <remarks>The new key would be added respectively to a position of that key and the position of other keys.</remarks>
         public new void Add(CurveKey item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            ArgumentNullException.ThrowIfNull(item);
 
             if (Count == 0)
             {

@@ -872,7 +872,7 @@ namespace Engine.Common
                 return false;
             }
 
-            dc.IASetVertexBuffers(0, [.. vertexBufferBindings]);
+            dc.IASetVertexBuffers(0, vertexBufferBindings);
 
             return true;
         }

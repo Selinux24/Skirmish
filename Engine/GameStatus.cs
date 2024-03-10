@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Internal status dictionary
         /// </summary>
-        internal readonly Dictionary<string, double> status = new();
+        internal readonly Dictionary<string, double> status = [];
 
         /// <summary>
         /// Constructor
@@ -37,11 +37,7 @@ namespace Engine
         /// <param name="value">Line value</param>
         public void Add(string key, double value)
         {
-            if (!status.ContainsKey(key))
-            {
-                status.Add(key, value);
-            }
-            else
+            if (!status.TryAdd(key, value))
             {
                 status[key] += value;
             }

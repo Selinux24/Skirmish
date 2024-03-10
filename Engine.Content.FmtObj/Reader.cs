@@ -51,7 +51,7 @@ namespace Engine.Content.FmtObj
             }
 
             var useMatIndices = lines.FindAllIndexOf("usemtl");
-            if (useMatIndices.Any())
+            if (useMatIndices.Length != 0)
             {
                 for (int i = 0; i < useMatIndices.Length; i++)
                 {
@@ -79,10 +79,10 @@ namespace Engine.Content.FmtObj
                 }
             }
 
-            materials = matLibs.ToArray();
-            content = models.ToArray();
+            materials = matLibs;
+            content = models;
         }
-        private static IEnumerable<string> ReadStreamLines(Stream stream)
+        private static List<string> ReadStreamLines(Stream stream)
         {
             var lines = new List<string>();
 
@@ -160,7 +160,7 @@ namespace Engine.Content.FmtObj
 
             return new Color3(r, g, b);
         }
-        private static IEnumerable<Vector2> ReadVector2(string strLine, string dataType)
+        private static Vector2[] ReadVector2(string strLine, string dataType)
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
@@ -172,12 +172,12 @@ namespace Engine.Content.FmtObj
 
                 v.Y = 1 - v.Y;
 
-                return new[] { v };
+                return [v];
             }
 
-            return Array.Empty<Vector2>();
+            return [];
         }
-        private static IEnumerable<Vector3> ReadVector3(string strLine, string dataType)
+        private static Vector3[] ReadVector3(string strLine, string dataType)
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
@@ -192,16 +192,16 @@ namespace Engine.Content.FmtObj
                 Vector3 vr = v;
                 vr.Z = -vr.Z;
 
-                return new[] { vr };
+                return [vr];
             }
 
-            return Array.Empty<Vector3>();
+            return [];
         }
         private static IEnumerable<Face[]> ReadFaces(string strLine)
         {
             if (!strLine.StartsWith("f ", StringComparison.OrdinalIgnoreCase))
             {
-                return Array.Empty<Face[]>();
+                return [];
             }
 
             var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -222,11 +222,11 @@ namespace Engine.Content.FmtObj
                         res.Add(value);
                     }
 
-                    return new Face(res.ToArray());
+                    return new Face([.. res]);
                 })
                 .ToArray();
 
-            return new[] { face };
+            return [face];
         }
 
         private static string ReadUseMaterial(string strLine)
@@ -238,26 +238,26 @@ namespace Engine.Content.FmtObj
 
             return ContentData.NoMaterial;
         }
-        private static IEnumerable<string> ReadMaterialFileName(string folder, string strLine, string dataType)
+        private static string[] ReadMaterialFileName(string folder, string strLine, string dataType)
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
                 string materialFile = strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
                 if (string.IsNullOrWhiteSpace(materialFile))
                 {
-                    return Array.Empty<string>();
+                    return [];
                 }
 
                 string path = Path.Combine(folder, materialFile);
                 if (File.Exists(path))
                 {
-                    return new[] { path };
+                    return [path];
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
-        private static IEnumerable<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
+        private static List<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
         {
             var materials = new List<Material>();
 

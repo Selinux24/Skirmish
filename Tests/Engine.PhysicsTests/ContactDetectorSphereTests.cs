@@ -79,7 +79,7 @@ namespace Engine.PhysicsTests
 
             var c1 = FromPlane(new Vector3(0, ah, 0), Vector3.Up, trnA);
             var c2 = FromTriangle(t, trnA);
-            var c3 = FromTriangles(new[] { t1, t2 }, trnA);
+            var c3 = FromTriangles([t1, t2], trnA);
 
             float bh = -0.5f;
             Matrix trnB = Matrix.Translation(0, bh, 0);
@@ -94,9 +94,9 @@ namespace Engine.PhysicsTests
             bool intersection2 = ContactDetector.BetweenObjects(c2, b, data2);
             bool intersection3 = ContactDetector.BetweenObjects(c3, b, data3);
 
-            Assert.AreEqual(true, intersection1, "Intersection expected.");
-            Assert.AreEqual(true, intersection2, "Intersection expected.");
-            Assert.AreEqual(true, intersection3, "Intersection expected.");
+            Assert.IsTrue(intersection1, "Intersection expected.");
+            Assert.IsTrue(intersection2, "Intersection expected.");
+            Assert.IsTrue(intersection3, "Intersection expected.");
 
             Assert.AreEqual(1, data1.ContactCount, "One contact expected");
             Assert.AreEqual(1, data2.ContactCount, "One contact expected");

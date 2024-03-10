@@ -9,23 +9,26 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    public class BufferManagerVertices : IEngineBufferDescriptor
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class BufferManagerVertices(VertexTypes type, bool dynamic) : IEngineBufferDescriptor
     {
         /// <summary>
         /// Data list
         /// </summary>
-        private readonly List<IVertexData> data = new();
+        private readonly List<IVertexData> data = [];
         /// <summary>
         /// Input element list
         /// </summary>
-        private readonly List<InputElement> input = new();
+        private readonly List<InputElement> input = [];
         /// <summary>
         /// Vertex descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> vertexDescriptors = new();
+        private readonly List<BufferDescriptor> vertexDescriptors = [];
 
         /// <inheritdoc/>
-        public bool Dynamic { get; private set; }
+        public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
@@ -53,11 +56,11 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes Type { get; private set; }
+        public VertexTypes Type { get; private set; } = type;
         /// <summary>
         /// Vertex data
         /// </summary>
-        public IEnumerable<IVertexData> Data { get { return data.ToArray(); } }
+        public IEnumerable<IVertexData> Data { get { return [.. data]; } }
         /// <summary>
         /// Instancing buffer descriptor
         /// </summary>
@@ -65,20 +68,11 @@ namespace Engine.Common
         /// <summary>
         /// Input elements
         /// </summary>
-        public IEnumerable<InputElement> Input { get { return input.ToArray(); } }
+        public IEnumerable<InputElement> Input { get { return [.. input]; } }
         /// <summary>
         /// Vertex buffer binding index in the manager list
         /// </summary>
         public int BufferBindingIndex { get; set; } = -1;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public BufferManagerVertices(VertexTypes type, bool dynamic)
-        {
-            Type = type;
-            Dynamic = dynamic;
-        }
 
         /// <summary>
         /// Gets the buffer format stride
@@ -195,7 +189,7 @@ namespace Engine.Common
                 //Remove descriptor
                 vertexDescriptors.Remove(descriptor);
 
-                if (!vertexDescriptors.Any())
+                if (vertexDescriptors.Count == 0)
                 {
                     return;
                 }

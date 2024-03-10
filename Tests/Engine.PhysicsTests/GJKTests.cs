@@ -60,7 +60,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void SphereSphere2Test()
@@ -70,7 +70,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(false, contact);
+            Assert.IsFalse(contact);
         }
         [TestMethod()]
         public void SphereSphere3Test()
@@ -80,7 +80,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void SphereSphere4Test()
@@ -90,7 +90,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
 
         [TestMethod()]
@@ -101,7 +101,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubeSphere2Test()
@@ -111,7 +111,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(false, contact);
+            Assert.IsFalse(contact);
         }
         [TestMethod()]
         public void CubeSphere3Test()
@@ -121,7 +121,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubeSphere4Test()
@@ -131,7 +131,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
 
         [TestMethod()]
@@ -142,7 +142,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubeCube2Test()
@@ -152,7 +152,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(false, contact);
+            Assert.IsFalse(contact);
         }
         [TestMethod()]
         public void CubeCube3Test()
@@ -162,7 +162,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubeCube4Test()
@@ -172,7 +172,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
 
         [TestMethod()]
@@ -183,7 +183,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubePolytope2Test()
@@ -193,7 +193,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(false, contact);
+            Assert.IsFalse(contact);
         }
         [TestMethod()]
         public void CubePolytope3Test()
@@ -203,7 +203,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
         [TestMethod()]
         public void CubePolytope4Test()
@@ -213,7 +213,7 @@ namespace Engine.PhysicsTests
 
             bool contact = Solver.GJK(s1, s2, out _);
 
-            Assert.AreEqual(true, contact);
+            Assert.IsTrue(contact);
         }
     }
 }

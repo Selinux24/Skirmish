@@ -18,7 +18,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Rotation string list
         /// </summary>
-        private static readonly string[] rotationStrings = new[] { RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270 };
+        private static readonly string[] rotationStrings = [RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270];
 
         /// <summary>
         /// Creates an asset map
@@ -134,15 +134,16 @@ namespace Engine.Content.OnePageDungeon
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                List<AssetReference> roomAssets = new();
-
-                roomAssets.AddRange(CreateRoom(rect, walls, configuration));
-                roomAssets.AddRange(CreateColumns(rect, dungeon, configuration));
+                List<AssetReference> roomAssets =
+                [
+                    .. CreateRoom(rect, walls, configuration),
+                    .. CreateColumns(rect, dungeon, configuration),
+                ];
 
                 yield return new Asset
                 {
                     Name = $"{rectIndex++}",
-                    References = roomAssets.ToArray(),
+                    References = roomAssets,
                     Connections = CreateConnections(rect, dungeon, configuration),
                 };
             }
@@ -153,9 +154,9 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="walls">Wall list</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
+        private static List<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
         {
-            List<AssetReference> references = new();
+            List<AssetReference> references = [];
 
             for (int x = 0; x < rect.W; x++)
             {
@@ -178,7 +179,7 @@ namespace Engine.Content.OnePageDungeon
                 }
             }
 
-            return references.ToArray();
+            return references;
         }
         /// <summary>
         /// Creates an asset reference from the specified property
@@ -214,9 +215,9 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="vz">Z position</param>
         /// <param name="cellWall">Wall</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetReference> CreateWall(float vx, float vz, Wall cellWall, DungeonAssetConfiguration configuration)
+        private static List<AssetReference> CreateWall(float vx, float vz, Wall cellWall, DungeonAssetConfiguration configuration)
         {
-            List<AssetReference> references = new();
+            List<AssetReference> references = [];
 
             float blockDelta = configuration.BlockSize * 0.5f;
 
@@ -283,7 +284,7 @@ namespace Engine.Content.OnePageDungeon
 
             if (!neis.Any())
             {
-                return Enumerable.Empty<AssetConnection>();
+                return [];
             }
 
             // Create connection between the room and the neighbors
@@ -295,9 +296,9 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="one">Room rectangle one</param>
         /// <param name="two">Room rectangle two</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
+        private static List<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
         {
-            List<AssetConnection> connections = new();
+            List<AssetConnection> connections = [];
 
             for (int x = 0; x < one.W; x++)
             {
@@ -310,7 +311,7 @@ namespace Engine.Content.OnePageDungeon
                 }
             }
 
-            return connections.ToArray();
+            return connections;
         }
         /// <summary>
         /// Creates a connection between the room rectangle and the area rectangle
@@ -410,7 +411,7 @@ namespace Engine.Content.OnePageDungeon
         {
             return new LevelMap
             {
-                Levels = new[] { CreateLevel(dungeon, configuration) }
+                Levels = [CreateLevel(dungeon, configuration)]
             };
         }
         /// <summary>

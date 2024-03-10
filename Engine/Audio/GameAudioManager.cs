@@ -41,15 +41,15 @@ namespace Engine.Audio
         /// <summary>
         /// Sound dictionary
         /// </summary>
-        private readonly Dictionary<string, string> soundList = new();
+        private readonly Dictionary<string, string> soundList = [];
         /// <summary>
         /// Effect parameters library
         /// </summary>
-        private readonly Dictionary<string, GameAudioEffectParameters> effectParamsLib = new();
+        private readonly Dictionary<string, GameAudioEffectParameters> effectParamsLib = [];
         /// <summary>
         /// Effect instances list
         /// </summary>
-        private readonly List<EffectInstance> effectInstances = new();
+        private readonly List<EffectInstance> effectInstances = [];
 
         /// <summary>
         /// Gets or sets the master volume
@@ -153,7 +153,7 @@ namespace Engine.Audio
                 .FindAll(i => i.Effect.DueToDispose)
                 .ToArray();
 
-            if (toDispose.Any())
+            if (toDispose.Length != 0)
             {
                 effectInstances.RemoveAll(i => i.Effect.DueToDispose);
                 Task.Run(() =>
@@ -196,7 +196,7 @@ namespace Engine.Audio
                 throw new EngineException($"The specified file not exists: [{contentFolder}][{fileName}]");
             }
 
-            if (soundList.ContainsKey(soundName))
+            if (!soundList.TryAdd(soundName, path))
             {
                 if (replaceIfExists)
                 {
@@ -208,11 +208,6 @@ namespace Engine.Audio
                     throw new EngineException($"{soundName} already exists in the sound dictionary.");
                 }
             }
-            else
-            {
-                //Adds the sound to the collection
-                soundList.Add(soundName, path);
-            }
         }
         /// <summary>
         /// Adds an effect parametrization to the library
@@ -221,10 +216,7 @@ namespace Engine.Audio
         /// <param name="effectParams">Effect parameters</param>
         public void AddEffectParams(string effectName, GameAudioEffectParameters effectParams)
         {
-            if (!effectParamsLib.ContainsKey(effectName))
-            {
-                effectParamsLib.Add(effectName, effectParams);
-            }
+            effectParamsLib.TryAdd(effectName, effectParams);
         }
         /// <summary>
         /// Creates an effect instance
@@ -329,7 +321,7 @@ namespace Engine.Audio
         public void ClearEffects()
         {
             var toDispose = effectInstances.ToList();
-            if (toDispose.Any())
+            if (toDispose.Count != 0)
             {
                 effectInstances.Clear();
                 Task.Run(() =>

@@ -21,7 +21,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private UIConsole console = null;
 
         private Model soldier = null;
-        private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new();
+        private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = [];
         private readonly Vector3 soldierInitPosition = new(0, 0, 5);
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
@@ -99,12 +99,11 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeFloor(),
                     InitializeSoldier(),
                     InitializeDebug(),
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
@@ -112,19 +111,19 @@ namespace IntermediateSamples.SceneSmoothTransitions
             float l = 15f;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
+                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
+                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
+                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                     0, 1, 2,
                     1, 3, 2,
-            };
+            ];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneSmoothTransitions/resources/d_road_asphalt_stripes_diffuse.dds";
@@ -431,9 +430,9 @@ namespace IntermediateSamples.SceneSmoothTransitions
         /// <param name="from">Position from</param>
         /// <param name="to">Position to</param>
         /// <returns>Returns the path</returns>
-        private static IControllerPath CalcPath(Vector3 from, Vector3 to)
+        private static SegmentPath CalcPath(Vector3 from, Vector3 to)
         {
-            return new SegmentPath(from, to);
+            return new(from, to);
         }
         /// <summary>
         /// Calculates an animation plan

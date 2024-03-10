@@ -113,7 +113,7 @@ namespace Engine.Common
                 }
             }
 
-            return indices.ToArray();
+            return [.. indices];
         }
         /// <summary>
         /// Computes the top side indexes for triangle soup quad
@@ -124,22 +124,22 @@ namespace Engine.Common
         /// <param name="indexPRow">P index</param>
         /// <param name="indexCRow">C index</param>
         /// <returns>Returns the indexes list</returns>
-        private static IEnumerable<uint> ComputeTopSide(bool firstRow, bool topSide, uint offset, uint indexPRow, uint indexCRow)
+        private static uint[] ComputeTopSide(bool firstRow, bool topSide, uint offset, uint indexPRow, uint indexCRow)
         {
             if (firstRow && topSide)
             {
-                return new[]
-                {
+                return
+                [
                     //Top
                     indexCRow,
                     indexPRow - (1 * offset),
                     indexPRow + (1 * offset),
-                };
+                ];
             }
             else
             {
-                return new[]
-                {
+                return
+                [
                     //Top left
                     indexCRow,
                     indexPRow - (1 * offset),
@@ -148,7 +148,7 @@ namespace Engine.Common
                     indexCRow,
                     indexPRow,
                     indexPRow + (1 * offset),
-                };
+                ];
             }
         }
         /// <summary>
@@ -160,22 +160,22 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static IEnumerable<uint> ComputeBottomSide(bool lastRow, bool bottomSide, uint offset, uint indexCRow, uint indexNRow)
+        private static uint[] ComputeBottomSide(bool lastRow, bool bottomSide, uint offset, uint indexCRow, uint indexNRow)
         {
             if (lastRow && bottomSide)
             {
-                return new[]
-                {
+                return
+                [
                     //Bottom only
                     indexCRow,
                     indexNRow + (1 * offset),
                     indexNRow - (1 * offset),
-                };
+                ];
             }
             else
             {
-                return new[]
-                {
+                return
+                [
                     //Bottom left
                     indexCRow,
                     indexNRow,
@@ -184,7 +184,7 @@ namespace Engine.Common
                     indexCRow,
                     indexNRow + (1 * offset),
                     indexNRow,
-                };
+                ];
             }
         }
         /// <summary>
@@ -197,22 +197,22 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static IEnumerable<uint> ComputeLeftSide(bool firstColumn, bool leftSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        private static uint[] ComputeLeftSide(bool firstColumn, bool leftSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
         {
             if (firstColumn && leftSide)
             {
-                return new[]
-                {
+                return
+                [
                     //Left only
                     indexCRow,
                     indexNRow - (1 * offset),
                     indexPRow - (1 * offset),
-                };
+                ];
             }
             else
             {
-                return new[]
-                {
+                return
+                [
                     //Left top
                     indexCRow,
                     indexCRow - (1 * offset),
@@ -221,7 +221,7 @@ namespace Engine.Common
                     indexCRow,
                     indexNRow - (1 * offset),
                     indexCRow - (1 * offset),
-                };
+                ];
             }
         }
         /// <summary>
@@ -234,22 +234,22 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static IEnumerable<uint> ComputeRightSide(bool lastColumn, bool rightSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        private static uint[] ComputeRightSide(bool lastColumn, bool rightSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
         {
             if (lastColumn && rightSide)
             {
-                return new[]
-                {
+                return
+                [
                     //Right only
                     indexCRow,
                     indexPRow + (1 * offset),
                     indexNRow + (1 * offset),
-                };
+                ];
             }
             else
             {
-                return new[]
-                {
+                return
+                [
                     //Right top
                     indexCRow,
                     indexPRow + (1 * offset),
@@ -258,7 +258,7 @@ namespace Engine.Common
                     indexCRow,
                     indexCRow + (1 * offset),
                     indexNRow + (1 * offset),
-                };
+                ];
             }
         }
         /// <summary>
@@ -455,15 +455,7 @@ namespace Engine.Common
             vertices[3] = new Vector3(right, top, 0.0f);
             uvs[3] = new Vector2(u1, v0);
 
-            uint[] indices = new uint[6];
-
-            indices[0] = 0;
-            indices[1] = 1;
-            indices[2] = 2;
-
-            indices[3] = 0;
-            indices[4] = 3;
-            indices[5] = 1;
+            uint[] indices = [0, 1, 2, 0, 3, 1];
 
             return new GeometryDescriptor()
             {
@@ -616,11 +608,11 @@ namespace Engine.Common
 
                 return new GeometryDescriptor()
                 {
-                    Vertices = vertList.ToArray(),
-                    Normals = normList.ToArray(),
-                    Tangents = tangList.ToArray(),
-                    Binormals = binmList.ToArray(),
-                    Uvs = uvList.ToArray(),
+                    Vertices = [.. vertList],
+                    Normals = [.. normList],
+                    Tangents = [.. tangList],
+                    Binormals = [.. binmList],
+                    Uvs = [.. uvList],
                     Indices = indexList.Select(i => (uint)i).ToArray(),
                 };
             }
@@ -663,7 +655,7 @@ namespace Engine.Common
 
                 return new GeometryDescriptor()
                 {
-                    Vertices = vertList.ToArray(),
+                    Vertices = [.. vertList],
                     Indices = indexList.Select(i => (uint)i).ToArray(),
                 };
             }
@@ -823,8 +815,8 @@ namespace Engine.Common
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     0, 3,
                     1, 2,
@@ -839,7 +831,7 @@ namespace Engine.Common
                     1, 7,
                     2, 6,
                     3, 5,
-                };
+                ];
             }
             else
             {
@@ -941,8 +933,8 @@ namespace Engine.Common
 
             return new GeometryDescriptor()
             {
-                Vertices = vertList.ToArray(),
-                Indices = indexList.ToArray(),
+                Vertices = [.. vertList],
+                Indices = [.. indexList],
             };
         }
         /// <summary>
@@ -974,8 +966,8 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0,1,2,
                     0,2,3,
 
@@ -993,12 +985,12 @@ namespace Engine.Common
 
                     0,3,7,
                     0,7,4,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     0, 3,
                     1, 2,
@@ -1013,7 +1005,7 @@ namespace Engine.Common
                     1, 5,
                     2, 6,
                     3, 7
-                };
+                ];
             }
             else
             {
@@ -1040,25 +1032,25 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1, 2,
                     0, 2, 3,
                     1, 3, 2,
                     0, 3, 1,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     1, 2,
                     2, 0,
                     0, 3,
                     1, 3,
                     2, 3,
-                };
+                ];
             }
             else
             {
@@ -1096,8 +1088,8 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1, 2,
                     0, 2, 3,
                     0, 3, 4,
@@ -1107,12 +1099,12 @@ namespace Engine.Common
                     5, 3, 2,
                     5, 4, 3,
                     5, 1, 4,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     0, 2,
                     0, 3,
@@ -1127,22 +1119,22 @@ namespace Engine.Common
                     2, 3,
                     3, 4,
                     4, 1,
-                };
+                ];
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            var vertices = new[]
-            {
-                new Vector3(0f, 1f, 0f),
-                new Vector3(1f, 0f, 0f),
-                new Vector3(0f, 0f, -1f),
-                new Vector3(-1f, 0f, 0f),
-                new Vector3(0f, 0f, 1f),
-                new Vector3(0f, -1f, 0f),
-            };
+            Vector3[] vertices =
+            [
+                new (0f, 1f, 0f),
+                new (1f, 0f, 0f),
+                new (0f, 0f, -1f),
+                new (-1f, 0f, 0f),
+                new (0f, 0f, 1f),
+                new (0f, -1f, 0f),
+            ];
 
             Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
@@ -1167,8 +1159,8 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0,1,2,
                     0,3,1,
                     0,2,4,
@@ -1194,12 +1186,12 @@ namespace Engine.Common
                     10,5,4,
                     10,11,9,
                     10,8,11,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     0, 2,
                     0, 3,
@@ -1238,32 +1230,32 @@ namespace Engine.Common
                     10, 8,
                     11, 9,
                     11, 8,
-                };
+                ];
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            var vertices = new[]
-            {
-                new Vector3(-InverseGoldenRatio, +1f, 0f),
-                new Vector3(+InverseGoldenRatio, +1f, 0f),
+            Vector3[] vertices =
+            [
+                new (-InverseGoldenRatio, +1f, 0f),
+                new (+InverseGoldenRatio, +1f, 0f),
 
-                new Vector3(0f, +InverseGoldenRatio, -1f),
-                new Vector3(0f, +InverseGoldenRatio, +1f),
+                new (0f, +InverseGoldenRatio, -1f),
+                new (0f, +InverseGoldenRatio, +1f),
 
-                new Vector3(-1f, 0f, -InverseGoldenRatio),
-                new Vector3(-1f, 0f, +InverseGoldenRatio),
-                new Vector3(+1f, 0f, -InverseGoldenRatio),
-                new Vector3(+1f, 0f, +InverseGoldenRatio),
+                new (-1f, 0f, -InverseGoldenRatio),
+                new (-1f, 0f, +InverseGoldenRatio),
+                new (+1f, 0f, -InverseGoldenRatio),
+                new (+1f, 0f, +InverseGoldenRatio),
 
-                new Vector3(0f, -InverseGoldenRatio, -1f),
-                new Vector3(0f, -InverseGoldenRatio, +1f),
+                new (0f, -InverseGoldenRatio, -1f),
+                new (0f, -InverseGoldenRatio, +1f),
 
-                new Vector3(-InverseGoldenRatio, -1f, 0f),
-                new Vector3(+InverseGoldenRatio, -1f, 0f),
-            };
+                new (-InverseGoldenRatio, -1f, 0f),
+                new (+InverseGoldenRatio, -1f, 0f),
+            ];
 
             Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
@@ -1288,8 +1280,8 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     //0,1,4,6,2,
                     0,6,2,
                     0,4,6,
@@ -1349,12 +1341,12 @@ namespace Engine.Common
                     19,16,10,
                     19,10,11,
                     19,11,17,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     //0,1,4,6,2,
                     0,1,
                     1,4,
@@ -1404,42 +1396,42 @@ namespace Engine.Common
                     17,11,
                     11,10,
                     10,16,
-                };
+                ];
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            var vertices = new[]
-            {
-                new Vector3(-QuadInverseGoldenRatio, +1f, 0f),
-                new Vector3(+QuadInverseGoldenRatio, +1f, 0f),
+            Vector3[] vertices =
+            [
+                new (-QuadInverseGoldenRatio, +1f, 0f),
+                new (+QuadInverseGoldenRatio, +1f, 0f),
 
-                new Vector3(-InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
-                new Vector3(-InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
-                new Vector3(+InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
-                new Vector3(+InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
+                new (-InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
+                new (-InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
+                new (+InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
+                new (+InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
 
-                new Vector3(0f, +QuadInverseGoldenRatio, -1f),
-                new Vector3(0f, +QuadInverseGoldenRatio, +1f),
+                new (0f, +QuadInverseGoldenRatio, -1f),
+                new (0f, +QuadInverseGoldenRatio, +1f),
 
-                new Vector3(-1f, 0f, -QuadInverseGoldenRatio),
-                new Vector3(-1f, 0f, +QuadInverseGoldenRatio),
-                new Vector3(+1f, 0f, -QuadInverseGoldenRatio),
-                new Vector3(+1f, 0f, +QuadInverseGoldenRatio),
+                new (-1f, 0f, -QuadInverseGoldenRatio),
+                new (-1f, 0f, +QuadInverseGoldenRatio),
+                new (+1f, 0f, -QuadInverseGoldenRatio),
+                new (+1f, 0f, +QuadInverseGoldenRatio),
 
-                new Vector3(0f, -QuadInverseGoldenRatio, -1f),
-                new Vector3(0f, -QuadInverseGoldenRatio, +1f),
+                new (0f, -QuadInverseGoldenRatio, -1f),
+                new (0f, -QuadInverseGoldenRatio, +1f),
 
-                new Vector3(-InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
-                new Vector3(-InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
-                new Vector3(+InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
-                new Vector3(+InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
+                new (-InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
+                new (-InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
+                new (+InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
+                new (+InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
 
-                new Vector3(-QuadInverseGoldenRatio, -1f, 0f),
-                new Vector3(+QuadInverseGoldenRatio, -1f, 0f),
-            };
+                new (-QuadInverseGoldenRatio, -1f, 0f),
+                new (+QuadInverseGoldenRatio, -1f, 0f),
+            ];
 
             Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
@@ -1464,20 +1456,20 @@ namespace Engine.Common
             uint[] indices;
             if (topology == Topology.TriangleList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1, 2,
                     0, 2, 3,
                     0, 3, 4,
                     0, 4, 1,
                     1, 3, 2,
                     3, 1, 4,
-                };
+                ];
             }
             else if (topology == Topology.LineList)
             {
-                indices = new uint[]
-                {
+                indices =
+                [
                     0, 1,
                     0, 2,
                     0, 3,
@@ -1487,21 +1479,21 @@ namespace Engine.Common
                     2, 3,
                     3, 4,
                     4, 1,
-                };
+                ];
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            var vertices = new[]
-            {
-                new Vector3(0f, 1f, 0f),
-                new Vector3(-1f, -1f, 1f),
-                new Vector3(1f, -1f, 1f),
-                new Vector3(1f, -1f, -1f),
-                new Vector3(-1f, -1f, -1f),
-            };
+            Vector3[] vertices =
+            [
+                new (0f, 1f, 0f),
+                new (-1f, -1f, 1f),
+                new (1f, -1f, 1f),
+                new (1f, -1f, -1f),
+                new (-1f, -1f, -1f),
+            ];
 
             Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
@@ -1627,11 +1619,11 @@ namespace Engine.Common
 
                 return new GeometryDescriptor()
                 {
-                    Vertices = vertList.ToArray(),
-                    Normals = normList.ToArray(),
-                    Tangents = tangList.ToArray(),
-                    Binormals = binmList.ToArray(),
-                    Uvs = uvList.ToArray(),
+                    Vertices = [.. vertList],
+                    Normals = [.. normList],
+                    Tangents = [.. tangList],
+                    Binormals = [.. binmList],
+                    Uvs = [.. uvList],
                     Indices = indexList.Select(i => (uint)i).ToArray(),
                 };
             }
@@ -1704,7 +1696,7 @@ namespace Engine.Common
                     verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
                 }
             }
-            verts.AddRange(new[] { bsePosition, capPosition });
+            verts.AddRange([bsePosition, capPosition]);
 
             if (topology == Topology.TriangleList)
             {
@@ -1721,22 +1713,22 @@ namespace Engine.Common
                     var p0Cap = p0Base + sliceCount;
                     var p1Cap = p1Base + sliceCount;
 
-                    indexList.AddRange(new[]
-                    {
-                    // Base circle
-                    cBase,
-                    p1Base,
-                    p0Base,
+                    indexList.AddRange(
+                    [
+                        // Base circle
+                        cBase,
+                        p1Base,
+                        p0Base,
                     
-                    // Cap circle
-                    cCap,
-                    p0Cap,
-                    p1Cap,
+                        // Cap circle
+                        cCap,
+                        p0Cap,
+                        p1Cap,
 
-                    // Side
-                    p0Base, p1Base, p0Cap,
-                    p1Base, p1Cap, p0Cap,
-                });
+                        // Side
+                        p0Base, p1Base, p0Cap,
+                        p1Base, p1Cap, p0Cap,
+                    ]);
                 }
 
                 var norms = new List<Vector3>();
@@ -1746,7 +1738,7 @@ namespace Engine.Common
                     norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
                 }
 
-                norms.AddRange(new[] { Vector3.Down, Vector3.Up });
+                norms.AddRange([Vector3.Down, Vector3.Up]);
 
                 return new GeometryDescriptor()
                 {
@@ -1764,10 +1756,10 @@ namespace Engine.Common
                     int i0 = i;
                     int i1 = (i + 1) % sliceCount;
 
-                    indexList.AddRange(new[] { i0, i1 });
-                    indexList.AddRange(new[] { i0 + sliceCount, i1 + sliceCount });
+                    indexList.AddRange([i0, i1]);
+                    indexList.AddRange([i0 + sliceCount, i1 + sliceCount]);
 
-                    indexList.AddRange(new[] { i0, i0 + sliceCount });
+                    indexList.AddRange([i0, i0 + sliceCount]);
                 }
 
                 return new GeometryDescriptor()
@@ -1867,12 +1859,12 @@ namespace Engine.Common
                     uint p0 = i;
                     uint p1 = (i + 1) % (uint)sliceCount;
 
-                    indexList.AddRange(new[]
-                    {
+                    indexList.AddRange(
+                    [
                         // Side
                         p0 + bseCylinderOffset, p0 + capCylinderOffset, p1 + bseCylinderOffset,
                         p1 + bseCylinderOffset, p0 + capCylinderOffset, p1 + capCylinderOffset,
-                    });
+                    ]);
                 }
 
                 return new GeometryDescriptor()
@@ -1945,10 +1937,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
         {
-            if (stackCount < 3)
-            {
-                throw new ArgumentOutOfRangeException(nameof(stackCount));
-            }
+            ArgumentOutOfRangeException.ThrowIfLessThan(stackCount, 3);
 
             var verts = new List<Vector3>();
 
@@ -2009,35 +1998,35 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateXZPlane(float size, float height)
         {
-            Vector3[] vertices = new Vector3[]
-            {
+            Vector3[] vertices =
+            [
                 new (-size*0.5f, +height, -size*0.5f),
                 new (-size*0.5f, +height, +size*0.5f),
                 new (+size*0.5f, +height, -size*0.5f),
                 new (+size*0.5f, +height, +size*0.5f),
-            };
+            ];
 
-            Vector3[] normals = new Vector3[]
-            {
+            Vector3[] normals =
+            [
                 Vector3.Up,
                 Vector3.Up,
                 Vector3.Up,
                 Vector3.Up,
-            };
+            ];
 
-            Vector2[] uvs = new Vector2[]
-            {
+            Vector2[] uvs =
+            [
                 new (0.0f, 0.0f),
                 new (0.0f, size),
                 new (size, 0.0f),
                 new (size, size),
-            };
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             return new GeometryDescriptor()
             {
@@ -2093,8 +2082,8 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCurvePlane(uint size, int textureRepeat, float planeWidth, float planeTop, float planeBottom)
         {
-            if (size == 0) throw new ArgumentOutOfRangeException(nameof(size));
-            if (planeWidth <= 0) throw new ArgumentOutOfRangeException(nameof(planeWidth));
+            ArgumentOutOfRangeException.ThrowIfZero(size);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(planeWidth);
             if (planeTop <= planeBottom) throw new ArgumentException($"{nameof(planeTop)} must be greater than {nameof(planeBottom)}", nameof(planeTop));
 
             Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];
@@ -2149,8 +2138,8 @@ namespace Engine.Common
                     uint index3 = (j + 1) * (size + 1) + i;
                     uint index4 = (j + 1) * (size + 1) + (i + 1);
 
-                    indexList.AddRange(new[]
-                    {
+                    indexList.AddRange(
+                    [
                         index1, // Triangle 1 - Upper Left
                         index2, // Triangle 1 - Upper Right
                         index3, // Triangle 1 - Bottom Left
@@ -2158,7 +2147,7 @@ namespace Engine.Common
                         index3, // Triangle 2 - Bottom Left
                         index2, // Triangle 2 - Upper Right
                         index4, // Triangle 2 - Bottom Right
-                    });
+                    ]);
                 }
             }
 
@@ -2166,7 +2155,7 @@ namespace Engine.Common
             {
                 Vertices = vertices,
                 Uvs = uvs,
-                Indices = indexList.ToArray(),
+                Indices = [.. indexList],
             };
         }
 

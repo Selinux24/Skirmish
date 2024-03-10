@@ -15,7 +15,13 @@ namespace Engine
     /// <summary>
     /// Ground garden planter
     /// </summary>
-    public sealed class GroundGardener : Drawable<GroundGardenerDescription>, IUseMaterials
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class GroundGardener(Scene scene, string id, string name) : Drawable<GroundGardenerDescription>(scene, id, name), IUseMaterials
     {
         #region Helper classes
 
@@ -32,7 +38,7 @@ namespace Engine
             /// <summary>
             /// Foliage generated data
             /// </summary>
-            private IEnumerable<VertexBillboard> foliageData = Array.Empty<VertexBillboard>();
+            private IEnumerable<VertexBillboard> foliageData = [];
 
             /// <summary>
             /// Foliage populating flag
@@ -70,11 +76,11 @@ namespace Engine
             /// <param name="description">Vegetation task</param>
             /// <param name="gbbox">Relative bounding box to plant</param>
             /// <returns>Returns generated vertex data</returns>
-            private static IEnumerable<VertexBillboard> PlantNode(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
+            private static List<VertexBillboard> PlantNode(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
             {
                 if (node == null)
                 {
-                    return Enumerable.Empty<VertexBillboard>();
+                    return [];
                 }
 
                 List<VertexBillboard> vertexData = new(MAX);
@@ -261,7 +267,7 @@ namespace Engine
             {
                 if (!foliageData.Any())
                 {
-                    return Enumerable.Empty<VertexBillboard>();
+                    return [];
                 }
 
                 //Sort data
@@ -530,11 +536,11 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new();
+        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = [];
         /// <summary>
         /// Foliage buffer list
         /// </summary>
-        private readonly List<FoliageBuffer> foliageBuffers = new();
+        private readonly List<FoliageBuffer> foliageBuffers = [];
         /// <summary>
         /// Random texture
         /// </summary>
@@ -546,7 +552,7 @@ namespace Engine
         /// <summary>
         /// Foliage map channels for vegetation planting task
         /// </summary>
-        private readonly List<FoliageMapChannel> foliageMapChannels = new();
+        private readonly List<FoliageMapChannel> foliageMapChannels = [];
         /// <summary>
         /// Material
         /// </summary>
@@ -562,7 +568,7 @@ namespace Engine
         /// <summary>
         /// Last visible node collection
         /// </summary>
-        private IEnumerable<QuadTreeNode> visibleNodes = Enumerable.Empty<QuadTreeNode>();
+        private IEnumerable<QuadTreeNode> visibleNodes = [];
         /// <summary>
         /// Counter of the elapsed seconds between the last node sorting
         /// </summary>
@@ -570,7 +576,7 @@ namespace Engine
         /// <summary>
         /// Buffer data to write
         /// </summary>
-        private readonly List<FoliagePatch> toAssign = new();
+        private readonly List<FoliagePatch> toAssign = [];
         /// <summary>
         /// Initialized flag
         /// </summary>
@@ -589,17 +595,6 @@ namespace Engine
         /// </summary>
         public float WindStrength { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public GroundGardener(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -963,12 +958,12 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="sph">Foliage bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        private IEnumerable<QuadTreeNode> GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
+        private QuadTreeNode[] GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
             var nodes = foliageQuadtree.GetNodesInVolume(ref sph);
             if (nodes?.Any() != true)
             {
-                return Enumerable.Empty<QuadTreeNode>();
+                return [];
             }
 
             return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint).ToArray();
@@ -1008,9 +1003,9 @@ namespace Engine
         /// </remarks>
         private async Task<IEnumerable<FoliagePatch>> DoPlantAsync(BoundingBox bbox)
         {
-            List<FoliagePatch> toAssignList = new();
+            List<FoliagePatch> toAssignList = [];
 
-            List<Task> plantTaskList = new();
+            List<Task> plantTaskList = [];
 
             int channelCount = foliageMapChannels.Count;
 
@@ -1018,9 +1013,9 @@ namespace Engine
             {
                 var fPatchList = GetNodePatches(node, channelCount);
 
-                for (int i = 0; i < fPatchList.Count(); i++)
+                for (int i = 0; i < fPatchList.Count; i++)
                 {
-                    var fPatch = fPatchList.ElementAt(i);
+                    var fPatch = fPatchList[i];
                     if (!fPatch.Planted)
                     {
                         plantTaskList.Add(fPatch.PlantAsync(Scene, node, foliageMap, foliageMapChannels[i], bbox));
@@ -1041,18 +1036,18 @@ namespace Engine
         /// </summary>
         /// <param name="node">Node</param>
         /// <param name="channelCount">Channel count</param>
-        private IEnumerable<FoliagePatch> GetNodePatches(QuadTreeNode node, int channelCount)
+        private List<FoliagePatch> GetNodePatches(QuadTreeNode node, int channelCount)
         {
             if (foliagePatches.TryGetValue(node, out var value))
             {
                 return value;
             }
 
-            foliagePatches.Add(node, new List<FoliagePatch>());
+            foliagePatches.Add(node, []);
 
             for (int i = 0; i < channelCount; i++)
             {
-                foliagePatches[node].Add(new FoliagePatch());
+                foliagePatches[node].Add(new());
             }
 
             return foliagePatches[node];
@@ -1072,7 +1067,7 @@ namespace Engine
 
             var taskList = list.ToList();
 
-            while (taskList.Any())
+            while (taskList.Count != 0)
             {
                 var t = await Task.WhenAny(taskList);
 
@@ -1118,7 +1113,7 @@ namespace Engine
         /// </remarks>
         private void AttachFreePatches(IEngineDeviceContext dc, Vector3 eyePosition)
         {
-            if (!toAssign.Any())
+            if (toAssign.Count == 0)
             {
                 return;
             }
@@ -1136,7 +1131,7 @@ namespace Engine
                 (b.CurrentPatch == null) ||
                 (b.CurrentPatch != null && !visibleNodes.Any(n => n == b.CurrentPatch.CurrentNode)));
 
-            if (!freeBuffers.Any())
+            if (freeBuffers.Count == 0)
             {
                 Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count} patches to attach.");
 
@@ -1164,7 +1159,7 @@ namespace Engine
                 freeBuffers.RemoveAt(0);
             }
 
-            if (toAssign.Any())
+            if (toAssign.Count != 0)
             {
                 Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count} patches to attach.");
             }
@@ -1208,7 +1203,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            return foliageMaterial != null ? new[] { foliageMaterial } : Enumerable.Empty<IMeshMaterial>();
+            return foliageMaterial != null ? [foliageMaterial] : [];
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

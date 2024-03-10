@@ -29,7 +29,7 @@ namespace Engine.Content.FmtObj
         /// <param name="transform">Transform</param>
         /// <param name="materials">Resulting material list</param>
         /// <returns>Returns a list of model contents</returns>
-        private static IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out IEnumerable<Material> materials)
+        private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out List<Material> materials)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (!modelList.Any())
@@ -50,9 +50,9 @@ namespace Engine.Content.FmtObj
                 res.AddRange(contentList);
             }
 
-            materials = matList.ToArray();
+            materials = matList;
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Saves a triangle list in a file
@@ -110,7 +110,7 @@ namespace Engine.Content.FmtObj
         /// <returns>Returns a extension array list</returns>
         public IEnumerable<string> GetExtensions()
         {
-            return new string[] { ".obj" };
+            return [".obj"];
         }
 
         /// <summary>
@@ -124,9 +124,9 @@ namespace Engine.Content.FmtObj
             var transform = content.GetTransform();
 
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
-            if (!meshList.Any())
+            if (meshList.Count == 0)
             {
-                return Array.Empty<ContentData>();
+                return [];
             }
 
             ContentData m = new()
@@ -155,14 +155,14 @@ namespace Engine.Content.FmtObj
                     m.TryAddTexture(contentFolder, mat.MapBump);
                 }
 
-                for (int i = 0; i < meshList.Count(); i++)
+                for (int i = 0; i < meshList.Count; i++)
                 {
-                    var mesh = meshList.ElementAt(i);
+                    var mesh = meshList[i];
                     m.ImportMaterial($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
                 }
             });
 
-            return new[] { m };
+            return [m];
         }
     }
 

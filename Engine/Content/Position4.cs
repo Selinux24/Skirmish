@@ -63,10 +63,8 @@ namespace Engine.Content
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
         public Position4(float[] values)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
+            ArgumentNullException.ThrowIfNull(values);
+
             if (values.Length != 4)
             {
                 throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only four input values for Position4.");

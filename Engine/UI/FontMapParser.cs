@@ -19,6 +19,10 @@ namespace Engine.UI
         /// Color validator
         /// </summary>
         private static readonly Regex colorRegex = new(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+        /// <summary>
+        /// Separator pattern
+        /// </summary>
+        private static readonly string[] separatorPattern = [" "];
 
         /// <summary>
         /// Parses a sentence
@@ -53,7 +57,7 @@ namespace Engine.UI
 
                 ParseLine(line, defaultForeColor, defaultShadowColor, out string parsedLine, out var charColors, out var charShadowColors);
 
-                var parts = parsedLine.Split(new[] { " " }, StringSplitOptions.None);
+                var parts = parsedLine.Split(separatorPattern, StringSplitOptions.None);
 
                 for (int p = 0; p < parts.Length; p++)
                 {
@@ -76,8 +80,8 @@ namespace Engine.UI
                     }
 
                     sentenceParts.Add(" ");
-                    colorParts.Add(new Color4[] { Color.Transparent });
-                    shadowColorParts.Add(new Color4[] { Color.Transparent });
+                    colorParts.Add([Color.Transparent]);
+                    shadowColorParts.Add([Color.Transparent]);
                 }
 
                 if (lastLine)
@@ -86,16 +90,16 @@ namespace Engine.UI
                 }
 
                 sentenceParts.Add(Environment.NewLine);
-                colorParts.Add(new Color4[] { Color.Transparent });
-                shadowColorParts.Add(new Color4[] { Color.Transparent });
+                colorParts.Add([Color.Transparent]);
+                shadowColorParts.Add([Color.Transparent]);
             }
 
             return new FontMapParsedSentence
             {
-                Text = string.Join(string.Empty, sentenceParts.ToArray()),
-                Words = sentenceParts.ToArray(),
-                Colors = colorParts.ToArray(),
-                ShadowColors = shadowColorParts.ToArray(),
+                Text = string.Join(string.Empty, sentenceParts),
+                Words = sentenceParts,
+                Colors = colorParts,
+                ShadowColors = shadowColorParts,
             };
         }
         /// <summary>

@@ -34,7 +34,7 @@ namespace Engine.PhysicsTests
         }
         static ConvexMeshCollider FromTriangle(Triangle tri, Matrix transform)
         {
-            var ctri = new ConvexMeshCollider(new[] { tri });
+            var ctri = new ConvexMeshCollider([tri]);
             var triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
             ctri.Attach(triBody);
 
@@ -68,7 +68,7 @@ namespace Engine.PhysicsTests
             var triSoup = FromTriangle(tri, Matrix.Identity);
 
             bool intersectionTri = ContactDetector.BetweenObjects(box, triSoup, dataTri);
-            Assert.AreEqual(true, intersectionTri);
+            Assert.IsTrue(intersectionTri);
 
             var contactsTri = dataTri.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
             Assert.AreEqual(1, contactsTri.Length);
@@ -90,10 +90,10 @@ namespace Engine.PhysicsTests
             var triSoup = FromTriangle(tri, Matrix.Identity);
 
             bool intersectionPln = ContactDetector.BetweenObjects(triSoup, plane, dataPln);
-            Assert.AreEqual(true, intersectionPln);
+            Assert.IsTrue(intersectionPln);
 
             bool intersectionTri = ContactDetector.BetweenObjects(box, triSoup, dataTri);
-            Assert.AreEqual(true, intersectionTri);
+            Assert.IsTrue(intersectionTri);
 
             var contactsPln = dataPln.GetContacts();
             var contactsTri = dataTri.GetContacts();

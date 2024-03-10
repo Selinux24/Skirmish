@@ -128,15 +128,15 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing objects drawer
         /// </summary>
-        private readonly IPostProcessingDrawer processingDrawerObjects = null;
+        private readonly PostProcessingDrawer processingDrawerObjects = null;
         /// <summary>
         /// Post-processing UI drawer
         /// </summary>
-        private readonly IPostProcessingDrawer processingDrawerUI = null;
+        private readonly PostProcessingDrawer processingDrawerUI = null;
         /// <summary>
         /// Post-processing results drawer
         /// </summary>
-        private readonly IPostProcessingDrawer processingDrawerFinal = null;
+        private readonly PostProcessingDrawer processingDrawerFinal = null;
         /// <summary>
         /// Scene objects target
         /// </summary>
@@ -161,24 +161,24 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing effects list
         /// </summary>
-        private readonly List<PostProcessinStateData> postProcessingEffects = new();
+        private readonly List<PostProcessinStateData> postProcessingEffects = [];
 
         /// <summary>
         /// Deferred context list
         /// </summary>
-        private readonly List<IEngineDeviceContext> deferredContextList = new();
+        private readonly List<IEngineDeviceContext> deferredContextList = [];
         /// <summary>
         /// Pass list
         /// </summary>
-        private readonly List<PassContext> passLists = new();
+        private readonly List<PassContext> passLists = [];
         /// <summary>
         /// Command list
         /// </summary>
-        private readonly ConcurrentBag<(IEngineCommandList Command, int Order)> commandList = new();
+        private readonly ConcurrentBag<(IEngineCommandList Command, int Order)> commandList = [];
         /// <summary>
         /// Action queue
         /// </summary>
-        private readonly ConcurrentBag<Action> actions = new();
+        private readonly ConcurrentBag<Action> actions = [];
 
         /// <summary>
         /// Update materials palette flag
@@ -210,7 +210,7 @@ namespace Engine.Common
         /// <summary>
         /// Shadow mapping stats dictionary
         /// </summary>
-        private readonly Dictionary<string, double> shadowMappingDict = new();
+        private readonly Dictionary<string, double> shadowMappingDict = [];
 #endif
 
         /// <summary>
@@ -859,7 +859,7 @@ namespace Engine.Common
                 return false;
             }
 
-            var cullables = components?.OfType<ICullable>() ?? Enumerable.Empty<ICullable>();
+            var cullables = components?.OfType<ICullable>() ?? [];
             if (!cullables.Any())
             {
                 return false;
@@ -1102,7 +1102,7 @@ namespace Engine.Common
                 .Where(c => IsVisible(c, cullIndex))
                 .ToList();
 
-            if (!objects.Any())
+            if (objects.Count == 0)
             {
                 return;
             }
@@ -1283,11 +1283,11 @@ namespace Engine.Common
         {
             return target switch
             {
-                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
+                Targets.Screen => [],
                 Targets.Objects => sceneObjectsTarget.Textures,
                 Targets.UI => sceneUITarget.Textures,
                 Targets.Result => sceneResultsTarget.Textures,
-                _ => Enumerable.Empty<EngineShaderResourceView>(),
+                _ => [],
             };
         }
 
@@ -1454,10 +1454,10 @@ namespace Engine.Common
         {
             Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
 
-            List<IMeshMaterial> mats = new()
-            {
+            List<IMeshMaterial> mats =
+            [
                 MeshMaterial.FromMaterial(MaterialBlinnPhong.Default),
-            };
+            ];
 
             var matComponents = Scene.Components.Get<IUseMaterials>().SelectMany(c => c.GetMaterials());
             if (matComponents.Any())
@@ -1465,7 +1465,7 @@ namespace Engine.Common
                 mats.AddRange(matComponents);
             }
 
-            List<Vector4> values = new();
+            List<Vector4> values = [];
 
             for (int i = 0; i < mats.Count; i++)
             {
@@ -1495,9 +1495,9 @@ namespace Engine.Common
                 .Select(c => c.SkinningData)
                 .ToArray();
 
-            List<ISkinningData> addedSks = new();
+            List<ISkinningData> addedSks = [];
 
-            List<Vector4> values = new();
+            List<Vector4> values = [];
 
             for (int i = 0; i < skData.Length; i++)
             {
@@ -1539,7 +1539,7 @@ namespace Engine.Common
         private void AssignLightShadowMapsDirectional()
         {
             var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
-            if (!dirLights.Any())
+            if (dirLights.Length == 0)
             {
                 return;
             }

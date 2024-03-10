@@ -398,7 +398,7 @@ namespace Engine.BuiltIn
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);
 
-            dc.IASetVertexBuffers(bufferSlot, vertexBufferBinding);
+            dc.IASetVertexBuffers(bufferSlot, [vertexBufferBinding]);
             dc.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
             dc.IAPrimitiveTopology = topology;
 
