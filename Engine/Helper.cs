@@ -625,13 +625,13 @@ namespace Engine
         {
             if (array == null)
             {
-                return Array.Empty<T>();
+                return [];
             }
 
             if (array.Length <= count)
             {
                 //Copy array
-                return array.ToArray();
+                return [.. array];
             }
 
             return array.Take(count).ToArray();
@@ -1026,23 +1026,23 @@ namespace Engine
         }
         public static Vector2Int[] GetVertices(this Rectangle rectangle)
         {
-            return new[]
-            {
-                new Vector2Int(rectangle.Left, rectangle.Top),
-                new Vector2Int(rectangle.Right, rectangle.Top),
-                new Vector2Int(rectangle.Right, rectangle.Bottom),
-                new Vector2Int(rectangle.Left, rectangle.Bottom),
-            };
+            return
+            [
+                new (rectangle.Left, rectangle.Top),
+                new (rectangle.Right, rectangle.Top),
+                new (rectangle.Right, rectangle.Bottom),
+                new (rectangle.Left, rectangle.Bottom),
+            ];
         }
         public static Vector2[] GetVertices(this RectangleF rectangle)
         {
-            return new[]
-            {
-                new Vector2(rectangle.Left, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Bottom),
-                new Vector2(rectangle.Left, rectangle.Bottom),
-            };
+            return
+            [
+                new (rectangle.Left, rectangle.Top),
+                new (rectangle.Right, rectangle.Top),
+                new (rectangle.Right, rectangle.Bottom),
+                new (rectangle.Left, rectangle.Bottom),
+            ];
         }
         public static RectangleF Scale(this RectangleF rectangle, float scale)
         {

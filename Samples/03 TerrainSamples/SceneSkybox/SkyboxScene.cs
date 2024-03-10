@@ -16,6 +16,12 @@ namespace TerrainSamples.SceneSkybox
 {
     public class SkyboxScene : WalkableScene
     {
+        private const string resourceSkyboxString = "SceneSkybox/resources";
+        private const string resourceLakeBottomString = "SceneSkybox/resources/lakebottom";
+        private const string resourceFountainString = "SceneSkybox/resources/Fountain";
+        private const string resourceObeliskString = "SceneSkybox/resources/obelisk";
+        private const string resourceAudioString = "SceneSkybox/resources/Audio/Effects";
+
         private const float alpha = 0.25f;
 
         private readonly Color4 ruinsVolumeColor = new(Color.Green.RGB(), alpha);
@@ -80,9 +86,9 @@ namespace TerrainSamples.SceneSkybox
         private SceneLightPoint movingFireLight = null;
 
         private ParticleManager pManager = null;
-        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire("SceneSkybox/resources", "fire.png", 0.5f);
-        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("SceneSkybox/resources", "fire.png", 0.1f);
-        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneSkybox/resources", "smoke.png", 0.1f);
+        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire(resourceSkyboxString, "fire.png", 0.5f);
+        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire(resourceSkyboxString, "fire.png", 0.1f);
+        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceSkyboxString, "smoke.png", 0.1f);
 
         private DecalDrawer decalEmitter = null;
 
@@ -212,7 +218,7 @@ namespace TerrainSamples.SceneSkybox
 
             var textures = new HeightmapTexturesDescription
             {
-                ContentPath = "SceneSkybox/resources/lakebottom",
+                ContentPath = resourceLakeBottomString,
                 TexturesLR = ["Diffuse.jpg"],
                 NormalMaps = ["Normal.jpg"],
                 Scale = 0.0333f,
@@ -230,7 +236,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneSkybox/resources", "torch.json"),
+                Content = ContentDescription.FromFile(resourceSkyboxString, "torch.json"),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Default,
             };
@@ -243,7 +249,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneSkybox/resources/obelisk", "obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObeliskString, "obelisk.json"),
                 StartsVisible = false,
             };
 
@@ -254,7 +260,7 @@ namespace TerrainSamples.SceneSkybox
             var fountainDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneSkybox/resources/Fountain", "Fountain.json"),
+                Content = ContentDescription.FromFile(resourceFountainString, "Fountain.json"),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Perfect,
             };
@@ -263,7 +269,7 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeRuins()
         {
-            var ruinsDesc = GroundDescription.FromFile("SceneSkybox/resources", "ruins.json");
+            var ruinsDesc = GroundDescription.FromFile(resourceSkyboxString, "ruins.json");
             ruinsDesc.Quadtree.MaximumDepth = 1;
             ruinsDesc.StartsVisible = false;
 
@@ -755,7 +761,7 @@ namespace TerrainSamples.SceneSkybox
             const string sphereSound = "target_balls_single_loop";
             const string sphereEffect = "Sphere";
 
-            AudioManager.LoadSound(sphereSound, "SceneSkybox/resources/Audio/Effects", "target_balls_single_loop.wav");
+            AudioManager.LoadSound(sphereSound, resourceAudioString, "target_balls_single_loop.wav");
 
             AudioManager.AddEffectParams(
                 sphereEffect,

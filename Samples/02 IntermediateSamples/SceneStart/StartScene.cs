@@ -12,6 +12,9 @@ namespace IntermediateSamples.SceneStart
 {
     class StartScene : Scene
     {
+        private const string EmtpyNameString = "Empty";
+        private const string MusicString = "Music";
+
         private AudioEffectTweener audioTweener;
 
         private Model backGround = null;
@@ -160,17 +163,17 @@ namespace IntermediateSamples.SceneStart
             });
             var panExit = await AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
 
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", EmtpyNameString, emptyDesc), false);
             mainPanel.AddChild(panSimpleAnimation, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", EmtpyNameString, emptyDesc), false);
             mainPanel.AddChild(panMixamo, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", EmtpyNameString, emptyDesc), false);
             mainPanel.AddChild(panDeferredLights, false);
 
             mainPanel.AddChild(panSmoothTransitions, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", EmtpyNameString, emptyDesc), false);
             mainPanel.AddChild(panAnimationParts, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty6", "Empty", emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty6", EmtpyNameString, emptyDesc), false);
             mainPanel.AddChild(panInstancing, false);
             mainPanel.AddChild(panExit, false);
         }
@@ -187,18 +190,18 @@ namespace IntermediateSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            AudioManager.LoadSound("Music", "scenestart/resources", "anttisinstrumentals+keepshiningoninstrumental.mp3");
+            AudioManager.LoadSound(MusicString, "scenestart/resources", "anttisinstrumentals+keepshiningoninstrumental.mp3");
             AudioManager.AddEffectParams(
-                "Music",
+                MusicString,
                 new GameAudioEffectParameters
                 {
                     DestroyWhenFinished = false,
-                    SoundName = "Music",
+                    SoundName = MusicString,
                     IsLooped = true,
                     UseAudio3D = true,
                 });
 
-            currentMusic = AudioManager.CreateEffectInstance("Music");
+            currentMusic = AudioManager.CreateEffectInstance(MusicString);
 
             await Task.CompletedTask;
         }

@@ -909,7 +909,7 @@ namespace Engine
                 return true;
             }
 
-            results = Enumerable.Empty<PickingResult<T>>();
+            results = [];
 
             return false;
         }

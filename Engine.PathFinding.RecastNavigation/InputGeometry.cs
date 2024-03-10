@@ -10,21 +10,18 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Input geometry
     /// </summary>
-    public class InputGeometry : PathFinderInput
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="fnc">Triangle function</param>
+    public class InputGeometry(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
+        private const string ErrorCreatingGraphString = "Error creating the graph.";
+
         /// <summary>
         /// Chunky mesh
         /// </summary>
         public ChunkyTriMesh ChunkyMesh { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="fnc">Triangle function</param>
-        public InputGeometry(Func<IEnumerable<Triangle>> fnc) : base(fnc)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
@@ -37,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, "Error creating the graph.", ex);
+                Logger.WriteError(this, ErrorCreatingGraphString, ex);
 
                 throw;
             }
@@ -53,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, "Error creating the graph.", ex);
+                Logger.WriteError(this, ErrorCreatingGraphString, ex);
 
                 throw;
             }
@@ -116,7 +113,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, "Error creating the graph.", ex);
+                Logger.WriteError(this, ErrorCreatingGraphString, ex);
 
                 throw;
             }
@@ -132,7 +129,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, "Error creating the graph.", ex);
+                Logger.WriteError(this, ErrorCreatingGraphString, ex);
 
                 throw;
             }

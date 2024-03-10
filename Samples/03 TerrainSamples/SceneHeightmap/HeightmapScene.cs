@@ -17,6 +17,11 @@ namespace TerrainSamples.SceneHeightmap
 {
     public class HeightmapScene : WalkableScene
     {
+        private const string GlowString = "lfGlow.png";
+        private const string Flare1String = "lfFlare1.png";
+        private const string Flare2String = "lfFlare2.png";
+        private const string Flare3String = "lfFlare3.png";
+
         private const float near = 0.5f;
         private const float far = 3000f;
         private const float fogStart = 500f;
@@ -403,21 +408,21 @@ namespace TerrainSamples.SceneHeightmap
             var lfDesc = new LensFlareDescription()
             {
                 ContentPath = @"SceneHeightmap/Resources/Scenery/Flare",
-                GlowTexture = "lfGlow.png",
+                GlowTexture = GlowString,
                 Flares =
                 [
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
 
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
 
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);

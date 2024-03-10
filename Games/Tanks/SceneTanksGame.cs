@@ -21,6 +21,12 @@ namespace Tanks
     {
         const int layerUIModal = LayerUIEffects + 3;
         const string fontFilename = "Resources/LeagueSpartan-Bold.otf";
+        const string resourceAudioFolder = "Resources/Audio";
+        const string resourceParticlesFolder = "Resources/particles";
+        const string particleSmokeFileName = "smoke.png";
+        const string particleFireFileName = "fire.png";
+        const string resourceTankFolder = "Resources/Leopard";
+        const string resourceTerrainFolder = "Resources/terrain";
 
         private bool gameReady = false;
 
@@ -99,11 +105,11 @@ namespace Tanks
         private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
         private Model projectile;
 
-        private readonly List<ModelInstanced> treeModels = new();
+        private readonly List<ModelInstanced> treeModels = [];
 
         private Sprite[] trajectoryMarkerPool;
 
-        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = new();
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = [];
         private ParticleManager particleManager = null;
         private readonly float explosionDurationSeconds = 0.5f;
         private readonly float shotDurationSeconds = 0.2f;
@@ -198,11 +204,10 @@ namespace Tanks
         private void LoadLoadingUI()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeLoadingUI()
-                },
+                ],
                 LoadLoadingUICompleted);
         }
         private async Task InitializeTweener()
@@ -259,9 +264,7 @@ namespace Tanks
         {
             InitializePlayers();
 
-            List<Task> taskList = new();
-            taskList.AddRange(InitializeUI());
-            taskList.AddRange(InitializeModels());
+            List<Task> taskList = [.. InitializeUI(), .. InitializeModels()];
 
             var loadingGroup = LoadResourceGroup.FromTasks(loadGroupSceneObjects, taskList);
 
@@ -270,8 +273,8 @@ namespace Tanks
 
         private Task[] InitializeUI()
         {
-            return new[]
-            {
+            return
+            [
                 InitializeUIGameMessages(),
                 InitializeUIModalDialog(),
                 InitializeUIPlayers(),
@@ -280,7 +283,7 @@ namespace Tanks
                 InitializeUIFire(),
                 InitializeUIMinimap(),
                 InitializeUIShotPath(),
-            };
+            ];
         }
         private async Task InitializeUIGameMessages()
         {
@@ -509,8 +512,8 @@ namespace Tanks
 
         private Task[] InitializeModels()
         {
-            return new Task[]
-            {
+            return
+            [
                 InitializeModelsTanks(),
                 InitializeModelsTerrain(),
                 InitializeModelsTrees(),
@@ -520,20 +523,20 @@ namespace Tanks
                 InitializeAudio(),
                 InitializeLights(),
                 InitializeDebugDrawer(),
-            };
+            ];
         }
         private async Task InitializeModelsTanks()
         {
             var tDesc = new ModelInstancedDescription()
             {
-                Content = ContentDescription.FromFile("Resources/Leopard", "Leopard.json"),
+                Content = ContentDescription.FromFile(resourceTankFolder, "Leopard.json"),
                 Instances = 2,
                 Optimize = false,
                 PickingHull = PickingHullTypes.Hull,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 StartsVisible = false,
-                TransformNames = new[] { tankBarrelPart, tankTurretPart, tankHullPart },
-                TransformDependences = new[] { 1, 2, -1 },
+                TransformNames = [tankBarrelPart, tankTurretPart, tankHullPart],
+                TransformDependences = [1, 2, -1],
             };
 
             tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
@@ -563,9 +566,9 @@ namespace Tanks
 
             HeightmapTexturesDescription textures = new()
             {
-                ContentPath = "Resources/terrain",
-                TexturesLR = new[] { "Diffuse.jpg" },
-                NormalMaps = new[] { "Normal.jpg" },
+                ContentPath = resourceTerrainFolder,
+                TexturesLR = ["Diffuse.jpg"],
+                NormalMaps = ["Normal.jpg"],
                 Scale = 0.2f,
             };
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
@@ -619,12 +622,12 @@ namespace Tanks
         {
             particleManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("Resources/particles", "smoke.png", 5);
-            var pFire = ParticleSystemDescription.InitializeFire("Resources/particles", "fire.png", 5);
-            var pDust = ParticleSystemDescription.InitializeDust("Resources/particles", "smoke.png", 5);
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Resources/particles", "smoke.png", 5);
-            var pExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "fire.png", 5);
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "smoke.png", 5);
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesFolder, particleSmokeFileName, 5);
+            var pFire = ParticleSystemDescription.InitializeFire(resourceParticlesFolder, particleFireFileName, 5);
+            var pDust = ParticleSystemDescription.InitializeDust(resourceParticlesFolder, particleSmokeFileName, 5);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourceParticlesFolder, particleSmokeFileName, 5);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleFireFileName, 5);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleSmokeFileName, 5);
 
             particleDescriptions.Add("Plume", pPlume);
             particleDescriptions.Add("Fire", pFire);
@@ -633,7 +636,7 @@ namespace Tanks
             particleDescriptions.Add("Explosion", pExplosion);
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            var pShotExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "fire.png", 5);
+            var pShotExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleFireFileName, 5);
             pShotExplosion.Gravity = Direction3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             pShotExplosion.MinVerticalVelocity = 0f;
@@ -642,7 +645,7 @@ namespace Tanks
             pShotExplosion.MaxHorizontalVelocity = 0.1f;
             particleDescriptions.Add("ShotExplosion", pShotExplosion);
 
-            var pShotSmoke = ParticleSystemDescription.InitializeExplosion("Resources/particles", "smoke.png", 5);
+            var pShotSmoke = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleSmokeFileName, 5);
             pShotSmoke.Gravity = Direction3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             particleDescriptions.Add("ShotSmoke", pShotSmoke);
@@ -663,21 +666,21 @@ namespace Tanks
             tankMoveEffect = "TankMove";
             tankDestroyedEffect = "TankDestroyed";
             tankShootingEffect = "TankShooting";
-            impactEffects = new[] { "Impact1", "Impact2", "Impact3", "Impact4" };
-            damageEffects = new[] { "Damage1", "Damage2", "Damage3", "Damage4" };
+            impactEffects = ["Impact1", "Impact2", "Impact3", "Impact4"];
+            damageEffects = ["Damage1", "Damage2", "Damage3", "Damage4"];
 
-            AudioManager.LoadSound(music, "Resources/Audio", "elsasong.wav");
-            AudioManager.LoadSound("Tank", "Resources/Audio", "tank_engine.wav");
-            AudioManager.LoadSound("TankDestroyed", "Resources/Audio", "explosion_vehicle_small_close_01.wav");
-            AudioManager.LoadSound("TankShooting", "Resources/Audio", "cannon-shooting.wav");
-            AudioManager.LoadSound(impactEffects[0], "Resources/Audio", "metal_grate_large_01.wav");
-            AudioManager.LoadSound(impactEffects[1], "Resources/Audio", "metal_grate_large_02.wav");
-            AudioManager.LoadSound(impactEffects[2], "Resources/Audio", "metal_grate_large_03.wav");
-            AudioManager.LoadSound(impactEffects[3], "Resources/Audio", "metal_grate_large_04.wav");
-            AudioManager.LoadSound(damageEffects[0], "Resources/Audio", "metal_pipe_large_01.wav");
-            AudioManager.LoadSound(damageEffects[1], "Resources/Audio", "metal_pipe_large_02.wav");
-            AudioManager.LoadSound(damageEffects[2], "Resources/Audio", "metal_pipe_large_03.wav");
-            AudioManager.LoadSound(damageEffects[3], "Resources/Audio", "metal_pipe_large_04.wav");
+            AudioManager.LoadSound(music, resourceAudioFolder, "elsasong.wav");
+            AudioManager.LoadSound("Tank", resourceAudioFolder, "tank_engine.wav");
+            AudioManager.LoadSound("TankDestroyed", resourceAudioFolder, "explosion_vehicle_small_close_01.wav");
+            AudioManager.LoadSound("TankShooting", resourceAudioFolder, "cannon-shooting.wav");
+            AudioManager.LoadSound(impactEffects[0], resourceAudioFolder, "metal_grate_large_01.wav");
+            AudioManager.LoadSound(impactEffects[1], resourceAudioFolder, "metal_grate_large_02.wav");
+            AudioManager.LoadSound(impactEffects[2], resourceAudioFolder, "metal_grate_large_03.wav");
+            AudioManager.LoadSound(impactEffects[3], resourceAudioFolder, "metal_grate_large_04.wav");
+            AudioManager.LoadSound(damageEffects[0], resourceAudioFolder, "metal_pipe_large_01.wav");
+            AudioManager.LoadSound(damageEffects[1], resourceAudioFolder, "metal_pipe_large_02.wav");
+            AudioManager.LoadSound(damageEffects[2], resourceAudioFolder, "metal_pipe_large_03.wav");
+            AudioManager.LoadSound(damageEffects[3], resourceAudioFolder, "metal_pipe_large_04.wav");
 
             AudioManager.AddEffectParams(
                 music,
@@ -819,7 +822,7 @@ namespace Tanks
         }
         private async Task InitializeLights()
         {
-            List<SceneLightPoint> pointLights = new();
+            List<SceneLightPoint> pointLights = [];
 
             var lightDesc = SceneLightPointDescription.Create(Vector3.One * float.MaxValue, 0, 0);
 
@@ -1494,7 +1497,7 @@ You will lost all the game progress.",
         }
         private void UpdateBoundsDrawer()
         {
-            List<Line3D> lines = new();
+            List<Line3D> lines = [];
 
             foreach (var treeModel in treeModels)
             {

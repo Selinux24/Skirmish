@@ -16,6 +16,16 @@ namespace BasicSamples.SceneTest
 {
     public class TestScene : Scene
     {
+        private const string GlowString = "lfGlow.png";
+        private const string Flare1String = "lfFlare1.png";
+        private const string Flare2String = "lfFlare2.png";
+        private const string Flare3String = "lfFlare3.png";
+        private const string DefaultString = "default";
+        private const string SceneLampsString = "SceneTest/lamps";
+        private const string SceneParticlesString = "SceneTest/particles";
+        const string particleSmokeFileName = "smoke.png";
+        const string particleFireFileName = "fire.png";
+
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
         private readonly Vector3 baseDelta = new(500, 7, 0);
@@ -46,7 +56,7 @@ namespace BasicSamples.SceneTest
         private SkyScattering skydom = null;
         private SkyPlane skyPlane = null;
 
-        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new();
+        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = [];
         private ParticleManager pManager = null;
 
         private IParticleSystem[] particlePlumes = null;
@@ -56,7 +66,7 @@ namespace BasicSamples.SceneTest
         private Vector2 nextWind = new();
         private float nextWindChange = 0;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new();
+        private readonly Dictionary<string, AnimationPlan> animations = [];
 
         private PrimitiveListDrawer<Line3D> volumeDrawer = null;
         private bool drawLightDrawVolumes = false;
@@ -94,11 +104,10 @@ namespace BasicSamples.SceneTest
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeUI()
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTweener()
@@ -248,22 +257,22 @@ namespace BasicSamples.SceneTest
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
-                GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+                GlowTexture = GlowString,
+                Flares =
+                [
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
 
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
 
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                ]
             });
 
             skydom = await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", SkyScatteringDescription.Default(), 1);
@@ -319,19 +328,19 @@ namespace BasicSamples.SceneTest
             float l = spaceSize;
             float h = baseHeight;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
+                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
+                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
+                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
@@ -443,11 +452,11 @@ namespace BasicSamples.SceneTest
 
             AnimationPath p1 = new();
             p1.AddLoop("idle1");
-            animations.Add("default", new AnimationPlan(p1));
+            animations.Add(DefaultString, new AnimationPlan(p1));
 
             characterSoldier.Manipulator.SetPosition((+s - 10) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
             characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            characterSoldier.AnimationController.Start(animations["default"]);
+            characterSoldier.AnimationController.Start(animations[DefaultString]);
 
             characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
             characterSoldierI[1].Manipulator.SetPosition((+spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
@@ -459,10 +468,10 @@ namespace BasicSamples.SceneTest
             characterSoldierI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             characterSoldierI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            characterSoldierI[0].AnimationController.Start(animations["default"], 1);
-            characterSoldierI[1].AnimationController.Start(animations["default"], 2);
-            characterSoldierI[2].AnimationController.Start(animations["default"], 3);
-            characterSoldierI[3].AnimationController.Start(animations["default"], 4);
+            characterSoldierI[0].AnimationController.Start(animations[DefaultString], 1);
+            characterSoldierI[1].AnimationController.Start(animations[DefaultString], 2);
+            characterSoldierI[2].AnimationController.Start(animations[DefaultString], 3);
+            characterSoldierI[3].AnimationController.Start(animations[DefaultString], 4);
         }
         private async Task InitializeVehicles()
         {
@@ -502,9 +511,7 @@ namespace BasicSamples.SceneTest
             vehicleI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             vehicleI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            List<ISceneLight> lights = new();
-
-            lights.AddRange(vehicle.Lights);
+            List<ISceneLight> lights = [.. vehicle.Lights];
 
             for (int i = 0; i < vehicleI.InstanceCount; i++)
             {
@@ -522,7 +529,7 @@ namespace BasicSamples.SceneTest
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
+                    Content = ContentDescription.FromFile(SceneLampsString, "lamp.json"),
                 });
 
             var lampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -533,7 +540,7 @@ namespace BasicSamples.SceneTest
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
-                    Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
+                    Content = ContentDescription.FromFile(SceneLampsString, "lamp.json"),
                 });
 
             float dist = 0.23f;
@@ -552,9 +559,7 @@ namespace BasicSamples.SceneTest
             lampI[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
             lampI[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
-            List<ISceneLight> lights = new();
-
-            lights.AddRange(lamp.Lights);
+            List<ISceneLight> lights = [.. lamp.Lights];
 
             for (int i = 0; i < lampI.InstanceCount; i++)
             {
@@ -572,7 +577,7 @@ namespace BasicSamples.SceneTest
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
+                    Content = ContentDescription.FromFile(SceneLampsString, "streetlamp.json"),
                 });
 
             var streetlampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -583,7 +588,7 @@ namespace BasicSamples.SceneTest
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 9,
-                    Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
+                    Content = ContentDescription.FromFile(SceneLampsString, "streetlamp.json"),
                 });
 
             streetlamp.Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -2f + baseDelta.Z);
@@ -605,9 +610,7 @@ namespace BasicSamples.SceneTest
             streetlampI[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             streetlampI[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
-            List<ISceneLight> lights = new();
-
-            lights.AddRange(streetlamp.Lights);
+            List<ISceneLight> lights = [.. streetlamp.Lights];
 
             for (int i = 0; i < streetlampI.InstanceCount; i++)
             {
@@ -711,12 +714,12 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeParticles()
         {
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTest/particles", "smoke.png", 10f);
-            var pFire = ParticleSystemDescription.InitializeFire("SceneTest/particles", "fire.png", 10f);
-            var pDust = ParticleSystemDescription.InitializeDust("SceneTest/particles", "smoke.png", 10f);
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTest/particles", "smoke.png", 10f);
-            var pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTest/particles", "fire.png", 10f);
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTest/particles", "smoke.png", 10f);
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume(SceneParticlesString, particleSmokeFileName, 10f);
+            var pFire = ParticleSystemDescription.InitializeFire(SceneParticlesString, particleFireFileName, 10f);
+            var pDust = ParticleSystemDescription.InitializeDust(SceneParticlesString, particleSmokeFileName, 10f);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(SceneParticlesString, particleSmokeFileName, 10f);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion(SceneParticlesString, particleFireFileName, 10f);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(SceneParticlesString, particleSmokeFileName, 10f);
 
             pDescriptions.Add("Plume", pPlume);
             pDescriptions.Add("Fire", pFire);
@@ -731,19 +734,19 @@ namespace BasicSamples.SceneTest
                 ParticleManagerDescription.Default());
 
             float d = 500;
-            var positions = new Vector3[]
-            {
-                new Vector3(+d,0,+d),
-                new Vector3(+d,0,-d),
-                new Vector3(-d,0,+d),
-                new Vector3(-d,0,-d),
-            };
+            Vector3[] positions =
+            [
+                new (+d,0,+d),
+                new (+d,0,-d),
+                new (-d,0,+d),
+                new (-d,0,-d),
+            ];
 
             var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
 
             particlePlumes = new IParticleSystem[positions.Length];
-            List<Triangle> markers = new();
+            List<Triangle> markers = [];
             for (int i = 0; i < positions.Length; i++)
             {
                 particlePlumes[i] = await pManager.AddParticleSystem(
@@ -762,8 +765,8 @@ namespace BasicSamples.SceneTest
 
             var desc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Primitives = markers.ToArray(),
-                Color = new Color4(Color.Yellow.ToColor3(), 0.3333f),
+                Primitives = [.. markers],
+                Color = new(Color.Yellow.ToColor3(), 0.3333f),
             };
             await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DebugPM",

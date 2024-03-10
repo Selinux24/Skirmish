@@ -11,7 +11,8 @@ namespace BasicSamples.SceneUI
 {
     public class UIScene : Scene
     {
-        private readonly string resourcesFolder = "SceneUI/resources";
+        private const string resourcesFolder = "SceneUI/resources";
+        private const string fontFamilyString = "LeagueSpartan-Bold.otf";
 
         private const int layerUIBackground = LayerUI - 1;
         private const int layerUIObjects = LayerUI + 1;
@@ -60,13 +61,12 @@ namespace BasicSamples.SceneUI
         private void LoadUserInterface()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeConsole(),
                     InitializeBackground(),
                     InitializeProgressbar()
-                },
+                ],
                 LoadUserInterfaceCompleted);
         }
         private async Task InitializeTweener()
@@ -93,7 +93,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeProgressbar()
         {
-            var defaultFont = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 10, true);
+            var defaultFont = TextDrawerDescription.FromFile(fontFamilyString, 10, true);
             defaultFont.ContentPath = resourcesFolder;
 
             var desc = UIProgressBarDescription.Default(defaultFont, new Color(0, 0, 0, 0.5f), Color.Green);
@@ -123,14 +123,13 @@ namespace BasicSamples.SceneUI
         private void LoadControls()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeSmiley(),
                     InitializeStaticPan(),
                     InitializeDynamicPan(),
                     InitializeButtonTest(),
                     InitializeScroll(),
-                },
+                ],
                 LoadControlsCompleted);
         }
         private async Task InitializeSmiley()
@@ -160,14 +159,14 @@ namespace BasicSamples.SceneUI
                 Background = new SpriteDescription
                 {
                     ContentPath = resourcesFolder,
-                    Textures = new[] { "pan_bw.png" },
+                    Textures = ["pan_bw.png"],
                     BaseColor = new Color(176, 77, 45),
                 },
                 StartsVisible = false,
             };
             staticPan = await AddComponentUI<UIPanel, UIPanelDescription>("StaticPanel", "StaticPanel", desc);
 
-            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 18, true);
+            var font = TextDrawerDescription.FromFile(fontFamilyString, 18, true);
             font.ContentPath = resourcesFolder;
 
             var descText = new UITextAreaDescription()
@@ -205,7 +204,7 @@ namespace BasicSamples.SceneUI
                 Background = new SpriteDescription()
                 {
                     ContentPath = resourcesFolder,
-                    Textures = new[] { "pan_bw.png" },
+                    Textures = ["pan_bw.png"],
                     BaseColor = Color.Pink,
                 },
 
@@ -221,7 +220,7 @@ namespace BasicSamples.SceneUI
             var releasedRect = new Vector4(w0, 0, w1, 1f);
             var pressedRect = new Vector4(w2, 0, w3, 1f);
 
-            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
+            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, "buttons.png", releasedRect, pressedRect);
@@ -261,7 +260,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeButtonTest()
         {
-            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
+            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);

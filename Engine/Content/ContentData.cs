@@ -27,6 +27,10 @@ namespace Engine.Content
         /// Default material name
         /// </summary>
         public const string DefaultMaterial = "_base_material_default_";
+        /// <summary>
+        /// Mesh string
+        /// </summary>
+        private const string MeshString = "-mesh";
 
         /// <summary>
         /// Skinning information
@@ -1232,7 +1236,7 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ContentData Filter(string geometryName)
         {
-            var geo = geometryContent.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
+            var geo = geometryContent.Where(g => string.Equals(g.Key, $"{geometryName}{MeshString}", StringComparison.OrdinalIgnoreCase));
 
             if (!geo.Any())
             {
@@ -1264,7 +1268,7 @@ namespace Engine.Content
                 return null;
             }
 
-            var geo = geometryContent.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
+            var geo = geometryContent.Where(g => geometryNames.Any(i => string.Equals(g.Key, $"{i}{MeshString}", StringComparison.OrdinalIgnoreCase)));
 
             if (!geo.Any())
             {
@@ -1352,7 +1356,7 @@ namespace Engine.Content
 
             foreach (var mesh in modelContent.geometryContent.Keys)
             {
-                TryAddLights(mesh.Replace("-mesh", ""), ref modelContent);
+                TryAddLights(mesh.Replace(MeshString, ""), ref modelContent);
             }
 
             return true;
@@ -1371,7 +1375,7 @@ namespace Engine.Content
 
             var geo = geometryContent.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+                g.Key.EndsWith(MeshString, StringComparison.OrdinalIgnoreCase));
 
             if (geo.Any())
             {
@@ -1686,7 +1690,7 @@ namespace Engine.Content
         {
             var geo = geometryContent.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+                g.Key.EndsWith(MeshString, StringComparison.OrdinalIgnoreCase));
 
             if (!geo.Any())
             {

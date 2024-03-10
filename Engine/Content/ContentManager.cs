@@ -13,6 +13,13 @@ namespace Engine.Content
     public static class ContentManager
     {
         /// <summary>
+        /// File not found string
+        /// </summary>
+        private const string FileNotFoundString = "File not found";
+
+        private const string CompressedFileString = "Compressed files not implemented yet";
+
+        /// <summary>
         /// Zip files manager
         /// </summary>
         static class ZipManager
@@ -116,12 +123,12 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        private static IEnumerable<MemoryStream> FindContentDirectory(string contentSource, string resourcePath, bool throwException)
+        private static MemoryStream[] FindContentDirectory(string contentSource, string resourcePath, bool throwException)
         {
             var path = Path.Combine(contentSource, resourcePath);
             if (File.Exists(path))
             {
-                return new[] { path.CopyToMemory() };
+                return [path.CopyToMemory()];
             }
 
             var files = Directory.GetFiles(
@@ -141,10 +148,10 @@ namespace Engine.Content
 
             if (throwException)
             {
-                throw new FileNotFoundException("File not found", path);
+                throw new FileNotFoundException(FileNotFoundString, path);
             }
 
-            return Array.Empty<MemoryStream>();
+            return [];
         }
         /// <summary>
         /// Finds content int zippped file
@@ -157,11 +164,11 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        private static IEnumerable<MemoryStream> FindContentZip(string contentSource, string resourcePath, bool throwException)
+        private static MemoryStream[] FindContentZip(string contentSource, string resourcePath, bool throwException)
         {
             if (ZipManager.Contains(contentSource, resourcePath))
             {
-                return new[] { ZipManager.GetFile(contentSource, resourcePath) };
+                return [ZipManager.GetFile(contentSource, resourcePath)];
             }
 
             var res = ZipManager.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
@@ -172,10 +179,10 @@ namespace Engine.Content
 
             if (throwException)
             {
-                throw new FileNotFoundException("File not found", resourcePath);
+                throw new FileNotFoundException(FileNotFoundString, resourcePath);
             }
 
-            return Array.Empty<MemoryStream>();
+            return [];
         }
 
         /// <summary>
@@ -193,12 +200,12 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return Array.Empty<MemoryStream>();
+                return [];
             }
 
             if (File.Exists(resourcePath))
             {
-                return new[] { resourcePath.CopyToMemory() };
+                return [resourcePath.CopyToMemory()];
             }
 
             if (Directory.Exists(contentSource))
@@ -215,10 +222,10 @@ namespace Engine.Content
 
             if (throwException)
             {
-                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
+                throw new DirectoryNotFoundException($"Content source {resourcePath} not exists");
             }
 
-            return Array.Empty<MemoryStream>();
+            return [];
         }
         /// <summary>
         /// Finds content
@@ -244,12 +251,12 @@ namespace Engine.Content
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("File not found", resourcePath);
+                        throw new FileNotFoundException(FileNotFoundString, resourcePath);
                     }
                 }
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Finds paths
@@ -265,12 +272,12 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return Array.Empty<string>();
+                return [];
             }
 
             if (File.Exists(resourcePath))
             {
-                return new[] { resourcePath };
+                return [resourcePath];
             }
 
             if (Directory.Exists(contentSource))
@@ -279,7 +286,7 @@ namespace Engine.Content
                 resourcePath = Path.Combine(contentSource, resourcePath);
                 if (File.Exists(resourcePath))
                 {
-                    return new[] { resourcePath };
+                    return [resourcePath];
                 }
 
                 string[] files = Directory.GetFiles(
@@ -292,22 +299,22 @@ namespace Engine.Content
 
                 if (throwException)
                 {
-                    throw new FileNotFoundException("File not found", resourcePath);
+                    throw new FileNotFoundException(FileNotFoundString, resourcePath);
                 }
             }
 
             if (File.Exists(contentSource))
             {
                 //Compressed file
-                throw new NotImplementedException("Compressed files not implemented yet");
+                throw new NotImplementedException(CompressedFileString);
             }
 
             if (throwException)
             {
-                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
+                throw new DirectoryNotFoundException($"Content source {resourcePath} not exists");
             }
 
-            return Array.Empty<string>();
+            return [];
         }
         /// <summary>
         /// Finds paths
@@ -333,12 +340,12 @@ namespace Engine.Content
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("File not found", resourcePath);
+                        throw new FileNotFoundException(FileNotFoundString, resourcePath);
                     }
                 }
             }
 
-            return res.ToArray();
+            return [.. res];
         }
     }
 }

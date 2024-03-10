@@ -13,6 +13,11 @@ namespace BasicSamples.SceneCascadedShadows
     public class CascadedShadowsScene : Scene
     {
         private const float spaceSize = 80;
+        private const string GlowString = "lfGlow.png";
+        private const string Flare1String = "lfFlare1.png";
+        private const string Flare2String = "lfFlare2.png";
+        private const string Flare3String = "lfFlare3.png";
+        private const string Flare4String = "lfFlare4.png";
 
         private UITextArea title = null;
         private UITextArea help = null;
@@ -67,8 +72,7 @@ namespace BasicSamples.SceneCascadedShadows
         private void InitializeUI()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeUITitle(),
                     InitializeUILevelsControl(),
                     InitializeUIDrawers(),
@@ -77,7 +81,7 @@ namespace BasicSamples.SceneCascadedShadows
                     InitializeTree(),
                     InitializeSkyEffects(),
                     InitializeLights(),
-                },
+                ],
                 InitializeUICompleted);
         }
         private async Task InitializeUITitle()
@@ -162,19 +166,19 @@ namespace BasicSamples.SceneCascadedShadows
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
+                new (){ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
+                new (){ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
+                new (){ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
@@ -219,20 +223,20 @@ namespace BasicSamples.SceneCascadedShadows
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flare", "Flare", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
-                GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.0f, 5.6f, new Color( 25,  25,  25), "lfFlare4.png"),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
+                GlowTexture = GlowString,
+                Flares =
+                [
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
+                    new ( 0.0f, 5.6f, new Color( 25,  25,  25), Flare4String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                ]
             });
         }
         private async Task InitializeLights()

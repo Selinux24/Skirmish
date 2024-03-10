@@ -11,7 +11,15 @@ namespace BasicSamples.SceneParticles
 {
     public class ParticlesScene : Scene
     {
-        private readonly string resourcesFolder = "SceneParticles";
+        private const string resourcesFolder = "SceneParticles";
+        private const string particleSmokeFileName = "smoke.png";
+        private const string particleFireFileName = "fire.png";
+        private const string particlePlumeString = "Plume";
+        private const string particleFireString = "Fire";
+        private const string particleDustString = "Dust";
+        private const string particleProjectileString = "Projectile";
+        private const string particleExplosionString = "Explosion";
+        private const string particleSmokeExplosionString = "SmokeExplosion";
 
         private UITextArea text = null;
         private UITextArea statistics = null;
@@ -20,11 +28,11 @@ namespace BasicSamples.SceneParticles
         private UIConsole console = null;
         private Sprite backPanel = null;
 
-        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new();
+        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = [];
         private ParticleManager pManager = null;
 
         private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
-        private readonly List<Line3D> lines = new();
+        private readonly List<Line3D> lines = [];
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -100,12 +108,11 @@ namespace BasicSamples.SceneParticles
         private void InitializeSceneObjects()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeFloor(),
                     InitializeModels(),
                     InitializeParticleVolumeDrawer()
-                },
+                ],
                 InitializeSceneObjectsCompleted);
         }
         private async Task InitializeFloor()
@@ -113,19 +120,19 @@ namespace BasicSamples.SceneParticles
             float l = 10f;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, l) },
-                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(l, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(l, l) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new (-l, -h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
+                new (){ Position = new (-l, -h, +l), Normal = Vector3.Up, Texture = new (0.0f, l) },
+                new (){ Position = new (+l, -h, -l), Normal = Vector3.Up, Texture = new (l, 0.0f) },
+                new (){ Position = new (+l, -h, +l), Normal = Vector3.Up, Texture = new (l, l) },
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFolder + "/floor.png";
@@ -140,19 +147,19 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeModels()
         {
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume(resourcesFolder, "smoke.png");
-            var pFire = ParticleSystemDescription.InitializeFire(resourcesFolder, "fire.png");
-            var pDust = ParticleSystemDescription.InitializeDust(resourcesFolder, "smoke.png");
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourcesFolder, "smoke.png");
-            var pExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, "fire.png");
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, "smoke.png");
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume(resourcesFolder, particleSmokeFileName);
+            var pFire = ParticleSystemDescription.InitializeFire(resourcesFolder, particleFireFileName);
+            var pDust = ParticleSystemDescription.InitializeDust(resourcesFolder, particleSmokeFileName);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourcesFolder, particleSmokeFileName);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, particleFireFileName);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, particleSmokeFileName);
 
-            pDescriptions.Add("Plume", pPlume);
-            pDescriptions.Add("Fire", pFire);
-            pDescriptions.Add("Dust", pDust);
-            pDescriptions.Add("Projectile", pProjectile);
-            pDescriptions.Add("Explosion", pExplosion);
-            pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
+            pDescriptions.Add(particlePlumeString, pPlume);
+            pDescriptions.Add(particleFireString, pFire);
+            pDescriptions.Add(particleDustString, pDust);
+            pDescriptions.Add(particleProjectileString, pProjectile);
+            pDescriptions.Add(particleExplosionString, pExplosion);
+            pDescriptions.Add(particleSmokeExplosionString, pSmokeExplosion);
 
             pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>(
                 "ParticleManager",
@@ -343,8 +350,8 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 100f,
             };
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Explosion"], emitter1);
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["SmokeExplosion"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleExplosionString], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleSmokeExplosionString], emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -357,7 +364,7 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 100f,
             };
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Projectile"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleProjectileString], emitter);
         }
         private void AddDustSystem()
         {
@@ -370,7 +377,7 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 250f,
             };
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Dust"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleDustString], emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -399,8 +406,8 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 500f,
             };
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter1);
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleFireString], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter2);
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
@@ -447,11 +454,11 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 500f,
             };
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter11);
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Fire"], emitter12);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particleFireString], emitter11);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions[particleFireString], emitter12);
 
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter21);
-            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Plume"], emitter22);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter21);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions[particlePlumeString], emitter22);
         }
         private async Task AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
@@ -464,7 +471,7 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter);
+            var pSystem = await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter);
 
             var parameters = pSystem.GetParameters();
 
@@ -486,7 +493,7 @@ namespace BasicSamples.SceneParticles
                 lines.AddRange(Line3D.CreateFromVertices(geom));
             }
 
-            pManagerLineDrawer.SetPrimitives(Color.Red, lines.ToArray());
+            pManagerLineDrawer.SetPrimitives(Color.Red, [.. lines]);
         }
 
         public override void Draw(IGameTime gameTime)

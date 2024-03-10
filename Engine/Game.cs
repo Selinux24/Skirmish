@@ -16,6 +16,9 @@ namespace Engine
     /// </summary>
     public class Game : IDisposable
     {
+        private const string LogLineString = "**************************************************************************";
+        private const string NoIdString = "no-id";
+
         /// <summary>
         /// Images helper static instance
         /// </summary>
@@ -52,7 +55,7 @@ namespace Engine
         /// <summary>
         /// Scene list
         /// </summary>
-        private readonly List<Scene> scenes = new();
+        private readonly List<Scene> scenes = [];
         /// <summary>
         /// Next scene to load
         /// </summary>
@@ -444,9 +447,9 @@ namespace Engine
         /// </summary>
         public void Run()
         {
-            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, LogLineString);
             Logger.WriteInformation(this, "** Game started                                                         **");
-            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, LogLineString);
 
             Form.Render(Frame);
         }
@@ -787,13 +790,13 @@ namespace Engine
         /// <returns>Returns a load resource result.</returns>
         private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
         {
-            List<TaskResult<T>> loadResult = new();
+            List<TaskResult<T>> loadResult = [];
 
             var taskList = taskGroup.Tasks.ToList();
 
             int totalTasks = taskList.Count;
             int currentTask = 0;
-            while (taskList.Any())
+            while (taskList.Count != 0)
             {
                 var t = await Task.WhenAny(taskList);
 
@@ -827,13 +830,13 @@ namespace Engine
         /// <returns>Returns a load resource result.</returns>
         private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
         {
-            List<TaskResult> loadResult = new();
+            List<TaskResult> loadResult = [];
 
             var taskList = taskGroup.Tasks.ToList();
 
             int totalTasks = taskList.Count;
             int currentTask = 0;
-            while (taskList.Any())
+            while (taskList.Count != 0)
             {
                 var t = await Task.WhenAny(taskList);
 
@@ -866,17 +869,17 @@ namespace Engine
         {
             try
             {
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Recreating buffers");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => BufferManager: Recreating buffers");
                 await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Buffers recreated");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => BufferManager: Buffers recreated");
 
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: Creating new resources");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => ResourceManager: Creating new resources");
                 ResourceManager.CreateResources(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: New resources created");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => ResourceManager: New resources created");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => error: {ex.Message}", ex);
 
                 throw;
             }
@@ -897,9 +900,9 @@ namespace Engine
         {
             if (exiting)
             {
-                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, LogLineString);
                 Logger.WriteInformation(this, "** Game closed                                                          **");
-                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, LogLineString);
 
                 //Exit form
                 Form.Close();

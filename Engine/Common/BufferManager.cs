@@ -13,6 +13,10 @@ namespace Engine.Common
     /// </summary>
     public class BufferManager : IDisposable
     {
+        private const string NoIdString = "no-id";
+        private const string DynamicString = "dynamic";
+        private const string StaticString = "static";
+
         /// <summary>
         /// Imput asembler key
         /// </summary>
@@ -93,31 +97,31 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffers
         /// </summary>
-        private readonly List<EngineBuffer> vertexBuffers = new();
+        private readonly List<EngineBuffer> vertexBuffers = [];
         /// <summary>
         /// Vertex buffer bindings
         /// </summary>
-        private readonly List<EngineVertexBufferBinding> vertexBufferBindings = new();
+        private readonly List<EngineVertexBufferBinding> vertexBufferBindings = [];
         /// <summary>
         /// Index buffer
         /// </summary>
-        private readonly List<EngineBuffer> indexBuffers = new();
+        private readonly List<EngineBuffer> indexBuffers = [];
         /// <summary>
         /// Vertex buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerVertices> vertexBufferDescriptors = new();
+        private readonly List<BufferManagerVertices> vertexBufferDescriptors = [];
         /// <summary>
         /// Instancing buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerInstances<VertexInstancingData>> instancingBufferDescriptors = new();
+        private readonly List<BufferManagerInstances<VertexInstancingData>> instancingBufferDescriptors = [];
         /// <summary>
         /// Index buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerIndices> indexBufferDescriptors = new();
+        private readonly List<BufferManagerIndices> indexBufferDescriptors = [];
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly ConcurrentDictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = new();
+        private readonly ConcurrentDictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = [];
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -125,7 +129,7 @@ namespace Engine.Common
         /// <summary>
         /// Descriptor request list
         /// </summary>
-        private ConcurrentBag<IBufferDescriptorRequest> requestedDescriptors = new();
+        private ConcurrentBag<IBufferDescriptorRequest> requestedDescriptors = [];
 
         /// <summary>
         /// Gets whether the manager is initialized or not
@@ -255,11 +259,11 @@ namespace Engine.Common
 
                 if (!Initilialized)
                 {
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Creating reserved buffer descriptors");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Creating reserved buffer descriptors");
 
                     await CreateReservedBuffers();
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reserved buffer descriptors created");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Reserved buffer descriptors created");
 
                     Initilialized = true;
                 }
@@ -276,11 +280,11 @@ namespace Engine.Common
 
                 float requestTotal = toAssign.Length;
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing descriptor requests: {requestTotal}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processing descriptor requests: {requestTotal}");
 
                 float requestCurrent = await DoProcessRequest(id, progress, 0, requestTotal, toAssign);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Descriptor requests processed: {requestCurrent}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Descriptor requests processed: {requestCurrent}");
 
                 var instancingList = instancingBufferDescriptors
                     .Where(v => v.Dirty)
@@ -300,7 +304,7 @@ namespace Engine.Common
                     vertexList.Length +
                     indexList.Length;
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocating {total - requestTotal} buffers: Vtx[{vertexList.Length}], Idx[{indexList.Length}], Ins[{instancingList.Length}]");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Reallocating {total - requestTotal} buffers: Vtx[{vertexList.Length}], Idx[{indexList.Length}], Ins[{instancingList.Length}]");
 
                 float current = await ReallocateInstances(id, progress, requestCurrent, total, instancingList);
 
@@ -308,11 +312,11 @@ namespace Engine.Common
 
                 current = await ReallocateIndexData(id, progress, current, total, indexList);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Buffers reallocated: {current - requestCurrent}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Buffers reallocated: {current - requestCurrent}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating buffers: {ex.Message}", ex);
+                Logger.WriteError(this, $"Loading Group {id ?? NoIdString} => Error creating buffers: {ex.Message}", ex);
 
                 throw;
             }
@@ -335,7 +339,7 @@ namespace Engine.Common
                     int bufferIndex = vertexBuffers.Count;
                     int bindingIndex = vertexBufferBindings.Count;
 
-                    string name = $"Reserved buffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"Reserved buffer.{bufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
 
                     //Empty buffer
                     vertexBuffers.Add(null);
@@ -365,11 +369,11 @@ namespace Engine.Common
         {
             foreach (var request in toAssign)
             {
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing {request}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processing {request}");
 
                 await request.ProcessAsync(this);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processed {request}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processed {request}");
 
                 progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
@@ -394,7 +398,7 @@ namespace Engine.Common
                 if (descriptor.Allocated)
                 {
                     //Recreate the buffer
-                    string name = $"IndexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"IndexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     var buffer = await CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     //Reserve current buffer
@@ -404,21 +408,21 @@ namespace Engine.Common
                     //Dispose buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
                     int bufferIndex = indexBuffers.Count;
 
                     //Recreate the buffer
-                    string name = $"IndexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"IndexBuffer.{bufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     var buffer = await CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     indexBuffers.Add(buffer);
 
                     descriptor.BufferIndex = bufferIndex;
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Created {name}. Size {descriptor.Data.Count()}");
                 }
 
                 //Updates the allocated buffer size
@@ -449,7 +453,7 @@ namespace Engine.Common
                     var oldBuffer = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
-                    string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new EngineVertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
@@ -459,7 +463,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -467,7 +471,7 @@ namespace Engine.Common
                     int bindingIndex = vertexBufferBindings.Count;
 
                     //Create the buffer and binding
-                    string name = $"VertexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"VertexBuffer.{bufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new EngineVertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
@@ -479,7 +483,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
                 descriptor.ClearInstancingInputs();
@@ -518,7 +522,7 @@ namespace Engine.Common
                     var oldBuffer = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
-                    string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new EngineVertexBufferBinding(buffer, data[0].GetStride(), 0);
@@ -529,7 +533,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name}. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -537,7 +541,7 @@ namespace Engine.Common
                     int bindingIndex = vertexBufferBindings.Count;
 
                     //Create the buffer and binding
-                    string name = $"InstancingBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"InstancingBuffer.{bufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new EngineVertexBufferBinding(buffer, data[0].GetStride(), 0);
@@ -548,7 +552,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name} and binding. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -578,7 +582,7 @@ namespace Engine.Common
                 Action = BufferDescriptorRequestActions.Add,
             };
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddIndexData {request}.");
+            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddIndexData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -618,7 +622,7 @@ namespace Engine.Common
                 Action = BufferDescriptorRequestActions.Add,
             };
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddVertexData {request}.");
+            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddVertexData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -640,7 +644,7 @@ namespace Engine.Common
                 Action = BufferDescriptorRequestActions.Add,
             };
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddInstancingData {request}.");
+            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddInstancingData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -868,7 +872,7 @@ namespace Engine.Common
                 return false;
             }
 
-            dc.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
+            dc.IASetVertexBuffers(0, [.. vertexBufferBindings]);
 
             return true;
         }

@@ -14,14 +14,16 @@ namespace BasicSamples.SceneStart
 {
     class StartScene : Scene
     {
+        private const string MusicResourceString = "Music";
+
         private AudioEffectTweener audioTweener;
         private UIControlTweener uiTweener;
 
         private Model backGround = null;
         private UITextArea title = null;
 
-        private readonly List<UIButton> sceneButtons = new();
-        private readonly List<(char Key, Type SceneType)> sceneButtonsChars = new();
+        private readonly List<UIButton> sceneButtons = [];
+        private readonly List<(char Key, Type SceneType)> sceneButtonsChars = [];
         private UIPanel buttonPanel = null;
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
@@ -153,18 +155,18 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            AudioManager.LoadSound("Music", "SceneStart", "anttisinstrumentals+icemanandangelinstrumental.mp3");
+            AudioManager.LoadSound(MusicResourceString, "SceneStart", "anttisinstrumentals+icemanandangelinstrumental.mp3");
             AudioManager.AddEffectParams(
-                "Music",
+                MusicResourceString,
                 new GameAudioEffectParameters
                 {
                     DestroyWhenFinished = false,
-                    SoundName = "Music",
+                    SoundName = MusicResourceString,
                     IsLooped = true,
                     UseAudio3D = true,
                 });
 
-            currentMusic = AudioManager.CreateEffectInstance("Music");
+            currentMusic = AudioManager.CreateEffectInstance(MusicResourceString);
 
             await Task.CompletedTask;
         }

@@ -8,17 +8,21 @@ namespace Engine.Common
     /// Shader stage state helper
     /// </summary>
     /// <typeparam name="T">Type of resource</typeparam>
-    public class EngineShaderStageState<T>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="deviceContext">Device context</param>
+    public class EngineShaderStageState<T>(EngineDeviceContext deviceContext)
     {
         /// <summary>
         /// Internal resource list
         /// </summary>
-        private readonly List<T> resources = new();
+        private readonly List<T> resources = [];
 
         /// <summary>
         /// Device context
         /// </summary>
-        protected EngineDeviceContext DeviceContext { get; private set; }
+        protected EngineDeviceContext DeviceContext { get; private set; } = deviceContext;
 
         /// <summary>
         /// Start slot of the last call
@@ -37,15 +41,6 @@ namespace Engine.Common
             {
                 return resources.Count;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="deviceContext">Device context</param>
-        public EngineShaderStageState(EngineDeviceContext deviceContext)
-        {
-            DeviceContext = deviceContext;
         }
 
         /// <summary>
@@ -81,7 +76,7 @@ namespace Engine.Common
         /// <returns>Returns true if all the elements in the resource list are in the specified slot since the last call</returns>
         private bool LookupResource(int startSlot, IEnumerable<T> resourceList)
         {
-            if (!resources.Any())
+            if (resources.Count == 0)
             {
                 //Resources is empty
                 return false;
@@ -132,7 +127,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!resources.Any())
+            if (resources.Count == 0)
             {
                 //Empty resource state, add the first resource
                 StartSlot = slot;
@@ -175,7 +170,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!resources.Any())
+            if (resources.Count == 0)
             {
                 //Empty resource state, add the first resource
                 StartSlot = startSlot;

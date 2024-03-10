@@ -27,7 +27,9 @@ namespace TerrainSamples.SceneModularDungeon
     {
         private const float maxDistance = 35;
 
-        private readonly string resourcesFolder = "SceneModularDungeon/resources";
+        private const string resourcesFolder = "SceneModularDungeon/resources";
+        private const string resourceAudio = "audio/effects";
+
         private readonly bool isOnePageDungeon;
         private readonly string dungeonDefFile;
         private readonly string dungeonMapFile;
@@ -474,7 +476,7 @@ namespace TerrainSamples.SceneModularDungeon
             scenery = await AddComponentGround<ModularScenery, ModularSceneryDescription>("Scenery", "Scenery", desc);
             scenery.TriggerEnd += TriggerEnds;
         }
-        private async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
+        private static async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {
             var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
 
@@ -496,7 +498,7 @@ namespace TerrainSamples.SceneModularDungeon
                 Levels = levelsMap,
             };
         }
-        private async Task<IEnumerable<ContentData>> ReadAssetFiles(IEnumerable<string> assets)
+        private static async Task<IEnumerable<ContentData>> ReadAssetFiles(IEnumerable<string> assets)
         {
             if (assets?.Any() != true)
             {
@@ -507,7 +509,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             return contentData.SelectMany(c => c);
         }
-        private async Task<IEnumerable<ContentData>> ReadAssets(IEnumerable<ContentDataFile> assets)
+        private static async Task<IEnumerable<ContentData>> ReadAssets(IEnumerable<ContentDataFile> assets)
         {
             if (assets?.Any() != true)
             {
@@ -601,24 +603,24 @@ namespace TerrainSamples.SceneModularDungeon
             //Sounds
             soundDoor = "door";
             soundLadder = "ladder";
-            AudioManager.LoadSound(soundDoor, Path.Combine(resourcesFolder, "audio/effects"), "door.wav");
-            AudioManager.LoadSound(soundLadder, Path.Combine(resourcesFolder, "audio/effects"), "ladder.wav");
+            AudioManager.LoadSound(soundDoor, Path.Combine(resourcesFolder, resourceAudio), "door.wav");
+            AudioManager.LoadSound(soundLadder, Path.Combine(resourcesFolder, resourceAudio), "ladder.wav");
 
             string soundWind1 = "wind1";
             string soundWind2 = "wind2";
             string soundWind3 = "wind3";
-            AudioManager.LoadSound(soundWind1, Path.Combine(resourcesFolder, "audio/effects"), "Wind1_S.wav");
-            AudioManager.LoadSound(soundWind2, Path.Combine(resourcesFolder, "audio/effects"), "Wind2_S.wav");
-            AudioManager.LoadSound(soundWind3, Path.Combine(resourcesFolder, "audio/effects"), "Wind3_S.wav");
+            AudioManager.LoadSound(soundWind1, Path.Combine(resourcesFolder, resourceAudio), "Wind1_S.wav");
+            AudioManager.LoadSound(soundWind2, Path.Combine(resourcesFolder, resourceAudio), "Wind2_S.wav");
+            AudioManager.LoadSound(soundWind3, Path.Combine(resourcesFolder, resourceAudio), "Wind3_S.wav");
             soundWinds = [soundWind1, soundWind2, soundWind3];
 
             ratSoundMove = "mouseMove";
             ratSoundTalk = "mouseTalk";
-            AudioManager.LoadSound(ratSoundMove, Path.Combine(resourcesFolder, "audio/effects"), "mouse1.wav");
-            AudioManager.LoadSound(ratSoundTalk, Path.Combine(resourcesFolder, "audio/effects"), "mouse2.wav");
+            AudioManager.LoadSound(ratSoundMove, Path.Combine(resourcesFolder, resourceAudio), "mouse1.wav");
+            AudioManager.LoadSound(ratSoundTalk, Path.Combine(resourcesFolder, resourceAudio), "mouse2.wav");
 
             soundTorch = "torch";
-            AudioManager.LoadSound(soundTorch, Path.Combine(resourcesFolder, "audio/effects"), "loop_torch.wav");
+            AudioManager.LoadSound(soundTorch, Path.Combine(resourcesFolder, resourceAudio), "loop_torch.wav");
 
             //Effects
             AudioManager.AddEffectParams(

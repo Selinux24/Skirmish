@@ -8,6 +8,11 @@ namespace BasicSamples.SceneWater
 {
     public class WaterScene : Scene
     {
+        private const string GlowString = "lfGlow.png";
+        private const string Flare1String = "lfFlare1.png";
+        private const string Flare2String = "lfFlare2.png";
+        private const string Flare3String = "lfFlare3.png";
+
         private const float fogStart = 150f;
         private const float fogRange = 200f;
 
@@ -46,13 +51,13 @@ namespace BasicSamples.SceneWater
         }
         private void InitializeComponents()
         {
-            LoadResourcesAsync(new[]
-            {
+            LoadResourcesAsync(
+            [
                 InitializeLensFlare(),
                 InitializeSky(),
                 InitializeWater(),
                 InitializeSeaBottom(),
-            }, 
+            ], 
             (res) => { res.ThrowExceptions(); });
         }
         private async Task InitializeLensFlare()
@@ -60,22 +65,22 @@ namespace BasicSamples.SceneWater
             var lfDesc = new LensFlareDescription()
             {
                 ContentPath = @"Common/LensFlare",
-                GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
-                    new LensFlareDescription.Flare(-0.7f, 4.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare(-0.5f, 2.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare(-0.3f, 1.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                GlowTexture = GlowString,
+                Flares =
+                [
+                    new (-0.7f, 4.7f, new Color( 50, 100,  25), Flare3String),
+                    new (-0.5f, 2.7f, new Color( 50,  25,  50), Flare1String),
+                    new (-0.3f, 1.7f, new Color(200,  50,  50), Flare2String),
 
-                    new LensFlareDescription.Flare( 0.1f, 1.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 0.3f, 1.7f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.6f, 1.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 2.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new ( 0.1f, 1.6f, new Color( 25,  25,  25), Flare3String),
+                    new ( 0.3f, 1.7f, new Color(100, 255, 200), Flare1String),
+                    new ( 0.6f, 1.9f, new Color( 50, 100,  50), Flare2String),
+                    new ( 0.7f, 2.4f, new Color( 50, 200, 200), Flare2String),
 
-                    new LensFlareDescription.Flare( 1.2f, 3.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 4.5f, new Color( 50, 100,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 2.0f, 6.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
+                    new ( 1.2f, 3.0f, new Color(100,  50,  50), Flare1String),
+                    new ( 1.5f, 4.5f, new Color( 50, 100,  50), Flare1String),
+                    new ( 2.0f, 6.4f, new Color( 25,  50, 100), Flare3String),
+                ]
             };
 
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -121,8 +126,8 @@ namespace BasicSamples.SceneWater
             var textures = new HeightmapTexturesDescription
             {
                 ContentPath = "SceneWater",
-                TexturesLR = new[] { "Diffuse.jpg" },
-                NormalMaps = new[] { "Normal.jpg" },
+                TexturesLR = ["Diffuse.jpg"],
+                NormalMaps = ["Normal.jpg"],
                 Scale = 0.0333f,
             };
             var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);

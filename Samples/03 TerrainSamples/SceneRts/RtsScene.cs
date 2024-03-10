@@ -24,6 +24,18 @@ namespace TerrainSamples.SceneRts
 
     public class RtsScene : WalkableScene
     {
+        private const string resourceParticlesString = "SceneRts/resources/particles";
+        private const string resourceParticleSmokeString = "smoke.png";
+        private const string resourceParticleFireString = "fire.png";
+        private const string GlowString = "lfGlow.png";
+        private const string Flare1String = "lfFlare1.png";
+        private const string Flare2String = "lfFlare2.png";
+        private const string Flare3String = "lfFlare3.png";
+        private const string helicopterString = "Helicopter";
+        private const string tank1String = "Tank1";
+        private const string tank2String = "Tank2";
+        private const string resourceEffectsString = "SceneRts/resources/Audio/Effects";
+
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;
 
@@ -429,12 +441,12 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneRts/resources/particles", "smoke.png");
-            pFire = ParticleSystemDescription.InitializeFire("SceneRts/resources/particles", "fire.png");
-            pDust = ParticleSystemDescription.InitializeDust("SceneRts/resources/particles", "smoke.png");
-            pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneRts/resources/particles", "smoke.png");
-            pExplosion = ParticleSystemDescription.InitializeExplosion("SceneRts/resources/particles", "fire.png");
-            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneRts/resources/particles", "smoke.png");
+            pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesString, resourceParticleSmokeString);
+            pFire = ParticleSystemDescription.InitializeFire(resourceParticlesString, resourceParticleFireString);
+            pDust = ParticleSystemDescription.InitializeDust(resourceParticlesString, resourceParticleSmokeString);
+            pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourceParticlesString, resourceParticleSmokeString);
+            pExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesString, resourceParticleFireString);
+            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesString, resourceParticleSmokeString);
 
             pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
@@ -453,21 +465,21 @@ namespace TerrainSamples.SceneRts
             var lfDesc = new LensFlareDescription()
             {
                 ContentPath = "SceneRts/resources/Flare",
-                GlowTexture = "lfGlow.png",
+                GlowTexture = GlowString,
                 Flares =
                 [
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
 
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
 
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -492,7 +504,7 @@ namespace TerrainSamples.SceneRts
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 StartsVisible = false,
             };
-            helicopter = await AddComponentAgent<Model, ModelDescription>("Helicopter", "Helicopter", hDesc);
+            helicopter = await AddComponentAgent<Model, ModelDescription>(nameof(helicopter), helicopterString, hDesc);
             helicopter.Manipulator.SetScaling(0.15f);
 
             PrepareLights(helicopter.Lights);
@@ -500,7 +512,7 @@ namespace TerrainSamples.SceneRts
             sw.Stop();
             return new TaskResult()
             {
-                Text = "Helicopter",
+                Text = helicopterString,
                 Duration = sw.Elapsed,
             };
         }
@@ -518,8 +530,8 @@ namespace TerrainSamples.SceneRts
                 TransformDependences = [1, 2, -1],
                 StartsVisible = false,
             };
-            tankP1 = await AddComponentAgent<Model, ModelDescription>("Tank1", "Tank1", tDesc);
-            tankP2 = await AddComponentAgent<Model, ModelDescription>("Tank2", "Tank2", tDesc);
+            tankP1 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP1), tank1String, tDesc);
+            tankP2 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP2), tank2String, tDesc);
 
             tankP1.Manipulator.SetScaling(0.2f);
             tankP2.Manipulator.SetScaling(0.2f);
@@ -809,10 +821,10 @@ namespace TerrainSamples.SceneRts
         private void StartAudio()
         {
             string forestEffect = "Forest";
-            heliEffect = "Helicopter";
+            heliEffect = helicopterString;
             heliDestroyedEffect = "HelicopterDestroyed";
-            tank1Effect = "Tank1";
-            tank2Effect = "Tank2";
+            tank1Effect = tank1String;
+            tank2Effect = tank2String;
             tank1DestroyedEffect = "Tank1Destroyed";
             tank2DestroyedEffect = "Tank2Destroyed";
             tank1ShootingEffect = "Tank1Shooting";
@@ -820,20 +832,20 @@ namespace TerrainSamples.SceneRts
             impactEffects = ["Impact1", "Impact2", "Impact3", "Impact4"];
             damageEffects = ["Damage1", "Damage2", "Damage3", "Damage4"];
 
-            AudioManager.LoadSound(forestEffect, "SceneRts/resources/Audio/Effects", "wind_birds_forest_01.wav");
-            AudioManager.LoadSound(heliEffect, "SceneRts/resources/Audio/Effects", "heli.wav");
-            AudioManager.LoadSound(heliDestroyedEffect, "SceneRts/resources/Audio/Effects", "explosion_helicopter_close_01.wav");
-            AudioManager.LoadSound("Tank", "SceneRts/resources/Audio/Effects", "tank_engine.wav");
-            AudioManager.LoadSound("TankDestroyed", "SceneRts/resources/Audio/Effects", "explosion_vehicle_small_close_01.wav");
-            AudioManager.LoadSound("TankShooting", "SceneRts/resources/Audio/Effects", "machinegun-shooting.wav");
-            AudioManager.LoadSound(impactEffects[0], "SceneRts/resources/Audio/Effects", "metal_grate_large_01.wav");
-            AudioManager.LoadSound(impactEffects[1], "SceneRts/resources/Audio/Effects", "metal_grate_large_02.wav");
-            AudioManager.LoadSound(impactEffects[2], "SceneRts/resources/Audio/Effects", "metal_grate_large_03.wav");
-            AudioManager.LoadSound(impactEffects[3], "SceneRts/resources/Audio/Effects", "metal_grate_large_04.wav");
-            AudioManager.LoadSound(damageEffects[0], "SceneRts/resources/Audio/Effects", "metal_pipe_large_01.wav");
-            AudioManager.LoadSound(damageEffects[1], "SceneRts/resources/Audio/Effects", "metal_pipe_large_02.wav");
-            AudioManager.LoadSound(damageEffects[2], "SceneRts/resources/Audio/Effects", "metal_pipe_large_03.wav");
-            AudioManager.LoadSound(damageEffects[3], "SceneRts/resources/Audio/Effects", "metal_pipe_large_04.wav");
+            AudioManager.LoadSound(forestEffect, resourceEffectsString, "wind_birds_forest_01.wav");
+            AudioManager.LoadSound(heliEffect, resourceEffectsString, "heli.wav");
+            AudioManager.LoadSound(heliDestroyedEffect, resourceEffectsString, "explosion_helicopter_close_01.wav");
+            AudioManager.LoadSound("Tank", resourceEffectsString, "tank_engine.wav");
+            AudioManager.LoadSound("TankDestroyed", resourceEffectsString, "explosion_vehicle_small_close_01.wav");
+            AudioManager.LoadSound("TankShooting", resourceEffectsString, "machinegun-shooting.wav");
+            AudioManager.LoadSound(impactEffects[0], resourceEffectsString, "metal_grate_large_01.wav");
+            AudioManager.LoadSound(impactEffects[1], resourceEffectsString, "metal_grate_large_02.wav");
+            AudioManager.LoadSound(impactEffects[2], resourceEffectsString, "metal_grate_large_03.wav");
+            AudioManager.LoadSound(impactEffects[3], resourceEffectsString, "metal_grate_large_04.wav");
+            AudioManager.LoadSound(damageEffects[0], resourceEffectsString, "metal_pipe_large_01.wav");
+            AudioManager.LoadSound(damageEffects[1], resourceEffectsString, "metal_pipe_large_02.wav");
+            AudioManager.LoadSound(damageEffects[2], resourceEffectsString, "metal_pipe_large_03.wav");
+            AudioManager.LoadSound(damageEffects[3], resourceEffectsString, "metal_pipe_large_04.wav");
 
             AudioManager.AddEffectParams(
                 forestEffect,
@@ -1357,8 +1369,8 @@ namespace TerrainSamples.SceneRts
             tankP1Agent = new TankAIAgent(agentManager, tankAgentType, tankP1, tStats);
             tankP2Agent = new TankAIAgent(agentManager, tankAgentType, tankP2, tStats);
 
-            tankP1Agent.SceneObject.Name = "Tank1";
-            tankP2Agent.SceneObject.Name = "Tank2";
+            tankP1Agent.SceneObject.Name = tank1String;
+            tankP2Agent.SceneObject.Name = tank2String;
 
             // Register events
             tankP1Agent.Moving += Agent_Moving;

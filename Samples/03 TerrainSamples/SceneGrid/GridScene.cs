@@ -19,6 +19,8 @@ namespace TerrainSamples.SceneGrid
     public class GridScene : WalkableScene
     {
         private const string resources = "SceneGrid/Resources";
+        private const string buttonOnString = "button_on.png";
+        private const string buttonOffString = "button_off.png";
         private const string resources3D = "SceneGrid/Resources3D";
 
         private UITextArea txtTitle = null;
@@ -51,8 +53,8 @@ namespace TerrainSamples.SceneGrid
 
         private ModelInstanced troops = null;
         private readonly GridAgentType soldierAgent = null;
-        private readonly Dictionary<Soldier, ModelInstance> soldierModels = new();
-        private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new();
+        private readonly Dictionary<Soldier, ModelInstance> soldierModels = [];
+        private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = [];
         private AnimationPlan soldierCrawl;
         private AnimationPlan soldierWalk;
         private AnimationPlan soldierRun;
@@ -151,12 +153,11 @@ namespace TerrainSamples.SceneGrid
         private void InitializeUI()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeHUD(),
                     InitializeText(),
                     InitializeMinimap(),
-                },
+                ],
                 InitializeUICompleted);
         }
         private async Task InitializeHUD()
@@ -202,7 +203,7 @@ namespace TerrainSamples.SceneGrid
             txtAction = await AddComponentUI<UITextArea, UITextAreaDescription>("txtAction", "txtAction", UITextAreaDescription.Default(textFont), LayerUI);
             txtAction.TextForeColor = Color.Yellow;
 
-            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "button_on.png", "button_off.png");
+            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, buttonOnString, buttonOffString);
             butCloseDesc.ContentPath = resources;
             butCloseDesc.Width = 60;
             butCloseDesc.Height = 20;
@@ -217,8 +218,8 @@ namespace TerrainSamples.SceneGrid
             {
                 ContentPath = resources,
                 TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
+                TextureReleased = buttonOnString,
+                TexturePressed = buttonOffString,
                 Width = 120,
                 Height = 20,
                 Font = buttonsFont,
@@ -231,8 +232,8 @@ namespace TerrainSamples.SceneGrid
             {
                 ContentPath = resources,
                 TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
+                TextureReleased = buttonOnString,
+                TexturePressed = buttonOffString,
                 Width = 150,
                 Height = 20,
                 Font = buttonsFont,
@@ -245,8 +246,8 @@ namespace TerrainSamples.SceneGrid
             {
                 ContentPath = resources,
                 TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
+                TextureReleased = buttonOnString,
+                TexturePressed = buttonOffString,
                 Width = 150,
                 Height = 20,
                 Font = buttonsFont,
@@ -259,8 +260,8 @@ namespace TerrainSamples.SceneGrid
             {
                 ContentPath = resources,
                 TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
+                TextureReleased = buttonOnString,
+                TexturePressed = buttonOffString,
                 Width = 150,
                 Height = 20,
                 Font = buttonsFont,
@@ -273,8 +274,8 @@ namespace TerrainSamples.SceneGrid
             {
                 ContentPath = resources,
                 TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
+                TextureReleased = buttonOnString,
+                TexturePressed = buttonOffString,
                 Width = 150,
                 Height = 20,
                 Font = buttonsFont,
@@ -330,11 +331,10 @@ namespace TerrainSamples.SceneGrid
         private void InitializeResources()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeModels(),
                     InitializeDebug()
-                },
+                ],
                 InitializeResourcesCompleted);
         }
         private async Task InitializeModels()
@@ -1174,7 +1174,7 @@ namespace TerrainSamples.SceneGrid
             RefreshActions();
         }
 
-        private IControllerPath SetPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
+        private SegmentPath SetPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
         {
             var path = FindPath(agentType, origin, destination);
             if (path != null)
@@ -1191,7 +1191,7 @@ namespace TerrainSamples.SceneGrid
         private Soldier PickSoldierNearestToPosition(PickingRay cursorRay, bool enemyOnly)
         {
             Team[] teams = enemyOnly ? skirmishGame.EnemyOf(skirmishGame.CurrentTeam) : skirmishGame.Teams;
-            if (!teams.Any())
+            if (teams.Length == 0)
             {
                 return null;
             }

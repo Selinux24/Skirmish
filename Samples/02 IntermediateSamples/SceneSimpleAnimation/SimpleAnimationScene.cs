@@ -13,6 +13,23 @@ namespace IntermediateSamples.SceneSimpleAnimation
 {
     public class SimpleAnimationScene : Scene
     {
+        private const string SceneResourceDoors = "SceneSimpleAnimation/Resources/Doors";
+        private const string SceneResourceLadder = "SceneSimpleAnimation/Resources/Ladder";
+        private const string SceneResourceSoldier = "SceneSimpleAnimation/Resources/Soldier";
+        private const string SceneResourceRat = "SceneSimpleAnimation/Resources/Rat";
+
+        private const string DefaultString = "default";
+        private const string OpenString = "open";
+        private const string CloseString = "close";
+        private const string RepString = "rep";
+        private const string Idle1String = "idle1";
+        private const string Idle2String = "idle2";
+        private const string StandString = "stand";
+        private const string PullString = "pull";
+        private const string PushString = "push";
+        private const string WalkString = "walk";
+        private const string RunString = "run";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea animText = null;
@@ -85,10 +102,10 @@ namespace IntermediateSamples.SceneSimpleAnimation
             };
         }
 
-        private readonly List<ModelInstanced> animObjects = new();
+        private readonly List<ModelInstanced> animObjects = [];
 
-        private readonly Dictionary<string, AnimationPlan> soldierPaths = new();
-        private readonly Dictionary<string, AnimationPlan> ratPaths = new();
+        private readonly Dictionary<string, AnimationPlan> soldierPaths = [];
+        private readonly Dictionary<string, AnimationPlan> ratPaths = [];
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -160,8 +177,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeLadder(),
                     InitializeLadder2(),
                     InitializeSoldier(),
@@ -170,7 +186,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     InitializeJails(),
                     InitializeFloor(),
                     InitializeDebug()
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
@@ -178,19 +194,19 @@ namespace IntermediateSamples.SceneSimpleAnimation
             float l = 15f;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                    new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
+                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
+                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
+                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
-                    0, 1, 2,
-                    1, 3, 2,
-            };
+            uint[] indices =
+            [
+                0, 1, 2,
+                1, 3, 2,
+            ];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneSimpleAnimation/resources/d_road_asphalt_stripes_diffuse.dds";
@@ -216,7 +232,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     Instances = 2,
                     CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.json"),
+                    Content = ContentDescription.FromFile(SceneResourceLadder, "Dn_Anim_Ladder.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-4f, 1, 0);
@@ -226,21 +242,21 @@ namespace IntermediateSamples.SceneSimpleAnimation
             ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
             var def = new AnimationPath();
-            def.Add("default");
+            def.Add(DefaultString);
             var pull = new AnimationPath();
-            pull.Add("pull");
+            pull.Add(PullString);
             var push = new AnimationPath();
-            push.Add("push");
+            push.Add(PushString);
 
             var ladderPaths = new Dictionary<string, AnimationPlan>
             {
-                { "default", new AnimationPlan(def) },
-                { "pull", new AnimationPlan(pull) },
-                { "push", new AnimationPlan(push) }
+                { DefaultString, new AnimationPlan(def) },
+                { PullString, new AnimationPlan(pull) },
+                { PushString, new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AppendPlan(ladderPaths["pull"]);
-            ladder[1].AnimationController.AppendPlan(ladderPaths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladderPaths[PullString]);
+            ladder[1].AnimationController.AppendPlan(ladderPaths[PullString]);
 
             animObjects.Add(ladder);
         }
@@ -254,7 +270,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.json"),
+                    Content = ContentDescription.FromFile(SceneResourceLadder, "Dn_Anim_Ladder_2.json"),
                 });
 
             var ladder2 = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -265,7 +281,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.json"),
+                    Content = ContentDescription.FromFile(SceneResourceLadder, "Dn_Anim_Ladder_22.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-3f, 1, 0);
@@ -281,24 +297,24 @@ namespace IntermediateSamples.SceneSimpleAnimation
             ladder2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
             var def = new AnimationPath();
-            def.Add("default");
+            def.Add(DefaultString);
             var pull = new AnimationPath();
-            pull.Add("pull");
+            pull.Add(PullString);
             var push = new AnimationPath();
-            push.Add("push");
+            push.Add(PushString);
 
             var ladder2Paths = new Dictionary<string, AnimationPlan>
             {
-                { "default", new AnimationPlan(def) },
-                { "pull", new AnimationPlan(pull) },
-                { "push", new AnimationPlan(push) }
+                { DefaultString, new AnimationPlan(def) },
+                { PullString, new AnimationPlan(pull) },
+                { PushString, new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AppendPlan(ladder2Paths["pull"]);
-            ladder[1].AnimationController.AppendPlan(ladder2Paths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladder2Paths[PullString]);
+            ladder[1].AnimationController.AppendPlan(ladder2Paths[PullString]);
 
-            ladder2[0].AnimationController.AppendPlan(ladder2Paths["push"]);
-            ladder2[1].AnimationController.AppendPlan(ladder2Paths["push"]);
+            ladder2[0].AnimationController.AppendPlan(ladder2Paths[PushString]);
+            ladder2[1].AnimationController.AppendPlan(ladder2Paths[PushString]);
 
             animObjects.Add(ladder);
             animObjects.Add(ladder2);
@@ -313,7 +329,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Soldier", "soldier_anim2.json"),
+                    Content = ContentDescription.FromFile(SceneResourceSoldier, "soldier_anim2.json"),
                 });
 
             soldier[0].Manipulator.SetPosition(0, 0, 0);
@@ -323,28 +339,28 @@ namespace IntermediateSamples.SceneSimpleAnimation
             soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
 
             var p1 = new AnimationPath();
-            p1.Add("idle1");
+            p1.Add(Idle1String);
 
             var p2 = new AnimationPath();
-            p2.Add("idle2");
+            p2.Add(Idle2String);
 
             var p3 = new AnimationPath();
-            p3.Add("stand");
+            p3.Add(StandString);
 
             var p4 = new AnimationPath();
-            p4.Add("walk");
+            p4.Add(WalkString);
 
             var p5 = new AnimationPath();
-            p5.Add("run");
+            p5.Add(RunString);
 
-            soldierPaths.Add("idle1", new AnimationPlan(p1));
-            soldierPaths.Add("idle2", new AnimationPlan(p2));
-            soldierPaths.Add("stand", new AnimationPlan(p3));
-            soldierPaths.Add("walk", new AnimationPlan(p4));
-            soldierPaths.Add("run", new AnimationPlan(p5));
+            soldierPaths.Add(Idle1String, new AnimationPlan(p1));
+            soldierPaths.Add(Idle2String, new AnimationPlan(p2));
+            soldierPaths.Add(StandString, new AnimationPlan(p3));
+            soldierPaths.Add(WalkString, new AnimationPlan(p4));
+            soldierPaths.Add(RunString, new AnimationPlan(p5));
 
-            soldier[0].AnimationController.AppendPlan(soldierPaths["idle1"]);
-            soldier[1].AnimationController.AppendPlan(soldierPaths["idle1"]);
+            soldier[0].AnimationController.AppendPlan(soldierPaths[Idle1String]);
+            soldier[1].AnimationController.AppendPlan(soldierPaths[Idle1String]);
 
             animObjects.Add(soldier);
         }
@@ -358,19 +374,19 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Rat", "rat.json"),
+                    Content = ContentDescription.FromFile(SceneResourceRat, "rat.json"),
                 });
 
             rat[0].Manipulator.SetPosition(2, 0, 0);
             rat[1].Manipulator.SetPosition(2.5f, 0, 5);
 
             var p0 = new AnimationPath();
-            p0.AddLoop("walk");
+            p0.AddLoop(WalkString);
 
-            ratPaths.Add("walk", new AnimationPlan(p0));
+            ratPaths.Add(WalkString, new AnimationPlan(p0));
 
-            rat[0].AnimationController.AppendPlan(ratPaths["walk"]);
-            rat[1].AnimationController.AppendPlan(ratPaths["walk"]);
+            rat[0].AnimationController.AppendPlan(ratPaths[WalkString]);
+            rat[1].AnimationController.AppendPlan(ratPaths[WalkString]);
 
             animObjects.Add(rat);
         }
@@ -384,7 +400,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Dn_Doors.json"),
+                    Content = ContentDescription.FromFile(SceneResourceDoors, "Dn_Doors.json"),
                 });
 
             var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -395,7 +411,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Wall1.json"),
+                    Content = ContentDescription.FromFile(SceneResourceDoors, "Wall1.json"),
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8);
@@ -407,24 +423,24 @@ namespace IntermediateSamples.SceneSimpleAnimation
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
-            def.Add("default");
+            def.Add(DefaultString);
             var open = new AnimationPath();
-            open.Add("open");
+            open.Add(OpenString);
             var close = new AnimationPath();
-            close.Add("close");
+            close.Add(CloseString);
             var rep = new AnimationPath();
-            rep.Add("open");
-            rep.Add("close");
+            rep.Add(OpenString);
+            rep.Add(CloseString);
 
             var doorsPaths = new Dictionary<string, AnimationPlan>
             {
-                { "default", new AnimationPlan(def) },
-                { "open", new AnimationPlan(open) },
-                { "close", new AnimationPlan(close) },
-                { "rep", new AnimationPlan(rep) }
+                { DefaultString, new AnimationPlan(def) },
+                { OpenString, new AnimationPlan(open) },
+                { CloseString, new AnimationPlan(close) },
+                { RepString, new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AppendPlan(doorsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(doorsPaths[RepString]);
 
             animObjects.Add(doors);
         }
@@ -438,7 +454,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Wall2.json"),
+                    Content = ContentDescription.FromFile(SceneResourceDoors, "Wall2.json"),
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8);
@@ -453,7 +469,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSimpleAnimation/Resources/Doors", "Dn_Jails.json"),
+                    Content = ContentDescription.FromFile(SceneResourceDoors, "Dn_Jails.json"),
                 });
 
             doors[0].Manipulator.SetPosition(10, 0, 8);
@@ -461,24 +477,24 @@ namespace IntermediateSamples.SceneSimpleAnimation
             doors[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
-            def.Add("default");
+            def.Add(DefaultString);
             var open = new AnimationPath();
-            open.Add("open");
+            open.Add(OpenString);
             var close = new AnimationPath();
-            close.Add("close");
+            close.Add(CloseString);
             var rep = new AnimationPath();
-            rep.Add("open");
-            rep.Add("close");
+            rep.Add(OpenString);
+            rep.Add(CloseString);
 
             var jailsPaths = new Dictionary<string, AnimationPlan>
             {
-                { "default", new AnimationPlan(def) },
-                { "open", new AnimationPlan(open) },
-                { "close", new AnimationPlan(close) },
-                { "rep", new AnimationPlan(rep) }
+                { DefaultString, new AnimationPlan(def) },
+                { OpenString, new AnimationPlan(open) },
+                { CloseString, new AnimationPlan(close) },
+                { RepString, new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AppendPlan(jailsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(jailsPaths[RepString]);
 
             animObjects.Add(doors);
         }
