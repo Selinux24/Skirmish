@@ -110,7 +110,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var verts = GetPolyVerts(poly);
 
-            if (!verts.Any())
+            if (verts.Length == 0)
             {
                 return center;
             }
@@ -380,16 +380,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="p">Polygon</param>
         /// <returns>Returns a triangle array</returns>
-        public IEnumerable<Triangle> GetDetailTris(Poly p)
+        public List<Triangle> GetDetailTris(Poly p)
         {
+            List<Triangle> tris = [];
+
             var pd = GetDetailMesh(p);
 
             for (int k = 0; k < pd.TriCount; k++)
             {
                 var pmt = DetailTris[pd.TriBase + k];
 
-                yield return GetDetailTri(p, pd.VertBase, pmt);
+                tris.Add(GetDetailTri(p, pd.VertBase, pmt));
             }
+
+            return tris;
         }
 
         /// <summary>
@@ -415,14 +419,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             Data = data;
 
-            if (data.NavVerts.Count > 0) Verts = data.NavVerts.ToArray();
-            if (data.NavPolys.Count > 0) Polys = data.NavPolys.ToArray();
+            if (data.NavVerts.Count > 0) Verts = [.. data.NavVerts];
+            if (data.NavPolys.Count > 0) Polys = [.. data.NavPolys];
 
-            if (data.NavDMeshes.Count > 0) DetailMeshes = data.NavDMeshes.ToArray();
-            if (data.NavDVerts.Count > 0) DetailVerts = data.NavDVerts.ToArray();
-            if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
-            if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
-            if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
+            if (data.NavDMeshes.Count > 0) DetailMeshes = [.. data.NavDMeshes];
+            if (data.NavDVerts.Count > 0) DetailVerts = [.. data.NavDVerts];
+            if (data.NavDTris.Count > 0) DetailTris = [.. data.NavDTris];
+            if (data.NavBvtree.Count > 0) BvTree = [.. data.NavBvtree];
+            if (data.OffMeshCons.Count > 0) OffMeshCons = [.. data.OffMeshCons];
         }
 
         /// <summary>
@@ -504,7 +508,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var verts = GetPolyVerts(poly);
 
-            if (!Utils.PointInPolygon2D(pos, verts.ToArray()))
+            if (!Utils.PointInPolygon2D(pos, [.. verts]))
             {
                 return false;
             }

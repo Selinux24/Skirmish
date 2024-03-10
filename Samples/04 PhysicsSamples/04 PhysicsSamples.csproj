@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="ScenePhysics\Resources\Terrain\collisionTerrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -27,19 +27,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Item indices
         /// </summary>
-        private readonly List<GraphItem> itemIndices = new();
+        private readonly List<GraphItem> itemIndices = [];
         /// <summary>
         /// Debug info
         /// </summary>
-        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new();
+        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = [];
         /// <summary>
         /// Agent query list
         /// </summary>
-        private readonly List<GraphAgentQueryFactory> agentQuerieFactories = new();
+        private readonly List<GraphAgentQueryFactory> agentQuerieFactories = [];
         /// <summary>
         /// Crowd list
         /// </summary>
-        private readonly List<Crowd> crowds = new();
+        private readonly List<Crowd> crowds = [];
 
         /// <inheritdoc/>
         public bool Initialized { get; internal set; }
@@ -136,7 +136,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a list of tiles</returns>
-        private IEnumerable<UpdateTileData> LookupTiles(BoundingBox bbox)
+        private List<UpdateTileData> LookupTiles(BoundingBox bbox)
         {
             var points = bbox.GetVertices();
 
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="positions">Position list</param>
         /// <returns>Returns a list of tiles</returns>
-        private IEnumerable<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
+        private List<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
         {
             var tiles = new List<UpdateTileData>();
 
@@ -237,8 +237,8 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                var tileCfg = Settings.GetTiledConfig(agentQ.Agent, tile.BoundingBox);
-                var tileCacheCfg = Settings.GetTileCacheConfig(agentQ.Agent, bbox);
+                var tileCfg = TilesConfig.GetConfig(Settings, agentQ.Agent, tile.BoundingBox);
+                var tileCacheCfg = TilesConfig.GetTileCacheConfig(Settings, agentQ.Agent, bbox);
 
                 agentQ.NavMesh.BuildTileAtPosition(tile.X, tile.Y, Input, tileCfg, tileCacheCfg);
             }
@@ -318,7 +318,7 @@ namespace Engine.PathFinding.RecastNavigation
             var graphQuery = GetAgentQueryFactory(agent);
             if (graphQuery == null)
             {
-                return Enumerable.Empty<IGraphNode>();
+                return [];
             }
 
             return GraphNode.FindAll(graphQuery.NavMesh);
@@ -340,7 +340,7 @@ namespace Engine.PathFinding.RecastNavigation
             var query = CreateAgentQuery(agent);
             if (query == null)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             var status = query.CalcPath(
@@ -349,7 +349,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (!status.HasFlag(Status.DT_SUCCESS))
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             return result;
@@ -400,7 +400,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Updating?.Invoke(this, new EventArgs());
 
-            BuildTiles(new[] { position }, false);
+            BuildTiles([position], false);
 
             Updated?.Invoke(this, new EventArgs());
 
@@ -409,7 +409,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool CreateAt(BoundingBox bbox)
         {
-            if (LookupTiles(bbox).Any())
+            if (LookupTiles(bbox).Count != 0)
             {
                 return false;
             }
@@ -425,7 +425,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool CreateAt(IEnumerable<Vector3> positions)
         {
-            if (LookupTiles(positions).Any())
+            if (LookupTiles(positions).Count != 0)
             {
                 return false;
             }
@@ -441,14 +441,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool UpdateAt(Vector3 position)
         {
-            if (!LookupTiles(new[] { position }).Any())
+            if (LookupTiles([position]).Count == 0)
             {
                 return false;
             }
 
             Updating?.Invoke(this, new EventArgs());
 
-            BuildTiles(new[] { position }, true);
+            BuildTiles([position], true);
 
             Updated?.Invoke(this, new EventArgs());
 
@@ -457,7 +457,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool UpdateAt(BoundingBox bbox)
         {
-            if (!LookupTiles(bbox).Any())
+            if (LookupTiles(bbox).Count == 0)
             {
                 return false;
             }
@@ -473,7 +473,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool UpdateAt(IEnumerable<Vector3> positions)
         {
-            if (!LookupTiles(positions).Any())
+            if (LookupTiles(positions).Count == 0)
             {
                 return false;
             }
@@ -489,14 +489,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool RemoveAt(Vector3 position)
         {
-            if (!LookupTiles(new[] { position }).Any())
+            if (LookupTiles([position]).Count == 0)
             {
                 return false;
             }
 
             Updating?.Invoke(this, new EventArgs());
 
-            RemoveTiles(new[] { position });
+            RemoveTiles([position]);
 
             Updated?.Invoke(this, new EventArgs());
 
@@ -505,7 +505,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool RemoveAt(BoundingBox bbox)
         {
-            if (!LookupTiles(bbox).Any())
+            if (LookupTiles(bbox).Count == 0)
             {
                 return false;
             }
@@ -521,7 +521,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool RemoveAt(IEnumerable<Vector3> positions)
         {
-            if (!LookupTiles(positions).Any())
+            if (LookupTiles(positions).Count == 0)
             {
                 return false;
             }
@@ -560,7 +560,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var o = new GraphItem()
             {
-                Indices = obstacles.ToArray()
+                Indices = [.. obstacles]
             };
 
             itemIndices.Add(o);
@@ -718,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (!debugInfo.TryGetValue(crowd, out var debugData))
             {
-                debugData = new();
+                debugData = [];
                 debugInfo.Add(crowd, debugData);
             }
 

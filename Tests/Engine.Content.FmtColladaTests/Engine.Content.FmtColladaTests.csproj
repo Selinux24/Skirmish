@@ -6,13 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Tank\Leopard.bmp" />
-    <None Remove="Resources\Tank\Leopard.dae" />
-    <None Remove="Resources\Tank\Leopard.json" />
-    <None Remove="Resources\Tank\Leopard_backed.json" />
-    <None Remove="Resources\Tree1.dae" />
-    <None Remove="Resources\tree1.json" />
-    <None Remove="Resources\Tree\tree1_baked.json" />
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
   <ItemGroup>

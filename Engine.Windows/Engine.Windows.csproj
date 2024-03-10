@@ -17,6 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="engine.ico">
       <Pack>True</Pack>
     </None>

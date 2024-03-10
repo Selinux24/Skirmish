@@ -18,9 +18,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="mesh">Navigation mesh</param>
         /// <returns>Returns a list of graph nodes</returns>
-        public static IEnumerable<GraphNode> FindAll(NavMesh mesh)
+        public static List<GraphNode> FindAll(NavMesh mesh)
         {
-            List<GraphNode> nodes = new();
+            List<GraphNode> nodes = [];
 
             if (mesh.TileCache != null)
             {
@@ -62,31 +62,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="mesh">Navigation mesh</param>
         /// <param name="tile">Tile</param>
         /// <returns>Returns a list of graph nodes</returns>
-        private static IEnumerable<GraphNode> FindAllNodes(NavMesh mesh, MeshTile tile)
+        private static List<GraphNode> FindAllNodes(NavMesh mesh, MeshTile tile)
         {
-            List<GraphNode> nodes = new();
+            List<GraphNode> nodes = [];
+
+            var bse = mesh.GetTileRef(tile);
+            int tileNum = mesh.DecodePolyIdTile(bse);
 
             var polys = tile
                 .GetPolys()
                 .Where(p => p.Type != PolyTypes.OffmeshConnection)
                 .ToArray();
 
-            foreach (var p in polys)
+            var tris = polys.SelectMany(tile.GetDetailTris);
+
+            nodes.Add(new()
             {
-                var bse = mesh.GetTileRef(tile);
-
-                int tileNum = mesh.DecodePolyIdTile(bse);
-                var tileColor = Helper.IntToCol(tileNum, 128);
-
-                var tris = tile.GetDetailTris(p);
-
-                nodes.Add(new()
-                {
-                    Triangles = tris.ToArray(),
-                    TotalCost = 1,
-                    Color = tileColor,
-                });
-            }
+                Id = tileNum,
+                Triangles = [.. tris],
+                TotalCost = 1,
+            });
 
             return nodes;
         }
@@ -145,39 +140,40 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a graph node</returns>
         private static GraphNode FindNode(NavMesh mesh, MeshTile tile, Vector3 point)
         {
+            var bse = mesh.GetTileRef(tile);
+            int tileNum = mesh.DecodePolyIdTile(bse);
+
             var polys = tile
                 .GetPolys()
                 .Where(p => p.Type != PolyTypes.OffmeshConnection)
                 .ToArray();
 
+            List<Triangle> tris = [];
+
             foreach (var p in polys)
             {
-                var tris = tile.GetDetailTris(p);
+                var dtris = tile.GetDetailTris(p);
 
-                if (!Intersection.PointInMesh(point, tris))
+                if (!Intersection.PointInMesh(point, dtris))
                 {
                     continue;
                 }
 
-                var bse = mesh.GetTileRef(tile);
-                int tileNum = mesh.DecodePolyIdTile(bse);
-                var tileColor = Helper.IntToCol(tileNum, 128);
-
-                return new()
-                {
-                    Triangles = tris,
-                    TotalCost = 1,
-                    Color = tileColor,
-                };
+                tris.AddRange(dtris);
             }
 
-            return null;
+            return new()
+            {
+                Id = tileNum,
+                Triangles = tris,
+                TotalCost = 1,
+            };
         }
 
-        /// <summary>
-        /// Node triangle list
-        /// </summary>
-        public IEnumerable<Triangle> Triangles { get; private set; }
+        /// <inheritdoc/>
+        public int Id { get; set; }
+        /// <inheritdoc/>
+        public float TotalCost { get; set; }
         /// <inheritdoc/>
         public Vector3 Center
         {
@@ -193,12 +189,10 @@ namespace Engine.PathFinding.RecastNavigation
                 return center / Math.Max(1, Triangles.Count());
             }
         }
-        /// <inheritdoc/>
-        public float TotalCost { get; set; }
         /// <summary>
-        /// Node color
+        /// Node triangle list
         /// </summary>
-        public Color4 Color { get; set; }
+        public IEnumerable<Triangle> Triangles { get; private set; }
 
         /// <inheritdoc/>
         public bool Contains(Vector3 point)

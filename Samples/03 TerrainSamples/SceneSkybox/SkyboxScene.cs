@@ -24,27 +24,27 @@ namespace TerrainSamples.SceneSkybox
         private readonly Color4 fountainVolumeColor = new(Color.DarkSeaGreen.RGB(), alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
-        private readonly Vector2[] firePositions = new[]
-        {
+        private readonly Vector2[] firePositions =
+        [
             new Vector2(+5, +5),
             new Vector2(-5, +5),
             new Vector2(+5, -5),
             new Vector2(-5, -5),
-        };
-        private readonly Vector3[] obeliskPositions = new[]
-        {
+        ];
+        private readonly Vector3[] obeliskPositions =
+        [
             new Vector3(+100, -0.2f, +100),
             new Vector3(-100, -10, +100),
             new Vector3(+100, -1, -100),
             new Vector3(-100, -1, -100),
-        };
-        private readonly Quaternion[] obeliskRotations = new[]
-        {
+        ];
+        private readonly Quaternion[] obeliskRotations =
+        [
             Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.75f, MathUtil.PiOverTwo*1.03f, 0.45f),
             Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
-        };
+        ];
 
         private readonly Agent walker = new()
         {
@@ -129,8 +129,7 @@ namespace TerrainSamples.SceneSkybox
         private void InitializeResources()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeUI(),
                     InitializeSkydom(),
                     InitializeLakeBottom(),
@@ -143,7 +142,7 @@ namespace TerrainSamples.SceneSkybox
                     InitializeEmitter(),
                     InitializeDecalEmitter(),
                     InitializeDebug(),
-                },
+                ],
                 InitializeResourcesCompleted);
         }
         private async Task InitializeUI()
@@ -214,8 +213,8 @@ namespace TerrainSamples.SceneSkybox
             var textures = new HeightmapTexturesDescription
             {
                 ContentPath = "SceneSkybox/resources/lakebottom",
-                TexturesLR = new[] { "Diffuse.jpg" },
-                NormalMaps = new[] { "Normal.jpg" },
+                TexturesLR = ["Diffuse.jpg"],
+                NormalMaps = ["Normal.jpg"],
                 Scale = 0.0333f,
             };
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
@@ -683,7 +682,8 @@ namespace TerrainSamples.SceneSkybox
 
             foreach (var node in nodes)
             {
-                graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                var color = Helper.IntToCol(node.Id, 128);
+                graphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
 

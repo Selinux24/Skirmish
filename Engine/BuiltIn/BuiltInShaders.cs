@@ -19,43 +19,43 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader list
         /// </summary>
-        private static readonly List<IEngineShader> shaders = new();
+        private static readonly List<IEngineShader> shaders = [];
         /// <summary>
         /// Constant buffer list
         /// </summary>
-        private static readonly List<IEngineConstantBuffer> constantBuffers = new();
+        private static readonly List<IEngineConstantBuffer> constantBuffers = [];
         /// <summary>
         /// Sampler state list
         /// </summary>
-        private static readonly List<EngineSamplerState> samplerStates = new();
+        private static readonly List<EngineSamplerState> samplerStates = [];
         /// <summary>
         /// Vertex shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineVertexShader>> vertexShaders = new();
+        private static readonly List<IBuiltInShader<EngineVertexShader>> vertexShaders = [];
         /// <summary>
         /// Hull shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineHullShader>> hullShaders = new();
+        private static readonly List<IBuiltInShader<EngineHullShader>> hullShaders = [];
         /// <summary>
         /// Domain shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineDomainShader>> domainShaders = new();
+        private static readonly List<IBuiltInShader<EngineDomainShader>> domainShaders = [];
         /// <summary>
         /// Geometry shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineGeometryShader>> geometryShaders = new();
+        private static readonly List<IBuiltInShader<EngineGeometryShader>> geometryShaders = [];
         /// <summary>
         /// Pixel shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EnginePixelShader>> pixelShaders = new();
+        private static readonly List<IBuiltInShader<EnginePixelShader>> pixelShaders = [];
         /// <summary>
         /// Compute shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineComputeShader>> computeShaders = new();
+        private static readonly List<IBuiltInShader<EngineComputeShader>> computeShaders = [];
         /// <summary>
         /// Drawer list
         /// </summary>
-        private static readonly List<IBuiltInDrawer> drawers = new();
+        private static readonly List<IBuiltInDrawer> drawers = [];
 
         /// <summary>
         /// Sampler point

@@ -74,11 +74,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Obstacle requests
         /// </summary>
-        private readonly List<ObstacleRequest> m_reqs = new();
+        private readonly List<ObstacleRequest> m_reqs = [];
         /// <summary>
         /// Compressed tiles to update
         /// </summary>
-        private readonly List<CompressedTile> m_update = new();
+        private readonly List<CompressedTile> m_update = [];
 
         /// <summary>
         /// Constructor
@@ -170,7 +170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="geometry">Input geometry</param>
         /// <param name="cfg">Configuration</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void BuildTileCache(InputGeometry geometry, Config cfg, Action<float> progressCallback)
+        public void BuildTileCache(InputGeometry geometry, TilesConfig cfg, Action<float> progressCallback)
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
@@ -269,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns a tile list</returns>
         public CompressedTile[] GetTiles()
         {
-            return m_tiles?.ToArray() ?? Array.Empty<CompressedTile>();
+            return m_tiles?.ToArray() ?? [];
         }
         /// <summary>
         /// Gets the tiles at the specified coordinates
@@ -300,7 +300,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 tile = tile.Next;
             }
 
-            return tiles.ToArray();
+            return [.. tiles];
         }
         /// <summary>
         /// Gets the tile at coordinates
@@ -659,7 +659,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private void ProcessRequests()
         {
-            if (!m_reqs.Any())
+            if (m_reqs.Count == 0)
             {
                 return;
             }
@@ -825,7 +825,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
-            return results.ToArray();
+            return [.. results];
         }
 
         /// <summary>
@@ -862,7 +862,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             };
 
             // Reset untouched obstacles
-            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && !o.Touched.Any());
+            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && o.Touched.Count == 0);
             foreach (var ob in obs)
             {
                 ProcessRequestAdd(ob);

@@ -64,8 +64,8 @@ namespace TerrainSamples.SceneRts
         private GroundGardener gardener = null;
         private readonly Vector3 windDirection = Vector3.UnitX;
         private readonly float windStrength = 1f;
-        private readonly List<Line3D> oks = new();
-        private readonly List<Line3D> errs = new();
+        private readonly List<Line3D> oks = [];
+        private readonly List<Line3D> errs = [];
 
         private Model heliport = null;
         private Model garage = null;
@@ -110,7 +110,7 @@ namespace TerrainSamples.SceneRts
         private ParticleSystemDescription pSmokeExplosion = null;
         private ParticleManager pManager = null;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new();
+        private readonly Dictionary<string, AnimationPlan> animations = [];
 
         private string heliEffect;
         private IGameAudioEffect heliEffectInstance;
@@ -257,8 +257,8 @@ namespace TerrainSamples.SceneRts
 
         private void InitializeModels()
         {
-            List<Task> loadTasks = new()
-            {
+            List<Task> loadTasks =
+            [
                 InitializeWalker(),
                 InitializeDebug(),
                 InitializeParticles(),
@@ -275,7 +275,7 @@ namespace TerrainSamples.SceneRts
                 InitializeClouds(),
                 InitializeTerrain(),
                 InitializeGardener(),
-            };
+            ];
 
             LoadResourcesAsync(
                 loadTasks,
@@ -454,8 +454,8 @@ namespace TerrainSamples.SceneRts
             {
                 ContentPath = "SceneRts/resources/Flare",
                 GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
+                Flares =
+                [
                     new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
@@ -468,7 +468,7 @@ namespace TerrainSamples.SceneRts
                     new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
+                ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
 
@@ -514,8 +514,8 @@ namespace TerrainSamples.SceneRts
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
                 Content = ContentDescription.FromFile("SceneRts/resources/Leopard", "Leopard.json"),
-                TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
-                TransformDependences = new[] { 1, 2, -1 },
+                TransformNames = ["Barrel-mesh", "Turret-mesh", "Hull-mesh"],
+                TransformDependences = [1, 2, -1],
                 StartsVisible = false,
             };
             tankP1 = await AddComponentAgent<Model, ModelDescription>("Tank1", "Tank1", tDesc);
@@ -762,7 +762,7 @@ namespace TerrainSamples.SceneRts
                 ContentPath = "SceneRts/resources/Terrain/Foliage/Billboard",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass_v.dds" },
+                    VegetationTextures = ["grass_v.dds"],
                     Saturation = 10f,
                     StartRadius = 0f,
                     EndRadius = 50f,
@@ -817,8 +817,8 @@ namespace TerrainSamples.SceneRts
             tank2DestroyedEffect = "Tank2Destroyed";
             tank1ShootingEffect = "Tank1Shooting";
             tank2ShootingEffect = "Tank2Shooting";
-            impactEffects = new[] { "Impact1", "Impact2", "Impact3", "Impact4" };
-            damageEffects = new[] { "Damage1", "Damage2", "Damage3", "Damage4" };
+            impactEffects = ["Impact1", "Impact2", "Impact3", "Impact4"];
+            damageEffects = ["Damage1", "Damage2", "Damage3", "Damage4"];
 
             AudioManager.LoadSound(forestEffect, "SceneRts/resources/Audio/Effects", "wind_birds_forest_01.wav");
             AudioManager.LoadSound(heliEffect, "SceneRts/resources/Audio/Effects", "heli.wav");
@@ -1071,11 +1071,7 @@ namespace TerrainSamples.SceneRts
             Parallel.ForEach(actionList, options, a => a());
 
             var navSettings = BuildSettings.Default;
-            navSettings.Agents = new[]
-            {
-                walkerAgentType,
-                tankAgentType,
-            };
+            navSettings.Agents = [walkerAgentType, tankAgentType];
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
@@ -1310,14 +1306,14 @@ namespace TerrainSamples.SceneRts
             agentManager.AddAgent(0, helicopterAgent);
 
             // Define patrolling check points
-            Vector3[] hCheckPoints = new Vector3[]
-            {
+            Vector3[] hCheckPoints =
+            [
                 new Vector3(+60, 20, +60),
                 new Vector3(+60, 20, -60),
                 new Vector3(-70, 20, +70),
                 new Vector3(-60, 20, -60),
                 new Vector3(+00, 25, +00),
-            };
+            ];
 
             // Define behaviors
             helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
@@ -1378,22 +1374,22 @@ namespace TerrainSamples.SceneRts
             agentManager.AddAgent(1, tankP2Agent);
 
             // Define check-points
-            Vector3[] t1CheckPoints = new Vector3[]
-            {
+            Vector3[] t1CheckPoints =
+            [
                 new Vector3(+60, 0, -60),
                 new Vector3(-60, 0, -60),
                 new Vector3(+60, 0, +60),
                 new Vector3(-70, 0, +70),
-            };
+            ];
 
-            Vector3[] t2CheckPoints = new Vector3[]
-            {
+            Vector3[] t2CheckPoints =
+            [
                 new Vector3(+60, 0, -60),
                 new Vector3(+60, 0, +60),
                 new Vector3(-70, 0, +70),
                 new Vector3(-60, 0, -60),
                 new Vector3(+00, 0, +00),
-            };
+            ];
 
             //Adjust check-points
             for (int i = 0; i < t1CheckPoints.Length; i++)
@@ -1452,11 +1448,11 @@ namespace TerrainSamples.SceneRts
 
             if (oks.Count > 0)
             {
-                terrainLineDrawer.AddPrimitives(Color.Green, oks.ToArray());
+                terrainLineDrawer.AddPrimitives(Color.Green, [.. oks]);
             }
             if (errs.Count > 0)
             {
-                terrainLineDrawer.AddPrimitives(Color.Red, errs.ToArray());
+                terrainLineDrawer.AddPrimitives(Color.Red, [.. errs]);
             }
 
             // Axis
@@ -2354,7 +2350,7 @@ namespace TerrainSamples.SceneRts
                 return;
             }
 
-            List<Vector3> path = new();
+            List<Vector3> path = [];
 
             float pass = curve.Length / 500f;
 
@@ -2365,7 +2361,7 @@ namespace TerrainSamples.SceneRts
                 path.Add(pos);
             }
 
-            curveLineDrawer.SetPrimitives(curvesColor, Line3D.CreateLineList(path.ToArray()));
+            curveLineDrawer.SetPrimitives(curvesColor, Line3D.CreateLineList([.. path]));
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
@@ -2439,7 +2435,8 @@ namespace TerrainSamples.SceneRts
 
                 foreach (var node in nodes)
                 {
-                    terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    var color = Helper.IntToCol(node.Id, 128);
+                    terrainGraphDrawer.AddPrimitives(color, node.Triangles);
                 }
             }
             else
@@ -2455,7 +2452,8 @@ namespace TerrainSamples.SceneRts
 
                     var node = nodes.ToArray()[graphIndex];
 
-                    terrainGraphDrawer.SetPrimitives(node.Color, node.Triangles);
+                    var color = Helper.IntToCol(node.Id, 128);
+                    terrainGraphDrawer.SetPrimitives(color, node.Triangles);
                 }
             }
         }
@@ -2518,16 +2516,19 @@ namespace TerrainSamples.SceneRts
             boxes.AddRange(obelisk.GetInstances().Select(i => i.GetBoundingBox()));
             boxes.AddRange(rocks.GetInstances().Select(i => i.GetBoundingBox()));
 
-            List<Triangle> tris = new();
-            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)));
-            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)));
+            List<Triangle> tris =
+            [
+                .. tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),
+                .. tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),
+            ];
 
-            List<Line3D> lines = new();
+            List<Line3D> lines =
+            [
+                .. Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)),
+                .. Line3D.CreateWiredTriangle(tris),
+            ];
 
-            lines.AddRange(Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
-            lines.AddRange(Line3D.CreateWiredTriangle(tris));
-
-            staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());
+            staticObjLineDrawer.SetPrimitives(objColor, lines);
         }
         private void DEBUGDrawMovingVolumes()
         {
@@ -2541,7 +2542,7 @@ namespace TerrainSamples.SceneRts
             var hsph = helicopter.GetBoundingSphere();
             var t1sph = tankP1.GetBoundingSphere();
             var t2sph = tankP2.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, new[] { hsph, t1sph, t2sph }, 50, 20)));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, [hsph, t1sph, t2sph], 50, 20)));
 
             var hbox = helicopter.GetOrientedBoundingBox();
             var t1box = tankP1.GetOrientedBoundingBox();

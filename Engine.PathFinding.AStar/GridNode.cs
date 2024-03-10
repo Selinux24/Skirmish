@@ -8,42 +8,53 @@ namespace Engine.PathFinding.AStar
     /// <summary>
     /// Grid node
     /// </summary>
-    public class GridNode : IGraphNode
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="ne">North east point</param>
+    /// <param name="nw">North west point</param>
+    /// <param name="sw">South west point</param>
+    /// <param name="se">South east point</param>
+    /// <param name="center">Center point</param>
+    /// <param name="cost">Cost</param>
+    public class GridNode(Vector3 ne, Vector3 nw, Vector3 sw, Vector3 se, Vector3 center, float cost) : IGraphNode
     {
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
-        private readonly Dictionary<Headings, int> nodesDictionary = new();
+        private readonly Dictionary<Headings, int> nodesDictionary = [];
 
         /// <summary>
         /// Connections to this node list
         /// </summary>
-        protected List<GridNode> ConnectedNodes = new();
+        protected List<GridNode> ConnectedNodes = [];
 
         /// <summary>
         /// North West point
         /// </summary>
-        public Vector3 NorthWest { get; private set; }
+        public Vector3 NorthWest { get; private set; } = nw;
         /// <summary>
         /// North East point
         /// </summary>
-        public Vector3 NorthEast { get; private set; }
+        public Vector3 NorthEast { get; private set; } = ne;
         /// <summary>
         /// South West point
         /// </summary>
-        public Vector3 SouthWest { get; private set; }
+        public Vector3 SouthWest { get; private set; } = se;
         /// <summary>
         /// South East point
         /// </summary>
-        public Vector3 SouthEast { get; private set; }
+        public Vector3 SouthEast { get; private set; } = sw;
         /// <inheritdoc/>
-        public Vector3 Center { get; private set; }
+        public int Id { get; private set; }
         /// <inheritdoc/>
-        public float TotalCost { get; set; }
+        public Vector3 Center { get; private set; } = center;
+        /// <inheritdoc/>
+        public float TotalCost { get; set; } = cost;
         /// <summary>
         /// Node state
         /// </summary>
-        public GridNodeStates State { get; set; }
+        public GridNodeStates State { get; set; } = GridNodeStates.Clear;
         /// <summary>
         /// Gets whether the node is connected in all headings
         /// </summary>
@@ -108,7 +119,7 @@ namespace Engine.PathFinding.AStar
 
                 //Process multiple point nodes
                 var resMultiple = MultipleCollision(max, nodeSize, coor0, coor1, coor2, coor3);
-                if (resMultiple.Any())
+                if (resMultiple.Count != 0)
                 {
                     result.AddRange(resMultiple);
                 }
@@ -184,7 +195,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="coor2">Collision info 3</param>
         /// <param name="coor3">Collision info 4</param>
         /// <returns>Returns a node list from multiple collision data</returns>
-        private static IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        private static List<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
         {
             var result = new List<GridNode>();
 
@@ -304,26 +315,6 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="ne">North east point</param>
-        /// <param name="nw">North west point</param>
-        /// <param name="sw">South west point</param>
-        /// <param name="se">South east point</param>
-        /// <param name="center">Center point</param>
-        /// <param name="cost">Cost</param>
-        public GridNode(Vector3 ne, Vector3 nw, Vector3 sw, Vector3 se, Vector3 center, float cost)
-        {
-            NorthEast = ne;
-            NorthWest = nw;
-            SouthEast = sw;
-            SouthWest = se;
-            Center = center;
-            TotalCost = cost;
-            State = GridNodeStates.Clear;
-        }
-
-        /// <summary>
         /// Gets if node has connection with specified position
         /// </summary>
         /// <param name="position">Position</param>
@@ -440,13 +431,13 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()
         {
-            return new[]
-            {
+            return
+            [
                 NorthEast,
                 NorthWest,
                 SouthWest,
                 SouthEast,
-            };
+            ];
         }
 
         /// <inheritdoc/>

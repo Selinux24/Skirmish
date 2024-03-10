@@ -25,31 +25,36 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Navigation vertices
         /// </summary>
-        public List<Vector3> NavVerts { get; set; } = new List<Vector3>();
+        public List<Vector3> NavVerts { get; set; } = [];
         /// <summary>
         /// Navigation polygons
         /// </summary>
-        public List<Poly> NavPolys { get; set; } = new List<Poly>();
+        public List<Poly> NavPolys { get; set; } = [];
         /// <summary>
         /// Navigation detail meshes
         /// </summary>
-        public List<PolyDetail> NavDMeshes { get; set; } = new List<PolyDetail>();
+        public List<PolyDetail> NavDMeshes { get; set; } = [];
         /// <summary>
         /// Navigation detail vertices
         /// </summary>
-        public List<Vector3> NavDVerts { get; set; } = new List<Vector3>();
+        public List<Vector3> NavDVerts { get; set; } = [];
         /// <summary>
         /// Navigation detail triangles
         /// </summary>
-        public List<PolyMeshTriangleIndices> NavDTris { get; set; } = new List<PolyMeshTriangleIndices>();
+        public List<PolyMeshTriangleIndices> NavDTris { get; set; } = [];
         /// <summary>
         /// Navigation BVTree
         /// </summary>
-        public List<BVNode> NavBvtree { get; set; } = new List<BVNode>();
+        public List<BVNode> NavBvtree { get; set; } = [];
         /// <summary>
         /// Off-mesh connections
         /// </summary>
-        public List<OffMeshConnection> OffMeshCons { get; set; } = new List<OffMeshConnection>();
+        public List<OffMeshConnection> OffMeshCons { get; set; } = [];
+       
+        /// <summary>
+        /// Build data
+        /// </summary>
+        internal BuildData BuildData { get; set; }
 
         /// <summary>
         /// Creates the mesh data

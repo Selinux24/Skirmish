@@ -34,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="cfg">Configuration</param>
-        public static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
+        public static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, TilesConfig cfg)
         {
             var chunkyMesh = geometry.ChunkyMesh;
 

@@ -56,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Build data
         /// </summary>
-        private NavMeshBuildData m_buildData;
+        private BuildData m_buildData;
 
         /// <summary>
         /// Mesh tile list
@@ -157,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             const int passCount = 13;
 
             // Generation params.
-            var cfg = settings.GetSoloConfig(agent, bbox);
+            var cfg = SoloConfig.GetConfig(settings, agent, bbox);
 
             var solid = Heightfield.Build(cfg);
             progressCallback?.Invoke(1f / passCount);
@@ -219,10 +219,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 PolyFlags = pmesh.Flags,
                 PolyCount = pmesh.NPolys,
                 Nvp = pmesh.NVP,
-                DetailMeshes = dmesh.Meshes.ToArray(),
-                DetailVerts = dmesh.Vertices.ToArray(),
+                DetailMeshes = [.. dmesh.Meshes],
+                DetailVerts = [.. dmesh.Vertices],
                 DetailVertsCount = dmesh.Vertices.Count,
-                DetailTris = dmesh.Triangles.ToArray(),
+                DetailTris = [.. dmesh.Triangles],
                 DetailTriCount = dmesh.Triangles.Count,
                 OffMeshCon = geometry.GetConnections()?.ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
@@ -245,7 +245,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException($"Bad header. {header.Magic}-{header.Version}");
             }
 
-            var nvParams = BuildSettings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
+            var nvParams = SoloConfig.GetNavMeshParams(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
             nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
@@ -273,7 +273,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
-            var nmParams = settings.GetTiledNavMeshParams(bbox);
+            var nmParams = TilesConfig.GetNavMeshParams(settings, bbox);
             var nm = new NavMesh(nmParams);
 
             int passes = 0;
@@ -300,7 +300,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Init cache
 
                 // Generation params.
-                var cfg = settings.GetTileCacheConfig(agent, bbox);
+                var cfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
 
                 nm.CreateTileCache(geometry, cfg.TileCacheParams);
 
@@ -322,7 +322,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="cfg">Configuration</param>
-        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, Config cfg)
+        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig cfg)
         {
             if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
@@ -337,7 +337,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
-            if (!cid.Any())
+            if (cid.Length == 0)
             {
                 return null; // empty
             }
@@ -397,10 +397,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 PolyFlags = pmesh.Flags,
                 PolyCount = pmesh.NPolys,
                 Nvp = pmesh.NVP,
-                DetailMeshes = dmesh.Meshes.ToArray(),
-                DetailVerts = dmesh.Vertices.ToArray(),
+                DetailMeshes = [.. dmesh.Meshes],
+                DetailVerts = [.. dmesh.Vertices],
                 DetailVertsCount = dmesh.Vertices.Count,
-                DetailTris = dmesh.Triangles.ToArray(),
+                DetailTris = [.. dmesh.Triangles],
                 DetailTriCount = dmesh.Triangles.Count,
                 OffMeshCon = geometry.GetConnections().ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
@@ -416,7 +416,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BuildBvTree = true
             };
 
-            return MeshData.CreateNavMeshData(param);
+            var meshData = MeshData.CreateNavMeshData(param);
+
+            if (cfg.EnableDebugInfo)
+            {
+                meshData.BuildData = new()
+                {
+                    Heightfield = solid,
+                };
+            }
+
+            return meshData;
         }
         /// <summary>
         /// Gets the tile located at the specified position
@@ -589,7 +599,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Tile generation params.
-            var tileParams = settings.GetTileParams(bbox);
+            var tileParams = TilesConfig.GetTileParams(settings, bbox);
 
             float totalTiles = tileParams.Height * tileParams.Width;
             int tile = 0;
@@ -601,7 +611,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
 
                     // Init build configuration
-                    var cfg = settings.GetTiledConfig(agent, tileBounds);
+                    var cfg = TilesConfig.GetConfig(settings, agent, tileBounds);
+                    cfg.EnableDebugInfo = settings.EnableDebugInfo;
 
                     var data = BuildTileMesh(x, y, geometry, cfg);
                     if (data != null)
@@ -633,7 +644,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Tiled generation config</param>
         /// <param name="tileCacheCfg">Tile cache generation config</param>
-        public void BuildTileAtPosition(int x, int y, InputGeometry geometry, Config tiledCfg, Config tileCacheCfg)
+        public void BuildTileAtPosition(int x, int y, InputGeometry geometry, TilesConfig tiledCfg, TilesConfig tileCacheCfg)
         {
             // Remove any previous data (navmesh owns and deletes the data).
             RemoveTiles(x, y);
@@ -1007,7 +1018,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 tile = tile.Next;
             }
 
-            return tiles.ToArray();
+            return [.. tiles];
         }
         /// <summary>
         /// Gets the tile reference of the specified tile
@@ -1406,8 +1417,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            con = conList.ToArray();
-            conarea = conareaList.ToArray();
+            con = [.. conList];
+            conarea = [.. conareaList];
         }
         /// <summary>
         /// Connect internal links
@@ -1467,7 +1478,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var poly = tile.GetPoly(con.Poly);
 
-                var halfExtents = new Vector3(new float[] { con.Rad, tile.Header.WalkableClimb, con.Rad });
+                var halfExtents = new Vector3(con.Rad, tile.Header.WalkableClimb, con.Rad);
 
                 // Find polygon to connect to.
                 int r = FindNearestPolyInTile(tile, con.Start, halfExtents, out Vector3 nearestPt);
@@ -1866,7 +1877,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return polys.ToArray();
+            return [.. polys];
         }
         /// <summary>
         /// Performs a query in the polygons of the specified tile
@@ -1900,7 +1911,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return polys.ToArray();
+            return [.. polys];
         }
         /// <summary>
         /// Finds the nearest polygon in a tile, from the specified position
@@ -2001,21 +2012,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the navigation mesh build data
         /// </summary>
-        /// <returns></returns>
-        internal NavMeshBuildData GetBuildData()
+        internal BuildData GetBuildData(int tx, int ty)
         {
-            return m_buildData;
+            if (Tiles?.Length == 0)
+            {
+                //Solo build
+                return m_buildData;
+            }
+            else if (TileCache == null)
+            {
+                //Tiles build
+                return GetTileAt(tx, ty, 0).Data.BuildData;
+            }
+            else
+            {
+                //Tile cache build
+                return default;
+            }
         }
-    }
-
-    /// <summary>
-    /// Navigation mesh build data
-    /// </summary>
-    struct NavMeshBuildData
-    {
-        /// <summary>
-        /// Height field
-        /// </summary>
-        public Heightfield Heightfield { get; set; }
     }
 }

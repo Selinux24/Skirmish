@@ -96,7 +96,7 @@ namespace TerrainSamples.SceneHeightmap
             MaxSlope = 45,
         };
 
-        private readonly Dictionary<string, AnimationPlan> animations = new();
+        private readonly Dictionary<string, AnimationPlan> animations = [];
 
         private UITextureRenderer bufferDrawer = null;
 
@@ -130,11 +130,10 @@ namespace TerrainSamples.SceneHeightmap
         private void LoadingTaskUI()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeUIAssets()
-                },
+                ],
                 LoadingTaskUICompleted);
         }
         private async Task InitializeTweener()
@@ -381,16 +380,16 @@ namespace TerrainSamples.SceneHeightmap
                 Textures = new HeightmapTexturesDescription()
                 {
                     ContentPath = "Textures",
-                    NormalMaps = new[] { "normal001.dds", "normal002.dds" },
+                    NormalMaps = ["normal001.dds", "normal002.dds"],
 
                     UseAlphaMapping = true,
                     AlphaMap = "alpha001.dds",
-                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+                    ColorTextures = ["dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds"],
 
                     UseSlopes = false,
                     SlopeRanges = new Vector2(0.005f, 0.25f),
-                    TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
-                    TexturesHR = new[] { "dirt0hr.dds" },
+                    TexturesLR = ["dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds"],
+                    TexturesHR = ["dirt0hr.dds"],
 
                     Proportion = 0.25f,
                     Resolution = 100f,
@@ -405,8 +404,8 @@ namespace TerrainSamples.SceneHeightmap
             {
                 ContentPath = @"SceneHeightmap/Resources/Scenery/Flare",
                 GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
+                Flares =
+                [
                     new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
@@ -419,7 +418,7 @@ namespace TerrainSamples.SceneHeightmap
                     new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
+                ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
         }
@@ -538,7 +537,7 @@ namespace TerrainSamples.SceneHeightmap
                 CastShadow = ShadowCastingAlgorihtms.All,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass_v.dds" },
+                    VegetationTextures = ["grass_v.dds"],
                     Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
@@ -550,8 +549,8 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass_d.dds" },
-                    VegetationNormalMaps = new[] { "grass_n.dds" },
+                    VegetationTextures = ["grass_d.dds"],
+                    VegetationNormalMaps = ["grass_n.dds"],
                     Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
@@ -563,7 +562,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass1.png" },
+                    VegetationTextures = ["grass1.png"],
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -586,7 +585,7 @@ namespace TerrainSamples.SceneHeightmap
                 PlantingArea = gardenerArea2,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "flower0.dds" },
+                    VegetationTextures = ["flower0.dds"],
                     Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -597,7 +596,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "flower1.dds" },
+                    VegetationTextures = ["flower1.dds"],
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -608,7 +607,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "flower2.dds" },
+                    VegetationTextures = ["flower2.dds"],
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
@@ -969,13 +968,13 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task SetSoldiersPosition()
         {
-            Vector3[] iPos = new Vector3[]
-            {
+            Vector3[] iPos =
+            [
                 new (4, -2, MathUtil.PiOverFour),
                 new (5, -5, MathUtil.PiOverTwo),
                 new (-4, -2, -MathUtil.PiOverFour),
                 new (-5, -5, -MathUtil.PiOverTwo),
-            };
+            ];
 
             for (int i = 0; i < 4; i++)
             {
@@ -1045,7 +1044,7 @@ namespace TerrainSamples.SceneHeightmap
             nmsettings.CellHeight = 0.2f;
 
             //Agents
-            nmsettings.Agents = new[] { agent };
+            nmsettings.Agents = [agent];
 
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Watershed;
@@ -1636,7 +1635,8 @@ namespace TerrainSamples.SceneHeightmap
 
                     foreach (var node in nodes)
                     {
-                        graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                        var color = Helper.IntToCol(node.Id, 128);
+                        graphDrawer.AddPrimitives(color, node.Triangles);
                     }
                 }
 

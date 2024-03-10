@@ -25,6 +25,6 @@ namespace Engine.PathFinding
         /// Gets the debug information specified by id
         /// </summary>
         /// <param name="id">Information id</param>
-        Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id);
+        Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id, Vector3 point);
     }
 }

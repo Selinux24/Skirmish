@@ -7,9 +7,12 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.ModularScenery.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj" />

@@ -11,6 +11,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         None,
         /// <summary>
+        /// Navigation mesh
+        /// </summary>
+        NavMesh,
+        /// <summary>
         /// Nodes
         /// </summary>
         Nodes,

@@ -28,7 +28,7 @@ namespace TerrainSamples.SceneCrowds
         private Sprite upperPanel = null;
 
         private Agent tankAgentType = null;
-        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new();
+        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = [];
 
         private Graph graph = null;
         private Crowd crowd = null;
@@ -39,7 +39,7 @@ namespace TerrainSamples.SceneCrowds
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new();
+        private readonly Dictionary<string, AnimationPlan> animations = [];
 
         private bool objectsReady = false;
         private bool gameReady = false;
@@ -63,11 +63,10 @@ namespace TerrainSamples.SceneCrowds
         private async Task InitializeUIComponents()
         {
             await LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeCursor(),
                     InitializeUI()
-                },
+                ],
                 InitializeUIComponentsComplete);
         }
         private async Task InitializeCursor()
@@ -111,14 +110,13 @@ namespace TerrainSamples.SceneCrowds
         private async Task InitializeSceneComponents()
         {
             await LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeSkydom(),
                     InitializeTanks(),
                     InitializeTerrain(),
                     InitializeTrees(),
                     InitializeDebug()
-                },
+                ],
                 InitializeSceneComponentsCompleted);
         }
         private async Task InitializeSkydom()
@@ -244,7 +242,7 @@ namespace TerrainSamples.SceneCrowds
             var nmsettings = BuildSettings.Default;
             nmsettings.CellSize = 0.5f;
             nmsettings.CellHeight = 1f;
-            nmsettings.Agents = new[] { tankAgentType };
+            nmsettings.Agents = [tankAgentType];
             nmsettings.PartitionType = SamplePartitionTypes.Layers;
             nmsettings.EdgeMaxError = 1.0f;
             nmsettings.BuildMode = BuildModes.Tiled;
@@ -278,7 +276,8 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
+                var color = Helper.IntToCol(node.Id, 128);
+                terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
         private void StartAnimations()
@@ -486,7 +485,7 @@ namespace TerrainSamples.SceneCrowds
             FindFirstGroundPosition<Triangle>(c3.X, c3.Y, out var r3);
             FindFirstGroundPosition<Triangle>(ct.X, ct.Y, out var rt);
 
-            lines.AddRange(Line3D.CreateWiredSquare(new[] { r0.Position, r1.Position, r2.Position, r3.Position }));
+            lines.AddRange(Line3D.CreateWiredSquare([r0.Position, r1.Position, r2.Position, r3.Position]));
 
             float r = Vector3.Distance(r0.Position, r2.Position) * 0.5f;
             grid.QueryItems(rt.Position, r, out var items);
@@ -569,7 +568,8 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
+                var color = Helper.IntToCol(node.Id, 128);
+                terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
     }

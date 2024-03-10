@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="SceneAnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

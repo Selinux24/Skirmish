@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Linked list of span pools.
         /// </summary>
-        public List<SpanPool> Pools = new();
+        public List<SpanPool> Pools = [];
         /// <summary>
         /// The next free span.
         /// </summary>
@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns a rasterize item collection</returns>
         private static RasterizeItem[] MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris)
         {
-            var res = new List<RasterizeItem>();
+            List<RasterizeItem> res = [];
 
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
@@ -95,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Gets whether the span (min, max) is outside the specified box size

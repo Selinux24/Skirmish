@@ -7,9 +7,12 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.Audio.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />

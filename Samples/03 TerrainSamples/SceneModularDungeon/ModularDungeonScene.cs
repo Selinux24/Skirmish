@@ -61,7 +61,7 @@ namespace TerrainSamples.SceneModularDungeon
         private bool ratActive = false;
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
-        private Vector3[] ratHoles = Array.Empty<Vector3>();
+        private Vector3[] ratHoles = [];
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private Item selectedItem = null;
@@ -79,7 +79,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        private readonly List<ObstacleInfo> obstacles = new();
+        private readonly List<ObstacleInfo> obstacles = [];
         private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
 
         private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
@@ -303,12 +303,11 @@ namespace TerrainSamples.SceneModularDungeon
         private void LoadUI()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeUI(),
                     InitializeMapTexture()
-                },
+                ],
                 LoadUICompleted);
         }
         private async Task InitializeTweener()
@@ -479,10 +478,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
 
-            List<ContentData> contentData = new();
-
-            contentData.AddRange(await ReadAssetFiles(config.AssetFiles));
-            contentData.AddRange(await ReadAssets(config.Assets));
+            List<ContentData> contentData = [.. await ReadAssetFiles(config.AssetFiles), .. await ReadAssets(config.Assets)];
 
             var content = contentData.Select(c => new ContentDescription { ContentData = c });
 
@@ -504,7 +500,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (assets?.Any() != true)
             {
-                return Enumerable.Empty<ContentData>();
+                return [];
             }
 
             var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
@@ -515,7 +511,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (assets?.Any() != true)
             {
-                return Enumerable.Empty<ContentData>();
+                return [];
             }
 
             var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
@@ -614,7 +610,7 @@ namespace TerrainSamples.SceneModularDungeon
             AudioManager.LoadSound(soundWind1, Path.Combine(resourcesFolder, "audio/effects"), "Wind1_S.wav");
             AudioManager.LoadSound(soundWind2, Path.Combine(resourcesFolder, "audio/effects"), "Wind2_S.wav");
             AudioManager.LoadSound(soundWind3, Path.Combine(resourcesFolder, "audio/effects"), "Wind3_S.wav");
-            soundWinds = new[] { soundWind1, soundWind2, soundWind3 };
+            soundWinds = [soundWind1, soundWind2, soundWind3];
 
             ratSoundMove = "mouseMove";
             ratSoundTalk = "mouseTalk";
@@ -1034,7 +1030,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             ratTime -= gameTime.ElapsedSeconds;
 
-            if (!ratHoles.Any())
+            if (ratHoles.Length == 0)
             {
                 return;
             }
@@ -1146,7 +1142,7 @@ namespace TerrainSamples.SceneModularDungeon
                 })
                 .ToList();
 
-            if (items.Any())
+            if (items.Count != 0)
             {
                 //Sort by distance to the picking ray
                 items.Sort((i1, i2) =>
@@ -1226,7 +1222,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(t => t.Actions.Any())
                 .ToArray();
 
-            if (triggers.Any())
+            if (triggers.Length != 0)
             {
                 int index = 1;
                 var msg = string.Join(", ", triggers.Select(t => $"Press {index++} to {t.Name} the {item.Object.Name}"));
@@ -1293,7 +1289,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(t => t.Actions.Any())
                 .ToArray();
 
-            if (triggers.Any())
+            if (triggers.Length != 0)
             {
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
@@ -1599,9 +1595,11 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void StartEntitiesAudioBigFires()
         {
-            List<ModelInstance> fires = new();
-            fires.AddRange(scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Instance));
-            fires.AddRange(scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Instance));
+            List<ModelInstance> fires =
+            [
+                .. scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Instance),
+                .. scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Instance),
+            ];
 
             int index = 0;
             foreach (var item in fires)
@@ -1742,14 +1740,14 @@ namespace TerrainSamples.SceneModularDungeon
             var nodes = GetNodes(agent).OfType<GraphNode>();
             if (!nodes.Any())
             {
-                return new();
+                return [];
             }
 
-            Dictionary<Color4, IEnumerable<Triangle>> res = new();
+            Dictionary<Color4, IEnumerable<Triangle>> res = [];
 
             foreach (var node in nodes)
             {
-                var color = node.Color;
+                var color = Helper.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
                 if (!res.TryGetValue(color, out var value))

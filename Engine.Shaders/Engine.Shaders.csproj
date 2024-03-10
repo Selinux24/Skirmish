@@ -7,10 +7,13 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.Shaders.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Properties\CommonResources.Designer.cs">

@@ -12,7 +12,11 @@ namespace Engine.PathFinding
     /// <summary>
     /// Walkable scene
     /// </summary>
-    public class WalkableScene : Scene
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game instance</param>
+    public class WalkableScene(Game game) : Scene(game)
     {
         /// <summary>
         /// Navigation graph update requested
@@ -47,7 +51,7 @@ namespace Engine.PathFinding
                 return GetGeometryForNavigationGraph(pickable);
             }
 
-            return Enumerable.Empty<T>();
+            return [];
         }
         /// <summary>
         /// Gets the current scene geometry for navigation
@@ -101,14 +105,6 @@ namespace Engine.PathFinding
         /// </summary>
         protected IGraph NavigationGraph { get; private set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game instance</param>
-        public WalkableScene(Game game) : base(game)
-        {
-
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -538,9 +534,9 @@ namespace Engine.PathFinding
                 float offset = agent.Height;
                 newFeetPosition.Y -= offset;
 
-                results = results
+                results = [.. results
                     .Where(r => Vector3.Distance(r.Position, newFeetPosition) < offset)
-                    .OrderBy(r => r.Distance).ToArray();
+                    .OrderBy(r => r.Distance)];
             }
 
             var positions = results.Select(r => r.Position).ToArray();
@@ -811,7 +807,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the path finder grid nodes</returns>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            return NavigationGraph?.GetNodes(agent) ?? Enumerable.Empty<IGraphNode>();
+            return NavigationGraph?.GetNodes(agent) ?? [];
         }
         /// <summary>
         /// Gets the graph debug information

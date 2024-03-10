@@ -6,87 +6,120 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Recast;
 
     /// <summary>
     /// Graph debug helper
     /// </summary>
-    public struct GraphDebug : IGraphDebug
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="graph">Graph</param>
+    /// <param name="agent">Agent</param>
+    public struct GraphDebug(Graph graph, AgentType agent) : IGraphDebug
     {
-        /// <inheritdoc/>
-        public IGraph Graph { get; private set; }
-        /// <inheritdoc/>
-        public AgentType Agent { get; private set; }
-
         /// <summary>
-        /// Navigation mesh build date
+        /// Internal graph
         /// </summary>
-        private NavMeshBuildData buildData;
+        private readonly Graph graph = graph ?? throw new ArgumentNullException(nameof(graph));
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="graph">Graph</param>
-        /// <param name="agent">Agent</param>
-        /// <param name="buildData">Build data</param>
-        public GraphDebug(Graph graph, AgentType agent)
-        {
-            Graph = graph ?? throw new ArgumentNullException(nameof(graph));
-            Agent = agent ?? throw new ArgumentNullException(nameof(agent));
-
-            buildData = graph.CreateAgentQuery(agent)?.GetAttachedNavMesh()?.GetBuildData() ?? throw new ArgumentException("Invalid angent data", nameof(agent));
-        }
+        /// <inheritdoc/>
+        public readonly IGraph Graph { get { return graph; } }
+        /// <inheritdoc/>
+        public AgentType Agent { get; private set; } = agent ?? throw new ArgumentNullException(nameof(agent));
 
         /// <inheritdoc/>
         public readonly IEnumerable<(int Id, string Information)> GetAvailableDebugInformation()
         {
             return Enum
                 .GetValues<GraphDebugTypes>()
-                .Except(new[] { GraphDebugTypes.None })
+                .Except([GraphDebugTypes.None])
                 .Select(v => ((int)v, v.ToString()));
         }
         /// <inheritdoc/>
-        public readonly Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id)
+        public readonly Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id, Vector3 point)
         {
-            return (GraphDebugTypes)id switch
+            var nm = graph.CreateAgentQuery(agent)?.GetAttachedNavMesh();
+            if (nm == null)
             {
-                GraphDebugTypes.Nodes => GetNodes(),
-                GraphDebugTypes.Heightfield => GetHeightfield(false),
-                GraphDebugTypes.WalkableHeightfield => GetHeightfield(true),
-                _ => new()
-            };
+                return [];
+            }
+
+            var debug = (GraphDebugTypes)id;
+
+            if (graph.Settings.BuildMode == BuildModes.Solo)
+            {
+                var buildData = nm.GetBuildData(0, 0);
+
+                return debug switch
+                {
+                    GraphDebugTypes.NavMesh => GetNodes(false),
+                    GraphDebugTypes.Nodes => GetNodes(true),
+                    GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
+                    GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    _ => []
+                };
+            }
+            else if (graph.Settings.BuildMode == BuildModes.Tiled)
+            {
+                NavMesh.GetTileAtPosition(point, graph.Input, graph.Settings, out var tx, out var ty, out _);
+
+                var buildData = nm.GetBuildData(tx, ty);
+
+                return debug switch
+                {
+                    GraphDebugTypes.NavMesh => GetNodes(false),
+                    GraphDebugTypes.Nodes => GetNodes(true),
+                    GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
+                    GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    _ => []
+                };
+            }
+
+            return [];
         }
 
         /// <summary>
         /// Gets the nodes debug information
         /// </summary>
-        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetNodes()
+        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetNodes(bool separateNodes)
         {
-            var nodes = Graph.GetNodes(Agent).OfType<GraphNode>();
+            var nodes = graph.GetNodes(Agent).OfType<GraphNode>();
             if (!nodes.Any())
             {
-                return new();
+                return [];
             }
 
-            return nodes
-                .GroupBy(n => n.Color)
-                .ToDictionary(keySelector => keySelector.Key, elementSelector => elementSelector.SelectMany(gn => gn.Triangles).AsEnumerable());
+            if (separateNodes)
+            {
+                return nodes
+                    .GroupBy(n => Helper.IntToCol(n.Id, 128))
+                    .ToDictionary(keySelector => keySelector.Key, elementSelector => elementSelector.SelectMany(gn => gn.Triangles).AsEnumerable());
+            }
+            else
+            {
+                Color4 color = new Color(0, 192, 255, 255);
+
+                return new([new(color, nodes.SelectMany(n => n.Triangles).AsEnumerable())]);
+            }
         }
         /// <summary>
         /// Gets the height field debug information
         /// </summary>
-        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetHeightfield(bool walkable)
+        private static Dictionary<Color4, IEnumerable<Triangle>> GetHeightfield(Heightfield hf, bool walkable)
         {
-            var hf = buildData.Heightfield;
             if (hf == null)
             {
-                return new();
+                return [];
             }
 
             var orig = hf.BoundingBox.Minimum;
             float cs = hf.CellSize;
             float ch = hf.CellHeight;
 
-            List<Triangle> triangles = new();
+            List<Triangle> walkableTriangles = [];
+            List<Triangle> nullTriangles = [];
+            List<Triangle> multiTriangles = [];
 
             foreach (var (row, col, span) in hf.IterateSpans())
             {
@@ -96,28 +129,50 @@ namespace Engine.PathFinding.RecastNavigation
                 var s = span;
                 do
                 {
-                    if (walkable && s.Area != AreaTypes.RC_WALKABLE_AREA)
-                    {
-                        s = s.Next;
-
-                        continue;
-                    }
-
                     var min = new Vector3(fx, orig.Y + s.SMin * ch, fz);
                     var max = new Vector3(fx + cs, orig.Y + s.SMax * ch, fz + cs);
 
                     var boxTris = TriangulateBox(min, max);
-                    triangles.AddRange(boxTris);
+
+                    if (s.Area == AreaTypes.RC_WALKABLE_AREA)
+                    {
+                        walkableTriangles.AddRange(boxTris);
+                    }
+                    else if (s.Area == AreaTypes.RC_NULL_AREA)
+                    {
+                        nullTriangles.AddRange(boxTris);
+                    }
+                    else
+                    {
+                        multiTriangles.AddRange(boxTris);
+                    }
 
                     s = s.Next;
                 }
                 while (s != null);
             }
 
-            return new()
+            if (walkable)
             {
-                { Color.White, triangles }
-            };
+                Color4 walkableColor = new Color(64, 128, 160, 255);
+                Color4 nullColor = new Color(64, 64, 64, 255);
+                Color4 multiColor = new Color(0, 192, 255, 255);
+
+                return new()
+                {
+                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up) },
+                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up) },
+                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up) },
+                    { Color.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up), .. nullTriangles.Where(t => t.Normal != Vector3.Up), .. multiTriangles.Where(t => t.Normal != Vector3.Up)] },
+                };
+            }
+            else
+            {
+                return new()
+                {
+                    { Color.White, [.. walkableTriangles, ..nullTriangles, .. multiTriangles] },
+                };
+            }
         }
 
         /// <summary>

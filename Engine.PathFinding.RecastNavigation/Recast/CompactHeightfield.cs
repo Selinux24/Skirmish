@@ -37,45 +37,37 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Sample vertex
         /// </summary>
-        struct SampleVertex
+        /// <remarks>
+        /// Constructor
+        /// </remarks>
+        struct SampleVertex(int x, int y, int z, bool added)
         {
             /// <summary>
             /// X position index
             /// </summary>
-            public int X { get; set; }
+            public int X { get; set; } = x;
             /// <summary>
             /// Y position index
             /// </summary>
-            public int Y { get; set; }
+            public int Y { get; set; } = y;
             /// <summary>
             /// Z position index
             /// </summary>
-            public int Z { get; set; }
+            public int Z { get; set; } = z;
             /// <summary>
             /// Sample added
             /// </summary>
-            public bool Added { get; set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public SampleVertex(int x, int y, int z, bool added)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-                Added = added;
-            }
+            public bool Added { get; set; } = added;
         }
 
         /// <summary>
         /// Direction values
         /// </summary>
-        private readonly int[] dirs = { 0, 1, 2, 3 };
+        private readonly int[] dirs = [0, 1, 2, 3];
         /// <summary>
         /// Dirty entries list
         /// </summary>
-        private readonly List<RecastRegionDirtyEntry> dirtyEntries = new();
+        private readonly List<RecastRegionDirtyEntry> dirtyEntries = [];
 
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
@@ -321,7 +313,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the updated stack list</returns>
         private static LevelStackEntry[] AppendStacks(LevelStackEntry[] srcStack, int[] srcReg)
         {
-            var dstStack = new List<LevelStackEntry>();
+            List<LevelStackEntry> dstStack = [];
 
             foreach (var stack in srcStack)
             {
@@ -334,7 +326,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 dstStack.Add(stack);
             }
 
-            return dstStack.ToArray();
+            return [.. dstStack];
         }
         /// <summary>
         /// Sorts the specified edge vertices (vi, vj)
@@ -1010,7 +1002,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int dirp = GridUtils.RotateCW(dir);
             int conp;
 
-            int[] regs = { 0, 0, 0, 0 };
+            int[] regs = [0, 0, 0, 0];
 
             // Combine region and area codes in order to prevent
             // border vertices which are in between two areas to be removed.
@@ -1129,7 +1121,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             bool empty = true;
 
-            var queue = new List<HeightDataItem>();
+            List<HeightDataItem> queue = [];
 
             // Copy the height from the same region, and mark region borders
             // as seed points to fill the rest.
@@ -1158,7 +1150,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            dataItems = queue.ToArray();
+            dataItems = [.. queue];
 
             return empty;
         }
@@ -1271,13 +1263,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // create a bit better triangulation for long thin triangles when there
             // are no internal points.
             var tris = TriangulationHelper.TriangulateHull(verts, hull);
-            if (!tris.Any())
+            if (tris.Length == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
                 Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Length} verts).");
 
                 outVerts = verts;
-                outTris = Array.Empty<Int3>();
+                outTris = [];
 
                 return;
             }
@@ -1306,7 +1298,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
         {
             var verts = polygon.ToList();
-            var hullList = new List<int>(MAX_VERTS);
+            List<int> hullList = new(MAX_VERTS);
 
             int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
@@ -1341,9 +1333,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            hull = hullList.ToArray();
+            hull = [.. hullList];
 
-            return verts.ToArray();
+            return [.. verts];
         }
         /// <summary>
         /// Creates height patch samples
@@ -1355,7 +1347,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="nn">Number of vertices in the edge</param>
         private void CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, out Vector3[] edge, out int nn)
         {
-            var edgeList = new List<Vector3>(MAX_VERTS_PER_EDGE + 1);
+            List<Vector3> edgeList = new(MAX_VERTS_PER_EDGE + 1);
 
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
@@ -1390,7 +1382,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 edgeList.Add(pos);
             }
 
-            edge = edgeList.ToArray();
+            edge = [.. edgeList];
         }
         /// <summary>
         /// Create sample locations in a grid
@@ -1418,7 +1410,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Find sample with most error.
-                var (bestpt, bestd, besti) = FindSampleWithMostError(samples, sampleDist, verts.ToArray(), triList.ToArray());
+                var (bestpt, bestd, besti) = FindSampleWithMostError(samples, sampleDist, [.. verts], [.. triList]);
 
                 // If the max error is within accepted threshold, stop tesselating.
                 if (bestd <= sampleMaxError || besti == -1)
@@ -1435,15 +1427,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 verts.Add(bestpt);
 
                 // Create new triangulation. Full rebuild.
-                var dTris = TriangulateDelaunay(verts.ToArray(), hull);
+                var dTris = TriangulateDelaunay([.. verts], hull);
 
                 triList.Clear();
                 triList.AddRange(dTris);
             }
 
-            newTris = triList.ToArray();
+            newTris = [.. triList];
 
-            return verts.ToArray();
+            return [.. verts];
         }
         /// <summary>
         /// Triangulate hull using delaunay
@@ -1502,7 +1494,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return samples.ToArray();
+            return [.. samples];
         }
         /// <summary>
         /// Finds samples with most error
@@ -1641,7 +1633,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var chs = Spans[hdItem.I];
             hp.Data[(hdItem.X - bounds.X) + (hdItem.Y - bounds.Y) * bounds.Width] = chs.Y;
 
-            return stack.ToArray();
+            return [.. stack];
         }
         /// <summary>
         /// Build the neighbour's item list of the specified height data item
@@ -1697,7 +1689,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Int3[] verts, Rectangle bounds)
         {
             int[] offset =
-            {
+            [
                 +0, +0,
                 -1, -1,
                 +0, -1,
@@ -1707,7 +1699,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 +0, +1,
                 -1, +1,
                 -1, +0,
-            };
+            ];
 
             // Find cell closest to a poly vertex
             var polyIndices = poly.GetVertices();
@@ -1847,7 +1839,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private List<LevelStackEntry> ExpandRegionsFillStack(int level, int[] srcReg)
         {
             // Find cells revealed by the raised level.
-            List<LevelStackEntry> stack = new();
+            List<LevelStackEntry> stack = [];
 
             foreach (var (x, y, i, _) in IterateCells())
             {
@@ -2164,7 +2156,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
                 else
                 {
-                    var stacks = AppendStacks(lvlStacks[sId - 1].ToArray(), srcReg); // copy left overs from last level
+                    var stacks = AppendStacks([.. lvlStacks[sId - 1]], srcReg); // copy left overs from last level
                     lvlStacks[sId].AddRange(stacks);
                 }
 
@@ -2387,7 +2379,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             if (SpanCount <= 0)
             {
-                return Array.Empty<int>();
+                return [];
             }
 
             // Mark boundary cells.
@@ -2501,7 +2493,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private int[] TestConn(int x, int y, int i, int id1, int id2, int[] arr)
         {
-            int[] res = arr.ToArray();
+            int[] res = [.. arr];
 
             var s = Spans[i];
             if (!s.GetCon(id1, out int con1))
@@ -2856,7 +2848,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="flags">Flags to update</param>
         public (int Reg, AreaTypes Area, ContourVertex[] RawVerts)[] BuildCompactCells(int x, int y, int[] flags)
         {
-            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> res = new();
+            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> res = [];
 
             foreach (var (s, i) in IterateCellSpans(x, y))
             {
@@ -2878,7 +2870,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 res.Add((reg, area, verts));
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Walks the contour to find neighbours
@@ -2891,7 +2883,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the neighbour list</returns>
         private int[] FindNeighbours(int col, int row, int spanIndex, int dir, int[] srcReg)
         {
-            var cont = new List<int>();
+            List<int> cont = [];
 
             int startIdx = spanIndex;
             int startDir = dir;
@@ -2913,7 +2905,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (!iterateNext)
                 {
                     // Should not happen.
-                    return Array.Empty<int>();
+                    return [];
                 }
 
                 if (newReg == -1)
@@ -2930,7 +2922,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return cont.ToArray();
+            return [.. cont];
         }
         /// <summary>
         /// Iterates over the specified span
@@ -2987,7 +2979,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the edge contour list</returns>
         private ContourVertex[] WalkContour(int col, int row, int spanIndex, int[] flags)
         {
-            var points = new List<ContourVertex>();
+            List<ContourVertex> points = [];
 
             // Choose the first non-connected edge
             int dir = 0;
@@ -3023,7 +3015,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (ni == -1)
                     {
                         // Should not happen.
-                        return Array.Empty<ContourVertex>();
+                        return [];
                     }
 
                     col = nx;
@@ -3039,7 +3031,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return points.ToArray();
+            return [.. points];
         }
         /// <summary>
         /// Gets the corner edge

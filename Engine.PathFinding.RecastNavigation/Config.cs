@@ -2,12 +2,10 @@
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-
     /// <summary>
-    /// Config
+    /// Build configuration
     /// </summary>
-    public struct Config
+    public abstract class Config
     {
         /// <summary>
         /// Agent type
@@ -103,18 +101,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// Partition type
         /// </summary>
         public SamplePartitionTypes PartitionType { get; set; }
+
         /// <summary>
-        /// Use tile cache
+        /// Enables debug information
         /// </summary>
-        public bool UseTileCache { get; set; }
-        /// <summary>
-        /// Build all tiles from the beginning
-        /// </summary>
-        public bool BuildAllTiles { get; set; }
-        /// <summary>
-        /// Tile cache parameters
-        /// </summary>
-        public TileCacheParams TileCacheParams { get; set; }
+        public bool EnableDebugInfo { get; set; }
 
         /// <summary>
         /// Updates the tile bounds

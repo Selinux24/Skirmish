@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SceneNavMeshTest\Resources\buttons.png" />
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
   <ItemGroup>

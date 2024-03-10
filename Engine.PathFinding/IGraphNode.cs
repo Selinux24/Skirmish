@@ -9,6 +9,10 @@ namespace Engine.PathFinding
     public interface IGraphNode : IValueWithCost
     {
         /// <summary>
+        /// Node id
+        /// </summary>
+        public int Id { get; }
+        /// <summary>
         /// Center position
         /// </summary>
         Vector3 Center { get; }
