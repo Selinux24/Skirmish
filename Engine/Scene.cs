@@ -694,7 +694,7 @@ namespace Engine
         public async Task<TObj> AddComponent<TObj>(TObj component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
             where TObj : ISceneObject
         {
-            if (component == null)
+            if (Equals(component, default(TObj)))
             {
                 throw new ArgumentNullException(nameof(component));
             }

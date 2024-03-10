@@ -329,7 +329,7 @@ namespace Engine.BuiltIn
             }
 
             T vs = vertexShaders.OfType<T>().FirstOrDefault();
-            if (vs != null)
+            if (!Equals(vs, default(T)))
             {
                 return vs;
             }
@@ -352,7 +352,7 @@ namespace Engine.BuiltIn
             }
 
             T hs = hullShaders.OfType<T>().FirstOrDefault();
-            if (hs != null)
+            if (!Equals(hs, default(T)))
             {
                 return hs;
             }
@@ -375,7 +375,7 @@ namespace Engine.BuiltIn
             }
 
             T ds = domainShaders.OfType<T>().FirstOrDefault();
-            if (ds != null)
+            if (!Equals(ds, default(T)))
             {
                 return ds;
             }
@@ -398,7 +398,7 @@ namespace Engine.BuiltIn
             }
 
             T gs = geometryShaders.OfType<T>().FirstOrDefault();
-            if (gs != null)
+            if (!Equals(gs, default(T)))
             {
                 return gs;
             }
@@ -421,7 +421,7 @@ namespace Engine.BuiltIn
             }
 
             T ps = pixelShaders.OfType<T>().FirstOrDefault();
-            if (ps != null)
+            if (!Equals(ps, default(T)))
             {
                 return ps;
             }
@@ -444,7 +444,7 @@ namespace Engine.BuiltIn
             }
 
             T cs = computeShaders.OfType<T>().FirstOrDefault();
-            if (cs != null)
+            if (!Equals(cs, default(T)))
             {
                 return cs;
             }
@@ -467,7 +467,7 @@ namespace Engine.BuiltIn
             }
 
             T dr = drawers.OfType<T>().FirstOrDefault();
-            if (dr != null)
+            if (!Equals(dr, default(T)))
             {
                 return dr;
             }

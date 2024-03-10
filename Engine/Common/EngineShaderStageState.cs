@@ -120,7 +120,7 @@ namespace Engine.Common
         /// <returns>Returns true if the update must change the current resource state in the device</returns>
         public bool Update(int slot, T resource)
         {
-            if (resource == null)
+            if (Equals(resource, default(T)))
             {
                 //Nothing to do
                 return false;

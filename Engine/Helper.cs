@@ -564,7 +564,7 @@ namespace Engine
                 var item1 = enum1.ElementAt(i);
                 var item2 = enum2.ElementAt(i);
 
-                if (item1 == null && item2 == null)
+                if (Equals(item1, default(T)) && Equals(item2, default(T)))
                 {
                     continue;
                 }
