@@ -194,7 +194,7 @@ namespace Engine.UI
             }
             set
             {
-                if (width != value)
+                if (!MathUtil.NearEqual(width, value))
                 {
                     width = value;
 
@@ -211,7 +211,7 @@ namespace Engine.UI
             }
             set
             {
-                if (height != value)
+                if (!MathUtil.NearEqual(height, value))
                 {
                     height = value;
 
@@ -229,7 +229,7 @@ namespace Engine.UI
             }
             set
             {
-                if (scale != value)
+                if (!MathUtil.NearEqual(scale, value))
                 {
                     scale = value;
 
@@ -255,7 +255,7 @@ namespace Engine.UI
             set
             {
                 float v = value % MathUtil.TwoPi;
-                if (rotation != v)
+                if (!MathUtil.NearEqual(rotation, v))
                 {
                     rotation = v;
 
@@ -298,7 +298,7 @@ namespace Engine.UI
             }
             set
             {
-                if (left != value)
+                if (!MathUtil.NearEqual(left, value))
                 {
                     left = value;
 
@@ -323,7 +323,7 @@ namespace Engine.UI
             }
             set
             {
-                if (top != value)
+                if (!MathUtil.NearEqual(top, value))
                 {
                     top = value;
 
@@ -515,7 +515,7 @@ namespace Engine.UI
             }
             set
             {
-                if (alpha != value)
+                if (!MathUtil.NearEqual(alpha, value))
                 {
                     alpha = value;
                 }

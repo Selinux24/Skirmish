@@ -8,12 +8,16 @@ namespace Engine.Animation
     /// <summary>
     /// Animation controller
     /// </summary>
-    public class AnimationController : IHasGameState
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="obj">Skinning data object</param>
+    public class AnimationController(IUseSkinningData obj) : IHasGameState
     {
         /// <summary>
         /// Skinning data object
         /// </summary>
-        private readonly IUseSkinningData skinningDataObject;
+        private readonly IUseSkinningData skinningDataObject = obj;
         /// <summary>
         /// Animation plan
         /// </summary>
@@ -94,15 +98,6 @@ namespace Engine.Animation
         /// On animation plan ending event
         /// </summary>
         public event AnimationControllerEventHandler PlanEnding;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="obj">Skinning data object</param>
-        public AnimationController(IUseSkinningData obj)
-        {
-            skinningDataObject = obj;
-        }
 
         /// <summary>
         /// Calculates an animation plan with initial and end clips, and with a central looping clip
@@ -254,7 +249,7 @@ namespace Engine.Animation
             }
 
             float tunedElapsedTime = elapsedSeconds * TimeDelta;
-            if (tunedElapsedTime == 0f)
+            if (MathUtil.IsZero(tunedElapsedTime))
             {
                 return;
             }

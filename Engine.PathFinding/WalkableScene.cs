@@ -772,7 +772,7 @@ namespace Engine.PathFinding
         /// <returns>Returns true if a position were found</returns>
         public bool GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph, out Vector3 point)
         {
-            if (bsph.Radius == 0f)
+            if (MathUtil.IsZero(bsph.Radius))
             {
                 point = Vector3.Zero;
 

@@ -164,7 +164,7 @@ namespace Engine
         {
             get
             {
-                return PreviuosElevation != Elevation;
+                return !MathUtil.NearEqual(PreviuosElevation, Elevation);
             }
         }
 
@@ -212,15 +212,7 @@ namespace Engine
         {
             PreviuosElevation = NextElevation;
 
-            if (AzimuthOverride != 0f)
-            {
-                Elevation = MeridianAngle;
-                Azimuth = AzimuthOverride;
-
-                //Already normalized
-                NextElevation = Elevation;
-            }
-            else
+            if (MathUtil.IsZero(AzimuthOverride))
             {
                 //Simplified azimuth/elevation calculation.
 
@@ -244,6 +236,14 @@ namespace Engine
                 }
 
                 NextElevation = normalizedElevation;
+            }
+            else
+            {
+                Elevation = MeridianAngle;
+                Azimuth = AzimuthOverride;
+
+                //Already normalized
+                NextElevation = Elevation;
             }
 
             LightDirection = CalcLightDirection(Elevation, Azimuth);

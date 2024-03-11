@@ -185,8 +185,8 @@ namespace Engine.Animation
             return
                 Joint == other.Joint &&
                 Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
-                StartTime == other.StartTime &&
-                EndTime == other.EndTime;
+                MathUtil.NearEqual(StartTime, other.StartTime) &&
+                MathUtil.NearEqual(EndTime, other.EndTime);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)
@@ -196,7 +196,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return Joint.GetHashCode() ^ Keyframes.GetHashCode() ^ StartTime.GetHashCode() ^ EndTime.GetHashCode();
+            return HashCode.Combine(Joint, Keyframes, StartTime, EndTime);
         }
 
         /// <summary>

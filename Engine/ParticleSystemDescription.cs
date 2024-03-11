@@ -473,21 +473,23 @@ namespace Engine
         /// <param name="scale">Scale to apply</param>
         public void Scale(float scale)
         {
-            if (scale != 1f)
+            if (MathUtil.IsOne(scale))
             {
-                MaxHorizontalVelocity *= scale;
-                MinHorizontalVelocity *= scale;
-                MaxVerticalVelocity *= scale;
-                MinVerticalVelocity *= scale;
-
-                Gravity = (Vector3)Gravity * scale;
-                EndVelocity *= scale;
-
-                MinStartSize *= scale;
-                MaxStartSize *= scale;
-                MinEndSize *= scale;
-                MaxEndSize *= scale;
+                return;
             }
+
+            MaxHorizontalVelocity *= scale;
+            MinHorizontalVelocity *= scale;
+            MaxVerticalVelocity *= scale;
+            MinVerticalVelocity *= scale;
+
+            Gravity = (Vector3)Gravity * scale;
+            EndVelocity *= scale;
+
+            MinStartSize *= scale;
+            MaxStartSize *= scale;
+            MinEndSize *= scale;
+            MaxEndSize *= scale;
         }
         /// <summary>
         /// Updates the current particle parameters with the specified particle description

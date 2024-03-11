@@ -8,6 +8,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public readonly struct ObstacleOrientedBox : IObstacle
     {
+        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
+
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix
         /// </summary>
@@ -31,22 +33,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            var yRotation = 0f;
+            if (MathUtil.IsZero(rotation.Angle))
+            {
+                return 0f;
+            }
 
             // Validates the angle and axis
-            if (rotation.Angle != 0)
+            var yRotation = 0f;
+
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
             {
-                Vector3 epsilon = Vector3.Up * 0.0001f;
+                yRotation = rotation.Angle;
+            }
 
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
-                {
-                    yRotation = rotation.Angle;
-                }
-
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
-                {
-                    yRotation = -rotation.Angle;
-                }
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
+            {
+                yRotation = -rotation.Angle;
             }
 
             return yRotation;

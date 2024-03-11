@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -8,6 +9,8 @@ namespace Engine.PathFinding
     [Serializable]
     public abstract class AgentType
     {
+        const string defaultAgentTypeString = "Agent";
+
         /// <summary>
         /// Agent name
         /// </summary>
@@ -22,7 +25,7 @@ namespace Engine.PathFinding
         /// </summary>
         protected AgentType()
         {
-            Name = "Player";
+            Name = defaultAgentTypeString;
             Height = 2.0f;
         }
 
@@ -39,7 +42,7 @@ namespace Engine.PathFinding
             {
                 return
                     other.Name == Name &&
-                    other.Height == Height;
+                    MathUtil.NearEqual(other.Height, Height);
             }
 
             return false;
@@ -50,7 +53,7 @@ namespace Engine.PathFinding
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return (Name ?? "").GetHashCode();
+            return HashCode.Combine(Name, Height);
         }
     }
 }

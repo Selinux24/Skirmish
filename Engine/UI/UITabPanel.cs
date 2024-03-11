@@ -11,16 +11,22 @@ namespace Engine.UI
     /// <summary>
     /// Tab Panel
     /// </summary>
-    public sealed class UITabPanel : UIControl<UITabPanelDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITabPanel(Scene scene, string id, string name) : UIControl<UITabPanelDescription>(scene, id, name)
     {
         /// <summary>
         /// Button list
         /// </summary>
-        private readonly List<UIButton> tabButtons = new();
+        private readonly List<UIButton> tabButtons = [];
         /// <summary>
         /// Panel list
         /// </summary>
-        private readonly List<UIPanel> tabPanels = new();
+        private readonly List<UIPanel> tabPanels = [];
         /// <summary>
         /// Update layout flag
         /// </summary>
@@ -87,7 +93,7 @@ namespace Engine.UI
             }
             set
             {
-                if (tabButtonsAreaSize == value)
+                if (MathUtil.NearEqual(tabButtonsAreaSize, value))
                 {
                     return;
                 }
@@ -245,7 +251,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabButtons.ToArray();
+                return [.. tabButtons];
             }
         }
         /// <summary>
@@ -255,7 +261,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabPanels.ToArray();
+                return [.. tabPanels];
             }
         }
         /// <inheritdoc/>
@@ -294,18 +300,6 @@ namespace Engine.UI
         /// Mouse click
         /// </summary>
         public event UITabPanelEventHandler TabClick;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITabPanel(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override async Task ReadAssets(UITabPanelDescription description)

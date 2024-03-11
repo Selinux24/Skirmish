@@ -362,7 +362,7 @@ namespace Engine.Physics
 
                 // We have the linear amount of motion required to rotate the body.
                 // Now you have to calculate the desired rotation to make it rotate.
-                if (angularMove == 0f)
+                if (MathUtil.IsZero(angularMove))
                 {
                     // There is no angular movement. No rotation.
                     angularChange[i] = Vector3.Zero;
@@ -462,7 +462,7 @@ namespace Engine.Physics
 
             // Calculate the impulse on each contact axis
             Vector3 impulseContact;
-            if (friction == 0f)
+            if (MathUtil.IsZero(friction))
             {
                 // Frictionless impulse
                 impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);

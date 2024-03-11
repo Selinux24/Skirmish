@@ -12,20 +12,22 @@ namespace TerrainSamples.SceneRts.Controllers
         /// <inheritdoc/>
         public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
-            if (HasPath)
+            if (!HasPath)
             {
-                var target = path.GetNextControlPoint(path.Length);
-                var position = manipulator.Position;
-                float dToTarget = (target - position).Length();
+                return;
+            }
 
-                if (dToTarget > ArrivingThreshold)
-                {
-                    MoveToTarget(gameTime, manipulator, dToTarget);
-                }
-                else
-                {
-                    Clear();
-                }
+            var target = path.GetNextControlPoint(path.Length);
+            var position = manipulator.Position;
+            float dToTarget = (target - position).Length();
+
+            if (dToTarget > ArrivingThreshold)
+            {
+                MoveToTarget(gameTime, manipulator, dToTarget);
+            }
+            else
+            {
+                Clear();
             }
         }
         /// <summary>
@@ -47,68 +49,70 @@ namespace TerrainSamples.SceneRts.Controllers
             // A vector pointing from the location to the target
             var desired = (next - position);
             float dToNext = desired.Length();
-            if (dToNext != 0)
+            if (MathUtil.IsZero(dToNext))
             {
-                if (distanceToTarget < ArrivingRadius)
-                {
-                    var m = Map(distanceToTarget, 0, ArrivingRadius, 0, maxSpeed);
-                    desired = Vector3.Normalize(desired) * m;
-                }
-                else
-                {
-                    desired = Vector3.Normalize(desired) * maxSpeed;
-                }
+                return;
+            }
 
-                // Steering = Desired minus Velocity
-                var steer = desired - Velocity;
+            if (distanceToTarget < ArrivingRadius)
+            {
+                var m = Map(distanceToTarget, 0, ArrivingRadius, 0, maxSpeed);
+                desired = Vector3.Normalize(desired) * m;
+            }
+            else
+            {
+                desired = Vector3.Normalize(desired) * maxSpeed;
+            }
 
-                // Limit to maximum steering force
-                steer = steer.Limit(maxForce);
+            // Steering = Desired minus Velocity
+            var steer = desired - Velocity;
 
-                // Update velocity
-                var newVelocity = Velocity + steer;
+            // Limit to maximum steering force
+            steer = steer.Limit(maxForce);
 
-                // Limit speed
-                newVelocity = newVelocity.Limit(maxSpeed);
+            // Update velocity
+            var newVelocity = Velocity + steer;
 
-                //Calculates 2 seconds in future
-                var futureTime = pathTime + 2;
-                var futurePosition = path.GetPosition(futureTime);
-                var futureNormal = path.GetNormal(futureTime);
-                var futureTarget = futurePosition + (futurePosition - position);
+            // Limit speed
+            newVelocity = newVelocity.Limit(maxSpeed);
 
-                //Calculates a delta using the future angle
-                var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, Axis.Y);
-                float futureAngle = Helper.Angle(rotation, futureRotation);
-                float maxRot = MathUtil.PiOverTwo;
-                futureAngle = Math.Min(futureAngle, maxRot);
-                float velDelta = 1.0f - (futureAngle / maxRot);
+            //Calculates 2 seconds in future
+            var futureTime = pathTime + 2;
+            var futurePosition = path.GetPosition(futureTime);
+            var futureNormal = path.GetNormal(futureTime);
+            var futureTarget = futurePosition + (futurePosition - position);
 
-                //Apply delta to velocity
-                newVelocity *= velDelta;
-                Velocity = newVelocity;
+            //Calculates a delta using the future angle
+            var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, Axis.Y);
+            float futureAngle = Helper.Angle(rotation, futureRotation);
+            float maxRot = MathUtil.PiOverTwo;
+            futureAngle = Math.Min(futureAngle, maxRot);
+            float velDelta = 1.0f - (futureAngle / maxRot);
 
-                if (velDelta == 0 && futureAngle != 0)
-                {
-                    //Rotates only
-                    manipulator.RotateTo(futureTarget, futureNormal, Axis.Y, 0.01f);
-                }
-                else
-                {
-                    //Gets new time
-                    var newTime = pathTime + newVelocity.Length();
-                    var newPosition = path.GetPosition(newTime);
-                    var newNormal = path.GetNormal(newTime);
-                    var newTarget = newPosition + (newPosition - position);
+            //Apply delta to velocity
+            newVelocity *= velDelta;
+            Velocity = newVelocity;
 
-                    //Rotate and move
-                    manipulator.SetPosition(newPosition);
-                    manipulator.RotateTo(newTarget, newNormal, Axis.Y, 0.01f);
-                    manipulator.SetNormal(newNormal);
+            if (MathUtil.IsZero(velDelta) && !MathUtil.IsZero(futureAngle))
+            {
+                //Rotates only
+                manipulator.RotateTo(futureTarget, futureNormal, Axis.Y, 0.01f);
+            }
+            else
+            {
+                //Gets new time
+                var newTime = pathTime + newVelocity.Length();
+                var newPosition = path.GetPosition(newTime);
+                var newNormal = path.GetNormal(newTime);
+                var newTarget = newPosition + (newPosition - position);
 
-                    //Updates new time in curve
-                    pathTime = newTime;
-                }
+                //Rotate and move
+                manipulator.SetPosition(newPosition);
+                manipulator.RotateTo(newTarget, newNormal, Axis.Y, 0.01f);
+                manipulator.SetNormal(newNormal);
+
+                //Updates new time in curve
+                pathTime = newTime;
             }
         }
     }

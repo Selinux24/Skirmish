@@ -305,9 +305,9 @@ namespace Engine.UI.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
-                control.Visible = control.Scale != 0;
+                control.Visible = !MathUtil.IsZero(control.Scale);
 
-                if (ftScale.CurrentValue == ftScale.EndValue)
+                if (MathUtil.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
                 {
                     return true;
                 }
@@ -329,9 +329,9 @@ namespace Engine.UI.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
-                control.Visible = control.Scale != 0;
+                control.Visible = !MathUtil.IsZero(control.Scale);
 
-                if (ftScale.CurrentValue == ftScale.EndValue)
+                if (MathUtil.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
                 {
                     var newStart = ftScale.EndValue;
                     var newEnd = ftScale.StartValue;
@@ -357,7 +357,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (ftRotate.CurrentValue == ftRotate.EndValue)
+                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     return true;
                 }
@@ -380,7 +380,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (ftRotate.CurrentValue == ftRotate.EndValue)
+                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     var newStart = ftRotate.StartValue;
                     var newEnd = ftRotate.EndValue;
@@ -406,7 +406,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (ftRotate.CurrentValue == ftRotate.EndValue)
+                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     var newStart = ftRotate.EndValue;
                     var newEnd = ftRotate.StartValue;
@@ -436,7 +436,9 @@ namespace Engine.UI.Tween
 
                 control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
-                if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
+                if (MathUtil.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
+                    MathUtil.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
+                    MathUtil.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
                 {
                     return true;
                 }
@@ -463,7 +465,9 @@ namespace Engine.UI.Tween
 
                 control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
-                if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
+                if (MathUtil.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
+                    MathUtil.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
+                    MathUtil.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
                 {
                     var newStartR = ftColorR.EndValue;
                     var newStartG = ftColorG.EndValue;
@@ -495,9 +499,9 @@ namespace Engine.UI.Tween
                 ftAlpha.Update(d);
 
                 control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
-                control.Visible = control.Alpha != 0;
+                control.Visible = !MathUtil.IsZero(control.Alpha);
 
-                if (ftAlpha.CurrentValue == ftAlpha.EndValue)
+                if (MathUtil.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
                 {
                     return true;
                 }
@@ -519,9 +523,9 @@ namespace Engine.UI.Tween
                 ftAlpha.Update(d);
 
                 control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
-                control.Visible = control.Alpha != 0;
+                control.Visible = !MathUtil.IsZero(control.Alpha);
 
-                if (ftAlpha.CurrentValue == ftAlpha.EndValue)
+                if (MathUtil.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
                 {
                     var newStart = ftAlpha.EndValue;
                     var newEnd = ftAlpha.StartValue;

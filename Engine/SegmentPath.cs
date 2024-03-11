@@ -124,7 +124,7 @@ namespace Engine
                 length += Vector3.Distance(lPath[i], lPath[i - 1]);
             }
 
-            this.path = lPath.ToArray();
+            this.path = [.. lPath];
             Length = length;
         }
         /// <summary>
@@ -134,34 +134,39 @@ namespace Engine
         /// <returns>Returns the position at time</returns>
         public Vector3 GetPosition(float time)
         {
-            if (PositionCount > 0)
-            {
-                if (time == 0) return path[0];
-                if (time >= Length) return path[^1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < path.Length; i++)
-                {
-                    Vector3 segment = path[i] - path[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = path[i - 1] + (Vector3.Normalize(segment) * l);
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return path[0];
+            }
+
+            if (time >= Length)
+            {
+                return path[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < path.Length; i++)
+            {
+                Vector3 segment = path[i] - path[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = path[i - 1] + (Vector3.Normalize(segment) * l);
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
         /// <summary>
         /// Gets path normal in specified time
@@ -179,34 +184,39 @@ namespace Engine
         /// <returns>Returns the next control path at specified time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            if (PositionCount > 0)
-            {
-                if (time == 0) return path[0];
-                if (time >= Length) return path[^1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < path.Length; i++)
-                {
-                    Vector3 segment = path[i] - path[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = path[i];
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return path[0];
+            }
+
+            if (time >= Length)
+            {
+                return path[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < path.Length; i++)
+            {
+                Vector3 segment = path[i] - path[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = path[i];
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
         /// <summary>
         /// Samples current path in a vector array
@@ -215,7 +225,7 @@ namespace Engine
         /// <returns>Returns a vector array</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            var returnPath = new List<Vector3>();
+            List<Vector3> returnPath = [];
 
             float time = 0;
             while (time < Length)
@@ -225,7 +235,7 @@ namespace Engine
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return returnPath;
         }
     }
 }

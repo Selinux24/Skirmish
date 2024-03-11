@@ -204,7 +204,7 @@ namespace Engine.Content.FmtObj
             matContent.EmissiveColor = mat.Ke;
             matContent.Shininess = mat.Ni;
 
-            matContent.IsTransparent = mat.D != 1;
+            matContent.IsTransparent = mat.D < 1f;
 
             matContent.NormalMapTexture = mat.MapBump;
 

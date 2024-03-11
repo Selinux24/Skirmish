@@ -10,7 +10,13 @@ namespace Engine
     /// <summary>
     /// Axis aligned bounding cylinder
     /// </summary>
-    public struct BoundingCylinder : IEquatable<BoundingCylinder>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="center">Center position</param>
+    /// <param name="radius">Radius</param>
+    /// <param name="height">Height</param>
+    public struct BoundingCylinder(Vector3 center, float radius, float height) : IEquatable<BoundingCylinder>
     {
         /// <summary>
         /// Constructs a BoundingCylinder that fully contains the given points.
@@ -63,15 +69,15 @@ namespace Engine
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; set; }
+        public float Radius { get; set; } = radius;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; }
+        public float Height { get; set; } = height;
         /// <summary>
         /// Center
         /// </summary>
-        public Vector3 Center { get; set; }
+        public Vector3 Center { get; set; } = center;
         /// <summary>
         /// Base position
         /// </summary>
@@ -91,19 +97,6 @@ namespace Engine
             {
                 return new Vector3(Center.X, Center.Y + (Height * 0.5f), Center.Z);
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="center">Center position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
-        public BoundingCylinder(Vector3 center, float radius, float height)
-        {
-            Center = center;
-            Radius = radius;
-            Height = height;
         }
 
         /// <summary>
@@ -134,13 +127,13 @@ namespace Engine
                 return ContainmentType.Disjoint;
             }
 
-            if (distance == Radius)
+            if (MathUtil.NearEqual(distance, Radius))
             {
                 // The point is into the cylinder radius, and between cap and base distances.
                 return ContainmentType.Intersects;
             }
 
-            if (distOnAxis == hh)
+            if (MathUtil.NearEqual(distOnAxis, hh))
             {
                 // The point is in the cap or base.
                 return ContainmentType.Intersects;
@@ -175,8 +168,8 @@ namespace Engine
         {
             return
                 left.Center == right.Center &&
-                left.Radius == right.Radius &&
-                left.Height == right.Height;
+                MathUtil.NearEqual(left.Radius, right.Radius) &&
+                MathUtil.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
         public static bool operator !=(BoundingCylinder left, BoundingCylinder right)

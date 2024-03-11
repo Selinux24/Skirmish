@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -17,7 +18,7 @@ namespace Engine
         /// <summary>
         /// The collection of curve keys.
         /// </summary>
-        public CurveKeyCollection Keys { get; private set; } = new CurveKeyCollection();
+        public CurveKeyCollection Keys { get; private set; } = [];
         /// <summary>
         /// Defines how to handle weighting values that are greater than the last control point in the curve.
         /// </summary>
@@ -193,7 +194,7 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (position != first.Position)
+            if (!MathUtil.NearEqual(position, first.Position))
             {
                 //start -> end / start -> end
                 int cycle = GetNumberOfCycle(first, last, position);
@@ -215,7 +216,7 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (position != first.Position)
+            if (!MathUtil.NearEqual(position, first.Position))
             {
                 //make the curve continue (with no step) so must up the curve each cycle of delta(value)
                 int cycle = GetNumberOfCycle(first, last, position);
@@ -237,13 +238,13 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (position != first.Position)
+            if (!MathUtil.NearEqual(position, first.Position))
             {
                 //go back on curve from end and target start 
                 // start-> end / end -> start
                 int cycle = GetNumberOfCycle(first, last, position);
                 float virtualPos;
-                if (0 == cycle % 2f)
+                if (0 == cycle % 2)
                 {
                     //if pair
                     virtualPos = position - (cycle * (last.Position - first.Position));

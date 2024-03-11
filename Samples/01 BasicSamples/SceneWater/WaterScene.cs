@@ -57,7 +57,7 @@ namespace BasicSamples.SceneWater
                 InitializeSky(),
                 InitializeWater(),
                 InitializeSeaBottom(),
-            ], 
+            ],
             (res) => { res.ThrowExceptions(); });
         }
         private async Task InitializeLensFlare()
@@ -198,8 +198,8 @@ namespace BasicSamples.SceneWater
 
         private void ToggleFog()
         {
-            Lights.FogStart = Lights.FogStart == 0f ? fogStart : 0f;
-            Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
+            Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
     }
 }

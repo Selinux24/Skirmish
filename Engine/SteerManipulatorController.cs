@@ -59,7 +59,7 @@ namespace Engine
             // A vector pointing from the location to the target
             var desired = next - position;
             float dToNext = desired.Length();
-            if (dToNext == 0)
+            if (MathUtil.IsZero(dToNext))
             {
                 return;
             }

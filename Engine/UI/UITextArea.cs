@@ -9,7 +9,13 @@ namespace Engine.UI
     /// <summary>
     /// Text area
     /// </summary>
-    public sealed class UITextArea : UIControl<UITextAreaDescription>, IScrollable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextArea(Scene scene, string id, string name) : UIControl<UITextAreaDescription>(scene, id, name), IScrollable
     {
         /// <summary>
         /// Button text drawer
@@ -292,17 +298,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextArea(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -493,8 +488,8 @@ namespace Engine.UI
             var absRect = base.GetRenderArea(false);
 
             //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
-            if ((GrowControlWithText && !HasParent) || absRect.Width == 0) absRect.Width = Game.Form.RenderWidth - absRect.Left;
-            if ((GrowControlWithText && !HasParent) || absRect.Height == 0) absRect.Height = Game.Form.RenderHeight - absRect.Top;
+            if ((GrowControlWithText && !HasParent) || MathUtil.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
+            if ((GrowControlWithText && !HasParent) || MathUtil.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
             return applyPadding ? Padding.Apply(absRect) : absRect;
         }
@@ -616,8 +611,8 @@ namespace Engine.UI
             var minHeight = textDrawer?.GetLineHeight() ?? 0;
 
             //Set sizes if grow control with text or sizes not setted
-            if (GrowControlWithText || Width == 0) Width = size.X;
-            if (GrowControlWithText || Height == 0) Height = size.Y == 0 ? minHeight : size.Y;
+            if (GrowControlWithText || MathUtil.IsZero(Width)) Width = size.X;
+            if (GrowControlWithText || MathUtil.IsZero(Height)) Height = MathUtil.IsZero(size.Y) ? minHeight : size.Y;
         }
     }
 }

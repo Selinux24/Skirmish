@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -8,6 +9,8 @@ namespace Engine.PathFinding.RecastNavigation
     [Serializable]
     public class Agent : AgentType
     {
+        private const string agentDefaultString = "Agent";
+
         /// <summary>
         /// Default agent
         /// </summary>
@@ -17,7 +20,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new Agent()
                 {
-                    Name = "Default",
+                    Name = agentDefaultString,
                     Height = 2.0f,
                     Radius = 0.6f,
                     MaxClimb = 0.9f,
@@ -57,9 +60,9 @@ namespace Engine.PathFinding.RecastNavigation
             if (obj is Agent other)
             {
                 return
-                    other.Radius == Radius &&
-                    other.MaxClimb == MaxClimb &&
-                    other.MaxSlope == MaxSlope;
+                    MathUtil.NearEqual(other.Radius, Radius) &&
+                    MathUtil.NearEqual(other.MaxClimb, MaxClimb) &&
+                    MathUtil.NearEqual(other.MaxSlope, MaxSlope);
             }
 
             return false;
@@ -67,7 +70,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return HashCode.Combine(base.GetHashCode(), Radius, MaxClimb, MaxSlope);
         }
     }
 }

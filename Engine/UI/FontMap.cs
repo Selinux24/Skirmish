@@ -43,7 +43,7 @@ namespace Engine.UI
                 float diffX = GetDeltaX(horizontalAlign, rect.Width, lineSize.X);
                 float diffY = GetDeltaY(verticalAlign, rect.Height, textSize.Y);
 
-                if (diffX == 0 && diffY == 0)
+                if (MathUtil.IsZero(diffX) && MathUtil.IsZero(diffY))
                 {
                     //No changes, add the line and skip the update
                     res.AddRange(l);
@@ -76,7 +76,7 @@ namespace Engine.UI
 
             for (int i = 0; i < verts.Length; i += 4)
             {
-                if (verts[i].Position.X == 0)
+                if (MathUtil.IsZero(verts[i].Position.X))
                 {
                     if (line.Count > 0)
                     {

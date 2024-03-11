@@ -2057,7 +2057,7 @@ namespace Engine.Common
             float angle = Helper.AngleSigned(Vector3.Up, rotNormal);
 
             Vector3 axis;
-            if (angle == MathUtil.Pi)
+            if (MathUtil.NearEqual(angle, MathUtil.Pi))
             {
                 //Parallel negative axis: Vector3.Down
                 axis = Vector3.Left;

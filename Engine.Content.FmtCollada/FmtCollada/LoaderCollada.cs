@@ -1121,7 +1121,7 @@ namespace Engine.Content.FmtCollada
                 for (int v = 0; v < n; v++)
                 {
                     float weightValue = weights.ElementAt(skin.VertexWeights.V[index + weightsOffset]);
-                    if (weightValue != 0f)
+                    if (!MathUtil.IsZero(weightValue))
                     {
                         string jointName = joints.ElementAt(skin.VertexWeights.V[index + jointsOffset]);
 

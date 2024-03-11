@@ -88,14 +88,12 @@ namespace Engine
         /// <returns>Returns the clamped value</returns>
         private static float InverseLerp(float a, float b, float value)
         {
-            if (a != b)
-            {
-                return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
-            }
-            else
+            if (MathUtil.NearEqual(a, b))
             {
                 return 0.0f;
             }
+
+            return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
         }
 
         /// <summary>

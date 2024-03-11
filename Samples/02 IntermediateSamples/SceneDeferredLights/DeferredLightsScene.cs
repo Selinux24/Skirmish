@@ -46,7 +46,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
         private bool onlyModels = true;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new();
+        private readonly Dictionary<string, AnimationPlan> animations = [];
 
         private bool gameReady = false;
 
@@ -82,11 +82,10 @@ namespace IntermediateSamples.SceneDeferredLights
         private async Task LoadingTaskUI()
         {
             await LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeCursor(),
                     InitializeUIComponents()
-                },
+                ],
                 LoadingTaskUICompleted);
         }
         private async Task InitializeCursor()
@@ -137,15 +136,14 @@ namespace IntermediateSamples.SceneDeferredLights
         private async Task LoadingTaskObjects()
         {
             await LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeAndTrace(InitializeSkydom),
                     InitializeAndTrace(InitializeHelicopters),
                     InitializeAndTrace(InitializeTerrain),
                     InitializeAndTrace(InitializeGardener),
                     InitializeAndTrace(InitializeTrees),
                     InitializeDebug()
-                },
+                ],
                 LoadingTaskObjectsCompleted);
         }
         private async Task InitializeSkydom()
@@ -212,7 +210,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 ContentPath = "SceneDeferredLights/Resources/Vegetation",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass.png" },
+                    VegetationTextures = ["grass.png"],
                     Saturation = 20f,
                     StartRadius = 0f,
                     EndRadius = 50f,
@@ -425,8 +423,8 @@ namespace IntermediateSamples.SceneDeferredLights
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
-                Lights.FogStart = Lights.FogStart == 0f ? far * fogStart : 0f;
-                Lights.FogRange = Lights.FogRange == 0f ? far * fogRange : 0f;
+                Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? far * fogStart : 0f;
+                Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
 
             if (Game.Input.KeyJustReleased(Keys.G))

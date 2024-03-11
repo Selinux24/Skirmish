@@ -1517,7 +1517,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            if (!inDistance.HasValue || MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1551,7 +1551,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            if (!inDistance.HasValue || MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1592,13 +1592,13 @@ namespace Engine.Common
 
             bool intoSegmentBounds = false;
 
-            if (inDistance.HasValue && Math.Abs(inDistance.Value) != float.MaxValue && inDistance <= rayLength)
+            if (inDistance.HasValue && !MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
             {
                 enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
                 intoSegmentBounds = true;
             }
 
-            if (outDistance.HasValue && Math.Abs(outDistance.Value) != float.MaxValue && outDistance <= rayLength)
+            if (outDistance.HasValue && !MathUtil.NearEqual(Math.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
             {
                 exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
                 intoSegmentBounds = true;

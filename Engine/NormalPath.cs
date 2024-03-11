@@ -90,34 +90,39 @@ namespace Engine
         /// <returns>Returns the position at time</returns>
         public Vector3 GetPosition(float time)
         {
-            if (PositionCount > 0)
-            {
-                if (time == 0) return checkPoints[0];
-                if (time >= Length) return checkPoints[^1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < checkPoints.Length; i++)
-                {
-                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = checkPoints[i - 1] + (Vector3.Normalize(segment) * l);
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return checkPoints[0];
+            }
+
+            if (time >= Length)
+            {
+                return checkPoints[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < checkPoints.Length; i++)
+            {
+                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = checkPoints[i - 1] + (Vector3.Normalize(segment) * l);
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
         /// <summary>
         /// Gets path normal in specified time
@@ -126,34 +131,39 @@ namespace Engine
         /// <returns>Returns path normal</returns>
         public Vector3 GetNormal(float time)
         {
-            if (NormalCount > 0)
-            {
-                if (time == 0) return normals[0];
-                if (time >= Length) return normals[^1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < checkPoints.Length; i++)
-                {
-                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = Vector3.Lerp(normals[i], normals[i - 1], l / segmentLength);
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (NormalCount <= 0)
             {
                 return Vector3.Up;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return normals[0];
+            }
+
+            if (time >= Length)
+            {
+                return normals[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < checkPoints.Length; i++)
+            {
+                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = Vector3.Lerp(normals[i], normals[i - 1], l / segmentLength);
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
         /// <summary>
         /// Gets the next control point at specified time
@@ -162,34 +172,39 @@ namespace Engine
         /// <returns>Returns the next control path at specified time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            if (PositionCount > 0)
-            {
-                if (time == 0) return checkPoints[0];
-                if (time >= Length) return checkPoints[^1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < checkPoints.Length; i++)
-                {
-                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = checkPoints[i];
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return checkPoints[0];
+            }
+
+            if (time >= Length)
+            {
+                return checkPoints[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < checkPoints.Length; i++)
+            {
+                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = checkPoints[i];
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
         /// <summary>
         /// Samples current path in a vector array
@@ -198,7 +213,7 @@ namespace Engine
         /// <returns>Returns a vector array</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            var returnPath = new List<Vector3>();
+            List<Vector3> returnPath = [];
 
             float time = 0;
             while (time < Length)
@@ -208,7 +223,7 @@ namespace Engine
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return returnPath;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Engine.PathFinding.RecastNavigation;
+using SharpDX;
 using System;
 
 namespace TerrainSamples.SceneModularDungeon
@@ -17,7 +18,7 @@ namespace TerrainSamples.SceneModularDungeon
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return HashCode.Combine(base.GetHashCode, Velocity, VelocitySlow);
         }
         public override bool Equals(object obj)
         {
@@ -26,8 +27,8 @@ namespace TerrainSamples.SceneModularDungeon
             if (obj is Player other)
             {
                 return
-                    other.Velocity == Velocity &&
-                    other.VelocitySlow == VelocitySlow;
+                    MathUtil.NearEqual(other.Velocity, Velocity) &&
+                    MathUtil.NearEqual(other.VelocitySlow, VelocitySlow);
             }
 
             return false;

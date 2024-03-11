@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,7 +44,7 @@ namespace Engine.Animation
         {
             return
                 Name == other.Name &&
-                Duration == other.Duration &&
+                MathUtil.NearEqual(Duration, other.Duration) &&
                 Helper.CompareEnumerables(Animations, other.Animations);
         }
         /// <inheritdoc/>

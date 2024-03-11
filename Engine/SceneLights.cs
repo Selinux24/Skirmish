@@ -395,8 +395,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
-                    float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
+                    float f1 = l1.Radius / (MathUtil.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtil.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -433,8 +433,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
-                    float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
+                    float f1 = l1.Radius / (MathUtil.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtil.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });

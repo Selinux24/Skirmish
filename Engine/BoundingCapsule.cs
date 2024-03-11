@@ -10,7 +10,13 @@ namespace Engine
     /// <summary>
     /// Axis aligned bounding capsule
     /// </summary>
-    public struct BoundingCapsule : IEquatable<BoundingCapsule>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="center">Center position</param>
+    /// <param name="radius">Radius</param>
+    /// <param name="height">Height</param>
+    public struct BoundingCapsule(Vector3 center, float radius, float height) : IEquatable<BoundingCapsule>
     {
         /// <summary>
         /// Constructs a BoundingCapsule that fully contains the given points.
@@ -63,15 +69,15 @@ namespace Engine
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; set; }
+        public float Radius { get; set; } = radius;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; }
+        public float Height { get; set; } = height;
         /// <summary>
         /// Center
         /// </summary>
-        public Vector3 Center { get; set; }
+        public Vector3 Center { get; set; } = center;
         /// <summary>
         /// Base position
         /// </summary>
@@ -91,19 +97,6 @@ namespace Engine
             {
                 return new Vector3(Center.X, Center.Y + (Height * 0.5f), Center.Z);
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="center">Center position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
-        public BoundingCapsule(Vector3 center, float radius, float height)
-        {
-            Center = center;
-            Radius = radius;
-            Height = height;
         }
 
         /// <summary>
@@ -159,8 +152,8 @@ namespace Engine
         {
             return
                 left.Center == right.Center &&
-                left.Radius == right.Radius &&
-                left.Height == right.Height;
+                MathUtil.NearEqual(left.Radius, right.Radius) &&
+                MathUtil.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
         public static bool operator !=(BoundingCapsule left, BoundingCapsule right)

@@ -15,21 +15,23 @@ namespace Engine
         /// <returns>Returns a new particle system parameters set scaled to the specified value</returns>
         public static ParticleSystemParams operator *(ParticleSystemParams p, float scale)
         {
-            if (scale != 1f)
+            if (MathUtil.IsOne(scale))
             {
-                p.MaxHorizontalVelocity *= scale;
-                p.MinHorizontalVelocity *= scale;
-                p.MaxVerticalVelocity *= scale;
-                p.MinVerticalVelocity *= scale;
-
-                p.Gravity *= scale;
-                p.EndVelocity *= scale;
-
-                p.MinStartSize *= scale;
-                p.MaxStartSize *= scale;
-                p.MinEndSize *= scale;
-                p.MaxEndSize *= scale;
+                return p;
             }
+
+            p.MaxHorizontalVelocity *= scale;
+            p.MinHorizontalVelocity *= scale;
+            p.MaxVerticalVelocity *= scale;
+            p.MinVerticalVelocity *= scale;
+
+            p.Gravity *= scale;
+            p.EndVelocity *= scale;
+
+            p.MinStartSize *= scale;
+            p.MaxStartSize *= scale;
+            p.MinEndSize *= scale;
+            p.MaxEndSize *= scale;
 
             return p;
         }

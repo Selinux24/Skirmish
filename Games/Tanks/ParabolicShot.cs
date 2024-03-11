@@ -80,7 +80,7 @@ namespace Tanks
         public float GetTimeOfFlight(Vector3 shooterPosition, Vector3 targetPosition)
         {
             float h = shooterPosition.Y - targetPosition.Y;
-            if (h == 0)
+            if (MathUtil.IsZero(h))
             {
                 return 2f * verticalVelocity / g;
             }

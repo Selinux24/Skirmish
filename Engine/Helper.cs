@@ -449,7 +449,7 @@ namespace Engine
         /// <returns>Returns next pair</returns>
         public static int NextPair(this int num)
         {
-            return num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
+            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num + 1 : num;
         }
         /// <summary>
         /// Gets next odd of even number, if even
@@ -458,7 +458,7 @@ namespace Engine
         /// <returns>Returns next odd</returns>
         public static int NextOdd(this int num)
         {
-            return num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
+            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num : num + 1;
         }
         /// <summary>
         /// Calculates the next highest power of two.
@@ -860,7 +860,7 @@ namespace Engine
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis = Axis.None)
         {
-            if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
+            if (MathUtil.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target))))
             {
                 up = Vector3.Left;
             }
@@ -913,7 +913,7 @@ namespace Engine
         public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
         {
             float angle = Angle(from, to);
-            if (angle == 0f)
+            if (MathUtil.IsZero(angle))
             {
                 return to;
             }

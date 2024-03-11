@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -677,7 +676,7 @@ namespace Engine.PathFinding.RecastNavigation
             float s = Helper.RandomGenerator.NextFloat(0, 1);
             float t = Helper.RandomGenerator.NextFloat(0, 1);
 
-            List<float> areas = new();
+            List<float> areas = [];
 
             // Calc triangle areas
             float areasum = 0.0f;
@@ -836,12 +835,12 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            if (dmin == float.MaxValue)
+            if (dmin < float.MaxValue)
             {
-                return -1;
+                return dmin;
             }
 
-            return dmin;
+            return -1;
         }
 
         /// <summary>
@@ -959,7 +958,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (orig == Vector3.Zero)
             {
-                return verts.ToArray();
+                return [.. verts];
             }
 
             var res = new List<Vector3>();
@@ -968,7 +967,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = verts[j] + orig;
 
-                if (cellHeight != 0)
+                if (!MathUtil.IsZero(cellHeight))
                 {
                     p.Y += cellHeight;// Is this offset necessary?
                 }
@@ -976,7 +975,7 @@ namespace Engine.PathFinding.RecastNavigation
                 res.Add(p);
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Adds the origin to the vertex list

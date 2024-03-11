@@ -204,7 +204,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     {
                         outPoly1.Add(vb);
 
-                        if (nb != 0)
+                        if (!MathUtil.IsZero(nb))
                         {
                             continue;
                         }

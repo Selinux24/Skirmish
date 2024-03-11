@@ -1,4 +1,5 @@
 ﻿using Engine.Tween;
+using SharpDX;
 using System;
 
 namespace Engine.BuiltIn.PostProcess
@@ -78,7 +79,7 @@ namespace Engine.BuiltIn.PostProcess
 
                 propertyUpdater(control, ft.CurrentValue);
 
-                if (ft.CurrentValue == ft.EndValue)
+                if (MathUtil.NearEqual(ft.CurrentValue, ft.EndValue))
                 {
                     return true;
                 }
@@ -101,7 +102,7 @@ namespace Engine.BuiltIn.PostProcess
 
                 propertyUpdater(control, ft.CurrentValue);
 
-                if (ft.CurrentValue == ft.EndValue)
+                if (MathUtil.NearEqual(ft.CurrentValue, ft.EndValue))
                 {
                     var newStart = ft.EndValue;
                     var newEnd = ft.StartValue;

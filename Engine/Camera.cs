@@ -1019,7 +1019,7 @@ namespace Engine
             float delta = slow ? SlowZoomDelta : ZoomDelta;
             float zooming = zoomIn ? +delta : -delta;
 
-            if (zooming == 0f)
+            if (MathUtil.IsZero(zooming))
             {
                 return 0;
             }

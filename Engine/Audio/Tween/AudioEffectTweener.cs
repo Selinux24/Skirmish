@@ -1,4 +1,5 @@
 ﻿using Engine.Tween;
+using SharpDX;
 
 namespace Engine.Audio.Tween
 {
@@ -118,7 +119,7 @@ namespace Engine.Audio.Tween
 
                 effect.Volume = ftVolume.CurrentValue;
 
-                if (ftVolume.CurrentValue == ftVolume.EndValue)
+                if (MathUtil.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     return true;
                 }
@@ -141,7 +142,7 @@ namespace Engine.Audio.Tween
 
                 effect.Volume = ftVolume.CurrentValue;
 
-                if (ftVolume.CurrentValue == ftVolume.EndValue)
+                if (MathUtil.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     var newStart = ftVolume.EndValue;
                     var newEnd = ftVolume.StartValue;

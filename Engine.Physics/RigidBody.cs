@@ -145,7 +145,7 @@ namespace Engine.Physics
         public void SetMass(float mass)
         {
             Mass = mass;
-            InverseMass = mass == 0f ? float.PositiveInfinity : 1f / mass;
+            InverseMass = MathUtil.IsZero(mass) ? float.PositiveInfinity : 1f / mass;
         }
         /// <inheritdoc/>
         public bool HasFiniteMass()
@@ -266,7 +266,7 @@ namespace Engine.Physics
 
             // Calculate the linear acceleration from the forces
             LastFrameAcceleration = Acceleration;
-            if (forceAccum != Vector3.Zero && InverseMass != 0f)
+            if (forceAccum != Vector3.Zero && !MathUtil.IsZero(InverseMass))
             {
                 LastFrameAcceleration += Vector3.Multiply(forceAccum, InverseMass);
             }

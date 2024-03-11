@@ -313,7 +313,7 @@ namespace Engine
         {
             float maxActiveParticles = maxParticleDuration * (1f / EmissionRate);
 
-            return (int)(maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
+            return (int)(maxActiveParticles > (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
 
         /// <inheritdoc/>

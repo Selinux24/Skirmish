@@ -1503,8 +1503,8 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void ToggleFog()
         {
-            Lights.FogStart = Lights.FogStart == 0f ? fogStart : 0f;
-            Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
+            Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
         private void UpdateDrawers()
         {

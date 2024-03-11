@@ -242,7 +242,7 @@ namespace Engine
                 return;
             }
 
-            if (yaw == 0f && pitch == 0f && roll == 0f)
+            if (MathUtil.IsZero(yaw) && MathUtil.IsZero(pitch) && MathUtil.IsZero(roll))
             {
                 return;
             }
@@ -306,7 +306,7 @@ namespace Engine
                 return;
             }
 
-            if (scaling.X == 0f && scaling.Y == 0f && scaling.Z == 0f)
+            if (MathUtil.IsZero(scaling.X) && MathUtil.IsZero(scaling.Y) && MathUtil.IsZero(scaling.Z))
             {
                 return;
             }
@@ -503,7 +503,7 @@ namespace Engine
         {
             float angle = Helper.AngleSigned(Up, normal);
 
-            var axis = angle % MathUtil.Pi != 0 ? Vector3.Cross(Up, normal) : Vector3.Left;
+            var axis = MathUtil.IsZero(angle % MathUtil.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
 
             var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 

@@ -90,7 +90,7 @@ namespace Engine
         public static Matrix CreateFromPositionDirection(Vector3 position, Vector3 direction)
         {
             float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
-            Vector3 up = f == 1 ? Vector3.ForwardLH : Vector3.Up;
+            Vector3 up = MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
             return Helper.CreateWorld(position, direction, up);
         }
 
@@ -151,7 +151,7 @@ namespace Engine
         {
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
-            FromLightVP = Array.Empty<Matrix>();
+            FromLightVP = [];
         }
         /// <inheritdoc/>
         public override void SetShadowParameters(Camera camera, int assignedShadowMap)
@@ -174,7 +174,7 @@ namespace Engine
 
             var vp = view * projection;
 
-            return new[] { vp };
+            return [vp];
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()
@@ -218,7 +218,7 @@ namespace Engine
 
             //Then move and rotate the cone to light position and direction
             float f = Math.Abs(Vector3.Dot(Direction, Vector3.Up));
-            Matrix trn = Helper.CreateWorld(Position, Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
+            Matrix trn = Helper.CreateWorld(Position, Direction, MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }
