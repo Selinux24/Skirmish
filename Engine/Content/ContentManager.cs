@@ -29,9 +29,9 @@ namespace Engine.Content
             /// </summary>
             /// <param name="file">Zip file name</param>
             /// <returns>Returns zip file entry names array</returns>
-            public static IEnumerable<string> ReadEntryNames(string file)
+            public static List<string> ReadEntryNames(string file)
             {
-                var files = new List<string>();
+                List<string> files = [];
 
                 using (var archive = ZipFile.OpenRead(file))
                 {
@@ -87,9 +87,9 @@ namespace Engine.Content
             /// <param name="file">Zip file name</param>
             /// <param name="pattern">Entry name</param>
             /// <returns>Returns file streams for the entry pattern</returns>
-            public static IEnumerable<MemoryStream> GetFiles(string file, string pattern)
+            public static List<MemoryStream> GetFiles(string file, string pattern)
             {
-                var res = new List<MemoryStream>();
+                List<MemoryStream> res = [];
 
                 string regexMask = Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
 
@@ -172,9 +172,9 @@ namespace Engine.Content
             }
 
             var res = ZipManager.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
-            if (res?.Any() == true)
+            if (res.Count != 0)
             {
-                return res.ToArray();
+                return [.. res];
             }
 
             if (throwException)

@@ -581,9 +581,9 @@ namespace Engine.Content.FmtCollada
                 VertexData[] data = new VertexData[verts.Count];
                 for (int i = 0; i < data.Length; i += 3)
                 {
-                    data[i + 0] = verts.ElementAt(i + 0);
-                    data[i + 1] = verts.ElementAt(i + 2);
-                    data[i + 2] = verts.ElementAt(i + 1);
+                    data[i + 0] = verts[i + 0];
+                    data[i + 1] = verts[i + 2];
+                    data[i + 2] = verts[i + 1];
                 }
 
                 SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull, Matrix.Identity);
@@ -807,9 +807,9 @@ namespace Engine.Content.FmtCollada
                 VertexData[] data = new VertexData[verts.Count];
                 for (int i = 0; i < data.Length; i += 3)
                 {
-                    data[i + 0] = verts.ElementAt(i + 0);
-                    data[i + 1] = verts.ElementAt(i + 2);
-                    data[i + 2] = verts.ElementAt(i + 1);
+                    data[i + 0] = verts[i + 0];
+                    data[i + 1] = verts[i + 2];
+                    data[i + 2] = verts[i + 1];
                 }
 
                 SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull, Matrix.Identity);
