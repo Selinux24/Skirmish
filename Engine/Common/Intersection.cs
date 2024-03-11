@@ -132,7 +132,7 @@ namespace Engine.Common
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
         public static bool SphereIntersectsMeshAll(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<PickingResult<Triangle>> results)
         {
-            List<PickingResult<Triangle>> picks = new();
+            List<PickingResult<Triangle>> picks = [];
 
             foreach (var t in mesh)
             {
@@ -148,7 +148,7 @@ namespace Engine.Common
 
             results = picks;
 
-            return picks.Any();
+            return picks.Count != 0;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a plane
@@ -480,8 +480,8 @@ namespace Engine.Common
         /// <returns>Returns true if the mesh one intersects the mesh two</returns>
         public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
-            List<Triangle> tris = new();
-            List<Line3D> segs = new();
+            List<Triangle> tris = [];
+            List<Line3D> segs = [];
 
             foreach (var t in mesh1)
             {
@@ -727,8 +727,8 @@ namespace Engine.Common
         /// <returns>Returns true if the triangle intersects the mesh</returns>
         public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
-            List<Triangle> tris = new();
-            List<Line3D> segs = new();
+            List<Triangle> tris = [];
+            List<Line3D> segs = [];
 
             bool intersected = false;
             foreach (var t in mesh)

@@ -1,6 +1,4 @@
 ﻿using SharpDX;
-using System;
-using System.Linq;
 
 namespace Engine.Content
 {
@@ -16,12 +14,12 @@ namespace Engine.Content
         /// <summary>
         /// Sub mesh names
         /// </summary>
-        public string[] SubMeshes { get; set; } = Array.Empty<string>();
+        public string[] SubMeshes { get; set; } = [];
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (SubMeshes?.Any() == true)
+            if (SubMeshes.Length != 0)
             {
                 return $"{string.Join(", ", SubMeshes)}";
             }

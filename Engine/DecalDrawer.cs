@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +12,13 @@ namespace Engine
     /// <summary>
     /// Decal drawer class
     /// </summary>
-    public sealed class DecalDrawer : Drawable<DecalDrawerDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class DecalDrawer(Scene scene, string id, string name) : Drawable<DecalDrawerDescription>(scene, id, name)
     {
         /// <summary>
         /// Assigned buffer slot
@@ -75,17 +80,6 @@ namespace Engine
         public int ActiveDecals { get; private set; } = 0;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public DecalDrawer(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-        /// <summary>
         /// Destructor
         /// </summary>
         ~DecalDrawer()
@@ -130,7 +124,7 @@ namespace Engine
 
             var activeDecals = GetActiveDecals();
 
-            ActiveDecals = activeDecals.Count();
+            ActiveDecals = activeDecals.Length;
 
             if (ActiveDecals <= 0)
             {
@@ -139,7 +133,7 @@ namespace Engine
                 return;
             }
 
-            boundingVolume = SharpDXExtensions.BoundingSphereFromPoints(activeDecals.ToArray());
+            boundingVolume = SharpDXExtensions.BoundingSphereFromPoints(activeDecals);
         }
 
         /// <inheritdoc/>
@@ -239,11 +233,11 @@ namespace Engine
         /// Gets the active decal list
         /// </summary>
         /// <returns>Returns a position list</returns>
-        private IEnumerable<Vector3> GetActiveDecals()
+        private Vector3[] GetActiveDecals()
         {
-            if (!decals.Any())
+            if (decals.Length == 0)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             return decals
@@ -256,7 +250,7 @@ namespace Engine
         /// </summary>
         public void Clear()
         {
-            if (!decals.Any())
+            if (decals.Length == 0)
             {
                 return;
             }

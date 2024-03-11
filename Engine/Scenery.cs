@@ -18,7 +18,13 @@ namespace Engine
     /// <summary>
     /// Terrain model
     /// </summary>
-    public sealed class Scenery : Ground<GroundDescription>, IUseMaterials
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class Scenery(Scene scene, string id, string name) : Ground<GroundDescription>(scene, id, name), IUseMaterials
     {
         #region Helper Classes
 
@@ -28,7 +34,11 @@ namespace Engine
         /// <remarks>
         /// Holds the necessary information to render a portion of terrain using an arbitrary level of detail
         /// </remarks>
-        class SceneryPatch : IDisposable
+        /// <remarks>
+        /// Cosntructor
+        /// </remarks>
+        /// <param name="drawingData">Drawing data</param>
+        class SceneryPatch(DrawingData drawingData) : IDisposable
         {
             /// <summary>
             /// Creates a new patch
@@ -71,7 +81,7 @@ namespace Engine
             /// <summary>
             /// Drawing data
             /// </summary>
-            public DrawingData DrawingData = null;
+            public DrawingData DrawingData = drawingData;
             /// <summary>
             /// Next node id
             /// </summary>
@@ -81,14 +91,6 @@ namespace Engine
             /// </summary>
             public TimeSpan CreationDuration = TimeSpan.Zero;
 
-            /// <summary>
-            /// Cosntructor
-            /// </summary>
-            /// <param name="drawingData">Drawing data</param>
-            public SceneryPatch(DrawingData drawingData)
-            {
-                DrawingData = drawingData;
-            }
             /// <summary>
             /// Destructor
             /// </summary>
@@ -207,7 +209,7 @@ namespace Engine
                 };
                 sceneryDrawer.UpdateMaterial(dc, materialState);
 
-                return sceneryDrawer.Draw(dc, bufferManager, new[] { mesh });
+                return sceneryDrawer.Draw(dc, bufferManager, [mesh]);
             }
 
             /// <summary>
@@ -297,7 +299,7 @@ namespace Engine
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode<Triangle>[] visibleNodes = Array.Empty<PickingQuadTreeNode<Triangle>>();
+        private PickingQuadTreeNode<Triangle>[] visibleNodes = [];
 
         /// <summary>
         /// Gets the visible node count
@@ -314,17 +316,6 @@ namespace Engine
         /// </summary>
         public IEnumerable<SceneLight> Lights { get; private set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public Scenery(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -387,7 +378,7 @@ namespace Engine
 
             var tasks = nodes.Select(async node => await SceneryPatch.CreatePatch(Game, Name, content, node));
             var taskResults = await Task.WhenAll(tasks);
-            if (!taskResults.Any())
+            if (taskResults.Length == 0)
             {
                 return;
             }
@@ -418,7 +409,7 @@ namespace Engine
             }
 
             var nodes = GroundPickingQuadtree.GetNodesInVolume(volume).ToArray();
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return true;
             }
@@ -448,13 +439,13 @@ namespace Engine
             base.Update(context);
 
             visibleNodes = GroundPickingQuadtree.GetNodesInVolume((IntersectionVolumeFrustum)Scene.Camera.Frustum).ToArray();
-            if (!visibleNodes.Any())
+            if (visibleNodes.Length == 0)
             {
                 return;
             }
 
             // Detect nodes without assigned patch
-            List<Task<SceneryPatchTask>> taskList = new();
+            List<Task<SceneryPatchTask>> taskList = [];
 
             foreach (var node in visibleNodes)
             {
@@ -479,7 +470,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool DrawShadows(DrawContextShadows context)
         {
-            if (visibleNodes?.Any() != true)
+            if (visibleNodes.Length == 0)
             {
                 return false;
             }
@@ -504,7 +495,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Draw(DrawContext context)
         {
-            if (visibleNodes?.Any() != true)
+            if (visibleNodes.Length == 0)
             {
                 return false;
             }
@@ -575,7 +566,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            return patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? Enumerable.Empty<IMeshMaterial>()).ToArray();
+            return patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? []).ToArray();
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

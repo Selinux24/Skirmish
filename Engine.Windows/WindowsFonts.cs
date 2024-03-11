@@ -1,6 +1,5 @@
 ﻿using Engine.UI;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
@@ -19,12 +18,12 @@ namespace Engine.Windows
         /// </summary>
         /// <param name="fontFamily">Comma separated font family string</param>
         /// <returns>Returns an array of families</returns>
-        private static IEnumerable<string> ParseFontFamilies(string fontFamily)
+        private static string[] ParseFontFamilies(string fontFamily)
         {
             string[] fonts = fontFamily.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            if (!fonts.Any())
+            if (fonts.Length == 0)
             {
-                return Enumerable.Empty<string>();
+                return [];
             }
 
             return fonts
@@ -51,7 +50,7 @@ namespace Engine.Windows
                 FontName = family.Name,
                 FontSize = size,
                 FontStyle = style,
-                Map = new Dictionary<char, FontMapChar>(),
+                Map = [],
             };
 
             using (var bmp = new Bitmap(mapSize.Width, mapSize.Height))
@@ -206,7 +205,7 @@ namespace Engine.Windows
             }
 
             var fonts = ParseFontFamilies(fontFamily);
-            if (!fonts.Any())
+            if (fonts.Length == 0)
             {
                 return null;
             }

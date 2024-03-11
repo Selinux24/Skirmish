@@ -94,7 +94,7 @@ namespace Engine
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> Lights { get; private set; } = Array.Empty<ISceneLight>();
+        public IEnumerable<ISceneLight> Lights { get; private set; } = [];
         /// <inheritdoc/>
         public int ModelPartCount
         {
@@ -131,7 +131,7 @@ namespace Engine
                 Lights = drawData.GetLights();
             }
 
-            if (Description.TransformDependences?.Any() == true)
+            if (Description.TransformDependences.Length != 0)
             {
                 partHelper.AddModelParts(description.TransformNames, description.TransformDependences, ManipulatorUpdated);
                 partHelper.SetWorldTransforms(drawData);
@@ -233,7 +233,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.{materialName}.");
-                if (drawer.Draw(dc, BufferManager, new[] { mesh }))
+                if (drawer.Draw(dc, BufferManager, [mesh]))
                 {
                     count += mesh.Count;
                 }
@@ -302,7 +302,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName}.");
-                if (drawer.Draw(dc, BufferManager, new[] { mesh }))
+                if (drawer.Draw(dc, BufferManager, [mesh]))
                 {
                     count += mesh.Count;
                 }
@@ -465,7 +465,7 @@ namespace Engine
                 return GetGeometry(refresh);
             }
 
-            return Enumerable.Empty<Triangle>();
+            return [];
         }
         /// <inheritdoc/>
         public IEnumerable<Triangle> GetGeometry(bool refresh = false)

@@ -1003,7 +1003,7 @@ namespace Engine
 
             //First opaques
             var opaques = GetOpaques(cullIndex, components);
-            if (opaques.Any())
+            if (opaques.Count != 0)
             {
                 //Set opaques draw mode
                 context.DrawerMode = mode | DrawerModes.OpaqueOnly;
@@ -1017,7 +1017,7 @@ namespace Engine
 
             //Then transparents
             var transparents = GetTransparents(cullIndex, components);
-            if (transparents.Any())
+            if (transparents.Count != 0)
             {
                 //Set transparents draw mode
                 context.DrawerMode = mode | DrawerModes.TransparentOnly;

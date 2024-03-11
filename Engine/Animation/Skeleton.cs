@@ -13,11 +13,11 @@ namespace Engine.Animation
         /// <summary>
         /// Joint names list
         /// </summary>
-        private readonly List<string> jointNames = new();
+        private readonly List<string> jointNames = [];
         /// <summary>
         /// Bone names list
         /// </summary>
-        private readonly List<string> boneNames = new();
+        private readonly List<string> boneNames = [];
 
         /// <summary>
         /// Skeleton name
@@ -53,7 +53,7 @@ namespace Engine.Animation
             joints.Add(joint.Name);
             bones.Add(joint.Bone);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -83,7 +83,7 @@ namespace Engine.Animation
 
             joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -121,7 +121,7 @@ namespace Engine.Animation
                 Matrix.RotationQuaternion(rotation) *
                 Matrix.Translation(translation);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -139,7 +139,7 @@ namespace Engine.Animation
         {
             UpdateToWorldTransform(joint);
 
-            if (joint?.Childs?.Any() != true)
+            if ((joint?.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -224,7 +224,7 @@ namespace Engine.Animation
         /// <param name="transforms">Returns the transforms list of the pose</param>
         private void ApplyTranforms(ref Matrix[] transforms)
         {
-            if (!boneNames.Any())
+            if (boneNames.Count == 0)
             {
                 return;
             }
@@ -244,7 +244,7 @@ namespace Engine.Animation
         /// <returns>Returns the joint names list</returns>
         public IEnumerable<string> GetJointNames()
         {
-            return jointNames.ToArray();
+            return [.. jointNames];
         }
         /// <summary>
         /// Gets the bone names list
@@ -252,7 +252,7 @@ namespace Engine.Animation
         /// <returns>Returns the bone names list</returns>
         public IEnumerable<string> GetBoneNames()
         {
-            return boneNames.ToArray();
+            return [.. boneNames];
         }
 
         /// <inheritdoc/>

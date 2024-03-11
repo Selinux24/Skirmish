@@ -7,19 +7,22 @@ namespace Engine.Common
     /// <summary>
     /// Index buffer description
     /// </summary>
-    public class BufferManagerIndices : IEngineBufferDescriptor
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class BufferManagerIndices(bool dynamic) : IEngineBufferDescriptor
     {
         /// <summary>
         /// Data list
         /// </summary>
-        private readonly List<uint> data = new();
+        private readonly List<uint> data = [];
         /// <summary>
         /// Descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> descriptors = new();
+        private readonly List<BufferDescriptor> descriptors = [];
 
         /// <inheritdoc/>
-        public bool Dynamic { get; private set; }
+        public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
@@ -47,15 +50,7 @@ namespace Engine.Common
         /// <summary>
         /// Index data
         /// </summary>
-        public IEnumerable<uint> Data { get { return data.ToArray(); } }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public BufferManagerIndices(bool dynamic)
-        {
-            Dynamic = dynamic;
-        }
+        public IEnumerable<uint> Data { get { return [.. data]; } }
 
         /// <summary>
         /// Adds a buffer descritor to the internal descriptors list
@@ -131,7 +126,7 @@ namespace Engine.Common
                 //Remove from descriptors list
                 descriptors.RemoveAt(index);
 
-                if (!descriptors.Any())
+                if (descriptors.Count == 0)
                 {
                     return;
                 }

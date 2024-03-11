@@ -10,7 +10,7 @@ namespace Engine.Animation
     /// </summary>
     public class AnimationPlan
     {
-        private readonly List<AnimationPath> animationPaths = new();
+        private readonly List<AnimationPath> animationPaths = [];
 
         /// <summary>
         /// Last item time
@@ -70,7 +70,7 @@ namespace Engine.Animation
         {
             get
             {
-                return Initialized && animationPaths.Any() && !AtEnd;
+                return Initialized && animationPaths.Count != 0 && !AtEnd;
             }
         }
 
@@ -160,7 +160,7 @@ namespace Engine.Animation
         /// </summary>
         public bool Any()
         {
-            return animationPaths.Any();
+            return animationPaths.Count != 0;
         }
         /// <summary>
         /// Clears the plan
@@ -277,7 +277,7 @@ namespace Engine.Animation
         {
             if (skinningData == null)
             {
-                return Enumerable.Empty<Matrix>();
+                return [];
             }
 
             if (GetClipAndTime(out float time, out string clipName))
@@ -386,7 +386,7 @@ namespace Engine.Animation
         /// </summary>
         public void Reset()
         {
-            AtEnd = !animationPaths.Any();
+            AtEnd = animationPaths.Count == 0;
             CurrentPathIndex = 0;
             AnimationOffset = 0;
         }

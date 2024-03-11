@@ -288,7 +288,7 @@ namespace Engine.Common
         {
             if (vertices?.Any() != true)
             {
-                return Array.Empty<VertexData>();
+                return [];
             }
 
             if (transform.IsIdentity)
@@ -348,7 +348,7 @@ namespace Engine.Common
         {
             if (vertices?.Any() != true)
             {
-                return Array.Empty<IVertexData>();
+                return [];
             }
 
             if (transform.IsIdentity)
@@ -410,11 +410,11 @@ namespace Engine.Common
         /// <returns>Returns a vertex array</returns>
         public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
         {
-            var vertices = descriptor.Vertices?.ToArray() ?? Array.Empty<Vector3>();
-            var normals = descriptor.Normals?.ToArray() ?? Array.Empty<Vector3>();
-            var uvs = descriptor.Uvs?.ToArray() ?? Array.Empty<Vector2>();
-            var tangents = descriptor.Tangents?.ToArray() ?? Array.Empty<Vector3>();
-            var binormals = descriptor.Binormals?.ToArray() ?? Array.Empty<Vector3>();
+            var vertices = descriptor.Vertices?.ToArray() ?? [];
+            var normals = descriptor.Normals?.ToArray() ?? [];
+            var uvs = descriptor.Uvs?.ToArray() ?? [];
+            var tangents = descriptor.Tangents?.ToArray() ?? [];
+            var binormals = descriptor.Binormals?.ToArray() ?? [];
 
             VertexData[] res = new VertexData[vertices.Length];
 
@@ -423,10 +423,10 @@ namespace Engine.Common
                 res[i] = new VertexData()
                 {
                     Position = vertices[i],
-                    Normal = normals.Any() ? normals[i] : null,
-                    Texture = uvs.Any() ? uvs[i] : null,
-                    Tangent = tangents.Any() ? tangents[i] : null,
-                    BiNormal = binormals.Any() ? binormals[i] : null,
+                    Normal = normals.Length != 0 ? normals[i] : null,
+                    Texture = uvs.Length != 0 ? uvs[i] : null,
+                    Tangent = tangents.Length != 0 ? tangents[i] : null,
+                    BiNormal = binormals.Length != 0 ? binormals[i] : null,
                 };
             });
 
@@ -456,7 +456,7 @@ namespace Engine.Common
         /// <returns>Returns a vertex list</returns>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return new Vector3[] { Position.Value };
+            return [Position.Value];
         }
         /// <summary>
         /// Gets the vertex list topology

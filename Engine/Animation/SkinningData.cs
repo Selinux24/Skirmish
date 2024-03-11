@@ -10,7 +10,11 @@ namespace Engine.Animation
     /// <summary>
     /// Skinning data
     /// </summary>
-    public sealed class SkinningData : IEquatable<SkinningData>, ISkinningData
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="skeleton">Skeleton</param>
+    public sealed class SkinningData(Skeleton skeleton) : IEquatable<SkinningData>, ISkinningData
     {
         /// <summary>
         /// Default clip name
@@ -25,19 +29,19 @@ namespace Engine.Animation
         /// <summary>
         /// Animations clip dictionary
         /// </summary>
-        private readonly List<AnimationClip> animations = new();
+        private readonly List<AnimationClip> animations = [];
         /// <summary>
         /// Animation clip names collection
         /// </summary>
-        private readonly List<string> clips = new();
+        private readonly List<string> clips = [];
         /// <summary>
         /// Clip offsets in animation palette
         /// </summary>
-        private readonly List<int> offsets = new();
+        private readonly List<int> offsets = [];
         /// <summary>
         /// Skeleton
         /// </summary>
-        private readonly Skeleton skeleton = null;
+        private readonly Skeleton skeleton = skeleton;
 
         /// <inheritdoc/>
         public float TimeStep { get; private set; } = FixedTimeStep;
@@ -72,15 +76,6 @@ namespace Engine.Animation
             }
 
             return dictAnimations;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="skeleton">Skeleton</param>
-        public SkinningData(Skeleton skeleton)
-        {
-            this.skeleton = skeleton;
         }
 
         /// <inheritdoc/>
@@ -180,7 +175,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public IEnumerable<Matrix> GetPoseBase()
         {
-            if (animations.Any())
+            if (animations.Count != 0)
             {
                 return GetPoseAtTime(0, 0);
             }
@@ -257,7 +252,7 @@ namespace Engine.Animation
                 }
             }
 
-            return values.ToArray();
+            return [.. values];
         }
 
         /// <inheritdoc/>

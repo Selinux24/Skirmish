@@ -9,7 +9,12 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Quad-tree node
     /// </summary>
-    public class QuadTreeNode<T> //where T : IVertexList
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="quadTree">Quad-tree</param>
+    /// <param name="parent">Parent node</param>
+    public class QuadTreeNode<T>(QuadTree<T> quadTree, QuadTreeNode<T> parent)
     {
         /// <summary>
         /// Recursive partition creation
@@ -105,11 +110,11 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Parent
         /// </summary>
-        public QuadTree<T> QuadTree { get; private set; }
+        public QuadTree<T> QuadTree { get; private set; } = quadTree;
         /// <summary>
         /// Parent node
         /// </summary>
-        public QuadTreeNode<T> Parent { get; private set; }
+        public QuadTreeNode<T> Parent { get; private set; } = parent;
         /// <summary>
         /// Gets the child node at top left position (from above)
         /// </summary>
@@ -185,22 +190,12 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        public List<QuadTreeNode<T>> Children { get; private set; } = new List<QuadTreeNode<T>>();
+        public List<QuadTreeNode<T>> Children { get; private set; } = [];
         /// <summary>
         /// Node triangles
         /// </summary>
-        public List<T> Items { get; private set; } = new List<T>();
+        public List<T> Items { get; private set; } = [];
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="quadTree">Quad-tree</param>
-        /// <param name="parent">Parent node</param>
-        public QuadTreeNode(QuadTree<T> quadTree, QuadTreeNode<T> parent) : base()
-        {
-            QuadTree = quadTree;
-            Parent = parent;
-        }
         /// <summary>
         /// Connect nodes in the grid
         /// </summary>
@@ -216,12 +211,14 @@ namespace Engine.Collections.Generic
             BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
             BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (Children?.Count > 0)
+            if (Children.Count == 0)
             {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    Children[i].ConnectNodes();
-                }
+                return;
+            }
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Children[i].ConnectNodes();
             }
         }
         /// <summary>
@@ -230,32 +227,34 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtTop()
         {
-            if (Parent != null)
+            if (Parent == null)
             {
-                if (this == Parent.TopLeftChild)
+                return null;
+            }
+
+            if (this == Parent.TopLeftChild)
+            {
+                var node = Parent.FindNeighborNodeAtTop();
+                if (node != null)
                 {
-                    var node = Parent.FindNeighborNodeAtTop();
-                    if (node != null)
-                    {
-                        return node.BottomLeftChild;
-                    }
+                    return node.BottomLeftChild;
                 }
-                else if (this == Parent.TopRightChild)
+            }
+            else if (this == Parent.TopRightChild)
+            {
+                var node = Parent.FindNeighborNodeAtTop();
+                if (node != null)
                 {
-                    var node = Parent.FindNeighborNodeAtTop();
-                    if (node != null)
-                    {
-                        return node.BottomRightChild;
-                    }
+                    return node.BottomRightChild;
                 }
-                else if (this == Parent.BottomLeftChild)
-                {
-                    return Parent.TopLeftChild;
-                }
-                else if (this == Parent.BottomRightChild)
-                {
-                    return Parent.TopRightChild;
-                }
+            }
+            else if (this == Parent.BottomLeftChild)
+            {
+                return Parent.TopLeftChild;
+            }
+            else if (this == Parent.BottomRightChild)
+            {
+                return Parent.TopRightChild;
             }
 
             return null;
@@ -266,31 +265,33 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at bottom position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtBottom()
         {
-            if (Parent != null)
+            if (Parent == null)
             {
-                if (this == Parent.TopLeftChild)
+                return null;
+            }
+
+            if (this == Parent.TopLeftChild)
+            {
+                return Parent.BottomLeftChild;
+            }
+            else if (this == Parent.TopRightChild)
+            {
+                return Parent.BottomRightChild;
+            }
+            else if (this == Parent.BottomLeftChild)
+            {
+                var node = Parent.FindNeighborNodeAtBottom();
+                if (node != null)
                 {
-                    return Parent.BottomLeftChild;
+                    return node.TopLeftChild;
                 }
-                else if (this == Parent.TopRightChild)
+            }
+            else if (this == Parent.BottomRightChild)
+            {
+                var node = Parent.FindNeighborNodeAtBottom();
+                if (node != null)
                 {
-                    return Parent.BottomRightChild;
-                }
-                else if (this == Parent.BottomLeftChild)
-                {
-                    var node = Parent.FindNeighborNodeAtBottom();
-                    if (node != null)
-                    {
-                        return node.TopLeftChild;
-                    }
-                }
-                else if (this == Parent.BottomRightChild)
-                {
-                    var node = Parent.FindNeighborNodeAtBottom();
-                    if (node != null)
-                    {
-                        return node.TopRightChild;
-                    }
+                    return node.TopRightChild;
                 }
             }
 
@@ -302,31 +303,33 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtRight()
         {
-            if (Parent != null)
+            if (Parent == null)
             {
-                if (this == Parent.TopLeftChild)
+                return null;
+            }
+
+            if (this == Parent.TopLeftChild)
+            {
+                return Parent.TopRightChild;
+            }
+            else if (this == Parent.TopRightChild)
+            {
+                var node = Parent.FindNeighborNodeAtRight();
+                if (node != null)
                 {
-                    return Parent.TopRightChild;
+                    return node.TopLeftChild;
                 }
-                else if (this == Parent.TopRightChild)
+            }
+            else if (this == Parent.BottomLeftChild)
+            {
+                return Parent.BottomRightChild;
+            }
+            else if (this == Parent.BottomRightChild)
+            {
+                var node = Parent.FindNeighborNodeAtRight();
+                if (node != null)
                 {
-                    var node = Parent.FindNeighborNodeAtRight();
-                    if (node != null)
-                    {
-                        return node.TopLeftChild;
-                    }
-                }
-                else if (this == Parent.BottomLeftChild)
-                {
-                    return Parent.BottomRightChild;
-                }
-                else if (this == Parent.BottomRightChild)
-                {
-                    var node = Parent.FindNeighborNodeAtRight();
-                    if (node != null)
-                    {
-                        return node.BottomLeftChild;
-                    }
+                    return node.BottomLeftChild;
                 }
             }
 
@@ -338,32 +341,34 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at left position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtLeft()
         {
-            if (Parent != null)
+            if (Parent == null)
             {
-                if (this == Parent.TopLeftChild)
+                return null;
+            }
+
+            if (this == Parent.TopLeftChild)
+            {
+                var node = Parent.FindNeighborNodeAtLeft();
+                if (node != null)
                 {
-                    var node = Parent.FindNeighborNodeAtLeft();
-                    if (node != null)
-                    {
-                        return node.TopRightChild;
-                    }
+                    return node.TopRightChild;
                 }
-                else if (this == Parent.TopRightChild)
+            }
+            else if (this == Parent.TopRightChild)
+            {
+                return Parent.TopLeftChild;
+            }
+            else if (this == Parent.BottomLeftChild)
+            {
+                var node = Parent.FindNeighborNodeAtLeft();
+                if (node != null)
                 {
-                    return Parent.TopLeftChild;
+                    return node.BottomRightChild;
                 }
-                else if (this == Parent.BottomLeftChild)
-                {
-                    var node = Parent.FindNeighborNodeAtLeft();
-                    if (node != null)
-                    {
-                        return node.BottomRightChild;
-                    }
-                }
-                else if (this == Parent.BottomRightChild)
-                {
-                    return Parent.BottomLeftChild;
-                }
+            }
+            else if (this == Parent.BottomRightChild)
+            {
+                return Parent.BottomLeftChild;
             }
 
             return null;
@@ -376,32 +381,29 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            var bboxes = new List<BoundingBox>();
-
-            if (Children?.Any() == true)
+            if (Children.Count == 0)
             {
-                bool haltByDepth = (maxDepth > 0 && Level == maxDepth);
-                if (haltByDepth)
+                return [BoundingBox];
+            }
+
+            List<BoundingBox> bboxes = [];
+
+            if (maxDepth > 0 && Level == maxDepth)
+            {
+                Children.ForEach((c) =>
                 {
-                    Children.ForEach((c) =>
-                    {
-                        bboxes.Add(c.BoundingBox);
-                    });
-                }
-                else
-                {
-                    Children.ForEach((c) =>
-                    {
-                        bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
-                    });
-                }
+                    bboxes.Add(c.BoundingBox);
+                });
             }
             else
             {
-                bboxes.Add(BoundingBox);
+                Children.ForEach((c) =>
+                {
+                    bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
+                });
             }
 
-            return bboxes.ToArray();
+            return bboxes;
         }
         /// <summary>
         /// Gets maximum level value
@@ -409,20 +411,18 @@ namespace Engine.Collections.Generic
         /// <returns></returns>
         public int GetMaxLevel()
         {
+            if (Children.Count == 0)
+            {
+                return Level;
+            }
+
             int level = 0;
 
-            if (Children?.Any() == true)
+            for (int i = 0; i < Children.Count; i++)
             {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    int cLevel = Children[i].GetMaxLevel();
+                int cLevel = Children[i].GetMaxLevel();
 
-                    if (cLevel > level) level = cLevel;
-                }
-            }
-            else
-            {
-                level = Level;
+                if (cLevel > level) level = cLevel;
             }
 
             return level;
@@ -435,9 +435,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            var nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode<T>> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -456,7 +456,7 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets the leaf nodes contained into the specified bounding box
@@ -465,9 +465,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingBox bbox)
         {
-            var nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode<T>> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -486,7 +486,7 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets the leaf nodes contained into the specified bounding sphere
@@ -495,9 +495,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingSphere sphere)
         {
-            var nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode<T>> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -517,7 +517,7 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets all leaf nodes
@@ -525,19 +525,12 @@ namespace Engine.Collections.Generic
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
         {
-            var nodes = new List<QuadTreeNode<T>>();
-
-            if (Children?.Any() == true)
+            if (Children.Count == 0)
             {
-                var leafNodes = Children.SelectMany(c => c.GetLeafNodes());
-                nodes.AddRange(leafNodes);
-            }
-            else
-            {
-                nodes.Add(this);
+                return [this];
             }
 
-            return nodes.ToArray();
+            return Children.SelectMany(c => c.GetLeafNodes());
         }
         /// <summary>
         /// Gets node at position
@@ -546,7 +539,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf node which contains the specified position</returns>
         public QuadTreeNode<T> GetNode(Vector3 position)
         {
-            if (Children == null)
+            if (Children.Count == 0)
             {
                 if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
@@ -574,12 +567,12 @@ namespace Engine.Collections.Generic
             if (Children == null)
             {
                 //Leaf node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Items {2}", Id, Level, Items.Count);
+                return $"{nameof(QuadTreeNode<T>)} {Id}; Depth {Level}; Items {Items.Count}";
             }
             else
             {
                 //Node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Children {2}", Id, Level, Children.Count);
+                return $"{nameof(QuadTreeNode<T>)} {Id}; Depth {Level}; Children {Children.Count}";
             }
         }
     }

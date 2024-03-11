@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -131,7 +130,7 @@ namespace Engine
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 
-                if (Textures?.TexturesLR?.Any() == true)
+                if ((Textures?.TexturesLR?.Length ?? 0) != 0)
                 {
                     string diffuseTexureName = "diffuse";
 
@@ -142,7 +141,7 @@ namespace Engine
                     modelContent.AddTextureContent(diffuseTexureName, diffuseImage);
                 }
 
-                if (Textures?.NormalMaps?.Any() == true)
+                if ((Textures?.NormalMaps?.Length ?? 0) != 0)
                 {
                     string nmapTexureName = "normal";
 

@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -273,7 +272,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh</returns>
         public static PolyMesh Merge(PolyMesh[] meshes, ContourSet cset)
         {
-            if (!meshes.Any())
+            if (meshes.Length == 0)
             {
                 return null;
             }
@@ -369,7 +368,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="p">Indexed polygon</param>
         public Vector3[] BuildPolyVertices(IndexedPolygon p)
         {
-            var res = new List<Vector3>();
+            List<Vector3> res = [];
 
             float cs = CellSize;
             float ch = CellHeight;
@@ -387,7 +386,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 res.Add(pv);
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Finds polygon bounds

@@ -15,10 +15,10 @@ namespace Engine
         /// <summary>
         /// Transform names
         /// </summary>
-        public string[] TransformNames { get; set; }
+        public string[] TransformNames { get; set; } = [];
         /// <summary>
         /// Transform dependences
         /// </summary>
-        public int[] TransformDependences { get; set; }
+        public int[] TransformDependences { get; set; } = [];
     }
 }

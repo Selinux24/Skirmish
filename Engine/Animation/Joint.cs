@@ -1,26 +1,33 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Skeleton's Joint
     /// </summary>
-    public sealed class Joint : IEquatable<Joint>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Joint name</param>
+    /// <param name="bone">Bone name</param>
+    /// <param name="parent">Parent joint</param>
+    /// <param name="local">Local transform</param>
+    /// <param name="global">Global transform</param>
+    public sealed class Joint(string name, string bone, Joint parent, Matrix local, Matrix global) : IEquatable<Joint>
     {
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = name;
         /// <summary>
         /// Bone name
         /// </summary>
-        public string Bone { get; private set; }
+        public string Bone { get; private set; } = bone;
         /// <summary>
         /// Parent joint
         /// </summary>
-        public Joint Parent { get; set; }
+        public Joint Parent { get; set; } = parent;
         /// <summary>
         /// Child joints
         /// </summary>
@@ -32,28 +39,11 @@ namespace Engine.Animation
         /// <summary>
         /// Local transform matrix
         /// </summary>
-        public Matrix LocalTransform { get; set; }
+        public Matrix LocalTransform { get; set; } = local;
         /// <summary>
         /// World transform matrix
         /// </summary>
-        public Matrix GlobalTransform { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Joint name</param>
-        /// <param name="bone">Bone name</param>
-        /// <param name="parent">Parent joint</param>
-        /// <param name="local">Local transform</param>
-        /// <param name="global">Global transform</param>
-        public Joint(string name, string bone, Joint parent, Matrix local, Matrix global)
-        {
-            Name = name;
-            Bone = bone;
-            Parent = parent;
-            LocalTransform = local;
-            GlobalTransform = global;
-        }
+        public Matrix GlobalTransform { get; set; } = global;
 
         /// <summary>
         /// Finds a joint by name recursively
@@ -67,7 +57,7 @@ namespace Engine.Animation
                 return this;
             }
 
-            if (Childs?.Any() != true)
+            if ((Childs?.Length ?? 0) == 0)
             {
                 return null;
             }

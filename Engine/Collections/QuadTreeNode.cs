@@ -7,7 +7,12 @@ namespace Engine.Collections
     /// <summary>
     /// Quad-tree node
     /// </summary>
-    public class QuadTreeNode
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="quadTree">Quad-tree</param>
+    /// <param name="parent">Parent node</param>
+    public class QuadTreeNode(QuadTree quadTree, QuadTreeNode parent)
     {
         /// <summary>
         /// Recursive partition creation
@@ -95,11 +100,11 @@ namespace Engine.Collections
         /// <summary>
         /// Parent
         /// </summary>
-        public QuadTree QuadTree { get; private set; }
+        public QuadTree QuadTree { get; private set; } = quadTree;
         /// <summary>
         /// Parent node
         /// </summary>
-        public QuadTreeNode Parent { get; private set; }
+        public QuadTreeNode Parent { get; private set; } = parent;
         /// <summary>
         /// Gets the child node at top left position (from above)
         /// </summary>
@@ -175,18 +180,7 @@ namespace Engine.Collections
         /// <summary>
         /// Children list
         /// </summary>
-        public List<QuadTreeNode> Children { get; private set; } = new List<QuadTreeNode>();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="quadTree">Quad-tree</param>
-        /// <param name="parent">Parent node</param>
-        public QuadTreeNode(QuadTree quadTree, QuadTreeNode parent)
-        {
-            QuadTree = quadTree;
-            Parent = parent;
-        }
+        public List<QuadTreeNode> Children { get; private set; } = [];
 
         /// <summary>
         /// Connect nodes in the grid
@@ -203,12 +197,14 @@ namespace Engine.Collections
             BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
             BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (Children?.Count > 0)
+            if (Children.Count == 0)
             {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    Children[i].ConnectNodes();
-                }
+                return;
+            }
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Children[i].ConnectNodes();
             }
         }
         /// <summary>
@@ -371,31 +367,29 @@ namespace Engine.Collections
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            var bboxes = new List<BoundingBox>();
-
-            if (Children?.Any() == true)
+            if (Children.Count == 0)
             {
-                if (maxDepth > 0 && Level == maxDepth)
+                return [BoundingBox];
+            }
+
+            List<BoundingBox> bboxes = [];
+
+            if (maxDepth > 0 && Level == maxDepth)
+            {
+                Children.ForEach((c) =>
                 {
-                    Children.ForEach((c) =>
-                    {
-                        bboxes.Add(c.BoundingBox);
-                    });
-                }
-                else
-                {
-                    Children.ForEach((c) =>
-                    {
-                        bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
-                    });
-                }
+                    bboxes.Add(c.BoundingBox);
+                });
             }
             else
             {
-                bboxes.Add(BoundingBox);
+                Children.ForEach((c) =>
+                {
+                    bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
+                });
             }
 
-            return bboxes.ToArray();
+            return bboxes;
         }
         /// <summary>
         /// Gets maximum level value
@@ -403,20 +397,18 @@ namespace Engine.Collections
         /// <returns></returns>
         public int GetMaxLevel()
         {
+            if (Children.Count == 0)
+            {
+                return Level;
+            }
+
             int level = 0;
 
-            if (Children?.Any() == true)
+            for (int i = 0; i < Children.Count; i++)
             {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    int cLevel = Children[i].GetMaxLevel();
+                int cLevel = Children[i].GetMaxLevel();
 
-                    if (cLevel > level) level = cLevel;
-                }
-            }
-            else
-            {
-                level = Level;
+                if (cLevel > level) level = cLevel;
             }
 
             return level;
@@ -429,9 +421,9 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            var nodes = new List<QuadTreeNode>();
+            List<QuadTreeNode> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -450,7 +442,7 @@ namespace Engine.Collections
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets the leaf nodes contained into the specified bounding box
@@ -459,9 +451,9 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingBox bbox)
         {
-            var nodes = new List<QuadTreeNode>();
+            List<QuadTreeNode> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -480,7 +472,7 @@ namespace Engine.Collections
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets the leaf nodes contained into the specified bounding sphere
@@ -489,9 +481,9 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingSphere sphere)
         {
-            var nodes = new List<QuadTreeNode>();
+            List<QuadTreeNode> nodes = [];
 
-            if (Children?.Any() == true)
+            if (Children.Count != 0)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -511,7 +503,7 @@ namespace Engine.Collections
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets all leaf nodes
@@ -519,19 +511,12 @@ namespace Engine.Collections
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<QuadTreeNode> GetLeafNodes()
         {
-            var nodes = new List<QuadTreeNode>();
-
-            if (Children?.Any() == true)
+            if (Children.Count == 0)
             {
-                var leafNodes = Children.SelectMany(c => c.GetLeafNodes());
-                nodes.AddRange(leafNodes);
-            }
-            else
-            {
-                nodes.Add(this);
+                return [this];
             }
 
-            return nodes.ToArray();
+            return Children.SelectMany(c => c.GetLeafNodes());
         }
         /// <summary>
         /// Gets node at position
@@ -540,7 +525,7 @@ namespace Engine.Collections
         /// <returns>Returns the leaf node which contains the specified position</returns>
         public QuadTreeNode GetNode(Vector3 position)
         {
-            if (Children == null)
+            if (Children.Count == 0)
             {
                 if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
@@ -568,12 +553,12 @@ namespace Engine.Collections
             if (Children == null)
             {
                 //Leaf node
-                return $"QuadTreeNode {Id}; Depth {Level}";
+                return $"{nameof(QuadTreeNode)} {Id}; Depth {Level}";
             }
             else
             {
                 //Node
-                return $"QuadTreeNode {Id}; Depth {Level}; Children {Children.Count}";
+                return $"{nameof(QuadTreeNode)} {Id}; Depth {Level}; Children {Children.Count}";
             }
         }
     }

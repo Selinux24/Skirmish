@@ -19,14 +19,14 @@ namespace Engine.BuiltIn.PostProcess
         /// <inheritdoc/>
         public void Update(IGameTime gameTime)
         {
-            if (!taskList.Any())
+            if (taskList.IsEmpty)
             {
                 return;
             }
 
             // Copy active controls
             var activeControls = taskList
-                .Where(task => task.Value.Any())
+                .Where(task => task.Value.Count != 0)
                 .Select(task => task.Value)
                 .ToArray();
 
@@ -46,14 +46,14 @@ namespace Engine.BuiltIn.PostProcess
                     }
                 });
 
-                if (toDelete.Any())
+                if (toDelete.Count != 0)
                 {
                     toDelete.ForEach(t => tasks.Remove(t));
                 }
             }
 
             var emptyControls = taskList.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();
-            if (emptyControls.Any())
+            if (emptyControls.Count != 0)
             {
                 emptyControls.ForEach(c => taskList.TryRemove(c, out _));
             }
@@ -62,7 +62,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <inheritdoc/>
         public void AddTween(BuiltInPostProcessState item, Func<float, bool> tween)
         {
-            var list = taskList.GetOrAdd(item, new List<Func<float, bool>>());
+            var list = taskList.GetOrAdd(item, []);
 
             list.Add(tween);
         }

@@ -13,7 +13,11 @@ namespace Engine
     /// <summary>
     /// Engine resource manager
     /// </summary>
-    public class GameResourceManager : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    public class GameResourceManager(Game game) : IDisposable
     {
         /// <summary>
         /// Content loaders dictionary
@@ -101,7 +105,7 @@ namespace Engine
         /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game;
+        private readonly Game game = game;
         /// <summary>
         /// Requested resources dictionary
         /// </summary>
@@ -109,11 +113,11 @@ namespace Engine
         /// <summary>
         /// Resource dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> resources = new();
+        private readonly Dictionary<string, EngineShaderResourceView> resources = [];
         /// <summary>
         /// Global resources dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> globalResources = new();
+        private readonly Dictionary<string, EngineShaderResourceView> globalResources = [];
         /// <summary>
         /// Creating resources flag
         /// </summary>
@@ -126,18 +130,10 @@ namespace Engine
         {
             get
             {
-                return requestedResources.Any();
+                return !requestedResources.IsEmpty;
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        public GameResourceManager(Game game)
-        {
-            this.game = game;
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -193,7 +189,7 @@ namespace Engine
                 allocating = true;
 
                 var pendingRequests = requestedResources.ToArray();
-                if (!pendingRequests.Any())
+                if (pendingRequests.Length == 0)
                 {
                     return;
                 }
@@ -268,7 +264,7 @@ namespace Engine
         {
             var toRemove = requestKeys.ToList();
 
-            while (toRemove.Any())
+            while (toRemove.Count != 0)
             {
                 if (!requestedResources.ContainsKey(toRemove[0]))
                 {

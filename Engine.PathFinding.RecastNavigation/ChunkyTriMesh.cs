@@ -35,11 +35,11 @@ namespace Engine.PathFinding.RecastNavigation
             /// <summary>
             /// Node list
             /// </summary>
-            public List<ChunkyTriMeshNode> Nodes { get; set; } = new List<ChunkyTriMeshNode>();
+            public List<ChunkyTriMeshNode> Nodes { get; set; } = [];
             /// <summary>
             /// Indexed triangle list
             /// </summary>
-            public List<int> OutTris { get; set; } = new List<int>();
+            public List<int> OutTris { get; set; } = [];
             /// <summary>
             /// Tirangles per chunk
             /// </summary>
@@ -137,7 +137,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 MaxNodes = maxNodes,
                 TrisPerChunk = trisPerChunk,
-                Items = items.ToArray(),
+                Items = [.. items],
             };
 
             Subdivide(0, items.Count, data);
@@ -145,8 +145,8 @@ namespace Engine.PathFinding.RecastNavigation
             return new ChunkyTriMesh
             {
                 triangles = triangles.ToArray(),
-                nodes = data.Nodes.ToArray(),
-                triangleIndices = data.OutTris.ToArray()
+                nodes = [.. data.Nodes],
+                triangleIndices = [.. data.OutTris]
             };
         }
         /// <summary>
@@ -269,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangle list</returns>
         public Triangle[] GetTriangles()
         {
-            return triangles?.ToArray() ?? Array.Empty<Triangle>();
+            return triangles?.ToArray() ?? [];
         }
         /// <summary>
         /// Gets the triangles in the specified node
@@ -289,13 +289,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (node.Index < 0)
             {
-                return Array.Empty<Triangle>();
+                return [];
             }
 
             var tris = GetTriangles();
-            if (!tris.Any())
+            if (tris.Length == 0)
             {
-                return Array.Empty<Triangle>();
+                return [];
             }
 
             var indices = triangleIndices.Skip(node.Index).Take(node.Count);
@@ -307,7 +307,7 @@ namespace Engine.PathFinding.RecastNavigation
                 res.Add(tris[index]);
             }
 
-            return res.ToArray();
+            return [.. res];
         }
 
         /// <summary>
@@ -344,7 +344,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return ids.ToArray();
+            return [.. ids];
         }
     }
 }

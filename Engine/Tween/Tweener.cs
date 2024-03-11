@@ -8,21 +8,24 @@ namespace Engine.Tween
     /// <summary>
     /// Tweener
     /// </summary>
-    public class Tweener : IUpdatable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class Tweener(Scene scene, string id, string name) : IUpdatable
     {
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentBag<ITweenCollection> tweens = new();
+        private readonly ConcurrentBag<ITweenCollection> tweens = [];
 
         /// <inheritdoc/>
-        public string Id { get; private set; }
+        public string Id { get; private set; } = id;
         /// <inheritdoc/>
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         /// <inheritdoc/>
         public bool Active { get; set; } = true;
         /// <inheritdoc/>
-        public Scene Scene { get; private set; }
+        public Scene Scene { get; private set; } = scene;
         /// <inheritdoc/>
         public SceneObjectUsages Usage { get; set; }
         /// <inheritdoc/>
@@ -31,16 +34,6 @@ namespace Engine.Tween
         public bool HasOwner { get; private set; }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Tweener(Scene scene, string id, string name)
-        {
-            Scene = scene;
-            Id = id;
-            Name = name;
-        }
 
         /// <summary>
         /// Adds a new tween collection to the tween manager
@@ -67,7 +60,7 @@ namespace Engine.Tween
         /// <inheritdoc/>
         public void EarlyUpdate(UpdateContext context)
         {
-            if (!tweens.Any())
+            if (tweens.IsEmpty)
             {
                 return;
             }

@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -355,7 +354,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return lregs.ToArray();
+            return [.. lregs];
         }
         /// <summary>
         /// Update overlapping regions.
@@ -406,7 +405,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 stack.Clear();
                 stack.Add(i);
 
-                while (stack.Any())
+                while (stack.Count != 0)
                 {
                     // Pop front
                     var reg = Regions[stack.PopFirst()];

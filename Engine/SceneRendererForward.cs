@@ -14,7 +14,11 @@ namespace Engine
     /// <summary>
     /// Forward renderer class
     /// </summary>
-    public class SceneRendererForward : BaseSceneRenderer
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    public class SceneRendererForward(Scene scene) : BaseSceneRenderer(scene)
     {
         /// <summary>
         /// Objects pass index
@@ -170,15 +174,6 @@ namespace Engine
         public static bool Validate(Graphics graphics)
         {
             return graphics != null;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        public SceneRendererForward(Scene scene) : base(scene)
-        {
-
         }
 
         /// <inheritdoc/>
@@ -411,7 +406,7 @@ namespace Engine
 #endif
 
 
-            if (!toDrawComponents.Any())
+            if (toDrawComponents.Count == 0)
             {
                 return;
             }

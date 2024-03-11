@@ -11,12 +11,18 @@ namespace Engine
     /// <summary>
     /// CPU particle manager
     /// </summary>
-    public sealed class ParticleManager : Drawable<ParticleManagerDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class ParticleManager(Scene scene, string id, string name) : Drawable<ParticleManagerDescription>(scene, id, name)
     {
         /// <summary>
         /// Concurrent particle list
         /// </summary>
-        private readonly ConcurrentBag<IParticleSystem> particleSystems = new();
+        private readonly ConcurrentBag<IParticleSystem> particleSystems = [];
 
         /// <summary>
         /// Particle systems list
@@ -52,17 +58,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public ParticleManager(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-        /// <summary>
         /// Destructor
         /// </summary>
         ~ParticleManager()
@@ -90,7 +85,7 @@ namespace Engine
         {
             //Copy collection
             var particles = particleSystems.ToList();
-            if (!particles.Any())
+            if (particles.Count == 0)
             {
                 return;
             }
@@ -125,7 +120,7 @@ namespace Engine
                 }
             }
 
-            if (!toRestore.Any())
+            if (toRestore.Count == 0)
             {
                 return;
             }
@@ -136,7 +131,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Draw(DrawContext context)
         {
-            if (!particleSystems.Any())
+            if (particleSystems.IsEmpty)
             {
                 return false;
             }
@@ -159,7 +154,7 @@ namespace Engine
             distance = float.MaxValue;
             bool cull = true;
 
-            if (!particleSystems.Any())
+            if (particleSystems.IsEmpty)
             {
                 return cull;
             }
@@ -258,11 +253,6 @@ namespace Engine
         /// </summary>
         public void Clear()
         {
-            if (!particleSystems.Any())
-            {
-                return;
-            }
-
             while (!particleSystems.IsEmpty)
             {
                 if (particleSystems.TryTake(out var p))

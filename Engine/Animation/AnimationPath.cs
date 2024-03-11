@@ -12,7 +12,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation path items list
         /// </summary>
-        private readonly List<AnimationPathItem> items = new();
+        private readonly List<AnimationPathItem> items = [];
         /// <summary>
         /// Current item index
         /// </summary>
@@ -162,7 +162,7 @@ namespace Engine.Animation
         /// <param name="animationPath">Animation path to connect with current path</param>
         public static AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
         {
-            if (animationPath?.items?.Any() != true)
+            if ((animationPath?.items?.Count ?? 0) == 0)
             {
                 return new AnimationPath();
             }
@@ -183,7 +183,7 @@ namespace Engine.Animation
                 return;
             }
 
-            if (!items.Any())
+            if (items.Count == 0)
             {
                 return;
             }
@@ -414,7 +414,7 @@ namespace Engine.Animation
 
             Updated = true;
 
-            if (!items.Any())
+            if (items.Count == 0)
             {
                 return;
             }

@@ -14,7 +14,13 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : BaseModel<ModelInstancedDescription>, IComposed, IHasGameState
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public class ModelInstanced(Scene scene, string id, string name) : BaseModel<ModelInstancedDescription>(scene, id, name), IComposed, IHasGameState
     {
         /// <summary>
         /// Model instance list
@@ -81,9 +87,9 @@ namespace Engine
         /// <returns>Returns the instancing data for the instancing buffer</returns>
         private static VertexInstancingData[] PrepareInstancingBuffer(ModelInstance[] instances, Vector3 pointOfView)
         {
-            if (!instances.Any())
+            if (instances.Length == 0)
             {
-                return Array.Empty<VertexInstancingData>();
+                return [];
             }
 
             if (instances.Length > 1)
@@ -134,17 +140,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public ModelInstanced(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-        /// <summary>
         /// Destructor
         /// </summary>
         ~ModelInstanced()
@@ -182,7 +177,7 @@ namespace Engine
 
             MaximumCount = -1;
 
-            hasIndependentTransforms = Description.TransformDependences?.Any() == true;
+            hasIndependentTransforms = Description.TransformDependences.Length != 0;
 
             var points = GetDrawingData(GetLODMinimum()).GetPoints(Matrix.Identity);
             BoundsHelperInitialState.SetPoints(points);
@@ -201,7 +196,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            if (!instancesAll.Any())
+            if (instancesAll.Length == 0)
             {
                 return;
             }
@@ -384,7 +379,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
-                if (drawer.Draw(dc, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, BufferManager, [mesh], instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }
@@ -519,7 +514,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                if (drawer.Draw(dc, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, BufferManager, [mesh], instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }
@@ -634,7 +629,7 @@ namespace Engine
             distance = float.MaxValue;
 
             // Copy array
-            var tmp = instancesVisible?.ToArray() ?? Array.Empty<ModelInstance>();
+            var tmp = instancesVisible?.ToArray() ?? [];
 
             if (tmp.Length <= 0)
             {
@@ -654,7 +649,7 @@ namespace Engine
                 .OrderBy(i => i.Distance)
                 .ToArray();
 
-            if (!items.Any())
+            if (items.Length == 0)
             {
                 // Culled
                 return true;

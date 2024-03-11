@@ -84,12 +84,11 @@ namespace IntermediateSamples.SceneAnimationParts
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTank(),
                     InitializeFloor(),
                     InitializeDebug()
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTank()
@@ -99,18 +98,18 @@ namespace IntermediateSamples.SceneAnimationParts
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
                 Content = ContentDescription.FromFile("SceneAnimationParts/Resources/Leopard", "Leopard.json"),
-                TransformNames = new[]
-                {
+                TransformNames =
+                [
                     "Hull-mesh",
                     "Turret-mesh",
                     "Barrel-mesh"
-                },
-                TransformDependences = new[]
-                {
+                ],
+                TransformDependences =
+                [
                     -1,
                     0,
                     1
-                },
+                ],
             };
 
             tank = await AddComponentAgent<Model, ModelDescription>("Tanks", "Tanks", tDesc);
@@ -121,19 +120,19 @@ namespace IntermediateSamples.SceneAnimationParts
             float l = 50f;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new() { Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new() { Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new() { Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new() { Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new() { Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
+                new() { Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
+                new() { Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
+                new() { Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneAnimationParts/Resources/d_road_asphalt_stripes_diffuse.dds";

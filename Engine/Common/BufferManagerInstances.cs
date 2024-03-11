@@ -8,16 +8,19 @@ namespace Engine.Common
     /// Vertex buffer description
     /// </summary>
     /// <typeparam name="T">Data type</typeparam>
-    public class BufferManagerInstances<T> : IEngineBufferDescriptor
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class BufferManagerInstances<T>(bool dynamic) : IEngineBufferDescriptor
         where T : struct, IInstacingData
     {
         /// <summary>
         /// Instancing descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> instancingDescriptors = new();
+        private readonly List<BufferDescriptor> instancingDescriptors = [];
 
         /// <inheritdoc/>
-        public bool Dynamic { get; private set; }
+        public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
@@ -50,14 +53,6 @@ namespace Engine.Common
         /// Vertex buffer binding index in the manager list
         /// </summary>
         public int BufferBindingIndex { get; set; } = -1;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public BufferManagerInstances(bool dynamic)
-        {
-            Dynamic = dynamic;
-        }
 
         /// <summary>
         /// Gets the buffer format stride
@@ -112,7 +107,7 @@ namespace Engine.Common
                 //Remove descriptor
                 instancingDescriptors.Remove(descriptor);
 
-                if (instancingDescriptors.Any())
+                if (instancingDescriptors.Count != 0)
                 {
                     //Reallocate descriptor offsets
                     instancingDescriptors[0].BufferOffset = 0;

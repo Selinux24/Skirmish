@@ -11,7 +11,12 @@ namespace Engine.Common
     /// <summary>
     /// Mesh data
     /// </summary>
-    public class DrawingData : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    /// <param name="description">Description</param>
+    public class DrawingData(Game game, DrawingDataDescription description) : IDisposable
     {
         /// <summary>
         /// Model initialization
@@ -48,7 +53,7 @@ namespace Engine.Common
         /// <summary>
         /// Meshes
         /// </summary>
-        private readonly Dictionary<string, MeshByMaterialCollection> meshes = new();
+        private readonly Dictionary<string, MeshByMaterialCollection> meshes = [];
         /// <summary>
         /// Materials dictionary
         /// </summary>
@@ -60,20 +65,20 @@ namespace Engine.Common
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
-        private readonly List<Triangle> hullMesh = new();
+        private readonly List<Triangle> hullMesh = [];
         /// <summary>
         /// Light list
         /// </summary>
-        private readonly List<ISceneLight> lights = new();
+        private readonly List<ISceneLight> lights = [];
 
         /// <summary>
         /// Game instance
         /// </summary>
-        protected readonly Game Game = null;
+        protected readonly Game Game = game;
         /// <summary>
         /// Description
         /// </summary>
-        protected readonly DrawingDataDescription Description;
+        protected readonly DrawingDataDescription Description = description;
 
         /// <summary>
         /// Hull mesh
@@ -82,7 +87,7 @@ namespace Engine.Common
         {
             get
             {
-                return hullMesh.ToArray();
+                return [.. hullMesh];
             }
         }
         /// <summary>
@@ -90,16 +95,6 @@ namespace Engine.Common
         /// </summary>
         public ISkinningData SkinningData { get; set; } = null;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="description">Description</param>
-        public DrawingData(Game game, DrawingDataDescription description)
-        {
-            Game = game;
-            Description = description;
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -219,7 +214,7 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         public async Task Initialize(string name, BufferDescriptor instancingBuffer = null)
         {
-            if (!meshes.Any())
+            if (meshes.Count == 0)
             {
                 return;
             }

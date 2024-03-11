@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -44,7 +43,7 @@ namespace Engine.Common
             blendState.AlphaToCoverageEnable = obj.AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = obj.IndependentBlendEnable;
 
-            if (obj.RenderTarget?.Any() == true)
+            if ((obj.RenderTarget?.Length ?? 0) != 0)
             {
                 int count = Math.Min(MaxRenderTargetDescriptions, obj.RenderTarget.Length);
 
@@ -108,7 +107,7 @@ namespace Engine.Common
             blendState.AlphaToCoverageEnable = AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = IndependentBlendEnable;
 
-            if (RenderTarget?.Any() == true)
+            if ((RenderTarget?.Length ?? 0) != 0)
             {
                 int count = Math.Min(MaxRenderTargetDescriptions, RenderTarget.Length);
 

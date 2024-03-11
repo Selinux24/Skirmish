@@ -20,7 +20,7 @@ namespace Engine
                 .OrderBy(c => c.GetUpdateOrder())
                 .ToList();
 
-            if (!evaluableCtrls.Any())
+            if (evaluableCtrls.Count == 0)
             {
                 return;
             }

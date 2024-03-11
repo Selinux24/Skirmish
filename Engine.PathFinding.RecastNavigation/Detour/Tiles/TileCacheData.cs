@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -48,9 +47,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
 
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
-            if (!cid.Any())
+            if (cid.Length == 0)
             {
-                return Array.Empty<TileCacheData>(); // empty
+                return []; // empty
             }
 
             foreach (var id in cid)
@@ -88,7 +87,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 tiles.Add(lset.Layers[i].Create(x, y, i));
             }
 
-            return tiles.ToArray();
+            return [.. tiles];
         }
 
         /// <inheritdoc/>

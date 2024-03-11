@@ -1160,7 +1160,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             path = null;
 
-            if (existing?.Any() != true || maxPath <= 0)
+            if ((existing?.Length ?? 0) == 0 || maxPath <= 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1308,7 +1308,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             while (node != null);
 
-            return pathList.ToArray();
+            return [.. pathList];
         }
         /// <summary>
         /// Builds the node partial path from node to next
@@ -1358,7 +1358,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            partialPath = pathList.ToArray();
+            partialPath = [.. pathList];
 
             return status;
         }
@@ -2022,7 +2022,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
                 // If target is inside the poly, stop search.
-                if (Utils.PointInPolygon2D(endPos, verts.ToArray()))
+                if (Utils.PointInPolygon2D(endPos, verts))
                 {
                     bestNode = curNode;
                     bestPos = endPos;
@@ -2656,9 +2656,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>The status flags for the query.</returns>
         public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
         {
-            segmentsRes = Array.Empty<Segment>();
+            segmentsRes = [];
 
-            var segments = new List<Segment>();
+            List<Segment> segments = [];
 
             var cur = m_nav.GetTileAndPolyByRef(r);
             if (cur.Ref == 0)
@@ -2787,7 +2787,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            segmentsRes = segments.ToArray();
+            segmentsRes = [.. segments];
 
             return status;
         }
@@ -3572,10 +3572,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
             ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
 
-            var smoothPath = new List<Vector3>
-            {
-                iterPos
-            };
+            List<Vector3> smoothPath = [iterPos];
 
             // Move towards target a small advancement at a time until target reached or
             // when ran out of memory to store the path.
@@ -3588,7 +3585,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            resultPath = smoothPath.ToArray();
+            resultPath = smoothPath;
 
             return smoothPath.Count > 0;
         }
@@ -3743,7 +3740,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             if (polys.Count < 0)
             {
-                resultPath = Array.Empty<Vector3>();
+                resultPath = [];
 
                 return false;
             }

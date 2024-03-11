@@ -23,7 +23,12 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Picking quad tree node
     /// </summary>
-    public class PickingQuadTreeNode<T> : PickingQuadTreeNode where T : IVertexList, IRayIntersectable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="quadTree">Quadtree</param>
+    /// <param name="parent">Parent node</param>
+    public class PickingQuadTreeNode<T>(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent) : PickingQuadTreeNode() where T : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// Recursive partition creation
@@ -56,7 +61,7 @@ namespace Engine.Collections.Generic
                 })
                 .ToList(); //Break the reference
 
-            if (!nodeItems.Any())
+            if (nodeItems.Count == 0)
             {
                 return null;
             }
@@ -106,7 +111,7 @@ namespace Engine.Collections.Generic
             var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), items, maxDepth, nextTreeDepth);
             var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), items, maxDepth, nextTreeDepth);
 
-            List<PickingQuadTreeNode<T>> childList = new();
+            List<PickingQuadTreeNode<T>> childList = [];
 
             if (topLeftChild != null) childList.Add(topLeftChild);
             if (topRightChild != null) childList.Add(topRightChild);
@@ -126,7 +131,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        private readonly List<PickingQuadTreeNode<T>> children = new();
+        private readonly List<PickingQuadTreeNode<T>> children = [];
 
         /// <summary>
         /// Bounding box
@@ -136,11 +141,11 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Parent
         /// </summary>
-        public PickingQuadTree<T> QuadTree { get; private set; }
+        public PickingQuadTree<T> QuadTree { get; private set; } = quadTree;
         /// <summary>
         /// Parent node
         /// </summary>
-        public PickingQuadTreeNode<T> Parent { get; private set; }
+        public PickingQuadTreeNode<T> Parent { get; private set; } = parent;
         /// <summary>
         /// Gets the child node al top lef position (from above)
         /// </summary>
@@ -226,16 +231,6 @@ namespace Engine.Collections.Generic
         internal IEnumerable<T> Items { get; set; }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="quadTree">Quadtree</param>
-        /// <param name="parent">Parent node</param>
-        public PickingQuadTreeNode(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent) : base()
-        {
-            QuadTree = quadTree;
-            Parent = parent;
-        }
-        /// <summary>
         /// Connect nodes in the grid
         /// </summary>
         public void ConnectNodes()
@@ -250,7 +245,7 @@ namespace Engine.Collections.Generic
             BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
             BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 return;
             }
@@ -413,7 +408,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(PickingRay ray, out PickingResult<T> result)
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 return PickNearestItem(ray, out result);
             }
@@ -457,7 +452,7 @@ namespace Engine.Collections.Generic
         private bool PickNearestNode(PickingRay ray, out PickingResult<T> result)
         {
             var boxHitsByDistance = FindContacts(ray);
-            if (!boxHitsByDistance.Any())
+            if (boxHitsByDistance.Count == 0)
             {
                 result = new PickingResult<T>
                 {
@@ -503,7 +498,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns a sorted by distance node list</returns>
         private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(PickingRay ray)
         {
-            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new();
+            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = [];
 
             foreach (var node in children)
             {
@@ -530,7 +525,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(PickingRay ray, out PickingResult<T> result)
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 return PickFirstItem(ray, out result);
             }
@@ -608,7 +603,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 return PickAllItem(ray, out results);
             }
@@ -625,7 +620,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         private bool PickAllItem(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            results = Enumerable.Empty<PickingResult<T>>();
+            results = [];
 
             if (!Items.Any())
             {
@@ -650,7 +645,7 @@ namespace Engine.Collections.Generic
         {
             bool intersect = false;
 
-            List<PickingResult<T>> hits = new();
+            List<PickingResult<T>> hits = [];
 
             foreach (var node in children)
             {
@@ -689,9 +684,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            List<BoundingBox> bboxes = new();
+            List<BoundingBox> bboxes = [];
 
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 bboxes.Add(BoundingBox);
 
@@ -714,7 +709,7 @@ namespace Engine.Collections.Generic
         /// <returns></returns>
         public int GetMaxLevel()
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 return Level;
             }
@@ -729,9 +724,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the volume</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
         {
-            List<PickingQuadTreeNode<T>> nodes = new();
+            List<PickingQuadTreeNode<T>> nodes = [];
 
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 if (volume.Contains(BoundingBox) != ContainmentType.Disjoint)
                 {
@@ -750,7 +745,7 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets all leaf nodes
@@ -758,9 +753,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
         {
-            List<PickingQuadTreeNode<T>> nodes = new();
+            List<PickingQuadTreeNode<T>> nodes = [];
 
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 nodes.Add(this);
             }
@@ -776,7 +771,7 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Gets node at position
@@ -785,7 +780,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf node which contains the specified position</returns>
         public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
@@ -810,7 +805,7 @@ namespace Engine.Collections.Generic
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (!children.Any())
+            if (children.Count == 0)
             {
                 //Leaf node
                 return $"{nameof(PickingQuadTreeNode<T>)} {Id}.Leaf; Depth {Level}; Items {Items.Count()}";

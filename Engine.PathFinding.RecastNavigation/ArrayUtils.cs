@@ -95,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            if (array?.Any() != true)
+            if ((array?.Length ?? 0) == 0)
             {
                 return;
             }

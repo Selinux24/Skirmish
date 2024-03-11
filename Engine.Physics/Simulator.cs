@@ -9,7 +9,10 @@ namespace Engine.Physics
     /// <summary>
     /// Simulator
     /// </summary>
-    public sealed class Simulator
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public sealed class Simulator(BoundingBox worldBounds, int itemsPerNode)
     {
         /// <summary>
         /// Maximum iterations in the update pass
@@ -23,27 +26,27 @@ namespace Engine.Physics
         /// <summary>
         /// Physics object list
         /// </summary>
-        private readonly List<IPhysicsObject> physicsObjects = new();
+        private readonly List<IPhysicsObject> physicsObjects = [];
         /// <summary>
         /// Global force generator list
         /// </summary>
-        private readonly List<IGlobalForceGenerator> globalForceGenerators = new();
+        private readonly List<IGlobalForceGenerator> globalForceGenerators = [];
         /// <summary>
         /// Local force generator list
         /// </summary>
-        private readonly List<ILocalForceGenerator> localForceGenerators = new();
+        private readonly List<ILocalForceGenerator> localForceGenerators = [];
         /// <summary>
         /// Contact generator list
         /// </summary>
-        private readonly List<IContactGenerator> contactGenerators = new();
+        private readonly List<IContactGenerator> contactGenerators = [];
         /// <summary>
         /// Space partitioning OcTree
         /// </summary>
-        private readonly OcTree<IPhysicsObject> octree;
+        private readonly OcTree<IPhysicsObject> octree = new(worldBounds, itemsPerNode);
         /// <summary>
         /// Broad phase contact pair list
         /// </summary>
-        private readonly List<ContactPair> contactPairs = new();
+        private readonly List<ContactPair> contactPairs = [];
 
         /// <summary>
         /// Simulation velocity
@@ -70,14 +73,6 @@ namespace Engine.Physics
         /// Gets the contact generators count
         /// </summary>
         public int ContactGeneratorsCount { get => contactGenerators?.Count ?? 0; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Simulator(BoundingBox worldBounds, int itemsPerNode)
-        {
-            octree = new OcTree<IPhysicsObject>(worldBounds, itemsPerNode);
-        }
 
         /// <summary>
         /// Update physics
@@ -257,7 +252,7 @@ namespace Engine.Physics
         /// </summary>
         private void NarrowPhase()
         {
-            if (!contactPairs.Any())
+            if (contactPairs.Count == 0)
             {
                 return;
             }
