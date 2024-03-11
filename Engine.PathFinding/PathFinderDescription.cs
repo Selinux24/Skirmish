@@ -6,27 +6,21 @@ namespace Engine.PathFinding
     /// <summary>
     /// Path finder grid description
     /// </summary>
-    public class PathFinderDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="settings">Settings</param>
+    /// <param name="input">Geometry input</param>
+    public class PathFinderDescription(PathFinderSettings settings, PathFinderInput input)
     {
         /// <summary>
         /// Graph type
         /// </summary>
-        public PathFinderSettings Settings { get; protected set; }
+        public PathFinderSettings Settings { get; protected set; } = settings ?? throw new ArgumentNullException(nameof(settings));
         /// <summary>
         /// Path finder input
         /// </summary>
-        public PathFinderInput Input { get; protected set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="settings">Settings</param>
-        /// <param name="input">Geometry input</param>
-        public PathFinderDescription(PathFinderSettings settings, PathFinderInput input)
-        {
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            Input = input ?? throw new ArgumentNullException(nameof(input));
-        }
+        public PathFinderInput Input { get; protected set; } = input ?? throw new ArgumentNullException(nameof(input));
 
         /// <summary>
         /// Builds a graph from this settings

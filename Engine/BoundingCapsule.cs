@@ -36,25 +36,25 @@ namespace Engine
 
             for (int i = 0; i < points.Count(); i++)
             {
-                var c = points.ElementAt(i);
+                var p = points.ElementAt(i);
 
-                if (c.X < minX) minX = c.X;
-                if (c.X > maxX) maxX = c.X;
+                if (p.X < minX) minX = p.X;
+                if (p.X > maxX) maxX = p.X;
 
-                if (c.Y < minY) minY = c.Y;
-                if (c.Y > maxY) maxY = c.Y;
+                if (p.Y < minY) minY = p.Y;
+                if (p.Y > maxY) maxY = p.Y;
 
-                if (c.Z < minZ) minZ = c.Z;
-                if (c.Z > maxZ) maxZ = c.Z;
+                if (p.Z < minZ) minZ = p.Z;
+                if (p.Z > maxZ) maxZ = p.Z;
             }
 
-            float height = maxY - minY;
-            float radius = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
+            float h = maxY - minY;
+            float r = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
 
             //Find center
-            Vector3 center = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
+            Vector3 c = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
 
-            return new BoundingCapsule(center, radius, height);
+            return new BoundingCapsule(c, r, h);
         }
         /// <summary>
         /// Constructs a BoundingCapsule that fully contains the given points
