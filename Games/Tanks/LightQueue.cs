@@ -73,11 +73,11 @@ namespace Tanks
         /// <summary>
         /// Lights collection
         /// </summary>
-        private static readonly List<SceneLightPoint> lights = new();
+        private static readonly List<SceneLightPoint> lights = [];
         /// <summary>
         /// Tweeners collection
         /// </summary>
-        private static readonly List<LightTweener> lightTweeners = new();
+        private static readonly List<LightTweener> lightTweeners = [];
 
         /// <summary>
         /// Initializes the queue
@@ -97,7 +97,7 @@ namespace Tanks
         /// <param name="maxDuration">Maximum duration</param>
         public static void QueueLight(IGameTime gameTime, Vector3 position, LightTweenDescription description, float maxDuration)
         {
-            if (!lights.Any())
+            if (lights.Count == 0)
             {
                 return;
             }
@@ -130,7 +130,7 @@ namespace Tanks
         /// <param name="gameTime">Game time</param>
         public static void Update(IGameTime gameTime)
         {
-            if (!lightTweeners.Any())
+            if (lightTweeners.Count == 0)
             {
                 return;
             }

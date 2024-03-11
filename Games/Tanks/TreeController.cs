@@ -13,11 +13,11 @@ namespace Tanks
         /// <summary>
         /// Controller list
         /// </summary>
-        private static readonly List<IController> trees = new();
+        private static readonly List<IController> trees = [];
         /// <summary>
         /// Broken trees
         /// </summary>
-        private static readonly List<ModelInstance> brokenTrees = new();
+        private static readonly List<ModelInstance> brokenTrees = [];
 
         /// <summary>
         /// Adds a tree to the controller
@@ -50,14 +50,14 @@ namespace Tanks
         /// </summary>
         public static void Update(IGameTime gameTime)
         {
-            if (!trees.Any())
+            if (trees.Count == 0)
             {
                 return;
             }
 
             trees.RemoveAll(controller => !controller.Active);
 
-            if (!trees.Any())
+            if (trees.Count == 0)
             {
                 return;
             }

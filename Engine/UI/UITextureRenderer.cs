@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
@@ -12,7 +11,13 @@ namespace Engine.UI
     /// <summary>
     /// Render to texture control
     /// </summary>
-    public sealed class UITextureRenderer : UIControl<UITextureRendererDescription>
+    /// <remarks>
+    /// Contructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextureRenderer(Scene scene, string id, string name) : UIControl<UITextureRendererDescription>(scene, id, name)
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -25,7 +30,7 @@ namespace Engine.UI
         /// <summary>
         /// Effect
         /// </summary>
-        private readonly BuiltInSpriteTexture spriteDrawer;
+        private readonly BuiltInSpriteTexture spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
 
         /// <summary>
         /// Texture
@@ -50,17 +55,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Contructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextureRenderer(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-            spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -98,7 +92,7 @@ namespace Engine.UI
         /// <param name="textures">Texture names</param>
         private async Task<EngineShaderResourceView> InitializeTexture(string contentPath, string[] textures)
         {
-            if (textures?.Any() != true)
+            if ((textures?.Length ?? 0) == 0)
             {
                 return null;
             }

@@ -402,7 +402,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 root.LayerId = layerId;
                 root.IsBase = true;
 
-                stack.Clear();
                 stack.Add(i);
 
                 while (stack.Count != 0)

@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public sealed class UIPanel : UIControl<UIPanelDescription>, IScrollable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIPanel(Scene scene, string id, string name) : UIControl<UIPanelDescription>(scene, id, name), IScrollable
     {
         /// <summary>
         /// Background
@@ -108,18 +114,6 @@ namespace Engine.UI
         /// </summary>
         public Vector2 CellSize { get { return gridLayout.CurrentCellSize; } }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIPanel(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task ReadAssets(UIPanelDescription description)
         {
@@ -133,6 +127,9 @@ namespace Engine.UI
 
             SetGridLayout(Description.GridLayout);
         }
+        /// <summary>
+        /// Creates the background sprite
+        /// </summary>
         private async Task<Sprite> CreateBackground()
         {
             return await Scene.CreateComponent<Sprite, SpriteDescription>(
@@ -144,7 +141,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         protected override void UpdateInternalState()
         {
-            var childs = Children.Where(c => c != background).ToArray();
+            var childs = Children.Where(c => c != background);
             if (childs.Any())
             {
                 gridLayout = GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);

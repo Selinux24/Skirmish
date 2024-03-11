@@ -35,21 +35,14 @@ namespace Engine.BuiltIn.PostProcess
                 // Copy active tasks
                 var activeTasks = tasks.ToList();
 
-                var toDelete = new List<Func<float, bool>>();
-
                 activeTasks.ForEach(t =>
                 {
                     bool finished = t.Invoke(gameTime.ElapsedSeconds);
                     if (finished)
                     {
-                        toDelete.Add(t);
+                        tasks.Remove(t);
                     }
                 });
-
-                if (toDelete.Count != 0)
-                {
-                    toDelete.ForEach(t => tasks.Remove(t));
-                }
             }
 
             var emptyControls = taskList.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();

@@ -11,7 +11,13 @@ namespace Engine.UI
     /// <summary>
     /// Minimap
     /// </summary>
-    public sealed class UIMinimap : Drawable<UIMinimapDescription>, IScreenFitted
+    /// <remarks>
+    /// Contructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIMinimap(Scene scene, string id, string name) : Drawable<UIMinimapDescription>(scene, id, name), IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
@@ -40,24 +46,13 @@ namespace Engine.UI
         /// <summary>
         /// Drawables
         /// </summary>
-        private readonly List<IDrawable> drawables = new();
+        private readonly List<IDrawable> drawables = [];
 
         /// <summary>
         /// Back color
         /// </summary>
         public Color BackColor { get; set; }
 
-        /// <summary>
-        /// Contructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIMinimap(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -167,7 +162,7 @@ namespace Engine.UI
                 return false;
             }
 
-            if (!drawables.Any())
+            if (drawables.Count == 0)
             {
                 return false;
             }

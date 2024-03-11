@@ -11,7 +11,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface control
     /// </summary>
-    public abstract class UIControl<T> : Drawable<T>, IUIControl, IScreenFitted where T : UIControlDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class UIControl<T>(Scene scene, string id, string name) : Drawable<T>(scene, id, name), IUIControl, IScreenFitted where T : UIControlDescription
     {
         /// <inheritdoc/>
         public event MouseEventHandler MouseOver;
@@ -41,7 +47,7 @@ namespace Engine.UI
         /// <summary>
         /// Children collection
         /// </summary>
-        private readonly List<IUIControl> children = new();
+        private readonly List<IUIControl> children = [];
         /// <summary>
         /// Top position
         /// </summary>
@@ -139,7 +145,7 @@ namespace Engine.UI
         {
             get
             {
-                return children.ToArray();
+                return [.. children];
             }
         }
 
@@ -521,17 +527,6 @@ namespace Engine.UI
         /// <inheritdoc/>
         public string TooltipText { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected UIControl(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -599,11 +594,10 @@ namespace Engine.UI
                 UpdateInternals = false;
             }
 
-            var updatables = children.OfType<IUpdatable>().ToList();
-            if (updatables.Any())
-            {
-                updatables.ForEach(c => c.Update(context));
-            }
+            children
+                .OfType<IUpdatable>()
+                .ToList()
+                .ForEach(c => c.Update(context));
         }
         /// <summary>
         /// Updates the internal transform
@@ -630,10 +624,7 @@ namespace Engine.UI
                 Manipulator.Update2D(parentPos);
             }
 
-            if (children.Any())
-            {
-                children.ForEach(c => c.Invalidate());
-            }
+            children.ForEach(c => c.Invalidate());
         }
         /// <summary>
         /// Updates the control position, based on the specified anchor value
@@ -718,14 +709,9 @@ namespace Engine.UI
                 return false;
             }
 
-            var drawables = children.OfType<IDrawable>().ToList();
-            if (!drawables.Any())
-            {
-                return false;
-            }
-
             bool drawn = false;
-            foreach (var item in drawables)
+
+            foreach (var item in children.OfType<IDrawable>())
             {
                 drawn = item.Draw(context) || drawn;
             }
@@ -880,10 +866,7 @@ namespace Engine.UI
         {
             UpdateInternals = true;
 
-            if (children.Any())
-            {
-                children.ForEach(c => c.Resize());
-            }
+            children.ForEach(c => c.Resize());
         }
 
         /// <inheritdoc/>

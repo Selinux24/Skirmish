@@ -9,26 +9,21 @@ namespace TerrainSamples.SceneRts.AI
     /// <summary>
     /// Brain controller
     /// </summary>
-    public class Brain
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    public class Brain(WalkableScene scene)
     {
         /// <summary>
         /// Groups dictionary
         /// </summary>
-        private readonly Dictionary<int, List<AIAgent>> groups = new();
+        private readonly Dictionary<int, List<AIAgent>> groups = [];
 
         /// <summary>
         /// Ground instance
         /// </summary>
-        public WalkableScene Scene { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        public Brain(WalkableScene scene)
-        {
-            Scene = scene;
-        }
+        public WalkableScene Scene { get; set; } = scene;
 
         /// <summary>
         /// Adds agents to the brain groups
@@ -39,7 +34,7 @@ namespace TerrainSamples.SceneRts.AI
         {
             if (!groups.TryGetValue(index, out var group))
             {
-                group = new();
+                group = [];
                 groups.Add(index, group);
             }
 
@@ -62,7 +57,7 @@ namespace TerrainSamples.SceneRts.AI
                 }
             }
 
-            return targets.ToArray();
+            return [.. targets];
         }
 
         /// <summary>
@@ -72,7 +67,7 @@ namespace TerrainSamples.SceneRts.AI
         public void Update(IGameTime gameTime)
         {
             var agents = groups.Values.SelectMany(a => a.ToList()).ToList();
-            if (!agents.Any())
+            if (agents.Count == 0)
             {
                 return;
             }

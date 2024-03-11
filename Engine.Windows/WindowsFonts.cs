@@ -210,7 +210,7 @@ namespace Engine.Windows
                 return null;
             }
 
-            var font = fonts.FirstOrDefault(fnt =>
+            var font = Array.Find(fonts, fnt =>
             {
                 return Array.Exists(FontFamily.Families, f => string.Equals(f.Name, fnt, StringComparison.OrdinalIgnoreCase));
             });

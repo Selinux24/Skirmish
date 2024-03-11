@@ -64,9 +64,9 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = await DrawingData.Read(game, content, desc);
+                var dData = await DrawingData.Read(game, content, desc);
 
-                await drawingData.Initialize(name);
+                await dData.Initialize(name);
 
                 watch.Stop();
 
@@ -74,7 +74,7 @@ namespace Engine
                 {
                     Id = node.Id,
                     Duration = watch.Elapsed,
-                    Patch = new SceneryPatch(drawingData),
+                    Patch = new SceneryPatch(dData),
                 };
             }
 
