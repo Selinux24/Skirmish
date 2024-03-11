@@ -53,7 +53,7 @@ namespace Engine.Content
             {
                 var entries = ReadEntryNames(file);
 
-                return entries.FirstOrDefault(e => e.Equals(entryName, StringComparison.OrdinalIgnoreCase));
+                return entries.Find(e => e.Equals(entryName, StringComparison.OrdinalIgnoreCase));
             }
             /// <summary>
             /// Gets if an entry name eixts into the zip file, comparing names using ordinal ignore case
