@@ -31,8 +31,8 @@ namespace PhysicsSamples.ScenePhysics
         private readonly ExplosionDescription bigExplosionTemplate = ExplosionDescription.CreateBigExplosion();
         private Explosion lastExplosion = null;
 
-        private readonly ConcurrentBag<ColliderData> colliders = new();
-        private readonly ConcurrentBag<IContactGenerator> contactGenerators = new();
+        private readonly ConcurrentBag<ColliderData> colliders = [];
+        private readonly ConcurrentBag<IContactGenerator> contactGenerators = [];
 
         private bool gameReady = false;
 
@@ -54,8 +54,7 @@ namespace PhysicsSamples.ScenePhysics
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTexts(),
                     InitializeLineDrawer(),
                     InitializeTerrain(),
@@ -66,7 +65,7 @@ namespace PhysicsSamples.ScenePhysics
                     InitializeCapsules(),
                     InitializeJoint(),
                     InitializeRod(),
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTexts()
@@ -607,7 +606,7 @@ namespace PhysicsSamples.ScenePhysics
 
             var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
             var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
-            lineDrawer.AddPrimitives(Color4.White, new[] { lJoint, rJoint });
+            lineDrawer.AddPrimitives(Color4.White, [lJoint, rJoint]);
         }
         private void UpdateText()
         {
