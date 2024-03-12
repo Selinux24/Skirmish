@@ -50,8 +50,6 @@ namespace Engine.Physics.EPA
             var faces = Initialize(simplex, out int num_faces);
             int closest_face = 0;
 
-            var loose_edges = new Edge[EPA_MAX_NUM_LOOSE_EDGES];
-
             for (int iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++)
             {
                 // Find face that's closest to origin
@@ -59,7 +57,7 @@ namespace Engine.Physics.EPA
 
                 // Search normal to face that's closest to origin
                 var search_dir = faces[closest_face].Normal;
-                var p = new GJKSupportPoint(coll1, coll2, search_dir);
+                GJKSupportPoint p = new(coll1, coll2, search_dir);
 
                 float sdist = Vector3.Dot(p.Point, search_dir);
                 if (sdist - min_dist < EPA_TOLERANCE)
@@ -68,78 +66,11 @@ namespace Engine.Physics.EPA
                     return (faces[closest_face], sdist);
                 }
 
-                // Keep track of edges we need to fix after removing faces
-                int num_loose_edges = 0;
-
                 // Find all triangles that are facing p
-                for (int i = 0; i < num_faces; i++)
-                {
-                    if (Vector3.Dot(faces[i].Normal, p.Point - faces[i].A.Point) <= 0)
-                    {
-                        continue;
-                    }
-
-                    // Triangle i faces p, remove it
-                    // Add removed triangle's edges to loose edge list.
-                    // If it's already there, remove it (both triangles it belonged to are gone)
-
-                    // Three edges per face
-                    for (int j = 0; j < 3; j++)
-                    {
-                        var current_edge = faces[i].GetEdge(j);
-                        bool found_edge = false;
-
-                        //Check if current edge is already in list
-                        for (int k = 0; k < num_loose_edges; k++)
-                        {
-                            if (loose_edges[k].B.Point == current_edge.A.Point && loose_edges[k].A.Point == current_edge.B.Point)
-                            {
-                                // Edge is already in the list, remove it
-                                // THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
-                                // THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
-                                // Should be true provided every triangle is wound CCW)
-                                loose_edges[k] = loose_edges[num_loose_edges - 1]; //Overwrite current edge with last edge in list
-                                num_loose_edges--;
-                                found_edge = true;
-
-                                //Exit loop because edge can only be shared once
-                                break;
-                            }
-                        }
-
-                        if (!found_edge)
-                        {
-                            // Add current edge to list
-                            if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES) break;
-                            loose_edges[num_loose_edges] = current_edge;
-                            num_loose_edges++;
-                        }
-                    }
-
-                    // Remove triangle i from list
-                    faces[i] = faces[num_faces - 1];
-                    num_faces--;
-                    i--;
-                }
+                var (loose_edges, num_loose_edges) = FindTriangles(faces, ref num_faces, p);
 
                 // Reconstruct polytope with p added
-                for (int i = 0; i < num_loose_edges; i++)
-                {
-                    if (num_faces >= EPA_MAX_NUM_FACES)
-                    {
-                        break;
-                    }
-
-                    faces[num_faces] = new Face(loose_edges[i].A, loose_edges[i].B, p);
-
-                    // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
-                    if (Vector3.Dot(faces[num_faces].A.Point, faces[num_faces].Normal) + EPA_BIAS < 0)
-                    {
-                        faces[num_faces].Reverse();
-                    }
-
-                    num_faces++;
-                }
+                ReconstructPolytope(faces, ref num_faces, loose_edges, num_loose_edges, p);
             }
 
 #if DEBUG
@@ -189,6 +120,116 @@ namespace Engine.Physics.EPA
                     min_dist = dist;
                     closest_face = i;
                 }
+            }
+        }
+        /// <summary>
+        /// Finds all triangles that are facing p
+        /// </summary>
+        /// <param name="faces">Face list</param>
+        /// <param name="num_faces">Number of faces in the list</param>
+        /// <param name="p">Support point</param>
+        private static (Edge[] edges, int num_edges) FindTriangles(Face[] faces, ref int num_faces, GJKSupportPoint p)
+        {
+            Edge[] loose_edges = new Edge[EPA_MAX_NUM_LOOSE_EDGES];
+
+            // Keep track of edges we need to fix after removing faces
+            int num_loose_edges = 0;
+
+            for (int i = 0; i < num_faces; i++)
+            {
+                if (Vector3.Dot(faces[i].Normal, p.Point - faces[i].A.Point) <= 0)
+                {
+                    continue;
+                }
+
+                // Triangle i faces p, remove it
+                // Add removed triangle's edges to loose edge list.
+                // If it's already there, remove it (both triangles it belonged to are gone)
+
+                // Three edges per face
+                for (int j = 0; j < 3; j++)
+                {
+                    var current_edge = faces[i].GetEdge(j);
+
+                    //Check if current edge is already in list
+                    bool found_edge = FindEdge(current_edge, loose_edges, ref num_loose_edges);
+                    if (found_edge)
+                    {
+                        continue;
+                    }
+
+                    if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES)
+                    {
+                        break;
+                    }
+
+                    // Add current edge to list
+                    loose_edges[num_loose_edges++] = current_edge;
+                }
+
+                // Remove triangle i from list
+                faces[i] = faces[num_faces - 1];
+                num_faces--;
+                i--;
+            }
+
+            return (loose_edges, num_loose_edges);
+        }
+        /// <summary>
+        /// Checks if the specified edge is already in list
+        /// </summary>
+        /// <param name="current_edge">Edge to test</param>
+        /// <param name="loose_edges">Loose edges</param>
+        /// <param name="num_loose_edges">Number of loose edges in the list</param>
+        private static bool FindEdge(Edge current_edge, Edge[] loose_edges, ref int num_loose_edges)
+        {
+            bool found_edge = false;
+
+            for (int k = 0; k < num_loose_edges; k++)
+            {
+                if (loose_edges[k].B.Point == current_edge.A.Point && loose_edges[k].A.Point == current_edge.B.Point)
+                {
+                    // Edge is already in the list, remove it
+                    // THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
+                    // THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
+                    // Should be true provided every triangle is wound CCW)
+                    loose_edges[k] = loose_edges[num_loose_edges - 1]; //Overwrite current edge with last edge in list
+                    num_loose_edges--;
+                    found_edge = true;
+
+                    //Exit loop because edge can only be shared once
+                    break;
+                }
+            }
+
+            return found_edge;
+        }
+        /// <summary>
+        /// Reconstructs polytope with p added
+        /// </summary>
+        /// <param name="faces">Face list</param>
+        /// <param name="num_faces">Number of faces in the list</param>
+        /// <param name="loose_edges">Loose edges</param>
+        /// <param name="num_loose_edges">Number of loose edges in the list</param>
+        /// <param name="p">Support point</param>
+        private static void ReconstructPolytope(Face[] faces, ref int num_faces, Edge[] loose_edges, int num_loose_edges, GJKSupportPoint p)
+        {
+            for (int i = 0; i < num_loose_edges; i++)
+            {
+                if (num_faces >= EPA_MAX_NUM_FACES)
+                {
+                    break;
+                }
+
+                faces[num_faces] = new(loose_edges[i].A, loose_edges[i].B, p);
+
+                // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
+                if (Vector3.Dot(faces[num_faces].A.Point, faces[num_faces].Normal) + EPA_BIAS < 0)
+                {
+                    faces[num_faces].Reverse();
+                }
+
+                num_faces++;
             }
         }
     }

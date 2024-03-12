@@ -138,7 +138,7 @@ namespace Engine.Audio
 
                 soundList.Clear();
 
-                gameAudio.Dispose();
+                gameAudio?.Dispose();
             }
         }
 
