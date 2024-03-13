@@ -187,7 +187,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Find nearest position on navmesh and place the agent there.
             Status status = m_navquery.FindNearestPoly(
-                m_filters[param.QueryFilterTypeIndex], pos, m_agentPlacementHalfExtents,
+                pos, m_agentPlacementHalfExtents, m_filters[param.QueryFilterTypeIndex],
                 out int r, out Vector3 nearest);
             if (status != Status.DT_SUCCESS)
             {
@@ -350,12 +350,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // First check that the current location is valid.
             Vector3 agentPos = ag.NPos;
             int agentRef = ag.Corridor.GetFirstPoly();
-            if (!m_navquery.IsValidPolyRef(m_filters[ag.Params.QueryFilterTypeIndex], agentRef))
+            if (!m_navquery.IsValidPolyRef(agentRef, m_filters[ag.Params.QueryFilterTypeIndex]))
             {
                 // Current location is not valid, try to reposition.
                 // FIX: this can snap agents, how to handle that?
                 m_navquery.FindNearestPoly(
-                    m_filters[ag.Params.QueryFilterTypeIndex], ag.NPos, m_agentPlacementHalfExtents,
+                    ag.NPos, m_agentPlacementHalfExtents, m_filters[ag.Params.QueryFilterTypeIndex],
                     out agentRef, out Vector3 nearest);
 
                 agentPos = nearest;
@@ -390,11 +390,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             if (ag.TargetState != MoveRequestState.DT_CROWDAGENT_TARGET_NONE &&
                 ag.TargetState != MoveRequestState.DT_CROWDAGENT_TARGET_FAILED)
             {
-                if (!m_navquery.IsValidPolyRef(m_filters[ag.Params.QueryFilterTypeIndex], ag.TargetRef))
+                if (!m_navquery.IsValidPolyRef(ag.TargetRef, m_filters[ag.Params.QueryFilterTypeIndex]))
                 {
                     // Current target is not valid, try to reposition.
                     m_navquery.FindNearestPoly(
-                        m_filters[ag.Params.QueryFilterTypeIndex], ag.TargetPos, m_agentPlacementHalfExtents,
+                        ag.TargetPos, m_agentPlacementHalfExtents, m_filters[ag.Params.QueryFilterTypeIndex],
                         out int r, out Vector3 nearest);
 
                     ag.TargetRef = r;
@@ -506,8 +506,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             SimplePath reqPath;
 
             // Quick search towards the goal.
+            PathPoint start = new() { Ref = path[0], Pos = ag.NPos };
+            PathPoint end = new() { Ref = ag.TargetRef, Pos = ag.TargetPos };
+            m_navquery.InitSlicedFindPath(m_filters[ag.Params.QueryFilterTypeIndex], start, end);
             const int MAX_ITER = 20;
-            m_navquery.InitSlicedFindPath(m_filters[ag.Params.QueryFilterTypeIndex], path[0], ag.TargetRef, ag.NPos, ag.TargetPos);
             m_navquery.UpdateSlicedFindPath(MAX_ITER, out _);
 
             Status qStatus;
