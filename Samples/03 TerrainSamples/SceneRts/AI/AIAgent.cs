@@ -85,11 +85,11 @@ namespace TerrainSamples.SceneRts.AI
             }
         }
         /// <summary>
-        /// Gets wether the agent AI is active
+        /// Gets whether the agent AI is active
         /// </summary>
         public bool ActiveAI { get; set; }
         /// <summary>
-        /// Gets wether the agent is active
+        /// Gets whether the agent is active
         /// </summary>
         public bool Active
         {
@@ -103,7 +103,7 @@ namespace TerrainSamples.SceneRts.AI
             }
         }
         /// <summary>
-        /// Gets wether the agent is visible
+        /// Gets whether the agent is visible
         /// </summary>
         public bool Visible
         {
@@ -395,7 +395,7 @@ namespace TerrainSamples.SceneRts.AI
             });
         }
         /// <summary>
-        /// Gets wether the specified target is on sight
+        /// Gets whether the specified target is on sight
         /// </summary>
         /// <param name="target">Target</param>
         /// <returns>Returns true if the target is on sight</returns>
@@ -417,7 +417,7 @@ namespace TerrainSamples.SceneRts.AI
             return false;
         }
         /// <summary>
-        /// Gets wether the specified target is on range
+        /// Gets whether the specified target is on range
         /// </summary>
         /// <param name="target">Target</param>
         /// <returns>Returns true if the target is on range</returns>
@@ -438,7 +438,7 @@ namespace TerrainSamples.SceneRts.AI
             return false;
         }
         /// <summary>
-        /// Gets wether the specified target is too hard
+        /// Gets whether the specified target is too hard
         /// </summary>
         /// <param name="target">Target</param>
         /// <returns>Returns true if the target is too hard</returns>

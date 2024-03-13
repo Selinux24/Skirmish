@@ -173,7 +173,7 @@ namespace Engine.Helpers.DDS
         public uint ABitMask;
 
         /// <summary>
-        /// Gets wether this pixel format has a DDS_HEADER_DXT10 structure
+        /// Gets whether this pixel format has a DDS_HEADER_DXT10 structure
         /// </summary>
         public readonly bool IsDX10()
         {

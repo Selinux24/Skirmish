@@ -337,7 +337,7 @@ namespace Engine.PathFinding.RecastNavigation
             return polys;
         }
         /// <summary>
-        /// Gets wether the specified indexed triangle contains different indexes
+        /// Gets whether the specified indexed triangle contains different indexes
         /// </summary>
         /// <param name="t">Indexed triangle</param>
         private static bool ValidateIndex(Int3 t)
@@ -350,7 +350,7 @@ namespace Engine.PathFinding.RecastNavigation
             return true;
         }
         /// <summary>
-        /// Gets wether the specified indexed triangle has multiple regions
+        /// Gets whether the specified indexed triangle has multiple regions
         /// </summary>
         /// <param name="hreg">Regions</param>
         /// <param name="t">Indexed triangle</param>

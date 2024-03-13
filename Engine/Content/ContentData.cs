@@ -993,7 +993,7 @@ namespace Engine.Content
         /// Get vertex type from geometry
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
-        /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
+        /// <param name="isSkinned">Sets whether the current geometry has skinning data or not</param>
         /// <param name="loadNormalMaps">Load normal maps flag</param>
         /// <param name="materials">Material dictionary</param>
         /// <param name="material">Material name</param>

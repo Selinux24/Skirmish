@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int Id { get; set; }
         /// <summary>
-        /// Gets wether the node is open or not
+        /// Gets whether the node is open or not
         /// </summary>
         public bool IsOpen
         {
@@ -46,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
         /// <summary>
-        /// Gets wether the node is closed or not
+        /// Gets whether the node is closed or not
         /// </summary>
         public bool IsClosed
         {

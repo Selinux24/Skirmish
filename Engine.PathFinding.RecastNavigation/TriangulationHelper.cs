@@ -170,7 +170,7 @@ namespace Engine.PathFinding.RecastNavigation
             return mini;
         }
         /// <summary>
-        /// Gets wether p is into the ab,ac cone
+        /// Gets whether p is into the ab,ac cone
         /// </summary>
         /// <param name="ca">A point</param>
         /// <param name="cb">B point</param>
@@ -189,7 +189,7 @@ namespace Engine.PathFinding.RecastNavigation
             return !(LeftOn2D(ca, p, cb) && LeftOn2D(p, ca, cc));
         }
         /// <summary>
-        /// Gets wether j is into the i.i-1,i-i+1 cone
+        /// Gets whether j is into the i.i-1,i-i+1 cone
         /// </summary>
         /// <param name="i">Initial vertex index</param>
         /// <param name="j">Point to test index</param>

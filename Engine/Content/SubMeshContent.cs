@@ -11,7 +11,15 @@ namespace Engine.Content
     /// <summary>
     /// Sub mesh content
     /// </summary>
-    public class SubMeshContent
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="topology">Submesh topology</param>
+    /// <param name="material">Material name</param>
+    /// <param name="isTextured">Is textured mesh</param>
+    /// <param name="isHull">Is hull mesh</param>
+    /// <param name="transform">Transform</param>
+    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
     {
         /// <summary>
         /// Global id counter
@@ -29,39 +37,39 @@ namespace Engine.Content
         /// <summary>
         /// Submesh id
         /// </summary>
-        public int Id { get; private set; }
+        public int Id { get; private set; } = GetNextId();
         /// <summary>
         /// Vertex Topology
         /// </summary>
-        public Topology Topology { get; set; }
+        public Topology Topology { get; set; } = topology;
         /// <summary>
         /// Vertex type
         /// </summary>
         public VertexTypes VertexType { get; private set; } = VertexTypes.Unknown;
         /// <summary>
-        /// Gets or sets wether the submesh has attached a textured material
+        /// Gets or sets whether the submesh has attached a textured material
         /// </summary>
-        public bool Textured { get; private set; } = false;
+        public bool Textured { get; private set; } = isTextured;
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexData[] Vertices { get; private set; } = Array.Empty<VertexData>();
+        public VertexData[] Vertices { get; private set; } = [];
         /// <summary>
         /// Indices
         /// </summary>
-        public uint[] Indices { get; private set; } = Array.Empty<uint>();
+        public uint[] Indices { get; private set; } = [];
         /// <summary>
         /// Material
         /// </summary>
-        public string Material { get; set; }
+        public string Material { get; set; } = material;
         /// <summary>
         /// Gets or sets whether the current submesh content is a hull mesh
         /// </summary>
-        public bool IsHull { get; set; }
+        public bool IsHull { get; set; } = isHull;
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; private set; }
+        public Matrix Transform { get; private set; } = transform;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -132,31 +140,12 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="topology">Submesh topology</param>
-        /// <param name="material">Material name</param>
-        /// <param name="isTextured">Is textured mesh</param>
-        /// <param name="isHull">Is hull mesh</param>
-        /// <param name="transform">Transform</param>
-        public SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
-        {
-            Id = GetNextId();
-
-            Topology = topology;
-            Material = material;
-            Textured = isTextured;
-            IsHull = isHull;
-            Transform = transform;
-        }
-
-        /// <summary>
         /// Sets the submesh vertex list
         /// </summary>
         /// <param name="vertices">Vertex list</param>
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
-            Vertices = vertices?.ToArray() ?? Array.Empty<VertexData>();
+            Vertices = vertices?.ToArray() ?? [];
             VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexData.GetVertexType(Vertices[0], Textured);
         }
         /// <summary>
@@ -165,7 +154,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         public void SetIndices(IEnumerable<uint> indices)
         {
-            Indices = indices?.ToArray() ?? Array.Empty<uint>();
+            Indices = indices?.ToArray() ?? [];
         }
         /// <summary>
         /// Sets whether the submesh is textured or not
@@ -271,13 +260,13 @@ namespace Engine.Content
 
             var vertices = GetVertices().ToArray();
 
-            var triangles = new List<Triangle>();
+            List<Triangle> triangles = [];
 
             if (Indices.Length > 0)
             {
                 for (int i = 0; i < Indices.Length; i += 3)
                 {
-                    triangles.Add(new Triangle(
+                    triangles.Add(new(
                         vertices[(int)Indices[i + 0]].Position.Value,
                         vertices[(int)Indices[i + 1]].Position.Value,
                         vertices[(int)Indices[i + 2]].Position.Value));
@@ -287,14 +276,14 @@ namespace Engine.Content
             {
                 for (int i = 0; i < vertices.Length; i += 3)
                 {
-                    triangles.Add(new Triangle(
+                    triangles.Add(new(
                         vertices[i + 0].Position.Value,
                         vertices[i + 1].Position.Value,
                         vertices[i + 2].Position.Value));
                 }
             }
 
-            return triangles.ToArray();
+            return triangles;
         }
         /// <summary>
         /// Transforms the vertex data and resets de internal transform to identity

@@ -19,7 +19,7 @@ namespace Engine.PathFinding.RecastNavigation
         public Vector3 Pos { get; set; }
 
         /// <summary>
-        /// Gets wether the point is valid or not
+        /// Gets whether the point is valid or not
         /// </summary>
         /// <param name="nm">Navigation mesh</param>
         public readonly bool IsValid(NavMesh nm)

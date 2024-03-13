@@ -485,7 +485,7 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
-        /// Gets wether the specified position is walkable
+        /// Gets whether the specified position is walkable
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>

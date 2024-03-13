@@ -63,7 +63,7 @@ namespace Engine.PathFinding
         /// <returns>Return path if exists</returns>
         Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to);
         /// <summary>
-        /// Gets wether the specified position is walkable for the specified agent type
+        /// Gets whether the specified position is walkable for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>
@@ -71,7 +71,7 @@ namespace Engine.PathFinding
         /// <returns>Returns true if the specified position is walkable, and found nearest position is within the distance threshold with the specified position.</returns>
         bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold);
         /// <summary>
-        /// Gets wether the specified position is walkable for the specified agent type
+        /// Gets whether the specified position is walkable for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>

@@ -822,6 +822,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
                     m_query.Status = Status.DT_SUCCESS | details;
                     doneIters = iter;
+
                     return m_query.Status;
                 }
 
@@ -833,85 +834,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // The polygon has disappeared during the sliced query, fail.
                     m_query.Status = Status.DT_FAILURE;
                     doneIters = iter;
+
                     return m_query.Status;
                 }
 
                 // Get parent and grand parent poly and tile.
-                Node parentNode = null;
-                int? grandpaRef = null;
-                if (bestNode.PIdx != 0)
+                var (found, parent, parentNode, grandpaRef) = GetParents(bestNode);
+                if (!found)
                 {
-                    parentNode = m_nodePool.GetNodeAtIdx(bestNode.PIdx);
-                    if (parentNode.PIdx != 0)
-                    {
-                        grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
-                    }
+                    // The polygon has disappeared during the sliced query, fail.
+                    m_query.Status = Status.DT_FAILURE;
+                    doneIters = iter;
+
+                    return m_query.Status;
                 }
 
-                TileRef parent = TileRef.Null;
-                if (parentNode?.Id > 0)
-                {
-                    parent = m_nav.GetTileAndPolyByNode(parentNode);
-                    if (parent.Ref == 0 || (grandpaRef.HasValue && !m_nav.IsValidPolyRef(grandpaRef.Value)))
-                    {
-                        // The polygon has disappeared during the sliced query, fail.
-                        m_query.Status = Status.DT_FAILURE;
-                        doneIters = iter;
-                        return m_query.Status;
-                    }
-                }
-
-                // decide whether to test raycast to previous nodes
-                bool tryLOS = false;
-                if ((m_query.Options & FindPathOptions.AnyAngle) != 0 &&
-                    (parentNode != null) && (parentNode.Id != 0) &&
-                    (Vector3.DistanceSquared(parentNode.Pos, bestNode.Pos) < m_query.RaycastLimitSqr))
-                {
-                    tryLOS = true;
-                }
-
-                for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
-                {
-                    int neighbourRef = best.Tile.Links[i].NRef;
-
-                    // Skip invalid ids and do not expand back to where we came from.
-                    if (neighbourRef == 0 || neighbourRef == parentNode?.Id)
-                    {
-                        continue;
-                    }
-
-                    // Get neighbour poly and tile.
-                    // The API input has been cheked already, skip checking internal data.
-                    var neighbour = m_nav.GetTileAndPolyByRefUnsafe(neighbourRef);
-
-                    if (!m_query.Filter.PassFilter(neighbour.Poly.Flags))
-                    {
-                        continue;
-                    }
-
-                    // get the neighbor node
-                    Node neighbourNode = m_nodePool.GetNode(neighbourRef, 0);
-                    if (neighbourNode == null)
-                    {
-                        m_query.Status |= Status.DT_OUT_OF_NODES;
-                        continue;
-                    }
-
-                    // do not expand to nodes that were already visited from the same parent
-                    if (neighbourNode.PIdx != 0 && neighbourNode.PIdx == bestNode.PIdx)
-                    {
-                        continue;
-                    }
-
-                    neighbour.Node = neighbourNode;
-
-                    UpdateNeighbourNode(
-                        tryLOS,
-                        neighbour,
-                        parent,
-                        best,
-                        ref grandpaRef);
-                }
+                EvaluateLinks(best, bestNode, parent, parentNode, grandpaRef);
             }
 
             // Exhausted all nodes, but could not find path.
@@ -924,6 +862,103 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             doneIters = iter;
 
             return m_query.Status;
+        }
+        /// <summary>
+        /// Gets the parent and grand parent of the specified node
+        /// </summary>
+        /// <param name="node">Node</param>
+        private (bool Found, TileRef Parent, Node ParentNode, int? PrandpaRef) GetParents(Node node)
+        {
+            Node parentNode = null;
+            int? grandpaRef = null;
+            if (node.PIdx != 0)
+            {
+                parentNode = m_nodePool.GetNodeAtIdx(node.PIdx);
+                if (parentNode.PIdx != 0)
+                {
+                    grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
+                }
+            }
+
+            TileRef parent = TileRef.Null;
+            if (parentNode?.Id > 0)
+            {
+                parent = m_nav.GetTileAndPolyByNode(parentNode);
+                if (parent.Ref == 0 || (grandpaRef.HasValue && !m_nav.IsValidPolyRef(grandpaRef.Value)))
+                {
+                    return (false, default, default, default);
+                }
+            }
+
+            return (true, parent, parentNode, grandpaRef);
+        }
+        /// <summary>
+        /// Decides whether to test raycast to previous nodes
+        /// </summary>
+        /// <param name="parentNode">Parent node</param>
+        /// <param name="node">Node</param>
+        /// <returns></returns>
+        private bool UseLOS(Node parentNode, Node node)
+        {
+            if ((m_query.Options & FindPathOptions.AnyAngle) != 0 &&
+                ((parentNode?.Id ?? 0) != 0) &&
+                (Vector3.DistanceSquared(parentNode.Pos, node.Pos) < m_query.RaycastLimitSqr))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Evaluates the node links
+        /// </summary>
+        /// <param name="best">Tile</param>
+        /// <param name="bestNode">Node</param>
+        /// <param name="parent">Parent tile</param>
+        /// <param name="parentNode">Parent node</param>
+        /// <param name="grandpaRef">Grand parent reference</param>
+        private void EvaluateLinks(TileRef best, Node bestNode, TileRef parent, Node parentNode, int? grandpaRef)
+        {
+            // decide whether to test raycast to previous nodes
+            bool tryLOS = UseLOS(parentNode, bestNode);
+
+            for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+            {
+                int neighbourRef = best.Tile.Links[i].NRef;
+
+                // Skip invalid ids and do not expand back to where we came from.
+                if (neighbourRef == 0 || neighbourRef == parentNode?.Id)
+                {
+                    continue;
+                }
+
+                // Get neighbour poly and tile.
+                // The API input has been cheked already, skip checking internal data.
+                var neighbour = m_nav.GetTileAndPolyByRefUnsafe(neighbourRef);
+
+                if (!m_query.Filter.PassFilter(neighbour.Poly.Flags))
+                {
+                    continue;
+                }
+
+                // get the neighbor node
+                Node neighbourNode = m_nodePool.GetNode(neighbourRef, 0);
+                if (neighbourNode == null)
+                {
+                    m_query.Status |= Status.DT_OUT_OF_NODES;
+                    continue;
+                }
+
+                // do not expand to nodes that were already visited from the same parent
+                if (neighbourNode.PIdx != 0 && neighbourNode.PIdx == bestNode.PIdx)
+                {
+                    continue;
+                }
+
+                neighbour.Node = neighbourNode;
+
+                UpdateNeighbourNode(tryLOS, neighbour, parent, best, ref grandpaRef);
+            }
         }
         /// <summary>
         /// Updates the neighbour node cost
@@ -3269,38 +3304,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             while (nodeIndex < endIndex)
             {
-                var node = nodeIndex < tile.BvTree.Length ?
-                    tile.BvTree[nodeIndex] :
-                    new();
+                var node = nodeIndex < tile.BvTree.Length ? tile.BvTree[nodeIndex] : new();
 
                 bool overlap = Utils.OverlapBounds(bmin, bmax, node.BMin, node.BMax);
                 bool isLeafNode = node.I >= 0;
 
-                if (isLeafNode && overlap)
+                if (isLeafNode && overlap && filter.PassFilter(tile.Polys[node.I].Flags))
                 {
                     int r = bse | node.I;
 
-                    if (filter.PassFilter(tile.Polys[node.I].Flags))
-                    {
-                        polyRefs.Add(r);
+                    polyRefs.Add(r);
 
-                        if (polyRefs.Count == batchSize)
-                        {
-                            query.Process(tile, polyRefs);
-                            polyRefs.Clear();
-                        }
+                    if (polyRefs.Count == batchSize)
+                    {
+                        query.Process(tile, polyRefs);
+                        polyRefs.Clear();
                     }
                 }
 
                 if (overlap || isLeafNode)
                 {
                     nodeIndex++;
+
+                    continue;
                 }
-                else
-                {
-                    int escapeIndex = -node.I;
-                    nodeIndex += escapeIndex;
-                }
+
+                int escapeIndex = -node.I;
+                nodeIndex += escapeIndex;
             }
 
             // Process the last polygons that didn't make a full batch.
@@ -3327,8 +3357,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Must pass filter
-                int r = bse | i;
-
                 if (!filter.PassFilter(p.Flags))
                 {
                     continue;
@@ -3339,6 +3367,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 if (bounds.Contains(tileBounds) != ContainmentType.Disjoint)
                 {
+                    int r = bse | i;
+
                     polyRefs.Add(r);
 
                     if (polyRefs.Count == batchSize)
@@ -3405,7 +3435,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
                 }
 
-                if (GetPortalPoints(fromT, toT, out Vector3 left, out Vector3 right).HasFlag(Status.DT_FAILURE))
+                if (GetPortalPoints(fromT, toT, out var left, out var right).HasFlag(Status.DT_FAILURE))
                 {
                     break;
                 }
@@ -3444,7 +3474,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 length++;
                 curNode = m_nodePool.GetNodeAtIdx(curNode.PIdx);
-            } while (curNode != null);
+            }
+            while (curNode != null);
 
             // If the path cannot be fully stored then advance to the last node we will be able to store.
             curNode = endNode;

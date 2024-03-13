@@ -105,7 +105,7 @@ namespace Engine.Common
         /// Gets the vertex type based on vertex data
         /// </summary>
         /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
         /// <returns>Returns the vertex type</returns>
         public static VertexTypes GetVertexType(VertexData v, bool preferTextured = true)
         {
@@ -129,7 +129,7 @@ namespace Engine.Common
         /// Gets the vertex type based on vertex data (Position with Normal)
         /// </summary>
         /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
         /// <returns>Returns the vertex type</returns>
         public static VertexTypes GetPositionOnlyVariant(VertexData v, bool preferTextured)
         {
@@ -150,7 +150,7 @@ namespace Engine.Common
         /// Gets the vertex type based on vertex data (Position without Normal)
         /// </summary>
         /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
         /// <returns>Returns the vertex type</returns>
         public static VertexTypes GetPositionNormalVariant(VertexData v, bool preferTextured)
         {

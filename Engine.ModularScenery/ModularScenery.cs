@@ -777,7 +777,7 @@ namespace Engine.Modular
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
@@ -789,7 +789,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, ObjectTypes filter, bool useSphere, bool sortByDistance)
@@ -800,7 +800,7 @@ namespace Engine.Modular
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
@@ -812,7 +812,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, ObjectTypes filter, bool useSphere, bool sortByDistance)
@@ -823,7 +823,7 @@ namespace Engine.Modular
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
@@ -835,7 +835,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, ObjectTypes filter, bool useSphere, bool sortByDistance)
@@ -847,7 +847,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         private List<Item> GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
@@ -887,7 +887,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         private List<Item> GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
@@ -931,7 +931,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
         private List<Item> GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)

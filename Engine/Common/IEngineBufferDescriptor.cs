@@ -15,7 +15,7 @@ namespace Engine.Common
         /// </summary>
         int BufferIndex { get; }
         /// <summary>
-        /// Gets wether the current buffer is dirty
+        /// Gets whether the current buffer is dirty
         /// </summary>
         /// <remarks>A buffer is dirty when needs reallocation or if it's not allocated at all</remarks>
         bool Dirty { get; }
@@ -28,11 +28,11 @@ namespace Engine.Common
         /// </summary>
         int ToAllocateSize { get; }
         /// <summary>
-        /// Gets wether the internal buffer needs reallocation
+        /// Gets whether the internal buffer needs reallocation
         /// </summary>
         bool ReallocationNeeded { get; }
         /// <summary>
-        /// Gets wether the internal buffer is currently allocated in the graphic device
+        /// Gets whether the internal buffer is currently allocated in the graphic device
         /// </summary>
         bool Allocated { get; }
     }

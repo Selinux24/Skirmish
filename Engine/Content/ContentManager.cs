@@ -117,7 +117,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentSource">Content source</param>
         /// <param name="resourcePath">Resource path</param>
-        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <param name="throwException">Sets whether throw exception or not</param>
         /// <returns>Returns resource paths found</returns>
         /// <remarks>
         /// Content source can be a folder or a zip file
@@ -158,7 +158,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentSource">Content source</param>
         /// <param name="resourcePath">Resource path</param>
-        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <param name="throwException">Sets whether throw exception or not</param>
         /// <returns>Returns resource paths found</returns>
         /// <remarks>
         /// Content source can be a folder or a zip file
@@ -190,7 +190,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentSource">Content source</param>
         /// <param name="resourcePath">Resource path</param>
-        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <param name="throwException">Sets whether throw exception or not</param>
         /// <returns>Returns resource paths found</returns>
         /// <remarks>
         /// Content source can be a folder or a zip file

@@ -113,7 +113,7 @@ namespace Engine
         /// </summary>
         public IUIControl FocusedControl { get; set; }
         /// <summary>
-        /// Gets wether the input is being processed by user interface controls
+        /// Gets whether the input is being processed by user interface controls
         /// </summary>
         public bool InputProcessedByUI { get { return FocusedControl != null && TopMostControl != null; } }
 

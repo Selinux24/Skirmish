@@ -6,7 +6,14 @@ namespace TerrainSamples.SceneRts.AI
     /// <summary>
     /// Agent weapon
     /// </summary>
-    public class Weapon
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Name</param>
+    /// <param name="damage">Damage</param>
+    /// <param name="range">Range</param>
+    /// <param name="cadence">Cadence</param>
+    public class Weapon(string name, float damage, float range, float cadence)
     {
         /// <summary>
         /// Last attack time
@@ -16,21 +23,21 @@ namespace TerrainSamples.SceneRts.AI
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         /// <summary>
         /// Fire cadence
         /// </summary>
-        public float Cadence { get; set; }
+        public float Cadence { get; set; } = cadence;
         /// <summary>
         /// Damage
         /// </summary>
-        public float Damage { get; set; }
+        public float Damage { get; set; } = damage;
         /// <summary>
         /// Range
         /// </summary>
-        public float Range { get; set; }
+        public float Range { get; set; } = range;
         /// <summary>
-        /// Gets wether the weapon can make an attack
+        /// Gets whether the weapon can make an attack
         /// </summary>
         public bool CanShoot
         {
@@ -47,20 +54,6 @@ namespace TerrainSamples.SceneRts.AI
         public Weapon(WeaponDescription desc) : this(desc.Name, desc.Damage, desc.Range, desc.Cadence)
         {
 
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="damage">Damage</param>
-        /// <param name="range">Range</param>
-        /// <param name="cadence">Cadence</param>
-        public Weapon(string name, float damage, float range, float cadence)
-        {
-            Name = name;
-            Damage = damage;
-            Range = range;
-            Cadence = cadence;
         }
 
         /// <summary>

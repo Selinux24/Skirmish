@@ -909,7 +909,7 @@ namespace Engine.PathFinding.RecastNavigation
                 !(amin.Z > bmax.Z || amax.Z < bmin.Z);
         }
         /// <summary>
-        /// Checks wether the extents overlaps
+        /// Checks whether the extents overlaps
         /// </summary>
         /// <param name="amin">A minimum rectangle point</param>
         /// <param name="amax">A maximum rectangle point</param>
@@ -922,7 +922,7 @@ namespace Engine.PathFinding.RecastNavigation
                 !(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
         }
         /// <summary>
-        /// Checks wether the extents overlaps
+        /// Checks whether the extents overlaps
         /// </summary>
         /// <param name="amin">A minimum rectangle point</param>
         /// <param name="amax">A maximum rectangle point</param>
@@ -935,7 +935,7 @@ namespace Engine.PathFinding.RecastNavigation
             return !((amin + eps) > bmax || (amax - eps) < bmin);
         }
         /// <summary>
-        /// Checks wether the extents overlaps
+        /// Checks whether the extents overlaps
         /// </summary>
         /// <param name="amin">A minimum rectangle point</param>
         /// <param name="amax">A maximum rectangle point</param>
