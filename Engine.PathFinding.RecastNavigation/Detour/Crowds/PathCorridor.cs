@@ -136,7 +136,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_ITER = 32;
             int MAX_RES = 32;
 
-            navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter);
+            navquery.InitSlicedFindPath(filter, m_path.Start, m_path.End, m_pos, m_target);
             navquery.UpdateSlicedFindPath(MAX_ITER, out _);
             Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), out var res);
 
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Keep valid path as far as possible.
             int n = 0;
             var path = m_path.GetPath();
-            while (n < m_path.Count && navquery.IsValidPolyRef(path[n], filter))
+            while (n < m_path.Count && navquery.IsValidPolyRef(filter, path[n]))
             {
                 n++;
             }
@@ -262,7 +262,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = m_path.GetPath();
             for (int i = 0; i < n; ++i)
             {
-                if (!navquery.IsValidPolyRef(path[i], filter))
+                if (!navquery.IsValidPolyRef(filter, path[i]))
                 {
                     return false;
                 }
@@ -287,7 +287,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
-                m_path.Start, m_pos, npos, filter, MAX_VISITED,
+                filter, m_path.Start, m_pos, npos, MAX_VISITED,
                 out var result, out var visited);
 
             if (status == Status.DT_SUCCESS)
@@ -321,7 +321,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
-                m_path.End, m_target, npos, filter, MAX_VISITED,
+                filter, m_path.End, m_target, npos, MAX_VISITED,
                 out var result, out var visited);
 
             if (status == Status.DT_SUCCESS)

@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public const int MAX_LOCAL_POLYS = 16;
 
         private Vector3 m_center;
-        private readonly List<LocalBoundarySegment> m_segs = new();
+        private readonly List<LocalBoundarySegment> m_segs = [];
 
         private PolyRefs m_polys = null;
 
@@ -36,12 +36,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_center = pos;
 
             // First query non-overlapping polygons.
-            navquery.FindLocalNeighbourhood(r, pos, collisionQueryRange, filter, MAX_LOCAL_POLYS, out m_polys);
+            navquery.FindLocalNeighbourhood(filter, r, pos, collisionQueryRange, MAX_LOCAL_POLYS, out m_polys);
 
             // Secondly, store all polygon edges.
             for (int j = 0; j < m_polys.Count; ++j)
             {
-                navquery.GetPolyWallSegments(m_polys.Refs[j], filter, MAX_SEGS_PER_POLY, out var segs);
+                navquery.GetPolyWallSegments(filter, m_polys.Refs[j], MAX_SEGS_PER_POLY, out var segs);
 
                 foreach (var seg in segs)
                 {
@@ -80,7 +80,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Check that all polygons still pass query filter.
             for (int i = 0; i < m_polys.Count; ++i)
             {
-                if (!navquery.IsValidPolyRef(m_polys.Refs[i], filter))
+                if (!navquery.IsValidPolyRef(filter, m_polys.Refs[i]))
                 {
                     return false;
                 }
@@ -95,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public IEnumerable<LocalBoundarySegment> GetSegments()
         {
-            return m_segs.ToArray();
+            return [.. m_segs];
         }
     }
 }

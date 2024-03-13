@@ -35,5 +35,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Polygon ref the node corresponds to.
         /// </summary>
         public int Id { get; set; }
+        /// <summary>
+        /// Gets wether the node is open or not
+        /// </summary>
+        public bool IsOpen
+        {
+            get
+            {
+                return (Flags & NodeFlagTypes.Open) != 0;
+            }
+        }
+        /// <summary>
+        /// Gets wether the node is closed or not
+        /// </summary>
+        public bool IsClosed
+        {
+            get
+            {
+                return (Flags & NodeFlagTypes.Closed) != 0;
+            }
+        }
     }
 }

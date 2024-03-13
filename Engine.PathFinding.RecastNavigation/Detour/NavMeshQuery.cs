@@ -280,17 +280,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxPath">The maximum number of polygons the @p path array can hold.</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out SimplePath resultPath)
+        public Status FindPath(QueryFilter filter, int startRef, Vector3 startPos, int endRef, Vector3 endPos, int maxPath, out SimplePath resultPath)
         {
             resultPath = new SimplePath(maxPath);
 
             // Validate input
-            if (!m_nav.IsValidPolyRef(startRef) ||
-                !m_nav.IsValidPolyRef(endRef) ||
-                startPos.IsInfinity() ||
-                endPos.IsInfinity() ||
-                filter == null ||
-                maxPath <= 0)
+            if (!m_nav.IsValidPolyRef(startRef) || !m_nav.IsValidPolyRef(endRef) ||
+                startPos.IsInfinity() || endPos.IsInfinity() ||
+                filter == null || maxPath <= 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -298,6 +295,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (startRef == endRef)
             {
                 resultPath.StartPath(startRef);
+
                 return Status.DT_SUCCESS;
             }
 
@@ -313,10 +311,36 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
-            var lastBestNode = startNode;
+            var prStatus = ProcessQueue(filter, startNode, endRef, endPos, out var lastBestNode, out bool outOfNodes);
+            if (prStatus != Status.DT_SUCCESS)
+            {
+                return prStatus;
+            }
+
+            var status = GetPathToNode(lastBestNode, maxPath, out resultPath);
+            if (status != Status.DT_SUCCESS)
+            {
+                return status;
+            }
+
+            if (lastBestNode.Id != endRef)
+            {
+                status |= Status.DT_PARTIAL_RESULT;
+            }
+
+            if (outOfNodes)
+            {
+                status |= Status.DT_OUT_OF_NODES;
+            }
+
+            return status;
+        }
+        private Status ProcessQueue(QueryFilter filter, Node startNode, int endRef, Vector3 endPos, out Node lastBestNode, out bool outOfNodes)
+        {
+            lastBestNode = startNode;
             float lastBestNodeCost = startNode.Total;
 
-            bool outOfNodes = false;
+            outOfNodes = false;
 
             while (!m_openList.Empty())
             {
@@ -337,142 +361,169 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Id);
 
                 // Get parent poly and tile.
-                int parentRef = 0;
-                TileRef parent = TileRef.Null;
-                if (bestNode.PIdx != 0)
+                var (parentRef, parent) = GetNodeParent(bestNode);
+
+                var evRes = EvaluateLinks(filter, parentRef, parent, bestNode, best, endRef, endPos, ref lastBestNode, ref lastBestNodeCost, out outOfNodes);
+                if (evRes != Status.DT_SUCCESS)
                 {
-                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
-                }
-                if (parentRef != 0)
-                {
-                    parent = m_nav.GetTileAndPolyByRefUnsafe(parentRef);
-                }
-
-                for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
-                {
-                    int neighbourRef = best.Tile.Links[i].NRef;
-
-                    // Skip invalid ids and do not expand back to where we came from.
-                    if (neighbourRef == 0 || neighbourRef == parentRef)
-                    {
-                        continue;
-                    }
-
-                    // Get neighbour poly and tile.
-                    // The API input has been cheked already, skip checking internal data.
-                    var neighbour = m_nav.GetTileAndPolyByRefUnsafe(neighbourRef);
-
-                    if (!filter.PassFilter(neighbour.Poly.Flags))
-                    {
-                        continue;
-                    }
-
-                    // deal explicitly with crossing tile boundaries
-                    int crossSide = 0;
-                    if (best.Tile.Links[i].Side != 0xff)
-                    {
-                        crossSide = best.Tile.Links[i].Side >> 1;
-                    }
-
-                    // get the node
-                    var neighbourNode = m_nodePool.GetNode(neighbourRef, crossSide);
-                    if (neighbourNode == null)
-                    {
-                        outOfNodes = true;
-                        continue;
-                    }
-
-                    // If the node is visited the first time, calculate node position.
-                    if (neighbourNode.Flags == NodeFlagTypes.None)
-                    {
-                        var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
-
-                        if (midPointRes != Status.DT_SUCCESS)
-                        {
-                            Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
-                            return midPointRes;
-                        }
-
-                        neighbourNode.Pos = pos;
-                    }
-
-                    // Calculate cost and heuristic.
-                    float cost;
-                    float heuristic;
-
-                    // Special case for last node.
-                    if (neighbourRef == endRef)
-                    {
-                        // Cost
-                        float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
-                        float endCost = filter.GetCost(neighbourNode.Pos, endPos, best, neighbour, TileRef.Null);
-
-                        cost = bestNode.Cost + curCost + endCost;
-                        heuristic = 0;
-                    }
-                    else
-                    {
-                        // Cost
-                        float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
-                        cost = bestNode.Cost + curCost;
-                        heuristic = Vector3.Distance(neighbourNode.Pos, endPos) * H_SCALE;
-                    }
-
-                    float total = cost + heuristic;
-
-                    // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.Flags & NodeFlagTypes.Open) != 0 && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-                    // The node is already visited and process, and the new result is worse, skip.
-                    if ((neighbourNode.Flags & NodeFlagTypes.Closed) != 0 && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-
-                    // Add or update the node.
-                    neighbourNode.PIdx = m_nodePool.GetNodeIdx(bestNode);
-                    neighbourNode.Id = neighbourRef;
-                    neighbourNode.Flags &= ~NodeFlagTypes.Closed;
-                    neighbourNode.Cost = cost;
-                    neighbourNode.Total = total;
-
-                    if ((neighbourNode.Flags & NodeFlagTypes.Open) != 0)
-                    {
-                        // Already in open, update node location.
-                        m_openList.Modify(neighbourNode);
-                    }
-                    else
-                    {
-                        // Put the node in open list.
-                        neighbourNode.Flags |= NodeFlagTypes.Open;
-                        m_openList.Push(neighbourNode);
-                    }
-
-                    // Update nearest node to target so far.
-                    if (heuristic < lastBestNodeCost)
-                    {
-                        lastBestNodeCost = heuristic;
-                        lastBestNode = neighbourNode;
-                    }
+                    return evRes;
                 }
             }
 
-            Status status = GetPathToNode(lastBestNode, maxPath, out resultPath);
-
-            if (lastBestNode.Id != endRef)
-            {
-                status |= Status.DT_PARTIAL_RESULT;
-            }
-
-            if (outOfNodes)
-            {
-                status |= Status.DT_OUT_OF_NODES;
-            }
-
-            return status;
+            return Status.DT_SUCCESS;
         }
+        private (int parentRef, TileRef parent) GetNodeParent(Node node)
+        {
+            int parentRef = 0;
+            TileRef parent = TileRef.Null;
+            if (node.PIdx != 0)
+            {
+                parentRef = m_nodePool.GetNodeAtIdx(node.PIdx).Id;
+            }
+            if (parentRef != 0)
+            {
+                parent = m_nav.GetTileAndPolyByRefUnsafe(parentRef);
+            }
+
+            return (parentRef, parent);
+        }
+        private Status EvaluateLinks(QueryFilter filter, int parentRef, TileRef parent, Node bestNode, TileRef best, int endRef, Vector3 endPos, ref Node lastBestNode, ref float lastBestNodeCost, out bool outOfNodes)
+        {
+            outOfNodes = false;
+
+            for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+            {
+                int neighbourRef = best.Tile.Links[i].NRef;
+
+                // Skip invalid ids and do not expand back to where we came from.
+                if (!GetNeighbourFromLink(filter, neighbourRef, parentRef, out var neighbour))
+                {
+                    continue;
+                }
+
+                // deal explicitly with crossing tile boundaries
+                int crossSide = 0;
+                if (best.Tile.Links[i].Side != 0xff)
+                {
+                    crossSide = best.Tile.Links[i].Side >> 1;
+                }
+
+                // get the node
+                var neighbourNode = m_nodePool.GetNode(neighbourRef, crossSide);
+                if (neighbourNode == null)
+                {
+                    outOfNodes = true;
+                    continue;
+                }
+
+                // If the node is visited the first time, calculate node position.
+                if (neighbourNode.Flags == NodeFlagTypes.None)
+                {
+                    var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
+                    if (midPointRes != Status.DT_SUCCESS)
+                    {
+                        Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
+                        return midPointRes;
+                    }
+
+                    neighbourNode.Pos = pos;
+                }
+
+                // Calculate cost and heuristic.
+                var (cost, heuristic) = CalculateCostAndHeuristics(filter, bestNode, best, neighbourRef, neighbourNode, neighbour, parent, endRef, endPos);
+
+                float total = cost + heuristic;
+
+                if (neighbourNode.IsOpen && total >= neighbourNode.Total)
+                {
+                    // The node is already in open list and the new result is worse, skip.
+                    continue;
+                }
+                if (neighbourNode.IsClosed && total >= neighbourNode.Total)
+                {
+                    // The node is already visited and process, and the new result is worse, skip.
+                    continue;
+                }
+
+                // Add or update the node.
+                neighbourNode.PIdx = m_nodePool.GetNodeIdx(bestNode);
+                neighbourNode.Id = neighbourRef;
+                neighbourNode.Flags &= ~NodeFlagTypes.Closed;
+                neighbourNode.Cost = cost;
+                neighbourNode.Total = total;
+
+                if (neighbourNode.IsOpen)
+                {
+                    // Already in open, update node location.
+                    m_openList.Modify(neighbourNode);
+                }
+                else
+                {
+                    // Put the node in open list.
+                    neighbourNode.Flags |= NodeFlagTypes.Open;
+                    m_openList.Push(neighbourNode);
+                }
+
+                // Update nearest node to target so far.
+                if (heuristic < lastBestNodeCost)
+                {
+                    lastBestNodeCost = heuristic;
+                    lastBestNode = neighbourNode;
+                }
+            }
+
+            return Status.DT_SUCCESS;
+        }
+        private static (float cost, float heuristic) CalculateCostAndHeuristics(QueryFilter filter, Node bestNode, TileRef best, int neighbourRef, Node neighbourNode, TileRef neighbour, TileRef parent, int endRef, Vector3 endPos)
+        {
+            float cost;
+            float heuristic;
+
+            // Special case for last node.
+            if (neighbourRef == endRef)
+            {
+                // Cost
+                float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
+                float endCost = filter.GetCost(neighbourNode.Pos, endPos, best, neighbour, TileRef.Null);
+
+                cost = bestNode.Cost + curCost + endCost;
+                heuristic = 0;
+            }
+            else
+            {
+                // Cost
+                float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
+                cost = bestNode.Cost + curCost;
+                heuristic = Vector3.Distance(neighbourNode.Pos, endPos) * H_SCALE;
+            }
+
+            return (cost, heuristic);
+        }
+        private bool GetNeighbourFromLink(QueryFilter filter, int neighbourRef, int parentRef, out TileRef neighbour)
+        {
+            // Skip invalid ids and do not expand back to where we came from.
+            if (neighbourRef == 0 || neighbourRef == parentRef)
+            {
+                neighbour = default;
+
+                return false;
+            }
+
+            // Get neighbour poly and tile.
+            // The API input has been cheked already, skip checking internal data.
+            var nei = m_nav.GetTileAndPolyByRefUnsafe(neighbourRef);
+            if (!filter.PassFilter(nei.Poly.Flags))
+            {
+                neighbour = default;
+
+                return false;
+            }
+
+            neighbour = nei;
+
+            return true;
+        }
+
         /// <summary>
         /// Finds the straight path from the start to the end position within the polygon corridor.
         /// </summary>
@@ -736,7 +787,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// -# Call UpdateSlicedFindPath() until it returns complete.
         /// -# Call FinalizeSlicedFindPath() to get the path.
         /// </example>
-        public Status InitSlicedFindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, FindPathOptions options = FindPathOptions.AnyAngle)
+        public Status InitSlicedFindPath(QueryFilter filter, int startRef, int endRef, Vector3 startPos, Vector3 endPos, FindPathOptions options = FindPathOptions.AnyAngle)
         {
             // Init path state.
             m_query = new QueryData
@@ -1373,7 +1424,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundCircle(QueryFilter filter, int startRef, Vector3 centerPos, float radius, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
@@ -1442,7 +1493,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Center = centerPos,
                     Radius = radius,
                 };
-                ProcessTileLinksQuery(best, parent, query, filter, out bool outOfNodes);
+                ProcessTileLinksQuery(filter, best, parent, query, out bool outOfNodes);
                 if (outOfNodes)
                 {
                     status |= Status.DT_OUT_OF_NODES;
@@ -1463,7 +1514,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(QueryFilter filter, int startRef, Vector3[] verts, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
@@ -1534,7 +1585,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 var query = new FindPolysAroundShapeQuery(verts);
-                ProcessTileLinksQuery(best, parent, query, filter, out bool outOfNodes);
+                ProcessTileLinksQuery(filter, best, parent, query, out bool outOfNodes);
                 if (outOfNodes)
                 {
                     status |= Status.DT_OUT_OF_NODES;
@@ -1553,7 +1604,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="query">Query</param>
         /// <param name="filter">Query filter</param>
         /// <param name="outOfNodes">Return true if the query is out of available nodes</param>
-        private void ProcessTileLinksQuery(TileRef best, TileRef parent, IFindPolysQuery query, QueryFilter filter, out bool outOfNodes)
+        private void ProcessTileLinksQuery(QueryFilter filter, TileRef best, TileRef parent, IFindPolysQuery query, out bool outOfNodes)
         {
             outOfNodes = false;
 
@@ -1567,7 +1618,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                ProcessTileLinkNeighbourQuery(link, best, parent, query, filter, out bool neiOutOfNodes);
+                ProcessTileLinkNeighbourQuery(filter, link, best, parent, query, out bool neiOutOfNodes);
                 if (neiOutOfNodes)
                 {
                     outOfNodes = true;
@@ -1583,7 +1634,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="query">Query</param>
         /// <param name="filter">Query filter</param>
         /// <param name="outOfNodes">Return true if the query is out of available nodes</param>
-        private void ProcessTileLinkNeighbourQuery(Link link, TileRef best, TileRef parent, IFindPolysQuery query, QueryFilter filter, out bool outOfNodes)
+        private void ProcessTileLinkNeighbourQuery(QueryFilter filter, Link link, TileRef best, TileRef parent, IFindPolysQuery query, out bool outOfNodes)
         {
             outOfNodes = false;
 
@@ -1694,7 +1745,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nearestRef">The reference id of the nearest polygon.</param>
         /// <param name="nearestPt">The nearest point on the polygon.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindNearestPoly(Vector3 center, Vector3 halfExtents, QueryFilter filter, out int nearestRef, out Vector3 nearestPt)
+        public Status FindNearestPoly(QueryFilter filter, Vector3 center, Vector3 halfExtents, out int nearestRef, out Vector3 nearestPt)
         {
             nearestRef = 0;
             nearestPt = Vector3.Zero;
@@ -1703,7 +1754,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var query = new FindNearestPolyQuery(this, center);
 
-            Status status = QueryPolygons(center, halfExtents, filter, query);
+            Status status = QueryPolygons(filter, center, halfExtents, query);
             if (status.HasFlag(Status.DT_FAILURE))
             {
                 return status;
@@ -1728,7 +1779,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="filter">The polygon filter to apply to the query.</param>
         /// <param name="query">The query. Polygons found will be batched together and passed to this query.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status QueryPolygons(Vector3 center, Vector3 halfExtents, QueryFilter filter, IPolyQuery query)
+        public Status QueryPolygons(QueryFilter filter, Vector3 center, Vector3 halfExtents, IPolyQuery query)
         {
             if (center.IsInfinity() ||
                 halfExtents.IsInfinity() ||
@@ -1771,7 +1822,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons in the local neighbourhood.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindLocalNeighbourhood(QueryFilter filter, int startRef, Vector3 centerPos, float radius, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
@@ -1968,7 +2019,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
+        public Status MoveAlongSurface(QueryFilter filter, int startRef, Vector3 startPos, Vector3 endPos, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
         {
             resultPos = Vector3.Zero;
             visited = new SimplePath(maxVisitedSize);
@@ -2376,7 +2427,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="hitPos">The nearest position on the wall that was hit.</param>
         /// <param name="hitNormal">The normalized ray formed from the wall point to the source point.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindDistanceToWall(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
+        public Status FindDistanceToWall(QueryFilter filter, int startRef, Vector3 centerPos, float maxRadius, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
         {
             hitDist = 0;
             hitPos = Vector3.Zero;
@@ -2425,10 +2476,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Hit test walls.
-                hitPos = HitTestWalls(best, filter, centerPos, radiusSqr);
+                hitPos = HitTestWalls(filter, best, centerPos, radiusSqr);
 
                 // Process the links
-                status = ProcessLinksFindDistance(best, parentRef, centerPos, radiusSqr, filter);
+                status = ProcessLinksFindDistance(filter, best, parentRef, centerPos, radiusSqr);
             }
 
             // Calc hit normal.
@@ -2447,7 +2498,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="centerPos">Circle center position</param>
         /// <param name="radiusSqr">Circle squared radius</param>
         /// <returns>Returns the closest hit position</returns>
-        private Vector3 HitTestWalls(TileRef best, QueryFilter filter, Vector3 centerPos, float radiusSqr)
+        private Vector3 HitTestWalls(QueryFilter filter, TileRef best, Vector3 centerPos, float radiusSqr)
         {
             var hitPos = Vector3.Zero;
 
@@ -2457,7 +2508,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (best.Poly.NeighbourIsExternalLink(j))
                 {
                     // Tile border.
-                    bool solid = BorderIsSolid(best, j, filter);
+                    bool solid = BorderIsSolid(filter, best, j);
                     if (!solid)
                     {
                         continue;
@@ -2499,7 +2550,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="j">Border neighbour</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns true if the border is solid</returns>
-        private bool BorderIsSolid(TileRef best, int j, QueryFilter filter)
+        private bool BorderIsSolid(QueryFilter filter, TileRef best, int j)
         {
             bool solid = true;
 
@@ -2531,7 +2582,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the partial status</returns>
-        private Status ProcessLinksFindDistance(TileRef best, int parentRef, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private Status ProcessLinksFindDistance(QueryFilter filter, TileRef best, int parentRef, Vector3 centerPos, float radiusSqr)
         {
             Status status = Status.DT_SUCCESS;
 
@@ -2545,7 +2596,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     return status;
                 }
 
-                Status neiStatus = ProcessLinksNeighbourFindDistance(link, best, centerPos, radiusSqr, filter);
+                Status neiStatus = ProcessLinksNeighbourFindDistance(filter, link, best, centerPos, radiusSqr);
                 if (neiStatus != Status.DT_SUCCESS)
                 {
                     status = neiStatus;
@@ -2563,7 +2614,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the partial result</returns>
-        private Status ProcessLinksNeighbourFindDistance(Link link, TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private Status ProcessLinksNeighbourFindDistance(QueryFilter filter, Link link, TileRef best, Vector3 centerPos, float radiusSqr)
         {
             Status status = Status.DT_SUCCESS;
 
@@ -2654,7 +2705,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="segmentCount">The number of segments returned.</param>
         /// <param name="maxSegments">The maximum number of segments the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
+        public Status GetPolyWallSegments(QueryFilter filter, int r, int maxSegments, out Segment[] segmentsRes)
         {
             segmentsRes = [];
 
@@ -2914,7 +2965,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Polygons are chosen weighted by area. The search runs in linear related to number of polygon.
         /// The location is not exactly constrained by the circle, but it limits the visited polygons.
         /// </remarks>
-        public Status FindRandomPointAroundCircle(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out int randomRef, out Vector3 randomPt)
+        public Status FindRandomPointAroundCircle(QueryFilter filter, int startRef, Vector3 centerPos, float maxRadius, out int randomRef, out Vector3 randomPt)
         {
             randomRef = 0;
             randomPt = new Vector3();
@@ -2963,7 +3014,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 random = SelectBestTile(best, random, ref areaSum);
 
-                EvaluateTiles(best, centerPos, radiusSqr, filter);
+                EvaluateTiles(filter, best, centerPos, radiusSqr);
             }
 
             if (random.Ref == TileRef.Null.Ref)
@@ -2995,7 +3046,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="centerPos">Center position</param>
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
-        private void EvaluateTiles(TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private void EvaluateTiles(QueryFilter filter, TileRef best, Vector3 centerPos, float radiusSqr)
         {
             // Get parent poly and tile.
             int parentRef = m_nodePool.GetNodeAtIdx(best.Node.PIdx)?.Id ?? 0;
@@ -3202,7 +3253,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">The polygon reference to check.</param>
         /// <param name="filter">The filter to apply.</param>
         /// <returns>Returns true if the polygon reference is valid and passes the filter restrictions.</returns>
-        public bool IsValidPolyRef(int r, QueryFilter filter)
+        public bool IsValidPolyRef(QueryFilter filter, int r)
         {
             var cur = m_nav.GetTileAndPolyByRef(r);
             // If cannot get polygon, assume it does not exists and boundary is invalid.
@@ -3493,17 +3544,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="endPos">End position</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>Returns the status of the path calculation</returns>
-        public Status CalcPath(
-            QueryFilter filter,
-            Vector3 polyPickExt,
-            PathFindingMode mode,
-            Vector3 startPos, Vector3 endPos,
-            out IEnumerable<Vector3> resultPath)
+        public Status CalcPath(QueryFilter filter, Vector3 polyPickExt, PathFindingMode mode, Vector3 startPos, Vector3 endPos, out IEnumerable<Vector3> resultPath)
         {
             resultPath = null;
 
-            FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out _);
-            FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out _);
+            FindNearestPoly(filter, startPos, polyPickExt, out int startRef, out _);
+            FindNearestPoly(filter, endPos, polyPickExt, out int endRef, out _);
 
             var endPointsDefined = (startRef != 0 && endRef != 0);
             if (!endPointsDefined)
@@ -3513,7 +3559,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             if (mode == PathFindingMode.Follow)
             {
-                if (CalcPathFollow(filter, startPos, endPos, startRef, endRef, out var path))
+                if (CalcPathFollow(filter, startRef, startPos, endRef, endPos, out var path))
                 {
                     resultPath = path;
 
@@ -3522,7 +3568,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             else if (mode == PathFindingMode.Straight)
             {
-                if (CalcPathStraigh(filter, startPos, endPos, startRef, endRef, out var path))
+                if (CalcPathStraigh(filter, startRef, startPos, endRef, endPos, out var path))
                 {
                     resultPath = path;
 
@@ -3531,7 +3577,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             else if (mode == PathFindingMode.Sliced)
             {
-                var status = InitSlicedFindPath(startRef, endRef, startPos, endPos, filter);
+                var status = InitSlicedFindPath(filter, startRef, endRef, startPos, endPos);
                 if (status != Status.DT_SUCCESS)
                 {
                     return status;
@@ -3550,16 +3596,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="startRef">Start reference</param>
         /// <param name="endRef">End reference</param>
         /// <param name="resultPath">Resulting path</param>
-        private bool CalcPathFollow(
-            QueryFilter filter,
-            Vector3 startPos, Vector3 endPos,
-            int startRef, int endRef,
-            out IEnumerable<Vector3> resultPath)
+        private bool CalcPathFollow(QueryFilter filter, int startRef, Vector3 startPos, int endRef, Vector3 endPos, out IEnumerable<Vector3> resultPath)
         {
             resultPath = null;
 
             FindPath(
-                startRef, endRef, startPos, endPos, filter,
+                filter,
+                startRef, startPos,
+                endRef, endPos,
                 MAX_POLYS,
                 out var iterPath);
 
@@ -3620,7 +3664,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Move
             MoveAlongSurface(
-                iterPath.Start, iterPos, moveTgt, filter, 16,
+                filter, iterPath.Start, iterPos, moveTgt, 16,
                 out var result, out var visited);
 
             SimplePath.FixupCorridor(iterPath, visited);
@@ -3728,16 +3772,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="startRef">Start reference</param>
         /// <param name="endRef">End reference</param>
         /// <param name="resultPath">Resulting path</param>
-        private bool CalcPathStraigh(
-            QueryFilter filter,
-            Vector3 startPos, Vector3 endPos,
-            int startRef, int endRef,
-            out IEnumerable<Vector3> resultPath)
+        private bool CalcPathStraigh(QueryFilter filter, int startRef, Vector3 startPos, int endRef, Vector3 endPos, out IEnumerable<Vector3> resultPath)
         {
-            FindPath(
-                startRef, endRef, startPos, endPos, filter, MAX_POLYS,
-                out var polys);
-
+            FindPath(filter, startRef, startPos, endRef, endPos, MAX_POLYS, out var polys);
             if (polys.Count < 0)
             {
                 resultPath = [];

@@ -298,13 +298,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             var filter = new QueryFilter();
 
-            var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
+            var fStatus = query.FindNearestPoly(filter, position, new Vector3(2, 4, 2), out int startRef, out var nearestPt);
             if (fStatus != Status.DT_SUCCESS)
             {
                 return null;
             }
 
-            var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
+            var pStatus = query.FindRandomPointAroundCircle(filter, startRef, nearestPt, radius, out _, out var pt);
             if (pStatus != Status.DT_SUCCESS)
             {
                 return null;
@@ -380,7 +380,7 @@ namespace Engine.PathFinding.RecastNavigation
             var agentExtents = new Vector3(agent.Height);
 
             var status = query.FindNearestPoly(
-                position, agentExtents, new QueryFilter(),
+                new QueryFilter(), position, agentExtents, 
                 out int nRef, out Vector3 nPoint);
 
             if (nRef == 0 || status.HasFlag(Status.DT_FAILURE))
@@ -673,7 +673,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
+            Status status = query.FindNearestPoly(crowd.GetFilter(0), p, crowd.GetQueryExtents(), out int poly, out Vector3 nP);
             if (status == Status.DT_FAILURE)
             {
                 return;
@@ -700,7 +700,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
+            Status status = query.FindNearestPoly(crowd.GetFilter(0), p, crowd.GetQueryExtents(), out int poly, out Vector3 nP);
             if (status == Status.DT_FAILURE)
             {
                 return;

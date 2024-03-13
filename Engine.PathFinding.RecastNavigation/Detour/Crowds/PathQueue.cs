@@ -156,7 +156,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Handle query start.
             if (q.Status == 0)
             {
-                q.Status = m_navquery.InitSlicedFindPath(q.StartRef, q.EndRef, q.StartPos, q.EndPos, q.Filter);
+                q.Status = m_navquery.InitSlicedFindPath(q.Filter, q.StartRef, q.EndRef, q.StartPos, q.EndPos);
             }
 
             // Handle query in progress.
