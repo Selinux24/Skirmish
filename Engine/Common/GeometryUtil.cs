@@ -2328,7 +2328,6 @@ namespace Engine.Common
                 // Cap
                 .. hemVerts.Select(v => new Vector3(v.X, v.Y + hh, v.Z)),
             ];
-            uint offset = (uint)verts.Count;
 
             // Base
             verts.AddRange(hemVerts.Select(v => new Vector3(v.X, -v.Y - hh, v.Z)));

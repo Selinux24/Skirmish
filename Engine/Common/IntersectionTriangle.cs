@@ -85,31 +85,23 @@ namespace Engine.Common
             coplanar = false;
 
             // Compute distance signs of p1, q1 and r1 to the plane of triangle(p2,q2,r2)
-
-            float dp1 = Vector3.Dot(Vector3.Subtract(t1.Point1, t2.Point3), t2.Normal);
-            float dq1 = Vector3.Dot(Vector3.Subtract(t1.Point2, t2.Point3), t2.Normal);
-            float dr1 = Vector3.Dot(Vector3.Subtract(t1.Point3, t2.Point3), t2.Normal);
-
-            if (((dp1 * dq1) > 0.0f) && ((dp1 * dr1) > 0.0f))
+            var (dist1, dp1, dq1, dr1) = ComputeDistances(t1, t2);
+            if (!dist1)
             {
-                test1 = new Triangle();
-                test2 = new Triangle();
-                distances = new Vector3(float.MaxValue);
+                test1 = new();
+                test2 = new();
+                distances = new(float.MaxValue);
 
                 return false;
             }
 
             // Compute distance signs of p2, q2 and r2 to the plane of triangle(p1,q1,r1)
-
-            float dp2 = Vector3.Dot(Vector3.Subtract(t2.Point1, t1.Point3), t1.Normal);
-            float dq2 = Vector3.Dot(Vector3.Subtract(t2.Point2, t1.Point3), t1.Normal);
-            float dr2 = Vector3.Dot(Vector3.Subtract(t2.Point3, t1.Point3), t1.Normal);
-
-            if (((dp2 * dq2) > 0.0f) && ((dp2 * dr2) > 0.0f))
+            var (dist2, dp2, dq2, dr2) = ComputeDistances(t2, t1);
+            if (!dist2)
             {
-                test1 = new Triangle();
-                test2 = new Triangle();
-                distances = new Vector3(float.MaxValue);
+                test1 = new();
+                test2 = new();
+                distances = new(float.MaxValue);
 
                 return false;
             }
@@ -118,106 +110,161 @@ namespace Engine.Common
 
             if (dp1 > 0.0f)
             {
-                if (dq1 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
-                }
-                else if (dr1 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
-                }
+                var resMajor = TestIntersectionDp1Major(t1, t2, dq1, dr1, dp2, dq2, dr2);
+
+                test1 = resMajor.test1;
+                test2 = resMajor.test2;
+                distances = resMajor.distances;
             }
             else if (dp1 < 0.0f)
             {
-                if (dq1 < 0.0f)
+                var resMinor = TestIntersectionDp1Minor(t1, t2, dq1, dr1, dp2, dq2, dr2);
+
+                test1 = resMinor.test1;
+                test2 = resMinor.test2;
+                distances = resMinor.distances;
+            }
+            else
+            {
+                var resZero = TestIntersectionDp1Zero(t1, t2, dq1, dr1, dp2, dq2, dr2);
+
+                test1 = resZero.test1;
+                test2 = resZero.test2;
+                distances = resZero.distances;
+                coplanar = resZero.coplanar;
+            }
+
+            return true;
+        }
+        private static (bool, float dp, float dq, float dr) ComputeDistances(Triangle t1, Triangle t2)
+        {
+            float dp = Vector3.Dot(Vector3.Subtract(t1.Point1, t2.Point3), t2.Normal);
+            float dq = Vector3.Dot(Vector3.Subtract(t1.Point2, t2.Point3), t2.Normal);
+            float dr = Vector3.Dot(Vector3.Subtract(t1.Point3, t2.Point3), t2.Normal);
+
+            if (((dp * dq) > 0.0f) && ((dp * dr) > 0.0f))
+            {
+                return (false, 0, 0, 0);
+            }
+
+            return (true, dp, dq, dr);
+        }
+        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Major(Triangle t1, Triangle t2, float dq1, float dr1, float dp2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+            Vector3 distances;
+
+            if (dq1 > 0.0f)
+            {
+                test1 = new(t1.Point3, t1.Point1, t1.Point2);
+                test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                distances = new(dp2, dr2, dq2);
+            }
+            else if (dr1 > 0.0f)
+            {
+                test1 = new(t1.Point2, t1.Point3, t1.Point1);
+                test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                distances = new(dp2, dr2, dq2);
+            }
+            else
+            {
+                test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                distances = new(dp2, dq2, dr2);
+            }
+
+            return (test1, test2, distances);
+        }
+        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Minor(Triangle t1, Triangle t2, float dq1, float dr1, float dp2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+            Vector3 distances;
+
+            if (dq1 < 0.0f)
+            {
+                test1 = new(t1.Point3, t1.Point1, t1.Point2);
+                test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                distances = new(dp2, dq2, dr2);
+            }
+            else if (dr1 < 0.0f)
+            {
+                test1 = new(t1.Point2, t1.Point3, t1.Point1);
+                test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                distances = new(dp2, dq2, dr2);
+            }
+            else
+            {
+                test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                distances = new(dp2, dr2, dq2);
+            }
+
+            return (test1, test2, distances);
+        }
+        private static (Triangle test1, Triangle test2, Vector3 distances, bool coplanar) TestIntersectionDp1Zero(Triangle t1, Triangle t2, float dq1, float dr1, float dp2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+            Vector3 distances;
+            bool coplanar = false;
+
+            if (dq1 < 0.0f)
+            {
+                if (dr1 >= 0.0f)
                 {
-                    test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
-                }
-                else if (dr1 < 0.0f)
-                {
-                    test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
+                    test1 = new(t1.Point2, t1.Point3, t1.Point1);
+                    test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                    distances = new(dp2, dr2, dq2);
                 }
                 else
                 {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
+                    test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                    test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                    distances = new(dp2, dq2, dr2);
+                }
+            }
+            else if (dq1 > 0.0f)
+            {
+                if (dr1 > 0.0f)
+                {
+                    test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                    test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                    distances = new(dp2, dr2, dq2);
+                }
+                else
+                {
+                    test1 = new(t1.Point2, t1.Point3, t1.Point1);
+                    test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                    distances = new(dp2, dq2, dr2);
                 }
             }
             else
             {
-                if (dq1 < 0.0f)
+                if (dr1 > 0.0f)
                 {
-                    if (dr1 >= 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
+                    test1 = new(t1.Point3, t1.Point1, t1.Point2);
+                    test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                    distances = new(dp2, dq2, dr2);
                 }
-                else if (dq1 > 0.0f)
+                else if (dr1 < 0.0f)
                 {
-                    if (dr1 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
+                    test1 = new(t1.Point3, t1.Point1, t1.Point2);
+                    test2 = new(t2.Point1, t2.Point3, t2.Point2);
+                    distances = new(dp2, dr2, dq2);
                 }
                 else
                 {
-                    if (dr1 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
-                    else if (dr1 < 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        // triangles are co-planar
-                        coplanar = true;
-                        test1 = new Triangle();
-                        test2 = new Triangle();
-                        distances = new Vector3(float.MaxValue);
-
-                        return true;
-                    }
+                    // triangles are co-planar
+                    coplanar = true;
+                    test1 = new();
+                    test2 = new();
+                    distances = new(float.MaxValue);
                 }
             }
 
-            return true;
+            return (test1, test2, distances, coplanar);
         }
 
         private static bool DetectIntersection3D(Triangle t1, Triangle t2, Vector3 distances, out Triangle test1, out Triangle test2)
@@ -231,88 +278,129 @@ namespace Engine.Common
 
             if (dp2 > 0.0f)
             {
-                if (dq2 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                }
-                else if (dr2 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                }
+                var resMajor = TestIntersection3DDp2Major(t1, t2, dq2, dr2);
+
+                test1 = resMajor.test1;
+                test2 = resMajor.test2;
             }
             else if (dp2 < 0.0f)
             {
-                if (dq2 < 0.0f)
+                var resMinor = TestIntersection3DDp2Minor(t1, t2, dq2, dr2);
+
+                test1 = resMinor.test1;
+                test2 = resMinor.test2;
+            }
+            else
+            {
+                var resZero = TestIntersection3DDp2Zero(t1, t2, dq2, dr2);
+
+                if (!resZero.res)
                 {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
+                    return false;
                 }
-                else if (dr2 < 0.0f)
+
+                test1 = resZero.test1;
+                test2 = resZero.test2;
+            }
+
+            return true;
+        }
+        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Major(Triangle t1, Triangle t2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+
+            if (dq2 > 0.0f)
+            {
+                test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                test2 = new(t2.Point3, t2.Point1, t2.Point2);
+            }
+            else if (dr2 > 0.0f)
+            {
+                test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                test2 = new(t2.Point2, t2.Point3, t2.Point1);
+            }
+            else
+            {
+                test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                test2 = new(t2.Point1, t2.Point2, t2.Point3);
+            }
+
+            return (test1, test2);
+        }
+        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Minor(Triangle t1, Triangle t2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+
+            if (dq2 < 0.0f)
+            {
+                test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                test2 = new(t2.Point3, t2.Point1, t2.Point2);
+            }
+            else if (dr2 < 0.0f)
+            {
+                test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                test2 = new(t2.Point2, t2.Point3, t2.Point1);
+            }
+            else
+            {
+                test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                test2 = new(t2.Point1, t2.Point2, t2.Point3);
+            }
+
+            return (test1, test2);
+        }
+        private static (Triangle test1, Triangle test2, bool res) TestIntersection3DDp2Zero(Triangle t1, Triangle t2, float dq2, float dr2)
+        {
+            Triangle test1;
+            Triangle test2;
+
+            if (dq2 < 0.0f)
+            {
+                if (dr2 >= 0.0f)
                 {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
+                    test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                    test2 = new(t2.Point2, t2.Point3, t2.Point1);
                 }
                 else
                 {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
+                    test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                    test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                }
+            }
+            else if (dq2 > 0.0f)
+            {
+                if (dr2 > 0.0f)
+                {
+                    test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                    test2 = new(t2.Point1, t2.Point2, t2.Point3);
+                }
+                else
+                {
+                    test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                    test2 = new(t2.Point2, t2.Point3, t2.Point1);
                 }
             }
             else
             {
-                if (dq2 < 0.0f)
+                if (dr2 > 0.0f)
                 {
-                    if (dr2 >= 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    }
+                    test1 = new(t1.Point1, t1.Point2, t1.Point3);
+                    test2 = new(t2.Point3, t2.Point1, t2.Point2);
                 }
-                else if (dq2 > 0.0f)
+                else if (dr2 < 0.0f)
                 {
-                    if (dr2 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                    }
+                    test1 = new(t1.Point1, t1.Point3, t1.Point2);
+                    test2 = new(t2.Point3, t2.Point1, t2.Point2);
                 }
                 else
                 {
-                    if (dr2 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                    }
-                    else if (dr2 < 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return (default, default, false);
                 }
             }
 
-            return true;
+            return (test1, test2, true);
         }
 
         private static bool ConstructIntersection3D(Triangle t1, Triangle t2, Vector3 n1, Vector3 n2, out Line3D? segment)
@@ -331,7 +419,6 @@ namespace Engine.Common
                 return ConstructAxis1(t1, t2, v, v1, n1, n2, out segment);
             }
         }
-
         private static bool ConstructAxis0(Triangle t1, Triangle t2, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Line3D? segment)
         {
             segment = null;
@@ -384,7 +471,6 @@ namespace Engine.Common
                 return true;
             }
         }
-
         private static bool ConstructAxis1(Triangle t1, Triangle t2, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Line3D? segment)
         {
             segment = null;
@@ -486,7 +572,48 @@ namespace Engine.Common
                 r2 = t2.Point3.XY();
             }
 
-            return Overlap2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
+            return Overlap2D(new(p1, q1, r1), new(p2, q2, r2));
+        }
+        private static bool Overlap2D(Triangle2D t1, Triangle2D t2)
+        {
+            var p1 = t1.Point1;
+            var q1 = t1.Point2;
+            var r1 = t1.Point3;
+
+            var p2 = t2.Point1;
+            var q2 = t2.Point2;
+            var r2 = t2.Point3;
+
+            if (Orient2D(new(p1, q1, r1)) < 0.0f)
+            {
+                if (Orient2D(new(p2, q2, r2)) < 0.0f)
+                {
+                    return DetectIntersection2D(new(p1, r1, q1), new(p2, r2, q2));
+                }
+                else
+                {
+                    return DetectIntersection2D(new(p1, r1, q1), new(p2, q2, r2));
+                }
+            }
+            else
+            {
+                if (Orient2D(new(p2, q2, r2)) < 0.0f)
+                {
+                    return DetectIntersection2D(new(p1, q1, r1), new(p2, r2, q2));
+                }
+                else
+                {
+                    return DetectIntersection2D(new(p1, q1, r1), new(p2, q2, r2));
+                }
+            }
+        }
+        private static float Orient2D(Triangle2D t)
+        {
+            var a = t.Point1;
+            var b = t.Point2;
+            var c = t.Point3;
+
+            return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
         }
 
         private static bool CheckMinMax(Triangle t1, Triangle t2)
@@ -508,49 +635,6 @@ namespace Engine.Common
             return true;
         }
 
-        private static bool Overlap2D(Triangle2D t1, Triangle2D t2)
-        {
-            var p1 = t1.Point1;
-            var q1 = t1.Point2;
-            var r1 = t1.Point3;
-
-            var p2 = t2.Point1;
-            var q2 = t2.Point2;
-            var r2 = t2.Point3;
-
-            if (Orient2D(new Triangle2D(p1, q1, r1)) < 0.0f)
-            {
-                if (Orient2D(new Triangle2D(p2, q2, r2)) < 0.0f)
-                {
-                    return DetectIntersection2D(new Triangle2D(p1, r1, q1), new Triangle2D(p2, r2, q2));
-                }
-                else
-                {
-                    return DetectIntersection2D(new Triangle2D(p1, r1, q1), new Triangle2D(p2, q2, r2));
-                }
-            }
-            else
-            {
-                if (Orient2D(new Triangle2D(p2, q2, r2)) < 0.0f)
-                {
-                    return DetectIntersection2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, r2, q2));
-                }
-                else
-                {
-                    return DetectIntersection2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
-                }
-            }
-        }
-
-        private static float Orient2D(Triangle2D t)
-        {
-            var a = t.Point1;
-            var b = t.Point2;
-            var c = t.Point3;
-
-            return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
-        }
-
         private static bool DetectIntersection2D(Triangle2D t1, Triangle2D t2)
         {
             var p1 = t1.Point1;
@@ -563,46 +647,54 @@ namespace Engine.Common
 
             if (Orient2D(new Triangle2D(p2, q2, p1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(q2, r2, p1)) >= 0.0f)
+                return TestIntersection2DMajor(p1, q1, r1, p2, q2, r2);
+            }
+            else
+            {
+                return TestIntersection2DMinor(p1, q1, r1, p2, q2, r2);
+            }
+        }
+        private static bool TestIntersection2DMajor(Vector2 p1, Vector2 q1, Vector2 r1, Vector2 p2, Vector2 q2, Vector2 r2)
+        {
+            if (Orient2D(new(q2, r2, p1)) >= 0.0f)
+            {
+                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
-                    }
+                    return true;
                 }
                 else
                 {
-                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
-                    {
-                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(r2, p2, q2));
-                    }
-                    else
-                    {
-                        return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
-                    }
+                    return IntersectionEdge(new(p1, q1, r1), new(p2, q2, r2));
                 }
             }
             else
             {
-                if (Orient2D(new Triangle2D(q2, r2, p1)) >= 0.0f)
+                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
-                    {
-                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(q2, r2, p2));
-                    }
-                    else
-                    {
-                        return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(q2, r2, p2));
-                    }
+                    return IntersectionEdge(new(p1, q1, r1), new(r2, p2, q2));
                 }
                 else
                 {
-                    return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(r2, p2, q2));
+                    return IntersectionVertex(new(p1, q1, r1), new(p2, q2, r2));
                 }
+            }
+        }
+        private static bool TestIntersection2DMinor(Vector2 p1, Vector2 q1, Vector2 r1, Vector2 p2, Vector2 q2, Vector2 r2)
+        {
+            if (Orient2D(new(q2, r2, p1)) >= 0.0f)
+            {
+                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
+                {
+                    return IntersectionEdge(new(p1, q1, r1), new(q2, r2, p2));
+                }
+                else
+                {
+                    return IntersectionVertex(new(p1, q1, r1), new(q2, r2, p2));
+                }
+            }
+            else
+            {
+                return IntersectionVertex(new(p1, q1, r1), new(r2, p2, q2));
             }
         }
 
@@ -616,33 +708,33 @@ namespace Engine.Common
             var q2 = t2.Point2;
             var r2 = t2.Point3;
 
-            if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
+            if (Orient2D(new(r2, p2, q1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(r2, q2, q1)) <= 0.0f)
+                if (Orient2D(new(r2, q2, q1)) <= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(p1, p2, q1)) > 0.0f)
+                    if (Orient2D(new(p1, p2, q1)) > 0.0f)
                     {
-                        return Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f;
+                        return Orient2D(new(p1, q2, q1)) <= 0.0f;
                     }
-                    else if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
+                    else if (Orient2D(new(p1, p2, r1)) >= 0.0f)
                     {
-                        return Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f;
+                        return Orient2D(new(q1, r1, p2)) >= 0.0f;
                     }
                 }
-                else if (Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f && Orient2D(new Triangle2D(r2, q2, r1)) <= 0.0f)
+                else if (Orient2D(new(p1, q2, q1)) <= 0.0f && Orient2D(new(r2, q2, r1)) <= 0.0f)
                 {
-                    return Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f;
+                    return Orient2D(new(q1, r1, q2)) >= 0.0f;
                 }
             }
-            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
+            else if (Orient2D(new(r2, p2, r1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f)
+                if (Orient2D(new(q1, r1, r2)) >= 0.0f)
                 {
-                    return Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f;
+                    return Orient2D(new(p1, p2, r1)) >= 0.0f;
                 }
-                else if (Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f)
+                else if (Orient2D(new(q1, r1, q2)) >= 0.0f)
                 {
-                    return Orient2D(new Triangle2D(r2, r1, q2)) >= 0.0f;
+                    return Orient2D(new(r2, r1, q2)) >= 0.0f;
                 }
             }
 
@@ -658,25 +750,25 @@ namespace Engine.Common
             var p2 = t2.Point1;
             var r2 = t2.Point3;
 
-            if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
+            if (Orient2D(new(r2, p2, q1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(p1, p2, q1)) >= 0.0f)
+                if (Orient2D(new(p1, p2, q1)) >= 0.0f)
                 {
-                    return Orient2D(new Triangle2D(p1, q1, r2)) >= 0.0f;
+                    return Orient2D(new(p1, q1, r2)) >= 0.0f;
                 }
-                else if (Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f)
+                else if (Orient2D(new(q1, r1, p2)) >= 0.0f)
                 {
-                    return Orient2D(new Triangle2D(r1, p1, p2)) >= 0.0f;
+                    return Orient2D(new(r1, p1, p2)) >= 0.0f;
                 }
             }
-            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f && Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
+            else if (Orient2D(new(r2, p2, r1)) >= 0.0f && Orient2D(new(p1, p2, r1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
+                if (Orient2D(new(p1, r1, r2)) >= 0.0f)
                 {
                     return true;
                 }
 
-                return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
+                return Orient2D(new(q1, r1, r2)) >= 0.0f;
             }
 
             return false;
@@ -685,33 +777,26 @@ namespace Engine.Common
         /// <summary>
         /// Triangle 2D
         /// </summary>
-        struct Triangle2D
+        /// <remarks>
+        /// Constructor
+        /// </remarks>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        struct Triangle2D(Vector2 point1, Vector2 point2, Vector2 point3)
         {
             /// <summary>
             /// Point 1
             /// </summary>
-            public Vector2 Point1 { get; set; }
+            public Vector2 Point1 { get; set; } = point1;
             /// <summary>
             /// Point 2
             /// </summary>
-            public Vector2 Point2 { get; set; }
+            public Vector2 Point2 { get; set; } = point2;
             /// <summary>
             /// Point 3
             /// </summary>
-            public Vector2 Point3 { get; set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="point1">Point 1</param>
-            /// <param name="point2">Point 2</param>
-            /// <param name="point3">Point 3</param>
-            public Triangle2D(Vector2 point1, Vector2 point2, Vector2 point3)
-            {
-                Point1 = point1;
-                Point2 = point2;
-                Point3 = point3;
-            }
+            public Vector2 Point3 { get; set; } = point3;
         }
     }
 }
