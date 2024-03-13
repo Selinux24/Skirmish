@@ -81,10 +81,10 @@ namespace TerrainSamples.SceneRts.AI
                 if (distance <= Range)
                 {
                     lastAttackTime = 0;
-                    var damage = Helper.RandomGenerator.NextFloat(0, Damage);
-                    if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
+                    var dmg = Helper.RandomGenerator.NextFloat(0, Damage);
+                    if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { dmg *= 2f; } //Critic
 
-                    return damage;
+                    return dmg;
                 }
             }
 

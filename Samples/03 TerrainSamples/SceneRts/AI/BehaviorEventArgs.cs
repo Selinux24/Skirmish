@@ -5,26 +5,20 @@ namespace TerrainSamples.SceneRts.AI
     /// <summary>
     /// Base behavior events args
     /// </summary>
-    public class BehaviorEventArgs : EventArgs
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="active">Active agent</param>
+    /// <param name="passive">Passive agent</param>
+    public class BehaviorEventArgs(AIAgent active, AIAgent passive) : EventArgs
     {
         /// <summary>
         /// Active agent
         /// </summary>
-        public AIAgent Active { get; set; }
+        public AIAgent Active { get; set; } = active;
         /// <summary>
         /// Passive agent
         /// </summary>
-        public AIAgent Passive { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="active">Active agent</param>
-        /// <param name="passive">Passive agent</param>
-        public BehaviorEventArgs(AIAgent active, AIAgent passive)
-        {
-            Active = active;
-            Passive = passive;
-        }
+        public AIAgent Passive { get; set; } = passive;
     }
 }

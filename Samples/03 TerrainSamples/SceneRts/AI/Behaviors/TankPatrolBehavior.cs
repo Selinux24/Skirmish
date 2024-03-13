@@ -6,21 +6,16 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Tank patrol behavior
     /// </summary>
-    public class TankPatrolBehavior : PatrolBehavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class TankPatrolBehavior(AIAgent agent) : PatrolBehavior(agent)
     {
         /// <summary>
         /// Random target when waiting
         /// </summary>
         private Vector3? randomTarget = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public TankPatrolBehavior(AIAgent agent) : base(agent)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override void Task(IGameTime gameTime)

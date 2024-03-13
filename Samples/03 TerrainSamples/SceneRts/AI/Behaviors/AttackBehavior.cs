@@ -7,7 +7,11 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Attack behavior
     /// </summary>
-    public class AttackBehavior : Behavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class AttackBehavior(AIAgent agent) : Behavior(agent)
     {
         /// <summary>
         /// Target
@@ -33,15 +37,6 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
             {
                 return attackPosition;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public AttackBehavior(AIAgent agent) : base(agent)
-        {
-
         }
 
         /// <summary>

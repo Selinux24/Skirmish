@@ -6,7 +6,11 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Retreat behavior
     /// </summary>
-    public class RetreatBehavior : Behavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class RetreatBehavior(AIAgent agent) : Behavior(agent)
     {
         /// <summary>
         /// Rally point
@@ -28,15 +32,6 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
             {
                 return retreatingPosition;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public RetreatBehavior(AIAgent agent) : base(agent)
-        {
-
         }
 
         /// <summary>

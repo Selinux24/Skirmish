@@ -47,7 +47,7 @@ namespace TerrainSamples.SceneRts.AI.Agents
                 p.Y = FlightHeight;
             }
 
-            Controller.Follow(new SegmentPath(new[] { Manipulator.Position, p }));
+            Controller.Follow(new SegmentPath([Manipulator.Position, p]));
             Controller.MaximumSpeed = speed;
         }
 

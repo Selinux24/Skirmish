@@ -6,17 +6,12 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Tank attack behavior
     /// </summary>
-    public class TankAttackBehavior : AttackBehavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class TankAttackBehavior(AIAgent agent) : AttackBehavior(agent)
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public TankAttackBehavior(AIAgent agent) : base(agent)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override void Task(IGameTime gameTime)
         {

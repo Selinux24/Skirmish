@@ -102,9 +102,9 @@ namespace Engine.Content
 
             var firstMesh = meshArray.First();
 
-            var topology = firstMesh.Topology;
-            string material = firstMesh.Material;
-            bool isTextured = firstMesh.Textured;
+            var meshTopology = firstMesh.Topology;
+            string meshMaterial = firstMesh.Material;
+            bool meshTextured = firstMesh.Textured;
 
             var verts = new List<VertexData>();
             var idx = new List<uint>();
@@ -131,7 +131,7 @@ namespace Engine.Content
                 indexOffset = (uint)verts.Count;
             }
 
-            optimizedMesh = new(topology, material, isTextured, false, Matrix.Identity);
+            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix.Identity);
 
             optimizedMesh.SetVertices(verts);
             optimizedMesh.SetIndices(idx);

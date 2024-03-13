@@ -6,7 +6,11 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Idle behavior
     /// </summary>
-    public class IdleBehavior : Behavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class IdleBehavior(AIAgent agent) : Behavior(agent)
     {
         /// <inheritdoc/>
         public override Vector3? Target
@@ -15,15 +19,6 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
             {
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public IdleBehavior(AIAgent agent) : base(agent)
-        {
-
         }
 
         /// <inheritdoc/>

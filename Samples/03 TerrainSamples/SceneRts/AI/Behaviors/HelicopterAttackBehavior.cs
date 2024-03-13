@@ -6,17 +6,12 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Helicopter attack behavior
     /// </summary>
-    public class HelicopterAttackBehavior : AttackBehavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class HelicopterAttackBehavior(AIAgent agent) : AttackBehavior(agent)
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public HelicopterAttackBehavior(AIAgent agent) : base(agent)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override void Task(IGameTime gameTime)
         {

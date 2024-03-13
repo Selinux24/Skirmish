@@ -7,7 +7,11 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
     /// <summary>
     /// Patrolling behavior
     /// </summary>
-    public class PatrolBehavior : Behavior
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    public class PatrolBehavior(AIAgent agent) : Behavior(agent)
     {
         /// <summary>
         /// Patrol check points
@@ -58,15 +62,6 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
         /// Patrolling velocity
         /// </summary>
         public float PatrollVelocity { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        public PatrolBehavior(AIAgent agent) : base(agent)
-        {
-
-        }
 
         /// <summary>
         /// Initializes the behavior
