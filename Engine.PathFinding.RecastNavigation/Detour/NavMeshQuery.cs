@@ -2682,8 +2682,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             segmentsRes = [];
 
-            List<Segment> segments = [];
-
             var cur = m_nav.GetTileAndPolyByRef(r);
             if (cur.Ref == 0)
             {
@@ -2696,7 +2694,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             int MAX_INTERVAL = 16;
-            var ints = new List<SegInterval>();
+            List<SegInterval> ints = [];
+            List<Segment> segments = [];
 
             Status status = Status.DT_SUCCESS;
 
@@ -2708,51 +2707,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Skip non-solid edges.
                 if (cur.Poly.NeighbourIsExternalLink(i))
                 {
-                    // Tile border.
-                    for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
-                    {
-                        var link = cur.Tile.Links[k];
-                        if (link.Edge == j && link.NRef != 0)
-                        {
-                            var nei = m_nav.GetTileAndPolyByRefUnsafe(link.NRef);
-                            if (filter.PassFilter(nei.Poly.Flags))
-                            {
-                                SegInterval.InsertInterval(ints, MAX_INTERVAL, link.BMin, link.BMax, link.NRef);
-                            }
-                        }
-                    }
+                    SkipExternalLink(filter, j, cur, ints, MAX_INTERVAL);
                 }
                 else
                 {
-                    // Internal edge
-                    int neij = cur.Poly.Neis[j];
-                    int neiRef = 0;
-                    if (neij != 0)
-                    {
-                        int idx = neij - 1;
-                        neiRef = m_nav.GetTileRef(cur.Tile) | idx;
-                        if (!filter.PassFilter(cur.Tile.Polys[idx].Flags))
-                        {
-                            neiRef = 0;
-                        }
-                    }
-
-                    // If the edge leads to another polygon and portals are not stored, skip.
-                    if (neiRef != 0)
-                    {
-                        continue;
-                    }
-
-                    if (segments.Count < maxSegments)
-                    {
-                        segments.Add(new()
-                        {
-                            S1 = vj,
-                            S2 = vi,
-                            R = neiRef,
-                        });
-                    }
-                    else
+                    if (!SkipInternalEdge(filter, j, cur, vi, vj, segments, maxSegments))
                     {
                         status |= Status.DT_BUFFER_TOO_SMALL;
                     }
@@ -2765,55 +2724,145 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 SegInterval.InsertInterval(ints, MAX_INTERVAL, 255, 256, 0);
 
                 // Store segments.
-                for (int k = 1; k < ints.Count; ++k)
+                if (!StoreSegments(vi, vj, ints, segments, maxSegments))
                 {
-                    // Portal segment.
-                    if (ints[k].R != 0)
-                    {
-                        float tmin = ints[k].TMin / 255.0f;
-                        float tmax = ints[k].TMax / 255.0f;
-                        if (segments.Count < maxSegments)
-                        {
-                            segments.Add(new()
-                            {
-                                S1 = Vector3.Lerp(vj, vi, tmin),
-                                S2 = Vector3.Lerp(vj, vi, tmax),
-                                R = ints[k].R,
-                            });
-                        }
-                        else
-                        {
-                            status |= Status.DT_BUFFER_TOO_SMALL;
-                        }
-                    }
-
-                    // Wall segment.
-                    int imin = ints[k - 1].TMax;
-                    int imax = ints[k].TMin;
-                    if (imin != imax)
-                    {
-                        float tmin = imin / 255.0f;
-                        float tmax = imax / 255.0f;
-                        if (segments.Count < maxSegments)
-                        {
-                            segments.Add(new()
-                            {
-                                S1 = Vector3.Lerp(vj, vi, tmin),
-                                S2 = Vector3.Lerp(vj, vi, tmax),
-                                R = 0,
-                            });
-                        }
-                        else
-                        {
-                            status |= Status.DT_BUFFER_TOO_SMALL;
-                        }
-                    }
+                    status |= Status.DT_BUFFER_TOO_SMALL;
                 }
             }
 
             segmentsRes = [.. segments];
 
             return status;
+        }
+        /// <summary>
+        /// Skips external link
+        /// </summary>
+        /// <param name="filter">Filter</param>
+        /// <param name="j">Neighbour index</param>
+        /// <param name="cur">Current tile reference</param>
+        /// <param name="ints">Interval list</param>
+        /// <param name="maxInterval">Maximum number of intervals in the list</param>
+        private void SkipExternalLink(QueryFilter filter, int j, TileRef cur, List<SegInterval> ints, int maxInterval)
+        {
+            // Tile border.
+            for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+            {
+                var link = cur.Tile.Links[k];
+                if (link.Edge == j && link.NRef != 0)
+                {
+                    var nei = m_nav.GetTileAndPolyByRefUnsafe(link.NRef);
+                    if (filter.PassFilter(nei.Poly.Flags))
+                    {
+                        SegInterval.InsertInterval(ints, maxInterval, link.BMin, link.BMax, link.NRef);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Skips internal edge
+        /// </summary>
+        /// <param name="filter">Filter</param>
+        /// <param name="j">Neighbour index</param>
+        /// <param name="cur">Current tile reference</param>
+        /// <param name="vi">Segment point i</param>
+        /// <param name="vj">Segment point j</param>
+        /// <param name="segments">Segment list</param>
+        /// <param name="maxSegments">Maximum segments in the list</param>
+        /// <returns>Returns false if the segment buffer is too small</returns>
+        private bool SkipInternalEdge(QueryFilter filter, int j, TileRef cur, Vector3 vi, Vector3 vj, List<Segment> segments, int maxSegments)
+        {
+            // Internal edge
+            int neij = cur.Poly.Neis[j];
+            int neiRef = 0;
+            if (neij != 0)
+            {
+                int idx = neij - 1;
+                neiRef = m_nav.GetTileRef(cur.Tile) | idx;
+                if (!filter.PassFilter(cur.Tile.Polys[idx].Flags))
+                {
+                    neiRef = 0;
+                }
+            }
+
+            // If the edge leads to another polygon and portals are not stored, skip.
+            if (neiRef != 0)
+            {
+                return true;
+            }
+
+            if (segments.Count < maxSegments)
+            {
+                segments.Add(new()
+                {
+                    S1 = vj,
+                    S2 = vi,
+                    R = neiRef,
+                });
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Stores the specified segment in the list
+        /// </summary>
+        /// <param name="vi">Segment point i</param>
+        /// <param name="vj">Segment point j</param>
+        /// <param name="ints">Interval list</param>
+        /// <param name="segments">Segment list</param>
+        /// <param name="maxSegments">Maximum segments in the list</param>
+        /// <returns>Returns false if the segment buffer is too small</returns>
+        private static bool StoreSegments(Vector3 vi, Vector3 vj, List<SegInterval> ints, List<Segment> segments, int maxSegments)
+        {
+            for (int k = 1; k < ints.Count; ++k)
+            {
+                if (segments.Count >= maxSegments)
+                {
+                    return false;
+                }
+
+                // Portal segment.
+                if (ints[k].R != 0)
+                {
+                    float tmin = ints[k].TMin / 255.0f;
+                    float tmax = ints[k].TMax / 255.0f;
+
+                    segments.Add(new()
+                    {
+                        S1 = Vector3.Lerp(vj, vi, tmin),
+                        S2 = Vector3.Lerp(vj, vi, tmax),
+                        R = ints[k].R,
+                    });
+                }
+
+                if (segments.Count >= maxSegments)
+                {
+                    return false;
+                }
+
+                // Wall segment.
+                int imin = ints[k - 1].TMax;
+                int imax = ints[k].TMin;
+                if (imin == imax)
+                {
+                    continue;
+                }
+
+                float min = imin / 255.0f;
+                float max = imax / 255.0f;
+
+                segments.Add(new()
+                {
+                    S1 = Vector3.Lerp(vj, vi, min),
+                    S2 = Vector3.Lerp(vj, vi, max),
+                    R = 0,
+                });
+            }
+
+            return true;
         }
 
         /// <summary>
