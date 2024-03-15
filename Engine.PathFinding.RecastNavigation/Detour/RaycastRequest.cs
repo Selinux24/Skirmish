@@ -54,7 +54,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
-
+        /// <summary>
+        /// Get current, previous and next tile references from the start reference
+        /// </summary>
+        /// <param name="navMesh">Navigation mesh</param>
         public readonly (TileRef cur, TileRef prev, TileRef next) GetTiles(NavMesh navMesh)
         {
             var cur = navMesh.GetTileAndPolyByRefUnsafe(StartRef);

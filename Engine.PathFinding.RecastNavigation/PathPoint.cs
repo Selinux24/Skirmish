@@ -26,5 +26,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return !Pos.IsInfinity() && nm.IsValidPolyRef(Ref);
         }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"{Ref} => {Pos}";
+        }
     }
 }

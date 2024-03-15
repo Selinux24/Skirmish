@@ -89,7 +89,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
-        private Vector3? pathFindingEnd = null;
         private readonly Color pathFindingColorPath = new(128, 0, 255, 255);
         private readonly Color pathFindingColorStart = new(97, 0, 255, 255);
         private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
@@ -146,7 +145,7 @@ namespace TerrainSamples.SceneNavMeshTest
             help.Text = null;
             help.Visible = false;
 
-            message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Orange });
+            message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Orange, GrowControlWithText = false, TextHorizontalAlign = TextHorizontalAlign.Right });
             message.Text = null;
             message.Visible = false;
 
@@ -728,14 +727,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            pathFindingEnd = r.PickingResult.Position;
-
             var circleEnd = Line3D.CreateCircle(r.PickingResult.Position, 0.25f, 8);
             lineDrawer.SetPrimitives(pathFindingColorEnd, circleEnd ?? []);
             lineDrawer.Visible = true;
 
-            //Calculate path fire & forget
-            var path = FindPath(agent, pathFindingStart.Value, pathFindingEnd.Value, false);
+            //Calculate path
+            var path = FindPath(agent, pathFindingStart.Value, r.PickingResult.Position, false);
             var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
             lineDrawer.SetPrimitives(pathFindingColorPath, pathLines);
             lineDrawer.Visible = true;
@@ -1174,7 +1171,6 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             pathFindingStart = null;
-            pathFindingEnd = null;
 
             lineDrawer.Clear(pathFindingColorPath);
             lineDrawer.Clear(pathFindingColorStart);

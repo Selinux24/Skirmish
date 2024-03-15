@@ -1,6 +1,4 @@
 ﻿
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     /// <summary>

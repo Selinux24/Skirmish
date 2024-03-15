@@ -344,7 +344,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             var status = query.CalcPath(
-                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
+                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Straight,
                 from, to, out var result);
 
             if (!status.HasFlag(Status.DT_SUCCESS))
