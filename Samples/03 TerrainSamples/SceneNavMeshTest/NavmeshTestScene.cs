@@ -90,7 +90,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
         private Vector3? pathFindingEnd = null;
-        private readonly Color pathFindingColorPath = new(128, 0, 255, 64);
+        private readonly Color pathFindingColorPath = new(128, 0, 255, 255);
+        private readonly Color pathFindingColorStart = new(97, 0, 255, 255);
+        private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -717,20 +719,28 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 pathFindingStart = r.PickingResult.Position;
 
+                var circleStart = Line3D.CreateCircle(r.PickingResult.Position, 0.25f, 8);
+                lineDrawer.SetPrimitives(pathFindingColorStart, circleStart ?? []);
+                lineDrawer.Visible = true;
+
+                ShowMessage($"Press {GContacPoint} to add the end point.");
+
                 return;
             }
 
             pathFindingEnd = r.PickingResult.Position;
 
-            //Calculate path fire & forget
-            IEnumerable<Line3D> pathLines = null;
-            Task.Run(async () =>
-            {
-                var path = await FindPathAsync(agent, pathFindingStart.Value, pathFindingEnd.Value, false);
+            var circleEnd = Line3D.CreateCircle(r.PickingResult.Position, 0.25f, 8);
+            lineDrawer.SetPrimitives(pathFindingColorEnd, circleEnd ?? []);
+            lineDrawer.Visible = true;
 
-                pathLines = Line3D.CreateLineList(path.Positions);
-            });
-            lineDrawer.SetPrimitives(pathFindingColorPath, pathLines ?? []);
+            //Calculate path fire & forget
+            var path = FindPath(agent, pathFindingStart.Value, pathFindingEnd.Value, false);
+            var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
+            lineDrawer.SetPrimitives(pathFindingColorPath, pathLines);
+            lineDrawer.Visible = true;
+
+            ShowMessage($"Press {GContacPoint} to change the end point. {GameExit} to close the path finding tool.");
         }
         private void UpdateNavmeshInput()
         {
@@ -1167,6 +1177,8 @@ namespace TerrainSamples.SceneNavMeshTest
             pathFindingEnd = null;
 
             lineDrawer.Clear(pathFindingColorPath);
+            lineDrawer.Clear(pathFindingColorStart);
+            lineDrawer.Clear(pathFindingColorEnd);
 
             ShowMessage($"Press {GContacPoint} to add the start point. Then, press {GContacPoint} to add the end point.");
         }

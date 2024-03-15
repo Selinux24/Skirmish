@@ -389,7 +389,7 @@ namespace Engine.PathFinding
 
             if (path.Count() <= 1)
             {
-                return null;
+                return new();
             }
 
             return ComputeGroundPositions(path, useGround);

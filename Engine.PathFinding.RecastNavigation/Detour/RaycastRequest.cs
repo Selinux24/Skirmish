@@ -35,5 +35,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Previous polygon reference
         /// </summary>
         public int? PrevReference { get; set; }
+
+        /// <summary>
+        /// Gets whether the request is valid or not
+        /// </summary>
+        /// <param name="navMesh">Navigation mesh</param>
+        public readonly bool IsValid(NavMesh navMesh)
+        {
+            // Validate input
+            if (Filter == null ||
+                StartPos.IsInfinity() ||
+                EndPos.IsInfinity() ||
+                !navMesh.IsValidPolyRef(StartRef) ||
+                PrevReference.HasValue && !navMesh.IsValidPolyRef(PrevReference.Value))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public readonly (TileRef cur, TileRef prev, TileRef next) GetTiles(NavMesh navMesh)
+        {
+            var cur = navMesh.GetTileAndPolyByRefUnsafe(StartRef);
+            var prev = cur;
+            var next = cur;
+
+            if (PrevReference.HasValue)
+            {
+                prev = navMesh.GetTileAndPolyByRefUnsafe(PrevReference.Value);
+            }
+
+            return (cur, prev, next);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class RaycastHit
     {
-        private readonly List<int> path = new();
+        private readonly List<int> path = [];
 
         /// <summary>
         /// The hit parameter. (FLT_MAX if no wall hit.)
@@ -30,7 +31,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             get
             {
-                return path.ToArray();
+                return [.. path];
             }
         }
         /// <summary>
@@ -56,6 +57,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int PrevReference { get; set; }
 
+        /// <summary>
+        /// Prepares the hit data
+        /// </summary>
+        /// <param name="n">Path counter</param>
+        /// <param name="cur">Tile</param>
+        /// <param name="tmax">Maximum distance</param>
+        /// <param name="segMax">Maximum segment</param>
+        public bool PrepareHitData(ref int n, TileRef cur, float tmax, int segMax)
+        {
+            HitEdgeIndex = segMax;
+
+            // Keep track of furthest t so far.
+            T = Math.Max(T, tmax);
+
+            // Store visited polygons.
+            if (n < MaxPath)
+            {
+                Add(cur.Ref);
+
+                n++;
+
+                return true;
+            }
+
+            return false;
+        }
         /// <summary>
         /// Adds a polygon reference to the ray-cast path
         /// </summary>

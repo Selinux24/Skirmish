@@ -439,10 +439,8 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         return false;
                     }
-                    else
-                    {
-                        continue;
-                    }
+
+                    continue;
                 }
 
                 if (!EvaluateSegment(j, n, d, ref tmin, ref tmax, ref segMin, ref segMax))

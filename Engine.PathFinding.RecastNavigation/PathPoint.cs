@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nm">Navigation mesh</param>
         public readonly bool IsValid(NavMesh nm)
         {
-            return !nm.IsValidPolyRef(Ref) || Pos.IsInfinity();
+            return !Pos.IsInfinity() && nm.IsValidPolyRef(Ref);
         }
     }
 }

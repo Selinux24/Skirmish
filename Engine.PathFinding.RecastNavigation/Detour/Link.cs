@@ -1,4 +1,6 @@
 ﻿
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     /// <summary>
@@ -30,6 +32,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// If a boundary link, defines the maximum sub-edge area.
         /// </summary>
         public int BMax { get; set; }
+
+        /// <summary>
+        /// Checks if the link spans the whole edge
+        /// </summary>
+        public readonly bool ExcedBoundaries()
+        {
+            return BMin == 0 && BMax == 255;
+        }
 
         /// <inheritdoc/>
         public override readonly string ToString()

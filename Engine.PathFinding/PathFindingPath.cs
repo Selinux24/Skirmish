@@ -13,11 +13,11 @@ namespace Engine.PathFinding
         /// <summary>
         /// Position list
         /// </summary>
-        private readonly List<Vector3> positions = new();
+        private readonly List<Vector3> positions = [];
         /// <summary>
         /// Normal list
         /// </summary>
-        private readonly List<Vector3> normals = new();
+        private readonly List<Vector3> normals = [];
 
         /// <summary>
         /// Gets the position control points
@@ -26,7 +26,7 @@ namespace Engine.PathFinding
         {
             get
             {
-                return positions.ToArray();
+                return [.. positions];
             }
         }
         /// <summary>
@@ -36,7 +36,7 @@ namespace Engine.PathFinding
         {
             get
             {
-                return normals.ToArray();
+                return [.. normals];
             }
         }
         /// <summary>

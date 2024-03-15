@@ -43,7 +43,7 @@ namespace Engine
                 return line;
             }
 
-            return new Line3D(
+            return new(
                 Vector3.TransformCoordinate(line.Point1, transform),
                 Vector3.TransformCoordinate(line.Point2, transform));
         }
@@ -57,7 +57,7 @@ namespace Engine
         {
             if (lines?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             if (transform.IsIdentity)
@@ -72,44 +72,32 @@ namespace Engine
 
         public static IEnumerable<Line3D> CreateWiredSquare(IEnumerable<Vector3> corners)
         {
-            int[] indexes = new int[8];
-
-            indexes[0] = 0;
-            indexes[1] = 1;
-
-            indexes[2] = 1;
-            indexes[3] = 2;
-
-            indexes[4] = 2;
-            indexes[5] = 3;
-
-            indexes[6] = 3;
-            indexes[7] = 0;
+            int[] indexes = [0, 1, 1, 2, 2, 3, 3, 0];
 
             return CreateFromVertices(corners, indexes);
         }
         public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            return new[]
-            {
-                new Line3D(v0, v1),
-                new Line3D(v1, v2),
-                new Line3D(v2, v3),
-                new Line3D(v3, v0)
-            };
+            return
+            [
+                new(v0, v1),
+                new(v1, v2),
+                new(v2, v3),
+                new(v3, v0)
+            ];
         }
         public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> path)
         {
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             var tmp = path.ToArray();
 
             for (int i = 0; i < tmp.Length - 1; i++)
             {
-                lines.Add(new Line3D(tmp[i], tmp[i + 1]));
+                lines.Add(new(tmp[i], tmp[i + 1]));
             }
 
-            return lines.ToArray();
+            return lines;
         }
         public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
@@ -133,18 +121,8 @@ namespace Engine
 
         public static IEnumerable<Line3D> CreateWiredTriangle(Vector3 v0, Vector3 v1, Vector3 v2)
         {
-            int[] indexes = new int[6];
-
-            indexes[0] = 0;
-            indexes[1] = 1;
-
-            indexes[2] = 1;
-            indexes[3] = 2;
-
-            indexes[4] = 2;
-            indexes[5] = 0;
-
-            return CreateFromVertices(new[] { v0, v1, v2 }, indexes);
+            int[] indexes = [0, 1, 1, 2, 2, 0];
+            return CreateFromVertices([v0, v1, v2], indexes);
         }
         public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
         {
@@ -154,7 +132,7 @@ namespace Engine
         {
             if (triangleList?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return triangleList
@@ -163,7 +141,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
         {
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             var p = transform.TranslationVector;
 
@@ -175,12 +153,12 @@ namespace Engine
             var c1 = (forward * 0.8f) + (left * 0.2f);
             var c2 = (forward * 0.8f) + (right * 0.2f);
 
-            lines.Add(new Line3D(p, up));
-            lines.Add(new Line3D(p, forward));
-            lines.Add(new Line3D(p, left));
+            lines.Add(new(p, up));
+            lines.Add(new(p, forward));
+            lines.Add(new(p, left));
 
-            lines.Add(new Line3D(forward, c1));
-            lines.Add(new Line3D(forward, c2));
+            lines.Add(new(forward, c1));
+            lines.Add(new(forward, c2));
 
             return lines;
         }
@@ -188,7 +166,7 @@ namespace Engine
         {
             if (transforms?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return transforms
@@ -197,13 +175,13 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
         {
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             float h = size * 0.5f;
-            lines.Add(new Line3D(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
-            lines.Add(new Line3D(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
-            lines.Add(new Line3D(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
-            lines.Add(new Line3D(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
+            lines.Add(new(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
+            lines.Add(new(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
+            lines.Add(new(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
+            lines.Add(new(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
 
             return lines;
         }
@@ -211,7 +189,7 @@ namespace Engine
         {
             if (points?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return points
@@ -220,7 +198,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateArc(Vector3 from, Vector3 to, float h, int points)
         {
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             float pad = 0.05f;
             float scale = (1.0f - pad * 2) / points;
@@ -228,14 +206,14 @@ namespace Engine
             var d = to - from;
             float len = d.Length();
 
-            EvalArc(from, d, len * h, pad, out Vector3 prev);
+            EvalArc(from, d, len * h, pad, out var prev);
 
             for (int i = 1; i <= points; i++)
             {
                 float u = pad + i * scale;
-                EvalArc(from, d, len * h, u, out Vector3 pt);
+                EvalArc(from, d, len * h, u, out var pt);
 
-                lines.Add(new Line3D(prev, pt));
+                lines.Add(new(prev, pt));
 
                 prev = pt;
             }
@@ -246,7 +224,7 @@ namespace Engine
         {
             if (arcs?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return arcs
@@ -255,7 +233,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             float[] dir = new float[segments * 2];
 
@@ -268,9 +246,9 @@ namespace Engine
 
             for (int i = 0, j = segments - 1; i < segments; j = i++)
             {
-                var line = new Line3D(
-                    new Vector3(center.X + dir[j * 2 + 0] * r, center.Y, center.Z + dir[j * 2 + 1] * r),
-                    new Vector3(center.X + dir[i * 2 + 0] * r, center.Y, center.Z + dir[i * 2 + 1] * r));
+                Line3D line = new(
+                    new(center.X + dir[j * 2 + 0] * r, center.Y, center.Z + dir[j * 2 + 1] * r),
+                    new(center.X + dir[i * 2 + 0] * r, center.Y, center.Z + dir[i * 2 + 1] * r));
 
                 lines.Add(line);
             }
@@ -281,7 +259,7 @@ namespace Engine
         {
             if (circles?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return circles
@@ -298,8 +276,8 @@ namespace Engine
                 var az = Vector3.Normalize(position - point);
                 var ax = Vector3.Cross(Vector3.Up, az);
 
-                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
-                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
+                lines.Add(new(point, new(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
+                lines.Add(new(point, new(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
             }
 
             return lines;
@@ -308,7 +286,7 @@ namespace Engine
         {
             if (arrows?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             return arrows
@@ -328,25 +306,23 @@ namespace Engine
         {
             if (vertices?.Any() != true)
             {
-                return Enumerable.Empty<Line3D>();
+                return [];
             }
 
             var vArray = vertices.ToArray();
 
-            var lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             if (indices?.Any() != true)
             {
                 // Use vertices only
-                for (int i = 0; i < vertices.Count(); i += 2)
+                for (int i = 0; i < vArray.Length; i += 2)
                 {
-                    var l = new Line3D()
+                    lines.Add(new()
                     {
                         Point1 = vArray[i],
                         Point2 = vArray[i + 1],
-                    };
-
-                    lines.Add(l);
+                    });
                 }
 
                 return lines;
@@ -356,13 +332,11 @@ namespace Engine
 
             for (int i = 0; i < iArray.Length; i += 2)
             {
-                var l = new Line3D()
+                lines.Add(new()
                 {
                     Point1 = vArray[iArray[i]],
                     Point2 = vArray[iArray[i + 1]],
-                };
-
-                lines.Add(l);
+                });
             }
 
             return lines;
@@ -378,7 +352,7 @@ namespace Engine
         /// <param name="res">Resulting point</param>
         private static void EvalArc(Vector3 v0, Vector3 v1, float h, float u, out Vector3 res)
         {
-            res = new Vector3(
+            res = new(
                 v0.X + v1.X * u,
                 v0.Y + v1.Y * u + h * (1 - (u * 2 - 1) * (u * 2 - 1)),
                 v0.Z + v1.Z * u);
@@ -395,8 +369,8 @@ namespace Engine
         /// <param name="z2">Z coordinate of end point</param>
         public Line3D(float x1, float y1, float z1, float x2, float y2, float z2)
         {
-            Point1 = new Vector3(x1, y1, z1);
-            Point2 = new Vector3(x2, y2, z2);
+            Point1 = new(x1, y1, z1);
+            Point2 = new(x2, y2, z2);
         }
         /// <summary>
         /// Constructor
@@ -424,11 +398,11 @@ namespace Engine
         /// <returns>Returns the vertex position list</returns>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return new[]
-            {
+            return
+            [
                 Point1,
                 Point2,
-            };
+            ];
         }
         /// <summary>
         /// Gets the vertex list stride
