@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -63,16 +64,13 @@ namespace TerrainSamples.SceneNavMeshTest
         private UITextArea message = null;
 
         private UIPanel mainPanel = null;
-        private UIButton btnDebug = null;
         private UIPanel debugPanel = null;
-        private UIButton btnArea = null;
-        private UIButton btnObstacle = null;
 
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
-        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
-        private PrimitiveListDrawer<Triangle> markDrawer = null;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private PrimitiveListDrawer<Triangle> triangleDrawer = null;
 
         private Model inputGeometry = null;
         private Model debugGeometry = null;
@@ -90,6 +88,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly List<AreaMarker> areas = [];
         private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
         private Vector3 lastPosition = Vector3.Zero;
+        private Vector3? pathFindingStart = null;
+        private Vector3? pathFindingEnd = null;
+        private readonly Color pathFindingColorPath = new(128, 0, 255, 64);
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -164,13 +165,22 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
 
-            var emptyDesc = SpriteDescription.Default();
-            emptyDesc.BaseColor = new Color4(sceneButtonColor.RGB(), 0.5f);
+            var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
+            var btnArea = await InitializeButton("btnArea", "Areas", btnDesc, () => stateManager.StartState(States.AddArea));
+            var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
+            {
+                if (!nmsettings.UseTileCache)
+                {
+                    ShowMessage("Tile cache must be enabled.");
 
-            btnDebug = await InitializeButton(nameof(btnDebug), "Debug", btnDesc, SceneButtonClick);
-            btnArea = await InitializeButton(nameof(btnArea), "Areas", btnDesc, SceneButtonClick);
-            btnObstacle = await InitializeButton(nameof(btnObstacle), "Obstacles", btnDesc, SceneButtonClick);
-            UIButton[] mainBtns = [btnDebug, btnArea, btnObstacle];
+                    return;
+                }
+
+                stateManager.StartState(States.AddObstacle);
+            });
+            var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
+
+            UIButton[] mainBtns = [btnDebug, btnArea, btnObstacle, btnPathFinding];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -195,20 +205,52 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Count()));
             debugPanel.Visible = false;
 
-            foreach (var e in enumValues)
+            foreach (var debug in enumValues)
             {
-                var btn = await InitializeButton($"btnDebug{e}", $"{e}", btnDesc, (ctrl, args) => SceneButtonDebugClick(args, e));
+                var btn = await InitializeButton($"btnDebug{debug}", $"{debug}", btnDesc, async () =>
+                {
+                    if (debugType == debug)
+                    {
+                        stateManager.StartState(States.Default);
+
+                        return;
+                    }
+
+                    await Task.Delay(100);
+
+                    debugType = debug;
+
+                    DrawGraphNodes(agent);
+
+                    stateManager.StartState(States.Default);
+
+                });
                 debugPanel.AddChild(btn, false);
             }
         }
-        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Func<IUIControl, MouseEventArgs, Task> clickAction = null)
+        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Action clickAction = null)
         {
             var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, LayerUI);
             button.Caption.Text = caption;
 
             if (clickAction != null)
             {
-                button.MouseClick += async (ctrl, args) => await clickAction(ctrl, args);
+                button.MouseClick += async (ctrl, args) =>
+                {
+                    if (!gameReady)
+                    {
+                        return;
+                    }
+
+                    if (!args.Buttons.HasFlag(MouseButtons.Left))
+                    {
+                        return;
+                    }
+
+                    await Task.Delay(100);
+
+                    clickAction();
+                };
             }
 
             return button;
@@ -224,6 +266,7 @@ namespace TerrainSamples.SceneNavMeshTest
             stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
             stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
+            stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
 
             UpdateLayout();
             InitializeInputMapping();
@@ -366,13 +409,13 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 Count = 10000
             };
-            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+            lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
 
             var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = 50000,
             };
-            markDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
+            triangleDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
         }
         private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
@@ -652,6 +695,43 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.Default);
             }
         }
+        private void UpdateGameStatePathFinding()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContacPoint.JustReleased)
+            {
+                return;
+            }
+
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            if (pathFindingStart == null)
+            {
+                pathFindingStart = r.PickingResult.Position;
+
+                return;
+            }
+
+            pathFindingEnd = r.PickingResult.Position;
+
+            //Calculate path fire & forget
+            IEnumerable<Line3D> pathLines = null;
+            Task.Run(async () =>
+            {
+                var path = await FindPathAsync(agent, pathFindingStart.Value, pathFindingEnd.Value, false);
+
+                pathLines = Line3D.CreateLineList(path.Positions);
+            });
+            lineDrawer.SetPrimitives(pathFindingColorPath, pathLines ?? []);
+        }
         private void UpdateNavmeshInput()
         {
             if (NmRndPointCircle.JustReleased)
@@ -879,10 +959,10 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void DrawContact(Vector3 position, Triangle triangle)
         {
-            volumesDrawer.Clear(Color.Red);
-            volumesDrawer.Clear(Color.Green);
-            volumesDrawer.Clear(Color.Gray);
-            volumesDrawer.Clear(Color.White);
+            lineDrawer.Clear(Color.Red);
+            lineDrawer.Clear(Color.Green);
+            lineDrawer.Clear(Color.Gray);
+            lineDrawer.Clear(Color.White);
 
             bool walkable = IsWalkable(agent, position, 0.1f, out var nearest);
             var pColor = walkable ? Color.Green : Color.Red;
@@ -899,17 +979,17 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawPoint(Vector3 position, float size, Color color)
         {
             var cross = Line3D.CreateCross(position, size);
-            volumesDrawer.SetPrimitives(color, cross);
+            lineDrawer.SetPrimitives(color, cross);
         }
         private void DrawTriangle(Triangle triangle, Color color)
         {
             var tri = Line3D.CreateWiredTriangle(triangle);
-            volumesDrawer.SetPrimitives(color, tri);
+            lineDrawer.SetPrimitives(color, tri);
         }
         private void DrawCircle(Vector3 position, float radius, Color color)
         {
             var circle = Line3D.CreateCircle(position, radius, 12);
-            volumesDrawer.SetPrimitives(color, circle);
+            lineDrawer.SetPrimitives(color, circle);
         }
         private void DrawGraphNodes(AgentType agent)
         {
@@ -919,20 +999,20 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void DrawMarkers()
         {
-            markDrawer.Clear();
+            triangleDrawer.Clear();
 
             var obsColor = new Color4(Color.Yellow.RGB(), 0.2f);
 
             foreach (var obs in obstacles)
             {
-                markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, obs.Obstacle, 12));
+                triangleDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, obs.Obstacle, 12));
             }
 
             foreach (var area in areas)
             {
                 var g = GeometryUtil.CreateCircle(Topology.TriangleList, area.Center, area.Radius, 12);
 
-                markDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
+                triangleDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
             }
         }
         private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
@@ -1054,62 +1134,6 @@ namespace TerrainSamples.SceneNavMeshTest
 {NmRndPoint}: Finds random over navmesh";
         }
 
-        private async Task SceneButtonClick(IUIControl sender, MouseEventArgs e)
-        {
-            if (!gameReady)
-            {
-                return;
-            }
-
-            if (!e.Buttons.HasFlag(MouseButtons.Left))
-            {
-                return;
-            }
-
-            await Task.Delay(100);
-
-            if (sender == btnDebug) stateManager.StartState(States.Debug);
-            if (sender == btnArea) stateManager.StartState(States.AddArea);
-            if (sender == btnObstacle)
-            {
-                if (!nmsettings.UseTileCache)
-                {
-                    ShowMessage("Tile cache must be enabled.");
-
-                    return;
-                }
-
-                stateManager.StartState(States.AddObstacle);
-            }
-        }
-        private async Task SceneButtonDebugClick(MouseEventArgs e, GraphDebugTypes debug)
-        {
-            if (!gameReady)
-            {
-                return;
-            }
-
-            if (!e.Buttons.HasFlag(MouseButtons.Left))
-            {
-                return;
-            }
-
-            if (debugType == debug)
-            {
-                stateManager.StartState(States.Default);
-
-                return;
-            }
-
-            await Task.Delay(100);
-
-            debugType = debug;
-
-            DrawGraphNodes(agent);
-
-            stateManager.StartState(States.Default);
-        }
-
         private void StartDefaultState()
         {
             mainPanel.Visible = true;
@@ -1133,6 +1157,18 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
+        }
+        private void StartPathFindingState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+
+            pathFindingStart = null;
+            pathFindingEnd = null;
+
+            lineDrawer.Clear(pathFindingColorPath);
+
+            ShowMessage($"Press {GContacPoint} to add the start point. Then, press {GContacPoint} to add the end point.");
         }
 
         public override void GameGraphicsResized()

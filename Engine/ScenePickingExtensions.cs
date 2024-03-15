@@ -153,7 +153,7 @@ namespace Engine
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickAll<T>(this Scene scene, PickingRay ray, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
         {
-            results = Enumerable.Empty<ScenePickingResultMultiple<T>>();
+            results = [];
 
             var cmpList = scene.Components.Get(usage);
             if (!cmpList.Any())
@@ -173,14 +173,14 @@ namespace Engine
                     .Select(c => new ScenePickingResultMultiple<T>
                     {
                         SceneObject = c.SceneObject,
-                        PickingResults = new[]
-                        {
-                            new PickingResult<T>
+                        PickingResults =
+                        [
+                            new ()
                             {
                                 Distance = c.Distance,
                                 Position = c.Position,
                             }
-                        },
+                        ],
                     })
                     .ToArray();
 
@@ -201,7 +201,7 @@ namespace Engine
         {
             if (!collection.Any())
             {
-                results = Enumerable.Empty<ScenePickingResultMultiple<T>>();
+                results = [];
 
                 return false;
             }
@@ -249,7 +249,7 @@ namespace Engine
                 return pickable.PickAll(ray, out results);
             }
 
-            results = Enumerable.Empty<PickingResult<T>>();
+            results = [];
 
             return false;
         }
@@ -321,10 +321,10 @@ namespace Engine
         {
             if (!collection.Any())
             {
-                return Enumerable.Empty<CoarsePickingResult>();
+                return [];
             }
 
-            List<CoarsePickingResult> coarse = new();
+            List<CoarsePickingResult> coarse = [];
 
             foreach (var obj in collection)
             {
@@ -332,7 +332,7 @@ namespace Engine
                 {
                     if (TestCoarse(componsed, ray, out var d, out var p))
                     {
-                        coarse.Add(new CoarsePickingResult(obj, d, p));
+                        coarse.Add(new(obj, d, p));
                     }
                 }
                 else if (obj is IRayPickable<Triangle> pickable)
@@ -340,13 +340,13 @@ namespace Engine
                     bool picked = TestCoarse(pickable, ray, out var d, out var p);
                     if (picked)
                     {
-                        coarse.Add(new CoarsePickingResult(obj, d, p));
+                        coarse.Add(new(obj, d, p));
                     }
                 }
             }
 
             //Sort by distance
-            return coarse.OrderBy(c => c.Distance).ToArray();
+            return [.. coarse.OrderBy(c => c.Distance)];
         }
         /// <summary>
         /// Performs picking between the specified ray and the bounding volume of the object
