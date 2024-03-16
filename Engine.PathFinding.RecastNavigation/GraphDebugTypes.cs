@@ -19,6 +19,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         Nodes,
         /// <summary>
+        /// Nodes with links
+        /// </summary>
+        NodesWithLinks,
+        /// <summary>
         /// Height field
         /// </summary>
         Heightfield,

@@ -6,24 +6,19 @@ namespace TerrainSamples.Mapping
     /// <summary>
     /// Input mapper
     /// </summary>
-    public class InputMapper
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class InputMapper(Game game)
     {
         /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game;
+        private readonly Game game = game;
         /// <summary>
         /// input entry dictionary
         /// </summary>
-        private readonly Dictionary<string, InputEntry> entryList = new();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public InputMapper(Game game)
-        {
-            this.game = game;
-        }
+        private readonly Dictionary<string, InputEntry> entryList = [];
 
         /// <summary>
         /// Loads a input mapping description

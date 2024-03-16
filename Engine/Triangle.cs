@@ -223,7 +223,7 @@ namespace Engine
         {
             if (triangles?.Any() != true)
             {
-                return Enumerable.Empty<Triangle>();
+                return [];
             }
 
             return ReverseNormalIterator(triangles);

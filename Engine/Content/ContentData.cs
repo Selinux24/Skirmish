@@ -174,6 +174,18 @@ namespace Engine.Content
             return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
         }
         /// <summary>
+        /// Generates a line list model content from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ContentData GenerateLineList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        {
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
+
+            return Generate(Topology.LineList, vertices, [], materials);
+        }
+        /// <summary>
         /// Generate model content from scratch
         /// </summary>
         /// <param name="topology">Topology</param>

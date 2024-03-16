@@ -300,12 +300,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_openList.Clear();
 
             var startNode = m_nodePool.GetNode(start.Ref, 0);
+            startNode.Id = start.Ref;
             startNode.Pos = start.Pos;
+            startNode.Flags = NodeFlagTypes.Open;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = Vector3.Distance(start.Pos, end.Pos) * H_SCALE;
-            startNode.Id = start.Ref;
-            startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
             var lastBestNode = startNode;
@@ -343,34 +343,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     parent = m_nav.GetTileAndPolyByRefUnsafe(parentRef);
                 }
 
-                for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
+                foreach (var (neighbourRef, neighbour, neighbourNode) in best.ItearatePolygonLinks(filter, parentRef, m_nav, m_nodePool))
                 {
-                    int neighbourRef = best.Tile.Links[i].NRef;
-
-                    // Skip invalid ids and do not expand back to where we came from.
-                    if (neighbourRef == 0 || neighbourRef == parentRef)
-                    {
-                        continue;
-                    }
-
-                    // Get neighbour poly and tile.
-                    // The API input has been cheked already, skip checking internal data.
-                    var neighbour = m_nav.GetTileAndPolyByRefUnsafe(neighbourRef);
-
-                    if (!filter.PassFilter(neighbour.Poly.Flags))
-                    {
-                        continue;
-                    }
-
-                    // deal explicitly with crossing tile boundaries
-                    int crossSide = 0;
-                    if (best.Tile.Links[i].Side != 0xff)
-                    {
-                        crossSide = best.Tile.Links[i].Side >> 1;
-                    }
-
-                    // get the node
-                    var neighbourNode = m_nodePool.GetNode(neighbourRef, crossSide);
                     if (neighbourNode == null)
                     {
                         outOfNodes = true;
@@ -2148,7 +2122,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return status;
         }
-     
+
         /// <summary>
         /// Casts a 'walkability' ray along the surface of the navigation mesh from the start position toward the end position.
         /// </summary>

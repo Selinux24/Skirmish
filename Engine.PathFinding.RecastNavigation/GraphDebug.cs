@@ -37,12 +37,12 @@ namespace Engine.PathFinding.RecastNavigation
                 .Select(v => ((int)v, v.ToString()));
         }
         /// <inheritdoc/>
-        public readonly Dictionary<Color4, IEnumerable<Triangle>> GetInfo(int id, Vector3 point)
+        public readonly IGraphDebugData GetInfo(int id, Vector3 point)
         {
             var nm = graph.CreateAgentQuery(agent)?.GetAttachedNavMesh();
             if (nm == null)
             {
-                return [];
+                return new GraphDebugData([]);
             }
 
             var debug = (GraphDebugTypes)id;
@@ -51,14 +51,16 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var buildData = nm.GetBuildData(0, 0);
 
-                return debug switch
+                var data = debug switch
                 {
-                    GraphDebugTypes.NavMesh => GetNodes(false),
-                    GraphDebugTypes.Nodes => GetNodes(true),
+                    GraphDebugTypes.NavMesh => GetNodes(false, false),
+                    GraphDebugTypes.Nodes => GetNodes(true, false),
+                    GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
                     _ => []
                 };
+                return new GraphDebugData(data);
             }
             else if (graph.Settings.BuildMode == BuildModes.Tiled)
             {
@@ -66,52 +68,88 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var buildData = nm.GetBuildData(tx, ty);
 
-                return debug switch
+                var data = debug switch
                 {
-                    GraphDebugTypes.NavMesh => GetNodes(false),
-                    GraphDebugTypes.Nodes => GetNodes(true),
+                    GraphDebugTypes.NavMesh => GetNodes(false, false),
+                    GraphDebugTypes.Nodes => GetNodes(true, false),
+                    GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
                     _ => []
                 };
+                return new GraphDebugData(data);
             }
 
-            return [];
+            return new GraphDebugData([]);
         }
 
         /// <summary>
         /// Gets the nodes debug information
         /// </summary>
-        private readonly Dictionary<Color4, IEnumerable<Triangle>> GetNodes(bool separateNodes)
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetNodes(bool separateNodes, bool showTriangles)
         {
             var nodes = graph.GetNodes(Agent).OfType<GraphNode>();
             if (!nodes.Any())
             {
-                return [];
+                yield break;
             }
+
+            const string nameTris = $"{nameof(GetNodes)}_TRIS";
+            const string nameLines = $"{nameof(GetNodes)}_LINES";
+            Vector3 deltaY = new(0f, 0.01f, 0f);
 
             if (separateNodes)
             {
-                return nodes
+                var tris = nodes
                     .GroupBy(n => Helper.IntToCol(n.Id, 128))
-                    .ToDictionary(keySelector => keySelector.Key, elementSelector => elementSelector.SelectMany(gn => gn.Triangles).AsEnumerable());
+                    .ToDictionary(
+                        keySelector => keySelector.Key,
+                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable());
+
+                yield return (nameTris, Topology.TriangleList, tris);
+
+                if (!showTriangles)
+                {
+                    yield break;
+                }
+
+                var lines = nodes
+                    .GroupBy(n => Helper.IntToCol(n.Id, 128))
+                    .ToDictionary(
+                        keySelector => keySelector.Key,
+                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable());
+
+                yield return (nameLines, Topology.LineList, lines);
             }
             else
             {
-                Color4 color = new Color(0, 192, 255, 255);
+                Color4 colorTris = new Color(0, 192, 255, 255);
+                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable())]);
 
-                return new([new(color, nodes.SelectMany(n => n.Triangles).AsEnumerable())]);
+                yield return (nameTris, Topology.TriangleList, tris);
+
+                if (!showTriangles)
+                {
+                    yield break;
+                }
+
+                Color4 colorLines = new Color(255, 255, 255, 255);
+                Dictionary<Color4, IEnumerable<Vector3>> lines = new([new(colorLines, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable())]);
+
+                yield return (nameLines, Topology.LineList, lines);
             }
         }
         /// <summary>
         /// Gets the height field debug information
         /// </summary>
-        private static Dictionary<Color4, IEnumerable<Triangle>> GetHeightfield(Heightfield hf, bool walkable)
+        private static List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetHeightfield(Heightfield hf, bool walkable)
         {
             if (hf == null)
             {
                 return [];
             }
+
+            const string name = nameof(GetHeightfield);
 
             var orig = hf.BoundingBox.Minimum;
             float cs = hf.CellSize;
@@ -158,20 +196,26 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 nullColor = new Color(64, 64, 64, 255);
                 Color4 multiColor = new Color(0, 192, 255, 255);
 
-                return new()
+                Dictionary<Color4, IEnumerable<Vector3>> data = new()
                 {
-                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up) },
-                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up) },
-                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up) },
-                    { Color.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up), .. nullTriangles.Where(t => t.Normal != Vector3.Up), .. multiTriangles.Where(t => t.Normal != Vector3.Up)] },
+                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { Color.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())] },
                 };
+                return [(name, Topology.TriangleList, data)];
             }
             else
             {
-                return new()
+                var walkableVerts = walkableTriangles.SelectMany(t => t.GetVertices());
+                var nullVerts = nullTriangles.SelectMany(t => t.GetVertices());
+                var multiVerts = multiTriangles.SelectMany(t => t.GetVertices());
+
+                Dictionary<Color4, IEnumerable<Vector3>> data = new()
                 {
-                    { Color.White, [.. walkableTriangles, ..nullTriangles, .. multiTriangles] },
+                    { Color.White, [.. walkableVerts, .. nullVerts, .. multiVerts] },
                 };
+                return [(name, Topology.TriangleList, data)];
             }
         }
 
@@ -180,27 +224,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max)
         {
-            var boxVertices = new[]
-            {
-                new Vector3(min.X, min.Y, min.Z),
-                new Vector3(max.X, min.Y, min.Z),
-                new Vector3(max.X, min.Y, max.Z),
-                new Vector3(min.X, min.Y, max.Z),
-                new Vector3(min.X, max.Y, min.Z),
-                new Vector3(max.X, max.Y, min.Z),
-                new Vector3(max.X, max.Y, max.Z),
-                new Vector3(min.X, max.Y, max.Z),
-            };
+            Vector3[] boxVertices =
+            [
+                new(min.X, min.Y, min.Z),
+                new(max.X, min.Y, min.Z),
+                new(max.X, min.Y, max.Z),
+                new(min.X, min.Y, max.Z),
+                new(min.X, max.Y, min.Z),
+                new(max.X, max.Y, min.Z),
+                new(max.X, max.Y, max.Z),
+                new(min.X, max.Y, max.Z),
+            ];
 
-            var boxIndices = new uint[]
-            {
+            uint[] boxIndices =
+            [
                 7, 6, 5, 4,
                 0, 1, 2, 3,
                 1, 5, 6, 2,
                 3, 7, 4, 0,
                 2, 6, 7, 3,
                 0, 4, 5, 1,
-            };
+            ];
 
             int vIndex = 0;
             for (int i = 0; i < 6; i++)
@@ -212,11 +256,8 @@ namespace Engine.PathFinding.RecastNavigation
                 var v3 = boxVertices[boxIndices[vIndex++]];
 
                 //Triangles
-                var t0 = new Triangle(v0, v1, v2);
-                var t1 = new Triangle(v0, v2, v3);
-
-                yield return t0;
-                yield return t1;
+                yield return new(v0, v1, v2);
+                yield return new(v0, v2, v3);
             }
         }
     }

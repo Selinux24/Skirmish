@@ -38,7 +38,8 @@ namespace TerrainSamples.SceneNavMeshTest
         public InputEntry CamDown { get; set; }
         public InputEntry NmRndPointCircle { get; set; }
         public InputEntry NmRndPoint { get; set; }
-        public InputEntry GContacPoint { get; set; }
+        public InputEntry GContac1Point { get; set; }
+        public InputEntry GContac2Point { get; set; }
         public InputEntry GBuild { get; set; }
         public InputEntry GPartition { get; set; }
         public InputEntry GTileCache { get; set; }
@@ -87,8 +88,12 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<AreaMarker> areas = [];
         private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
+
+        private string pathFinderStartMessage = null;
+        private string pathFinderHelpMessage = null;
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
+        private Vector3? pathFindingEnd = null;
         private readonly Color pathFindingColorPath = new(128, 0, 255, 255);
         private readonly Color pathFindingColorStart = new(97, 0, 255, 255);
         private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
@@ -297,7 +302,8 @@ namespace TerrainSamples.SceneNavMeshTest
                     new("CamDown", Keys.C),
                     new("NmRndPointCircle", MouseButtons.Middle),
                     new("NmRndPoint", Keys.R),
-                    new("GContacPoint", MouseButtons.Left),
+                    new("GContac1Point", MouseButtons.Left),
+                    new("GContac2Point", MouseButtons.Right),
                     new("GBuild", Keys.B),
                     new("GPartition", Keys.P),
                     new("GTileCache", Keys.T),
@@ -326,7 +332,8 @@ namespace TerrainSamples.SceneNavMeshTest
             CamDown = inputMapper.Get("CamDown");
             NmRndPointCircle = inputMapper.Get("NmRndPointCircle");
             NmRndPoint = inputMapper.Get("NmRndPoint");
-            GContacPoint = inputMapper.Get("GContacPoint");
+            GContac1Point = inputMapper.Get("GContac1Point");
+            GContac2Point = inputMapper.Get("GContac2Point");
             GBuild = inputMapper.Get("GBuild");
             GPartition = inputMapper.Get("GPartition");
             GTileCache = inputMapper.Get("GTileCache");
@@ -334,6 +341,9 @@ namespace TerrainSamples.SceneNavMeshTest
             GLoad = inputMapper.Get("GLoad");
 
             help.Text = GetHelpText();
+
+            pathFinderStartMessage = $"Press {GContac1Point} to add the start point. Then, press {GContac1Point} to add the end point.";
+            pathFinderHelpMessage = $"Press {GContac1Point} to add the end point. {GContac2Point} to change the start point. {GameExit} to close the path finding tool.";
         }
         private void InitializeLights()
         {
@@ -552,7 +562,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.Default);
             }
 
-            if (!GContacPoint.JustReleased)
+            if (!GContac1Point.JustReleased)
             {
                 return;
             }
@@ -619,7 +629,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.Default);
             }
 
-            if (!GContacPoint.JustReleased)
+            if (!GContac1Point.JustReleased)
             {
                 return;
             }
@@ -703,7 +713,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.Default);
             }
 
-            if (!GContacPoint.JustReleased)
+            if (!GContac1Point.JustReleased && !GContac2Point.JustReleased)
             {
                 return;
             }
@@ -714,30 +724,51 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (pathFindingStart == null)
+            if (GContac2Point.JustReleased || pathFindingStart == null)
             {
                 pathFindingStart = r.PickingResult.Position;
 
-                var circleStart = Line3D.CreateCircle(r.PickingResult.Position, 0.25f, 8);
-                lineDrawer.SetPrimitives(pathFindingColorStart, circleStart ?? []);
-                lineDrawer.Visible = true;
-
-                ShowMessage($"Press {GContacPoint} to add the end point.");
+                UpdatePathFindingData();
 
                 return;
             }
 
-            var circleEnd = Line3D.CreateCircle(r.PickingResult.Position, 0.25f, 8);
-            lineDrawer.SetPrimitives(pathFindingColorEnd, circleEnd ?? []);
-            lineDrawer.Visible = true;
+            pathFindingEnd = r.PickingResult.Position;
 
-            //Calculate path
-            var path = FindPath(agent, pathFindingStart.Value, r.PickingResult.Position, false);
-            var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
-            lineDrawer.SetPrimitives(pathFindingColorPath, pathLines);
-            lineDrawer.Visible = true;
+            UpdatePathFindingData();
+        }
+        private void UpdatePathFindingData()
+        {
+            ShowMessage(pathFinderHelpMessage);
 
-            ShowMessage($"Press {GContacPoint} to change the end point. {GameExit} to close the path finding tool.");
+            var start = pathFindingStart;
+            var end = pathFindingEnd;
+
+            lineDrawer.Clear(pathFindingColorStart);
+            lineDrawer.Clear(pathFindingColorEnd);
+            lineDrawer.Clear(pathFindingColorPath);
+
+            if (start != null)
+            {
+                var cStart = Line3D.CreateCircle(start.Value, 0.25f, 8);
+                lineDrawer.SetPrimitives(pathFindingColorStart, cStart ?? []);
+                lineDrawer.Visible = true;
+            }
+
+            if (end != null)
+            {
+                var cEnd = Line3D.CreateCircle(end.Value, 0.25f, 8);
+                lineDrawer.SetPrimitives(pathFindingColorEnd, cEnd ?? []);
+                lineDrawer.Visible = true;
+            }
+
+            if (start != null && end != null)
+            {
+                var path = FindPath(agent, start.Value, end.Value, false);
+                var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
+                lineDrawer.SetPrimitives(pathFindingColorPath, pathLines);
+                lineDrawer.Visible = true;
+            }
         }
         private void UpdateNavmeshInput()
         {
@@ -803,7 +834,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (GContacPoint.JustReleased)
+            if (GContac1Point.JustReleased)
             {
                 UpdateContactInput();
 
@@ -1030,21 +1061,6 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            var geometry = debugInfo.GetInfo((int)debug, lastPosition);
-
-            List<VertexData> vertices = [];
-            foreach (var color in geometry.Keys)
-            {
-                foreach (var tri in geometry[color])
-                {
-                    var verts = tri.GetVertices();
-                    var norm = tri.Normal;
-
-                    var vData = verts.Select(v => new VertexData() { Color = color, Position = v, Normal = norm });
-                    vertices.AddRange(vData.ToArray());
-                }
-            }
-
             var material = new MaterialPhongContent()
             {
                 DiffuseColor = Color4.White,
@@ -1055,10 +1071,24 @@ namespace TerrainSamples.SceneNavMeshTest
                 IsTransparent = false,
             };
 
-            var data = ContentData.GenerateTriangleList(vertices, material);
+            ContentData content = new();
+            var debugInfoList = debugInfo.GetInfo((int)debug, lastPosition);
+            int i = 0;
+            foreach (var di in debugInfoList.GetValues())
+            {
+                string matName = $"mat_{i++}";
+                content.AddMaterialContent(matName, material);
+
+                var geo = GenerateVertexData(di.Topology, matName, di.Data);
+                if (geo != null)
+                {
+                    content.ImportMaterial(matName, matName, geo);
+                }
+            }
+
             var desc = new ModelDescription()
             {
-                Content = ContentDescription.FromContentData(data),
+                Content = ContentDescription.FromContentData(content),
                 CastShadow = ShadowCastingAlgorihtms.None,
                 PathFindingHull = PickingHullTypes.None,
                 CullingVolumeType = CullingVolumeTypes.None,
@@ -1072,6 +1102,54 @@ namespace TerrainSamples.SceneNavMeshTest
             };
 
             debugGeometry = await AddComponentEffect<Model, ModelDescription>("debugGeometry", "debugGeometry", desc);
+        }
+        private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Color4, IEnumerable<Vector3>> data)
+        {
+            if (topology == Topology.TriangleList)
+            {
+                List<VertexData> vertices = [];
+
+                foreach (var color in data.Keys)
+                {
+                    Vector3[] dverts = [.. data[color]];
+
+                    for (int i = 0; i < dverts.Length; i += 3)
+                    {
+                        Vector3[] verts = [dverts[i], dverts[i + 1], dverts[i + 2]];
+                        var norm = new Plane(dverts[i], dverts[i + 1], dverts[i + 2]).Normal;
+
+                        var vData = verts.Select(v => new VertexData() { Color = color, Position = v, Normal = norm });
+                        vertices.AddRange(vData.ToArray());
+                    }
+                }
+
+                SubMeshContent geo = new(topology, materialName, false, false, Matrix.Identity);
+                geo.SetVertices(vertices);
+                return geo;
+            }
+            else if (topology == Topology.LineList)
+            {
+                List<VertexData> vertices = [];
+
+                foreach (var color in data.Keys)
+                {
+                    Vector3[] dverts = [.. data[color]];
+
+                    for (int i = 0; i < dverts.Length; i += 2)
+                    {
+                        Vector3[] verts = [dverts[i], dverts[i + 1]];
+
+                        var vData = verts.Select(v => new VertexData() { Color = color, Position = v });
+                        vertices.AddRange(vData.ToArray());
+                    }
+                }
+
+                SubMeshContent geo = new(topology, materialName, false, false, Matrix.Identity);
+                geo.SetVertices(vertices);
+                return geo;
+            }
+
+            return null;
         }
 
         private void EnqueueGraph()
@@ -1136,7 +1214,7 @@ namespace TerrainSamples.SceneNavMeshTest
 {GTileCache}: Toggle using Tile Cache.
 {GSave}: Saves the graph to a file.
 {GLoad}: Loads the graph from a file.
-{GContacPoint}: Update current tile (SHIFT remove, CTRL add).
+{GContac1Point}: Update current tile (SHIFT remove, CTRL add).
 {NmRndPointCircle}: Finds random point around circle (5 units).
 {NmRndPoint}: Finds random over navmesh";
         }
@@ -1156,14 +1234,14 @@ namespace TerrainSamples.SceneNavMeshTest
             mainPanel.Visible = false;
             debugPanel.Visible = false;
 
-            ShowMessage($"Press {GContacPoint} to add area. SHIFT {GContacPoint} to remove.");
+            ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
         }
         private void StartAddObstacleState()
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
 
-            ShowMessage($"Press {GContacPoint} to add obstacle. SHIFT {GContacPoint} to remove.");
+            ShowMessage($"Press {GContac1Point} to add obstacle. SHIFT {GContac1Point} to remove.");
         }
         private void StartPathFindingState()
         {
@@ -1171,12 +1249,13 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             pathFindingStart = null;
+            pathFindingEnd = null;
 
             lineDrawer.Clear(pathFindingColorPath);
             lineDrawer.Clear(pathFindingColorStart);
             lineDrawer.Clear(pathFindingColorEnd);
 
-            ShowMessage($"Press {GContacPoint} to add the start point. Then, press {GContacPoint} to add the end point.");
+            ShowMessage(pathFinderStartMessage);
         }
 
         public override void GameGraphicsResized()

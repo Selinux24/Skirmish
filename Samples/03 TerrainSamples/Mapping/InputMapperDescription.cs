@@ -25,13 +25,6 @@ namespace TerrainSamples.Mapping
                 return false;
             }
 
-            if (InputEntries.Length != InputEntries.Select(e => e.InputEntry).Distinct().Count())
-            {
-                errorMessage = "Entries must be unique.";
-
-                return false;
-            }
-
             errorMessage = null;
 
             return true;
