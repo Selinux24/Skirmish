@@ -507,7 +507,7 @@ namespace Engine
         {
             yield return new Segment(Point2, Point1);
             yield return new Segment(Point3, Point2);
-            yield return new Segment(Point1, Point2);
+            yield return new Segment(Point1, Point3);
         }
         /// <summary>
         /// Gets the edge direction vector between points 2 and 1

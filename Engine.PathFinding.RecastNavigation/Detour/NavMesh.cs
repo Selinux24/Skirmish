@@ -612,7 +612,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     // Init build configuration
                     var cfg = TilesConfig.GetConfig(settings, agent, tileBounds);
-                    cfg.EnableDebugInfo = settings.EnableDebugInfo;
 
                     var data = BuildTileMesh(x, y, geometry, cfg);
                     if (data != null)

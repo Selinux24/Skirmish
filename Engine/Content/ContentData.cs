@@ -942,7 +942,7 @@ namespace Engine.Content
         {
             if (geometryContent.Count == 0)
             {
-                return default;
+                return [];
             }
 
             Dictionary<string, MeshByMaterialCollection> meshes = [];
@@ -1112,12 +1112,6 @@ namespace Engine.Content
                 return;
             }
 
-            //Copy dictionary
-            var tmp = new Dictionary<string, Dictionary<string, SubMeshContent>>(geometryContent);
-
-            //Clear actual dictionary
-            geometryContent.Clear();
-
             var skins = GetControllerSkins();
             if (skins.Length != 0)
             {
@@ -1126,14 +1120,14 @@ namespace Engine.Content
                 {
                     foreach (string material in materialContent.Keys)
                     {
-                        OptimizeSkinnedMesh(tmp, skin, material);
+                        OptimizeSkinnedMesh(geometryContent, skin, material);
                     }
                 }
             }
 
             foreach (string material in materialContent.Keys)
             {
-                OptimizeStaticMesh(tmp, material);
+                OptimizeStaticMesh(geometryContent, material);
             }
         }
         /// <summary>

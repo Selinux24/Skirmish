@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -17,7 +16,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public (string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data) GetValueByName(string name)
         {
-            return data.FirstOrDefault(d => d.Name == name);
+            return data.Find(d => d.Name == name);
         }
 
         /// <inheritdoc/>

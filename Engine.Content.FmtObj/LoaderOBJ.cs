@@ -158,7 +158,13 @@ namespace Engine.Content.FmtObj
                 for (int i = 0; i < meshList.Count; i++)
                 {
                     var mesh = meshList[i];
-                    m.ImportMaterial($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
+
+                    if (!m.ContainsMaterialContent(mesh.Material))
+                    {
+                        mesh.Material = ContentData.NoMaterial;
+                    }
+
+                    m.ImportMaterial($"Mesh{i + 1}", mesh.Material, mesh);
                 }
             });
 

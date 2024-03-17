@@ -23,6 +23,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             /// Area type
             /// </summary>
             public AreaTypes AreaType { get; set; }
+
+            /// <inheritdoc/>
+            public override readonly string ToString()
+            {
+                return $"{AreaType} => {Triangle}";
+            }
         }
 
         /// <summary>
@@ -334,8 +340,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Calculate the footprint of the triangle on the grid's y-axis
-            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
-            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
+            int y0 = (int)MathF.Round((t.Minimum.Z - b.Minimum.Z) * ics);
+            int y1 = (int)MathF.Round((t.Maximum.Z - b.Minimum.Z) * ics);
             y0 = MathUtil.Clamp(y0, 0, h - 1);
             y1 = MathUtil.Clamp(y1, 0, h - 1);
 
@@ -403,7 +409,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    for (Span s = Spans[x + y * w]; s != null; s = s.Next)
+                    for (var s = Spans[x + y * w]; s != null; s = s.Next)
                     {
                         if (s.Area != AreaTypes.RC_NULL_AREA)
                         {

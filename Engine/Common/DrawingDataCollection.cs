@@ -13,7 +13,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal list
         /// </summary>
-        private readonly List<(string Name, T Value)> list = new();
+        private readonly List<(string Name, T Value)> list = [];
 
         /// <summary>
         /// Gets the value by name

@@ -13,12 +13,18 @@ namespace Engine.Common
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class BaseModel<T> : Drawable<T>, IUseMaterials, IUseSkinningData where T : BaseModelDescription
+    /// <remarks>
+    /// Base model
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class BaseModel<T>(Scene scene, string id, string name) : Drawable<T>(scene, id, name), IUseMaterials, IUseSkinningData where T : BaseModelDescription
     {
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private readonly Dictionary<LevelOfDetail, DrawingData> meshesByLOD = new();
+        private readonly Dictionary<LevelOfDetail, DrawingData> meshesByLOD = [];
         /// <summary>
         /// Default level of detail
         /// </summary>
@@ -51,17 +57,6 @@ namespace Engine.Common
         /// </summary>
         public BoundsHelperInitialState BoundsHelperInitialState { get; private set; } = new();
 
-        /// <summary>
-        /// Base model
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected BaseModel(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -319,7 +314,7 @@ namespace Engine.Common
         {
             var drawingData = GetDrawingData(LevelOfDetail.High);
 
-            return drawingData?.GetMaterials() ?? Enumerable.Empty<IMeshMaterial>();
+            return drawingData?.GetMaterials() ?? [];
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

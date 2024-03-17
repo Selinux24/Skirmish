@@ -211,11 +211,11 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Count()));
             debugPanel.Visible = false;
 
-            foreach (var debug in enumValues)
+            foreach (var dType in enumValues)
             {
-                var btn = await InitializeButton($"btnDebug{debug}", $"{debug}", btnDesc, async () =>
+                var btn = await InitializeButton($"btnDebug{dType}", $"{dType}", btnDesc, async () =>
                 {
-                    if (debugType == debug)
+                    if (debugType == dType)
                     {
                         stateManager.StartState(States.Default);
 
@@ -224,7 +224,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
                     await Task.Delay(100);
 
-                    debugType = debug;
+                    debugType = dType;
 
                     DrawGraphNodes(agent);
 
@@ -363,7 +363,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json");
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
@@ -374,6 +374,7 @@ namespace TerrainSamples.SceneNavMeshTest
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
+            inputGeometry.Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0);
 
             //Rasterization
             nmsettings.CellSize = 0.1f;
@@ -440,7 +441,7 @@ namespace TerrainSamples.SceneNavMeshTest
             float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
 
             Camera.SetInterest(center);
-            Camera.SetPosition(center + new Vector3(1, 0.8f, -1) * maxD * 0.8f);
+            Camera.SetPosition(center + new Vector3(1f, 1.2f, 1f) * maxD * 0.8f);
 
             EnqueueGraph();
         }

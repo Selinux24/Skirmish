@@ -1399,6 +1399,15 @@
     <Content Include="SceneNavMeshTest\Resources\modular_dungeon.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneRts\Resources\Buildings\Building_1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

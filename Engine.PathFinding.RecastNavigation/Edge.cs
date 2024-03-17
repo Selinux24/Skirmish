@@ -154,7 +154,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Poly {Poly?.Join(",")}; Vert {Vert?.Join(",")}; PolyEdge {PolyEdge?.Join(",")};";
+            return $"Vert {Vert?.Join(",")}; PolyEdge {PolyEdge?.Join(",")}; Poly {Poly?.Join(",")}";
         }
     };
 }
