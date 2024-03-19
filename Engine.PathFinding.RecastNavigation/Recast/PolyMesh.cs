@@ -65,11 +65,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int k = 0; k < vertexCount; ++k)
                 {
-                    if (src.IsNull(k))
+                    if (src.VertexIsNull(k))
                     {
                         break;
                     }
-                    tgt[k] = vremap[src[k]];
+                    tgt.SetVertex(k, vremap[src.GetVertex(k)]);
                 }
 
                 if (!IsOnBorder)
@@ -77,9 +77,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     return;
                 }
 
-                for (int k = vertexCount; k < vertexCount * 2; ++k)
+                for (int k = 0; k < vertexCount; ++k)
                 {
-                    if (!src.IsExternalLink(k) || src[k] == 0xffff)
+                    if (!src.IsExternalLink(k) || src.GetVertex(k) == 0xffff)
                     {
                         continue;
                     }
@@ -87,7 +87,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int dir = src.GetDirection(k);
                     if (RemapDirection(dir))
                     {
-                        tgt[k] = src[k];
+                        tgt.SetAdjacency(k, src.GetAdjacency(k));
                     }
                 }
             }
@@ -375,12 +375,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < NVP; ++j)
             {
-                if (p.IsNull(j))
+                if (p.VertexIsNull(j))
                 {
                     break;
                 }
 
-                var v = Verts[p[j]];
+                var v = Verts[p.GetVertex(j)];
                 var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
 
                 res.Add(pv);
@@ -437,12 +437,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < NVP; ++j)
             {
-                if (p.IsNull(j))
+                if (p.VertexIsNull(j))
                 {
                     break;
                 }
 
-                var v = Verts[p[j]];
+                var v = Verts[p.GetVertex(j)];
                 xmin = Math.Min(xmin, v.X);
                 xmax = Math.Max(xmax, v.X);
                 ymin = Math.Min(ymin, v.Z);
@@ -555,18 +555,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < NPolys; ++i)
             {
                 var p = Polys[i];
-                int nv = p.CountPolyVerts();
 
                 // Collect edges which touches the removed vertex.
-                for (int j = 0, k = nv - 1; j < nv; k = j++)
+                foreach (var iter in p.IterateVertices())
                 {
-                    if (p[j] != rem && p[k] != rem)
+                    int a = iter.a;
+                    int b = iter.b;
+
+                    if (a != rem && b != rem)
                     {
                         continue;
                     }
 
                     // Arrange edge so that a=rem.
-                    int a = p[j], b = p[k];
                     if (b == rem)
                     {
                         Helper.Swap(ref a, ref b);
@@ -659,21 +660,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var p = Polys[i];
 
-                if (!p.Contains(rem))
+                if (!p.ContainsVertex(rem))
                 {
                     continue;
                 }
 
                 // Collect edges which does not touch the removed vertex.
-                int nv = p.CountPolyVerts();
-                for (int j = 0, k = nv - 1; j < nv; k = j++)
+                foreach (var (a, b, _, _) in p.IterateVertices())
                 {
-                    if (p[j] == rem || p[k] == rem)
+                    if (a == rem || b == rem)
                     {
                         continue;
                     }
 
-                    edges[nedges++] = new(p[k], p[j], Regs[i], Areas[i]);
+                    edges[nedges++] = new(b, a, Regs[i], Areas[i]);
                 }
 
                 // Remove the polygon.
@@ -725,10 +725,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < NPolys; ++i)
             {
                 var p = Polys[i];
-                int nv = p.CountPolyVerts();
-                for (int j = 0; j < nv; ++j)
+
+                foreach (var (a, _, j, _) in p.IterateVertices())
                 {
-                    if (p[j] > rem) p[j]--;
+                    if (a > rem)
+                    {
+                        p.SetVertex(j, a - 1);
+                    }
                 }
             }
         }
@@ -825,12 +828,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var polys = Polys;
             int npolys = NPolys;
             int nverts = NVerts;
-            int vertsPerPoly = NVP;
 
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, vertsPerPoly, nverts, false, 0);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, false, 0);
 
             if (BorderSize > 0)
             {
@@ -839,7 +841,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polys, vertsPerPoly, edges, edgeCount, false, 0);
+            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, false, 0);
         }
         /// <summary>
         /// Finds edges between portals
@@ -850,31 +852,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int w = cset.Width;
             int h = cset.Height;
 
-            foreach (var (p, _, _, j) in IndexedPolygon.Iterate(Polys, NPolys, NVP))
+            foreach (var (p, _, j) in IndexedPolygon.IteratePolygonVertices(Polys, NPolys))
             {
-                if (p.IsNull(j))
-                {
-                    break;
-                }
-
                 // Skip connected edges.
-                if (!p.IsNull(NVP + j))
+                if (!p.AdjacencyIsNull(j))
                 {
                     continue;
                 }
 
-                int nj = j + 1;
-                if (nj >= NVP || p.IsNull(nj))
-                {
-                    nj = 0;
-                }
-
-                var va = Verts[p[j]];
-                var vb = Verts[p[nj]];
+                var va = Verts[p.GetVertex(j)];
+                var vb = Verts[p.GetNextVertexIndex(j)];
 
                 if (Edge.IsPortal(va, vb, w, h, out int v))
                 {
-                    p[NVP + j] = v;
+                    p.SetAdjacency(j, v);
                 }
             }
         }
@@ -897,7 +888,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 //Polygon with adjacency
-                var p = new IndexedPolygon(NVP * 2);
+                var p = new IndexedPolygon(NVP, true);
                 p.CopyVertices(polys[i], NVP);
 
                 StorePolygon(p, pareas[i], pregs[i]);
@@ -921,7 +912,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < polys.Length; ++i)
             {
                 //Polygon with adjacency
-                var p = new IndexedPolygon(NVP * 2);
+                var p = new IndexedPolygon(NVP, true);
                 p.CopyVertices(polys[i], NVP);
 
                 StorePolygon(p, (SamplePolyAreas)(int)cont.Area, cont.RegionId);

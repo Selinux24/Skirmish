@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             if (!BuildMonotoneRegions(walkableClimb, out layerRegs, out nregs))
             {
-                layerRegs = Array.Empty<int>();
+                layerRegs = [];
                 nregs = -1;
 
                 return false;
@@ -349,7 +349,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int maxTempVerts = (w + h) * 2 * 2; // Twice around the layer.
 
             var tempVerts = new VertexWithNeigbour[maxTempVerts];
-            var tempPoly = new IndexedPolygon(maxTempVerts);
+            var tempPoly = new IndexedPolygon(maxTempVerts, false);
 
             var temp = new TempContour(tempVerts, maxTempVerts, tempPoly);
 
@@ -438,7 +438,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     // Try to merge with previous vertex.
                     if (!cont.AppendVertex(se))
                     {
-                        verts = Array.Empty<VertexWithNeigbour>();
+                        verts = [];
 
                         return false;
                     }

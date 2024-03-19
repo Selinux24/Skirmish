@@ -5,43 +5,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Temporal contour helper class
     /// </summary>
-    public class TempContour
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="verts">Polygon vertices</param>
+    /// <param name="cverts">Number of vertices</param>
+    /// <param name="poly">Indexed polygon definition</param>
+    public class TempContour(VertexWithNeigbour[] verts, int cverts, IndexedPolygon poly)
     {
         /// <summary>
         /// Vertices buffer
         /// </summary>
-        private readonly VertexWithNeigbour[] verts;
+        private readonly VertexWithNeigbour[] verts = verts;
         /// <summary>
         /// Number of vertices in the buffer
         /// </summary>
-        private int nverts;
+        private int nverts = 0;
         /// <summary>
         /// Contour vertices
         /// </summary>
-        private readonly int cverts;
+        private readonly int cverts = cverts;
         /// <summary>
         /// Indexed polygon
         /// </summary>
-        private readonly IndexedPolygon poly;
+        private readonly IndexedPolygon poly = poly;
         /// <summary>
         /// Number of vertices in the polygon
         /// </summary>
-        private int npoly;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="verts">Polygon vertices</param>
-        /// <param name="cverts">Number of vertices</param>
-        /// <param name="poly">Indexed polygon definition</param>
-        public TempContour(VertexWithNeigbour[] verts, int cverts, IndexedPolygon poly)
-        {
-            this.verts = verts;
-            nverts = 0;
-            this.cverts = cverts;
-            this.poly = poly;
-            npoly = 0;
-        }
+        private int npoly = 0;
 
         /// <summary>
         /// Appends a vertex to the contour
@@ -139,7 +130,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int rb = verts[i].Nei;
                 if (ra != rb)
                 {
-                    poly[npoly++] = i;
+                    poly.SetVertex(npoly++, i);
                 }
             }
         }
@@ -175,8 +166,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
             npoly = 0;
-            poly[npoly++] = lli;
-            poly[npoly++] = uri;
+            poly.SetVertex(npoly++, lli);
+            poly.SetVertex(npoly++, uri);
         }
         /// <summary>
         /// Add points until all raw points are within error tolerance to the simplified shape.
@@ -215,11 +206,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int maxi = -1;
             float maxd = 0;
 
-            int ai = poly[a];
+            int ai = poly.GetVertex(a);
             int ax = verts[ai].X;
             int az = verts[ai].Z;
 
-            int bi = poly[b];
+            int bi = poly.GetVertex(b);
             int bx = verts[bi].X;
             int bz = verts[bi].Z;
 
@@ -265,7 +256,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int start = 0;
             for (int i = 1; i < npoly; ++i)
             {
-                if (poly[i] < poly[start])
+                if (poly.GetVertex(i) < poly.GetVertex(start))
                 {
                     start = i;
                 }
@@ -276,7 +267,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < npoly; ++i)
             {
                 int j = (start + i) % npoly;
-                verts[nverts++] = new(verts[poly[j]]);
+                verts[nverts++] = new(verts[poly.GetVertex(j)]);
             }
         }
         /// <summary>
@@ -296,9 +287,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             npoly++;
             for (int j = npoly - 1; j > position; --j)
             {
-                poly[j] = poly[j - 1];
+                poly.SetVertex(j, poly.GetVertex(j - 1));
             }
-            poly[position + 1] = indexValue;
+            poly.SetVertex(position + 1, indexValue);
         }
         /// <summary>
         /// Remove last vertex

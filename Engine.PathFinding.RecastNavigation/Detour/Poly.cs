@@ -71,9 +71,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int[] neis = new int[nvp];
 
             var polyVerts = polygon.GetVertices();
+            var polyAdjacency = polygon.GetAdjacency();
 
             Array.ConstrainedCopy(polyVerts, 0, verts, 0, nvp);
-            Array.ConstrainedCopy(polyVerts, nvp, neis, 0, nvp);
+            Array.ConstrainedCopy(polyAdjacency, 0, neis, 0, nvp);
 
             neis = neis.Select(DecodeNei).ToArray();
 

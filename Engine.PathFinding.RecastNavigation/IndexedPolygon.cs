@@ -8,12 +8,8 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Indexed polygon
     /// </summary>
-    /// <remarks>
-    /// Constructor
-    /// </remarks>
-    /// <param name="capacity">Polygon capacity</param>
     [Serializable]
-    public class IndexedPolygon(int capacity)
+    public class IndexedPolygon
     {
         /// <summary>
         /// The maximum number of vertices per navigation polygon.
@@ -56,24 +52,35 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Polygon capacity
+        /// </summary>
+        private readonly int capacity;
+        /// <summary>
         /// Vertex indices
         /// </summary>
-        private int[] vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
+        private readonly int[] vertices;
         /// <summary>
-        /// Gets the polygon vertex index by index
+        /// Uses adjacency flag
         /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the polygon vertex index by index</returns>
-        public int this[int index]
+        private readonly bool useAdjacency;
+        /// <summary>
+        /// Adjacency flags
+        /// </summary>
+        private readonly int[] adjacency;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="capacity">Polygon capacity</param>
+        /// <param name="useAdjacency">Use adjacency</param>
+        public IndexedPolygon(int capacity, bool useAdjacency = false)
         {
-            get
-            {
-                return vertices[index];
-            }
-            set
-            {
-                vertices[index] = value;
-            }
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity, nameof(capacity));
+
+            this.capacity = capacity;
+            this.useAdjacency = useAdjacency;
+            vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
+            adjacency = useAdjacency ? Helper.CreateArray(capacity, RC_MESH_NULL_IDX) : [];
         }
 
         /// <summary>
@@ -98,24 +105,24 @@ namespace Engine.PathFinding.RecastNavigation
             // Check to see if the merged polygon would be convex.
             int va, vb, vc;
 
-            va = pa[(ea + na - 1) % na];
-            vb = pa[ea];
-            vc = pb[(eb + 2) % nb];
+            va = pa.vertices[(ea + na - 1) % na];
+            vb = pa.vertices[ea];
+            vc = pb.vertices[(eb + 2) % nb];
             if (!ULeft2D(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
 
-            va = pb[(eb + nb - 1) % nb];
-            vb = pb[eb];
-            vc = pa[(ea + 2) % na];
+            va = pb.vertices[(eb + nb - 1) % nb];
+            vb = pb.vertices[eb];
+            vc = pa.vertices[(ea + 2) % na];
             if (!ULeft2D(verts[va], verts[vb], verts[vc]))
             {
                 return RC_MESH_NULL_IDX;
             }
 
-            va = pa[ea];
-            vb = pa[(ea + 1) % na];
+            va = pa.vertices[ea];
+            vb = pa.vertices[(ea + 1) % na];
             int dx = verts[va].X - verts[vb].X;
             int dy = verts[va].Z - verts[vb].Z;
 
@@ -149,8 +156,8 @@ namespace Engine.PathFinding.RecastNavigation
             // Check if the polygons share an edge.
             for (int i = 0; i < na; ++i)
             {
-                int va0 = pa[i];
-                int va1 = pa[(i + 1) % na];
+                int va0 = pa.vertices[i];
+                int va1 = pa.vertices[(i + 1) % na];
 
                 if (va0 > va1)
                 {
@@ -159,8 +166,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int j = 0; j < nb; ++j)
                 {
-                    int vb0 = pb[j];
-                    int vb1 = pb[(j + 1) % nb];
+                    int vb0 = pb.vertices[j];
+                    int vb1 = pb.vertices[(j + 1) % nb];
 
                     if (vb0 > vb1)
                     {
@@ -296,10 +303,10 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                polys[npolys] = new();
-                polys[npolys][0] = indices[t.X];
-                polys[npolys][1] = indices[t.Y];
-                polys[npolys][2] = indices[t.Z];
+                polys[npolys] = new(3, false);
+                polys[npolys].SetVertex(0, indices[t.X]);
+                polys[npolys].SetVertex(1, indices[t.Y]);
+                polys[npolys].SetVertex(2, indices[t.Z]);
 
                 if (procAreas)
                 {
@@ -372,19 +379,28 @@ namespace Engine.PathFinding.RecastNavigation
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1));
+            bool useAdjacency = pa.useAdjacency && pb.useAdjacency;
+            var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1), useAdjacency);
 
             // Merge polygons.
             int n = 0;
+
             // Add pa
             for (int i = 0; i < na - 1; ++i)
             {
-                tmp[n++] = pa[(ea + 1 + i) % na];
+                int idx = (ea + 1 + i) % na;
+                tmp.vertices[n] = pa.vertices[idx];
+                if (useAdjacency) tmp.adjacency[n] = pa.adjacency[idx];
+                n++;
             }
+
             // Add pb
             for (int i = 0; i < nb - 1; ++i)
             {
-                tmp[n++] = pb[(eb + 1 + i) % nb];
+                int idx = (eb + 1 + i) % nb;
+                tmp.vertices[n] = pb.vertices[idx];
+                if (useAdjacency) tmp.adjacency[n] = pb.adjacency[idx];
+                n++;
             }
 
             return tmp;
@@ -403,7 +419,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="v">Vertex</param>
         /// <returns>Returns true if the vertex is null</returns>
-        public static bool VertexIsNull(int v)
+        public static bool IsNull(int v)
         {
             return v == RC_MESH_NULL_IDX;
         }
@@ -438,7 +454,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int numVerts = 0;
                 for (int j = 0; j < nv; ++j)
                 {
-                    if (p[j] == rem)
+                    if (p.vertices[j] == rem)
                     {
                         numTouchedVerts++;
                         numRemoved++;
@@ -463,16 +479,12 @@ namespace Engine.PathFinding.RecastNavigation
         public static int CountPolygonsToRemove(IndexedPolygon[] polys, int nPolys, int rem)
         {
             int numRemovedVerts = 0;
-            for (int i = 0; i < nPolys; i++)
+
+            foreach (var (p, _, j) in IteratePolygonVertices(polys, nPolys))
             {
-                var p = polys[i];
-                int nv = p.CountPolyVerts();
-                for (int j = 0; j < nv; ++j)
+                if (p.vertices[j] == rem)
                 {
-                    if (p[j] == rem)
-                    {
-                        numRemovedVerts++;
-                    }
+                    numRemovedVerts++;
                 }
             }
 
@@ -497,9 +509,11 @@ namespace Engine.PathFinding.RecastNavigation
             for (int j = 0; j < nPolys - 1; ++j)
             {
                 var pj = polys[j];
+
                 for (int k = j + 1; k < nPolys; ++k)
                 {
                     var pk = polys[k];
+
                     int v = GetMergeValue(pj, pk, verts, out int ea, out int eb);
                     if (v > bestMergeVal)
                     {
@@ -520,13 +534,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="polys">Polygon list</param>
         /// <param name="npolys">Number of polygons in the list</param>
-        /// <param name="vertsPerPoly">Vertices per each polygon</param>
         /// <param name="nverts">Number of total vertices in the referenced vertex list</param>
         /// <param name="addOpenEdges">Sets whether not matching edges must be connected by creating new edges</param>
         /// <param name="openPolyEdgeValue">Value to set in an open edge</param>
         /// <returns>Returns the edge list</returns>
-        public static (Edge[] Edges, int EdgeCount) BuildAdjacencyEdges(IndexedPolygon[] polys, int npolys, int vertsPerPoly, int nverts, bool addOpenEdges, int openPolyEdgeValue)
+        public static (Edge[] Edges, int EdgeCount) BuildAdjacencyEdges(IndexedPolygon[] polys, int npolys, int nverts, bool addOpenEdges, int openPolyEdgeValue)
         {
+            int vertsPerPoly = polys.Take(npolys).Sum(p => p.capacity);
+
             int maxEdgeCount = npolys * vertsPerPoly;
             int[] firstEdge = Helper.CreateArray(nverts, RC_MESH_NULL_IDX);
             int[] nextEdge = Helper.CreateArray(maxEdgeCount, RC_MESH_NULL_IDX);
@@ -534,32 +549,24 @@ namespace Engine.PathFinding.RecastNavigation
 
             Edge[] edges = new Edge[maxEdgeCount];
 
-            for (int i = 0; i < npolys; ++i)
+            foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys))
             {
-                var p = polys[i];
-                for (int j = 0; j < vertsPerPoly; ++j)
+                var (v0, v1) = p.GetSegmentIndices(j);
+                if (v0 >= v1)
                 {
-                    if (p.IsNull(j))
-                    {
-                        break;
-                    }
-
-                    int v0 = p[j];
-                    int v1 = (j + 1 >= vertsPerPoly || p.IsNull(j + 1)) ? p[0] : p[j + 1];
-                    if (v0 < v1)
-                    {
-                        edges[edgeCount] = new()
-                        {
-                            Vert = [v0, v1],
-                            Poly = [i, i],
-                            PolyEdge = [j, openPolyEdgeValue],
-                        };
-
-                        // Insert edge
-                        nextEdge[edgeCount] = firstEdge[v0];
-                        firstEdge[v0] = edgeCount++;
-                    }
+                    continue;
                 }
+
+                edges[edgeCount] = new()
+                {
+                    Vert = [v0, v1],
+                    Poly = [i, i],
+                    PolyEdge = [j, openPolyEdgeValue],
+                };
+
+                // Insert edge
+                nextEdge[edgeCount] = firstEdge[v0];
+                firstEdge[v0] = edgeCount++;
             }
 
             AdjacencyEdgeHelper adjEdges = new()
@@ -570,31 +577,7 @@ namespace Engine.PathFinding.RecastNavigation
                 NextEdge = nextEdge,
             };
 
-            return ConnectAdjacencyEdges(polys, npolys, vertsPerPoly, adjEdges, addOpenEdges, openPolyEdgeValue);
-        }
-        /// <summary>
-        /// Iterates the vertices of each polygon in the specified list
-        /// </summary>
-        /// <param name="polys">Polygon list</param>
-        /// <param name="npolys">Number of polygons in the list</param>
-        /// <param name="vertsPerPoly">Vertices per polygon</param>
-        /// <returns>Returns the polygon, the index of the polygon, and the index of de vertex</returns>
-        private static IEnumerable<(IndexedPolygon p, int i, int j)> IteratePolygonVertices(IndexedPolygon[] polys, int npolys, int vertsPerPoly)
-        {
-            for (int i = 0; i < npolys; ++i)
-            {
-                var p = polys[i];
-
-                for (int j = 0; j < vertsPerPoly; ++j)
-                {
-                    if (p.IsNull(j))
-                    {
-                        break;
-                    }
-
-                    yield return (p, i, j);
-                }
-            }
+            return ConnectAdjacencyEdges(polys, npolys, adjEdges, addOpenEdges, openPolyEdgeValue);
         }
         /// <summary>
         /// Connects the adjacency edges
@@ -606,23 +589,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="addOpenEdges">Sets whether not matching edges must be connected by creating new edges</param>
         /// <param name="openPolyEdgeValue">Value to set in an open edge</param>
         /// <returns>Returns the edge list</returns>
-        private static (Edge[] Edges, int EdgeCount) ConnectAdjacencyEdges(IndexedPolygon[] polys, int npolys, int vertsPerPoly, AdjacencyEdgeHelper edgeList, bool addOpenEdges, int openPolyEdgeValue)
+        private static (Edge[] Edges, int EdgeCount) ConnectAdjacencyEdges(IndexedPolygon[] polys, int npolys, AdjacencyEdgeHelper edgeList, bool addOpenEdges, int openPolyEdgeValue)
         {
             var edges = edgeList.Edges;
             var edgeCount = edgeList.EdgeCount;
             var firstEdge = edgeList.FirstEdge;
             var nextEdge = edgeList.NextEdge;
 
-            foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys, vertsPerPoly))
+            foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys))
             {
-                var (v0, v1) = p.GetSegmentIndices(j, vertsPerPoly);
+                var (v0, v1) = p.GetSegmentIndices(j);
                 if (v0 <= v1)
                 {
                     continue;
                 }
 
                 bool found = false;
-                for (int e = firstEdge[v1]; !VertexIsNull(e); e = nextEdge[e])
+                for (int e = firstEdge[v1]; !IsNull(e); e = nextEdge[e])
                 {
                     var edge = edges[e];
                     if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
@@ -657,10 +640,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// Stores the adjacency data
         /// </summary>
         /// <param name="polys">Polygon list to update</param>
-        /// <param name="vertsPerPoly">Vertices per polygon</param>
         /// <param name="edges">Edge list</param>
         /// <param name="edgeCount">Number of edges in the list</param>
-        public static void StoreAdjacency(IndexedPolygon[] polys, int vertsPerPoly, Edge[] edges, int edgeCount, bool addOpenEdges, int openPolyEdgeValue)
+        /// <param name="addOpenEdges">Adds open edges</param>
+        /// <param name="openPolyEdgeValue">Value to set in open edges</param>
+        public static void StoreAdjacency(IndexedPolygon[] polys, Edge[] edges, int edgeCount, bool addOpenEdges, int openPolyEdgeValue)
         {
             for (int i = 0; i < edgeCount; ++i)
             {
@@ -669,8 +653,8 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     var p0 = polys[e.Poly[0]];
                     var p1 = polys[e.Poly[1]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = e.Poly[1];
-                    p1[vertsPerPoly + e.PolyEdge[1]] = e.Poly[0];
+                    p0.adjacency[e.PolyEdge[0]] = e.Poly[1];
+                    p1.adjacency[e.PolyEdge[1]] = e.Poly[0];
                 }
 
                 if (!addOpenEdges)
@@ -681,19 +665,18 @@ namespace Engine.PathFinding.RecastNavigation
                 if (e.PolyEdge[1] != openPolyEdgeValue)
                 {
                     var p0 = polys[e.Poly[0]];
-                    p0[vertsPerPoly + e.PolyEdge[0]] = Edge.DT_EXT_LINK | e.PolyEdge[1];
+                    p0.adjacency[e.PolyEdge[0]] = Edge.DT_EXT_LINK | e.PolyEdge[1];
                 }
             }
         }
 
         /// <summary>
-        /// Iterates over the polygon vertices of each polygon in the collection
+        /// Iterates the vertices of each polygon in the specified list
         /// </summary>
         /// <param name="polys">Polygon list</param>
         /// <param name="npolys">Number of polygons in the list</param>
-        /// <param name="nvp">Number of vertes per polygon</param>
-        /// <returns>Returns the polygon, the polygon index in the polygon list, the vertex and the vertex index in the polygon vertex list</returns>
-        public static IEnumerable<(IndexedPolygon Poly, int pIndex, int vertex, int vIndex)> Iterate(IndexedPolygon[] polys, int npolys, int nvp)
+        /// <returns>Returns the polygon, the index of the polygon, and the index of de vertex</returns>
+        public static IEnumerable<(IndexedPolygon p, int i, int j)> IteratePolygonVertices(IndexedPolygon[] polys, int npolys)
         {
             if (npolys <= 0)
             {
@@ -704,19 +687,32 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = polys[i];
 
-                for (int j = 0; j < nvp; ++j)
+                for (int j = 0; j < p.capacity; ++j)
                 {
-                    yield return (p, i, p[j], j);
+                    if (p.VertexIsNull(j))
+                    {
+                        break;
+                    }
+
+                    yield return (p, i, j);
                 }
             }
         }
-
         /// <summary>
-        /// Constructor
+        /// Iterates over the polygon vertices
         /// </summary>
-        public IndexedPolygon() : this(10)
+        /// <returns>Returns the current and next vertex indices values (a,b), and its positions in the array (j,k)</returns>
+        public IEnumerable<(int a, int b, int j, int k)> IterateVertices()
         {
+            int nv = CountPolyVerts();
 
+            for (int j = 0, k = nv - 1; j < nv; k = j++)
+            {
+                int a = GetVertex(j);
+                int b = GetVertex(k);
+
+                yield return (a, b, j, k);
+            }
         }
 
         /// <summary>
@@ -725,15 +721,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the vertex count</returns>
         public int CountPolyVerts()
         {
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            for (int i = 0; i < capacity; ++i)
             {
-                if (vertices[i] == RC_MESH_NULL_IDX)
+                if (IsNull(vertices[i]))
                 {
                     return i;
                 }
             }
 
-            return DT_VERTS_PER_POLYGON;
+            return capacity;
         }
         /// <summary>
         /// Gets the vertices list
@@ -744,16 +740,72 @@ namespace Engine.PathFinding.RecastNavigation
             return [.. vertices];
         }
         /// <summary>
+        /// Gets the vertex index value
+        /// </summary>
+        /// <param name="i">Index</param>
+        public int GetVertex(int i)
+        {
+            return vertices[i];
+        }
+        /// <summary>
+        /// Sets the vertex index value
+        /// </summary>
+        /// <param name="i">Index</param>
+        /// <param name="value">Value</param>
+        public void SetVertex(int i, int value)
+        {
+            vertices[i] = value;
+        }
+        /// <summary>
+        /// Gets the adjacency list
+        /// </summary>
+        public int[] GetAdjacency()
+        {
+            //Copy array
+            return [.. adjacency];
+        }
+        /// <summary>
+        /// Gets the adjacency index value
+        /// </summary>
+        /// <param name="i">Index</param>
+        public int GetAdjacency(int i)
+        {
+            return adjacency[i];
+        }
+        /// <summary>
+        /// Sets the adjacency index value
+        /// </summary>
+        /// <param name="i">Index</param>
+        /// <param name="value">Value</param>
+        public void SetAdjacency(int i, int value)
+        {
+            adjacency[i] = value;
+        }
+        /// <summary>
+        /// Gets the next vertex valid index
+        /// </summary>
+        /// <param name="i">Start index</param>
+        /// <param name="vertsPerPoly">Number of vertices per polygon</param>
+        /// <returns>Returns the next index, or the first index if the start point is the last index</returns>
+        public int GetNextVertexIndex(int i)
+        {
+            return (i + 1 >= capacity || VertexIsNull(i + 1)) ? vertices[0] : vertices[i + 1];
+        }
+        /// <summary>
         /// Copy the current polygon to another instance
         /// </summary>
         /// <returns>Returns the new instance</returns>
         public IndexedPolygon Copy()
         {
-            return new IndexedPolygon(vertices.Length)
+            var p = new IndexedPolygon(vertices.Length, useAdjacency);
+
+            Array.Copy(vertices, p.vertices, vertices.Length);
+            if (useAdjacency)
             {
-                //Copy array
-                vertices = [.. vertices],
-            };
+                Array.Copy(adjacency, p.adjacency, adjacency.Length);
+            }
+
+            return p;
         }
         /// <summary>
         /// Gets the first free index (<see cref="RC_MESH_NULL_IDX"/> value)
@@ -779,7 +831,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets whether the collection contains the specified index
         /// </summary>
         /// <param name="index">Vertex index</param>
-        public bool Contains(int index)
+        public bool ContainsVertex(int index)
         {
             int nv = CountPolyVerts();
 
@@ -802,7 +854,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             for (int i = 0; i < nvp; ++i)
             {
-                vertices[i] = p[i];
+                vertices[i] = p.vertices[i];
             }
         }
 
@@ -810,9 +862,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets whether the vertex at the specified index is null
         /// </summary>
         /// <param name="index">Vertex index</param>
-        public bool IsNull(int index)
+        public bool VertexIsNull(int index)
         {
-            return VertexIsNull(vertices[index]);
+            return IsNull(vertices[index]);
+        }
+        /// <summary>
+        /// Gets whether the adjacency at the specified index is null
+        /// </summary>
+        /// <param name="index">Vertex index</param>
+        public bool AdjacencyIsNull(int index)
+        {
+            return IsNull(adjacency[index]);
         }
         /// <summary>
         /// Gets whether the vertex has stored a external link or not
@@ -821,7 +881,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public bool IsExternalLink(int adjIndex)
         {
-            return Edge.IsExternalLink(vertices[adjIndex]);
+            return Edge.IsExternalLink(adjacency[adjIndex]);
         }
         /// <summary>
         /// Gets whether the vertex has stored a direction or not
@@ -829,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public bool HasDirection(int adjIndex)
         {
-            return Edge.HasDirection(vertices[adjIndex]);
+            return Edge.HasDirection(adjacency[adjIndex]);
         }
         /// <summary>
         /// Gets the stored direction at the specified adjacency index
@@ -837,18 +897,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="adjIndex">Adjacency index</param>
         public int GetDirection(int adjIndex)
         {
-            return Edge.GetVertexDirection(vertices[adjIndex]);
+            return Edge.GetVertexDirection(adjacency[adjIndex]);
         }
         /// <summary>
         /// Gets the segment indices from the specified index
         /// </summary>
         /// <param name="index">Index</param>
-        /// <param name="vertsPerPoly">Number of vertices in the polygon</param>
         /// <returns>Returns the vertex at the specified index, and the next vertex in the polygon</returns>
-        private (int V0, int V1) GetSegmentIndices(int index, int vertsPerPoly)
+        private (int V0, int V1) GetSegmentIndices(int index)
         {
             int v0 = vertices[index];
-            int v1 = (index + 1 >= vertsPerPoly || IsNull(index + 1)) ? vertices[0] : vertices[index + 1];
+            int v1 = GetNextVertexIndex(index);
 
             return (v0, v1);
         }
@@ -876,7 +935,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Indices: {vertices?.Join(",")}";
+            if (useAdjacency)
+            {
+                return $"Indices: {vertices.Join(",")}; Adjacency: {adjacency.Join(",")}";
+            }
+            else
+            {
+                return $"Indices: {vertices.Join(",")}";
+            }
         }
     }
 }

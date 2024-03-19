@@ -82,8 +82,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         #endregion
 
-        const int MESH_NULL_IDX = -1;
-
         /// <summary>
         /// X axis comparer
         /// </summary>
@@ -116,15 +114,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public BVItem()
         {
 
-        }
-
-        /// <summary>
-        /// Gets whether the specified index is null or not
-        /// </summary>
-        /// <param name="index">Index to test</param>
-        public static bool ItemIsNull(int index)
-        {
-            return index == MESH_NULL_IDX;
         }
 
         /// <summary>
@@ -163,15 +152,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="cs">Cell size</param>
         public void CalcPolygonBounds(IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
         {
-            var itBMin = verts[p[0]];
-            var itBMax = verts[p[0]];
+            int p0 = p.GetVertex(0);
+            var v0 = verts[p0];
+            var itBMin = v0;
+            var itBMax = v0;
 
             for (int j = 1; j < nvp; ++j)
             {
-                if (p[j] == MESH_NULL_IDX) break;
-                var x = verts[p[j]].X;
-                var y = verts[p[j]].Y;
-                var z = verts[p[j]].Z;
+                if (p.VertexIsNull(j))
+                {
+                    break;
+                }
+
+                int pj = p.GetVertex(j);
+
+                var vj = verts[pj];
+                var x = vj.X;
+                var y = vj.Y;
+                var z = vj.Z;
 
                 if (x < BMin.X) itBMin.X = x;
                 if (y < BMin.Y) itBMin.Y = y;

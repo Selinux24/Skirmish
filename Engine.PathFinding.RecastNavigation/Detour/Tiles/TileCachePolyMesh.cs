@@ -241,13 +241,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // Collect edges which touches the removed vertex.
                 for (int j = 0, k = nv - 1; j < nv; k = j++)
                 {
-                    if (p[j] != rem && p[k] != rem)
+                    int a = p.GetVertex(j);
+                    int b = p.GetVertex(k);
+
+                    if (a != rem && b != rem)
                     {
                         continue;
                     }
 
                     // Arrange edge so that a=rem.
-                    int a = p[j], b = p[k];
                     if (b == rem)
                     {
                         Helper.Swap(ref a, ref b);
@@ -349,7 +351,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 var p = Polys[i];
 
-                if (!p.Contains(rem))
+                if (!p.ContainsVertex(rem))
                 {
                     continue;
                 }
@@ -358,7 +360,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int nv = p.CountPolyVerts();
                 for (int j = 0, k = nv - 1; j < nv; k = j++)
                 {
-                    if (p[j] == rem || p[k] == rem)
+                    int a = p.GetVertex(j);
+                    int b = p.GetVertex(k);
+
+                    if (a == rem || b == rem)
                     {
                         continue;
                     }
@@ -368,7 +373,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         return (Array.Empty<IndexedRegionEdge>(), -1);
                     }
 
-                    edges[nedges++] = new(p[k], p[j], -1, Areas[i]);
+                    edges[nedges++] = new(b, a, -1, Areas[i]);
                 }
 
                 // Remove the polygon.
@@ -417,9 +422,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int nv = p.CountPolyVerts();
                 for (int j = 0; j < nv; ++j)
                 {
-                    if (p[j] > rem)
+                    var a = p.GetVertex(j);
+                    if (a > rem)
                     {
-                        p[j]--;
+                        p.SetVertex(j, a - 1);
                     }
                 }
             }
@@ -534,18 +540,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var polys = Polys;
             int npolys = NPolys;
             int nverts = NVerts;
-            int vertsPerPoly = IndexedPolygon.DT_VERTS_PER_POLYGON;
 
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, vertsPerPoly, nverts, true, 0xff);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, true, 0xff);
 
             // Mark portal edges.
             FindPortalEdges(lcset, edges, edgeCount);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polys, vertsPerPoly, edges, edgeCount, true, 0xff);
+            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, true, 0xff);
         }
         /// <summary>
         /// Finds edges between portals
@@ -701,8 +706,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 //Polygon with adjacency
-                var p = new IndexedPolygon(IndexedPolygon.DT_VERTS_PER_POLYGON * 2);
-                p.CopyVertices(polys[i], IndexedPolygon.DT_VERTS_PER_POLYGON);
+                var p = new IndexedPolygon(NVP, true);
+                p.CopyVertices(polys[i], NVP);
 
                 StorePolygon(p, pareas[i]);
             }
@@ -726,8 +731,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 //Polygon with adjacency
-                var p = new IndexedPolygon(IndexedPolygon.DT_VERTS_PER_POLYGON * 2);
-                p.CopyVertices(polys[i], IndexedPolygon.DT_VERTS_PER_POLYGON);
+                var p = new IndexedPolygon(NVP, true);
+                p.CopyVertices(polys[i], NVP);
 
                 StorePolygon(p, (SamplePolyAreas)(int)cont.Area);
             }

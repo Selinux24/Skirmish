@@ -353,14 +353,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 for (int j = 0; j < nvp; ++j)
                 {
-                    if (BVItem.ItemIsNull(p[j]))
+                    if (p.VertexIsNull(j))
                     {
                         break;
                     }
 
                     edgeCount++;
 
-                    if (p.IsExternalLink(nvp + j) && p.HasDirection(nvp + j))
+                    if (p.IsExternalLink(j) && p.HasDirection(j))
                     {
                         portalCount++;
                     }
