@@ -825,23 +825,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private void BuildMeshAdjacency(ContourSet cset)
         {
-            var polys = Polys;
-            int npolys = NPolys;
-            int nverts = NVerts;
-
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, false, 0);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(Polys, NPolys, NVerts, false, 0);
+
+            // Store adjacency
+            IndexedPolygon.StoreAdjacency(Polys, edges, edgeCount, false, 0);
 
             if (BorderSize > 0)
             {
                 // Find portal edges
                 FindPortalEdges(cset);
             }
-
-            // Store adjacency
-            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, false, 0);
         }
         /// <summary>
         /// Finds edges between portals

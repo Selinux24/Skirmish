@@ -537,20 +537,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="lcset">Contour set</param>
         public readonly void BuildMeshAdjacency(TileCacheContourSet lcset)
         {
-            var polys = Polys;
-            int npolys = NPolys;
-            int nverts = NVerts;
-
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, true, 0xff);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(Polys, NPolys, NVerts, true, 0xff);
 
             // Mark portal edges.
             FindPortalEdges(lcset, edges, edgeCount);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, true, 0xff);
+            IndexedPolygon.StoreAdjacency(Polys, edges, edgeCount, true, 0xff);
         }
         /// <summary>
         /// Finds edges between portals

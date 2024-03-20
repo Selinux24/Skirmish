@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -16,7 +15,7 @@ namespace Engine
         {
             return new LoadResourceGroup
             {
-                Tasks = new[] { task }
+                Tasks = [task]
             };
         }
         /// <summary>
@@ -47,7 +46,7 @@ namespace Engine
             return new LoadResourceGroup
             {
                 Id = id,
-                Tasks = new[] { task }
+                Tasks = [task]
             };
         }
         /// <summary>
@@ -80,7 +79,7 @@ namespace Engine
         /// <summary>
         /// Task list
         /// </summary>
-        public IEnumerable<Task> Tasks { get; set; } = Array.Empty<Task>();
+        public IEnumerable<Task> Tasks { get; set; } = [];
     }
 
     /// <summary>
@@ -96,7 +95,7 @@ namespace Engine
         {
             return new LoadResourceGroup<T>
             {
-                Tasks = new[] { task }
+                Tasks = [task]
             };
         }
         /// <summary>
@@ -127,7 +126,7 @@ namespace Engine
             return new LoadResourceGroup<T>
             {
                 Id = id,
-                Tasks = new[] { task }
+                Tasks = [task]
             };
         }
         /// <summary>
@@ -160,6 +159,6 @@ namespace Engine
         /// <summary>
         /// Task list
         /// </summary>
-        public IEnumerable<Task<T>> Tasks { get; set; } = Array.Empty<Task<T>>();
+        public IEnumerable<Task<T>> Tasks { get; set; } = [];
     }
 }

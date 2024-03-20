@@ -540,14 +540,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the edge list</returns>
         public static (Edge[] Edges, int EdgeCount) BuildAdjacencyEdges(IndexedPolygon[] polys, int npolys, int nverts, bool addOpenEdges, int openPolyEdgeValue)
         {
-            int vertsPerPoly = polys.Take(npolys).Sum(p => p.capacity);
-
-            int maxEdgeCount = npolys * vertsPerPoly;
             int[] firstEdge = Helper.CreateArray(nverts, RC_MESH_NULL_IDX);
-            int[] nextEdge = Helper.CreateArray(maxEdgeCount, RC_MESH_NULL_IDX);
-            int edgeCount = 0;
 
-            Edge[] edges = new Edge[maxEdgeCount];
+            List<Edge> edges = [];
+            List<int> nextEdge = [];
 
             foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys))
             {
@@ -557,7 +553,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                edges[edgeCount] = new()
+                Edge e = new()
                 {
                     Vert = [v0, v1],
                     Poly = [i, i],
@@ -565,16 +561,17 @@ namespace Engine.PathFinding.RecastNavigation
                 };
 
                 // Insert edge
-                nextEdge[edgeCount] = firstEdge[v0];
-                firstEdge[v0] = edgeCount++;
+                edges.Add(e);
+                nextEdge.Add(firstEdge[v0]);
+                firstEdge[v0] = edges.Count - 1;
             }
 
             AdjacencyEdgeHelper adjEdges = new()
             {
-                Edges = edges,
-                EdgeCount = edgeCount,
+                EdgeCount = edges.Count,
+                Edges = [.. edges],
+                NextEdge = [.. nextEdge],
                 FirstEdge = firstEdge,
-                NextEdge = nextEdge,
             };
 
             return ConnectAdjacencyEdges(polys, npolys, adjEdges, addOpenEdges, openPolyEdgeValue);

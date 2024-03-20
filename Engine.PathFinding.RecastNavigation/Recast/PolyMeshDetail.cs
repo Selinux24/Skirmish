@@ -12,15 +12,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The sub-mesh data.
         /// </summary>
-        public List<PolyMeshDetailIndices> Meshes { get; set; } = new();
+        public List<PolyMeshDetailIndices> Meshes { get; set; } = [];
         /// <summary>
         /// The mesh vertices.
         /// </summary>
-        public List<Vector3> Vertices { get; set; } = new();
+        public List<Vector3> Vertices { get; set; } = [];
         /// <summary>
         /// The mesh triangles.
         /// </summary>
-        public List<PolyMeshTriangleIndices> Triangles { get; set; } = new();
+        public List<PolyMeshTriangleIndices> Triangles { get; set; } = [];
 
         /// <summary>
         /// Builds a new polygon mesh detail

@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int[] flags = chf.InitializeFlags();
 
-            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> cells = new();
+            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> cells = [];
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
@@ -131,7 +131,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             simplified = RemoveDegenerateSegments(simplified);
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
         /// <summary>
         /// Add initial points.
@@ -158,7 +158,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 simplified.AddRange(initialPoints);
             }
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
         /// <summary>
         /// Gets whether at least, one of the point of the list has connections
@@ -198,7 +198,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return changes.ToArray();
+            return [.. changes];
         }
         /// <summary>
         /// Find lower-left and upper-right vertices of the contour.
@@ -238,7 +238,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             initialPoints.Add(new(llx, lly, llz, lli));
             initialPoints.Add(new(urx, ury, urz, uri));
 
-            return initialPoints.ToArray();
+            return [.. initialPoints];
         }
         /// <summary>
         /// Adds the point list to de point array
@@ -276,7 +276,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
         /// <summary>
         /// Split long edgest
@@ -291,7 +291,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bool tesselate = maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0;
             if (!tesselate)
             {
-                return list.ToArray();
+                return [.. list];
             }
 
             var simplified = new List<ContourVertex>(list);
@@ -319,7 +319,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
         /// <summary>
         /// Finds the maximum deviation distance point from segment
@@ -467,7 +467,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 simplified[i] = sv;
             }
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
         /// <summary>
         /// Removes degenerate segments
@@ -495,7 +495,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 npts = simplified.Count;
             }
 
-            return simplified.ToArray();
+            return [.. simplified];
         }
 
         /// <summary>
@@ -551,9 +551,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var cont = new Contour
             {
                 NVertices = verts.Length,
-                Vertices = verts.ToArray(),
+                Vertices = verts,
                 NRawVertices = rawVerts.Length,
-                RawVertices = rawVerts.ToArray(),
+                RawVertices = rawVerts,
                 RegionId = reg,
                 Area = area
             };

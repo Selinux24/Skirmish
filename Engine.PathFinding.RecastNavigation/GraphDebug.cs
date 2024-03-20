@@ -58,6 +58,8 @@ namespace Engine.PathFinding.RecastNavigation
                     GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
+                    GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
                     _ => []
                 };
                 return new GraphDebugData(data);
@@ -75,6 +77,8 @@ namespace Engine.PathFinding.RecastNavigation
                     GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
+                    GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
                     _ => []
                 };
                 return new GraphDebugData(data);
@@ -218,6 +222,252 @@ namespace Engine.PathFinding.RecastNavigation
                 return [(name, Topology.TriangleList, data)];
             }
         }
+        /// <summary>
+        /// Gets the polygon mesh debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyMesh(PolyMesh pm)
+        {
+            if (pm == null)
+            {
+                return [];
+            }
+
+            return
+            [
+                .. GetPolyMeshTris(pm),
+                .. GetPolyEdges(pm),
+                .. GetPolyBoundaries(pm),
+            ];
+        }
+        /// <summary>
+        /// Gets the polygon mesh triangles debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyMeshTris(PolyMesh pm)
+        {
+            float cs = pm.CellSize;
+            float ch = pm.CellHeight;
+            var orig = pm.Bounds.Minimum;
+
+            Dictionary<Color4, List<Vector3>> tris = [];
+            for (int i = 0; i < pm.NPolys; i++)
+            {
+                List<Vector3> triangles = [];
+
+                var p = pm.Polys[i];
+                int vertCount = p.CountPolyVerts();
+                var area = pm.Areas[i];
+
+                Color4 color;
+                if (area == SamplePolyAreas.Ground)
+                {
+                    color = new Color(0, 192, 255, 64);
+                }
+                else if (area == SamplePolyAreas.None)
+                {
+                    color = new Color(0, 0, 0, 64);
+                }
+                else
+                {
+                    color = AreaToCol(area);
+                }
+
+                for (int j = 2; j < vertCount; ++j)
+                {
+                    Int3 vi;
+                    vi.X = p.GetVertex(0);
+                    vi.Y = p.GetVertex(j - 1);
+                    vi.Z = p.GetVertex(j);
+
+                    for (int k = 0; k < 3; ++k)
+                    {
+                        var v = pm.Verts[vi[k]];
+
+                        float x = orig[0] + v[0] * cs;
+                        float y = orig[1] + (v[1] + 1) * ch;
+                        float z = orig[2] + v[2] * cs;
+
+                        triangles.Add(new(x, y, z));
+                    }
+                }
+
+                if (triangles.Count <= 0)
+                {
+                    continue;
+                }
+
+                if (!tris.TryAdd(color, triangles))
+                {
+                    tris[color].AddRange(triangles);
+                }
+            }
+
+            if (tris.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dictTris = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dictTris);
+        }
+        /// <summary>
+        /// Gets the polygon mesh edges debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyEdges(PolyMesh pm)
+        {
+            float cs = pm.CellSize;
+            float ch = pm.CellHeight;
+            var orig = pm.Bounds.Minimum;
+
+            // Draw neighbours edges
+            Dictionary<Color4, List<Vector3>> edges = [];
+            Color4 coln = new Color(255, 48, 64, 255);
+            for (int i = 0; i < pm.NPolys; i++)
+            {
+                List<Vector3> triangles = [];
+
+                var p = pm.Polys[i];
+                int vertCount = p.CountPolyVerts();
+
+                for (int j = 2; j < vertCount; ++j)
+                {
+                    if (p.AdjacencyIsNull(j))
+                    {
+                        continue;
+                    }
+
+                    int pj = p.GetVertex(j);
+                    int pnj = p.GetNextVertexIndex(j);
+                    int[] vi = [pj, pnj];
+
+                    for (int k = 0; k < 2; ++k)
+                    {
+                        var v = pm.Verts[vi[k]];
+                        float x = orig[0] + v[0] * cs;
+                        float y = orig[1] + (v[1] + 1) * ch + 0.1f;
+                        float z = orig[2] + v[2] * cs;
+
+                        triangles.Add(new(x, y, z));
+                    }
+                }
+
+                if (triangles.Count <= 0)
+                {
+                    continue;
+                }
+
+                if (!edges.TryAdd(coln, triangles))
+                {
+                    edges[coln].AddRange(triangles);
+                }
+            }
+
+            if (edges.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dictEdges = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dictEdges);
+        }
+        /// <summary>
+        /// Gets the polygon mesh boundaries debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyBoundaries(PolyMesh pm)
+        {
+            float cs = pm.CellSize;
+            float ch = pm.CellHeight;
+            var orig = pm.Bounds.Minimum;
+
+            // Draw boundary edges
+            Dictionary<Color4, List<Vector3>> bEdges = [];
+            Color4 colb = new Color(0, 48, 64, 220);
+            for (int i = 0; i < pm.NPolys; i++)
+            {
+                List<Vector3> triangles = [];
+
+                var p = pm.Polys[i];
+                int vertCount = p.CountPolyVerts();
+
+                for (int j = 2; j < vertCount; ++j)
+                {
+                    if (!p.AdjacencyIsNull(j))
+                    {
+                        continue;
+                    }
+
+                    int pj = p.GetVertex(j);
+                    int pnj = p.GetNextVertexIndex(j);
+                    int[] vi = [pj, pnj];
+
+                    Color4 col = colb;
+
+                    if (p.IsExternalLink(j))
+                    {
+                        col = new Color(255, 255, 255, 128);
+                    }
+
+                    for (int k = 0; k < 2; ++k)
+                    {
+                        var v = pm.Verts[vi[k]];
+                        float x = orig[0] + v[0] * cs;
+                        float y = orig[1] + (v[1] + 1) * ch + 0.1f;
+                        float z = orig[2] + v[2] * cs;
+
+                        triangles.Add(new(x, y, z));
+                    }
+                }
+
+                if (triangles.Count <= 0)
+                {
+                    continue;
+                }
+
+                if (!bEdges.TryAdd(colb, triangles))
+                {
+                    bEdges[colb].AddRange(triangles);
+                }
+            }
+
+            if (bEdges.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dictBEdges = bEdges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dictBEdges);
+        }
+        /// <summary>
+        /// Gets the polygon detail mesh debug information
+        /// </summary>
+        /// <param name="dm">Detail mesh</param>
+        private static List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMesh(PolyMeshDetail dm)
+        {
+            if (dm == null)
+            {
+                return [];
+            }
+
+            const string name = nameof(GetDetailMesh);
+
+            List<Vector3> triangles = [];
+
+            foreach (var item in dm.Triangles)
+            {
+                triangles.Add(dm.Vertices[item.Point1]);
+                triangles.Add(dm.Vertices[item.Point2]);
+                triangles.Add(dm.Vertices[item.Point3]);
+            }
+
+            Dictionary<Color4, IEnumerable<Vector3>> data = new()
+            {
+                { Color.White, triangles },
+            };
+            return [(name, Topology.TriangleList, data)];
+        }
 
         /// <summary>
         /// Triangulates a box from a bounding box
@@ -258,6 +508,21 @@ namespace Engine.PathFinding.RecastNavigation
                 //Triangles
                 yield return new(v0, v1, v2);
                 yield return new(v0, v2, v3);
+            }
+        }
+        /// <summary>
+        /// Converts the area value to color
+        /// </summary>
+        private static Color4 AreaToCol(SamplePolyAreas area)
+        {
+            if (area == SamplePolyAreas.None)
+            {
+                // Treat zero area type as default.
+                return new Color(0, 192, 255, 255);
+            }
+            else
+            {
+                return Helper.IntToCol((int)area, 255);
             }
         }
     }
