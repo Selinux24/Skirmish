@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="useAdjacency">Use adjacency</param>
         public IndexedPolygon(int capacity, bool useAdjacency = false)
         {
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity, nameof(capacity));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
 
             this.capacity = capacity;
             this.useAdjacency = useAdjacency;
@@ -379,8 +379,8 @@ namespace Engine.PathFinding.RecastNavigation
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            bool useAdjacency = pa.useAdjacency && pb.useAdjacency;
-            var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1), useAdjacency);
+            bool useAdj = pa.useAdjacency && pb.useAdjacency;
+            var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1), useAdj);
 
             // Merge polygons.
             int n = 0;
@@ -390,7 +390,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 int idx = (ea + 1 + i) % na;
                 tmp.vertices[n] = pa.vertices[idx];
-                if (useAdjacency) tmp.adjacency[n] = pa.adjacency[idx];
+                if (useAdj) tmp.adjacency[n] = pa.adjacency[idx];
                 n++;
             }
 
@@ -399,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 int idx = (eb + 1 + i) % nb;
                 tmp.vertices[n] = pb.vertices[idx];
-                if (useAdjacency) tmp.adjacency[n] = pb.adjacency[idx];
+                if (useAdj) tmp.adjacency[n] = pb.adjacency[idx];
                 n++;
             }
 
