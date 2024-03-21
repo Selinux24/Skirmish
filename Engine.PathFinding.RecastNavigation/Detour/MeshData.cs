@@ -50,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Off-mesh connections
         /// </summary>
         public List<OffMeshConnection> OffMeshCons { get; set; } = [];
-       
+
         /// <summary>
         /// Build data
         /// </summary>

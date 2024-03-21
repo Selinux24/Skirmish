@@ -119,7 +119,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public static bool IsExternalLink(int flag)
         {
-            return (flag & DT_EXT_LINK) != 0;
+            return flag >= 0 && (flag & DT_EXT_LINK) != 0;
         }
         /// <summary>
         /// Gets the flag vertex direction

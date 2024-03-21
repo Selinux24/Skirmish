@@ -54,7 +54,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Polygon capacity
         /// </summary>
-        private readonly int capacity;
+        public int Capacity { get; private set; }
         /// <summary>
         /// Vertex indices
         /// </summary>
@@ -62,7 +62,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Uses adjacency flag
         /// </summary>
-        private readonly bool useAdjacency;
+        public bool UseAdjacency { get; private set; }
         /// <summary>
         /// Adjacency flags
         /// </summary>
@@ -77,8 +77,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
 
-            this.capacity = capacity;
-            this.useAdjacency = useAdjacency;
+            this.Capacity = capacity;
+            this.UseAdjacency = useAdjacency;
             vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
             adjacency = useAdjacency ? Helper.CreateArray(capacity, RC_MESH_NULL_IDX) : [];
         }
@@ -379,7 +379,7 @@ namespace Engine.PathFinding.RecastNavigation
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
-            bool useAdj = pa.useAdjacency && pb.useAdjacency;
+            bool useAdj = pa.UseAdjacency && pb.UseAdjacency;
             var tmp = new IndexedPolygon(Math.Max(DT_VERTS_PER_POLYGON, na - 1 + nb - 1), useAdj);
 
             // Merge polygons.
@@ -684,7 +684,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = polys[i];
 
-                for (int j = 0; j < p.capacity; ++j)
+                for (int j = 0; j < p.Capacity; ++j)
                 {
                     if (p.VertexIsNull(j))
                     {
@@ -718,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the vertex count</returns>
         public int CountPolyVerts()
         {
-            for (int i = 0; i < capacity; ++i)
+            for (int i = 0; i < Capacity; ++i)
             {
                 if (IsNull(vertices[i]))
                 {
@@ -726,7 +726,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return capacity;
+            return Capacity;
         }
         /// <summary>
         /// Gets the vertices list
@@ -779,14 +779,19 @@ namespace Engine.PathFinding.RecastNavigation
             adjacency[i] = value;
         }
         /// <summary>
-        /// Gets the next vertex valid index
+        /// Gets the next valid vertex
         /// </summary>
         /// <param name="i">Start index</param>
         /// <param name="vertsPerPoly">Number of vertices per polygon</param>
         /// <returns>Returns the next index, or the first index if the start point is the last index</returns>
-        public int GetNextVertexIndex(int i)
+        public int GetNextVertex(int i)
         {
-            return (i + 1 >= capacity || VertexIsNull(i + 1)) ? vertices[0] : vertices[i + 1];
+            return vertices[GetNextIndex(i)];
+        }
+
+        public int GetNextIndex(int i)
+        {
+            return (i + 1 >= Capacity || VertexIsNull(i + 1)) ? 0 : i + 1;
         }
         /// <summary>
         /// Copy the current polygon to another instance
@@ -794,10 +799,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new instance</returns>
         public IndexedPolygon Copy()
         {
-            var p = new IndexedPolygon(vertices.Length, useAdjacency);
+            var p = new IndexedPolygon(vertices.Length, UseAdjacency);
 
             Array.Copy(vertices, p.vertices, vertices.Length);
-            if (useAdjacency)
+            if (UseAdjacency)
             {
                 Array.Copy(adjacency, p.adjacency, adjacency.Length);
             }
@@ -904,7 +909,7 @@ namespace Engine.PathFinding.RecastNavigation
         private (int V0, int V1) GetSegmentIndices(int index)
         {
             int v0 = vertices[index];
-            int v1 = GetNextVertexIndex(index);
+            int v1 = GetNextVertex(index);
 
             return (v0, v1);
         }
@@ -932,7 +937,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (useAdjacency)
+            if (UseAdjacency)
             {
                 return $"Indices: {vertices.Join(",")}; Adjacency: {adjacency.Join(",")}";
             }

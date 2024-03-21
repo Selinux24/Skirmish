@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -55,20 +54,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="poly">Polygon vertices</param>
         public static PolyMeshTriangleIndices[] BuildTriangleList(Int3[] tris, Vector3[] verts, Vector3[] poly)
         {
-            var res = new List<PolyMeshTriangleIndices>();
+            PolyMeshTriangleIndices[] res = new PolyMeshTriangleIndices[tris.Length];
 
-            foreach (var t in tris)
+            for (int i = 0; i < tris.Length; i++)
             {
-                res.Add(new PolyMeshTriangleIndices
+                var t = tris[i];
+
+                res[i] = new()
                 {
                     Point1 = t.X,
                     Point2 = t.Y,
                     Point3 = t.Z,
                     Flags = GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly),
-                });
+                };
             }
 
-            return res.ToArray();
+            return res;
         }
         private static int GetTriFlags(Vector3 va, Vector3 vb, Vector3 vc, Vector3[] vpoly)
         {

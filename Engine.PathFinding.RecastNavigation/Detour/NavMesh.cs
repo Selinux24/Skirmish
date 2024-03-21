@@ -1567,7 +1567,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int j = 0; j < nv; ++j)
             {
                 // Skip non-portal edges.
-                if (poly.NeighbourIsExternalLink(j))
+                if (!poly.NeighbourIsExternalLink(j))
                 {
                     continue;
                 }

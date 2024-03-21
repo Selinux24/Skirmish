@@ -85,6 +85,15 @@ namespace TerrainSamples.SceneNavMeshTest
         private bool gameReady = false;
         private readonly StateManager stateManager = new();
 
+        private readonly Color4 pointColor = new(Color.Red.ToVector3(), 0.2f);
+        private readonly Color4 triColor = new(Color.BlueViolet.ToVector3(), 0.2f);
+        private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.2f);
+        private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.2f);
+        private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.2f);
+        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.2f);
+        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.2f);
+        private readonly Color4 unwalkableColor = new(Color.DarkRed.RGB(), 0.2f);
+
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<AreaMarker> areas = [];
         private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
@@ -792,12 +801,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
-            DrawTriangle(r.PickingResult.Primitive, Color.White);
+            DrawPoint(r.PickingResult.Position, 0.25f, pointColor);
+            DrawTriangle(r.PickingResult.Primitive, triColor);
 
             float radius = 5;
 
-            DrawCircle(r.PickingResult.Position, radius, Color.Orange);
+            DrawCircle(r.PickingResult.Position, radius, circleColor);
 
             var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
             if (!pt.HasValue)
@@ -806,7 +815,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
-            Color color = dist < radius ? Color.LightGreen : Color.Pink;
+            var color = dist < radius ? pickInColor : pickOutColor;
             DrawPoint(pt.Value, 2.5f, color);
         }
         private void UpdateFindRandomPointInput()
@@ -998,34 +1007,36 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void DrawContact(Vector3 position, Triangle triangle)
         {
-            lineDrawer.Clear(Color.Red);
-            lineDrawer.Clear(Color.Green);
-            lineDrawer.Clear(Color.Gray);
-            lineDrawer.Clear(Color.White);
+            lineDrawer.Clear(pointColor);
+            lineDrawer.Clear(triColor);
+            lineDrawer.Clear(circleColor);
+            lineDrawer.Clear(pickInColor);
+            lineDrawer.Clear(pickOutColor);
+            lineDrawer.Clear(obsColor);
 
             bool walkable = IsWalkable(agent, position, 0.1f, out var nearest);
-            var pColor = walkable ? Color.Green : Color.Red;
+            var pColor = walkable ? walkableColor : unwalkableColor;
 
             if (nearest.HasValue)
             {
-                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, Color.Gray);
+                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, pointColor);
             }
 
             DrawPoint(position, 0.25f, pColor);
-            DrawTriangle(triangle, Color.White);
+            DrawTriangle(triangle, triColor);
         }
 
-        private void DrawPoint(Vector3 position, float size, Color color)
+        private void DrawPoint(Vector3 position, float size, Color4 color)
         {
             var cross = Line3D.CreateCross(position, size);
             lineDrawer.SetPrimitives(color, cross);
         }
-        private void DrawTriangle(Triangle triangle, Color color)
+        private void DrawTriangle(Triangle triangle, Color4 color)
         {
             var tri = Line3D.CreateWiredTriangle(triangle);
             lineDrawer.SetPrimitives(color, tri);
         }
-        private void DrawCircle(Vector3 position, float radius, Color color)
+        private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
             var circle = Line3D.CreateCircle(position, radius, 12);
             lineDrawer.SetPrimitives(color, circle);
@@ -1039,8 +1050,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawMarkers()
         {
             triangleDrawer.Clear();
-
-            var obsColor = new Color4(Color.Yellow.RGB(), 0.2f);
 
             foreach (var obs in obstacles)
             {

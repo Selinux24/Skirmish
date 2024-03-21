@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -151,6 +152,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return res;
+        }
+
+        /// <summary>
+        /// Iterates over the mesh triangle vertices
+        /// </summary>
+        /// <returns>Returns the mesh index, and three triangle vertices</returns>
+        public IEnumerable<(int meshIndex, Vector3 p0, Vector3 p1, Vector3 p2)> IterateMeshTriangleVertices()
+        {
+            for (int i = 0; i < Meshes.Count; i++)
+            {
+                var m = Meshes[i];
+                int bverts = m.VertBase;
+                int btris = m.TriBase;
+                int ntris = m.TriCount;
+                var verts = Vertices.Skip(bverts).ToArray();
+                var tris = Triangles.Skip(btris).ToArray();
+
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+
+                    yield return (i, verts[t.Point1], verts[t.Point2], verts[t.Point3]);
+                }
+            }
         }
     }
 }

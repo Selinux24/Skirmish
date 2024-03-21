@@ -143,6 +143,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield return (nameLines, Topology.LineList, lines);
             }
         }
+
         /// <summary>
         /// Gets the height field debug information
         /// </summary>
@@ -222,6 +223,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return [(name, Topology.TriangleList, data)];
             }
         }
+
         /// <summary>
         /// Gets the polygon mesh debug information
         /// </summary>
@@ -251,55 +253,40 @@ namespace Engine.PathFinding.RecastNavigation
             var orig = pm.Bounds.Minimum;
 
             Dictionary<Color4, List<Vector3>> tris = [];
-            for (int i = 0; i < pm.NPolys; i++)
+            foreach (var (p, poly, i0, i1, i2) in pm.IteratePolyTriangles())
             {
-                List<Vector3> triangles = [];
+                var area = pm.Areas[p];
 
-                var p = pm.Polys[i];
-                int vertCount = p.CountPolyVerts();
-                var area = pm.Areas[i];
-
-                Color4 color;
+                Color4 col;
                 if (area == SamplePolyAreas.Ground)
                 {
-                    color = new Color(0, 192, 255, 64);
+                    col = new Color(0, 192, 255, 16);
                 }
                 else if (area == SamplePolyAreas.None)
                 {
-                    color = new Color(0, 0, 0, 64);
+                    col = new Color(0, 0, 0, 16);
                 }
                 else
                 {
-                    color = AreaToCol(area);
+                    col = AreaToCol(area);
                 }
 
-                for (int j = 2; j < vertCount; ++j)
+                tris.TryAdd(col, []);
+
+                int p0 = poly.GetVertex(i0);
+                int p1 = poly.GetVertex(i1);
+                int p2 = poly.GetVertex(i2);
+                int[] vi = [p0, p1, p2];
+
+                for (int k = 0; k < vi.Length; ++k)
                 {
-                    Int3 vi;
-                    vi.X = p.GetVertex(0);
-                    vi.Y = p.GetVertex(j - 1);
-                    vi.Z = p.GetVertex(j);
+                    var v = pm.Verts[vi[k]];
 
-                    for (int k = 0; k < 3; ++k)
-                    {
-                        var v = pm.Verts[vi[k]];
+                    float x = orig.X + v.X * cs;
+                    float y = orig.Y + (v.Y + 1) * ch;
+                    float z = orig.Z + v.Z * cs;
 
-                        float x = orig[0] + v[0] * cs;
-                        float y = orig[1] + (v[1] + 1) * ch;
-                        float z = orig[2] + v[2] * cs;
-
-                        triangles.Add(new(x, y, z));
-                    }
-                }
-
-                if (triangles.Count <= 0)
-                {
-                    continue;
-                }
-
-                if (!tris.TryAdd(color, triangles))
-                {
-                    tris[color].AddRange(triangles);
+                    tris[col].Add(new(x, y, z));
                 }
             }
 
@@ -308,8 +295,8 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            var dictTris = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return ($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dictTris);
+            var dict = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh edges debug information
@@ -322,45 +309,28 @@ namespace Engine.PathFinding.RecastNavigation
             var orig = pm.Bounds.Minimum;
 
             // Draw neighbours edges
+            Color4 col = new Color(0, 48, 64, 255);
             Dictionary<Color4, List<Vector3>> edges = [];
-            Color4 coln = new Color(255, 48, 64, 255);
-            for (int i = 0; i < pm.NPolys; i++)
+            edges.Add(col, []);
+            foreach (var (p, i0, i1) in pm.IteratePolySegments())
             {
-                List<Vector3> triangles = [];
-
-                var p = pm.Polys[i];
-                int vertCount = p.CountPolyVerts();
-
-                for (int j = 2; j < vertCount; ++j)
-                {
-                    if (p.AdjacencyIsNull(j))
-                    {
-                        continue;
-                    }
-
-                    int pj = p.GetVertex(j);
-                    int pnj = p.GetNextVertexIndex(j);
-                    int[] vi = [pj, pnj];
-
-                    for (int k = 0; k < 2; ++k)
-                    {
-                        var v = pm.Verts[vi[k]];
-                        float x = orig[0] + v[0] * cs;
-                        float y = orig[1] + (v[1] + 1) * ch + 0.1f;
-                        float z = orig[2] + v[2] * cs;
-
-                        triangles.Add(new(x, y, z));
-                    }
-                }
-
-                if (triangles.Count <= 0)
+                if (!p.AdjacencyIsNull(i0))
                 {
                     continue;
                 }
 
-                if (!edges.TryAdd(coln, triangles))
+                int p0 = p.GetVertex(i0);
+                int p1 = p.GetVertex(i1);
+                int[] vi = [p0, p1];
+
+                for (int k = 0; k < vi.Length; ++k)
                 {
-                    edges[coln].AddRange(triangles);
+                    var v = pm.Verts[vi[k]];
+                    float x = orig.X + v.X * cs;
+                    float y = orig.Y + (v.Y + 1) * ch + 0.1f;
+                    float z = orig.Z + v.Z * cs;
+
+                    edges[col].Add(new(x, y, z));
                 }
             }
 
@@ -369,8 +339,8 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            var dictEdges = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return ($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dictEdges);
+            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh boundaries debug information
@@ -383,90 +353,152 @@ namespace Engine.PathFinding.RecastNavigation
             var orig = pm.Bounds.Minimum;
 
             // Draw boundary edges
-            Dictionary<Color4, List<Vector3>> bEdges = [];
-            Color4 colb = new Color(0, 48, 64, 220);
-            for (int i = 0; i < pm.NPolys; i++)
+            Dictionary<Color4, List<Vector3>> edges = [];
+            foreach (var (p, i0, i1) in pm.IteratePolySegments())
             {
-                List<Vector3> triangles = [];
-
-                var p = pm.Polys[i];
-                int vertCount = p.CountPolyVerts();
-
-                for (int j = 2; j < vertCount; ++j)
-                {
-                    if (!p.AdjacencyIsNull(j))
-                    {
-                        continue;
-                    }
-
-                    int pj = p.GetVertex(j);
-                    int pnj = p.GetNextVertexIndex(j);
-                    int[] vi = [pj, pnj];
-
-                    Color4 col = colb;
-
-                    if (p.IsExternalLink(j))
-                    {
-                        col = new Color(255, 255, 255, 128);
-                    }
-
-                    for (int k = 0; k < 2; ++k)
-                    {
-                        var v = pm.Verts[vi[k]];
-                        float x = orig[0] + v[0] * cs;
-                        float y = orig[1] + (v[1] + 1) * ch + 0.1f;
-                        float z = orig[2] + v[2] * cs;
-
-                        triangles.Add(new(x, y, z));
-                    }
-                }
-
-                if (triangles.Count <= 0)
+                if (p.AdjacencyIsNull(i0))
                 {
                     continue;
                 }
 
-                if (!bEdges.TryAdd(colb, triangles))
+                Color4 col = new Color(0, 48, 64, 255);
+                if (p.IsExternalLink(i0))
                 {
-                    bEdges[colb].AddRange(triangles);
+                    col = new Color(255, 255, 255, 255);
+                }
+
+                edges.TryAdd(col, []);
+
+                int p0 = p.GetVertex(i0);
+                int p1 = p.GetVertex(i1);
+                int[] vi = [p0, p1];
+
+                for (int k = 0; k < vi.Length; ++k)
+                {
+                    var v = pm.Verts[vi[k]];
+                    float x = orig.X + v.X * cs;
+                    float y = orig.Y + (v.Y + 1) * ch + 0.1f;
+                    float z = orig.Z + v.Z * cs;
+
+                    edges[col].Add(new(x, y, z));
                 }
             }
 
-            if (bEdges.Count <= 0)
+            if (edges.Count <= 0)
             {
                 yield break;
             }
 
-            var dictBEdges = bEdges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return ($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dictBEdges);
+            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
         }
+
         /// <summary>
         /// Gets the polygon detail mesh debug information
         /// </summary>
         /// <param name="dm">Detail mesh</param>
-        private static List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMesh(PolyMeshDetail dm)
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMesh(PolyMeshDetail dm)
         {
             if (dm == null)
             {
                 return [];
             }
 
-            const string name = nameof(GetDetailMesh);
-
-            List<Vector3> triangles = [];
-
-            foreach (var item in dm.Triangles)
+            return
+            [
+                .. GetDetailMeshTris(dm),
+                .. GetDetailMeshEdges(dm),
+            ];
+        }
+        /// <summary>
+        /// Gets the polygon detail mesh triangles debug information
+        /// </summary>
+        /// <param name="dm">Detail mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMeshTris(PolyMeshDetail dm)
+        {
+            if (dm == null)
             {
-                triangles.Add(dm.Vertices[item.Point1]);
-                triangles.Add(dm.Vertices[item.Point2]);
-                triangles.Add(dm.Vertices[item.Point3]);
+                yield break;
             }
 
-            Dictionary<Color4, IEnumerable<Vector3>> data = new()
+            Dictionary<Color4, List<Vector3>> res = [];
+
+            foreach (var (meshIndex, p0, p1, p2) in dm.IterateMeshTriangleVertices())
             {
-                { Color.White, triangles },
-            };
-            return [(name, Topology.TriangleList, data)];
+                Color4 color = Helper.IntToCol(meshIndex, 192);
+
+                res.TryAdd(color, []);
+
+                res[color].Add(p0);
+                res[color].Add(p1);
+                res[color].Add(p2);
+            }
+
+            if (res.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.DetailMesh}_Tris", Topology.TriangleList, dict);
+        }
+        /// <summary>
+        /// Gets the polygon detail mesh edges debug information
+        /// </summary>
+        /// <param name="dm">Detail mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMeshEdges(PolyMeshDetail dm)
+        {
+            Dictionary<Color4, List<Vector3>> res = [];
+            Vector3 delta = Vector3.Up * 0.001f;
+
+            for (int i = 0; i < dm.Meshes.Count; i++)
+            {
+                var m = dm.Meshes[i];
+                int bverts = m.VertBase;
+                int btris = m.TriBase;
+                int ntris = m.TriCount;
+                var verts = dm.Vertices.Skip(bverts).ToArray();
+                var tris = dm.Triangles.Skip(btris).ToArray();
+
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+
+                    for (int k = 0, kp = 2; k < 3; kp = k++)
+                    {
+                        Color4 color;
+
+                        var ef = t.GetDetailTriEdgeFlags(kp);
+                        if (ef == DetailTriEdgeFlagTypes.Boundary)
+                        {
+                            // Ext edge
+                            color = new Color(128, 128, 128, 220);
+                        }
+                        else
+                        {
+                            if (t[kp] >= t[k])
+                            {
+                                continue;
+                            }
+
+                            // Internal edge
+                            color = new Color(0, 0, 0, 64);
+                        }
+
+                        res.TryAdd(color, []);
+                        res[color].Add(verts[t[kp]] + delta);
+                        res[color].Add(verts[t[k]] + delta);
+                    }
+                }
+            }
+
+            if (res.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.DetailMesh}_Edges", Topology.LineList, dict);
         }
 
         /// <summary>
@@ -522,7 +554,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                return Helper.IntToCol((int)area, 255);
+                return Helper.IntToCol((int)area, 16);
             }
         }
     }

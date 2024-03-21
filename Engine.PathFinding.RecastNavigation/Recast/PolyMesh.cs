@@ -857,7 +857,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var va = Verts[p.GetVertex(j)];
-                var vb = Verts[p.GetNextVertexIndex(j)];
+                var vb = Verts[p.GetNextVertex(j)];
 
                 if (Edge.IsPortal(va, vb, w, h, out int v))
                 {
@@ -943,6 +943,53 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(Areas[i]);
+            }
+        }
+
+        /// <summary>
+        /// Iterates over the mesh segments
+        /// </summary>
+        /// <returns>Returns the polygon, and the two vertices of each segment</returns>
+        public IEnumerable<(IndexedPolygon p, int i0, int i1)> IteratePolySegments()
+        {
+            for (int p = 0; p < NPolys; p++)
+            {
+                var poly = Polys[p];
+
+                for (int i0 = 0; i0 < poly.Capacity; i0++)
+                {
+                    if (poly.VertexIsNull(i0))
+                    {
+                        continue;
+                    }
+
+                    int i1 = poly.GetNextIndex(i0);
+
+                    yield return (poly, i0, i1);
+                }
+            }
+        }
+        /// <summary>
+        /// Iterates over the mesh triangles
+        /// </summary>
+        /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
+        public IEnumerable<(int p, IndexedPolygon poly, int i0, int i1, int i2)> IteratePolyTriangles()
+        {
+            for (int p = 0; p < NPolys; p++)
+            {
+                var poly = Polys[p];
+
+                for (int i2 = 2; i2 < poly.Capacity; i2++)
+                {
+                    if (poly.VertexIsNull(i2))
+                    {
+                        continue;
+                    }
+
+                    int i1 = i2 - 1;
+
+                    yield return (p, poly, 0, i1, i2);
+                }
             }
         }
     }
