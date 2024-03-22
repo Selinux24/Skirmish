@@ -85,15 +85,15 @@ namespace TerrainSamples.SceneNavMeshTest
         private bool gameReady = false;
         private readonly StateManager stateManager = new();
 
-        private readonly Color4 pointColor = new(Color.Red.ToVector3(), 0.2f);
-        private readonly Color4 triColor = new(Color.BlueViolet.ToVector3(), 0.2f);
-        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.2f);
-        private readonly Color4 unwalkableColor = new(Color.DarkRed.RGB(), 0.2f);
+        private readonly Color4 pointColor = new(Color.White.ToVector3(), 1f);
+        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.75f);
+        private readonly Color4 unwalkableColor = new(Color.Red.RGB(), 0.75f);
 
-        private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.2f);
-        private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.2f);
-        private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.2f);
-        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.2f);
+        private readonly Color4 rndColor = new(Color.White.ToVector3(), 0.5f);
+        private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.5f);
+        private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.5f);
+        private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.5f);
+        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.5f);
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<AreaMarker> areas = [];
@@ -181,8 +181,7 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
 
-            var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
-            var btnArea = await InitializeButton("btnArea", "Areas", btnDesc, () => stateManager.StartState(States.AddArea));
+            var btnTiles = await InitializeButton("btnTiles", "Tiles", btnDesc, () => stateManager.StartState(States.Tiles));
             var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
             {
                 if (!nmsettings.UseTileCache)
@@ -194,9 +193,11 @@ namespace TerrainSamples.SceneNavMeshTest
 
                 stateManager.StartState(States.AddObstacle);
             });
+            var btnArea = await InitializeButton("btnArea", "Areas", btnDesc, () => stateManager.StartState(States.AddArea));
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
+            var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnDebug, btnArea, btnObstacle, btnPathFinding];
+            UIButton[] mainBtns = [btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -279,10 +280,11 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
-            stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
-            stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
+            stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
+            stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
             stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
+            stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
 
             UpdateLayout();
             InitializeInputMapping();
@@ -358,8 +360,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void InitializeLights()
         {
             Lights.KeyLight.CastShadow = false;
-            Lights.BackLight.Enabled = false;
-            Lights.FillLight.Enabled = false;
+            Lights.BackLight.Enabled = true;
+            Lights.FillLight.Enabled = true;
         }
 
         private void InitializeMapData()
@@ -533,6 +535,16 @@ namespace TerrainSamples.SceneNavMeshTest
                 Camera.MoveDown(Game.GameTime, Game.Input.ShiftPressed);
             }
 
+            if (Game.Input.MouseWheelDelta > 0)
+            {
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.MouseWheelDelta < 0)
+            {
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
+            }
+
             if (GameWindowedLook.Pressed)
             {
                 Camera.RotateMouse(
@@ -565,6 +577,52 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UpdateNavmeshInput();
             UpdateGraphInput();
+        }
+        private void UpdateGameStateTiles()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            ToggleTile(lastPosition);
+        }
+        private void ToggleTile(Vector3 tilePosition)
+        {
+            lastElapsedSeconds = null;
+            loadState = $"Updating tile at {tilePosition}.";
+
+            bool remove = Game.Input.ShiftPressed;
+            bool create = Game.Input.ControlPressed;
+
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                if (create)
+                {
+                    NavigationGraph.CreateAt(tilePosition);
+                    return;
+                }
+
+                if (remove)
+                {
+                    NavigationGraph.RemoveAt(tilePosition);
+                    return;
+                }
+
+                NavigationGraph.UpdateAt(tilePosition);
+            }
+            finally
+            {
+                sw.Stop();
+                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+                loadState = null;
+            }
         }
         private void UpdateGameStateAddObstacle()
         {
@@ -791,8 +849,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateFindRandomPointCircleInput()
         {
-            lineDrawer.Clear(pointColor);
-            lineDrawer.Clear(triColor);
+            lineDrawer.Clear(rndColor);
             lineDrawer.Clear(circleColor);
             lineDrawer.Clear(pickInColor);
             lineDrawer.Clear(pickOutColor);
@@ -804,8 +861,8 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            DrawPoint(r.PickingResult.Position, 0.25f, pointColor);
-            DrawTriangle(r.PickingResult.Primitive, triColor);
+            DrawPoint(r.PickingResult.Position, 0.25f, rndColor);
+            DrawTriangle(r.PickingResult.Primitive, rndColor);
 
             float radius = 5;
 
@@ -915,7 +972,6 @@ namespace TerrainSamples.SceneNavMeshTest
             lineDrawer.Clear(walkableColor);
             lineDrawer.Clear(unwalkableColor);
             lineDrawer.Clear(pointColor);
-            lineDrawer.Clear(triColor);
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
@@ -926,18 +982,18 @@ namespace TerrainSamples.SceneNavMeshTest
 
             lastPosition = r.PickingResult.Position;
 
-            bool walkable = IsWalkable(agent, lastPosition, 0.1f, out var nearest);
+            bool walkable = IsWalkable(agent, lastPosition, agent.MaxClimb, out var nearest);
             var pColor = walkable ? walkableColor : unwalkableColor;
 
             if (nearest.HasValue)
             {
-                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, pointColor);
+                DrawCircle(nearest.Value + new Vector3(0.02f), 0.1f, pointColor);
             }
 
-            DrawPoint(lastPosition, 0.25f, pColor);
-            DrawTriangle(r.PickingResult.Primitive, triColor);
+            DrawPoint(lastPosition, 0.1f, pColor);
+            DrawTriangle(r.PickingResult.Primitive, pColor);
 
-            ToggleTile(lastPosition);
+            DrawGraphNodes(agent);
         }
         private bool ChangeBuilMode(bool next)
         {
@@ -1030,27 +1086,30 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawPoint(Vector3 position, float size, Color4 color)
         {
             var cross = Line3D.CreateCross(position, size);
-            lineDrawer.SetPrimitives(color, cross);
+            lineDrawer.AddPrimitives(color, cross);
         }
         private void DrawTriangle(Triangle triangle, Color4 color)
         {
-            var tri = Line3D.CreateWiredTriangle(triangle);
-            lineDrawer.SetPrimitives(color, tri);
+            var tri = Line3D.CreateTriangle(triangle);
+            lineDrawer.AddPrimitives(color, tri);
         }
         private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
             var circle = Line3D.CreateCircle(position, radius, 12);
-            lineDrawer.SetPrimitives(color, circle);
+            lineDrawer.AddPrimitives(color, circle);
         }
         private void DrawPlayer(Vector3 position, Color4 color)
         {
-            var cylinder = Line3D.CreateWiredCylinder(position, agent.Radius, agent.Height, 12);
-            lineDrawer.SetPrimitives(color, cylinder);
+            var basePosition = position;
+            basePosition.Y += agent.Height * 0.5f;
+
+            var cylinder = Line3D.CreateCylinder(basePosition, agent.Radius, agent.Height, 12);
+            lineDrawer.AddPrimitives(color, cylinder);
         }
         private void DrawPath(PathFindingPath path, Color4 color)
         {
             var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
-            lineDrawer.SetPrimitives(color, pathLines);
+            lineDrawer.AddPrimitives(color, pathLines);
         }
         private void DrawGraphNodes(AgentType agent)
         {
@@ -1076,8 +1135,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
         {
-            var debugInfo = GetDebugInfo(agent);
-            if (debugInfo == null)
+            var debugInfoList = GetDebugInfo(agent)?.GetInfo((int)debug, lastPosition)?.GetValues() ?? [];
+            if (!debugInfoList.Any())
             {
                 return;
             }
@@ -1093,9 +1152,9 @@ namespace TerrainSamples.SceneNavMeshTest
             };
 
             ContentData content = new();
-            var debugInfoList = debugInfo.GetInfo((int)debug, lastPosition);
+
             int i = 0;
-            foreach (var di in debugInfoList.GetValues())
+            foreach (var di in debugInfoList)
             {
                 string matName = $"mat_{i++}";
                 content.AddMaterialContent(matName, material);
@@ -1183,40 +1242,6 @@ namespace TerrainSamples.SceneNavMeshTest
             enqueueTime = DateTime.Now.TimeOfDay;
             EnqueueNavigationGraphUpdate();
         }
-        private void ToggleTile(Vector3 tilePosition)
-        {
-            lastElapsedSeconds = null;
-            loadState = $"Updating tile at {tilePosition}.";
-
-            bool remove = Game.Input.ShiftPressed;
-            bool create = Game.Input.ControlPressed;
-
-            var sw = Stopwatch.StartNew();
-            try
-            {
-                if (create)
-                {
-                    NavigationGraph.CreateAt(tilePosition);
-                    return;
-                }
-
-                if (remove)
-                {
-                    NavigationGraph.RemoveAt(tilePosition);
-                    return;
-                }
-
-                NavigationGraph.UpdateAt(tilePosition);
-            }
-            finally
-            {
-                sw.Stop();
-                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
-                loadState = null;
-
-                DrawGraphNodes(agent);
-            }
-        }
         private void ShowMessage(string text, long duration = 5000)
         {
             message.Text = text;
@@ -1245,17 +1270,12 @@ namespace TerrainSamples.SceneNavMeshTest
             mainPanel.Visible = true;
             debugPanel.Visible = false;
         }
-        private void StartDebugState()
-        {
-            mainPanel.Visible = false;
-            debugPanel.Visible = true;
-        }
-        private void StartAddAreaState()
+        private void StartTilesState()
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
 
-            ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
+            ShowMessage($"Press {GContac1Point} to update a tile. SHIFT {GContac1Point} to remove a tile. CTRL {GContac1Point} to add a tile.");
         }
         private void StartAddObstacleState()
         {
@@ -1263,6 +1283,13 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add obstacle. SHIFT {GContac1Point} to remove.");
+        }
+        private void StartAddAreaState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+
+            ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
         }
         private void StartPathFindingState()
         {
@@ -1277,6 +1304,11 @@ namespace TerrainSamples.SceneNavMeshTest
             lineDrawer.Clear(pathFindingColorEnd);
 
             ShowMessage(pathFinderStartMessage);
+        }
+        private void StartDebugState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = true;
         }
 
         public override void GameGraphicsResized()

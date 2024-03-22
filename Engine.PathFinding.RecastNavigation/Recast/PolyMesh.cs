@@ -885,7 +885,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 //Polygon with adjacency
                 var p = new IndexedPolygon(NVP, true);
-                p.CopyVertices(polys[i], NVP);
+                p.CopyVertices(polys[i]);
 
                 StorePolygon(p, pareas[i], pregs[i]);
             }
@@ -909,7 +909,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 //Polygon with adjacency
                 var p = new IndexedPolygon(NVP, true);
-                p.CopyVertices(polys[i], NVP);
+                p.CopyVertices(polys[i]);
 
                 StorePolygon(p, (SamplePolyAreas)(int)cont.Area, cont.RegionId);
             }

@@ -475,7 +475,7 @@ namespace TerrainSamples.SceneSkybox
 
                 if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Primitive);
+                    var tri = Line3D.CreateTriangle(r.Primitive);
                     var cross = Line3D.CreateCross(r.Position, 0.1f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);

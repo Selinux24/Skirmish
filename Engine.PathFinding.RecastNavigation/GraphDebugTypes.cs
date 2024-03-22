@@ -31,6 +31,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         WalkableHeightfield,
         /// <summary>
+        /// Contours
+        /// </summary>
+        Contours,
+        /// <summary>
         /// Polygon mesh
         /// </summary>
         PolyMesh,

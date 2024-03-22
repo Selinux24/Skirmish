@@ -77,8 +77,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
 
-            this.Capacity = capacity;
-            this.UseAdjacency = useAdjacency;
+            Capacity = capacity;
+            UseAdjacency = useAdjacency;
             vertices = Helper.CreateArray(capacity, RC_MESH_NULL_IDX);
             adjacency = useAdjacency ? Helper.CreateArray(capacity, RC_MESH_NULL_IDX) : [];
         }
@@ -588,10 +588,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the edge list</returns>
         private static (Edge[] Edges, int EdgeCount) ConnectAdjacencyEdges(IndexedPolygon[] polys, int npolys, AdjacencyEdgeHelper edgeList, bool addOpenEdges, int openPolyEdgeValue)
         {
-            var edges = edgeList.Edges;
-            var edgeCount = edgeList.EdgeCount;
-            var firstEdge = edgeList.FirstEdge;
-            var nextEdge = edgeList.NextEdge;
+            var edges = new List<Edge>(edgeList.Edges);
+            var firstEdge = new List<int>(edgeList.FirstEdge);
+            var nextEdge = new List<int>(edgeList.NextEdge);
 
             foreach (var (p, i, j) in IteratePolygonVertices(polys, npolys))
             {
@@ -619,19 +618,19 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Matching edge not found, it is an open edge, add it.
-                edges[edgeCount] = new()
+                edges.Add(new()
                 {
                     Vert = [v0, v1],
                     Poly = [i, i],
                     PolyEdge = [j, openPolyEdgeValue],
-                };
+                });
 
                 // Insert edge
-                nextEdge[edgeCount] = firstEdge[v1];
-                firstEdge[v1] = edgeCount++;
+                nextEdge.Add(firstEdge[v1]);
+                firstEdge[v1] = edges.Count - 1;
             }
 
-            return (edges, edgeCount);
+            return (edges.ToArray(), edges.Count);
         }
         /// <summary>
         /// Stores the adjacency data
@@ -788,7 +787,10 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return vertices[GetNextIndex(i)];
         }
-
+        /// <summary>
+        /// Gets the next index
+        /// </summary>
+        /// <param name="i">Current index</param>
         public int GetNextIndex(int i)
         {
             return (i + 1 >= Capacity || VertexIsNull(i + 1)) ? 0 : i + 1;
@@ -851,12 +853,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// Copy the other polygon vertices
         /// </summary>
         /// <param name="p">Indexed polygon</param>
-        /// <param name="nvp">Number of vertex to copy</param>
-        public void CopyVertices(IndexedPolygon p, int nvp)
+        public void CopyVertices(IndexedPolygon p)
         {
-            for (int i = 0; i < nvp; ++i)
+            int otherCapacity = p?.Capacity ?? 0;
+            if (otherCapacity == 0)
             {
-                vertices[i] = p.vertices[i];
+                return;
+            }
+
+            for (int i = 0; i < Capacity; ++i)
+            {
+                vertices[i] = i < otherCapacity ? p.vertices[i] : RC_MESH_NULL_IDX;
             }
         }
 

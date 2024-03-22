@@ -53,6 +53,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// Build settings
         /// </summary>
         public BuildSettings Settings { get; set; }
+        /// <summary>
+        /// Graph bounds
+        /// </summary>
+        public BoundingBox Bounds
+        {
+            get
+            {
+                return Settings.Bounds ?? Input.BoundingBox;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -176,9 +186,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tiles = new List<UpdateTileData>();
 
+            var tileCellSize = Settings.TileCellSize;
+            var bounds = Bounds;
+
             foreach (var position in positions)
             {
-                NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
+                NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty, out var bbox);
 
                 if (!tiles.Exists(t => t.X == tx && t.Y == ty))
                 {

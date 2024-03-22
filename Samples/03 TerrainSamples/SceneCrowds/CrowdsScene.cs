@@ -413,7 +413,7 @@ namespace TerrainSamples.SceneCrowds
                 return;
             }
 
-            var tri = Line3D.CreateWiredTriangle(r.PickingResult.Primitive);
+            var tri = Line3D.CreateTriangle(r.PickingResult.Primitive);
             var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);
 
             lineDrawer.SetPrimitives(Color.White, tri);
@@ -485,7 +485,7 @@ namespace TerrainSamples.SceneCrowds
             FindFirstGroundPosition<Triangle>(c3.X, c3.Y, out var r3);
             FindFirstGroundPosition<Triangle>(ct.X, ct.Y, out var rt);
 
-            lines.AddRange(Line3D.CreateWiredSquare([r0.Position, r1.Position, r2.Position, r3.Position]));
+            lines.AddRange(Line3D.CreateSquare([r0.Position, r1.Position, r2.Position, r3.Position]));
 
             float r = Vector3.Distance(r0.Position, r2.Position) * 0.5f;
             grid.QueryItems(rt.Position, r, out var items);

@@ -8,6 +8,10 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         Default,
         /// <summary>
+        /// Tile management
+        /// </summary>
+        Tiles,
+        /// <summary>
         /// Obstable adding
         /// </summary>
         AddObstacle,

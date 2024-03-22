@@ -10,14 +10,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Height field
         /// </summary>
-        internal Heightfield Heightfield { get; set; }
+        public Heightfield Heightfield { get; set; }
+        /// <summary>
+        /// Contour set
+        /// </summary>
+        public ContourSet CountourSet { get; set; }
         /// <summary>
         /// Polygon mesh
         /// </summary>
-        internal PolyMesh PolyMesh { get; set; }
+        public PolyMesh PolyMesh { get; set; }
         /// <summary>
         /// Polygon detail mesh
         /// </summary>
-        internal PolyMeshDetail PolyMeshDetail { get; set; }
+        public PolyMeshDetail PolyMeshDetail { get; set; }
     }
 }

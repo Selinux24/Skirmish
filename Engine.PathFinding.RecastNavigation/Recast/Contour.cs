@@ -82,6 +82,37 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public AreaTypes Area { get; set; }
 
         /// <summary>
+        /// Gets the contour center
+        /// </summary>
+        /// <param name="cont">Contour</param>
+        /// <param name="orig">Origin</param>
+        /// <param name="cs">Cell size</param>
+        /// <param name="ch">Cell height</param>
+        public static Vector3 GetContourCenter(Contour cont, Vector3 orig, float cs, float ch)
+        {
+            if (cont.NVertices <= 0)
+            {
+                return Vector3.Zero;
+            }
+
+            Int3 center = Int3.Zero;
+            for (int i = 0; i < cont.NVertices; i++)
+            {
+                var v = cont.Vertices[i];
+                center += v.Position;
+            }
+
+            Vector3 res = new(center.X, center.Y, center.Z);
+            float s = 1.0f / cont.NVertices;
+            res *= s * cs;
+
+            res.X += orig.X;
+            res.Y += orig.Y * ch;
+            res.Z += orig.Z;
+
+            return res;
+        }
+        /// <summary>
         /// Merges a contour into another, and clears it
         /// </summary>
         /// <param name="ca">Merged contour</param>

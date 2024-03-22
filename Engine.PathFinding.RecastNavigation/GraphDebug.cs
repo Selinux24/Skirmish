@@ -58,6 +58,7 @@ namespace Engine.PathFinding.RecastNavigation
                     GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    GraphDebugTypes.Contours => GetContours(buildData.CountourSet),
                     GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
                     GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
                     _ => []
@@ -66,7 +67,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else if (graph.Settings.BuildMode == BuildModes.Tiled)
             {
-                NavMesh.GetTileAtPosition(point, graph.Input, graph.Settings, out var tx, out var ty, out _);
+                NavMesh.GetTileAtPosition(point, graph.Settings.TileCellSize, graph.Bounds, out var tx, out var ty, out _);
 
                 var buildData = nm.GetBuildData(tx, ty);
 
@@ -77,6 +78,7 @@ namespace Engine.PathFinding.RecastNavigation
                     GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                     GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                     GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                    GraphDebugTypes.Contours => GetContours(buildData.CountourSet),
                     GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
                     GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
                     _ => []
@@ -95,12 +97,33 @@ namespace Engine.PathFinding.RecastNavigation
             var nodes = graph.GetNodes(Agent).OfType<GraphNode>();
             if (!nodes.Any())
             {
-                yield break;
+                return [];
             }
 
-            const string nameTris = $"{nameof(GetNodes)}_TRIS";
-            const string nameLines = $"{nameof(GetNodes)}_LINES";
-            Vector3 deltaY = new(0f, 0.01f, 0f);
+            if (showTriangles)
+            {
+                return
+                [
+                    .. GetBounds(),
+                    .. GetNodeTris(nodes, separateNodes),
+                    .. GetNodeLines(nodes, separateNodes),
+                ];
+            }
+            else
+            {
+                return
+                [
+                    .. GetBounds(),
+                    .. GetNodeTris(nodes, separateNodes),
+                ];
+            }
+        }
+        /// <summary>
+        /// Gets the node triangles debug information
+        /// </summary>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetNodeTris(IEnumerable<GraphNode> nodes, bool separateNodes)
+        {
+            string nameTris = $"{GraphDebugTypes.Nodes}_Tris";
 
             if (separateNodes)
             {
@@ -111,12 +134,26 @@ namespace Engine.PathFinding.RecastNavigation
                         elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable());
 
                 yield return (nameTris, Topology.TriangleList, tris);
+            }
+            else
+            {
+                Color4 colorTris = new Color(0, 192, 255, 255);
+                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable())]);
 
-                if (!showTriangles)
-                {
-                    yield break;
-                }
+                yield return (nameTris, Topology.TriangleList, tris);
+            }
+        }
+        /// <summary>
+        /// Gets the node lines debug information
+        /// </summary>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetNodeLines(IEnumerable<GraphNode> nodes, bool separateNodes)
+        {
+            string nameLines = $"{GraphDebugTypes.Nodes}_Lines";
 
+            Vector3 deltaY = new(0f, 0.01f, 0f);
+
+            if (separateNodes)
+            {
                 var lines = nodes
                     .GroupBy(n => Helper.IntToCol(n.Id, 128))
                     .ToDictionary(
@@ -127,16 +164,6 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Color4 colorTris = new Color(0, 192, 255, 255);
-                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable())]);
-
-                yield return (nameTris, Topology.TriangleList, tris);
-
-                if (!showTriangles)
-                {
-                    yield break;
-                }
-
                 Color4 colorLines = new Color(255, 255, 255, 255);
                 Dictionary<Color4, IEnumerable<Vector3>> lines = new([new(colorLines, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable())]);
 
@@ -175,7 +202,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var min = new Vector3(fx, orig.Y + s.SMin * ch, fz);
                     var max = new Vector3(fx + cs, orig.Y + s.SMax * ch, fz + cs);
 
-                    var boxTris = TriangulateBox(min, max);
+                    var boxTris = TriangulateBox(min, max, 0.95f);
 
                     if (s.Area == AreaTypes.RC_WALKABLE_AREA)
                     {
@@ -225,10 +252,141 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Gets the contour debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContours(ContourSet cset)
+        {
+            if (cset == null)
+            {
+                return [];
+            }
+
+            return
+            [
+                .. GetBounds(),
+                .. GetContourLines(cset, 0.5f),
+                .. GetContoursRegions(cset),
+            ];
+        }
+        /// <summary>
+        /// Gets the contour lines debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContourLines(ContourSet cset, float alpha)
+        {
+            var orig = cset.Bounds.Minimum;
+            float cs = cset.CellSize;
+            float ch = cset.CellHeight;
+
+            int a = (int)(alpha * 255.0f);
+
+            Dictionary<Color4, List<Vector3>> lines = [];
+            for (int i = 0; i < cset.NConts; ++i)
+            {
+                var c = cset.Conts[i];
+
+                if (c.NVertices <= 0)
+                {
+                    continue;
+                }
+
+                Color color = (Color)Helper.IntToCol(c.RegionId, a);
+                Color4 bcolor = Color.Lerp(color, new Color(255, 255, 255, a), 128);
+                for (int j = 0, k = c.NVertices - 1; j < c.NVertices; k = j++)
+                {
+                    var va = c.Vertices[k];
+                    var vb = c.Vertices[j];
+
+                    var col = Contour.IsAreaBorder(va.Flag) ? bcolor : color;
+                    lines.TryAdd(col, []);
+
+                    float fx, fy, fz;
+                    fx = orig[0] + va.X * cs;
+                    fy = orig[1] + (va.Y + 1 + (i & 1)) * ch;
+                    fz = orig[2] + va.Z * cs;
+
+                    lines[col].Add(new(fx, fy, fz));
+
+                    fx = orig[0] + vb.X * cs;
+                    fy = orig[1] + (vb.Y + 1 + (i & 1)) * ch;
+                    fz = orig[2] + vb.Z * cs;
+
+                    lines[col].Add(new(fx, fy, fz));
+                }
+            }
+
+            if (lines.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.Contours}_Lines", Topology.LineList, dict);
+        }
+        /// <summary>
+        /// Gets the contour regions debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContoursRegions(ContourSet cset)
+        {
+            var orig = cset.Bounds.Minimum;
+            float cs = cset.CellSize;
+            float ch = cset.CellHeight;
+
+            // Draw centers
+            Vector3 pos;
+            Vector3 pos2;
+
+            List<Vector3> lines = [];
+
+            for (int i = 0; i < cset.NConts; ++i)
+            {
+                var cont = cset.Conts[i];
+
+                pos = Contour.GetContourCenter(cont, orig, cs, ch);
+
+                for (int j = 0; j < cont.NVertices; j++)
+                {
+                    var v = cont.Vertices[j];
+                    var r = (int)(uint)v.Flag;
+
+                    if (v.Flag == 0 || r < cont.RegionId)
+                    {
+                        continue;
+                    }
+
+                    var cont2 = cset.FindContour(r);
+                    if (cont2 != null)
+                    {
+                        pos2 = Contour.GetContourCenter(cont2, orig, cs, ch);
+
+                        var points = Line3D.CreateArc(pos, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
+
+                        lines.AddRange(points);
+                    }
+                }
+            }
+
+            if (lines.Count <= 0)
+            {
+                yield break;
+            }
+
+            Color4 color = new Color(0, 0, 0, 196);
+
+            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            {
+                { color, lines }
+            };
+            yield return ($"{GraphDebugTypes.Contours}_Regions", Topology.LineList, dict);
+        }
+
+        /// <summary>
         /// Gets the polygon mesh debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyMesh(PolyMesh pm)
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetPolyMesh(PolyMesh pm)
         {
             if (pm == null)
             {
@@ -237,6 +395,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return
             [
+                .. GetBounds(),
                 .. GetPolyMeshTris(pm),
                 .. GetPolyEdges(pm),
                 .. GetPolyBoundaries(pm),
@@ -397,7 +556,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the polygon detail mesh debug information
         /// </summary>
         /// <param name="dm">Detail mesh</param>
-        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMesh(PolyMeshDetail dm)
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMesh(PolyMeshDetail dm)
         {
             if (dm == null)
             {
@@ -406,6 +565,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return
             [
+                .. GetBounds(),
                 .. GetDetailMeshTris(dm),
                 .. GetDetailMeshEdges(dm),
             ];
@@ -502,10 +662,35 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Gets the graph bounds
+        /// </summary>
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetBounds()
+        {
+            var bounds = graph.Bounds;
+
+            var points = Line3D.CreateBox(bounds).SelectMany(a => new[] { a.Point1, a.Point2 });
+
+            Color4 color = new Color(255, 255, 255, 32);
+
+            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            {
+                { color, points }
+            };
+            yield return ($"{GetBounds}", Topology.LineList, dict);
+        }
+
+        /// <summary>
         /// Triangulates a box from a bounding box
         /// </summary>
-        private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max)
+        /// <param name="min">Box minimum point</param>
+        /// <param name="max">Box maximum point</param>
+        /// <param name="scale">Scale</param>
+        private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max, float scale = 1f)
         {
+            var extents = (max - min) * 0.5f * (1f - scale);
+            min += extents;
+            max -= extents;
+
             Vector3[] boxVertices =
             [
                 new(min.X, min.Y, min.Z),

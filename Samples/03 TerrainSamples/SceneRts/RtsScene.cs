@@ -2348,7 +2348,7 @@ namespace TerrainSamples.SceneRts
                 var triangles = results.Select(r => r.Primitive).ToArray();
 
                 terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCross(positions, 1f));
-                terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
+                terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateTriangle(triangles));
                 if (positions.Length > 1)
                 {
                     terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[^1]));
@@ -2537,7 +2537,7 @@ namespace TerrainSamples.SceneRts
             List<Line3D> lines =
             [
                 .. Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)),
-                .. Line3D.CreateWiredTriangle(tris),
+                .. Line3D.CreateTriangle(tris),
             ];
 
             staticObjLineDrawer.SetPrimitives(objColor, lines);

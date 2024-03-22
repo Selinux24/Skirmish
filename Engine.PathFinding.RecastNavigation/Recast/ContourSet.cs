@@ -525,6 +525,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
         /// <summary>
+        /// Finds the contour by region id
+        /// </summary>
+        /// <param name="reg">Region id</param>
+        public Contour FindContour(int reg)
+        {
+            for (int i = 0; i < NConts; ++i)
+            {
+                if (Conts[i].RegionId == reg)
+                {
+                    return Conts[i];
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
         /// Adds the contour
         /// </summary>
         /// <param name="reg">Region</param>

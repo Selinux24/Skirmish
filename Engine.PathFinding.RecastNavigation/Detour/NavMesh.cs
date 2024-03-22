@@ -256,6 +256,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 nm.m_buildData = new()
                 {
                     Heightfield = solid,
+                    CountourSet = cset,
                     PolyMesh = pmesh,
                     PolyMeshDetail = dmesh,
                 };
@@ -425,6 +426,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 meshData.BuildData = new()
                 {
                     Heightfield = solid,
+                    CountourSet = cset,
                     PolyMesh = pmesh,
                     PolyMeshDetail = dmesh,
                 };
@@ -436,19 +438,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets the tile located at the specified position
         /// </summary>
         /// <param name="pos">Position</param>
-        /// <param name="geom">Input geometry</param>
-        /// <param name="settings">Build settings</param>
+        /// <param name="tileCellSize">Tile cell size</param>
+        /// <param name="bounds">Mesh bounds</param>
         /// <param name="x">Resulting x tile coordinate</param>
         /// <param name="y">Resulting y tile coordinate</param>
         /// <param name="tileBounds">Tile bounds</param>
-        public static void GetTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings, out int x, out int y, out BoundingBox tileBounds)
+        public static void GetTileAtPosition(Vector3 pos, float tileCellSize, BoundingBox bounds, out int x, out int y, out BoundingBox tileBounds)
         {
-            var bbox = settings.Bounds ?? geom.BoundingBox;
+            x = (int)((pos.X - bounds.Minimum.X) / tileCellSize);
+            y = (int)((pos.Z - bounds.Minimum.Z) / tileCellSize);
 
-            x = (int)((pos.X - bbox.Minimum.X) / settings.TileCellSize);
-            y = (int)((pos.Z - bbox.Minimum.Z) / settings.TileCellSize);
-
-            tileBounds = GetTileBounds(x, y, settings.TileCellSize, bbox);
+            tileBounds = GetTileBounds(x, y, tileCellSize, bounds);
         }
         /// <summary>
         /// Gets the specified tile bounding box
@@ -2020,12 +2020,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (Tiles?.Length == 0)
             {
                 //Solo build
+                return default;
+            }
+
+            if (Tiles?.Length == 1)
+            {
+                //Solo build
                 return m_buildData;
             }
-            else if (TileCache == null)
+
+            if (TileCache == null)
             {
                 //Tiles build
-                return GetTileAt(tx, ty, 0).Data.BuildData;
+                var tile = GetTileAt(tx, ty, 0);
+                if (tile == null)
+                {
+                    return default;
+                }
+
+                return tile.Data.BuildData;
             }
             else
             {

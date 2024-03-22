@@ -7,28 +7,31 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Contour vertex
     /// </summary>
-    public struct ContourVertex : IEquatable<ContourVertex>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public struct ContourVertex(int x, int y, int z, int flag) : IEquatable<ContourVertex>
     {
         /// <summary>
         /// Converts the specified collection
         /// </summary>
         public static Int3[] ToInt3List(ContourVertex[] v)
         {
-            return v?.Select(v => new Int3(v.X, v.Y, v.Z)).ToArray() ?? Array.Empty<Int3>();
+            return v?.Select(v => new Int3(v.X, v.Y, v.Z)).ToArray() ?? [];
         }
 
         /// <summary>
         /// X
         /// </summary>
-        public int X { get; set; }
+        public int X { get; set; } = x;
         /// <summary>
         /// Y
         /// </summary>
-        public int Y { get; set; }
+        public int Y { get; set; } = y;
         /// <summary>
         /// Z
         /// </summary>
-        public int Z { get; set; }
+        public int Z { get; set; } = z;
         /// <summary>
         /// Gets the x, y and z coordinates
         /// </summary>
@@ -42,17 +45,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Contour flag
         /// </summary>
-        public int Flag { get; set; }
-
+        public int Flag { get; set; } = flag;
         /// <summary>
-        /// Constructor
+        /// Gets the vertex position
         /// </summary>
-        public ContourVertex(int x, int y, int z, int flag)
+        public readonly Int3 Position
         {
-            X = x;
-            Y = y;
-            Z = z;
-            Flag = flag;
+            get
+            {
+                return new(X, Y, Z);
+            }
         }
 
         /// <inheritdoc/>
