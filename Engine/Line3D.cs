@@ -70,6 +70,20 @@ namespace Engine
                 .AsEnumerable();
         }
 
+        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> path)
+        {
+            List<Line3D> lines = [];
+
+            var tmp = path.ToArray();
+
+            for (int i = 0; i < tmp.Length - 1; i++)
+            {
+                lines.Add(new(tmp[i], tmp[i + 1]));
+            }
+
+            return lines;
+        }
+
         public static IEnumerable<Line3D> CreateWiredSquare(IEnumerable<Vector3> corners)
         {
             int[] indexes = [0, 1, 1, 2, 2, 3, 3, 0];
@@ -85,19 +99,6 @@ namespace Engine
                 new(v2, v3),
                 new(v3, v0)
             ];
-        }
-        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> path)
-        {
-            List<Line3D> lines = [];
-
-            var tmp = path.ToArray();
-
-            for (int i = 0; i < tmp.Length - 1; i++)
-            {
-                lines.Add(new(tmp[i], tmp[i + 1]));
-            }
-
-            return lines;
         }
         public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
@@ -117,6 +118,12 @@ namespace Engine
             }
 
             return CreateFromVertices(points, indexes);
+        }
+        public static IEnumerable<Line3D> CreateWiredCylinder(Vector3 center, float radius, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);
+
+            return CreateFromVertices(geometry);
         }
 
         public static IEnumerable<Line3D> CreateWiredTriangle(Vector3 v0, Vector3 v1, Vector3 v2)

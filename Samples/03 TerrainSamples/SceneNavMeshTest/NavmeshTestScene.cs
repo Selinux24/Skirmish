@@ -87,12 +87,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private readonly Color4 pointColor = new(Color.Red.ToVector3(), 0.2f);
         private readonly Color4 triColor = new(Color.BlueViolet.ToVector3(), 0.2f);
+        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.2f);
+        private readonly Color4 unwalkableColor = new(Color.DarkRed.RGB(), 0.2f);
+
         private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.2f);
         private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.2f);
         private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.2f);
         private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.2f);
-        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.2f);
-        private readonly Color4 unwalkableColor = new(Color.DarkRed.RGB(), 0.2f);
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<AreaMarker> areas = [];
@@ -466,7 +467,7 @@ namespace TerrainSamples.SceneNavMeshTest
             DrawGraphNodes(agent);
 
             obstacles.Clear();
-            DrawMarkers();
+            DrawGraphObjects();
 
             gameReady = true;
         }
@@ -606,7 +607,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 Obstacle = cy,
             };
             obstacles.Add(obs);
-            DrawMarkers();
+            DrawGraphObjects();
 
             NavigationGraph.UpdateAt(p);
 
@@ -623,7 +624,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 {
                     NavigationGraph.RemoveObstacle(obs.Id);
                     obstacles.Remove(obs);
-                    DrawMarkers();
+                    DrawGraphObjects();
 
                     NavigationGraph.UpdateAt(obs.Obstacle.Center);
 
@@ -676,7 +677,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 Radius = radius,
             };
             areas.Add(area);
-            DrawMarkers();
+            DrawGraphObjects();
             EnqueueGraph();
 
             stateManager.StartState(States.Default);
@@ -702,7 +703,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
                 PathFinderDescription.Input.RemoveArea(area.Id);
                 areas.Remove(area);
-                DrawMarkers();
+                DrawGraphObjects();
                 EnqueueGraph();
 
                 stateManager.StartState(States.Default);
@@ -749,35 +750,31 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdatePathFindingData()
         {
+            lineDrawer.Clear(pathFindingColorStart);
+            lineDrawer.Clear(pathFindingColorEnd);
+            lineDrawer.Clear(pathFindingColorPath);
+
             ShowMessage(pathFinderHelpMessage);
 
             var start = pathFindingStart;
             var end = pathFindingEnd;
 
-            lineDrawer.Clear(pathFindingColorStart);
-            lineDrawer.Clear(pathFindingColorEnd);
-            lineDrawer.Clear(pathFindingColorPath);
-
             if (start != null)
             {
-                var cStart = Line3D.CreateCircle(start.Value, 0.25f, 8);
-                lineDrawer.SetPrimitives(pathFindingColorStart, cStart ?? []);
-                lineDrawer.Visible = true;
+                DrawCircle(start.Value, agent.Radius * 2, pathFindingColorStart);
+                DrawPlayer(start.Value, pathFindingColorStart);
             }
 
             if (end != null)
             {
-                var cEnd = Line3D.CreateCircle(end.Value, 0.25f, 8);
-                lineDrawer.SetPrimitives(pathFindingColorEnd, cEnd ?? []);
-                lineDrawer.Visible = true;
+                DrawCircle(end.Value, agent.Radius * 2, pathFindingColorEnd);
+                DrawPlayer(end.Value, pathFindingColorEnd);
             }
 
             if (start != null && end != null)
             {
                 var path = FindPath(agent, start.Value, end.Value, false);
-                var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
-                lineDrawer.SetPrimitives(pathFindingColorPath, pathLines);
-                lineDrawer.Visible = true;
+                DrawPath(path, pathFindingColorPath);
             }
         }
         private void UpdateNavmeshInput()
@@ -794,6 +791,12 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateFindRandomPointCircleInput()
         {
+            lineDrawer.Clear(pointColor);
+            lineDrawer.Clear(triColor);
+            lineDrawer.Clear(circleColor);
+            lineDrawer.Clear(pickInColor);
+            lineDrawer.Clear(pickOutColor);
+
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
             if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
@@ -820,10 +823,12 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateFindRandomPointInput()
         {
+            lineDrawer.Clear(pickInColor);
+
             var pt = NavigationGraph.FindRandomPoint(agent);
             if (pt.HasValue)
             {
-                DrawPoint(pt.Value, 2.5f, Color.LightGreen);
+                DrawPoint(pt.Value, 2.5f, pickInColor);
             }
         }
         private void UpdateGraphInput()
@@ -907,16 +912,32 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateContactInput()
         {
+            lineDrawer.Clear(walkableColor);
+            lineDrawer.Clear(unwalkableColor);
+            lineDrawer.Clear(pointColor);
+            lineDrawer.Clear(triColor);
+
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
-                lastPosition = r.PickingResult.Position;
-
-                DrawContact(lastPosition, r.PickingResult.Primitive);
-
-                ToggleTile(lastPosition);
+                return;
             }
+
+            lastPosition = r.PickingResult.Position;
+
+            bool walkable = IsWalkable(agent, lastPosition, 0.1f, out var nearest);
+            var pColor = walkable ? walkableColor : unwalkableColor;
+
+            if (nearest.HasValue)
+            {
+                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, pointColor);
+            }
+
+            DrawPoint(lastPosition, 0.25f, pColor);
+            DrawTriangle(r.PickingResult.Primitive, triColor);
+
+            ToggleTile(lastPosition);
         }
         private bool ChangeBuilMode(bool next)
         {
@@ -1005,26 +1026,6 @@ namespace TerrainSamples.SceneNavMeshTest
 
             return true;
         }
-        private void DrawContact(Vector3 position, Triangle triangle)
-        {
-            lineDrawer.Clear(pointColor);
-            lineDrawer.Clear(triColor);
-            lineDrawer.Clear(circleColor);
-            lineDrawer.Clear(pickInColor);
-            lineDrawer.Clear(pickOutColor);
-            lineDrawer.Clear(obsColor);
-
-            bool walkable = IsWalkable(agent, position, 0.1f, out var nearest);
-            var pColor = walkable ? walkableColor : unwalkableColor;
-
-            if (nearest.HasValue)
-            {
-                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, pointColor);
-            }
-
-            DrawPoint(position, 0.25f, pColor);
-            DrawTriangle(triangle, triColor);
-        }
 
         private void DrawPoint(Vector3 position, float size, Color4 color)
         {
@@ -1041,13 +1042,23 @@ namespace TerrainSamples.SceneNavMeshTest
             var circle = Line3D.CreateCircle(position, radius, 12);
             lineDrawer.SetPrimitives(color, circle);
         }
+        private void DrawPlayer(Vector3 position, Color4 color)
+        {
+            var cylinder = Line3D.CreateWiredCylinder(position, agent.Radius, agent.Height, 12);
+            lineDrawer.SetPrimitives(color, cylinder);
+        }
+        private void DrawPath(PathFindingPath path, Color4 color)
+        {
+            var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
+            lineDrawer.SetPrimitives(color, pathLines);
+        }
         private void DrawGraphNodes(AgentType agent)
         {
             Components.RemoveComponent(debugGeometry);
 
             LoadResourcesAsync(LoadDebugModel(agent, debugType));
         }
-        private void DrawMarkers()
+        private void DrawGraphObjects()
         {
             triangleDrawer.Clear();
 
