@@ -48,13 +48,13 @@ namespace Engine.PathFinding.RecastNavigation
             BuildData buildData;
             if (graph.Settings.BuildMode == BuildModes.Solo)
             {
-                buildData = nm.GetBuildData(0, 0);
+                buildData = nm.GetSoloBuildData();
             }
             else if (graph.Settings.BuildMode == BuildModes.Tiled)
             {
                 NavMesh.GetTileAtPosition(point, graph.Settings.TileCellSize, graph.Bounds, out var tx, out var ty, out _);
 
-                buildData = nm.GetBuildData(tx, ty);
+                buildData = nm.GetTiledBuildData(tx, ty);
             }
             else
             {
@@ -483,15 +483,15 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 col;
                 if (area == SamplePolyAreas.Ground)
                 {
-                    col = new Color(0, 192, 255, 16);
+                    col = new Color(0, 192, 255, 255);
                 }
                 else if (area == SamplePolyAreas.None)
                 {
-                    col = new Color(0, 0, 0, 16);
+                    col = new Color(0, 0, 0, 255);
                 }
                 else
                 {
-                    col = AreaToCol(area);
+                    col = AreaToCol(area, 255);
                 }
 
                 tris.TryAdd(col, []);
@@ -776,7 +776,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Converts the area value to color
         /// </summary>
         /// <param name="area">Area value</param>
-        private static Color4 AreaToCol(SamplePolyAreas area)
+        private static Color4 AreaToCol(SamplePolyAreas area, int alpha)
         {
             if (area == SamplePolyAreas.None)
             {
@@ -785,7 +785,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                return Helper.IntToCol((int)area, 16);
+                return Helper.IntToCol((int)area, alpha);
             }
         }
     }

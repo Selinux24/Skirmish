@@ -58,6 +58,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             /// Sample added
             /// </summary>
             public bool Added { get; set; } = added;
+
+            /// <inheritdoc/>
+            public readonly override string ToString()
+            {
+                return $"X: {X}; Y: {Y}; Z: {Z}; Added: {Added};";
+            }
         }
 
         /// <summary>
@@ -549,7 +555,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (s.Area != AreaTypes.RC_NULL_AREA)
                     {
                         int bot = s.SMax;
-                        int top = s.Next != null ? s.Next.SMin : int.MaxValue;
+                        int top = s.Next?.SMin ?? int.MaxValue;
                         Spans[idx].Y = MathUtil.Clamp(bot, 0, SPAN_MAX_WIDTH);
                         Spans[idx].H = MathUtil.Clamp(top - bot, 0, SPAN_MAX_HEIGHT);
                         Areas[idx] = s.Area;
@@ -1076,17 +1082,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the height data
         /// </summary>
         /// <param name="poly">Polygon</param>
+        /// <param name="rect">Polygon bounds</param>
         /// <param name="verts">Vertex indices</param>
-        /// <param name="hp">Height patch</param>
         /// <param name="region">Region index</param>
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int region)
+        /// <returns>Returns the height patch</returns>
+        public HeightPatch GetHeightData(IndexedPolygon poly, int region, Int3[] verts, Rectangle rect)
         {
             var queue = new List<HeightDataItem>(512);
 
-            hp.InitializeData(hp.Bounds.Width * hp.Bounds.Height);
+            HeightPatch hp = new(rect);
 
             bool empty = true;
 
@@ -1109,6 +1116,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             ProcessHeightDataQueue(hp, queue);
+
+            return hp;
         }
         /// <summary>
         /// Gets the heigth data of the specified region
@@ -1253,7 +1262,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (minExtent < sampleDist * 2)
             {
                 outVerts = verts;
-                outTris = TriangulationHelper.TriangulateHull(verts, hull);
+                outTris = TriangulationHelper.TriangulateHull(verts, polygon.Length, hull);
 
                 return;
             }
@@ -1262,7 +1271,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // We're using the triangulateHull instead of delaunayHull as it tends to
             // create a bit better triangulation for long thin triangles when there
             // are no internal points.
-            var tris = TriangulationHelper.TriangulateHull(verts, hull);
+            var tris = TriangulationHelper.TriangulateHull(verts, polygon.Length, hull);
             if (tris.Length == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
@@ -1396,7 +1405,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var triList = new List<Int3>(tris);
 
             // Create sample locations in a grid.
-            var samples = new List<SampleVertex>(InitializeSamples(polygon, param, hp));
+            var samples = InitializeSamples(polygon, param, hp);
 
             // Add the samples starting from the one that has the most
             // error. The procedure stops when all samples are added
@@ -1454,12 +1463,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="polygon">Polygon vertices</param>
         /// <param name="param">Build polygon parameters</param>
         /// <param name="hp">Height patch</param>
-        private SampleVertex[] InitializeSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
+        private List<SampleVertex> InitializeSamples(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
         {
+            var samples = new List<SampleVertex>();
+
             float sampleDist = param.SampleDist;
+            float samplePDist = -sampleDist / 2;
             int heightSearchRadius = param.HeightSearchRadius;
 
             var bbox = Utils.GetPolygonBounds(polygon);
+            float h = (bbox.Maximum.Y + bbox.Minimum.Y) * 0.5f;
 
             int x0 = (int)Math.Floor(bbox.Minimum.X / sampleDist);
             int x1 = (int)Math.Ceiling(bbox.Maximum.X / sampleDist);
@@ -1469,8 +1482,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float cs = CellSize;
             float ics = 1.0f / cs;
 
-            var samples = new List<SampleVertex>();
-
             for (int z = z0; z < z1; ++z)
             {
                 for (int x = x0; x < x1; ++x)
@@ -1478,12 +1489,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var pt = new Vector3
                     {
                         X = x * sampleDist,
-                        Y = (bbox.Maximum.Y + bbox.Minimum.Y) * 0.5f,
+                        Y = h,
                         Z = z * sampleDist
                     };
 
                     // Make sure the samples are not too close to the edges.
-                    if (Utils.DistancePtPoly2D(pt, polygon) > -sampleDist / 2)
+                    var dist = Utils.DistancePtPoly2D(pt, polygon);
+                    if (dist > samplePDist)
                     {
                         continue;
                     }
@@ -1494,7 +1506,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return [.. samples];
+            return samples;
         }
         /// <summary>
         /// Finds samples with most error

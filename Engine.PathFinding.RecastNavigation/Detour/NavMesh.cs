@@ -2015,18 +2015,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the navigation mesh build data
         /// </summary>
-        internal BuildData GetBuildData(int tx, int ty)
+        internal BuildData GetSoloBuildData()
+        {
+            return m_buildData;
+        }
+        /// <summary>
+        /// Gets the navigation mesh build data
+        /// </summary>
+        internal BuildData GetTiledBuildData(int tx, int ty)
         {
             if (Tiles?.Length == 0)
             {
                 //Solo build
                 return default;
-            }
-
-            if (Tiles?.Length == 1)
-            {
-                //Solo build
-                return m_buildData;
             }
 
             if (TileCache == null)

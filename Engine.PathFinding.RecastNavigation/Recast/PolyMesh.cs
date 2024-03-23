@@ -279,7 +279,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var first = meshes[0];
 
-            var res = new PolyMesh
+            var mesh = new PolyMesh
             {
                 NVP = first.NVP,
                 CellSize = first.CellSize,
@@ -289,13 +289,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var (maxVerts, maxPolys, maxVertsPerMesh) = UpdateBounds(meshes);
 
-            res.NVerts = 0;
-            res.Verts = new Int3[maxVerts];
-            res.NPolys = 0;
-            res.Polys = new IndexedPolygon[maxPolys];
-            res.Regs = new int[maxPolys];
-            res.Areas = new SamplePolyAreas[maxPolys];
-            res.Flags = new SamplePolyFlagTypes[maxPolys];
+            mesh.NVerts = 0;
+            mesh.Verts = new Int3[maxVerts];
+            mesh.NPolys = 0;
+            mesh.Polys = new IndexedPolygon[maxPolys];
+            mesh.Regs = new int[maxPolys];
+            mesh.Areas = new SamplePolyAreas[maxPolys];
+            mesh.Flags = new SamplePolyFlagTypes[maxPolys];
 
             int[] nextVert = Helper.CreateArray(maxVerts, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -303,40 +303,40 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var pmesh in meshes)
             {
-                int ox = (int)Math.Floor((pmesh.Bounds.Minimum.X - res.Bounds.Minimum.X) / res.CellSize + 0.5f);
-                int oz = (int)Math.Floor((pmesh.Bounds.Minimum.X - res.Bounds.Minimum.Z) / res.CellSize + 0.5f);
+                int ox = (int)Math.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.X) / mesh.CellSize + 0.5f);
+                int oz = (int)Math.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.Z) / mesh.CellSize + 0.5f);
 
                 RemapParams remapParams = new()
                 {
                     IsMinX = ox == 0,
                     IsMinZ = oz == 0,
-                    IsMaxX = ((int)Math.Floor((res.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / res.CellSize + 0.5f)) == 0,
-                    IsMaxZ = ((int)Math.Floor((res.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / res.CellSize + 0.5f)) == 0,
+                    IsMaxX = ((int)Math.Floor((mesh.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / mesh.CellSize + 0.5f)) == 0,
+                    IsMaxZ = ((int)Math.Floor((mesh.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / mesh.CellSize + 0.5f)) == 0,
                 };
 
                 for (int j = 0; j < pmesh.NVerts; ++j)
                 {
                     var v = pmesh.Verts[j];
-                    vremap[j] = res.AddVertex(v.X + ox, v.Y, v.Z + oz, firstVert, nextVert);
+                    vremap[j] = mesh.AddVertex(v.X + ox, v.Y, v.Z + oz, firstVert, nextVert);
                 }
 
                 for (int j = 0; j < pmesh.NPolys; ++j)
                 {
-                    var tgt = res.Polys[res.NPolys];
+                    var tgt = mesh.Polys[mesh.NPolys];
                     var src = pmesh.Polys[j];
-                    res.Regs[res.NPolys] = pmesh.Regs[j];
-                    res.Areas[res.NPolys] = pmesh.Areas[j];
-                    res.Flags[res.NPolys] = pmesh.Flags[j];
-                    res.NPolys++;
+                    mesh.Regs[mesh.NPolys] = pmesh.Regs[j];
+                    mesh.Areas[mesh.NPolys] = pmesh.Areas[j];
+                    mesh.Flags[mesh.NPolys] = pmesh.Flags[j];
+                    mesh.NPolys++;
 
-                    remapParams.Remap(src, res.NVP, vremap, tgt);
+                    remapParams.Remap(src, mesh.NVP, vremap, tgt);
                 }
             }
 
             // Calculate adjacency.
-            res.BuildMeshAdjacency(cset);
+            mesh.BuildMeshAdjacency(cset);
 
-            return res;
+            return mesh;
         }
         /// <summary>
         /// Updates each mesh bounds

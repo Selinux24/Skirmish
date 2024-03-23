@@ -88,7 +88,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Sort potential diagonals by distance, we want to make the connection as short as possible.
             diags.Sort(PotentialDiagonal.DefaultComparer);
 
-            return diags.ToArray();
+            return [.. diags];
         }
 
         /// <summary>

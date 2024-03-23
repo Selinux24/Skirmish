@@ -204,40 +204,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private static ContourVertex[] CreateInitialPoints(ContourVertex[] points)
         {
-            var initialPoints = new List<ContourVertex>();
-
-            int llx = points[0].X;
-            int lly = points[0].Y;
-            int llz = points[0].Z;
-            int lli = 0;
-            int urx = points[0].X;
-            int ury = points[0].Y;
-            int urz = points[0].Z;
-            int uri = 0;
-            for (int i = 0; i < points.Length; i++)
+            var ll = points[0];
+            var ur = points[0];
+            for (int i = 1; i < points.Length; i++)
             {
-                int x = points[i].X;
-                int y = points[i].Y;
-                int z = points[i].Z;
-                if (x < llx || (x == llx && z < llz))
+                var p = points[i];
+                if (p.X < ll.X || (p.X == ll.X && p.Z < ll.Z))
                 {
-                    llx = x;
-                    lly = y;
-                    llz = z;
-                    lli = i;
+                    ll = p;
+                    ll.Flag = i;
                 }
-                if (x > urx || (x == urx && z > urz))
+
+                if (p.X > ur.X || (p.X == ur.X && p.Z > ur.Z))
                 {
-                    urx = x;
-                    ury = y;
-                    urz = z;
-                    uri = i;
+                    ur = p;
+                    ur.Flag = i;
                 }
             }
-            initialPoints.Add(new(llx, lly, llz, lli));
-            initialPoints.Add(new(urx, ury, urz, uri));
 
-            return [.. initialPoints];
+            return [ll, ur];
         }
         /// <summary>
         /// Adds the point list to de point array

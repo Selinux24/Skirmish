@@ -181,6 +181,7 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
 
+            var btnBuild = await InitializeButton("btnBuild", "Build", btnDesc, EnqueueGraph);
             var btnTiles = await InitializeButton("btnTiles", "Tiles", btnDesc, () => stateManager.StartState(States.Tiles));
             var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
             {
@@ -197,7 +198,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
             var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
+            UIButton[] mainBtns = [btnBuild, btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);

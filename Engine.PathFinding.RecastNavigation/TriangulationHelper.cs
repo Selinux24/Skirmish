@@ -358,14 +358,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// Triangulates a hull
         /// </summary>
         /// <param name="verts">Hull vertices</param>
+        /// <param name="nin">Number of initial vertices</param>
         /// <param name="hull">Hull indices</param>
         /// <returns>Returns the indexed triangle list</returns>
-        public static Int3[] TriangulateHull(Vector3[] verts, int[] hull)
+        public static Int3[] TriangulateHull(Vector3[] verts, int nin, int[] hull)
         {
             var tris = new List<Int3>();
 
             int nhull = hull.Length;
-            int nin = verts.Length;
 
             int start = 0, left = 1, right = nhull - 1;
 

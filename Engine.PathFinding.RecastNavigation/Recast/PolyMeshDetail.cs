@@ -41,31 +41,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var orig = mesh.Bounds.Minimum;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
-            var (Bounds, MaxHWidth, MaxHHeight) = mesh.FindBounds(chf);
-            var bounds = Bounds;
-            int maxhw = MaxHWidth;
-            int maxhh = MaxHHeight;
-
-            var hp = new HeightPatch()
-            {
-                Data = new int[maxhw * maxhh],
-            };
+            var (bounds, _, _) = mesh.FindBounds(chf);
 
             var dmesh = new PolyMeshDetail();
 
             for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var iPoly = mesh.Polys[i];
-                var region = mesh.Regs[i];
-                var b = bounds[i];
-
-                // Store polygon vertices for processing.
-                var poly = mesh.BuildPolyVertices(iPoly);
+                var mPoly = mesh.Polys[i];
+                var mRegion = mesh.Regs[i];
+                var rect = bounds[i].GetRectangle(); 
 
                 // Get the height data from the area of the polygon.
-                hp.Bounds = b.GetRectangle();
+                var hp = chf.GetHeightData(mPoly, mRegion, mesh.Verts, rect);
 
-                chf.GetHeightData(iPoly, mesh.Verts, hp, region);
+                // Store polygon vertices for processing.
+                var poly = mesh.BuildPolyVertices(mPoly);
 
                 // Build detail mesh.
                 var param = new BuildPolyDetailParams

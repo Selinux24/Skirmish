@@ -57,6 +57,38 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Content.FmtColladaTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Audio", "Engine.Audio\Engine.Audio.csproj", "{0179A205-6B71-4555-AFCC-F00E0A9E0F35}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{8E5DE9EF-630C-46FB-9891-CE18A4ECD1CC}"
+	ProjectSection(SolutionItems) = preProject
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{E393B492-0DC9-46EB-B76C-943DFCA4E1DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{6CA8F84D-EFFC-4D85-A840-0793218250C3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Images\1.png = Docs\Images\1.png
+		Docs\Images\10.png = Docs\Images\10.png
+		Docs\Images\2.png = Docs\Images\2.png
+		Docs\Images\3.0.png = Docs\Images\3.0.png
+		Docs\Images\3.1.png = Docs\Images\3.1.png
+		Docs\Images\3.2.png = Docs\Images\3.2.png
+		Docs\Images\3.3.png = Docs\Images\3.3.png
+		Docs\Images\3.4.png = Docs\Images\3.4.png
+		Docs\Images\4.0.png = Docs\Images\4.0.png
+		Docs\Images\4.1.png = Docs\Images\4.1.png
+		Docs\Images\4.2.png = Docs\Images\4.2.png
+		Docs\Images\5.png = Docs\Images\5.png
+		Docs\Images\6.png = Docs\Images\6.png
+		Docs\Images\7.png = Docs\Images\7.png
+		Docs\Images\8.0.png = Docs\Images\8.0.png
+		Docs\Images\8.1.png = Docs\Images\8.1.png
+		Docs\Images\9.png = Docs\Images\9.png
+		Docs\Images\Z.png = Docs\Images\Z.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -345,6 +377,8 @@ Global
 		{C48FB95A-F6A6-4B39-866D-F85688C6A100} = {71B5C84F-0784-436B-A0D9-A56594464201}
 		{E6C998A5-2D5C-42C2-A16A-C2011B254A49} = {EB142A8F-E8BB-4647-88CA-6A91804D5F6A}
 		{014BD441-91F4-4E8C-B391-211D4463641A} = {EB142A8F-E8BB-4647-88CA-6A91804D5F6A}
+		{E393B492-0DC9-46EB-B76C-943DFCA4E1DF} = {8E5DE9EF-630C-46FB-9891-CE18A4ECD1CC}
+		{6CA8F84D-EFFC-4D85-A840-0793218250C3} = {E393B492-0DC9-46EB-B76C-943DFCA4E1DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {37E26178-AF4C-4355-8F20-2DA5F9A09F3E}

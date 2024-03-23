@@ -23,10 +23,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Constructor
         /// </summary>
-        public HeightPatch()
+        public HeightPatch(Rectangle bounds)
         {
-            Data = null;
-            Bounds = new Rectangle(0, 0, 0, 0);
+            int size = bounds.Width * bounds.Height;
+            Data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
+            Bounds = bounds;
         }
 
         /// <summary>
