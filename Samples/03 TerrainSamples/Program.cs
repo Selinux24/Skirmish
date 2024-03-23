@@ -34,7 +34,7 @@ namespace TerrainSamples
                 GameResourceManager.RegisterLoader<LoaderObj>();
                 GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
-                cl.SetScene<SceneNavMeshTest.NavmeshTestScene>();
+                cl.SetScene<SceneStart.StartScene>();
 
                 cl.Run();
             }

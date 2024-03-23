@@ -11,11 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SceneNavMeshTest\Resources\testSimpleMap02.mtl" />
-    <None Remove="SceneNavMeshTest\Resources\testSimpleMap02.obj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
@@ -1404,13 +1399,31 @@
     <Content Include="SceneNavMeshTest\Resources\modular_dungeon.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneNavMeshTest\Resources\testSimpleMap.json">
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.mtl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneRts\Resources\Buildings\Building_1.json">

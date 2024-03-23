@@ -1356,19 +1356,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="nn">Number of vertices in the edge</param>
         private void CreateSamples(int npolys, BuildPolyDetailParams param, HeightPatch hp, Vector3 vi, Vector3 vj, out Vector3[] edge, out int nn)
         {
-            List<Vector3> edgeList = new(MAX_VERTS_PER_EDGE + 1);
-
             float sampleDist = param.SampleDist;
             int heightSearchRadius = param.HeightSearchRadius;
 
             float cs = CellSize;
             float ics = 1.0f / cs;
 
-            float dx = vi.X - vj.X;
-            float dy = vi.Y - vj.Y;
-            float dz = vi.Z - vj.Z;
-            float d = (float)Math.Sqrt(dx * dx + dz * dz);
-            nn = 1 + (int)Math.Floor(d / sampleDist);
+            var vd = vi - vj;
+            float d = MathF.Sqrt(vd.X * vd.X + vd.Z * vd.Z);
+            nn = 1 + (int)MathF.Floor(d / sampleDist);
             if (nn >= MAX_VERTS_PER_EDGE)
             {
                 nn = MAX_VERTS_PER_EDGE - 1;
@@ -1378,20 +1374,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 nn = MAX_VERTS - 1 - npolys;
             }
 
+            edge = new Vector3[nn + 1];
+
             for (int k = 0; k <= nn; ++k)
             {
                 float u = k / (float)nn;
-                var pos = new Vector3
-                {
-                    X = vj.X + dx * u,
-                    Y = vj.Y + dy * u,
-                    Z = vj.Z + dz * u
-                };
+                var pos = vj + vd * u;
                 pos.Y = hp.GetHeight(pos, ics, CellHeight, heightSearchRadius) * CellHeight;
-                edgeList.Add(pos);
-            }
 
-            edge = [.. edgeList];
+                edge[k] = pos;
+            }
         }
         /// <summary>
         /// Create sample locations in a grid

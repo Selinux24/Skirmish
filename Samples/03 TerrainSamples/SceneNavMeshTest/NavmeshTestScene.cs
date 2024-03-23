@@ -376,7 +376,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap.json");
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap02.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
