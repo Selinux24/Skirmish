@@ -13,7 +13,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The sub-mesh data.
         /// </summary>
-        public List<PolyMeshDetailIndices> Meshes { get; set; } = [];
+        public List<PolyMeshIndices> Meshes { get; set; } = [];
         /// <summary>
         /// The mesh vertices.
         /// </summary>
@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 poly = Utils.MoveToWorldSpace(poly, orig);
 
                 // Store detail submesh.
-                dmesh.Meshes.Add(new PolyMeshDetailIndices
+                dmesh.Meshes.Add(new PolyMeshIndices
                 {
                     VertBase = dmesh.Vertices.Count,
                     VertCount = verts.Length,
@@ -135,7 +135,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 foreach (var src in dm.Meshes)
                 {
-                    var dst = new PolyMeshDetailIndices
+                    var dst = new PolyMeshIndices
                     {
                         VertBase = res.Vertices.Count + src.VertBase,
                         VertCount = src.VertCount,
@@ -158,7 +158,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Iterates over the mesh triangle vertices
         /// </summary>
         /// <returns>Returns the mesh index, and three triangle vertices</returns>
-        public IEnumerable<(int meshIndex, Vector3 p0, Vector3 p1, Vector3 p2)> IterateMeshTriangleVertices()
+        public IEnumerable<(int meshIndex, Vector3 p0, Vector3 p1, Vector3 p2)> IterateMeshTriangles()
         {
             for (int i = 0; i < Meshes.Count; i++)
             {
@@ -174,6 +174,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var t = tris[j];
 
                     yield return (i, verts[t.Point1], verts[t.Point2], verts[t.Point3]);
+                }
+            }
+        }
+        /// <summary>
+        /// Iterates over the mesh segment vertices
+        /// </summary>
+        /// <returns>Returns the segment vertices, the edge flag and the internal flag</returns>
+        public IEnumerable<(Vector3 a, Vector3 b, DetailTriEdgeFlagTypes flag, bool isInternal)> IterateMeshEdges()
+        {
+            for (int i = 0; i < Meshes.Count; i++)
+            {
+                var m = Meshes[i];
+                int bverts = m.VertBase;
+                int btris = m.TriBase;
+                int ntris = m.TriCount;
+                var verts = Vertices.Skip(bverts).ToArray();
+                var tris = Triangles.Skip(btris).ToArray();
+
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+
+                    for (int k = 0, kp = 2; k < 3; kp = k++)
+                    {
+                        var ef = t.GetDetailTriEdgeFlags(kp);
+                        bool isInternal = t[kp] >= t[k];
+
+                        yield return (verts[t[kp]], verts[t[k]], ef, isInternal);
+                    }
                 }
             }
         }

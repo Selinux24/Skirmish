@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Mesh tile
     /// </summary>

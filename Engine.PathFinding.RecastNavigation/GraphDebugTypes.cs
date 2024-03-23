@@ -31,6 +31,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         WalkableHeightfield,
         /// <summary>
+        /// Raw contours
+        /// </summary>
+        RawContours,
+        /// <summary>
         /// Contours
         /// </summary>
         Contours,

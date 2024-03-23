@@ -1,10 +1,8 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Polygon mesh triangle indexes
     /// </summary>
@@ -107,7 +105,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns></returns>
         public readonly DetailTriEdgeFlagTypes GetDetailTriEdgeFlags(int edgeIndex)
         {
-            return (DetailTriEdgeFlagTypes)((Flags >> (edgeIndex * 2)) & 0x3);
+            return (DetailTriEdgeFlagTypes)(Flags >> edgeIndex * 2 & 0x3);
         }
     }
 }

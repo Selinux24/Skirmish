@@ -1,5 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 
@@ -121,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="dm">Detail mesh</param>
         /// <param name="detailVerts">Detail vertices</param>
-        public void CalcDetailBounds(PolyMeshDetailIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
+        public void CalcDetailBounds(PolyMeshIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
         {
             int vb = dm.VertBase;
             int ndv = dm.VertCount;

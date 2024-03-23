@@ -45,53 +45,44 @@ namespace Engine.PathFinding.RecastNavigation
                 return new GraphDebugData([]);
             }
 
-            var debug = (GraphDebugTypes)id;
-
+            BuildData buildData;
             if (graph.Settings.BuildMode == BuildModes.Solo)
             {
-                var buildData = nm.GetBuildData(0, 0);
-
-                var data = debug switch
-                {
-                    GraphDebugTypes.NavMesh => GetNodes(false, false),
-                    GraphDebugTypes.Nodes => GetNodes(true, false),
-                    GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
-                    GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
-                    GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
-                    GraphDebugTypes.Contours => GetContours(buildData.CountourSet),
-                    GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
-                    GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
-                    _ => []
-                };
-                return new GraphDebugData(data);
+                buildData = nm.GetBuildData(0, 0);
             }
             else if (graph.Settings.BuildMode == BuildModes.Tiled)
             {
                 NavMesh.GetTileAtPosition(point, graph.Settings.TileCellSize, graph.Bounds, out var tx, out var ty, out _);
 
-                var buildData = nm.GetBuildData(tx, ty);
-
-                var data = debug switch
-                {
-                    GraphDebugTypes.NavMesh => GetNodes(false, false),
-                    GraphDebugTypes.Nodes => GetNodes(true, false),
-                    GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
-                    GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
-                    GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
-                    GraphDebugTypes.Contours => GetContours(buildData.CountourSet),
-                    GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
-                    GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
-                    _ => []
-                };
-                return new GraphDebugData(data);
+                buildData = nm.GetBuildData(tx, ty);
+            }
+            else
+            {
+                buildData = default;
             }
 
-            return new GraphDebugData([]);
+            var debug = (GraphDebugTypes)id;
+            var data = debug switch
+            {
+                GraphDebugTypes.NavMesh => GetNodes(false, false),
+                GraphDebugTypes.Nodes => GetNodes(true, false),
+                GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
+                GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
+                GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
+                GraphDebugTypes.RawContours => GetContours(buildData.CountourSet, true),
+                GraphDebugTypes.Contours => GetContours(buildData.CountourSet, false),
+                GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
+                GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
+                _ => []
+            };
+            return new GraphDebugData(data);
         }
 
         /// <summary>
         /// Gets the nodes debug information
         /// </summary>
+        /// <param name="separateNodes">Separate nodes</param>
+        /// <param name="showTriangles">Show triangles</param>
         private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetNodes(bool separateNodes, bool showTriangles)
         {
             var nodes = graph.GetNodes(Agent).OfType<GraphNode>();
@@ -137,7 +128,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Color4 colorTris = new Color(0, 192, 255, 255);
+                Color4 colorTris = new Color(0, 192, 255, 128);
                 Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable())]);
 
                 yield return (nameTris, Topology.TriangleList, tris);
@@ -164,7 +155,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Color4 colorLines = new Color(255, 255, 255, 255);
+                Color4 colorLines = new Color(0, 192, 255, 128);
                 Dictionary<Color4, IEnumerable<Vector3>> lines = new([new(colorLines, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable())]);
 
                 yield return (nameLines, Topology.LineList, lines);
@@ -255,25 +246,36 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the contour debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContours(ContourSet cset)
+        /// <param name="drawRaw">Draw raw contour set</param>
+        private readonly List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContours(ContourSet cset, bool drawRaw)
         {
             if (cset == null)
             {
                 return [];
             }
 
-            return
+            List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> res =
             [
                 .. GetBounds(),
-                .. GetContourLines(cset, 0.5f),
                 .. GetContoursRegions(cset),
             ];
+
+            if (drawRaw)
+            {
+                res.AddRange(GetContourRawLines(cset, 0.75f));
+            }
+            else
+            {
+                res.AddRange(GetContourBorders(cset, 0.75f));
+            }
+
+            return res;
         }
         /// <summary>
         /// Gets the contour lines debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContourLines(ContourSet cset, float alpha)
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContourRawLines(ContourSet cset, float alpha)
         {
             var orig = cset.Bounds.Minimum;
             float cs = cset.CellSize;
@@ -282,6 +284,68 @@ namespace Engine.PathFinding.RecastNavigation
             int a = (int)(alpha * 255.0f);
 
             Dictionary<Color4, List<Vector3>> lines = [];
+
+            bool empty = true;
+            for (int i = 0; i < cset.NConts; ++i)
+            {
+                var c = cset.Conts[i];
+
+                if (c.NRawVertices <= 0)
+                {
+                    continue;
+                }
+
+                Color4 regColor = Helper.IntToCol(c.RegionId, a);
+                lines.TryAdd(regColor, []);
+
+                for (int j = 0; j < c.NRawVertices; j++)
+                {
+                    var v = c.RawVertices[j];
+
+                    float fx = orig.X + v.X * cs;
+                    float fy = orig.Y + (v.Y + 1 + (i & 1)) * ch;
+                    float fz = orig.Z + v.Z * cs;
+
+                    lines[regColor].Add(new(fx, fy, fz));
+                    if (j > 0)
+                    {
+                        lines[regColor].Add(new(fx, fy, fz));
+                    }
+                }
+
+                // Loop last segment.
+                var v0 = c.RawVertices[0];
+                float f0x = orig.X + v0.X * cs;
+                float f0y = orig.Y + (v0.Y + 1 + (i & 1)) * ch;
+                float f0z = orig.Z + v0.Z * cs;
+                lines[regColor].Add(new(f0x, f0y, f0z));
+                empty = false;
+            }
+
+            if (empty)
+            {
+                yield break;
+            }
+
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.Contours}_RawLines", Topology.LineList, dict);
+        }
+        /// <summary>
+        /// Gets the contour borders debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetContourBorders(ContourSet cset, float alpha)
+        {
+            var orig = cset.Bounds.Minimum;
+            float cs = cset.CellSize;
+            float ch = cset.CellHeight;
+
+            int a = (int)(alpha * 255.0f);
+            Color4 bseColor = new Color(255, 255, 255, a);
+
+            Dictionary<Color4, List<Vector3>> lines = [];
+
+            bool empty = true;
             for (int i = 0; i < cset.NConts; ++i)
             {
                 var c = cset.Conts[i];
@@ -291,38 +355,41 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Color color = (Color)Helper.IntToCol(c.RegionId, a);
-                Color4 bcolor = Color.Lerp(color, new Color(255, 255, 255, a), 128);
+                var regColor = Helper.IntToCol(c.RegionId, a);
+                var bColor = Color4.Lerp(regColor, bseColor, 0.5f);
+
                 for (int j = 0, k = c.NVertices - 1; j < c.NVertices; k = j++)
                 {
                     var va = c.Vertices[k];
                     var vb = c.Vertices[j];
 
-                    var col = Contour.IsAreaBorder(va.Flag) ? bcolor : color;
-                    lines.TryAdd(col, []);
+                    var colol = Contour.IsAreaBorder(va.Flag) ? regColor : bColor;
+                    lines.TryAdd(colol, []);
 
                     float fx, fy, fz;
-                    fx = orig[0] + va.X * cs;
-                    fy = orig[1] + (va.Y + 1 + (i & 1)) * ch;
-                    fz = orig[2] + va.Z * cs;
+                    fx = orig.X + va.X * cs;
+                    fy = orig.Y + (va.Y + 1 + (i & 1)) * ch;
+                    fz = orig.Z + va.Z * cs;
 
-                    lines[col].Add(new(fx, fy, fz));
+                    lines[colol].Add(new(fx, fy, fz));
 
-                    fx = orig[0] + vb.X * cs;
-                    fy = orig[1] + (vb.Y + 1 + (i & 1)) * ch;
-                    fz = orig[2] + vb.Z * cs;
+                    fx = orig.X + vb.X * cs;
+                    fy = orig.Y + (vb.Y + 1 + (i & 1)) * ch;
+                    fz = orig.Z + vb.Z * cs;
 
-                    lines[col].Add(new(fx, fy, fz));
+                    lines[colol].Add(new(fx, fy, fz));
+
+                    empty = false;
                 }
             }
 
-            if (lines.Count <= 0)
+            if (empty)
             {
                 yield break;
             }
 
             var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return ($"{GraphDebugTypes.Contours}_Lines", Topology.LineList, dict);
+            yield return ($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the contour regions debug information
@@ -334,24 +401,21 @@ namespace Engine.PathFinding.RecastNavigation
             float cs = cset.CellSize;
             float ch = cset.CellHeight;
 
-            // Draw centers
-            Vector3 pos;
-            Vector3 pos2;
-
             List<Vector3> lines = [];
 
+            // Draw centers
             for (int i = 0; i < cset.NConts; ++i)
             {
-                var cont = cset.Conts[i];
+                var cont1 = cset.Conts[i];
 
-                pos = Contour.GetContourCenter(cont, orig, cs, ch);
+                var pos1 = Contour.GetContourCenter(cont1, orig, cs, ch);
 
-                for (int j = 0; j < cont.NVertices; j++)
+                for (int j = 0; j < cont1.NVertices; j++)
                 {
-                    var v = cont.Vertices[j];
+                    var v = cont1.Vertices[j];
                     var r = (int)(uint)v.Flag;
 
-                    if (v.Flag == 0 || r < cont.RegionId)
+                    if (v.Flag == 0 || r < cont1.RegionId)
                     {
                         continue;
                     }
@@ -359,11 +423,11 @@ namespace Engine.PathFinding.RecastNavigation
                     var cont2 = cset.FindContour(r);
                     if (cont2 != null)
                     {
-                        pos2 = Contour.GetContourCenter(cont2, orig, cs, ch);
+                        var pos2 = Contour.GetContourCenter(cont2, orig, cs, ch);
 
-                        var points = Line3D.CreateArc(pos, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
+                        var arcPoints = Line3D.CreateArc(pos1, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
 
-                        lines.AddRange(points);
+                        lines.AddRange(arcPoints);
                     }
                 }
             }
@@ -373,13 +437,13 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Color4 color = new Color(0, 0, 0, 196);
+            Color4 color = new Color(32, 128, 128, 196);
 
             var dict = new Dictionary<Color4, IEnumerable<Vector3>>
             {
                 { color, lines }
             };
-            yield return ($"{GraphDebugTypes.Contours}_Regions", Topology.LineList, dict);
+            yield return ($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
         }
 
         /// <summary>
@@ -467,10 +531,9 @@ namespace Engine.PathFinding.RecastNavigation
             float ch = pm.CellHeight;
             var orig = pm.Bounds.Minimum;
 
+            List<Vector3> points = [];
+
             // Draw neighbours edges
-            Color4 col = new Color(0, 48, 64, 255);
-            Dictionary<Color4, List<Vector3>> edges = [];
-            edges.Add(col, []);
             foreach (var (p, i0, i1) in pm.IteratePolySegments())
             {
                 if (!p.AdjacencyIsNull(i0))
@@ -489,16 +552,21 @@ namespace Engine.PathFinding.RecastNavigation
                     float y = orig.Y + (v.Y + 1) * ch + 0.1f;
                     float z = orig.Z + v.Z * cs;
 
-                    edges[col].Add(new(x, y, z));
+                    points.Add(new(x, y, z));
                 }
             }
 
-            if (edges.Count <= 0)
+            if (points.Count <= 0)
             {
                 yield break;
             }
 
-            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            Color4 color = new Color(0, 48, 64, 255);
+
+            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            {
+                { color, points }
+            };
             yield return ($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
         }
         /// <summary>
@@ -511,8 +579,9 @@ namespace Engine.PathFinding.RecastNavigation
             float ch = pm.CellHeight;
             var orig = pm.Bounds.Minimum;
 
-            // Draw boundary edges
             Dictionary<Color4, List<Vector3>> edges = [];
+
+            // Draw boundary edges
             foreach (var (p, i0, i1) in pm.IteratePolySegments())
             {
                 if (p.AdjacencyIsNull(i0))
@@ -576,22 +645,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="dm">Detail mesh</param>
         private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMeshTris(PolyMeshDetail dm)
         {
-            if (dm == null)
-            {
-                yield break;
-            }
-
             Dictionary<Color4, List<Vector3>> res = [];
 
-            foreach (var (meshIndex, p0, p1, p2) in dm.IterateMeshTriangleVertices())
+            foreach (var (meshIndex, p0, p1, p2) in dm.IterateMeshTriangles())
             {
                 Color4 color = Helper.IntToCol(meshIndex, 192);
 
                 res.TryAdd(color, []);
-
-                res[color].Add(p0);
-                res[color].Add(p1);
-                res[color].Add(p2);
+                res[color].AddRange([p0, p1, p2]);
             }
 
             if (res.Count <= 0)
@@ -608,48 +669,32 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="dm">Detail mesh</param>
         private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetDetailMeshEdges(PolyMeshDetail dm)
         {
-            Dictionary<Color4, List<Vector3>> res = [];
             Vector3 delta = Vector3.Up * 0.001f;
 
-            for (int i = 0; i < dm.Meshes.Count; i++)
+            Dictionary<Color4, List<Vector3>> res = [];
+
+            foreach (var (a, b, flag, isInternal) in dm.IterateMeshEdges())
             {
-                var m = dm.Meshes[i];
-                int bverts = m.VertBase;
-                int btris = m.TriBase;
-                int ntris = m.TriCount;
-                var verts = dm.Vertices.Skip(bverts).ToArray();
-                var tris = dm.Triangles.Skip(btris).ToArray();
+                Color4 color;
 
-                for (int j = 0; j < ntris; ++j)
+                if (flag == DetailTriEdgeFlagTypes.Boundary)
                 {
-                    var t = tris[j];
-
-                    for (int k = 0, kp = 2; k < 3; kp = k++)
-                    {
-                        Color4 color;
-
-                        var ef = t.GetDetailTriEdgeFlags(kp);
-                        if (ef == DetailTriEdgeFlagTypes.Boundary)
-                        {
-                            // Ext edge
-                            color = new Color(128, 128, 128, 220);
-                        }
-                        else
-                        {
-                            if (t[kp] >= t[k])
-                            {
-                                continue;
-                            }
-
-                            // Internal edge
-                            color = new Color(0, 0, 0, 64);
-                        }
-
-                        res.TryAdd(color, []);
-                        res[color].Add(verts[t[kp]] + delta);
-                        res[color].Add(verts[t[k]] + delta);
-                    }
+                    // Ext edge
+                    color = new Color(128, 128, 128, 220);
                 }
+                else
+                {
+                    if (isInternal)
+                    {
+                        continue;
+                    }
+
+                    // Internal edge
+                    color = new Color(0, 0, 0, 64);
+                }
+
+                res.TryAdd(color, []);
+                res[color].AddRange([a + delta, b + delta]);
             }
 
             if (res.Count <= 0)
@@ -730,6 +775,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Converts the area value to color
         /// </summary>
+        /// <param name="area">Area value</param>
         private static Color4 AreaToCol(SamplePolyAreas area)
         {
             if (area == SamplePolyAreas.None)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.PathFinding.RecastNavigation.Detour
+namespace Engine.PathFinding.RecastNavigation
 {
     [Flags]
     public enum DetailTriEdgeFlagTypes
@@ -8,6 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// DT_DETAIL_EDGE_BOUNDARY. Detail triangle edge is part of the poly boundary
         /// </summary>
-        Boundary = 0x01,		
+        Boundary = 0x01,
     }
 }

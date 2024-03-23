@@ -3,8 +3,6 @@ using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Represents the source data used to build an navigation mesh tile.
     /// </summary>
@@ -53,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The height detail sub-mesh data. [Size: 4 * #polyCount]
         /// </summary>
-        public PolyMeshDetailIndices[] DetailMeshes { get; set; }
+        public PolyMeshIndices[] DetailMeshes { get; set; }
         /// <summary>
         /// The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
         /// </summary>

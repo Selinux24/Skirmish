@@ -1,10 +1,10 @@
 ﻿
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
-    /// Polygon mesh detail indices
+    /// Polygon mesh indices
     /// </summary>
-    public struct PolyMeshDetailIndices
+    public struct PolyMeshIndices
     {
         /// <summary>
         /// Vertex base

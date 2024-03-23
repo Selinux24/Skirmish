@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<AreaMarker> areas = [];
-        private GraphDebugTypes debugType = GraphDebugTypes.Nodes;
+        private GraphDebugTypes debugType = GraphDebugTypes.NavMesh;
 
         private string pathFinderStartMessage = null;
         private string pathFinderHelpMessage = null;
