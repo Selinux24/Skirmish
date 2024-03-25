@@ -387,7 +387,6 @@ namespace TerrainSamples.SceneNavMeshTest
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
-            inputGeometry.Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0);
 
             //Rasterization
             nmsettings.CellSize = 0.1f;

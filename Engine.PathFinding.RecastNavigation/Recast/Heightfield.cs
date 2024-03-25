@@ -89,19 +89,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns a rasterize item collection</returns>
         private static RasterizeItem[] MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris)
         {
-            List<RasterizeItem> res = [];
+            RasterizeItem[] res = new RasterizeItem[tris.Length];
 
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
-            foreach (var tri in tris)
+            for (int t = 0; t < tris.Length; t++)
             {
+                var tri = tris[t];
+
                 // Check if the face is walkable.
                 var area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
 
-                res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
+                res[t] = new() { Triangle = tri, AreaType = area };
             }
 
-            return [.. res];
+            return res;
         }
         /// <summary>
         /// Gets whether the span (min, max) is outside the specified box size
@@ -131,18 +133,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Calculates the span x sizes
         /// </summary>
         /// <param name="spanVertices">Vertex list</param>
-        /// <param name="bbox">Bounding box</param>
-        private static (float MinX, float MaxX) CalculateSpanMinMaxX(Vector3[] spanVertices, BoundingBox bbox)
+        private static (float MinX, float MaxX) CalculateSpanMinMaxX(Vector3[] spanVertices)
         {
             float minX = spanVertices[0].X;
             float maxX = spanVertices[0].X;
+
             for (int i = 1; i < spanVertices.Length; i++)
             {
                 minX = Math.Min(minX, spanVertices[i].X);
                 maxX = Math.Max(maxX, spanVertices[i].X);
             }
-            minX -= bbox.Minimum.X;
-            maxX -= bbox.Minimum.X;
 
             return (minX, maxX);
         }
@@ -150,87 +150,122 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Calculates the span y sizes
         /// </summary>
         /// <param name="spanVertices">Vertex list</param>
-        /// <param name="bbox">Bounding box</param>
-        private static (float MinY, float MaxY) CalculateSpanMinMaxY(Vector3[] spanVertices, BoundingBox bbox)
+        private static (float MinY, float MaxY) CalculateSpanMinMaxY(Vector3[] spanVertices)
         {
             float minY = spanVertices[0].Y;
             float maxY = spanVertices[0].Y;
+
             for (int i = 1; i < spanVertices.Length; ++i)
             {
                 minY = Math.Min(minY, spanVertices[i].Y);
                 maxY = Math.Max(maxY, spanVertices[i].Y);
             }
-            minY -= bbox.Minimum.Y;
-            maxY -= bbox.Minimum.Y;
 
             return (minY, maxY);
         }
         /// <summary>
+        /// Finds the z axis foot-print
+        /// </summary>
+        /// <param name="t">Triangle bounds</param>
+        /// <param name="b">Input geometry bounds</param>
+        /// <param name="ics">Inverse cell size</param>
+        /// <param name="h">Height</param>
+        private static (int, int) FindZFootPrint(BoundingBox t, BoundingBox b, float ics, int h)
+        {
+            int z0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
+            int z1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
+            z0 = MathUtil.Clamp(z0, -1, h - 1);
+            z1 = MathUtil.Clamp(z1, 0, h - 1);
+
+            return (z0, z1);
+        }
+        /// <summary>
+        /// Finds the x axis foot-print
+        /// </summary>
+        /// <param name="poly">Polygon vertices</param>
+        /// <param name="b">Input geometry bounds</param>
+        /// <param name="ics">Inverse cell size</param>
+        /// <param name="w">Width</param>
+        private static (bool, int, int) FindXFootPrint(Vector3[] poly, BoundingBox b, float ics, int w)
+        {
+            var (minX, maxX) = CalculateSpanMinMaxX(poly);
+            int x0 = (int)((minX - b.Minimum.X) * ics);
+            int x1 = (int)((maxX - b.Minimum.X) * ics);
+            if (x1 < 0 || x0 >= w)
+            {
+                return (false, x0, x1);
+            }
+            x0 = MathUtil.Clamp(x0, -1, w - 1);
+            x1 = MathUtil.Clamp(x1, 0, w - 1);
+
+            return (true, x0, x1);
+        }
+        /// <summary>
         /// Divides the specified polygon along the axis
         /// </summary>
-        private static (Vector3[] Poly1, Vector3[] Poly2) DividePoly(Vector3[] inPoly, float x, int axis)
+        private static (Vector3[] Poly1, Vector3[] Poly2) DividePoly(Vector3[] poly, float axisOffset, int axis)
         {
             var outPoly1 = new List<Vector3>();
             var outPoly2 = new List<Vector3>();
 
-            var d = GetPolyVerticesAxis(inPoly, x, axis);
+            var inVertAxisDelta = GetPolyVerticesInvertAxisDelta(poly, axisOffset, axis);
 
-            for (int i = 0, j = inPoly.Length - 1; i < inPoly.Length; j = i, i++)
+            for (int inVertA = 0, inVertB = poly.Length - 1; inVertA < poly.Length; inVertB = inVertA, inVertA++)
             {
-                var va = inPoly[j];
-                var vb = inPoly[i];
+                var va = poly[inVertA];
+                var vb = poly[inVertB];
 
-                float na = d[j];
-                float nb = d[i];
+                float na = inVertAxisDelta[inVertA];
+                float nb = inVertAxisDelta[inVertB];
 
-                bool ina = na >= 0;
-                bool inb = nb >= 0;
-                if (ina != inb)
+                // If the two vertices are on the same side of the separating axis
+                bool sameSide = (na >= 0) == (nb >= 0);
+                if (!sameSide)
                 {
-                    float s = na / (na - nb);
-                    var v = va + (vb - va) * s;
+                    float s = nb / (nb - na);
+                    var v = vb + (va - vb) * s;
                     outPoly1.Add(v);
                     outPoly2.Add(v);
 
                     // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
                     // since these were already added above
-                    if (nb > 0)
+                    if (na > 0)
                     {
-                        outPoly1.Add(vb);
+                        outPoly1.Add(va);
                     }
-                    else if (nb < 0)
+                    else if (na < 0)
                     {
-                        outPoly2.Add(vb);
+                        outPoly2.Add(va);
                     }
                 }
                 else // same side
                 {
                     // add the i'th point to the right polygon. Addition is done even for points on the dividing line
-                    if (nb >= 0)
+                    if (na >= 0)
                     {
-                        outPoly1.Add(vb);
+                        outPoly1.Add(va);
 
-                        if (!MathUtil.IsZero(nb))
+                        if (na != 0)
                         {
                             continue;
                         }
                     }
 
-                    outPoly2.Add(vb);
+                    outPoly2.Add(va);
                 }
             }
 
             return (outPoly1.ToArray(), outPoly2.ToArray());
         }
         /// <summary>
-        /// Gets polygon vertices in the axis
+        /// Gets the inverse axis delta polygon vertices
         /// </summary>
-        private static float[] GetPolyVerticesAxis(Vector3[] inPoly, float x, int axis)
+        private static float[] GetPolyVerticesInvertAxisDelta(Vector3[] poly, float axisOffset, int axis)
         {
-            float[] d = new float[inPoly.Length];
-            for (int i = 0; i < inPoly.Length; i++)
+            float[] d = new float[poly.Length];
+            for (int i = 0; i < poly.Length; i++)
             {
-                d[i] = x - inPoly[i][axis];
+                d[i] = axisOffset - poly[i][axis];
             }
 
             return d;
@@ -339,55 +374,56 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return true;
             }
 
-            // Calculate the footprint of the triangle on the grid's y-axis
-            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
-            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
-            y0 = MathUtil.Clamp(y0, 0, h - 1);
-            y1 = MathUtil.Clamp(y1, 0, h - 1);
+            // Calculate the footprint of the triangle on the grid's z-axis
+            var (z0, z1) = FindZFootPrint(t, b, ics, h);
 
             // Clip the triangle into all grid cells it touches.
             var inb = triverts.ToArray();
 
-            for (int y = y0; y <= y1; ++y)
+            for (int z = z0; z <= z1; ++z)
             {
                 // Clip polygon to row. Store the remaining polygon as well
-                float cz = b.Minimum.Z + y * cs;
-                var (Zp1, Zp2) = DividePoly(inb, cz + cs, 2);
-                Helper.Swap(ref inb, ref Zp2);
-                if (Zp1.Length < 3) continue;
+                float cz = b.Minimum.Z + z * cs;
+                var (inRow, zp1) = DividePoly(inb, cz + cs, 2);
+                inb = zp1;
+                if (inRow.Length < 3) continue;
+                if (z < 0) continue;
 
                 // find the horizontal bounds in the row
-                var (MinX, MaxX) = CalculateSpanMinMaxX(Zp1, b);
-                int x0 = (int)(MinX * ics);
-                int x1 = (int)(MaxX * ics);
-                x0 = MathUtil.Clamp(x0, 0, w - 1);
-                x1 = MathUtil.Clamp(x1, 0, w - 1);
+                var (found, x0, x1) = FindXFootPrint(inRow, b, ics, w);
+                if (!found)
+                {
+                    continue;
+                }
 
                 for (int x = x0; x <= x1; ++x)
                 {
                     // Clip polygon to column. store the remaining polygon as well
                     float cx = b.Minimum.X + x * cs;
-                    var (Xp1, Xp2) = DividePoly(Zp1, cx + cs, 0);
-                    Helper.Swap(ref Zp1, ref Xp2);
-                    if (Xp1.Length < 3) continue;
+                    var (xp1, xp2) = DividePoly(inRow, cx + cs, 0);
+                    inRow = xp2;
+                    if (xp1.Length < 3) continue;
+                    if (x < 0) continue;
 
                     // Calculate min and max of the span.
-                    var (MinY, MaxY) = CalculateSpanMinMaxY(Xp1, b);
-                    float minY = MinY;
-                    float maxY = MaxY;
-                    // Skip the span if it is outside the heightfield bbox
+                    var (minY, maxY) = CalculateSpanMinMaxY(xp1);
+                    minY -= b.Minimum.Y;
+                    maxY -= b.Minimum.Y;
+
                     if (SpanOutsideBBox(minY, maxY, by))
                     {
+                        // Skip the span if it is outside the heightfield bbox
                         continue;
                     }
+
                     // Clamp the span to the heightfield bbox.
                     SpanClamp(ref minY, ref maxY, by);
 
                     // Snap the span to the heightfield height grid.
-                    int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
-                    int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
+                    int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, Span.SpanMaxHeight);
+                    int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
 
-                    AddSpan(x, y, ismin, ismax, item.AreaType, flagMergeThr);
+                    AddSpan(x, z, ismin, ismax, item.AreaType, flagMergeThr);
                 }
             }
 
@@ -424,8 +460,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Allocates a new span
         /// </summary>
+        /// <param name="smin">Lower limit</param>
+        /// <param name="smax">Upper limit</param>
+        /// <param name="area">Area type</param>
         /// <returns>Returns the new span</returns>
-        private Span AllocSpan()
+        private Span AllocSpan(int smin, int smax, AreaTypes area)
         {
             // If running out of memory, allocate new page and update the freelist.
             if (FreeList == null || FreeList.Next == null)
@@ -441,6 +480,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Pop item from in front of the free list.
             var s = FreeList;
             FreeList = FreeList.Next;
+
+            s.SMin = smin;
+            s.SMax = smax;
+            s.Area = area;
+            s.Next = null;
+
             return s;
         }
         /// <summary>
@@ -468,11 +513,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int idx = x + y * Width;
 
-            Span s = AllocSpan();
-            s.SMin = smin;
-            s.SMax = smax;
-            s.Area = area;
-            s.Next = null;
+            if (x == 64)
+            {
+                area = AreaTypes.RC_DEBUG_AREA;
+            }
+
+            Span s = AllocSpan(smin, smax, area);
 
             // Empty cell, add the first span.
             if (Spans[idx] == null)
