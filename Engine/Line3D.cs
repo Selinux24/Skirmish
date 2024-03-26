@@ -127,22 +127,9 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreatePolygon(IEnumerable<Vector3> points)
         {
-            int count = points.Count();
+            var geometry = GeometryUtil.CreatePolygon(Topology.LineList, points);
 
-            int[] indexes = new int[count * 2];
-
-            int i1 = 0;
-            int i2 = 1;
-            for (int i = 0; i < count; i++)
-            {
-                indexes[i1] = i + 0;
-                indexes[i2] = i == count - 1 ? 0 : i + 1;
-
-                i1 += 2;
-                i2 += 2;
-            }
-
-            return CreateFromVertices(points, indexes);
+            return CreateFromVertices(geometry);
         }
         public static IEnumerable<Line3D> CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
         {

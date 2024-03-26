@@ -17,9 +17,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// Undefined area
         /// </summary>
         RC_UNDEFINED = 0b_1111_1111,
-        /// <summary>
-        /// Debug area
-        /// </summary>
-        RC_DEBUG_AREA = 0b_0000_1111,
     }
 }

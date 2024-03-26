@@ -2556,6 +2556,84 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="vertices">Polygon vertices</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        /// <remarks>Triangle topology must be convex</remarks>
+        public static GeometryDescriptor CreatePolygon(Topology topology, IEnumerable<Vector3> vertices)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(vertices.Count(), 3);
+
+            return topology switch
+            {
+                Topology.TriangleList => CreatePolygonTriangleList(vertices),
+                Topology.LineList => CreatePolygonLineList(vertices),
+                _ => throw new NotImplementedException()
+            };
+        }
+        /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Polygon center</param>
+        /// <param name="vertices">Polygon vertices</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        /// <remarks>Triangle topology must be convex</remarks>
+        public static GeometryDescriptor CreatePolygon(Topology topology, Vector3 center, IEnumerable<Vector3> vertices)
+        {
+            return CreatePolygon(topology, vertices.Select(v => v + center));
+        }
+        /// <summary>
+        /// Creates a triangle list polygon
+        /// </summary>
+        /// <param name="vertices">Polygon vertices</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices)
+        {
+            int count = vertices.Count();
+
+            List<uint> indexList = [];
+
+            for (int i = 2; i < count; i++)
+            {
+                indexList.Add(0);
+                indexList.Add((uint)i - 1);
+                indexList.Add((uint)i);
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indexList,
+            };
+        }
+        /// <summary>
+        /// Creates a line list polygon
+        /// </summary>
+        /// <param name="vertices">Polygon vertices</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePolygonLineList(IEnumerable<Vector3> vertices)
+        {
+            int count = vertices.Count();
+
+            List<uint> indexList = [];
+
+            for (int i = 0; i < count; i++)
+            {
+                indexList.Add((uint)i);
+                indexList.Add((uint)((i + 1) % count));
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indexList,
+            };
+        }
+
+        /// <summary>
         /// Creates a XZ plane
         /// </summary>
         /// <param name="size">Plane size</param>

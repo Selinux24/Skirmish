@@ -208,7 +208,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var outPoly1 = new List<Vector3>();
             var outPoly2 = new List<Vector3>();
 
-            var inVertAxisDelta = GetPolyVerticesInvertAxisDelta(poly, axisOffset, axis);
+            var inVertAxisDelta = GetPolyVerticesAxisDelta(poly, axisOffset, axis);
 
             for (int inVertA = 0, inVertB = poly.Length - 1; inVertA < poly.Length; inVertB = inVertA, inVertA++)
             {
@@ -223,7 +223,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (!sameSide)
                 {
                     float s = nb / (nb - na);
-                    var v = vb + (va - vb) * s;
+                    var v = Vector3.Lerp(vb, va, s);
                     outPoly1.Add(v);
                     outPoly2.Add(v);
 
@@ -258,11 +258,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return (outPoly1.ToArray(), outPoly2.ToArray());
         }
         /// <summary>
-        /// Gets the inverse axis delta polygon vertices
+        /// Gets the axis delta polygon vertices
         /// </summary>
-        private static float[] GetPolyVerticesInvertAxisDelta(Vector3[] poly, float axisOffset, int axis)
+        private static float[] GetPolyVerticesAxisDelta(Vector3[] poly, float axisOffset, int axis)
         {
             float[] d = new float[poly.Length];
+
             for (int i = 0; i < poly.Length; i++)
             {
                 d[i] = axisOffset - poly[i][axis];
@@ -337,6 +338,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns true if the rasterization finishes correctly</returns>
         public bool Rasterize(Triangle[] tris, float walkableSlopeAngle, int walkableClimb)
         {
+            HeightfieldDebugData.DividePolyTris.Clear();
+
             var triareas = MarkWalkableTriangles(walkableSlopeAngle, tris);
 
             // Rasterize triangles.
@@ -351,6 +354,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
+
         /// <summary>
         /// Rasterizes the specified item
         /// </summary>
@@ -361,36 +365,50 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float ich = 1.0f / CellHeight;
             int w = Width;
             int h = Height;
-            var b = BoundingBox;
-            float by = b.Height;
+            var bounds = BoundingBox;
+            float by = bounds.Height;
 
             // Calculate the bounding box of the triangle.
-            var triverts = item.Triangle.GetVertices().ToArray();
-            var t = SharpDXExtensions.BoundingBoxFromPoints(triverts);
+            var inb = item.Triangle.GetVertices().ToArray();
+            var triBounds = SharpDXExtensions.BoundingBoxFromPoints(inb);
+
+            HeightfieldDivideData data = new()
+            {
+                Triangle = item.Triangle,
+            };
+
+            HeightfieldDebugData.DividePolyTris.Add(data);
 
             // If the triangle does not touch the bbox of the heightfield, skip the triagle.
-            if (b.Contains(t) == ContainmentType.Disjoint)
+            if (bounds.Contains(triBounds) == ContainmentType.Disjoint)
             {
                 return true;
             }
 
             // Calculate the footprint of the triangle on the grid's z-axis
-            var (z0, z1) = FindZFootPrint(t, b, ics, h);
+            var (z0, z1) = FindZFootPrint(triBounds, bounds, ics, h);
 
             // Clip the triangle into all grid cells it touches.
-            var inb = triverts.ToArray();
-
             for (int z = z0; z <= z1; ++z)
             {
                 // Clip polygon to row. Store the remaining polygon as well
-                float cz = b.Minimum.Z + z * cs;
+                float cz = bounds.Minimum.Z + z * cs;
                 var (inRow, zp1) = DividePoly(inb, cz + cs, 2);
+
+                HeightfieldDivisionData divZ = new()
+                {
+                    SourcePoly = [.. inb],
+                    DividedPolys = [inRow, zp1],
+                };
+
                 inb = zp1;
                 if (inRow.Length < 3) continue;
                 if (z < 0) continue;
 
+                data.Divisions.Add(divZ);
+
                 // find the horizontal bounds in the row
-                var (found, x0, x1) = FindXFootPrint(inRow, b, ics, w);
+                var (found, x0, x1) = FindXFootPrint(inRow, bounds, ics, w);
                 if (!found)
                 {
                     continue;
@@ -399,16 +417,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int x = x0; x <= x1; ++x)
                 {
                     // Clip polygon to column. store the remaining polygon as well
-                    float cx = b.Minimum.X + x * cs;
+                    float cx = bounds.Minimum.X + x * cs;
                     var (xp1, xp2) = DividePoly(inRow, cx + cs, 0);
+
+                    HeightfieldDivisionData divX = new()
+                    {
+                        SourcePoly = [.. inRow],
+                        DividedPolys = [xp1, xp2],
+                    };
+
                     inRow = xp2;
                     if (xp1.Length < 3) continue;
                     if (x < 0) continue;
 
+                    data.Divisions.Add(divX);
+
                     // Calculate min and max of the span.
                     var (minY, maxY) = CalculateSpanMinMaxY(xp1);
-                    minY -= b.Minimum.Y;
-                    maxY -= b.Minimum.Y;
+                    minY -= bounds.Minimum.Y;
+                    maxY -= bounds.Minimum.Y;
 
                     if (SpanOutsideBBox(minY, maxY, by))
                     {
@@ -512,11 +539,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private void AddSpan(int x, int y, int smin, int smax, AreaTypes area, int flagMergeThr)
         {
             int idx = x + y * Width;
-
-            if (x == 64)
-            {
-                area = AreaTypes.RC_DEBUG_AREA;
-            }
 
             Span s = AllocSpan(smin, smax, area);
 
@@ -735,5 +757,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+    }
+
+    public static class HeightfieldDebugData
+    {
+        public static List<HeightfieldDivideData> DividePolyTris { get; set; } = [];
+    }
+
+    public class HeightfieldDivideData
+    {
+        public Triangle Triangle { get; set; }
+        public List<HeightfieldDivisionData> Divisions { get; set; } = [];
+    }
+
+    public class HeightfieldDivisionData
+    {
+        public Vector3[] SourcePoly { get; set; } = [];
+        public List<Vector3[]> DividedPolys { get; set; } = [];
     }
 }

@@ -4,6 +4,7 @@ using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.PathFinding.RecastNavigation.Recast;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -431,13 +432,15 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                Count = 10000
+                Count = 100000,
+                DepthEnabled = true,
             };
             lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
 
             var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Count = 50000,
+                Count = 100000,
+                DepthEnabled = true,
             };
             triangleDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
         }
@@ -1093,6 +1096,16 @@ namespace TerrainSamples.SceneNavMeshTest
             var tri = Line3D.CreateTriangle(triangle);
             lineDrawer.AddPrimitives(color, tri);
         }
+        private void DrawPolygon(IEnumerable<Vector3> points, Color4 color)
+        {
+            var poly = Line3D.CreatePolygon(points);
+            lineDrawer.AddPrimitives(color, poly);
+        }
+        private void DrawPolygonFill(IEnumerable<Vector3> points, Color4 color)
+        {
+            var poly = GeometryUtil.CreatePolygon(Topology.TriangleList, points);
+            triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(Topology.TriangleList, poly.Vertices, poly.Indices));
+        }
         private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
             var circle = Line3D.CreateCircle(position, radius, 12);
@@ -1111,6 +1124,46 @@ namespace TerrainSamples.SceneNavMeshTest
             var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
             lineDrawer.AddPrimitives(color, pathLines);
         }
+        private void DrawDividedPolys(Color4 color, Color4 srcColor, Color4 div1Color, Color4 div2Color)
+        {
+            const float delta = 0.05f;
+
+            float t = 1;
+            foreach (var dpoly in HeightfieldDebugData.DividePolyTris)
+            {
+                float h = 0;
+                var trn = Vector3.Zero * t;
+
+                var triPoins = dpoly.Triangle.GetVertices().Select(v => v + trn);
+                DrawPolygon(triPoins, color);
+
+                foreach (var division in dpoly.Divisions)
+                {
+                    h += delta;
+
+                    if (division.SourcePoly.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    var sourcePoly = division.SourcePoly.Select(p => p + (Vector3.Up * h) + trn);
+                    DrawPolygon(sourcePoly, srcColor);
+
+                    for (int p = 0; p < division.DividedPolys.Count; p++)
+                    {
+                        if (division.DividedPolys[p].Length < 3)
+                        {
+                            continue;
+                        }
+
+                        var col = p % 2 == 0 ? div1Color : div2Color;
+
+                        var divPoly = division.DividedPolys[p].Select(p => p + (Vector3.Up * h) + trn);
+                        DrawPolygonFill(divPoly, col);
+                    }
+                }
+            }
+        }
         private void DrawGraphNodes(AgentType agent)
         {
             Components.RemoveComponent(debugGeometry);
@@ -1120,6 +1173,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawGraphObjects()
         {
             triangleDrawer.Clear();
+
+            DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
 
             foreach (var obs in obstacles)
             {

@@ -10,7 +10,11 @@ namespace Engine.PathFinding
     /// <summary>
     /// Path finder input
     /// </summary>
-    public abstract class PathFinderInput
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="fnc">Get triangle function</param>
+    public abstract class PathFinderInput(Func<IEnumerable<Triangle>> fnc)
     {
         /// <summary>
         /// Maximum areas
@@ -24,7 +28,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Get triangle function
         /// </summary>
-        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = null;
+        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = fnc;
         /// <summary>
         /// Area list
         /// </summary>
@@ -39,15 +43,6 @@ namespace Engine.PathFinding
         public BoundingBox BoundingBox { get; protected set; }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="fnc">Get triangle function</param>
-        protected PathFinderInput(Func<IEnumerable<Triangle>> fnc)
-        {
-            getTrianglesFnc = fnc;
-        }
-
-        /// <summary>
         /// Gets the triangle list
         /// </summary>
         /// <returns></returns>
@@ -55,14 +50,14 @@ namespace Engine.PathFinding
         {
             if (getTrianglesFnc == null)
             {
-                return Array.Empty<Triangle>();
+                return [];
             }
 
             IEnumerable<Triangle> tris = null;
 
             await Task.Run(() =>
             {
-                tris = getTrianglesFnc() ?? Array.Empty<Triangle>();
+                tris = getTrianglesFnc() ?? [];
             });
 
             BoundingBox = GeometryUtil.CreateBoundingBox(tris);
@@ -77,10 +72,10 @@ namespace Engine.PathFinding
         {
             if (getTrianglesFnc == null)
             {
-                return Array.Empty<Triangle>();
+                return [];
             }
 
-            IEnumerable<Triangle> tris = getTrianglesFnc() ?? Array.Empty<Triangle>();
+            IEnumerable<Triangle> tris = getTrianglesFnc() ?? [];
 
             BoundingBox = GeometryUtil.CreateBoundingBox(tris);
 
@@ -123,7 +118,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the area list</returns>
         public IGraphArea[] GetAreas()
         {
-            return areas.ToArray();
+            return [.. areas];
         }
         /// <summary>
         /// Clears all areas
@@ -184,7 +179,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the connection list</returns>
         public IEnumerable<IGraphConnection> GetConnections()
         {
-            return connections.ToArray();
+            return [.. connections];
         }
         /// <summary>
         /// Clears all connections
