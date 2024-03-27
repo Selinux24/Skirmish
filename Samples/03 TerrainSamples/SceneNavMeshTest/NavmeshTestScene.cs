@@ -4,6 +4,8 @@ using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.PathFinding.RecastNavigation.Detour;
+using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -214,15 +216,13 @@ namespace TerrainSamples.SceneNavMeshTest
                 mainPanel.AddChild(b, false);
             }
 
-            var enumValues = Enum
-                .GetValues<GraphDebugTypes>()
-                .Except([GraphDebugTypes.None]);
+            var enumValues = Enum.GetValues<GraphDebugTypes>();
 
             var debugDesc = UIPanelDescription.Default(Color.Transparent);
             debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", debugDesc);
             debugPanel.Spacing = 10;
             debugPanel.Padding = 15;
-            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Count()));
+            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Length));
             debugPanel.Visible = false;
 
             foreach (var dType in enumValues)
@@ -605,9 +605,26 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
+            var graphBounds = nmsettings.Bounds ?? nminput.BoundingBox;
+            BoundingBox bounds;
+            int width;
+            int height;
+            if (nmsettings.BuildMode == BuildModes.Solo)
+            {
+                bounds = graphBounds;
+                BuildSettings.CalcGridSize(bounds, nmsettings.CellSize, out width, out height);
+            }
+            else
+            {
+                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty, out _);
+                var tileBounds = NavMesh.GetTileBounds(tx, ty, nminput, nmsettings);
+                var cfg = TilesConfig.GetConfig(nmsettings, agent, tileBounds);
+                width = cfg.Width;
+                height = cfg.Height;
+                bounds = cfg.BoundingBox;
+            }
+
             int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);
-            var bounds = nminput.BoundingBox;
-            BuildSettings.CalcGridSize(bounds, nmsettings.CellSize, out int width, out int height);
 
             RasterizerSettings settings = new()
             {
@@ -1183,37 +1200,26 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             const float delta = 0.05f;
 
-            float t = 1;
             foreach (var dpoly in Rasterizer.DebugData)
             {
                 float h = 0;
-                var trn = Vector3.Zero * t;
 
-                var triPoins = dpoly.Triangle.GetVertices().Select(v => v + trn);
+                var triPoins = dpoly.Triangle.GetVertices();
                 DrawPolygon(triPoins, color);
 
-                foreach (var division in dpoly.Divisions)
+                foreach (var division in dpoly.Divisions.Where(d => d.SourcePoly.Length >= 3))
                 {
                     h += delta;
+                    var trn = Vector3.Up * h;
 
-                    if (division.SourcePoly.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    var sourcePoly = division.SourcePoly.Select(p => p + (Vector3.Up * h) + trn).Reverse();
+                    var sourcePoly = division.SourcePoly.Select(sp => sp + trn).Reverse();
                     DrawPolygon(sourcePoly, srcColor);
 
-                    for (int p = 0; p < division.DividedPolys.Count; p++)
+                    foreach (var (p, poly) in division.DividedPolys.Where(dp => dp.Length >= 3).Select((dp, i) => (i, dp)))
                     {
-                        if (division.DividedPolys[p].Length < 3)
-                        {
-                            continue;
-                        }
-
                         var col = p % 2 == 0 ? div1Color : div2Color;
 
-                        var divPoly = division.DividedPolys[p].Select(p => p + (Vector3.Up * h) + trn).Reverse();
+                        var divPoly = poly.Select(dp => dp + trn).Reverse();
                         DrawPolygonFill(divPoly, col);
                     }
                 }
