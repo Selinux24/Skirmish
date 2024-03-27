@@ -1201,7 +1201,7 @@ namespace TerrainSamples.SceneNavMeshTest
                         continue;
                     }
 
-                    var sourcePoly = division.SourcePoly.Select(p => p + (Vector3.Up * h) + trn);
+                    var sourcePoly = division.SourcePoly.Select(p => p + (Vector3.Up * h) + trn).Reverse();
                     DrawPolygon(sourcePoly, srcColor);
 
                     for (int p = 0; p < division.DividedPolys.Count; p++)
@@ -1213,7 +1213,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
                         var col = p % 2 == 0 ? div1Color : div2Color;
 
-                        var divPoly = division.DividedPolys[p].Select(p => p + (Vector3.Up * h) + trn);
+                        var divPoly = division.DividedPolys[p].Select(p => p + (Vector3.Up * h) + trn).Reverse();
                         DrawPolygonFill(divPoly, col);
                     }
                 }

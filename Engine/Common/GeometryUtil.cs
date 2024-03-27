@@ -2599,8 +2599,8 @@ namespace Engine.Common
             for (int i = 2; i < count; i++)
             {
                 indexList.Add(0);
-                indexList.Add((uint)i - 1);
                 indexList.Add((uint)i);
+                indexList.Add((uint)i - 1);
             }
 
             return new GeometryDescriptor()
