@@ -1,8 +1,7 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
+﻿using SharpDX;
 using System;
 
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     /// <summary>
     /// Heightfield layer

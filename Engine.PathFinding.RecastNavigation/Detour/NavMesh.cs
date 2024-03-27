@@ -163,10 +163,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(1f / passCount);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
-            if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
-            {
-                throw new EngineException("rcRasterizeTriangles: Out of memory.");
-            }
+            solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb);
             progressCallback?.Invoke(2f / passCount);
 
             // Performs the heightfield filters
@@ -176,7 +173,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
             progressCallback?.Invoke(4f / passCount);
 
             // Erode the walkable area by agent radius.
@@ -337,9 +334,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = Heightfield.Build(cfg);
 
-            var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
-            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.BoundingBox);
             if (cid.Length == 0)
             {
                 return null; // empty
@@ -348,10 +343,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
-                {
-                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
-                }
+                solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb);
             }
 
             // Performs the heightfield filters
@@ -360,7 +352,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
             chf.ErodeWalkableArea(cfg.WalkableRadius);

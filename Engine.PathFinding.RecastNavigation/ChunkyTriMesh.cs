@@ -313,12 +313,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the chunks overlapping the specified rectangle
         /// </summary>
-        /// <param name="bmin">Bounding box minimum</param>
-        /// <param name="bmax">Bounding box maximum</param>
+        /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a list of indices</returns>
-        public int[] GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
+        public int[] GetChunksOverlappingRect(BoundingBox bbox)
         {
             var ids = new List<int>();
+
+            var bmin = new Vector2(bbox.Minimum.X, bbox.Minimum.Z);
+            var bmax = new Vector2(bbox.Maximum.X, bbox.Maximum.Z);
 
             // Traverse tree
             int i = 0;

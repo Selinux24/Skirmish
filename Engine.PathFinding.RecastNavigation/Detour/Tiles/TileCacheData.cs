@@ -1,6 +1,4 @@
-﻿using SharpDX;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -12,11 +10,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     [Serializable]
     public struct TileCacheData
     {
-        /// <summary>
-        /// Maximum number of layers
-        /// </summary>
-        const int MAX_LAYERS = 32;
-
         /// <summary>
         /// Header
         /// </summary>
@@ -43,10 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Create heightfield
             var solid = Heightfield.Build(cfg);
 
-            var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
-
-            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.BoundingBox);
             if (cid.Length == 0)
             {
                 return []; // empty
@@ -55,10 +45,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                if (!solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb))
-                {
-                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
-                }
+                solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb);
             }
 
             // Once all geometry is rasterized, we do initial pass of filtering to
@@ -69,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = solid.Build(cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
             chf.ErodeWalkableArea(cfg.WalkableRadius);
@@ -80,12 +67,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var lset = HeightfieldLayerSet.Build(chf, cfg.BorderSize, cfg.WalkableHeight);
 
             // Allocate voxel heightfield where we rasterize our input data to.
-            var tiles = new List<TileCacheData>();
-
-            for (int i = 0; i < Math.Min(lset.NLayers, MAX_LAYERS); i++)
-            {
-                tiles.Add(lset.Layers[i].Create(x, y, i));
-            }
+            var tiles = lset.AllocateTiles(x, y);
 
             return [.. tiles];
         }

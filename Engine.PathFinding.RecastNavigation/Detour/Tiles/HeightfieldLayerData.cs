@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Height field layer data
     /// </summary>
@@ -713,7 +715,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            return (portal << 4) | con;
+            return portal << 4 | con;
         }
     }
 }

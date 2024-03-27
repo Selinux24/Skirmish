@@ -8,6 +8,10 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         Default,
         /// <summary>
+        /// Rasterizer
+        /// </summary>
+        Rasterizer,
+        /// <summary>
         /// Tile management
         /// </summary>
         Tiles,

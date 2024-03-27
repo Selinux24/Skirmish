@@ -8,15 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class Span
     {
         /// <summary>
-        /// Span height bits
-        /// </summary>
-        const int SpanHeightBits = 13;
-        /// <summary>
-        /// Defines the maximum value for smin and smax.
-        /// </summary>
-        public const int SpanMaxHeight = (1 << SpanHeightBits) - 1;
-
-        /// <summary>
         /// The lower limit of the span
         /// </summary>
         public int SMin;

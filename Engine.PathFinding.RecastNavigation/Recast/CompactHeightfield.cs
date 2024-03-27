@@ -137,6 +137,40 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public AreaTypes[] Areas { get; set; }
 
         /// <summary>
+        /// Builds a new compact heightfield
+        /// </summary>
+        /// <param name="hf">Height field</param>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
+        /// <returns>Returns the new compact heightfield</returns>
+        public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
+        {
+            var bbox = hf.BoundingBox;
+            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
+
+            // Fill in header.
+            var chf = new CompactHeightfield
+            {
+                Width = hf.Width,
+                Height = hf.Height,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                MaxRegions = 0,
+                BoundingBox = bbox,
+                CellSize = hf.CellSize,
+                CellHeight = hf.CellHeight,
+            };
+
+            // Fill in cells and spans.
+            chf.FillCellsAndSpans(hf);
+
+            // Find neighbour connections.
+            chf.FindNeighbourConnections();
+
+            return chf;
+        }
+
+        /// <summary>
         /// Enumerates the specified compact cell list
         /// </summary>
         /// <returns>Returns each compact cell to evaulate</returns>
@@ -530,7 +564,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Fill in cells and spans.
         /// </summary>
         /// <param name="hf">Heightfield</param>
-        public void FillCellsAndSpans(Heightfield hf)
+        private void FillCellsAndSpans(Heightfield hf)
         {
             int spanCount = hf.GetSpanCount();
 
@@ -574,7 +608,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Find neighbour connections.
         /// </summary>
-        public void FindNeighbourConnections()
+        private void FindNeighbourConnections()
         {
             // Find neighbour connections.
             int maxLayers = CompactSpan.MaxLayers;

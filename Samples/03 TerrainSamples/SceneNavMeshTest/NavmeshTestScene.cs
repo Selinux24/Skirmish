@@ -4,7 +4,6 @@ using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using Engine.PathFinding.RecastNavigation.Recast;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -77,6 +76,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private Model inputGeometry = null;
         private Model debugGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
+        private InputGeometry nminput = null;
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -183,6 +183,7 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.StartsVisible = false;
 
             var btnBuild = await InitializeButton("btnBuild", "Build", btnDesc, EnqueueGraph);
+            var btnRasterizer = await InitializeButton("btnRasterizer", "Rasterizer", btnDesc, () => stateManager.StartState(States.Rasterizer));
             var btnTiles = await InitializeButton("btnTiles", "Tiles", btnDesc, () => stateManager.StartState(States.Tiles));
             var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
             {
@@ -199,7 +200,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
             var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnBuild, btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
+            UIButton[] mainBtns = [btnBuild, btnRasterizer, btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -282,6 +283,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
+            stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
             stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
             stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
@@ -424,7 +426,7 @@ namespace TerrainSamples.SceneNavMeshTest
             //Debugging
             nmsettings.EnableDebugInfo = true;
 
-            var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
+            nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
         }
@@ -580,6 +582,59 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UpdateNavmeshInput();
             UpdateGraphInput();
+        }
+        private void UpdateGameStateRasterizer()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            UpdateRasterization();
+        }
+        private void UpdateRasterization()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);
+            var bounds = nminput.BoundingBox;
+            BuildSettings.CalcGridSize(bounds, nmsettings.CellSize, out int width, out int height);
+
+            RasterizerSettings settings = new()
+            {
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableClimb = walkableClimb,
+                Bounds = bounds,
+                Width = width,
+                Height = height,
+                CellSize = nmsettings.CellSize,
+                CellHeight = nmsettings.CellHeight,
+            };
+
+            triangleDrawer.Clear(Color.CornflowerBlue);
+            triangleDrawer.Clear(Color.OrangeRed);
+            triangleDrawer.Clear(Color.Yellow);
+            triangleDrawer.Clear(Color.Blue);
+
+            lineDrawer.Clear(Color.CornflowerBlue);
+            lineDrawer.Clear(Color.OrangeRed);
+            lineDrawer.Clear(Color.Yellow);
+            lineDrawer.Clear(Color.Blue);
+
+            var rData = Rasterizer.Rasterize([r.PickingResult.Primitive], settings).ToArray();
+            if (rData.Length > 0)
+            {
+                DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
+            }
         }
         private void UpdateGameStateTiles()
         {
@@ -1129,7 +1184,7 @@ namespace TerrainSamples.SceneNavMeshTest
             const float delta = 0.05f;
 
             float t = 1;
-            foreach (var dpoly in HeightfieldDebugData.DividePolyTris)
+            foreach (var dpoly in Rasterizer.DebugData)
             {
                 float h = 0;
                 var trn = Vector3.Zero * t;
@@ -1173,8 +1228,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawGraphObjects()
         {
             triangleDrawer.Clear();
-
-            DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
 
             foreach (var obs in obstacles)
             {
@@ -1324,6 +1377,17 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = true;
             debugPanel.Visible = false;
+
+            Rasterizer.EnableDebug = false;
+        }
+        private void StartRasterizerState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+
+            Rasterizer.EnableDebug = true;
+
+            ShowMessage($"Press {GContac1Point} to select a triangle to rasterize.");
         }
         private void StartTilesState()
         {

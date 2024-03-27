@@ -6,6 +6,7 @@ using System.Linq;
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX.Direct2D1;
 
     /// <summary>
     /// Triangle
@@ -570,6 +571,13 @@ namespace Engine
         public readonly Vector3 GetBarycenter(Vector3 p)
         {
             return CalculateBarycenter(this, p);
+        }
+        /// <summary>
+        /// Gets the triangle bounding box
+        /// </summary>
+        public readonly BoundingBox GetBounds()
+        {
+            return SharpDXExtensions.BoundingBoxFromPoints([Point1, Point2, Point3]);
         }
 
         /// <summary>
