@@ -54,13 +54,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// Marks a walkable triangle list
         /// </summary>
         /// <param name="tris">Triangle list</param>
-        /// <param name="walkableSlopeAngle">Slope angle</param>
+        /// <param name="walkableSlopeAngle">Slope angle in degrees</param>
         /// <returns>Returns a rasterize item collection</returns>
         private static RasterizeItem[] MarkWalkableTriangles(Triangle[] tris, float walkableSlopeAngle)
         {
             RasterizeItem[] res = new RasterizeItem[tris.Length];
 
-            float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
+            float walkableThr = MathF.Cos(walkableSlopeAngle / 180.0f * MathF.PI);
 
             for (int t = 0; t < tris.Length; t++)
             {
@@ -107,7 +107,7 @@ namespace Engine.PathFinding.RecastNavigation
             foreach (var (x, z, p) in SubdividePoly(z0, z1, poly, settings))
             {
                 // Calculate min and max of the span.
-                var (minY, maxY) = CalculateSpanMinMaxY(p);
+                var (minY, maxY) = CalculateSpanMinMax(p, Axis.Y);
                 minY -= bounds.Minimum.Y;
                 maxY -= bounds.Minimum.Y;
 
@@ -121,8 +121,8 @@ namespace Engine.PathFinding.RecastNavigation
                 SpanClamp(ref minY, ref maxY, by);
 
                 // Snap the span to the heightfield height grid.
-                int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, RasterizerSettings.MaxHeight);
-                int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, RasterizerSettings.MaxHeight);
+                int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, RasterizerSettings.MaxHeight);
+                int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, RasterizerSettings.MaxHeight);
 
                 yield return new(x, z, ismin, ismax, item.AreaType, flagMergeThr);
             }
@@ -146,28 +146,28 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Clip polygon to row. Store the remaining polygon as well
                 float cz = bounds.Minimum.Z + z * cs;
-                var (inRow, zp1) = DividePoly(poly, 2, cz + cs);
+                var (row, p1) = DividePoly(poly, Axis.Z, cz + cs);
 
                 RasterizerDivisionData divZ = new()
                 {
                     SourcePoly = [.. poly],
-                    DividedPolys = [inRow, zp1],
+                    DividedPolys = [row, p1],
                 };
 
-                (poly, _) = (zp1, poly);
-                if (inRow.Length < 3) continue;
+                (poly, _) = (p1, poly);
+                if (row.Length < 3) continue;
                 if (z < 0) continue;
 
                 AddDivisionData(divZ);
 
                 // find the horizontal bounds in the row
-                var (found, x0, x1) = FindXFootPrint(inRow, bounds, ics, w);
+                var (found, x0, x1) = FindXFootPrint(row, bounds, ics, w);
                 if (!found)
                 {
                     continue;
                 }
 
-                foreach (var (x, p) in SubdivideRow(x0, x1, inRow, settings))
+                foreach (var (x, p) in SubdivideRow(x0, x1, row, settings))
                 {
                     yield return (x, z, p);
                 }
@@ -232,38 +232,24 @@ namespace Engine.PathFinding.RecastNavigation
             if (max > size) max = size;
         }
         /// <summary>
-        /// Calculates the span x sizes
+        /// Calculates the span axis sizes
         /// </summary>
         /// <param name="vertices">Vertex list</param>
-        private static (float MinX, float MaxX) CalculateSpanMinMaxX(Vector3[] vertices)
+        /// <param name="axis">Axis</param>
+        private static (float Min, float Max) CalculateSpanMinMax(Vector3[] vertices, Axis axis)
         {
-            float minX = vertices[0].X;
-            float maxX = vertices[0].X;
+            int a = (int)axis;
+
+            float min = vertices[0][a];
+            float max = vertices[0][a];
 
             for (int i = 1; i < vertices.Length; i++)
             {
-                minX = Math.Min(minX, vertices[i].X);
-                maxX = Math.Max(maxX, vertices[i].X);
+                min = MathF.Min(min, vertices[i][a]);
+                max = MathF.Max(max, vertices[i][a]);
             }
 
-            return (minX, maxX);
-        }
-        /// <summary>
-        /// Calculates the span y sizes
-        /// </summary>
-        /// <param name="vertices">Vertex list</param>
-        private static (float MinY, float MaxY) CalculateSpanMinMaxY(Vector3[] vertices)
-        {
-            float minY = vertices[0].Y;
-            float maxY = vertices[0].Y;
-
-            for (int i = 1; i < vertices.Length; ++i)
-            {
-                minY = Math.Min(minY, vertices[i].Y);
-                maxY = Math.Max(maxY, vertices[i].Y);
-            }
-
-            return (minY, maxY);
+            return (min, max);
         }
         /// <summary>
         /// Finds the z axis foot-print
@@ -274,8 +260,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="h">Height</param>
         private static (int, int) FindZFootPrint(BoundingBox t, BoundingBox b, float ics, int h)
         {
-            int z0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
-            int z1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
+            int z0 = (int)MathF.Round((t.Minimum.Z - b.Minimum.Z) * ics);
+            int z1 = (int)MathF.Round((t.Maximum.Z - b.Minimum.Z) * ics);
             z0 = MathUtil.Clamp(z0, -1, h - 1);
             z1 = MathUtil.Clamp(z1, 0, h - 1);
 
@@ -290,9 +276,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="w">Width</param>
         private static (bool, int, int) FindXFootPrint(Vector3[] poly, BoundingBox b, float ics, int w)
         {
-            var (minX, maxX) = CalculateSpanMinMaxX(poly);
-            int x0 = (int)((minX - b.Minimum.X) * ics);
-            int x1 = (int)((maxX - b.Minimum.X) * ics);
+            var (minX, maxX) = CalculateSpanMinMax(poly, Axis.X);
+            int x0 = (int)MathF.Round((minX - b.Minimum.X) * ics);
+            int x1 = (int)MathF.Round((maxX - b.Minimum.X) * ics);
             if (x1 < 0 || x0 >= w)
             {
                 return (false, x0, x1);
@@ -309,12 +295,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="axis">Division axis</param>
         /// <param name="axisOffset">Axis offset</param>
         /// <returns>Returns the resulting polygons</returns>
-        private static (Vector3[] Poly1, Vector3[] Poly2) DividePoly(Vector3[] poly, int axis, float axisOffset)
+        private static (Vector3[] Poly1, Vector3[] Poly2) DividePoly(Vector3[] poly, Axis axis, float axisOffset)
         {
             List<Vector3> outPoly1 = [];
             List<Vector3> outPoly2 = [];
 
-            var vertAxisDelta = GetPolyVerticesAxisDelta(poly, axis, axisOffset);
+            var vertAxisDelta = poly.Select(p => axisOffset - p[(int)axis]).ToArray();
 
             for (int vertA = 0, vertB = poly.Length - 1; vertA < poly.Length; vertB = vertA, vertA++)
             {
@@ -324,10 +310,10 @@ namespace Engine.PathFinding.RecastNavigation
                 float na = vertAxisDelta[vertA];
                 float nb = vertAxisDelta[vertB];
 
-                // If the two vertices are on the same side of the separating axis
                 bool sameSide = (na >= 0) == (nb >= 0);
                 if (!sameSide)
                 {
+                    // If the two vertices are on the same side of the separating axis
                     float s = nb / (nb - na);
                     var v = vb + (va - vb) * s;
                     outPoly1.Add(v);
@@ -343,42 +329,27 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         outPoly2.Add(va);
                     }
+
+                    continue;
                 }
-                else // same side
+
+                // same side
+
+                // add the i'th point to the right polygon. Addition is done even for points on the dividing line
+                if (na >= 0)
                 {
-                    // add the i'th point to the right polygon. Addition is done even for points on the dividing line
-                    if (na >= 0)
+                    outPoly1.Add(va);
+
+                    if (na != 0)
                     {
-                        outPoly1.Add(va);
-
-                        if (na != 0)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
-
-                    outPoly2.Add(va);
                 }
+
+                outPoly2.Add(va);
             }
 
             return (outPoly1.ToArray(), outPoly2.ToArray());
-        }
-        /// <summary>
-        /// Gets the axis delta polygon vertices
-        /// </summary>
-        /// <param name="poly">Polygon vertices</param>
-        /// <param name="axis">Axis</param>
-        /// <param name="axisOffset">Axis offset</param>
-        private static float[] GetPolyVerticesAxisDelta(Vector3[] poly, int axis, float axisOffset)
-        {
-            float[] d = new float[poly.Length];
-
-            for (int i = 0; i < poly.Length; i++)
-            {
-                d[i] = axisOffset - poly[i][axis];
-            }
-
-            return d;
         }
 
         /// <summary>
