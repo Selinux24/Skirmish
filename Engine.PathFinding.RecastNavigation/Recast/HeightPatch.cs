@@ -14,11 +14,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Data
         /// </summary>
-        public int[] Data { get; set; }
+        private readonly int[] data = [];
+
         /// <summary>
         /// Rectangle
         /// </summary>
-        public Rectangle Bounds { get; set; }
+        public Rectangle Bounds { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -26,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public HeightPatch(Rectangle bounds)
         {
             int size = bounds.Width * bounds.Height;
-            Data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
+            data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
             Bounds = bounds;
         }
 
@@ -51,32 +52,63 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// Initializes patch data to <see cref="RC_UNSET_HEIGHT"/>
+        /// Initializes patch data to value
         /// </summary>
-        /// <param name="size">Data array size</param>
-        public void InitializeData(int size)
+        /// <param name="value">Height value</param>
+        public void InitializeData(int value)
         {
-            // Set all heights to RC_UNSET_HEIGHT.
-            Data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] = value;
+            }
         }
         /// <summary>
-        /// Gets the patch height at the specified point
+        /// Gets the height data at coordinates
+        /// </summary>
+        /// <param name="hx">X coordinate</param>
+        /// <param name="hy">Y coordinate</param>
+        /// <returns>Returns the height value</returns>
+        public int GetHeight(int hx, int hy)
+        {
+            return data[hx + hy * Bounds.Width];
+        }
+        /// <summary>
+        /// Sets the height data at coordinates
+        /// </summary>
+        /// <param name="hx">X coordinate</param>
+        /// <param name="hy">Y coordinate</param>
+        /// <param name="value">Height value</param>
+        public void SetHeight(int hx, int hy, int value)
+        {
+            data[hx + hy * Bounds.Width] = value;
+        }
+        /// <summary>
+        /// Sets the height data
+        /// </summary>
+        /// <param name="hdItem">Height data item</param>
+        /// <param name="value">Height value</param>
+        public void SetHeight(HeightDataItem hdItem, int value)
+        {
+            SetHeight(hdItem.X - Bounds.X, hdItem.Y - Bounds.Y, value);
+        }
+        /// <summary>
+        /// Calculates the patch height at the specified point
         /// </summary>
         /// <param name="p">Point</param>
-        /// <param name="ics"></param>
-        /// <param name="ch"></param>
-        /// <param name="radius"></param>
-        /// <returns></returns>
-        public int GetHeight(Vector3 p, float ics, float ch, int radius)
+        /// <param name="ics">Inverse of the cell size</param>
+        /// <param name="ch">Cell height</param>
+        /// <param name="radius">Search radius</param>
+        /// <returns>Returns the patch height value</returns>
+        public int CalculateHeight(Vector3 p, float ics, float ch, int radius)
         {
-            int ix = (int)Math.Floor(p.X * ics + 0.01f);
-            int iz = (int)Math.Floor(p.Z * ics + 0.01f);
+            int ix = (int)MathF.Floor(p.X * ics + 0.01f);
+            int iz = (int)MathF.Floor(p.Z * ics + 0.01f);
             ix = MathUtil.Clamp(ix - Bounds.X, 0, Bounds.Width - 1);
             iz = MathUtil.Clamp(iz - Bounds.Y, 0, Bounds.Height - 1);
-            int h = Data[ix + iz * Bounds.Width];
-            if (h != RC_UNSET_HEIGHT)
+            int hmin = data[ix + iz * Bounds.Width];
+            if (hmin != RC_UNSET_HEIGHT)
             {
-                return h;
+                return hmin;
             }
 
             // Special case when data might be bad.
@@ -94,7 +126,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 int nx = ix + x;
                 int nz = iz + z;
-                GetMinDistance(nx, nz, ch, p.Y, ref h, ref dmin);
+                if (CalculateDistanceToCeiling(nx, nz, ch, p.Y, out var h, out var d) && (d < dmin))
+                {
+                    hmin = h;
+                    dmin = d;
+                }
 
                 // We are searching in a grid which looks approximately like this:
                 //  __________
@@ -115,7 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // a height, we abort the search.
                 if (i + 1 == nextRingIterStart)
                 {
-                    if (h != RC_UNSET_HEIGHT)
+                    if (hmin != RC_UNSET_HEIGHT)
                     {
                         break;
                     }
@@ -135,53 +171,48 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 z += dz;
             }
 
-            return h;
+            return hmin;
         }
         /// <summary>
-        /// Updates the minimum distance
+        /// Calculates the distance to ceiling of the specified coordinates
         /// </summary>
-        /// <param name="x">Heightpatch x coordinate</param>
-        /// <param name="z">Heightpatch z coordinate</param>
+        /// <param name="hx">Heightpatch x coordinate</param>
+        /// <param name="hy">Heightpatch z coordinate</param>
         /// <param name="ch">Cell height</param>
-        /// <param name="pY">Point height</param>
+        /// <param name="ph">Point height</param>
         /// <param name="h">Height value</param>
-        /// <param name="dmin">Minimum distance value</param>
-        /// <remarks>Only updates the height and distance if it is less</remarks>
-        private void GetMinDistance(int x, int z, float ch, float pY, ref int h, ref float dmin)
+        /// <param name="dist">Distance to ceiling</param>
+        /// <returns>Returns true if the specified coordinates returns a height value</returns>
+        private bool CalculateDistanceToCeiling(int hx, int hy, float ch, float ph, out int h, out float dist)
         {
-            Bounds.Contains(x, z);
+            h = int.MaxValue;
+            dist = float.MaxValue;
 
-            if (x < 0 || z < 0 || x >= Bounds.Width || z >= Bounds.Height)
-            {
-                return;
-            }
-
-            int nh = Data[x + z * Bounds.Width];
-            if (nh == RC_UNSET_HEIGHT)
-            {
-                return;
-            }
-
-            float d = Math.Abs(nh * ch - pY);
-            if (d < dmin)
-            {
-                h = nh;
-                dmin = d;
-            }
-        }
-        /// <summary>
-        /// Gets whether the specified magnitudes were into the heightpatch or not
-        /// </summary>
-        /// <param name="x">X height</param>
-        /// <param name="z">Y height</param>
-        public bool CompareBounds(int x, int z)
-        {
-            if (x < 0 || z < 0 || x >= Bounds.Width || z >= Bounds.Height)
+            if (!Contains(hx, hy))
             {
                 return false;
             }
 
-            if (Data[x + z * Bounds.Width] != RC_UNSET_HEIGHT)
+            int nh = GetHeight(hx, hy);
+            if (nh == RC_UNSET_HEIGHT)
+            {
+                return false;
+            }
+
+            h = nh;
+            dist = MathF.Abs(nh * ch - ph);
+
+            return true;
+        }
+        /// <summary>
+        /// Gets whether the patch contains the specified coordinates
+        /// </summary>
+        /// <param name="hx">X coordinate</param>
+        /// <param name="hy">Y coordinate</param>
+        /// <returns>Returns true if the path contains the coordinates</returns>
+        public bool Contains(int hx, int hy)
+        {
+            if (hx < 0 || hy < 0 || hx >= Bounds.Width || hy >= Bounds.Height)
             {
                 return false;
             }
@@ -189,14 +220,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return true;
         }
         /// <summary>
-        /// Sets the height data at coordinates
+        /// Gets whether the specified coordinates contains a height value or not
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="value">Hight value</param>
-        public void SetHeight(int x, int z, int value)
+        /// <param name="hx">X coordinate</param>
+        /// <param name="hy">Y coordinate</param>
+        public bool IsSet(int hx, int hy)
         {
-            Data[x + z * Bounds.Width] = value;
+            return GetHeight(hx, hy) != RC_UNSET_HEIGHT;
         }
     }
 }

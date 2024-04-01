@@ -190,8 +190,8 @@ namespace Engine.PathFinding.RecastNavigation
                 var s = span;
                 do
                 {
-                    var min = new Vector3(fx, orig.Y + s.SMin * ch, fz);
-                    var max = new Vector3(fx + cs, orig.Y + s.SMax * ch, fz + cs);
+                    var min = new Vector3(fx, orig.Y + s.Min * ch, fz);
+                    var max = new Vector3(fx + cs, orig.Y + s.Max * ch, fz + cs);
 
                     var boxTris = TriangulateBox(min, max, 0.95f);
 

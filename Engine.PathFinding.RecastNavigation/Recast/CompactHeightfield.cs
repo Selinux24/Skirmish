@@ -35,6 +35,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         const int RC_BORDER_REG = 0x8000;
 
         /// <summary>
+        /// Cell offsets list
+        /// </summary>
+        static readonly Int3[] cellOffsets =
+        [
+            new(+0, +0, +0),
+            new(-1, +0, -1),
+            new(+0, +0, -1),
+            new(+1, +0, -1),
+            new(+1, +0, +0),
+            new(+1, +0, +1),
+            new(+0, +0, +1),
+            new(-1, +0, +1),
+            new(-1, +0, +0),
+        ];
+
+        /// <summary>
         /// Sample vertex
         /// </summary>
         /// <remarks>
@@ -588,8 +604,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (s.Area != AreaTypes.RC_NULL_AREA)
                     {
-                        int bot = s.SMax;
-                        int top = s.Next?.SMin ?? int.MaxValue;
+                        int bot = s.Max;
+                        int top = s.Next?.Min ?? int.MaxValue;
                         Spans[idx].Y = MathUtil.Clamp(bot, 0, SPAN_MAX_WIDTH);
                         Spans[idx].H = MathUtil.Clamp(top - bot, 0, SPAN_MAX_HEIGHT);
                         Areas[idx] = s.Area;
@@ -1251,15 +1267,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int hx = ax - hp.Bounds.X - BorderSize;
                     int hy = ay - hp.Bounds.Y - BorderSize;
 
-                    if (!hp.CompareBounds(hx, hy))
+                    if (!hp.Contains(hx, hy))
+                    {
+                        continue;
+                    }
+
+                    if (hp.IsSet(hx, hy))
                     {
                         continue;
                     }
 
                     int ai = Cells[ax + ay * Width].Index + con;
-                    var a = Spans[ai];
-
-                    hp.Data[hx + hy * hp.Bounds.Width] = a.Y;
+                    hp.SetHeight(hx, hy, Spans[ai].Y);
 
                     queue.Add(new() { X = ax, Y = ay, I = ai });
                 }
@@ -1395,6 +1414,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             float cs = CellSize;
             float ics = 1.0f / cs;
+            float ch = CellHeight;
 
             var vd = vi - vj;
             float d = MathF.Sqrt(vd.X * vd.X + vd.Z * vd.Z);
@@ -1414,7 +1434,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 float u = k / (float)nn;
                 var pos = vj + vd * u;
-                pos.Y = hp.GetHeight(pos, ics, CellHeight, heightSearchRadius) * CellHeight;
+                pos.Y = hp.CalculateHeight(pos, ics, ch, heightSearchRadius) * ch;
 
                 edge[k] = pos;
             }
@@ -1507,6 +1527,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             float cs = CellSize;
             float ics = 1.0f / cs;
+            float ch = CellHeight;
 
             for (int z = z0; z < z1; ++z)
             {
@@ -1526,7 +1547,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int y = hp.GetHeight(pt, ics, CellHeight, heightSearchRadius);
+                    int y = hp.CalculateHeight(pt, ics, ch, heightSearchRadius);
 
                     samples.Add(new(x, y, z, false)); // Not added
                 }
@@ -1600,9 +1621,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Int3[] verts, HeightPatch hp)
         {
-            var bounds = hp.Bounds;
-
-            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(poly, verts, bounds);
+            var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(poly, verts, hp);
 
             var (centerX, centerY) = poly.GetCenter2D(verts);
 
@@ -1615,7 +1634,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 I = startSpanIndex
             });
 
-            hp.Data = Helper.CreateArray(bounds.Width * bounds.Height, 0);
+            hp.InitializeData(0);
+
             // DFS to move to the center. Note that we need a DFS here and can not just move
             // directly towards the center without recording intermediate nodes, even though the polygons
             // are convex. In very rare we can get stuck due to contour simplification if we do not
@@ -1652,7 +1672,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Push the direct dir last so we start with this on next iteration
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
 
-                stack.PushRange(BuildHeightDataItems(hdItem, bounds, dirs, hp));
+                stack.PushRange(BuildHeightDataItems(hdItem, dirs, hp));
 
                 (dirs[directDir], dirs[3]) = (dirs[3], dirs[directDir]);
             }
@@ -1667,9 +1687,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 I = hdItem.I,
             });
 
-            hp.Data = Helper.CreateArray(bounds.Width * bounds.Height, SPAN_MAX_HEIGHT);
-            var chs = Spans[hdItem.I];
-            hp.Data[(hdItem.X - bounds.X) + (hdItem.Y - bounds.Y) * bounds.Width] = chs.Y;
+            hp.InitializeData(SPAN_MAX_HEIGHT);
+            hp.SetHeight(hdItem, Spans[hdItem.I].Y);
 
             return [.. stack];
         }
@@ -1677,10 +1696,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Build the neighbour's item list of the specified height data item
         /// </summary>
         /// <param name="hdItem">Height data item</param>
-        /// <param name="bounds">Bounds</param>
         /// <param name="dirs">Direction list</param>
         /// <param name="hp">Height path to store data</param>
-        private IEnumerable<HeightDataItem> BuildHeightDataItems(HeightDataItem hdItem, Rectangle bounds, int[] dirs, HeightPatch hp)
+        private IEnumerable<HeightDataItem> BuildHeightDataItems(HeightDataItem hdItem, int[] dirs, HeightPatch hp)
         {
             var cs = Spans[hdItem.I];
 
@@ -1694,20 +1712,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 int newX = hdItem.X + GridUtils.GetDirOffsetX(dir);
                 int newY = hdItem.Y + GridUtils.GetDirOffsetY(dir);
-
-                int hpx = newX - bounds.X;
-                int hpy = newY - bounds.Y;
-                if (hpx < 0 || hpx >= bounds.Width || hpy < 0 || hpy >= bounds.Height)
+                int hpx = newX - hp.Bounds.X;
+                int hpy = newY - hp.Bounds.Y;
+                if (!hp.Contains(hpx, hpy))
                 {
                     continue;
                 }
 
-                if (hp.Data[hpx + hpy * bounds.Width] != 0)
+                if (hp.GetHeight(hpx, hpy) != 0)
                 {
                     continue;
                 }
 
-                hp.Data[hpx + hpy * bounds.Width] = 1;
+                hp.SetHeight(hpx, hpy, 1);
                 int index = Cells[(newX + BorderSize) + (newY + BorderSize) * Width].Index + con;
 
                 yield return new HeightDataItem
@@ -1723,22 +1740,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <param name="verts">Polygon vertices</param>
-        /// <param name="bounds">Bounds</param>
-        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Int3[] verts, Rectangle bounds)
+        /// <param name="hp">Height patch</param>
+        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Int3[] verts, HeightPatch hp)
         {
-            int[] offset =
-            [
-                +0, +0,
-                -1, -1,
-                +0, -1,
-                +1, -1,
-                +1, +0,
-                +1, +1,
-                +0, +1,
-                -1, +1,
-                -1, +0,
-            ];
-
             // Find cell closest to a poly vertex
             var polyIndices = poly.GetVertices();
             int startCellX = 0;
@@ -1749,25 +1753,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var vert = verts[polyIndices[j]];
 
-                for (int k = 0; k < 9 && dmin > 0; ++k)
+                for (int k = 0; k < cellOffsets.Length && dmin > 0; ++k)
                 {
-                    int ax = vert.X + offset[k * 2 + 0];
-                    int ay = vert.Y;
-                    int az = vert.Z + offset[k * 2 + 1];
-                    if (!bounds.Contains(ax, az))
+                    var offset = cellOffsets[k];
+                    var a = vert + offset;
+                    if (!hp.Contains(a.X, a.Z))
                     {
                         continue;
                     }
 
-                    var c = Cells[(ax + BorderSize + az + BorderSize) * Width];
+                    var c = Cells[(a.X + BorderSize + a.Z + BorderSize) * Width];
                     for (int i = c.Index, ni = c.Index + c.Count; i < ni && dmin > 0; ++i)
                     {
                         var s = Spans[i];
-                        int d = Math.Abs(ay - s.Y);
+                        int d = Math.Abs(a.Y - s.Y);
                         if (d < dmin)
                         {
-                            startCellX = ax;
-                            startCellY = az;
+                            startCellX = a.X;
+                            startCellY = a.Z;
                             startSpanIndex = i;
                             dmin = d;
                         }

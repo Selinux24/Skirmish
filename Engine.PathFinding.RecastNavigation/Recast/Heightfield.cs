@@ -89,7 +89,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// Iterates over the specified span list
+        /// Iterates over the span list
         /// </summary>
         public IEnumerable<(int x, int y, Span span)> IterateSpans()
         {
@@ -109,6 +109,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
         }
         /// <summary>
+        /// Iterates over the span list and it's next span
+        /// </summary>
+        public IEnumerable<(int x, int y, Span span)> IterateSpansWithNexts()
+        {
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    for (var s = Spans[x + y * Width]; s != null; s = s.Next)
+                    {
+                        yield return (x, y, s);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the span count
         /// </summary>
         /// <returns>Returns the span count</returns>
@@ -116,18 +133,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int spanCount = 0;
 
-            for (int y = 0; y < Height; ++y)
+            foreach (var (x, y, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < Width; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (var span = Spans[x + y * Width]; span != null; span = span.Next)
-                    {
-                        if (span.Area != AreaTypes.RC_NULL_AREA)
-                        {
-                            spanCount++;
-                        }
-                    }
+                    continue;
                 }
+
+                spanCount++;
             }
 
             return spanCount;
@@ -155,11 +169,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Pop item from in front of the free list.
             var s = FreeList;
             FreeList = FreeList.Next;
-
-            s.SMin = smin;
-            s.SMax = smax;
-            s.Area = area;
-            s.Next = null;
+            s.Initialize(smin, smax, area);
 
             return s;
         }
@@ -204,13 +214,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Insert and merge spans.
             while (cur != null)
             {
-                if (cur.SMin > s.SMax)
+                if (cur.Min > s.Max)
                 {
                     // Current span is further than the new span, break.
                     break;
                 }
 
-                if (cur.SMax < s.SMin)
+                if (cur.Max < s.Min)
                 {
                     // Current span is before the new span advance.
                     prev = cur;
@@ -220,7 +230,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Merge spans.
-                s.MergeSpans(cur, flagMergeThr);
+                s.Merge(cur, flagMergeThr);
 
                 // Remove current span.
                 var next = cur.Next;
@@ -278,32 +288,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="walkableClimb">Walkable climb</param>
         private void FilterLowHangingWalkableObstacles(int walkableClimb)
         {
-            int w = Width;
-            int h = Height;
-
-            for (int y = 0; y < h; y++)
+            foreach (var (_, _, span) in IterateSpans())
             {
-                for (int x = 0; x < w; x++)
+                bool previousWalkable = false;
+                AreaTypes previousArea = AreaTypes.RC_NULL_AREA;
+
+                Span ps = null;
+                for (Span s = span; s != null; ps = s, s = s.Next)
                 {
-                    bool previousWalkable = false;
-                    AreaTypes previousArea = AreaTypes.RC_NULL_AREA;
+                    bool walkable = s.Area != AreaTypes.RC_NULL_AREA;
 
-                    Span ps = null;
-
-                    for (Span s = Spans[x + y * w]; s != null; ps = s, s = s.Next)
+                    // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
+                    if (!walkable && previousWalkable && Math.Abs(s.Max - ps.Max) <= walkableClimb)
                     {
-                        bool walkable = s.Area != AreaTypes.RC_NULL_AREA;
-
-                        // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
-                        if (!walkable && previousWalkable && Math.Abs(s.SMax - ps.SMax) <= walkableClimb)
-                        {
-                            s.Area = previousArea;
-                        }
-
-                        // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
-                        previousWalkable = walkable;
-                        previousArea = s.Area;
+                        s.Area = previousArea;
                     }
+
+                    // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
+                    previousWalkable = walkable;
+                    previousArea = s.Area;
                 }
             }
         }
@@ -315,21 +318,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private void FilterLedgeSpans(int walkableHeight, int walkableClimb)
         {
             // Mark border spans.
-            for (int y = 0; y < Height; ++y)
+            foreach (var (x, y, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < Width; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (Span s = Spans[x + y * Width]; s != null; s = s.Next)
-                    {
-                        // Skip non walkable spans.
-                        if (s.Area == AreaTypes.RC_NULL_AREA)
-                        {
-                            continue;
-                        }
-
-                        FilterLedgeSpan(s, x, y, Width, Height, walkableHeight, walkableClimb);
-                    }
+                    continue;
                 }
+
+                FilterLedgeSpan(s, x, y, Width, Height, walkableHeight, walkableClimb);
             }
         }
         /// <summary>
@@ -348,8 +345,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int minh = int.MaxValue;
 
             // Min and max height of accessible neighbours.
-            int asmin = span.SMax;
-            int asmax = span.SMax;
+            int asmin = span.Max;
+            int asmax = span.Max;
 
             for (int dir = 0; dir < 4; ++dir)
             {
@@ -358,7 +355,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int dy = y + GridUtils.GetDirOffsetY(dir);
                 if (dx < 0 || dy < 0 || dx >= width || dy >= height)
                 {
-                    minh = Math.Min(minh, -walkableClimb - span.SMax);
+                    minh = Math.Min(minh, -walkableClimb - span.Max);
                     continue;
                 }
 
@@ -386,24 +383,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="walkableHeight">Walkable height</param>
         private void FilterWalkableLowHeightSpans(int walkableHeight)
         {
-            int w = Width;
-            int h = Height;
-
             // Remove walkable flag from spans which do not have enough space above them for the agent to stand there.
-            for (int y = 0; y < h; ++y)
+            foreach (var (_, _, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < w; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (var s = Spans[x + y * w]; s != null; s = s.Next)
-                    {
-                        int bot = s.SMax;
-                        int top = s.Next != null ? s.Next.SMin : int.MaxValue;
+                    continue;
+                }
 
-                        if ((top - bot) <= walkableHeight)
-                        {
-                            s.Area = AreaTypes.RC_NULL_AREA;
-                        }
-                    }
+                int bot = s.Max;
+                int top = s.Next?.Min ?? int.MaxValue;
+
+                if ((top - bot) <= walkableHeight)
+                {
+                    s.Area = AreaTypes.RC_NULL_AREA;
                 }
             }
         }

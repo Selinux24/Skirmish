@@ -10,34 +10,56 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The lower limit of the span
         /// </summary>
-        public int SMin;
+        public int Min { get; private set; }
         /// <summary>
         /// The upper limit of the span
         /// </summary>
-        public int SMax;
+        public int Max { get; private set; }
         /// <summary>
         /// The area id assigned to the span.
         /// </summary>
-        public AreaTypes Area;
+        public AreaTypes Area { get; set; }
         /// <summary>
         /// The next span higher up in column.
         /// </summary>
-        public Span Next;
+        public Span Next { get; set; }
 
+        /// <summary>
+        /// Initializes the span data
+        /// </summary>
+        /// <param name="min">Lower limit</param>
+        /// <param name="max">Upper limit</param>
+        /// <param name="area">Area</param>
+        /// <param name="next">Next span</param>
+        public void Initialize(int min, int max, AreaTypes area, Span next = null)
+        {
+            Min = min;
+            Max = max;
+            Area = area;
+            Next = next;
+        }
         /// <summary>
         /// Merges the specified span with current instance
         /// </summary>
         /// <param name="s">Span to merge</param>
         /// <param name="flagMergeThr">Flag merge threshold</param>
-        public void MergeSpans(Span s, int flagMergeThr)
+        public void Merge(Span s, int flagMergeThr)
         {
-            if (s == null) return;
+            if (s == null)
+            {
+                return;
+            }
 
-            SMin = Math.Min(SMin, s.SMin);
-            SMax = Math.Max(SMax, s.SMax);
+            Min = Math.Min(Min, s.Min);
+            Max = Math.Max(Max, s.Max);
+
+            if (Area == s.Area)
+            {
+                return;
+            }
 
             // Merge flags.
-            if (Math.Abs(SMax - s.SMax) <= flagMergeThr)
+            if (Math.Abs(Max - s.Max) <= flagMergeThr)
             {
                 Area = (AreaTypes)Math.Max((int)Area, (int)s.Area);
             }
@@ -55,15 +77,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public (int MinHeight, int MinNei, int MaxNei) FindMinimumHeight(Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
         {
             int minh = minHeight;
-            int asmin = minimumAccessibleNeigbor;
-            int asmax = maximumAccessibleNeigbor;
+            int amin = minimumAccessibleNeigbor;
+            int amax = maximumAccessibleNeigbor;
 
-            int bot = SMax;
-            int top = Next?.SMin ?? int.MaxValue;
+            int bot = Max;
+            int top = Next?.Min ?? int.MaxValue;
 
             // From minus infinity to the first span.
             int nbot = -walkableClimb;
-            int ntop = span?.SMin ?? int.MaxValue;
+            int ntop = span?.Min ?? int.MaxValue;
 
             // Skip neightbour if the gap between the spans is too small.
             if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
@@ -74,8 +96,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var ns = span;
             while (ns != null)
             {
-                nbot = ns.SMax;
-                ntop = ns.Next?.SMin ?? int.MaxValue;
+                nbot = ns.Max;
+                ntop = ns.Next?.Min ?? int.MaxValue;
 
                 ns = ns.Next;
 
@@ -93,17 +115,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                asmin = Math.Min(nbot, asmin);
-                asmax = Math.Max(nbot, asmax);
+                amin = Math.Min(nbot, amin);
+                amax = Math.Max(nbot, amax);
             }
 
-            return (minh, asmin, asmax);
+            return (minh, amin, amax);
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Min {SMin} Max {SMax} Area: {Area}; {(Next != null ? "Next =>" : "")};";
+            return $"Min {Min} Max {Max} Area: {Area}; {(Next != null ? $"Next => {Next};" : "")}";
         }
     }
 }

@@ -93,8 +93,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             AddDebugData(new() { Triangle = item.Triangle, });
 
-            float ics = 1.0f / settings.CellSize;
-            float ich = 1.0f / settings.CellHeight;
+            float ics = settings.InverseCellSize;
+            float ich = settings.InverseCellHeight;
             int h = settings.Height;
             int flagMergeThr = settings.WalkableClimb;
             float by = bounds.Height;
@@ -121,8 +121,10 @@ namespace Engine.PathFinding.RecastNavigation
                 SpanClamp(ref minY, ref maxY, by);
 
                 // Snap the span to the heightfield height grid.
-                int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, RasterizerSettings.MaxHeight);
-                int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, RasterizerSettings.MaxHeight);
+                float fmin = MathF.Round(MathF.Floor(minY * ich));
+                float fmax = MathF.Round(MathF.Ceiling(maxY * ich));
+                int ismin = MathUtil.Clamp((int)fmin, 0, RasterizerSettings.MaxHeight);
+                int ismax = MathUtil.Clamp((int)fmax, ismin + 1, RasterizerSettings.MaxHeight);
 
                 yield return new(x, z, ismin, ismax, item.AreaType, flagMergeThr);
             }
@@ -138,7 +140,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static IEnumerable<(int X, int Z, Vector3[] Poly)> SubdividePoly(int z0, int z1, Vector3[] poly, RasterizerSettings settings)
         {
             float cs = settings.CellSize;
-            float ics = 1.0f / cs;
+            float ics = settings.InverseCellSize;
             int w = settings.Width;
             var bounds = settings.Bounds;
 
@@ -146,15 +148,17 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Clip polygon to row. Store the remaining polygon as well
                 float cz = bounds.Minimum.Z + z * cs;
-                var (row, p1) = DividePoly(poly, Axis.Z, cz + cs);
+                var (row, newPoly) = DividePoly(poly, Axis.Z, cz + cs);
 
                 RasterizerDivisionData divZ = new()
                 {
+                    X = -1,
+                    Z = z,
                     SourcePoly = [.. poly],
-                    DividedPolys = [row, p1],
+                    DividedPolys = [row, newPoly],
                 };
 
-                (poly, _) = (p1, poly);
+                poly = newPoly;
                 if (row.Length < 3) continue;
                 if (z < 0) continue;
 
@@ -167,7 +171,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                foreach (var (x, p) in SubdivideRow(x0, x1, row, settings))
+                foreach (var (x, p) in SubdivideRow(x0, x1, z, row, settings))
                 {
                     yield return (x, z, p);
                 }
@@ -181,7 +185,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="row">Row</param>
         /// <param name="settings">Rasterizer settings</param>
         /// <returns>Returns a list of x coordinates and the span polygon</returns>
-        private static IEnumerable<(int X, Vector3[] Poly)> SubdivideRow(int x0, int x1, Vector3[] row, RasterizerSettings settings)
+        private static IEnumerable<(int X, Vector3[] Poly)> SubdivideRow(int x0, int x1, int z, Vector3[] row, RasterizerSettings settings)
         {
             float cs = settings.CellSize;
             var bounds = settings.Bounds;
@@ -190,21 +194,23 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Clip polygon to column. store the remaining polygon as well
                 float cx = bounds.Minimum.X + x * cs;
-                var (xp1, xp2) = DividePoly(row, 0, cx + cs);
+                var (patch, newRow) = DividePoly(row, Axis.X, cx + cs);
 
                 RasterizerDivisionData divX = new()
                 {
+                    X = x,
+                    Z = z,
                     SourcePoly = [.. row],
-                    DividedPolys = [xp1, xp2],
+                    DividedPolys = [patch, newRow],
                 };
 
-                (row, _) = (xp2, row);
-                if (xp1.Length < 3) continue;
+                row = newRow;
+                if (patch.Length < 3) continue;
                 if (x < 0) continue;
 
                 AddDivisionData(divX);
 
-                yield return (x, xp1);
+                yield return (x, patch);
             }
         }
         /// <summary>
@@ -398,6 +404,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// Rasterized division data
         /// </summary>
         public List<RasterizerDivisionData> Divisions { get; set; } = [];
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Triangle} => {Divisions.Count} divisions.";
+        }
     }
 
     /// <summary>
@@ -406,6 +418,14 @@ namespace Engine.PathFinding.RecastNavigation
     public class RasterizerDivisionData
     {
         /// <summary>
+        /// X coordinate
+        /// </summary>
+        public int X { get; set; }
+        /// <summary>
+        /// Z coordinate
+        /// </summary>
+        public int Z { get; set; }
+        /// <summary>
         /// Source polygon to subdivide
         /// </summary>
         public Vector3[] SourcePoly { get; set; } = [];
@@ -413,5 +433,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// Results of the subdivision
         /// </summary>
         public List<Vector3[]> DividedPolys { get; set; } = [];
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"({X},{Z}) => {SourcePoly.Join(",")}";
+        }
     }
 }
