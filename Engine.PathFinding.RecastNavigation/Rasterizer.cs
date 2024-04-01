@@ -90,17 +90,24 @@ namespace Engine.PathFinding.RecastNavigation
                 // If the triangle does not touch the bbox of the heightfield, skip the triangle.
                 yield break;
             }
+            float min = polyBounds.Minimum.Z;
+            float max = polyBounds.Maximum.Z;
+            float ics = settings.InverseCellSize;
+            int h = settings.Height;
+            int maxHeight = RasterizerSettings.MaxHeight;
+
+            // Calculate the footprint of the triangle on the grid's z-axis
+            var (found, z0, z1) = FindFootPrint(min, max, bounds, ics, Axis.Z, h);
+            if (!found)
+            {
+                yield break;
+            }
 
             AddDebugData(new() { Triangle = item.Triangle, });
 
-            float ics = settings.InverseCellSize;
             float ich = settings.InverseCellHeight;
-            int h = settings.Height;
             int flagMergeThr = settings.WalkableClimb;
             float by = bounds.Height;
-
-            // Calculate the footprint of the triangle on the grid's z-axis
-            var (z0, z1) = FindZFootPrint(polyBounds, bounds, ics, h);
 
             // Clip the triangle into all grid cells it touches.
             var poly = item.Triangle.GetVertices().ToArray();
@@ -111,20 +118,19 @@ namespace Engine.PathFinding.RecastNavigation
                 minY -= bounds.Minimum.Y;
                 maxY -= bounds.Minimum.Y;
 
-                if (SpanOutsideBBox(minY, maxY, by))
+                // Clamp the span to the heightfield bbox.
+                var (inside, nminY, nmaxY) = SpanInsideBBox(minY, maxY, by);
+                if (!inside)
                 {
                     // Skip the span if it is outside the heightfield bbox
                     continue;
                 }
-
-                // Clamp the span to the heightfield bbox.
-                SpanClamp(ref minY, ref maxY, by);
+                minY = nminY;
+                maxY = nmaxY;
 
                 // Snap the span to the heightfield height grid.
-                float fmin = MathF.Round(MathF.Floor(minY * ich));
-                float fmax = MathF.Round(MathF.Ceiling(maxY * ich));
-                int ismin = MathUtil.Clamp((int)fmin, 0, RasterizerSettings.MaxHeight);
-                int ismax = MathUtil.Clamp((int)fmax, ismin + 1, RasterizerSettings.MaxHeight);
+                int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, maxHeight);
+                int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, maxHeight);
 
                 yield return new(x, z, ismin, ismax, item.AreaType, flagMergeThr);
             }
@@ -165,7 +171,8 @@ namespace Engine.PathFinding.RecastNavigation
                 AddDivisionData(divZ);
 
                 // find the horizontal bounds in the row
-                var (found, x0, x1) = FindXFootPrint(row, bounds, ics, w);
+                var (minX, maxX) = CalculateSpanMinMax(row, Axis.X);
+                var (found, x0, x1) = FindFootPrint(minX, maxX, bounds, ics, Axis.X, w);
                 if (!found)
                 {
                     continue;
@@ -214,28 +221,20 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
-        /// Gets whether the span (min, max) is outside the specified box size
+        /// Gets whether the span (min, max) is outside the specified box height, and returns the min,max clamped values
         /// </summary>
-        /// <param name="min">Min size</param>
-        /// <param name="max">Max size</param>
-        /// <param name="size">Size</param>
-        private static bool SpanOutsideBBox(float min, float max, float size)
+        /// <param name="min">Min height</param>
+        /// <param name="max">Max height</param>
+        /// <param name="height">Height</param>
+        private static (bool Inside, float Min, float Max) SpanInsideBBox(float min, float max, float height)
         {
-            if (max < 0.0f) return true;
-            if (min > size) return true;
+            if (max < 0f) return (false, min, max);
+            if (min > height) return (false, min, max);
 
-            return false;
-        }
-        /// <summary>
-        /// Clamps the span (min, max) into the box size
-        /// </summary>
-        /// <param name="min">Min size</param>
-        /// <param name="max">Max size</param>
-        /// <param name="size">Size</param>
-        private static void SpanClamp(ref float min, ref float max, float size)
-        {
-            if (min < 0.0f) min = 0;
-            if (max > size) max = size;
+            if (min < 0f) min = 0;
+            if (max > height) max = height;
+
+            return (true, min, max);
         }
         /// <summary>
         /// Calculates the span axis sizes
@@ -258,41 +257,29 @@ namespace Engine.PathFinding.RecastNavigation
             return (min, max);
         }
         /// <summary>
-        /// Finds the z axis foot-print
+        /// Finds the axis foot-print
         /// </summary>
-        /// <param name="t">Triangle bounds</param>
+        /// <param name="min">Minimum bounds value</param>
+        /// <param name="max">Maximum bounds value</param>
         /// <param name="b">Input geometry bounds</param>
         /// <param name="ics">Inverse cell size</param>
-        /// <param name="h">Height</param>
-        private static (int, int) FindZFootPrint(BoundingBox t, BoundingBox b, float ics, int h)
+        /// <param name="axis">Axis</param>
+        /// <param name="axisOffset">Axis offset</param>
+        private static (bool, int, int) FindFootPrint(float min, float max, BoundingBox b, float ics, Axis axis, int axisOffset)
         {
-            int z0 = (int)MathF.Round((t.Minimum.Z - b.Minimum.Z) * ics);
-            int z1 = (int)MathF.Round((t.Maximum.Z - b.Minimum.Z) * ics);
-            z0 = MathUtil.Clamp(z0, -1, h - 1);
-            z1 = MathUtil.Clamp(z1, 0, h - 1);
+            int a = (int)axis;
+            float av = b.Minimum[a];
 
-            return (z0, z1);
-        }
-        /// <summary>
-        /// Finds the x axis foot-print
-        /// </summary>
-        /// <param name="poly">Polygon vertices</param>
-        /// <param name="b">Input geometry bounds</param>
-        /// <param name="ics">Inverse cell size</param>
-        /// <param name="w">Width</param>
-        private static (bool, int, int) FindXFootPrint(Vector3[] poly, BoundingBox b, float ics, int w)
-        {
-            var (minX, maxX) = CalculateSpanMinMax(poly, Axis.X);
-            int x0 = (int)MathF.Round((minX - b.Minimum.X) * ics);
-            int x1 = (int)MathF.Round((maxX - b.Minimum.X) * ics);
-            if (x1 < 0 || x0 >= w)
+            int s0 = (int)MathF.Round((min - av) * ics);
+            int s1 = (int)MathF.Round((max - av) * ics);
+            if (s1 < 0 || s0 >= axisOffset)
             {
-                return (false, x0, x1);
+                return (false, s0, s1);
             }
-            x0 = MathUtil.Clamp(x0, -1, w - 1);
-            x1 = MathUtil.Clamp(x1, 0, w - 1);
+            s0 = MathUtil.Clamp(s0, -1, axisOffset - 1);
+            s1 = MathUtil.Clamp(s1, 0, axisOffset - 1);
 
-            return (true, x0, x1);
+            return (true, s0, s1);
         }
         /// <summary>
         /// Divides the specified polygon along the axis

@@ -9,12 +9,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     class HeightPatch
     {
-        const int RC_UNSET_HEIGHT = -1;
+        /// <summary>
+        /// Unset height default value
+        /// </summary>
+        public const int RC_UNSET_HEIGHT = 0xffff;
 
         /// <summary>
         /// Data
         /// </summary>
-        private readonly int[] data = [];
+        private readonly int[] data;
 
         /// <summary>
         /// Rectangle
@@ -92,20 +95,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             SetHeight(hdItem.X - Bounds.X, hdItem.Y - Bounds.Y, value);
         }
         /// <summary>
-        /// Calculates the patch height at the specified point
+        /// Calculates the patch height at the specified coordinates
         /// </summary>
-        /// <param name="p">Point</param>
-        /// <param name="ics">Inverse of the cell size</param>
+        /// <param name="hx">X coordinate</param>
+        /// <param name="hy">Y coordinate</param>
+        /// <param name="ph">Height value</param>
         /// <param name="ch">Cell height</param>
         /// <param name="radius">Search radius</param>
         /// <returns>Returns the patch height value</returns>
-        public int CalculateHeight(Vector3 p, float ics, float ch, int radius)
+        public int CalculateHeight(int hx, int hy, float ph, float ch, int radius)
         {
-            int ix = (int)MathF.Floor(p.X * ics + 0.01f);
-            int iz = (int)MathF.Floor(p.Z * ics + 0.01f);
-            ix = MathUtil.Clamp(ix - Bounds.X, 0, Bounds.Width - 1);
-            iz = MathUtil.Clamp(iz - Bounds.Y, 0, Bounds.Height - 1);
-            int hmin = data[ix + iz * Bounds.Width];
+            hx = MathUtil.Clamp(hx - Bounds.X, 0, Bounds.Width - 1);
+            hy = MathUtil.Clamp(hy - Bounds.Y, 0, Bounds.Height - 1);
+            int hmin = data[hx + hy * Bounds.Width];
             if (hmin != RC_UNSET_HEIGHT)
             {
                 return hmin;
@@ -124,9 +126,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float dmin = float.MaxValue;
             for (int i = 0; i < maxIter; i++)
             {
-                int nx = ix + x;
-                int nz = iz + z;
-                if (CalculateDistanceToCeiling(nx, nz, ch, p.Y, out var h, out var d) && (d < dmin))
+                int nx = hx + x;
+                int nz = hy + z;
+                if (CalculateDistanceToCeiling(nx, nz, ph, ch, out var h, out var d) && (d < dmin))
                 {
                     hmin = h;
                     dmin = d;
@@ -178,12 +180,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="hx">Heightpatch x coordinate</param>
         /// <param name="hy">Heightpatch z coordinate</param>
-        /// <param name="ch">Cell height</param>
         /// <param name="ph">Point height</param>
+        /// <param name="ch">Cell height</param>
         /// <param name="h">Height value</param>
         /// <param name="dist">Distance to ceiling</param>
         /// <returns>Returns true if the specified coordinates returns a height value</returns>
-        private bool CalculateDistanceToCeiling(int hx, int hy, float ch, float ph, out int h, out float dist)
+        private bool CalculateDistanceToCeiling(int hx, int hy, float ph, float ch, out int h, out float dist)
         {
             h = int.MaxValue;
             dist = float.MaxValue;
@@ -227,6 +229,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public bool IsSet(int hx, int hy)
         {
             return GetHeight(hx, hy) != RC_UNSET_HEIGHT;
+        }
+
+        /// <summary>
+        /// Converts the specified point to height patch coordinates
+        /// </summary>
+        /// <param name="p">Point</param>
+        /// <param name="cs">Cell size</param>
+        public static (int hx, int hy) PointToPatch(Vector3 p, float cs)
+        {
+            float ics = 1f / cs;
+            int x = (int)MathF.Floor(p.X * ics + 0.01f);
+            int z = (int)MathF.Floor(p.Z * ics + 0.01f);
+
+            return (x, z);
         }
     }
 }

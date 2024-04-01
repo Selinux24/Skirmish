@@ -1202,7 +1202,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             foreach (var dpoly in Rasterizer.DebugData)
             {
-                float h = 0;
+                float h = 0.01f;
 
                 var triPoins = dpoly.Triangle.GetVertices();
                 DrawPolygon(triPoins, color);

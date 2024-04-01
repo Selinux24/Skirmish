@@ -1413,7 +1413,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int heightSearchRadius = param.HeightSearchRadius;
 
             float cs = CellSize;
-            float ics = 1.0f / cs;
             float ch = CellHeight;
 
             var vd = vi - vj;
@@ -1434,7 +1433,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 float u = k / (float)nn;
                 var pos = vj + vd * u;
-                pos.Y = hp.CalculateHeight(pos, ics, ch, heightSearchRadius) * ch;
+                var (hx, hy) = HeightPatch.PointToPatch(pos, cs);
+                pos.Y = hp.CalculateHeight(hx, hy, pos.Y, ch, heightSearchRadius) * ch;
 
                 edge[k] = pos;
             }
@@ -1526,14 +1526,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int z1 = (int)Math.Ceiling(bbox.Maximum.Z / sampleDist);
 
             float cs = CellSize;
-            float ics = 1.0f / cs;
             float ch = CellHeight;
 
             for (int z = z0; z < z1; ++z)
             {
                 for (int x = x0; x < x1; ++x)
                 {
-                    var pt = new Vector3
+                    var pos = new Vector3
                     {
                         X = x * sampleDist,
                         Y = h,
@@ -1541,13 +1540,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     };
 
                     // Make sure the samples are not too close to the edges.
-                    var dist = Utils.DistancePtPoly2D(pt, polygon);
+                    var dist = Utils.DistancePtPoly2D(pos, polygon);
                     if (dist > samplePDist)
                     {
                         continue;
                     }
 
-                    int y = hp.CalculateHeight(pt, ics, ch, heightSearchRadius);
+                    var (hx, hy) = HeightPatch.PointToPatch(pos, cs);
+                    int y = hp.CalculateHeight(hx, hy, pos.Y, ch, heightSearchRadius);
 
                     samples.Add(new(x, y, z, false)); // Not added
                 }
@@ -1702,7 +1702,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var cs = Spans[hdItem.I];
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < dirs.Length; i++)
             {
                 int dir = dirs[i];
                 if (!cs.GetCon(dir, out int con))
@@ -1748,7 +1748,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int startCellX = 0;
             int startCellY = 0;
             int startSpanIndex = -1;
-            int dmin = -1;
+            int dmin = HeightPatch.RC_UNSET_HEIGHT;
             for (int j = 0; j < polyIndices.Length; ++j)
             {
                 var vert = verts[polyIndices[j]];
