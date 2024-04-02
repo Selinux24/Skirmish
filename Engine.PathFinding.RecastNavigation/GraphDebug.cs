@@ -483,15 +483,15 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 col;
                 if (area == SamplePolyAreas.Ground)
                 {
-                    col = new Color(0, 192, 255, 255);
+                    col = new Color(0, 192, 255, 128);
                 }
                 else if (area == SamplePolyAreas.None)
                 {
-                    col = new Color(0, 0, 0, 255);
+                    col = new Color(0, 0, 0, 128);
                 }
                 else
                 {
-                    col = AreaToCol(area, 255);
+                    col = AreaToCol(area, 128);
                 }
 
                 tris.TryAdd(col, []);

@@ -389,30 +389,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="a">Source edge vertex A</param>
         /// <param name="b">Source edge vertex B</param>
-        /// <param name="ra">Resulting vertex A</param>
-        /// <param name="rb">Resulting vertex B</param>
+        /// <param name="vb">Resulting vertex A</param>
+        /// <param name="va">Resulting vertex B</param>
         /// <returns>Returns true if the sorting operation swaps de vertex order</returns>
-        private static bool GetPolyVerts(Vector3 a, Vector3 b, out Vector3 ra, out Vector3 rb)
+        private static bool GetPolyVerts(Vector3 a, Vector3 b, out Vector3 va, out Vector3 vb)
         {
-            rb = a;
-            ra = b;
+            va = a;
+            vb = b;
             bool swapped = false;
 
             // Make sure the segments are always handled in same order
             // using lexological sort or else there will be seams.
-            if (Math.Abs(rb.X - ra.X) < Utils.ZeroTolerance)
+            if (Math.Abs(vb.X - va.X) < Utils.ZeroTolerance)
             {
-                if (rb.Z > ra.Z)
+                if (vb.Z > va.Z)
                 {
-                    (ra, rb) = (rb, ra);
+                    (vb, va) = (va, vb);
                     swapped = true;
                 }
             }
             else
             {
-                if (rb.X > ra.X)
+                if (vb.X > va.X)
                 {
-                    (ra, rb) = (rb, ra);
+                    (vb, va) = (va, vb);
                     swapped = true;
                 }
             }
@@ -1295,9 +1295,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="outTris">Resulting triangle indices</param>
         public void BuildPolyDetail(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Int3[] outTris)
         {
-            //Copy polygon array
-            var verts = polygon.ToArray();
-            var hull = Array.Empty<int>();
+            Vector3[] verts;
+            int[] hull;
 
             // Tessellate outlines.
             // This is done in separate pass in order to ensure
@@ -1305,7 +1304,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float sampleDist = param.SampleDist;
             if (sampleDist > 0)
             {
-                verts = TesselateOutlines(verts, param, hp, out hull);
+                var (newVerts, newHull) = TesselateOutlines([.. polygon], param, hp);
+                verts = newVerts;
+                hull = newHull;
+            }
+            else
+            {
+                verts = [.. polygon];
+                hull = [];
             }
 
             // Calculate minimum extents of the polygon based on input data.
@@ -1357,10 +1363,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Tessellate outlines.
         /// </summary>
-        private Vector3[] TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out int[] hull)
+        /// <param name="polygon">Polygon vertices</param>
+        /// <param name="param">Build parameters</param>
+        /// <param name="hp">Height patch</param>
+        /// <returns>Returns the new vertices and the hull indices</returns>
+        private (Vector3[] Verts, int[] Hull) TesselateOutlines(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp)
         {
-            var verts = polygon.ToList();
-            List<int> hullList = new(MAX_VERTS);
+            List<Vector3> verts = [.. polygon];
+            List<int> hull = new(MAX_VERTS);
 
             int ninp = polygon.Length;
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
@@ -1373,7 +1383,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Simplify samples.
                 var idx = SimplifySamples(edgeSamples, nn, param);
 
-                hullList.Add(j);
+                hull.Add(j);
 
                 // Add new vertices.
                 int nidx = idx.Length;
@@ -1381,7 +1391,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     for (int k = nidx - 2; k > 0; --k)
                     {
-                        hullList.Add(verts.Count);
+                        hull.Add(verts.Count);
                         verts.Add(edgeSamples[idx[k]]);
                     }
                 }
@@ -1389,15 +1399,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     for (int k = 1; k < nidx - 1; ++k)
                     {
-                        hullList.Add(verts.Count);
+                        hull.Add(verts.Count);
                         verts.Add(edgeSamples[idx[k]]);
                     }
                 }
             }
 
-            hull = [.. hullList];
-
-            return [.. verts];
+            return ([.. verts], [.. hull]);
         }
         /// <summary>
         /// Creates height patch samples
