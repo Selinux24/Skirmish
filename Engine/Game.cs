@@ -988,9 +988,15 @@ namespace Engine
                 iSW.Stop();
                 GameStatus.Add(nameof(FrameInput), iSW);
             }
+            catch (System.Runtime.InteropServices.SEHException ex)
+            {
+                Logger.WriteError(this, $"{nameof(FrameInput)}: {Graphics.GetDeviceErrors()}", ex);
+
+                throw;
+            }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{nameof(FrameInput)}: Input Update error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(FrameInput)}: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -1006,9 +1012,15 @@ namespace Engine
                 uSW.Stop();
                 GameStatus.Add(nameof(FrameSceneUpdate), uSW);
             }
+            catch (System.Runtime.InteropServices.SEHException ex)
+            {
+                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: {Graphics.GetDeviceErrors()}", ex);
+
+                throw;
+            }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: Update error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -1024,9 +1036,15 @@ namespace Engine
                 dSW.Stop();
                 GameStatus.Add(nameof(FrameSceneDraw), dSW);
             }
+            catch (System.Runtime.InteropServices.SEHException ex)
+            {
+                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: {Graphics.GetDeviceErrors()}", ex);
+
+                throw;
+            }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: Draw error: {ex.Message}. {Graphics.GetDeviceRemovedReason()}", ex);
+                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -1041,11 +1059,15 @@ namespace Engine
                 pSW.Stop();
                 GameStatus.Add(nameof(FramePresent), pSW);
             }
-            catch (Exception ex)
+            catch (System.Runtime.InteropServices.SEHException ex)
             {
-                Logger.WriteError(this, $"{nameof(FramePresent)}: Graphics End error: {ex.Message}. {Graphics.GetDeviceRemovedReason()}", ex);
+                Logger.WriteError(this, $"{nameof(FramePresent)}: {Graphics.GetDeviceErrors()}", ex);
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"{nameof(FramePresent)}: {ex.Message}", ex);
             }
         }
         /// <summary>

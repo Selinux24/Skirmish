@@ -3,6 +3,7 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Engine
 {
@@ -464,11 +465,11 @@ namespace Engine
                 },
                 DenyList = new InfoQueueFilterDescription()
                 {
-                    Severities = new MessageSeverity[]
-                    {
+                    Severities =
+                    [
                         MessageSeverity.Information,
                         MessageSeverity.Message,
-                    },
+                    ],
                 }
             };
 
@@ -480,15 +481,40 @@ namespace Engine
                 },
                 DenyList = new InfoQueueFilterDescription()
                 {
-                    Ids = new MessageId[]
-                    {
+                    Ids =
+                    [
                         MessageId.MessageIdDeviceDrawRenderTargetViewNotSet,
-                    },
+                    ],
                 }
             };
 
             deviceDebugInfoQueue.AddStorageFilterEntries(severityFilter);
             deviceDebugInfoQueue.AddStorageFilterEntries(idFilter);
+        }
+        /// <summary>
+        /// Gets the debug info
+        /// </summary>
+        public string GetDebugInfo()
+        {
+            var mcount = deviceDebugInfoQueue.NumStoredMessages;
+            if (mcount == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new();
+
+            for (int i = 0; i < mcount; i++)
+            {
+                var message = deviceDebugInfoQueue.GetMessage(i);
+                string desc = message.Description.Replace('\0', ' ');
+                string txt = $"({i + 1}){message.Id}[{message.Severity}]-{message.Category}=>{desc}";
+                sb.AppendLine(txt);
+            }
+
+            deviceDebugInfoQueue.ClearStoredMessages();
+
+            return sb.ToString();
         }
 #endif
 
@@ -507,9 +533,9 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the device removed reason
+        /// Gets the device error state
         /// </summary>
-        public string GetDeviceRemovedReason()
+        public string GetDeviceErrors()
         {
             var res = device.DeviceRemovedReason;
             if (res.Failure)
@@ -517,7 +543,11 @@ namespace Engine
                 return ResultDescriptor.Find(res)?.Description;
             }
 
+#if DEBUG
+            return GetDebugInfo();
+#else
             return null;
+#endif
         }
 
         /// <summary>

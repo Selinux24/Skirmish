@@ -65,13 +65,12 @@ namespace TerrainSamples.SceneStart
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeCursor(),
                     InitializeBackground(),
                     InitializeAssets(),
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTweener()
@@ -100,7 +99,7 @@ namespace TerrainSamples.SceneStart
 
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
             titleFont.ContentPath = resourcesFolder;
-            titleFont.CustomKeycodes = new[] { '✌' };
+            titleFont.CustomKeycodes = ['✌'];
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.ContentPath = resourcesFolder;
@@ -164,8 +163,8 @@ namespace TerrainSamples.SceneStart
 
             #endregion
 
-            sceneButtons = new[]
-            {
+            sceneButtons =
+            [
                 sceneCrowdsButton,
                 sceneGridButton,
                 sceneHeightmapButton,
@@ -175,7 +174,7 @@ namespace TerrainSamples.SceneStart
                 sceneRtsButton,
                 sceneSkyboxButton,
                 exitButton,
-            };
+            ];
 
             await InitializeModularDungeonTabs();
         }
@@ -191,7 +190,7 @@ namespace TerrainSamples.SceneStart
         }
         private async Task InitializeModularDungeonTabs()
         {
-            List<string> tabButtons = new();
+            List<string> tabButtons = [];
             int basicIndex = -1;
             int backIndex = -1;
 
@@ -214,7 +213,7 @@ namespace TerrainSamples.SceneStart
             var mediumClickFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
             mediumClickFont.ContentPath = resourcesFolder;
 
-            var desc = UITabPanelDescription.Default(tabButtons.ToArray(), Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
+            var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
             desc.ContentPath = resourcesFolder;
             desc.ButtonDescription.Font = mediumFont;
             desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;

@@ -91,6 +91,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var (Reg, Area, RawVerts) in cells)
             {
+                if (RawVerts.Length < 3)
+                {
+                    continue;
+                }
+
                 var cont = SimplifyContour(RawVerts, maxError, maxEdgeLen, buildFlags);
                 if (cont.Length < 3)
                 {
