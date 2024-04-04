@@ -1,20 +1,53 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     /// <summary>
     /// Tile cache contour set
     /// </summary>
-    public struct TileCacheContourSet
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="nconts">Number of contours</param>
+    public readonly struct TileCacheContourSet(int nconts)
     {
         /// <summary>
         /// Number of contours
         /// </summary>
-        public int NConts { get; set; }
+        private readonly int nconts = nconts;
         /// <summary>
         /// Contour list
         /// </summary>
-        public TileCacheContour[] Conts { get; set; }
+        private readonly TileCacheContour[] conts = new TileCacheContour[nconts];
+
+        /// <summary>
+        /// Gets the contour at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public readonly TileCacheContour GetContour(int index)
+        {
+            return conts[index];
+        }
+        /// <summary>
+        /// Sets the contour value at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="contour">Contout</param>
+        public readonly void SetContour(int index, TileCacheContour contour)
+        {
+            conts[index] = contour;
+        }
+        /// <summary>
+        /// Iterates over the contour list
+        /// </summary>
+        public readonly IEnumerable<(int i, TileCacheContour c)> IterateContours()
+        {
+            for (int i = 0; i < conts.Length; i++)
+            {
+                yield return (i, conts[i]);
+            }
+        }
 
         /// <summary>
         /// Gets the geometry configuration of the contour set
@@ -28,9 +61,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             maxTris = 0;
             maxVertsPerCont = 0;
 
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                var nverts = Conts[i].NVertices;
+                var nverts = conts[i].GetVertexCount();
 
                 // Skip null contours.
                 if (nverts < 3)

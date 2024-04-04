@@ -13,11 +13,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// An array of the contours in the set. [Size: #nconts]
         /// </summary>
-        public Contour[] Conts { get; set; }
+        private Contour[] conts;
         /// <summary>
         /// The number of contours in the set.
         /// </summary>
-        public int NConts { get; set; }
+        private int nconts;
+
         /// <summary>
         /// The bounds in world space.
         /// </summary>
@@ -48,6 +49,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public float MaxError { get; set; }
 
         /// <summary>
+        /// Gets whether the contour set has contours
+        /// </summary>
+        public bool HasContours()
+        {
+            return nconts > 0;
+        }
+
+        /// <summary>
+        /// Iterates over the contour list
+        /// </summary>
+        public IEnumerable<(int i, Contour c)> IterateContours()
+        {
+            for (int i = 0; i < nconts; i++)
+            {
+                yield return (i, conts[i]);
+            }
+        }
+
+        /// <summary>
         /// Builds a new contour set
         /// </summary>
         /// <param name="chf">Compact heightfield</param>
@@ -75,8 +95,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Height = h - borderSize * 2,
                 BorderSize = borderSize,
                 MaxError = maxError,
-                Conts = new Contour[maxContours],
-                NConts = 0
+                conts = new Contour[maxContours],
+                nconts = 0
             };
 
             int[] flags = chf.InitializeFlags();
@@ -488,9 +508,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             maxPolys = 0;
             maxVertsPerCont = 0;
 
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                var nverts = Conts[i].NVertices;
+                var nverts = conts[i].GetVertexCount();
 
                 // Skip null contours.
                 if (nverts < 3)
@@ -509,11 +529,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="reg">Region id</param>
         public Contour FindContour(int reg)
         {
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                if (Conts[i].RegionId == reg)
+                if (conts[i].RegionId == reg)
                 {
-                    return Conts[i];
+                    return conts[i];
                 }
             }
 
@@ -530,31 +550,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="borderSize">Border size</param>
         public void AddContour(int reg, AreaTypes area, ContourVertex[] rawVerts, ContourVertex[] verts, int maxContours, int borderSize)
         {
-            if (NConts >= maxContours)
+            if (nconts >= maxContours)
             {
                 // Allocate more contours.
                 // This happens when a region has holes.
                 Contour[] newConts = new Contour[maxContours * 2];
-                for (int j = 0; j < NConts; ++j)
+                for (int j = 0; j < nconts; ++j)
                 {
-                    newConts[j] = Conts[j];
+                    newConts[j] = conts[j];
                 }
-                Conts = newConts;
+                conts = newConts;
             }
 
-            var cont = new Contour
-            {
-                RegionId = reg,
-                Area = area,
-                NRawVertices = rawVerts.Length,
-                RawVertices = rawVerts,
-                NVertices = verts.Length,
-                Vertices = verts,
-            };
+            Contour cont = new(reg, area, rawVerts, verts);
 
             cont.RemoveBorderSize(borderSize);
 
-            Conts[NConts++] = cont;
+            conts[nconts++] = cont;
         }
         /// <summary>
         /// Merge holes
@@ -562,7 +574,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="nregions">Number of regions</param>
         private void MergeHoles(int nregions)
         {
-            if (NConts <= 0)
+            if (nconts <= 0)
             {
                 return;
             }
@@ -590,11 +602,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private ContourRegion[] CollectOutlinesAndHolesPerRegion(int nregions, int[] winding)
         {
             var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
-            var holes = Helper.CreateArray(NConts, () => { return new ContourHole(); });
+            var holes = Helper.CreateArray(nconts, () => { return new ContourHole(); });
 
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                var cont = Conts[i];
+                var cont = conts[i];
 
                 // Positively would contours are outlines, negative holes.
                 if (winding[i] <= 0)
@@ -626,14 +638,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 regions[i].NHoles = 0;
             }
 
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
                 if (winding[i] >= 0)
                 {
                     continue;
                 }
 
-                var cont = Conts[i];
+                var cont = conts[i];
                 var reg = regions[cont.RegionId];
                 reg.Holes[reg.NHoles++].Contour = cont;
             }
@@ -673,11 +685,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="winding">Resulting winding list</param>
         private bool CalculateWindings(out int[] winding)
         {
-            winding = new int[NConts];
+            winding = new int[nconts];
             int nholes = 0;
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                var cont = Conts[i];
+                var cont = conts[i];
                 // If the contour is wound backwards, it is a hole.
                 winding[i] = cont.CalcAreaOfPolygon2D() < 0 ? -1 : 1;
                 if (winding[i] < 0)

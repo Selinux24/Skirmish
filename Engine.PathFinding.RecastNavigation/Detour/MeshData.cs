@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="param">Creation parameters</param>
         public static MeshData CreateNavMeshData(NavMeshCreateParams param)
         {
-            if (param.Nvp > IndexedPolygon.DT_VERTS_PER_POLYGON ||
+            if (param.NVP > IndexedPolygon.DT_VERTS_PER_POLYGON ||
                 param.VertCount == 0 || param.Verts == null ||
                 param.PolyCount == 0 || param.Polys == null)
             {
@@ -266,7 +266,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
                 else
                 {
-                    it.CalcPolygonBounds(param.Polys[i], param.Nvp, param.Verts, param.CellSize, param.CellHeight);
+                    it.CalcPolygonBounds(param.Polys[i], param.NVP, param.Verts, param.CellSize, param.CellHeight);
                 }
                 items[i] = it;
             }
@@ -343,7 +343,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             edgeCount = 0;
             portalCount = 0;
 
-            int nvp = param.Nvp;
+            int nvp = param.NVP;
 
             for (int i = 0; i < param.PolyCount; ++i)
             {
@@ -385,7 +385,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var p = param.Polys[i];
                     var ndv = param.DetailMeshes[i].VertCount;
-                    int nv = p.FindFirstFreeIndex(param.Nvp);
+                    int nv = p.FindFirstFreeIndex(param.NVP);
                     ndv -= nv;
                     uniqueDetailVertCount += ndv;
                 }
@@ -398,7 +398,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < param.PolyCount; ++i)
                 {
                     var p = param.Polys[i];
-                    int nv = p.FindFirstFreeIndex(param.Nvp);
+                    int nv = p.FindFirstFreeIndex(param.NVP);
                     detailTriCount += nv - 2;
                 }
             }
@@ -481,7 +481,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             for (int i = 0; i < param.PolyCount; i++)
             {
-                var p = Poly.Create(param.Polys[i], param.PolyFlags[i], param.PolyAreas[i], param.Nvp);
+                var p = Poly.Create(param.Polys[i], param.PolyFlags[i], param.PolyAreas[i], param.NVP);
 
                 NavPolys.Add(p);
             }

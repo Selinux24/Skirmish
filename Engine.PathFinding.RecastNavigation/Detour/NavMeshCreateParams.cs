@@ -40,7 +40,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Number maximum number of vertices per polygon. [Limit: >= 3]
         /// </summary>
-        public int Nvp { get; set; }
+        public int NVP { get; set; }
 
         #endregion
 

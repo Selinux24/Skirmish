@@ -2,33 +2,40 @@
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    public class TileCacheMeshProcess
+    /// <summary>
+    /// Tile cache mes processor
+    /// </summary>
+    /// <param name="geometry">Geometry to process</param>
+    public class TileCacheMeshProcess(InputGeometry geometry)
     {
-        private readonly InputGeometry m_geom = null;
+        /// <summary>
+        /// Input geometry
+        /// </summary>
+        private readonly InputGeometry geometry = geometry;
 
-        public TileCacheMeshProcess(InputGeometry geometry)
-        {
-            m_geom = geometry;
-        }
-
+        /// <summary>
+        /// Process the geometry
+        /// </summary>
+        /// <param name="param">Navmesh parameters</param>
+        /// <param name="bc">Build context</param>
         public void Process(ref NavMeshCreateParams param, TileCacheBuildContext bc)
         {
             // Update poly flags from areas.
             for (int i = 0; i < param.PolyCount; ++i)
             {
-                if ((int)bc.PolyMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if ((int)bc.PolyMesh.GetArea(i) == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    bc.PolyMesh.Areas[i] = SamplePolyAreas.Ground;
+                    bc.PolyMesh.SetArea(i, SamplePolyAreas.Ground);
                 }
 
-                bc.PolyMesh.Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(bc.PolyMesh.Areas[i]);
+                bc.PolyMesh.SetFlag(i, SamplePolyFlagTypesExtents.EvaluateArea(bc.PolyMesh.GetArea(i)));
             }
 
             // Pass in off-mesh connections.
-            if (m_geom != null)
+            if (geometry != null)
             {
-                param.OffMeshCon = m_geom.GetConnections().ToArray();
-                param.OffMeshConCount = m_geom.GetConnectionCount();
+                param.OffMeshCon = geometry.GetConnections().ToArray();
+                param.OffMeshConCount = geometry.GetConnectionCount();
             }
         }
     }

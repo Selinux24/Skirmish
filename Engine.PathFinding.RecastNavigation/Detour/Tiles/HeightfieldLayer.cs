@@ -14,37 +14,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         const int NULL_ID = 0xff;
 
         /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CS { get; set; }
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CH { get; set; }
-        /// <summary>
         /// The heightfield. [Size: width * height]
         /// </summary>
-        public int[] Heights { get; set; }
+        private int[] heights;
         /// <summary>
         /// Area ids. [Size: Same as #heights]
         /// </summary>
-        public AreaTypes[] Areas { get; set; }
+        private AreaTypes[] areas;
         /// <summary>
         /// Packed neighbor connection information. [Size: Same as #heights]
         /// </summary>
-        public int[] Cons { get; set; }
+        private int[] cons;
+
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
-        /// <summary>
-        /// Height min range
-        /// </summary>
-        public int HMin { get; set; }
-        /// <summary>
-        /// Height max range
-        /// </summary>
-        public int HMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// Width of the layer.
         /// </summary>
@@ -53,6 +46,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Height of the layer.
         /// </summary>
         public int Height { get; set; }
+        /// <summary>
+        /// Height min range
+        /// </summary>
+        public int HMin { get; set; }
+        /// <summary>
+        /// Height max range
+        /// </summary>
+        public int HMax { get; set; }
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
@@ -95,23 +96,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="i"></param>
         private TileCacheLayerHeader CreateHeader(int x, int y, int i)
         {
-            return new TileCacheLayerHeader
+            return new()
             {
                 // Tile layer location in the navmesh.
                 TX = x,
                 TY = y,
                 TLayer = i,
-                BBox = BoundingBox,
+                Bounds = Bounds,
 
                 // Tile info.
                 Width = Width,
                 Height = Height,
+                HMin = HMin,
+                HMax = HMax,
                 MinX = MinX,
                 MaxX = MaxX,
                 MinY = MinY,
                 MaxY = MaxY,
-                HMin = HMin,
-                HMax = HMax
             };
         }
         /// <summary>
@@ -121,9 +122,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             return new TileCacheLayerData()
             {
-                Heights = Heights,
-                Areas = Areas,
-                Connections = Cons,
+                Heights = heights,
+                Areas = areas,
+                Connections = cons,
             };
         }
         /// <summary>
@@ -133,23 +134,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             int gridSize = data.LayerWidth * data.LayerHeight;
 
-            Heights = Helper.CreateArray(gridSize, NULL_ID);
-            Areas = Helper.CreateArray(gridSize, AreaTypes.RC_NULL_AREA);
-            Cons = Helper.CreateArray(gridSize, 0x00);
+            heights = Helper.CreateArray(gridSize, NULL_ID);
+            areas = Helper.CreateArray(gridSize, AreaTypes.RC_NULL_AREA);
+            cons = Helper.CreateArray(gridSize, 0x00);
 
             // Find layer height bounds.
             var (hmin, hmax) = data.FindLayerHeightBounds(curId);
 
             Width = data.LayerWidth;
             Height = data.LayerHeight;
-            CS = data.Heightfield.CellSize;
-            CH = data.Heightfield.CellHeight;
+            CellSize = data.Heightfield.CellSize;
+            CellHeight = data.Heightfield.CellHeight;
 
             // Adjust the bbox to fit the heightfield.
             var lbbox = data.BoundingBox;
             lbbox.Minimum.Y = data.BoundingBox.Minimum.Y + hmin * data.Heightfield.CellHeight;
             lbbox.Maximum.Y = data.BoundingBox.Minimum.Y + hmax * data.Heightfield.CellHeight;
-            BoundingBox = lbbox;
+            Bounds = lbbox;
             HMin = hmin;
             HMax = hmax;
 
@@ -211,11 +212,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 // Store height and area type.
                 int idx = x + y * data.LayerWidth;
-                Heights[idx] = s.Y - hmin;
-                Areas[idx] = data.Heightfield.Areas[j];
+                heights[idx] = s.Y - hmin;
+                areas[idx] = data.Heightfield.Areas[j];
 
                 // Check connection.
-                Cons[idx] = data.CheckConnection(s, cx, cy, lid, idx, hmin, Heights);
+                cons[idx] = data.CheckConnection(s, cx, cy, lid, idx, hmin, heights);
             }
         }
     }

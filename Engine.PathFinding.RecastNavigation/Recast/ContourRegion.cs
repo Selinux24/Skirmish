@@ -22,43 +22,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int NHoles { get; set; }
 
         /// <summary>
-        /// Gets whether the specified segments intersects
-        /// </summary>
-        /// <param name="d0">First segment</param>
-        /// <param name="d1">Second segment</param>
-        /// <param name="i">Incident vertex index</param>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="n">Number of vertices</param>
-        /// <returns></returns>
-        private static bool IntersectSegCountour(ContourVertex d0, ContourVertex d1, int i, ContourVertex[] verts, int n)
-        {
-            // For each edge (k,k+1) of P
-            for (int k = 0; k < n; k++)
-            {
-                int k1 = ArrayUtils.Next(k, n);
-
-                // Skip edges incident to i.
-                if (i == k || i == k1)
-                {
-                    continue;
-                }
-
-                var p0 = verts[k];
-                var p1 = verts[k1];
-                if (d0 == p0 || d1 == p0 || d0 == p1 || d1 == p1)
-                {
-                    continue;
-                }
-
-                if (TriangulationHelper.Intersect2D(d0.Coords, d1.Coords, p0.Coords, p1.Coords))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
         /// Find potential diagonals
         /// </summary>
         /// <param name="corner">Corner</param>
@@ -68,19 +31,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var diags = new List<PotentialDiagonal>();
 
-            var verts = ContourVertex.ToInt3List(outline.Vertices);
-            int n = outline.NVertices;
-
-            for (int i = 0; i < n; i++)
+            foreach (var (i, ca, cb, cc) in outline.IterateTriangles())
             {
-                var ca = verts[i];
-                var cb = verts[ArrayUtils.Next(i, n)];
-                var cc = verts[ArrayUtils.Prev(i, n)];
-
                 if (TriangulationHelper.InCone2D(ca, cb, cc, corner.Coords))
                 {
-                    int dx = verts[i].X - corner.X;
-                    int dz = verts[i].Z - corner.Z;
+                    int dx = ca.X - corner.X;
+                    int dz = ca.Z - corner.Z;
                     diags.Add(new() { Vert = i, Dist = dx * dx + dz * dz });
                 }
             }
@@ -143,7 +99,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int index = -1;
             int bestVertex = hole.Leftmost;
 
-            for (int iter = 0; iter < hole.Contour.NVertices; iter++)
+            for (int iter = 0; iter < hole.Contour.GetVertexCount(); iter++)
             {
                 // Find potential diagonals.
                 // The 'best' vertex must be in the cone described by 3 cosequtive vertices of the outline.
@@ -153,7 +109,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 //   |
                 // j o-----o j+1
                 //         :
-                var corner = hole.Contour.Vertices[bestVertex];
+                var corner = hole.Contour.GetVertex(bestVertex);
                 var diags = FindPotentialDiagonals(corner, outline);
 
                 // Find a diagonal that is not intersecting the outline not the remaining holes.
@@ -167,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // All the potential diagonals for the current vertex were intersecting, try next vertex.
-                bestVertex = (bestVertex + 1) % hole.Contour.NVertices;
+                bestVertex = (bestVertex + 1) % hole.Contour.GetVertexCount();
             }
 
             return (bestVertex, index);
@@ -185,12 +141,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < diags.Length; j++)
             {
-                var pt = outline.Vertices[diags[j].Vert];
+                var pt = outline.GetVertex(diags[j].Vert);
 
-                bool intersect = IntersectSegCountour(pt, corner, diags[i].Vert, outline.Vertices, outline.NVertices);
+                bool intersect = outline.IntersectSegCountour(pt, corner, diags[i].Vert);
                 for (int k = i; k < NHoles && !intersect; k++)
                 {
-                    intersect |= IntersectSegCountour(pt, corner, -1, Holes[k].Contour.Vertices, Holes[k].Contour.NVertices);
+                    intersect |= Holes[k].Contour.IntersectSegCountour(pt, corner, -1);
                 }
 
                 if (!intersect)

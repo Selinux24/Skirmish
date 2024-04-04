@@ -33,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh detail</returns>
         public static PolyMeshDetail Build(PolyMesh mesh, CompactHeightfield chf, float sampleDist, float sampleMaxError)
         {
-            if (mesh.NVerts == 0 || mesh.NPolys == 0)
+            if (mesh.GetVertexCount() == 0 || mesh.GetPolyCount() == 0)
             {
                 return null;
             }
@@ -45,14 +45,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var dmesh = new PolyMeshDetail();
 
-            for (int i = 0; i < mesh.NPolys; ++i)
+            foreach (var (i, mPoly, mRegion, _) in mesh.IteratePolygons())
             {
-                var mPoly = mesh.Polys[i];
-                var mRegion = mesh.Regs[i];
-                var rect = bounds[i].GetRectangle(); 
+                var rect = bounds[i].GetRectangle();
 
                 // Get the height data from the area of the polygon.
-                var hp = chf.GetHeightData(mPoly, mRegion, mesh.Verts, rect);
+                var hp = chf.GetHeightData(mPoly, mRegion, mesh.GetVertices(), rect);
 
                 // Store polygon vertices for processing.
                 var poly = mesh.BuildPolyVertices(mPoly);

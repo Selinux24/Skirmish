@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -119,39 +120,38 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
 
         /// <summary>
-        /// The mesh vertices. [Form: (x, y, z) * #<see cref="NVerts"/>]
-        /// </summary>
-        public Int3[] Verts { get; set; }
-        /// <summary>
         /// The number of vertices.
         /// </summary>
-        public int NVerts { get; set; }
+        private int nverts;
         /// <summary>
-        /// Polygon and neighbor data. [Length: #<see cref="MaxPolys"/> * 2 * #<see cref="NVP"/>]
+        /// The mesh vertices. [Form: (x, y, z) * #<see cref="nverts"/>]
         /// </summary>
-        public IndexedPolygon[] Polys { get; set; }
+        private Int3[] verts;
         /// <summary>
         /// The number of polygons.
         /// </summary>
-        public int NPolys { get; set; }
+        private int npolys;
         /// <summary>
-        /// The maximum number of vertices per polygon.
+        /// Polygon and neighbor data. [Length: #<see cref="MaxPolys"/> * 2 * #<see cref="NVP"/>]
         /// </summary>
-        public int NVP { get; set; }
-
+        private IndexedPolygon[] polys;
         /// <summary>
         /// The region id assigned to each polygon. [Length: #<see cref="MaxPolys"/>]
         /// </summary>
-        public int[] Regs { get; set; }
-        /// <summary>
-        /// The user defined flags for each polygon. [Length: #<see cref="MaxPolys"/>]
-        /// </summary>
-        public SamplePolyFlagTypes[] Flags { get; set; }
+        private int[] regs;
         /// <summary>
         /// The area id assigned to each polygon. [Length: #<see cref="MaxPolys"/>]
         /// </summary>
-        public SamplePolyAreas[] Areas { get; set; }
+        private SamplePolyAreas[] areas;
+        /// <summary>
+        /// The user defined flags for each polygon. [Length: #<see cref="MaxPolys"/>]
+        /// </summary>
+        private SamplePolyFlagTypes[] flags;
 
+        /// <summary>
+        /// The maximum number of vertices per polygon.
+        /// </summary>
+        public int NVP { get; private set; }
         /// <summary>
         /// The bounds in world space.
         /// </summary>
@@ -189,14 +189,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var mesh = new PolyMesh
             {
-                NVerts = 0,
-                Verts = new Int3[maxVertices],
+                nverts = 0,
+                verts = new Int3[maxVertices],
 
-                NPolys = 0,
-                Polys = new IndexedPolygon[maxPolys],
-                Regs = Helper.CreateArray(maxPolys, -1),
-                Areas = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
-                Flags = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
+                npolys = 0,
+                polys = new IndexedPolygon[maxPolys],
+                regs = Helper.CreateArray(maxPolys, -1),
+                areas = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
+                flags = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
 
                 NVP = nvp,
 
@@ -211,12 +211,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, NULL_IDX);
 
-            for (int i = 0; i < cset.NConts; ++i)
+            foreach (var (i, cont) in cset.IterateContours())
             {
-                var cont = cset.Conts[i];
-
                 // Skip null contours.
-                if (cont.NVertices < 3)
+                int nverts = cont.GetVertexCount();
+                if (nverts < 3)
                 {
                     continue;
                 }
@@ -225,10 +224,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var tris = cont.Triangulate();
 
                 // Add and merge vertices.
-                int[] indices = new int[cont.NVertices];
-                for (int j = 0; j < cont.NVertices; ++j)
+                int[] indices = new int[nverts];
+                for (int j = 0; j < nverts; ++j)
                 {
-                    var cv = cont.Vertices[j];
+                    var cv = cont.GetVertex(j);
 
                     indices[j] = mesh.AddVertex(cv.X, cv.Y, cv.Z, firstVert, nextVert);
                     if (Contour.IsBorderVertex(cv.Flag))
@@ -246,12 +245,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Merge polygons.
-                var mergedPolys = IndexedPolygon.MergePolygons(polys, mesh.Verts);
+                var mergedPolys = IndexedPolygon.MergePolygons(polys, mesh.verts);
 
                 // Store polygons.
                 if (!mesh.StorePolygons(mergedPolys, cont, maxPolys))
                 {
-                    throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.NPolys} (max:{maxPolys}).");
+                    throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.npolys} (max:{maxPolys}).");
                 }
             }
 
@@ -289,13 +288,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var (maxVerts, maxPolys, maxVertsPerMesh) = UpdateBounds(meshes);
 
-            mesh.NVerts = 0;
-            mesh.Verts = new Int3[maxVerts];
-            mesh.NPolys = 0;
-            mesh.Polys = new IndexedPolygon[maxPolys];
-            mesh.Regs = new int[maxPolys];
-            mesh.Areas = new SamplePolyAreas[maxPolys];
-            mesh.Flags = new SamplePolyFlagTypes[maxPolys];
+            mesh.nverts = 0;
+            mesh.verts = new Int3[maxVerts];
+            mesh.npolys = 0;
+            mesh.polys = new IndexedPolygon[maxPolys];
+            mesh.regs = new int[maxPolys];
+            mesh.areas = new SamplePolyAreas[maxPolys];
+            mesh.flags = new SamplePolyFlagTypes[maxPolys];
 
             int[] nextVert = Helper.CreateArray(maxVerts, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -314,20 +313,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     IsMaxZ = ((int)Math.Floor((mesh.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / mesh.CellSize + 0.5f)) == 0,
                 };
 
-                for (int j = 0; j < pmesh.NVerts; ++j)
+                for (int j = 0; j < pmesh.nverts; ++j)
                 {
-                    var v = pmesh.Verts[j];
+                    var v = pmesh.verts[j];
                     vremap[j] = mesh.AddVertex(v.X + ox, v.Y, v.Z + oz, firstVert, nextVert);
                 }
 
-                for (int j = 0; j < pmesh.NPolys; ++j)
+                for (int j = 0; j < pmesh.npolys; ++j)
                 {
-                    var tgt = mesh.Polys[mesh.NPolys];
-                    var src = pmesh.Polys[j];
-                    mesh.Regs[mesh.NPolys] = pmesh.Regs[j];
-                    mesh.Areas[mesh.NPolys] = pmesh.Areas[j];
-                    mesh.Flags[mesh.NPolys] = pmesh.Flags[j];
-                    mesh.NPolys++;
+                    var tgt = mesh.polys[mesh.npolys];
+                    var src = pmesh.polys[j];
+                    mesh.regs[mesh.npolys] = pmesh.regs[j];
+                    mesh.areas[mesh.npolys] = pmesh.areas[j];
+                    mesh.flags[mesh.npolys] = pmesh.flags[j];
+                    mesh.npolys++;
 
                     remapParams.Remap(src, mesh.NVP, vremap, tgt);
                 }
@@ -354,9 +353,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var bmin = Vector3.Min(first.Bounds.Minimum, mesh.Bounds.Minimum);
                 var bmax = Vector3.Max(first.Bounds.Maximum, mesh.Bounds.Maximum);
                 mesh.Bounds = new(bmin, bmax);
-                maxVertsPerMesh = Math.Max(maxVertsPerMesh, mesh.NVerts);
-                maxVerts += mesh.NVerts;
-                maxPolys += mesh.NPolys;
+                maxVertsPerMesh = Math.Max(maxVertsPerMesh, mesh.nverts);
+                maxVerts += mesh.nverts;
+                maxPolys += mesh.npolys;
             }
 
             return (maxVerts, maxPolys, maxVertsPerMesh);
@@ -380,7 +379,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     break;
                 }
 
-                var v = Verts[p.GetVertex(j)];
+                var v = verts[p.GetVertex(j)];
                 var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
 
                 res.Add(pv);
@@ -401,9 +400,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int maxhh = 0;
 
             // Find max size for a polygon area.
-            for (int i = 0; i < NPolys; ++i)
+            for (int i = 0; i < npolys; ++i)
             {
-                var p = Polys[i];
+                var p = polys[i];
 
                 var (b, PolyVerts) = FindMaxSizeArea(chf, p);
 
@@ -442,7 +441,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     break;
                 }
 
-                var v = Verts[p.GetVertex(j)];
+                var v = verts[p.GetVertex(j)];
                 xmin = Math.Min(xmin, v.X);
                 xmax = Math.Max(xmax, v.X);
                 ymin = Math.Min(ymin, v.Z);
@@ -475,7 +474,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             while (i != NULL_IDX)
             {
-                var v = Verts[i];
+                var v = verts[i];
                 if (v.X == x && v.Z == z && (Math.Abs(v.Y - y) <= 2))
                 {
                     return i;
@@ -484,8 +483,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Could not find, create new.
-            i = NVerts++;
-            Verts[i] = new(x, y, z);
+            i = nverts++;
+            verts[i] = new(x, y, z);
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 
@@ -499,7 +498,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxPolys">Maximum number of polygons</param>
         private void RemoveEdgeVertices(bool[] vflags, int maxPolys)
         {
-            for (int i = 0; i < NVerts; ++i)
+            for (int i = 0; i < nverts; ++i)
             {
                 if (!vflags[i])
                 {
@@ -520,7 +519,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Remove vertex
                 // Note: mesh.nverts is already decremented inside removeVertex()!
                 // Fixup vertex flags
-                for (int j = i; j < NVerts; ++j)
+                for (int j = i; j < nverts; ++j)
                 {
                     vflags[j] = vflags[j + 1];
                 }
@@ -536,7 +535,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private bool CanRemoveVertex(int rem)
         {
             // Count number of polygons to remove.
-            var (numTouchedVerts, numRemainingEdges) = IndexedPolygon.CountVertexToRemove(Polys, NPolys, rem);
+            var (numTouchedVerts, numRemainingEdges) = IndexedPolygon.CountVertexToRemove(polys, npolys, rem);
 
             // There would be too few edges remaining to create a polygon.
             // This can happen for example when a tip of a triangle is marked
@@ -552,9 +551,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int nedges = 0;
             IndexedEdge[] edges = new IndexedEdge[maxEdges];
 
-            for (int i = 0; i < NPolys; ++i)
+            for (int i = 0; i < npolys; ++i)
             {
-                var p = Polys[i];
+                var p = polys[i];
 
                 // Collect edges which touches the removed vertex.
                 foreach (var iter in p.IterateVertices())
@@ -601,7 +600,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private bool RemoveVertex(int rem, int maxPolys)
         {
             // Count number of polygons to remove.
-            int numRemovedVerts = IndexedPolygon.CountPolygonsToRemove(Polys, NPolys, rem);
+            int numRemovedVerts = IndexedPolygon.CountPolygonsToRemove(this.polys, npolys, rem);
 
             var (edges, nedges) = GenerateRemoveEdges(numRemovedVerts, rem);
             if (nedges == 0)
@@ -630,7 +629,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (NVP > 3)
             {
                 // Merge polygons.
-                var (mergedPolys, mergedAreas, mergedRegs) = IndexedPolygon.MergePolygons(polys, pareas, pregs, Verts);
+                var (mergedPolys, mergedAreas, mergedRegs) = IndexedPolygon.MergePolygons(polys, pareas, pregs, verts);
                 polys = mergedPolys;
                 pareas = mergedAreas;
                 pregs = mergedRegs;
@@ -639,7 +638,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Store polygons.
             if (!StorePolygons(polys, polys.Length, pareas, pregs, maxPolys))
             {
-                Logger.WriteWarning(this, $"removeVertex: Too many polygons {NPolys} (max:{maxPolys}).");
+                Logger.WriteWarning(this, $"removeVertex: Too many polygons {npolys} (max:{maxPolys}).");
 
                 return false;
             }
@@ -656,9 +655,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var edges = new IndexedRegionEdge[numRemovedVerts * NVP];
             int nedges = 0;
-            for (int i = 0; i < NPolys; ++i)
+            for (int i = 0; i < npolys; ++i)
             {
-                var p = Polys[i];
+                var p = polys[i];
 
                 if (!p.ContainsVertex(rem))
                 {
@@ -673,7 +672,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    edges[nedges++] = new(b, a, Regs[i], Areas[i]);
+                    edges[nedges++] = new(b, a, regs[i], areas[i]);
                 }
 
                 // Remove the polygon.
@@ -699,15 +698,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="rem">Index to remove</param>
         private void RemovePolygon(int rem)
         {
-            Polys[rem] = Polys[NPolys - 1];
-            Regs[rem] = Regs[NPolys - 1];
-            Areas[rem] = Areas[NPolys - 1];
+            polys[rem] = polys[npolys - 1];
+            regs[rem] = regs[npolys - 1];
+            areas[rem] = areas[npolys - 1];
 
-            Polys[NPolys - 1] = null;
-            Regs[NPolys - 1] = NULL_IDX;
-            Areas[NPolys - 1] = SamplePolyAreas.None;
+            polys[npolys - 1] = null;
+            regs[npolys - 1] = NULL_IDX;
+            areas[npolys - 1] = SamplePolyAreas.None;
 
-            NPolys--;
+            npolys--;
         }
         /// <summary>
         /// Removes the specified vertex by index, and adjusts the indexed polygon layout
@@ -715,16 +714,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="rem">Index to remove</param>
         private void RemoveVertexIndex(int rem)
         {
-            for (int i = rem; i < NVerts - 1; ++i)
+            for (int i = rem; i < nverts - 1; ++i)
             {
-                Verts[i] = Verts[i + 1];
+                verts[i] = verts[i + 1];
             }
-            NVerts--;
+            nverts--;
 
             // Adjust indices to match the removed vertex layout.
-            for (int i = 0; i < NPolys; ++i)
+            for (int i = 0; i < npolys; ++i)
             {
-                var p = Polys[i];
+                var p = polys[i];
 
                 foreach (var (a, _, j, _) in p.IterateVertices())
                 {
@@ -810,9 +809,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < nhole; ++i)
             {
                 int pi = hole[i];
-                tverts[i].X = Verts[pi].X;
-                tverts[i].Y = Verts[pi].Y;
-                tverts[i].Z = Verts[pi].Z;
+                tverts[i].X = verts[pi].X;
+                tverts[i].Y = verts[pi].Y;
+                tverts[i].Z = verts[pi].Z;
                 thole[i] = i;
             }
 
@@ -828,10 +827,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(Polys, NPolys, NVerts, false, 0);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, false, 0);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(Polys, edges, edgeCount, false, 0);
+            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, false, 0);
 
             if (BorderSize > 0)
             {
@@ -848,7 +847,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int w = cset.Width;
             int h = cset.Height;
 
-            foreach (var (p, _, j) in IndexedPolygon.IteratePolygonVertices(Polys, NPolys))
+            foreach (var (p, _, j) in IndexedPolygon.IteratePolygonVertices(polys, npolys))
             {
                 // Skip connected edges.
                 if (!p.AdjacencyIsNull(j))
@@ -856,8 +855,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                var va = Verts[p.GetVertex(j)];
-                var vb = Verts[p.GetNextVertex(j)];
+                var va = verts[p.GetVertex(j)];
+                var vb = verts[p.GetNextVertex(j)];
 
                 if (Edge.IsPortal(va, vb, w, h, out int v))
                 {
@@ -924,10 +923,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="area">Area type</param>
         private void StorePolygon(IndexedPolygon p, SamplePolyAreas area, int reg)
         {
-            Polys[NPolys] = p;
-            Areas[NPolys] = area;
-            Regs[NPolys] = reg;
-            NPolys++;
+            polys[npolys] = p;
+            areas[npolys] = area;
+            regs[npolys] = reg;
+            npolys++;
         }
 
         /// <summary>
@@ -935,37 +934,47 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public void UpdatePolyFlags()
         {
-            for (int i = 0; i < NPolys; ++i)
+            for (int i = 0; i < npolys; ++i)
             {
-                if ((int)Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if ((int)areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    Areas[i] = SamplePolyAreas.Ground;
+                    areas[i] = SamplePolyAreas.Ground;
                 }
 
-                Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(Areas[i]);
+                flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(areas[i]);
             }
         }
 
         /// <summary>
+        /// Iterates over the mesh polygons
+        /// </summary>
+        public IEnumerable<(int i, IndexedPolygon p, int r, SamplePolyAreas a)> IteratePolygons()
+        {
+            for (int p = 0; p < npolys; p++)
+            {
+                yield return (p, polys[p], regs[p], areas[p]);
+            }
+        }
+        /// <summary>
         /// Iterates over the mesh segments
         /// </summary>
         /// <returns>Returns the polygon, and the two vertices of each segment</returns>
-        public IEnumerable<(IndexedPolygon p, int i0, int i1)> IteratePolySegments()
+        public IEnumerable<(int i0, int i1, IndexedPolygon p)> IteratePolySegments()
         {
-            for (int p = 0; p < NPolys; p++)
+            for (int i = 0; i < npolys; i++)
             {
-                var poly = Polys[p];
+                var p = polys[i];
 
-                for (int i0 = 0; i0 < poly.Capacity; i0++)
+                for (int i0 = 0; i0 < p.Capacity; i0++)
                 {
-                    if (poly.VertexIsNull(i0))
+                    if (p.VertexIsNull(i0))
                     {
                         continue;
                     }
 
-                    int i1 = poly.GetNextIndex(i0);
+                    int i1 = p.GetNextIndex(i0);
 
-                    yield return (poly, i0, i1);
+                    yield return (i0, i1, p);
                 }
             }
         }
@@ -973,24 +982,96 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Iterates over the mesh triangles
         /// </summary>
         /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
-        public IEnumerable<(int p, IndexedPolygon poly, int i0, int i1, int i2)> IteratePolyTriangles()
+        public IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int r, SamplePolyAreas a)> IteratePolyTriangles()
         {
-            for (int p = 0; p < NPolys; p++)
+            for (int i = 0; i < npolys; i++)
             {
-                var poly = Polys[p];
+                var p = polys[i];
 
-                for (int i2 = 2; i2 < poly.Capacity; i2++)
+                for (int ii = 2; ii < p.Capacity; ii++)
                 {
-                    if (poly.VertexIsNull(i2))
+                    if (p.VertexIsNull(ii))
                     {
                         continue;
                     }
 
-                    int i1 = i2 - 1;
+                    int p0 = p.GetVertex(0);
+                    int p1 = p.GetVertex(ii - 1);
+                    int p2 = p.GetVertex(ii);
+                    int[] vi = [p0, p1, p2];
+                    var tri = vi.Select(GetVertex).ToArray();
 
-                    yield return (p, poly, 0, i1, i2);
+                    yield return (i, tri, p, regs[ii], areas[ii]);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the number of vertices
+        /// </summary>
+        public int GetVertexCount()
+        {
+            return nverts;
+        }
+        /// <summary>
+        /// Return vertices
+        /// </summary>
+        public Int3[] GetVertices()
+        {
+            return [.. verts];
+        }
+        /// <summary>
+        /// Gets the vertex at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public Int3 GetVertex(int index)
+        {
+            return verts[index];
+        }
+
+        /// <summary>
+        /// Gets the number of polygons
+        /// </summary>
+        public int GetPolyCount()
+        {
+            return npolys;
+        }
+        /// <summary>
+        /// Return polygons
+        /// </summary>
+        public IndexedPolygon[] GetPolygons()
+        {
+            return [.. polys];
+        }
+        /// <summary>
+        /// Gets the polygon at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public IndexedPolygon GetPolygon(int index)
+        {
+            return polys[index];
+        }
+
+        /// <summary>
+        /// Return regions
+        /// </summary>
+        public int[] GetRegions()
+        {
+            return [.. regs];
+        }
+        /// <summary>
+        /// Return Areas
+        /// </summary>
+        public SamplePolyAreas[] GetAreas()
+        {
+            return [.. areas];
+        }
+        /// <summary>
+        /// Return flags
+        /// </summary>
+        public SamplePolyFlagTypes[] GetFlags()
+        {
+            return [.. flags];
         }
     }
 }

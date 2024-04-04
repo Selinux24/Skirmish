@@ -665,6 +665,15 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            lastPosition = r.PickingResult.Position;
+
             ToggleTile(lastPosition);
         }
         private void ToggleTile(Vector3 tilePosition)

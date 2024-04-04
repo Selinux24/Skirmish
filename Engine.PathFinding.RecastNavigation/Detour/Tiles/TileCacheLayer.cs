@@ -338,17 +338,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="walkableClimb">Walkable climb value</param>
         /// <param name="maxError">Maximum error value</param>
-        /// <param name="cset">Resulting contour set</param>
-        public bool BuildContourSet(int walkableClimb, float maxError, out TileCacheContourSet cset)
+        /// <returns>Resulting contour set</returns>
+        public readonly TileCacheContourSet BuildContourSet(int walkableClimb, float maxError)
         {
             int w = Header.Width;
             int h = Header.Height;
 
-            var lcset = new TileCacheContourSet
-            {
-                NConts = RegCount,
-                Conts = new TileCacheContour[RegCount],
-            };
+            TileCacheContourSet cset = new(RegCount);
 
             // Allocate temp buffer for contour tracing.
             int maxTempVerts = (w + h) * 2 * 2; // Twice around the layer.
@@ -370,8 +366,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         continue;
                     }
 
-                    var cont = lcset.Conts[ri];
-                    if (cont.NVertices > 0)
+                    var cont = cset.GetContour(ri);
+                    if (cont.HasVertices())
                     {
                         continue;
                     }
@@ -382,20 +378,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     if (!WalkContour(temp, x, y, maxError, out var verts))
                     {
                         // Too complex contour.
-                        // Note: If you hit here often, try increasing 'maxTempVerts'.
-                        cset = new();
-                        return false;
+                        throw new EngineException("Too complex contour, try increasing 'maxTempVerts'.");
                     }
 
                     // Store contour.
                     cont.StoreVerts(verts, verts.Length, this, walkableClimb);
 
-                    lcset.Conts[ri] = cont;
+                    cset.SetContour(ri, cont);
                 }
             }
 
-            cset = lcset;
-            return true;
+            return cset;
         }
         /// <summary>
         /// Walks the contour

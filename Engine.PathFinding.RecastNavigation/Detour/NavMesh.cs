@@ -209,13 +209,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var param = new NavMeshCreateParams
             {
-                Verts = pmesh.Verts,
-                VertCount = pmesh.NVerts,
-                Polys = pmesh.Polys,
-                PolyAreas = pmesh.Areas,
-                PolyFlags = pmesh.Flags,
-                PolyCount = pmesh.NPolys,
-                Nvp = pmesh.NVP,
+                VertCount = pmesh.GetVertexCount(),
+                Verts = pmesh.GetVertices(),
+                PolyCount = pmesh.GetPolyCount(),
+                Polys = pmesh.GetPolygons(),
+                PolyAreas = pmesh.GetAreas(),
+                PolyFlags = pmesh.GetFlags(),
+                NVP = pmesh.NVP,
                 DetailMeshes = [.. dmesh.Meshes],
                 DetailVerts = [.. dmesh.Vertices],
                 DetailVertsCount = dmesh.Vertices.Count,
@@ -365,7 +365,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Create contours.
             var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
-            if (cset.NConts == 0)
+            if (!cset.HasContours())
             {
                 return null;
             }
@@ -385,13 +385,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var param = new NavMeshCreateParams
             {
-                Verts = pmesh.Verts,
-                VertCount = pmesh.NVerts,
-                Polys = pmesh.Polys,
-                PolyAreas = pmesh.Areas,
-                PolyFlags = pmesh.Flags,
-                PolyCount = pmesh.NPolys,
-                Nvp = pmesh.NVP,
+                VertCount = pmesh.GetVertexCount(),
+                Verts = pmesh.GetVertices(),
+                PolyCount = pmesh.GetPolyCount(),
+                Polys = pmesh.GetPolygons(),
+                PolyAreas = pmesh.GetAreas(),
+                PolyFlags = pmesh.GetFlags(),
+                NVP = pmesh.NVP,
                 DetailMeshes = [.. dmesh.Meshes],
                 DetailVerts = [.. dmesh.Vertices],
                 DetailVertsCount = dmesh.Vertices.Count,

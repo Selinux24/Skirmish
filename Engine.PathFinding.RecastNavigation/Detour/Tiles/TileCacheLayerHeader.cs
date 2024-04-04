@@ -41,15 +41,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox BBox { get; set; }
-        /// <summary>
-        /// Height min range
-        /// </summary>
-        public int HMin { get; set; }
-        /// <summary>
-        /// Height max range
-        /// </summary>
-        public int HMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// Width of the layer.
         /// </summary>
@@ -58,6 +50,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Height of the layer.
         /// </summary>
         public int Height { get; set; }
+        /// <summary>
+        /// Height min range
+        /// </summary>
+        public int HMin { get; set; }
+        /// <summary>
+        /// Height max range
+        /// </summary>
+        public int HMax { get; set; }
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
@@ -92,12 +92,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var bmin = new Vector3();
             var bmax = new Vector3();
 
-            bmin.X = BBox.Minimum.X + MinX * cs;
-            bmin.Y = BBox.Minimum.Y;
-            bmin.Z = BBox.Minimum.Z + MinY * cs;
-            bmax.X = BBox.Minimum.X + (MaxX + 1) * cs;
-            bmax.Y = BBox.Maximum.Y;
-            bmax.Z = BBox.Minimum.Z + (MaxY + 1) * cs;
+            bmin.X = Bounds.Minimum.X + MinX * cs;
+            bmin.Y = Bounds.Minimum.Y;
+            bmin.Z = Bounds.Minimum.Z + MinY * cs;
+            bmax.X = Bounds.Minimum.X + (MaxX + 1) * cs;
+            bmax.Y = Bounds.Maximum.Y;
+            bmax.Z = Bounds.Minimum.Z + (MaxY + 1) * cs;
 
             return new(bmin, bmax);
         }
@@ -117,6 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
+     
         /// <inheritdoc/>
         public override readonly string ToString()
         {

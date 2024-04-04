@@ -286,11 +286,9 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> lines = [];
 
             bool empty = true;
-            for (int i = 0; i < cset.NConts; ++i)
+            foreach (var (i, c) in cset.IterateContours())
             {
-                var c = cset.Conts[i];
-
-                if (c.NRawVertices <= 0)
+                if (!c.HasRawVertices())
                 {
                     continue;
                 }
@@ -298,10 +296,8 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 regColor = Helper.IntToCol(c.RegionId, a);
                 lines.TryAdd(regColor, []);
 
-                for (int j = 0; j < c.NRawVertices; j++)
+                foreach (var (j, v) in c.IterateRawVertices())
                 {
-                    var v = c.RawVertices[j];
-
                     float fx = orig.X + v.X * cs;
                     float fy = orig.Y + (v.Y + 1 + (i & 1)) * ch;
                     float fz = orig.Z + v.Z * cs;
@@ -314,7 +310,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Loop last segment.
-                var v0 = c.RawVertices[0];
+                var v0 = c.GetRawVertex(0);
                 float f0x = orig.X + v0.X * cs;
                 float f0y = orig.Y + (v0.Y + 1 + (i & 1)) * ch;
                 float f0z = orig.Z + v0.Z * cs;
@@ -346,11 +342,9 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> lines = [];
 
             bool empty = true;
-            for (int i = 0; i < cset.NConts; ++i)
+            foreach (var (i, c) in cset.IterateContours())
             {
-                var c = cset.Conts[i];
-
-                if (c.NVertices <= 0)
+                if (!c.HasVertices())
                 {
                     continue;
                 }
@@ -358,11 +352,8 @@ namespace Engine.PathFinding.RecastNavigation
                 var regColor = Helper.IntToCol(c.RegionId, a);
                 var bColor = Color4.Lerp(regColor, bseColor, 0.5f);
 
-                for (int j = 0, k = c.NVertices - 1; j < c.NVertices; k = j++)
+                foreach (var (va, vb) in c.IterateSegments())
                 {
-                    var va = c.Vertices[k];
-                    var vb = c.Vertices[j];
-
                     var colol = Contour.IsAreaBorder(va.Flag) ? regColor : bColor;
                     lines.TryAdd(colol, []);
 
@@ -404,15 +395,12 @@ namespace Engine.PathFinding.RecastNavigation
             List<Vector3> lines = [];
 
             // Draw centers
-            for (int i = 0; i < cset.NConts; ++i)
+            foreach (var (i, cont1) in cset.IterateContours())
             {
-                var cont1 = cset.Conts[i];
+                var pos1 = cont1.GetContourCenter(orig, cs, ch);
 
-                var pos1 = Contour.GetContourCenter(cont1, orig, cs, ch);
-
-                for (int j = 0; j < cont1.NVertices; j++)
+                foreach (var (j, v) in cont1.IterateVertices())
                 {
-                    var v = cont1.Vertices[j];
                     var r = (int)(uint)v.Flag;
 
                     if (v.Flag == 0 || r < cont1.RegionId)
@@ -423,7 +411,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var cont2 = cset.FindContour(r);
                     if (cont2 != null)
                     {
-                        var pos2 = Contour.GetContourCenter(cont2, orig, cs, ch);
+                        var pos2 = cont2.GetContourCenter(orig, cs, ch);
 
                         var arcPoints = Line3D.CreateArc(pos1, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
 
@@ -476,10 +464,8 @@ namespace Engine.PathFinding.RecastNavigation
             var orig = pm.Bounds.Minimum;
 
             Dictionary<Color4, List<Vector3>> tris = [];
-            foreach (var (p, poly, i0, i1, i2) in pm.IteratePolyTriangles())
+            foreach (var (p, t, poly, _, area) in pm.IteratePolyTriangles())
             {
-                var area = pm.Areas[p];
-
                 Color4 col;
                 if (area == SamplePolyAreas.Ground)
                 {
@@ -496,18 +482,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 tris.TryAdd(col, []);
 
-                int p0 = poly.GetVertex(i0);
-                int p1 = poly.GetVertex(i1);
-                int p2 = poly.GetVertex(i2);
-                int[] vi = [p0, p1, p2];
-
-                for (int k = 0; k < vi.Length; ++k)
+                for (int k = 0; k < t.Length; ++k)
                 {
-                    var v = pm.Verts[vi[k]];
-
-                    float x = orig.X + v.X * cs;
-                    float y = orig.Y + (v.Y + 1) * ch;
-                    float z = orig.Z + v.Z * cs;
+                    float x = orig.X + t[k].X * cs;
+                    float y = orig.Y + (t[k].Y + 1) * ch;
+                    float z = orig.Z + t[k].Z * cs;
 
                     tris[col].Add(new(x, y, z));
                 }
@@ -534,7 +513,7 @@ namespace Engine.PathFinding.RecastNavigation
             List<Vector3> points = [];
 
             // Draw neighbours edges
-            foreach (var (p, i0, i1) in pm.IteratePolySegments())
+            foreach (var (i0, i1, p) in pm.IteratePolySegments())
             {
                 if (!p.AdjacencyIsNull(i0))
                 {
@@ -547,7 +526,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int k = 0; k < vi.Length; ++k)
                 {
-                    var v = pm.Verts[vi[k]];
+                    var v = pm.GetVertex(vi[k]);
                     float x = orig.X + v.X * cs;
                     float y = orig.Y + (v.Y + 1) * ch + 0.1f;
                     float z = orig.Z + v.Z * cs;
@@ -582,7 +561,7 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> edges = [];
 
             // Draw boundary edges
-            foreach (var (p, i0, i1) in pm.IteratePolySegments())
+            foreach (var (i0, i1, p) in pm.IteratePolySegments())
             {
                 if (p.AdjacencyIsNull(i0))
                 {
@@ -603,7 +582,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int k = 0; k < vi.Length; ++k)
                 {
-                    var v = pm.Verts[vi[k]];
+                    var v = pm.GetVertex(vi[k]);
                     float x = orig.X + v.X * cs;
                     float y = orig.Y + (v.Y + 1) * ch + 0.1f;
                     float z = orig.Z + v.Z * cs;

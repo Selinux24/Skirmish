@@ -861,18 +861,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 Layer = tile.Decompress(),
             };
 
-            // Reset untouched obstacles
-            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && o.Touched.Count == 0);
-            foreach (var ob in obs)
-            {
-                ProcessRequestAdd(ob);
-            }
-
-            // Rasterize obstacles.
-            for (int i = 0; i < m_params.MaxObstacles; ++i)
-            {
-                m_obstacles[i].Rasterize(bc, tile, m_params.CellSize, m_params.CellHeight);
-            }
+            // Process obstacles
+            ProcessObstacles(tile, bc);
 
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
@@ -882,16 +872,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return false;
             }
 
-            if (!bc.Layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError, out var lscet))
-            {
-                return false;
-            }
-            bc.ContourSet = lscet;
+            // Build contour set
+            bc.ContourSet = bc.Layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
 
+            // Build polygon mesh
             bc.PolyMesh = TileCachePolyMesh.Build(bc.ContourSet, IndexedPolygon.DT_VERTS_PER_POLYGON);
 
             // Early out if the mesh tile is empty.
-            if (bc.PolyMesh.NPolys == 0)
+            if (bc.PolyMesh.GetPolyCount() == 0)
             {
                 // Remove existing tile.
                 m_navMesh.RemoveTile(tile.Header);
@@ -901,13 +889,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             var param = new NavMeshCreateParams
             {
-                Verts = bc.PolyMesh.Verts,
-                VertCount = bc.PolyMesh.NVerts,
-                Polys = bc.PolyMesh.Polys,
-                PolyAreas = bc.PolyMesh.Areas,
-                PolyFlags = bc.PolyMesh.Flags,
-                PolyCount = bc.PolyMesh.NPolys,
-                Nvp = IndexedPolygon.DT_VERTS_PER_POLYGON,
+                VertCount = bc.PolyMesh.GetVertexCount(),
+                Verts = bc.PolyMesh.GetVertices(),
+                PolyCount = bc.PolyMesh.GetPolyCount(),
+                Polys = bc.PolyMesh.GetPolygons(),
+                PolyAreas = bc.PolyMesh.GetAreas(),
+                PolyFlags = bc.PolyMesh.GetFlags(),
+                NVP = bc.PolyMesh.NVP,
                 DetailMeshes = null,
                 DetailVerts = null,
                 DetailVertsCount = 0,
@@ -918,7 +906,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 WalkableHeight = m_params.WalkableHeight,
                 WalkableRadius = m_params.WalkableRadius,
                 WalkableClimb = m_params.WalkableClimb,
-                Bounds = tile.Header.BBox,
+                Bounds = tile.Header.Bounds,
                 CellSize = m_params.CellSize,
                 CellHeight = m_params.CellHeight,
                 BuildBvTree = false,
@@ -942,6 +930,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Add new tile
             return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
+        }
+        /// <summary>
+        /// Process obstacles
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <param name="bc">Build context</param>
+        private void ProcessObstacles(CompressedTile tile, TileCacheBuildContext bc)
+        {
+            // Reset untouched obstacles
+            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && o.Touched.Count == 0);
+            foreach (var ob in obs)
+            {
+                ProcessRequestAdd(ob);
+            }
+
+            // Rasterize obstacles.
+            for (int i = 0; i < m_params.MaxObstacles; ++i)
+            {
+                m_obstacles[i].Rasterize(bc, tile, m_params.CellSize, m_params.CellHeight);
+            }
         }
 
         /// <summary>

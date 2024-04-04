@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return;
             }
 
-            Obstacle.MarkArea(bc, tile.Header.BBox.Minimum, cellSize, cellHeight, 0);
+            Obstacle.MarkArea(bc, tile.Header.Bounds.Minimum, cellSize, cellHeight, 0);
         }
         /// <summary>
         /// Process the obstacle
