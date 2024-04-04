@@ -498,15 +498,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="maxPolys">Maximum number of polygons</param>
         private void RemoveEdgeVertices(bool[] vflags, int maxPolys)
         {
-            for (int i = 0; i < vertCount; ++i)
+            int i = 0;
+            while (i < vertCount)
             {
                 if (!vflags[i])
                 {
+                    i++;
                     continue;
                 }
 
                 if (!CanRemoveVertex(i))
                 {
+                    i++;
                     continue;
                 }
 
@@ -523,7 +526,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     vflags[j] = vflags[j + 1];
                 }
-                --i;
             }
         }
 
@@ -655,12 +657,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             var edges = new IndexedRegionEdge[numRemovedVerts * NVP];
             int nedges = 0;
-            for (int i = 0; i < polyCount; ++i)
+            int i = 0;
+            while (i < polyCount)
             {
                 var p = polyList[i];
 
                 if (!p.ContainsVertex(rem))
                 {
+                    i++;
                     continue;
                 }
 
@@ -677,17 +681,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Remove the polygon.
                 RemovePolygon(i);
-
-                --i;
             }
 
             // Remove vertex.
             RemoveVertexIndex(rem);
 
-            for (int i = 0; i < nedges; ++i)
+            for (int j = 0; j < nedges; ++j)
             {
-                if (edges[i].EdgeIndexA > rem) edges[i].EdgeIndexA--;
-                if (edges[i].EdgeIndexB > rem) edges[i].EdgeIndexB--;
+                if (edges[j].EdgeIndexA > rem) edges[j].EdgeIndexA--;
+                if (edges[j].EdgeIndexB > rem) edges[j].EdgeIndexB--;
             }
 
             return (edges, nedges);
@@ -761,7 +763,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 bool match = false;
 
-                for (int i = 0; i < nedges; ++i)
+                int i = 0;
+                while (i < nedges)
                 {
                     int ea = edges[i].EdgeIndexA;
                     int eb = edges[i].EdgeIndexB;
@@ -794,6 +797,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         match = true;
                         i--;
                     }
+
+                    i++;
                 }
 
                 if (!match)

@@ -252,7 +252,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float error = maxError * maxError;
 
             int pn = points.Length;
-            for (int i = 0; i < simplified.Count;)
+            int i = 0;
+            while (i < simplified.Count)
             {
                 int ii = (i + 1) % simplified.Count;
 
@@ -295,7 +296,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var simplified = new List<ContourVertex>(list);
 
             int pn = points.Length;
-            for (int i = 0; i < simplified.Count;)
+            int i = 0;
+            while (i < simplified.Count)
             {
                 int ii = (i + 1) % simplified.Count;
 

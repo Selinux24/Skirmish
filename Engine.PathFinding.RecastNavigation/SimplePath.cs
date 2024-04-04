@@ -441,7 +441,8 @@ namespace Engine.PathFinding.RecastNavigation
             Count += count - 1;
 
             // Remove trackbacks
-            for (int j = 0; j < Count; ++j)
+            int j = 0;
+            while (j < Count)
             {
                 if (j - 1 >= 0 && j + 1 < Count)
                 {
@@ -453,6 +454,8 @@ namespace Engine.PathFinding.RecastNavigation
                         j -= 2;
                     }
                 }
+
+                j++;
             }
         }
         /// <summary>

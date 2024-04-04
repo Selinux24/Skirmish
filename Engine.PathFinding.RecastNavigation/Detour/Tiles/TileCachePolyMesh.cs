@@ -172,15 +172,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="maxPolys">Maximum number of triangles</param>
         private void RemoveEdgeVertices(bool[] vflags, int maxPolys)
         {
-            for (int i = 0; i < vertCount; ++i)
+            int i = 0;
+            while (i < vertCount)
             {
                 if (!vflags[i])
                 {
+                    i++;
+
                     continue;
                 }
 
                 if (!CanRemoveVertex(i))
                 {
+                    i++;
+
                     continue;
                 }
 
@@ -197,7 +202,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     vflags[j] = vflags[j + 1];
                 }
-                --i;
             }
         }
 
@@ -345,12 +349,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var edges = new IndexedRegionEdge[numRemovedVerts];
             int nedges = 0;
-            for (int i = 0; i < polyCount; ++i)
+            int i = 0;
+            while (i < polyCount)
             {
                 var p = polyList[i];
 
                 if (!p.ContainsVertex(rem))
                 {
+                    i++;
+
                     continue;
                 }
 
@@ -376,8 +383,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 // Remove the polygon.
                 RemovePolygon(i);
-
-                --i;
             }
 
             // Remove vertex.
@@ -486,7 +491,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             bool match = false;
 
-            for (int i = 0; i < nedges; ++i)
+            int i = 0;
+            while (i < nedges)
             {
                 int ea = edges[i].EdgeIndexA;
                 int eb = edges[i].EdgeIndexB;
@@ -524,6 +530,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     match = true;
                     i--;
                 }
+
+                i++;
             }
 
             return match;

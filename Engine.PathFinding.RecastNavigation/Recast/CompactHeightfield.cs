@@ -434,7 +434,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             idx[0] = 0;
             idx[1] = nn;
             int nidx = 2;
-            for (int k = 0; k < nidx - 1;)
+
+            int k = 0;
+            while (k < nidx - 1)
             {
                 int a = idx[k];
                 int b = idx[k + 1];
@@ -456,7 +458,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                ++k;
+                k++;
             }
 
             return idx.Take(nidx).ToArray();

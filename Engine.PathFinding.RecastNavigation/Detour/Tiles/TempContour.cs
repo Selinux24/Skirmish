@@ -177,7 +177,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             float maxErrorSqr = maxError * maxError;
 
-            for (int i = 0; i < npoly;)
+            int i = 0;
+            while (i < npoly)
             {
                 int ii = (i + 1) % npoly;
 

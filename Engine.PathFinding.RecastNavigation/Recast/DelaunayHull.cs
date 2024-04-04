@@ -217,8 +217,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             // Copy array
             var tris = triangles.ToArray();
-
-            for (int i = 0; i < tris.Length; ++i)
+            int i = 0;
+            while (i < tris.Length)
             {
                 var t = tris[i];
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
@@ -228,6 +228,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
                 }
+
+                i++;
             }
 
             return tris;

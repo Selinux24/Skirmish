@@ -510,7 +510,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public void RemoveAdjacentNeighbours()
         {
             // Remove adjacent duplicates.
-            for (int i = 0; i < connections.Count && connections.Count > 1;)
+            int i = 0;
+            while (i < connections.Count && connections.Count > 1)
             {
                 // Next index
                 int ni = (i + 1) % connections.Count;
