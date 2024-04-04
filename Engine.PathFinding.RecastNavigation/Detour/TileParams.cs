@@ -16,9 +16,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int Height { get; set; }
         /// <summary>
-        /// Cell size
+        /// Tile cell size
         /// </summary>
-        public float CellSize { get; set; }
+        public float TileCellSize { get; set; }
         /// <summary>
         /// Bounds
         /// </summary>

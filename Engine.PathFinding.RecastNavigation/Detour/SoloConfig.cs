@@ -28,7 +28,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             BuildSettings.CalcGridSize(generationBounds, settings.CellSize, out int width, out int height);
             int borderSize = walkableRadius + 3;
-            int tileSize = 0;
 
             // Generation params.
             var cfg = new SoloConfig()
@@ -48,9 +47,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 MaxVertsPerPoly = settings.VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
-                BoundingBox = generationBounds,
+                Bounds = generationBounds,
                 BorderSize = borderSize,
-                TileSize = tileSize,
                 Width = width,
                 Height = height,
 

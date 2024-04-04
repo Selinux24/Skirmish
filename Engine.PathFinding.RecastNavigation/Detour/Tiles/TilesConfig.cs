@@ -14,6 +14,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         const int EXPECTED_LAYERS_PER_TILE = 4;
 
         /// <summary>
+        /// The width/height size of tile's on the xz-plane. [Limit: >= 0] [Units: vx]
+        /// </summary>
+        public int TileSize { get; set; }
+        /// <summary>
+        /// Gets the tile * cell size
+        /// </summary>
+        public float TileCellSize
+        {
+            get
+            {
+                return TileSize * CellSize;
+            }
+        }
+        /// <summary>
         /// Use tile cache
         /// </summary>
         public bool UseTileCache { get; set; }
@@ -27,13 +41,107 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public TileCacheParams TileCacheParams { get; set; }
 
         /// <summary>
+        /// Gets the specified tile bounding box
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="geom">Input geometry</param>
+        /// <param name="settings">Build settings</param>
+        public static BoundingBox GetTileBounds(int x, int y, InputGeometry geom, BuildSettings settings)
+        {
+            return GetTileBounds(x, y, settings.TileCellSize, settings.Bounds ?? geom.BoundingBox);
+        }
+        /// <summary>
+        /// Gets the specified tile bounding box
+        /// </summary>
+        /// <param name="x">X tile coordinate</param>
+        /// <param name="y">Y tile coordinate</param>
+        /// <param name="tileCellSize">Tile cell size</param>
+        /// <param name="bbox">Input bounding box</param>
+        public static BoundingBox GetTileBounds(int x, int y, float tileCellSize, BoundingBox bbox)
+        {
+            var tbbox = new BoundingBox();
+
+            tbbox.Minimum.X = bbox.Minimum.X + x * tileCellSize;
+            tbbox.Minimum.Y = bbox.Minimum.Y;
+            tbbox.Minimum.Z = bbox.Minimum.Z + y * tileCellSize;
+
+            tbbox.Maximum.X = bbox.Minimum.X + (x + 1) * tileCellSize;
+            tbbox.Maximum.Y = bbox.Maximum.Y;
+            tbbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tileCellSize;
+
+            return tbbox;
+        }
+        /// <summary>
+        /// Adjust tile bounds using border and cell size to expand
+        /// </summary>
+        /// <param name="tileBounds">Tile bounds</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="cellsize">Cell size</param>
+        /// <returns>Returns the new bounds</returns>
+        /// <remarks>
+        /// Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
+        /// 
+        /// This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+        /// and the obstacles close to the border work correctly with the dilation process.
+        /// No polygons (or contours) will be created on the border area.
+        /// 
+        /// IMPORTANT!
+        /// 
+        ///   :''''''''':
+        ///   : +-----+ :
+        ///   : |     | :
+        ///   : |     |<--- tile to build
+        ///   : |     | :  
+        ///   : +-----+ :<-- geometry needed
+        ///   :.........:
+        /// 
+        /// You should use this bounding box to query your input geometry.
+        /// 
+        /// For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+        /// you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+        /// or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+        /// </remarks>
+        public static BoundingBox AdjustTileBounds(BoundingBox tileBounds, int borderSize, float cellsize)
+        {
+            tileBounds.Minimum.X -= borderSize * cellsize;
+            tileBounds.Minimum.Z -= borderSize * cellsize;
+            tileBounds.Maximum.X += borderSize * cellsize;
+            tileBounds.Maximum.Z += borderSize * cellsize;
+
+            return tileBounds;
+        }
+
+        /// <summary>
+        /// Gets the navigation mesh parameters for a tile
+        /// </summary>
+        /// <param name="settings">Build settings</param>
+        /// <param name="generationBounds">Generation bounds</param>
+        public static TileParams GetTileParams(BuildSettings settings, BoundingBox generationBounds)
+        {
+            BuildSettings.CalcGridSize(generationBounds, settings.CellSize, out int gridWidth, out int gridHeight);
+            int tileSize = (int)settings.TileSize;
+            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
+            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
+            float tileCellSize = settings.TileCellSize;
+
+            return new()
+            {
+                Width = tileWidth,
+                Height = tileHeight,
+                TileCellSize = tileCellSize,
+                Bounds = generationBounds,
+            };
+        }
+
+        /// <summary>
         /// Gets the agent configuration for "tiled" navigation mesh build
         /// </summary>
         /// <param name="settings">Build settings</param>
         /// <param name="agent">Agent</param>
         /// <param name="tileBounds">Tile bounds</param>
         /// <returns>Returns the new configuration</returns>
-        public static TilesConfig GetConfig(BuildSettings settings, Agent agent, BoundingBox tileBounds)
+        public static TilesConfig GetTilesConfig(BuildSettings settings, Agent agent, BoundingBox tileBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
             int walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
@@ -50,10 +158,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int width = tileSize + borderSize * 2;
             int height = tileSize + borderSize * 2;
 
-            var generationBounds = AdjustTileBBox(tileBounds, borderSize, settings.CellSize);
+            var generationBounds = AdjustTileBounds(tileBounds, borderSize, settings.CellSize);
 
             // Init build configuration from GUI
-            var cfg = new TilesConfig
+            return new()
             {
                 Agent = agent,
 
@@ -70,7 +178,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 MaxVertsPerPoly = settings.VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
-                BoundingBox = generationBounds,
+                Bounds = generationBounds,
                 BorderSize = borderSize,
                 TileSize = tileSize,
                 Width = width,
@@ -85,8 +193,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 EnableDebugInfo = settings.EnableDebugInfo,
             };
-
-            return cfg;
         }
         /// <summary>
         /// Gets the agent tile cache build configuration
@@ -138,7 +244,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 };
             }
 
-            var cfg = new TilesConfig
+            return new()
             {
                 Agent = agent,
 
@@ -155,7 +261,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 MaxVertsPerPoly = settings.VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
-                BoundingBox = generationBounds,
+                Bounds = generationBounds,
                 BorderSize = borderSize,
                 TileSize = tileSize,
                 Width = width,
@@ -171,47 +277,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 EnableDebugInfo = settings.EnableDebugInfo,
             };
-
-            return cfg;
-        }
-        /// <summary>
-        /// Adjust tile bounds using border and cell size to expand
-        /// </summary>
-        /// <param name="tileBounds">Tile bounds</param>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="cellsize">Cell size</param>
-        /// <returns>Returns the new bounds</returns>
-        /// <remarks>
-        /// Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
-        /// 
-        /// This is done in order to make sure that the navmesh tiles connect correctly at the borders,
-        /// and the obstacles close to the border work correctly with the dilation process.
-        /// No polygons (or contours) will be created on the border area.
-        /// 
-        /// IMPORTANT!
-        /// 
-        ///   :''''''''':
-        ///   : +-----+ :
-        ///   : |     | :
-        ///   : |     |<--- tile to build
-        ///   : |     | :  
-        ///   : +-----+ :<-- geometry needed
-        ///   :.........:
-        /// 
-        /// You should use this bounding box to query your input geometry.
-        /// 
-        /// For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
-        /// you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
-        /// or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
-        /// </remarks>
-        private static BoundingBox AdjustTileBBox(BoundingBox tileBounds, int borderSize, float cellsize)
-        {
-            tileBounds.Minimum.X -= borderSize * cellsize;
-            tileBounds.Minimum.Z -= borderSize * cellsize;
-            tileBounds.Maximum.X += borderSize * cellsize;
-            tileBounds.Maximum.Z += borderSize * cellsize;
-
-            return tileBounds;
         }
 
         /// <summary>
@@ -241,27 +306,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileHeight = tileCellSize,
                 MaxTiles = maxTiles,
                 MaxPolys = maxPolysPerTile,
-            };
-        }
-        /// <summary>
-        /// Gets the navigation mesh parameters for a tile
-        /// </summary>
-        /// <param name="settings">Build settings</param>
-        /// <param name="generationBounds">Generation bounds</param>
-        public static TileParams GetTileParams(BuildSettings settings, BoundingBox generationBounds)
-        {
-            BuildSettings.CalcGridSize(generationBounds, settings.CellSize, out int gridWidth, out int gridHeight);
-            int tileSize = (int)settings.TileSize;
-            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
-            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
-            float tileCellSize = settings.TileCellSize;
-
-            return new TileParams
-            {
-                Width = tileWidth,
-                Height = tileHeight,
-                CellSize = tileCellSize,
-                Bounds = generationBounds,
             };
         }
     }

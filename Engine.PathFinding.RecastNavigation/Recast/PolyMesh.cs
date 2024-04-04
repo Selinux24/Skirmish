@@ -988,20 +988,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 var p = polys[i];
 
-                for (int ii = 2; ii < p.Capacity; ii++)
+                for (int iv = 2; iv < p.Capacity; iv++)
                 {
-                    if (p.VertexIsNull(ii))
+                    if (p.VertexIsNull(iv))
                     {
                         continue;
                     }
 
                     int p0 = p.GetVertex(0);
-                    int p1 = p.GetVertex(ii - 1);
-                    int p2 = p.GetVertex(ii);
+                    int p1 = p.GetVertex(iv - 1);
+                    int p2 = p.GetVertex(iv);
                     int[] vi = [p0, p1, p2];
                     var tri = vi.Select(GetVertex).ToArray();
 
-                    yield return (i, tri, p, regs[ii], areas[ii]);
+                    yield return (i, tri, p, regs[i], areas[i]);
                 }
             }
         }

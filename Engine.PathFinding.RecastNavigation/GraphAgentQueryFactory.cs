@@ -73,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             foreach (var tile in tiles)
             {
-                NavMesh.RemoveTilesAtPosition(tile.X, tile.Y);
+                NavMesh.RemoveTilesAtPosition(tile.TX, tile.TY);
             }
         }
     }

@@ -611,17 +611,17 @@ namespace TerrainSamples.SceneNavMeshTest
             int height;
             if (nmsettings.BuildMode == BuildModes.Solo)
             {
+                BuildSettings.CalcGridSize(graphBounds, nmsettings.CellSize, out width, out height);
                 bounds = graphBounds;
-                BuildSettings.CalcGridSize(bounds, nmsettings.CellSize, out width, out height);
             }
             else
             {
                 NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty, out _);
-                var tileBounds = NavMesh.GetTileBounds(tx, ty, nminput, nmsettings);
-                var cfg = TilesConfig.GetConfig(nmsettings, agent, tileBounds);
-                width = cfg.Width;
-                height = cfg.Height;
-                bounds = cfg.BoundingBox;
+                var tileBounds = TilesConfig.GetTileBounds(tx, ty, nminput, nmsettings);
+                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, tileBounds);
+                width = tiledCfg.Width;
+                height = tiledCfg.Height;
+                bounds = tiledCfg.Bounds;
             }
 
             int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);

@@ -150,32 +150,32 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var points = bbox.GetVertices();
 
-            var cornerTiles = LookupTiles(points).ToList();
+            var cornerTiles = LookupTiles(points);
 
-            int xMin = cornerTiles.Min(c => c.X);
-            int xMax = cornerTiles.Max(c => c.X);
+            int txMin = cornerTiles.Min(c => c.TX);
+            int txMax = cornerTiles.Max(c => c.TX);
 
-            int yMin = cornerTiles.Min(c => c.Y);
-            int yMax = cornerTiles.Max(c => c.Y);
+            int tyMin = cornerTiles.Min(c => c.TY);
+            int tyMax = cornerTiles.Max(c => c.TY);
 
-            cornerTiles.Clear();
+            List<UpdateTileData> tiles = [];
 
-            for (int y = yMin; y <= yMax; y++)
+            for (int ty = tyMin; ty <= tyMax; ty++)
             {
-                for (int x = xMin; x <= xMax; x++)
+                for (int tx = txMin; tx <= txMax; tx++)
                 {
-                    var tileBounds = NavMesh.GetTileBounds(x, y, Input, Settings);
+                    var tileBounds = TilesConfig.GetTileBounds(tx, ty, Input, Settings);
 
-                    cornerTiles.Add(new UpdateTileData
+                    tiles.Add(new()
                     {
-                        X = x,
-                        Y = y,
-                        BoundingBox = tileBounds,
+                        TX = tx,
+                        TY = ty,
+                        TileBounds = tileBounds,
                     });
                 }
             }
 
-            return cornerTiles;
+            return tiles;
         }
         /// <summary>
         /// Look up for tiles in a position list
@@ -184,26 +184,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a list of tiles</returns>
         private List<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
         {
-            var tiles = new List<UpdateTileData>();
+            List<UpdateTileData> tiles = [];
 
             var tileCellSize = Settings.TileCellSize;
             var bounds = Bounds;
 
             foreach (var position in positions)
             {
-                NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty, out var bbox);
+                NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty, out var tileBounds);
 
-                if (!tiles.Exists(t => t.X == tx && t.Y == ty))
+                if (tiles.Exists(t => t.TX == tx && t.TY == ty))
                 {
-                    var v = new UpdateTileData()
-                    {
-                        X = tx,
-                        Y = ty,
-                        BoundingBox = bbox,
-                    };
-
-                    tiles.Add(v);
+                    continue;
                 }
+
+                tiles.Add(new()
+                {
+                    TX = tx,
+                    TY = ty,
+                    TileBounds = tileBounds,
+                });
             }
 
             return tiles;
@@ -241,19 +241,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tiles">Tile list</param>
         private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<UpdateTileData> tiles, bool update)
         {
-            var bbox = Settings.Bounds ?? Input.BoundingBox;
-
             foreach (var tile in tiles)
             {
-                if (update && agentQ.NavMesh.HasTilesAt(tile.X, tile.Y))
+                if (update && agentQ.NavMesh.HasTilesAt(tile.TX, tile.TY))
                 {
                     continue;
                 }
 
-                var tileCfg = TilesConfig.GetConfig(Settings, agentQ.Agent, tile.BoundingBox);
-                var tileCacheCfg = TilesConfig.GetTileCacheConfig(Settings, agentQ.Agent, bbox);
-
-                agentQ.NavMesh.BuildTileAtPosition(tile.X, tile.Y, Input, tileCfg, tileCacheCfg);
+                agentQ.NavMesh.BuildTileAtPosition(tile, Settings, Input, agentQ.Agent);
             }
         }
         /// <summary>

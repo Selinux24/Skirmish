@@ -5,25 +5,25 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Data to update tiles
     /// </summary>
-    class UpdateTileData
+    public class UpdateTileData
     {
         /// <summary>
         /// X tile position
         /// </summary>
-        public int X { get; set; }
+        public int TX { get; set; }
         /// <summary>
         /// Y tile position
         /// </summary>
-        public int Y { get; set; }
+        public int TY { get; set; }
         /// <summary>
-        /// Bounding box
+        /// Tile bounds
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox TileBounds { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"X:{X}; Y:{Y}; Bounds:{BoundingBox};";
+            return $"TX: {TX}; TY: {TY}; TileBounds: {TileBounds};";
         }
     }
 }

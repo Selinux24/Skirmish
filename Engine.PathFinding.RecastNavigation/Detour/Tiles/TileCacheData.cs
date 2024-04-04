@@ -31,12 +31,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Update tile bounds.
-            cfg.UpdateTileBounds(x, y);
+            var tileBounds = TilesConfig.GetTileBounds(x, y, cfg.TileCellSize, cfg.Bounds);
+
+            // Adjust tile bounds
+            tileBounds = TilesConfig.AdjustTileBounds(tileBounds, cfg.BorderSize, cfg.CellSize);
 
             // Create heightfield
-            var solid = Heightfield.Build(cfg);
+            var solid = Heightfield.Build(cfg, tileBounds);
 
-            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.BoundingBox);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.Bounds);
             if (cid.Length == 0)
             {
                 return []; // empty

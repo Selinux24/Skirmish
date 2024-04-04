@@ -21,10 +21,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int Height { get; set; }
         /// <summary>
-        /// The width/height size of tile's on the xz-plane. [Limit: >= 0] [Units: vx]
-        /// </summary>
-        public int TileSize { get; set; }
-        /// <summary>
         /// The size of the non-navigable border around the heightfield. [Limit: >=0] [Units: vx]
         /// </summary>
         public int BorderSize { get; set; }
@@ -39,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The bounds of the field's AABB. [(x, y, z)] [Units: wu]
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The maximum slope that is considered walkable. [Limits: 0 <= value < 90] [Units: Degrees] 
         /// </summary>
@@ -106,33 +102,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// Enables debug information
         /// </summary>
         public bool EnableDebugInfo { get; set; }
-
-        /// <summary>
-        /// Updates the tile bounds
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        public void UpdateTileBounds(int x, int y)
-        {
-            // Tile bounds.
-            float tcs = TileSize * CellSize;
-
-            var bbox = new BoundingBox();
-
-            bbox.Minimum.X = BoundingBox.Minimum.X + x * tcs;
-            bbox.Minimum.Y = BoundingBox.Minimum.Y;
-            bbox.Minimum.Z = BoundingBox.Minimum.Z + y * tcs;
-
-            bbox.Maximum.X = BoundingBox.Minimum.X + (x + 1) * tcs;
-            bbox.Maximum.Y = BoundingBox.Maximum.Y;
-            bbox.Maximum.Z = BoundingBox.Minimum.Z + (y + 1) * tcs;
-
-            bbox.Minimum.X -= BorderSize * CellSize;
-            bbox.Minimum.Z -= BorderSize * CellSize;
-            bbox.Maximum.X += BorderSize * CellSize;
-            bbox.Maximum.Z += BorderSize * CellSize;
-
-            BoundingBox = bbox;
-        }
     }
 }

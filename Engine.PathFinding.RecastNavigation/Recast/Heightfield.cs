@@ -46,14 +46,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Builds a new empty heightfield
         /// </summary>
         /// <param name="cfg">Config</param>
+        /// <param name="bounds">Generation bounds</param>
         /// <returns>Returns a new heightfield</returns>
-        public static Heightfield Build(Config cfg)
+        public static Heightfield Build(Config cfg, BoundingBox bounds)
         {
             return new()
             {
+                BoundingBox = bounds,
+
                 Width = cfg.Width,
                 Height = cfg.Height,
-                BoundingBox = cfg.BoundingBox,
                 CellSize = cfg.CellSize,
                 CellHeight = cfg.CellHeight,
                 Spans = new Span[cfg.Width * cfg.Height],
