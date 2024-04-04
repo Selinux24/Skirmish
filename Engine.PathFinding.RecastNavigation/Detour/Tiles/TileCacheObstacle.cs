@@ -11,11 +11,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Touched tile list
         /// </summary>
-        public List<CompressedTile> Touched { get; set; } = new List<CompressedTile>();
+        public List<CompressedTile> Touched { get; set; } = [];
         /// <summary>
         /// Pending tile list
         /// </summary>
-        public List<CompressedTile> Pending { get; set; } = new List<CompressedTile>();
+        public List<CompressedTile> Pending { get; set; } = [];
         /// <summary>
         /// Salt
         /// </summary>
@@ -44,11 +44,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Rasterizes the obstacle descriptor
         /// </summary>
-        /// <param name="bc">Build context</param>
+        /// <param name="layer">Layer</param>
         /// <param name="tile">Tile</param>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
-        public void Rasterize(TileCacheBuildContext bc, CompressedTile tile, float cellSize, float cellHeight)
+        public void Rasterize(TileCacheLayer layer, CompressedTile tile, float cellSize, float cellHeight)
         {
             if (State == ObstacleState.DT_OBSTACLE_EMPTY || State == ObstacleState.DT_OBSTACLE_REMOVING)
             {
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return;
             }
 
-            Obstacle.MarkArea(bc, tile.Header.Bounds.Minimum, cellSize, cellHeight, 0);
+            Obstacle.MarkArea(layer, tile.Header.Bounds.Minimum, cellSize, cellHeight, 0);
         }
         /// <summary>
         /// Process the obstacle

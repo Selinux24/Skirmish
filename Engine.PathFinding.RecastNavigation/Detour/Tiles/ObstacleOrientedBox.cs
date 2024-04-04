@@ -98,10 +98,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return new BoundingBox(bmin, bmax);
         }
         /// <inheritdoc/>
-        public bool MarkArea(TileCacheBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        public bool MarkArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -132,13 +132,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         continue;
                     }
 
-                    int y = tc.Layer.Heights[x + z * w];
+                    int y = layer.Heights[x + z * w];
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    tc.Layer.Areas[x + z * w] = area;
+                    layer.Areas[x + z * w] = area;
                 }
             }
 

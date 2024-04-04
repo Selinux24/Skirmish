@@ -6,31 +6,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Cylinder obstacle
     /// </summary>
-    public readonly struct ObstacleCylinder : IObstacle
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="cylinder">Cylinder</param>
+    public readonly struct ObstacleCylinder(BoundingCylinder cylinder) : IObstacle
     {
         /// <summary>
         /// Center position
         /// </summary>
-        private readonly Vector3 center;
+        private readonly Vector3 center = cylinder.Center;
         /// <summary>
         /// Radius
         /// </summary>
-        private readonly float radius;
+        private readonly float radius = cylinder.Radius;
         /// <summary>
         /// Height
         /// </summary>
-        private readonly float height;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="cylinder">Cylinder</param>
-        public ObstacleCylinder(BoundingCylinder cylinder)
-        {
-            center = cylinder.Center;
-            radius = cylinder.Radius;
-            height = cylinder.Height;
-        }
+        private readonly float height = cylinder.Height;
 
         /// <inheritdoc/>
         public readonly BoundingBox GetBounds()
@@ -49,14 +42,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return new BoundingBox(bmin, bmax);
         }
         /// <inheritdoc/>
-        public readonly bool MarkArea(TileCacheBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        public readonly bool MarkArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             var bbox = GetBounds();
 
             float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
 
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -83,13 +76,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         continue;
                     }
 
-                    int y = tc.Layer.Heights[x + z * w];
+                    int y = layer.Heights[x + z * w];
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    tc.Layer.Areas[x + z * w] = area;
+                    layer.Areas[x + z * w] = area;
                 }
             }
 

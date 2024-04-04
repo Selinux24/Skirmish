@@ -38,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Mesh processor
         /// </summary>
-        private readonly TileCacheMeshProcess m_tmproc;
+        private readonly InputGeometry m_geom;
         /// <summary>
         /// Obstacle list
         /// </summary>
@@ -83,10 +83,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Constructor
         /// </summary>
-        public TileCache(NavMesh navMesh, TileCacheMeshProcess tmproc, TileCacheParams tcparams)
+        public TileCache(NavMesh navMesh, InputGeometry geometry, TileCacheParams tcparams)
         {
             m_navMesh = navMesh;
-            m_tmproc = tmproc;
+            m_geom = geometry;
             m_params = tcparams;
 
             // Alloc space for obstacles.
@@ -848,31 +848,28 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="tile">Tile</param>
         private bool BuildTile(CompressedTile tile)
         {
-            var bc = new TileCacheBuildContext
-            {
-                // Decompress tile layer data.
-                Layer = tile.Decompress(),
-            };
+            // Decompress tile layer data.
+            var layer = tile.Decompress();
 
             // Process obstacles
-            ProcessObstacles(tile, bc);
+            ProcessObstacles(tile, layer);
 
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!bc.Layer.BuildRegions(walkableClimbVx))
+            if (!layer.BuildRegions(walkableClimbVx))
             {
                 return false;
             }
 
             // Build contour set
-            bc.ContourSet = bc.Layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
+            var cset = layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
 
             // Build polygon mesh
-            bc.PolyMesh = TileCachePolyMesh.Build(bc.ContourSet, IndexedPolygon.DT_VERTS_PER_POLYGON);
+            var mesh = TileCachePolyMesh.Build(cset, IndexedPolygon.DT_VERTS_PER_POLYGON);
 
             // Early out if the mesh tile is empty.
-            if (bc.PolyMesh.GetPolyCount() == 0)
+            if (mesh.GetPolyCount() == 0)
             {
                 // Remove existing tile.
                 m_navMesh.RemoveTile(tile.Header);
@@ -880,22 +877,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
+            mesh.UpdatePolyFlags();
+
             var param = new NavMeshCreateParams
             {
-                VertCount = bc.PolyMesh.GetVertexCount(),
-                Verts = bc.PolyMesh.GetVertices(),
-                PolyCount = bc.PolyMesh.GetPolyCount(),
-                Polys = bc.PolyMesh.GetPolygons(),
-                PolyAreas = bc.PolyMesh.GetAreas(),
-                PolyFlags = bc.PolyMesh.GetFlags(),
-                NVP = bc.PolyMesh.NVP,
+                VertCount = mesh.GetVertexCount(),
+                Verts = mesh.GetVertices(),
+                PolyCount = mesh.GetPolyCount(),
+                Polys = mesh.GetPolygons(),
+                PolyAreas = mesh.GetAreas(),
+                PolyFlags = mesh.GetFlags(),
+                NVP = mesh.NVP,
                 DetailMeshes = null,
                 DetailVerts = null,
                 DetailVertsCount = 0,
                 DetailTris = null,
                 DetailTriCount = 0,
-                OffMeshCon = null,
-                OffMeshConCount = 0,
                 WalkableHeight = m_params.WalkableHeight,
                 WalkableRadius = m_params.WalkableRadius,
                 WalkableClimb = m_params.WalkableClimb,
@@ -907,9 +904,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileX = tile.Header.TX,
                 TileY = tile.Header.TY,
                 TileLayer = tile.Header.TLayer,
-            };
 
-            m_tmproc?.Process(ref param, bc);
+                // Pass in off-mesh connections.
+                OffMeshConCount = m_geom?.GetConnectionCount() ?? 0,
+                OffMeshCon = m_geom?.GetConnections().ToArray() ?? [],
+            };
 
             // Remove existing tile.
             m_navMesh.RemoveTile(tile.Header);
@@ -928,8 +927,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Process obstacles
         /// </summary>
         /// <param name="tile">Tile</param>
-        /// <param name="bc">Build context</param>
-        private void ProcessObstacles(CompressedTile tile, TileCacheBuildContext bc)
+        /// <param name="layer">Layer</param>
+        private void ProcessObstacles(CompressedTile tile, TileCacheLayer layer)
         {
             // Reset untouched obstacles
             var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && o.Touched.Count == 0);
@@ -941,7 +940,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
-                m_obstacles[i].Rasterize(bc, tile, m_params.CellSize, m_params.CellHeight);
+                m_obstacles[i].Rasterize(layer, tile, m_params.CellSize, m_params.CellHeight);
             }
         }
 

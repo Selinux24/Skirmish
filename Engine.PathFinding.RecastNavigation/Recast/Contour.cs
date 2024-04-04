@@ -310,16 +310,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int CalcAreaOfPolygon2D()
         {
-            int area = 0;
+            int parea = 0;
 
-            for (int i = 0, j = nvertices - 1; i < nvertices; j = i++)
+            foreach (var (vi, vj) in IterateSegments())
             {
-                var vi = vertices[i];
-                var vj = vertices[j];
-                area += vi.X * vj.Z - vj.X * vi.Z;
+                parea += vi.X * vj.Z - vj.X * vi.Z;
             }
 
-            return (area + 1) / 2;
+            return (parea + 1) / 2;
         }
         /// <summary>
         /// Gets whether the specified segments intersects

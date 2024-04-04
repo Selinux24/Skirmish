@@ -24,32 +24,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Number of vertices.
         /// </summary>
-        private int nverts;
+        private int vertCount;
         /// <summary>
         /// Vertices of the mesh, 3 elements per vertex.
         /// </summary>
-        private Int3[] verts;
+        private Int3[] vertList;
         /// <summary>
         /// Number of polygons.
         /// </summary>
-        private int npolys;
+        private int polyCount;
         /// <summary>
         /// Polygons of the mesh, nvp*2 elements per polygon.
         /// </summary>
-        private IndexedPolygon[] polys;
+        private IndexedPolygon[] polyList;
         /// <summary>
         /// Per polygon flags.
         /// </summary>
-        private SamplePolyFlagTypes[] flags;
+        private SamplePolyFlagTypes[] flagList;
         /// <summary>
         /// Area ID of polygons.
         /// </summary>
-        private SamplePolyAreas[] areas;
+        private SamplePolyAreas[] areaList;
 
         /// <summary>
         /// The maximum number of vertices per polygon.
         /// </summary>
-        public int NVP { get; private set; }
+        public int NVP { get; set; }
 
         /// <summary>
         /// Builds a tile cache polygon mesh
@@ -62,13 +62,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             var mesh = new TileCachePolyMesh
             {
-                npolys = 0,
+                vertCount = 0,
+                vertList = new Int3[maxVertices],
 
-                nverts = 0,
-                verts = new Int3[maxVertices],
-                polys = new IndexedPolygon[maxPolys],
-                areas = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
-                flags = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
+                polyCount = 0,
+                polyList = new IndexedPolygon[maxPolys],
+                areaList = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
+                flagList = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
 
                 NVP = nvp,
             };
@@ -111,13 +111,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 if (nvp > 3)
                 {
                     // Merge polygons.
-                    polys = IndexedPolygon.MergePolygons(polys, mesh.verts);
+                    polys = IndexedPolygon.MergePolygons(polys, mesh.vertList);
                 }
 
                 // Store polygons.
                 if (!mesh.StorePolygons(polys, polys.Length, cont, maxPolys))
                 {
-                    throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.npolys} (max:{maxPolys}).");
+                    throw new EngineException($"rcBuildPolyMesh: Too many polygons {mesh.polyCount} (max:{maxPolys}).");
                 }
             }
 
@@ -148,7 +148,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             while (i != NULL_IDX)
             {
-                var v = verts[i];
+                var v = vertList[i];
                 if (v.X == x && v.Z == z && (Math.Abs(v.Y - y) <= 2))
                 {
                     return i;
@@ -157,8 +157,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Could not find, create new.
-            i = nverts++;
-            verts[i] = new(x, y, z);
+            i = vertCount++;
+            vertList[i] = new(x, y, z);
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="maxPolys">Maximum number of triangles</param>
         private void RemoveEdgeVertices(bool[] vflags, int maxPolys)
         {
-            for (int i = 0; i < nverts; ++i)
+            for (int i = 0; i < vertCount; ++i)
             {
                 if (!vflags[i])
                 {
@@ -193,7 +193,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // Remove vertex
                 // Note: mesh.nverts is already decremented inside removeVertex()!
                 // Fixup vertex flags
-                for (int j = i; j < nverts; ++j)
+                for (int j = i; j < vertCount; ++j)
                 {
                     vflags[j] = vflags[j + 1];
                 }
@@ -209,7 +209,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public readonly bool CanRemoveVertex(int rem)
         {
             // Count number of polygons to remove.
-            var (numTouchedVerts, numRemainingEdges) = IndexedPolygon.CountVertexToRemove(polys, npolys, rem);
+            var (numTouchedVerts, numRemainingEdges) = IndexedPolygon.CountVertexToRemove(polyList, polyCount, rem);
 
             // There would be too few edges remaining to create a polygon.
             // This can happen for example when a tip of a triangle is marked
@@ -231,9 +231,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int nedges = 0;
             IndexedEdge[] edges = new IndexedEdge[MAX_REM_EDGES];
 
-            for (int i = 0; i < npolys; ++i)
+            for (int i = 0; i < polyCount; ++i)
             {
-                var p = polys[i];
+                var p = polyList[i];
                 int nv = p.CountPolyVerts();
 
                 // Collect edges which touches the removed vertex.
@@ -281,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public bool RemoveVertex(int rem, int maxPolys)
         {
             // Count number of polygons to remove.
-            int numRemovedVerts = IndexedPolygon.CountPolygonsToRemove(this.polys, npolys, rem);
+            int numRemovedVerts = IndexedPolygon.CountPolygonsToRemove(polyList, polyCount, rem);
             numRemovedVerts = Math.Min(numRemovedVerts, MAX_REM_EDGES);
 
             var (edges, nedges) = RemoveEdges(rem, numRemovedVerts);
@@ -320,7 +320,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (NVP > 3)
             {
                 // Merge polygons.
-                var (mergedPolys, mergedAreas, _) = IndexedPolygon.MergePolygons(polys, pareas, null, verts);
+                var (mergedPolys, mergedAreas, _) = IndexedPolygon.MergePolygons(polys, pareas, null, vertList);
                 polys = mergedPolys;
                 pareas = mergedAreas;
             }
@@ -328,7 +328,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Store polygons.
             if (!StorePolygons(polys, polys.Length, pareas, maxPolys))
             {
-                Logger.WriteWarning(this, $"removeVertex: Too many polygons {npolys} (max:{maxPolys}).");
+                Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
 
                 return false;
             }
@@ -345,9 +345,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var edges = new IndexedRegionEdge[numRemovedVerts];
             int nedges = 0;
-            for (int i = 0; i < npolys; ++i)
+            for (int i = 0; i < polyCount; ++i)
             {
-                var p = polys[i];
+                var p = polyList[i];
 
                 if (!p.ContainsVertex(rem))
                 {
@@ -371,7 +371,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         return (Array.Empty<IndexedRegionEdge>(), -1);
                     }
 
-                    edges[nedges++] = new(b, a, -1, areas[i]);
+                    edges[nedges++] = new(b, a, -1, areaList[i]);
                 }
 
                 // Remove the polygon.
@@ -393,13 +393,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="rem">Index to remove</param>
         private void RemovePolygon(int rem)
         {
-            polys[rem] = polys[npolys - 1];
-            areas[rem] = areas[npolys - 1];
+            polyList[rem] = polyList[polyCount - 1];
+            areaList[rem] = areaList[polyCount - 1];
 
-            polys[npolys - 1] = null;
-            areas[npolys - 1] = SamplePolyAreas.None;
+            polyList[polyCount - 1] = null;
+            areaList[polyCount - 1] = SamplePolyAreas.None;
 
-            npolys--;
+            polyCount--;
         }
         /// <summary>
         /// Removes the specified vertex by index, and adjusts the indexed polygon layout
@@ -407,16 +407,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="rem">Index to remove</param>
         private void RemoveVertex(int rem)
         {
-            for (int i = rem; i < nverts - 1; ++i)
+            for (int i = rem; i < vertCount - 1; ++i)
             {
-                verts[i] = verts[i + 1];
+                vertList[i] = vertList[i + 1];
             }
-            nverts--;
+            vertCount--;
 
             // Adjust indices to match the removed vertex layout.
-            for (int i = 0; i < npolys; ++i)
+            for (int i = 0; i < polyCount; ++i)
             {
-                var p = polys[i];
+                var p = polyList[i];
                 int nv = p.CountPolyVerts();
                 for (int j = 0; j < nv; ++j)
                 {
@@ -467,7 +467,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Generate temp vertex array for triangulation.
             for (int i = 0; i < nhole; ++i)
             {
-                tverts[i] = verts[hole[i]];
+                tverts[i] = vertList[hole[i]];
                 thole[i] = i;
             }
 
@@ -538,13 +538,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polys, npolys, nverts, true, 0xff);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polyList, polyCount, vertCount, true, 0xff);
 
             // Mark portal edges.
             FindPortalEdges(cset, edges, edgeCount);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polys, edges, edgeCount, true, 0xff);
+            IndexedPolygon.StoreAdjacency(polyList, edges, edgeCount, true, 0xff);
         }
         /// <summary>
         /// Finds edges between portals
@@ -609,8 +609,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                var eva = verts[e.Vert[0]];
-                var evb = verts[e.Vert[1]];
+                var eva = vertList[e.Vert[0]];
+                var evb = vertList[e.Vert[1]];
                 if (eva.X != x || evb.X != x)
                 {
                     continue;
@@ -658,8 +658,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                var eva = verts[e.Vert[0]];
-                var evb = verts[e.Vert[1]];
+                var eva = vertList[e.Vert[0]];
+                var evb = vertList[e.Vert[1]];
                 if (eva.Z != z || evb.Z != z)
                 {
                     continue;
@@ -677,6 +677,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     // Reuse the other polyedge to store dir.
                     e.PolyEdge[1] = dir;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Update polygon flags
+        /// </summary>
+        public readonly void UpdatePolyFlags()
+        {
+            // Update poly flags from areas.
+            for (int i = 0; i < polyCount; ++i)
+            {
+                if ((int)areaList[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                {
+                    areaList[i] = SamplePolyAreas.Ground;
+                }
+
+                flagList[i] = SamplePolyFlagTypesExtents.EvaluateArea(areaList[i]);
             }
         }
 
@@ -737,9 +754,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="area">Area type</param>
         private void StorePolygon(IndexedPolygon p, SamplePolyAreas area)
         {
-            polys[npolys] = p;
-            areas[npolys] = area;
-            npolys++;
+            polyList[polyCount] = p;
+            areaList[polyCount] = area;
+            polyCount++;
         }
 
         /// <summary>
@@ -747,14 +764,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly int GetVertexCount()
         {
-            return nverts;
+            return vertCount;
         }
         /// <summary>
         /// Return vertices
         /// </summary>
         public readonly Int3[] GetVertices()
         {
-            return [.. verts];
+            return [.. vertList];
         }
 
         /// <summary>
@@ -762,14 +779,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly int GetPolyCount()
         {
-            return npolys;
+            return polyCount;
         }
         /// <summary>
         /// Return polygons
         /// </summary>
         public readonly IndexedPolygon[] GetPolygons()
         {
-            return [.. polys];
+            return [.. polyList];
         }
 
         /// <summary>
@@ -777,7 +794,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly SamplePolyAreas[] GetAreas()
         {
-            return [.. areas];
+            return [.. areaList];
         }
         /// <summary>
         /// Gets the area at index
@@ -785,7 +802,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="index">Index</param>
         public readonly SamplePolyAreas GetArea(int index)
         {
-            return areas[index];
+            return areaList[index];
         }
         /// <summary>
         /// Sets the area at index
@@ -794,7 +811,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="area">Area value</param>
         public readonly void SetArea(int index, SamplePolyAreas area)
         {
-            areas[index] = area;
+            areaList[index] = area;
         }
 
         /// <summary>
@@ -802,7 +819,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly SamplePolyFlagTypes[] GetFlags()
         {
-            return [.. flags];
+            return [.. flagList];
         }
         /// <summary>
         /// Gets the flag at index
@@ -810,16 +827,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="index">Index</param>
         public readonly SamplePolyFlagTypes GetFlag(int index)
         {
-            return flags[index];
+            return flagList[index];
         }
         /// <summary>
-        /// Sets the flag at index
+        /// Sets tg
         /// </summary>
-        /// <param name="index">Index</param>
-        /// <param name="flag">Flag value</param>
+        /// <param name="index"></param>
+        /// <param name="flag"></param>
         public readonly void SetFlag(int index, SamplePolyFlagTypes flag)
         {
-            flags[index] = flag;
+            flagList[index] = flag;
         }
     }
 }

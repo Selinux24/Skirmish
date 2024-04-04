@@ -1986,7 +1986,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="cacheParams">Parameters</param>
         public void CreateTileCache(InputGeometry geometry, TileCacheParams cacheParams)
         {
-            TileCache = new TileCache(this, new TileCacheMeshProcess(geometry), cacheParams);
+            TileCache = new(this, geometry, cacheParams);
         }
 
         /// <summary>
