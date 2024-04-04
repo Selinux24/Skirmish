@@ -203,6 +203,36 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return tris;
         }
 
+        /// <summary>
+        /// Removes the specified border size from the vertices and rawvertices collections
+        /// </summary>
+        /// <param name="borderSize">Border size</param>
+        public void RemoveBorderSize(int borderSize)
+        {
+            if (borderSize <= 0)
+            {
+                return;
+            }
+
+            // If the heightfield was build with bordersize, remove the offset.
+            for (int j = 0; j < NVertices; ++j)
+            {
+                var v = Vertices[j];
+                v.X -= borderSize;
+                v.Z -= borderSize;
+                Vertices[j] = v;
+            }
+
+            // If the heightfield was build with bordersize, remove the offset.
+            for (int j = 0; j < NRawVertices; ++j)
+            {
+                var v = RawVertices[j];
+                v.X -= borderSize;
+                v.Z -= borderSize;
+                RawVertices[j] = v;
+            }
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {

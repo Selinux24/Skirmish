@@ -48,7 +48,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="tile">Tile</param>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
-        public void Rasterize(NavMeshTileBuildContext bc, CompressedTile tile, float cellSize, float cellHeight)
+        public void Rasterize(TileCacheBuildContext bc, CompressedTile tile, float cellSize, float cellHeight)
         {
             if (State == ObstacleState.DT_OBSTACLE_EMPTY || State == ObstacleState.DT_OBSTACLE_REMOVING)
             {

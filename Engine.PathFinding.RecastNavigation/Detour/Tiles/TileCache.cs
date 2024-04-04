@@ -855,7 +855,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="tile">Tile</param>
         private bool BuildTile(CompressedTile tile)
         {
-            var bc = new NavMeshTileBuildContext
+            var bc = new TileCacheBuildContext
             {
                 // Decompress tile layer data.
                 Layer = tile.Decompress(),
@@ -877,37 +877,36 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!bc.Layer.BuildRegions(walkableClimbVx, out var layerRegs, out var nRegs))
+            if (!bc.Layer.BuildRegions(walkableClimbVx))
             {
                 return false;
             }
-            bc.SetLayerRegs(layerRegs, nRegs);
 
             if (!bc.Layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError, out var lscet))
             {
                 return false;
             }
-            bc.LCSet = lscet;
+            bc.ContourSet = lscet;
 
-            bc.LMesh = TileCachePolyMesh.Build(bc.LCSet, IndexedPolygon.DT_VERTS_PER_POLYGON);
+            bc.PolyMesh = TileCachePolyMesh.Build(bc.ContourSet, IndexedPolygon.DT_VERTS_PER_POLYGON);
 
             // Early out if the mesh tile is empty.
-            if (bc.LMesh.NPolys == 0)
+            if (bc.PolyMesh.NPolys == 0)
             {
                 // Remove existing tile.
-                m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
+                m_navMesh.RemoveTile(tile.Header);
 
                 return true;
             }
 
             var param = new NavMeshCreateParams
             {
-                Verts = bc.LMesh.Verts,
-                VertCount = bc.LMesh.NVerts,
-                Polys = bc.LMesh.Polys,
-                PolyAreas = bc.LMesh.Areas,
-                PolyFlags = bc.LMesh.Flags,
-                PolyCount = bc.LMesh.NPolys,
+                Verts = bc.PolyMesh.Verts,
+                VertCount = bc.PolyMesh.NVerts,
+                Polys = bc.PolyMesh.Polys,
+                PolyAreas = bc.PolyMesh.Areas,
+                PolyFlags = bc.PolyMesh.Flags,
+                PolyCount = bc.PolyMesh.NPolys,
                 Nvp = IndexedPolygon.DT_VERTS_PER_POLYGON,
                 DetailMeshes = null,
                 DetailVerts = null,
@@ -932,7 +931,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             m_tmproc?.Process(ref param, bc);
 
             // Remove existing tile.
-            m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
+            m_navMesh.RemoveTile(tile.Header);
 
             var navData = MeshData.CreateNavMeshData(param);
             if (navData == null)

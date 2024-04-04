@@ -379,7 +379,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json");
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap03.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,

@@ -11,17 +11,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             m_geom = geometry;
         }
 
-        public void Process(ref NavMeshCreateParams param, NavMeshTileBuildContext bc)
+        public void Process(ref NavMeshCreateParams param, TileCacheBuildContext bc)
         {
             // Update poly flags from areas.
             for (int i = 0; i < param.PolyCount; ++i)
             {
-                if ((int)bc.LMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if ((int)bc.PolyMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    bc.LMesh.Areas[i] = SamplePolyAreas.Ground;
+                    bc.PolyMesh.Areas[i] = SamplePolyAreas.Ground;
                 }
 
-                bc.LMesh.Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(bc.LMesh.Areas[i]);
+                bc.PolyMesh.Flags[i] = SamplePolyFlagTypesExtents.EvaluateArea(bc.PolyMesh.Areas[i]);
             }
 
             // Pass in off-mesh connections.

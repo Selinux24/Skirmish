@@ -6,7 +6,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Tile cache layer
     /// </summary>
-    public struct TileCacheLayer
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="header">Tile cache header</param>
+    public struct TileCacheLayer(TileCacheLayerHeader header)
     {
         /// <summary>
         /// Maximum neighbours
@@ -20,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Header
         /// </summary>
-        public TileCacheLayerHeader Header { get; set; }
+        public TileCacheLayerHeader Header { get; private set; } = header;
         /// <summary>
         /// Region count.
         /// </summary>
@@ -46,14 +50,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Builds the region id list
         /// </summary>
         /// <param name="walkableClimb">Walkable climb value</param>
-        /// <param name="layerRegs">Resulting layer regions</param>
-        /// <param name="nregs">Region count</param>
-        public bool BuildRegions(int walkableClimb, out int[] layerRegs, out int nregs)
+        public bool BuildRegions(int walkableClimb)
         {
-            if (!BuildMonotoneRegions(walkableClimb, out layerRegs, out nregs))
+            if (!BuildMonotoneRegions(walkableClimb, out var layerRegs, out int nregs))
             {
-                layerRegs = [];
-                nregs = -1;
+                Regs = [];
+                RegCount = -1;
 
                 return false;
             }
@@ -63,6 +65,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Compact ids.
             CompactIds(regs, layerRegs, nregs);
+
+            Regs = layerRegs;
+            RegCount = nregs;
 
             return true;
         }

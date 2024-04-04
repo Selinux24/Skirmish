@@ -2915,6 +2915,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var area = Areas[i];
                 var verts = WalkContour(x, y, i, flags);
+                if (verts.Length < 3)
+                {
+                    continue;
+                }
 
                 res.Add((reg, area, verts));
             }

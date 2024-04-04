@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return bbox;
         }
         /// <inheritdoc/>
-        public bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        public bool MarkArea(TileCacheBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             int w = tc.Layer.Header.Width;
             int h = tc.Layer.Header.Height;

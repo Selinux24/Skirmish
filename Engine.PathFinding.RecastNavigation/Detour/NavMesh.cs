@@ -600,26 +600,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float totalTiles = tileParams.Height * tileParams.Width;
             int tile = 0;
 
-            for (int y = 0; y < tileParams.Height; y++)
+            foreach (var (x, y) in GridUtils.Iterate(tileParams.Width, tileParams.Height))
             {
-                for (int x = 0; x < tileParams.Width; x++)
+                var tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
+
+                // Init build configuration
+                var cfg = TilesConfig.GetConfig(settings, agent, tileBounds);
+
+                var data = BuildTileMesh(x, y, geometry, cfg);
+                if (data != null)
                 {
-                    var tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
-
-                    // Init build configuration
-                    var cfg = TilesConfig.GetConfig(settings, agent, tileBounds);
-
-                    var data = BuildTileMesh(x, y, geometry, cfg);
-                    if (data != null)
-                    {
-                        // Remove any previous data (navmesh owns and deletes the data).
-                        RemoveTile(x, y, 0);
-                        // Let the navmesh own the data.
-                        AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
-                    }
-
-                    progressCallback?.Invoke(++tile / totalTiles);
+                    // Remove any previous data (navmesh owns and deletes the data).
+                    RemoveTile(x, y, 0);
+                    // Let the navmesh own the data.
+                    AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
                 }
+
+                progressCallback?.Invoke(++tile / totalTiles);
             }
         }
 
@@ -792,6 +789,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return tile;
         }
 
+        /// <summary>
+        /// Removes the tile from the navigation mesh
+        /// </summary>
+        /// <param name="header">Tile cache layer header</param>
+        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
+        public bool RemoveTile(TileCacheLayerHeader header)
+        {
+            return RemoveTile(header.TX, header.TY, header.TLayer);
+        }
         /// <summary>
         /// Removes the tile from the navigation mesh
         /// </summary>

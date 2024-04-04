@@ -34,29 +34,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the tile layer</returns>
         public TileCacheLayer Decompress()
         {
-            var layer = new TileCacheLayer()
-            {
-                Header = Header,
-                Areas = null,
-                Heights = null,
-                Cons = null,
-                Regs = null,
-                RegCount = 0,
-            };
+            var layer = new TileCacheLayer(Header);
 
-            if (Data.Areas != null && Data.Areas.Length > 0)
+            if (Data.Areas?.Length > 0)
             {
                 layer.Areas = new AreaTypes[Data.Areas.Length];
                 Array.Copy(Data.Areas, layer.Areas, Data.Areas.Length);
             }
 
-            if (Data.Heights != null && Data.Heights.Length > 0)
+            if (Data.Heights?.Length > 0)
             {
                 layer.Heights = new int[Data.Heights.Length];
                 Array.Copy(Data.Heights, layer.Heights, Data.Heights.Length);
             }
 
-            if (Data.Connections != null && Data.Connections.Length > 0)
+            if (Data.Connections?.Length > 0)
             {
                 layer.Cons = new int[Data.Connections.Length];
                 Array.Copy(Data.Connections, layer.Cons, Data.Connections.Length);

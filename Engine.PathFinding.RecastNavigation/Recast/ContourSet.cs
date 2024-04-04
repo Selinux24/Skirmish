@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -80,22 +81,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int[] flags = chf.InitializeFlags();
 
-            List<(int Reg, AreaTypes Area, ContourVertex[] RawVerts)> cells = [];
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    cells.AddRange(chf.BuildCompactCells(x, y, flags));
-                }
-            }
+            var cells = GridUtils.Iterate(w, h).SelectMany((item) => chf.BuildCompactCells(item.row, item.col, flags));
 
             foreach (var (Reg, Area, RawVerts) in cells)
             {
-                if (RawVerts.Length < 3)
-                {
-                    continue;
-                }
-
                 var cont = SimplifyContour(RawVerts, maxError, maxEdgeLen, buildFlags);
                 if (cont.Length < 3)
                 {
@@ -555,34 +544,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var cont = new Contour
             {
-                NVertices = verts.Length,
-                Vertices = verts,
+                RegionId = reg,
+                Area = area,
                 NRawVertices = rawVerts.Length,
                 RawVertices = rawVerts,
-                RegionId = reg,
-                Area = area
+                NVertices = verts.Length,
+                Vertices = verts,
             };
 
-            if (borderSize > 0)
-            {
-                // If the heightfield was build with bordersize, remove the offset.
-                for (int j = 0; j < cont.NVertices; ++j)
-                {
-                    var v = cont.Vertices[j];
-                    v.X -= borderSize;
-                    v.Z -= borderSize;
-                    cont.Vertices[j] = v;
-                }
-
-                // If the heightfield was build with bordersize, remove the offset.
-                for (int j = 0; j < cont.NRawVertices; ++j)
-                {
-                    var v = cont.RawVertices[j];
-                    v.X -= borderSize;
-                    v.Z -= borderSize;
-                    cont.RawVertices[j] = v;
-                }
-            }
+            cont.RemoveBorderSize(borderSize);
 
             Conts[NConts++] = cont;
         }

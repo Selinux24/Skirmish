@@ -49,7 +49,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return new BoundingBox(bmin, bmax);
         }
         /// <inheritdoc/>
-        public readonly bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        public readonly bool MarkArea(TileCacheBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             var bbox = GetBounds();
 
