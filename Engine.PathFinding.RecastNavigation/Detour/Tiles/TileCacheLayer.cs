@@ -537,7 +537,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // No connection, return portal or hard edge.
                 if (IsPortalAtDirection(portal, dir))
                 {
-                    return TileCacheContour.DT_NEI_DIR_MASK + dir;
+                    return VertexWithNeigbour.DT_NEI_DIR_MASK + dir;
                 }
                 return LayerMonotoneRegion.NULL_ID;
             }

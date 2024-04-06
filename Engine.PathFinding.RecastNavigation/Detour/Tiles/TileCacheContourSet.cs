@@ -40,6 +40,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
 
         /// <summary>
+        /// Finds the contour by region id
+        /// </summary>
+        /// <param name="reg">Region id</param>
+        public TileCacheContour? FindContour(int reg)
+        {
+            for (int i = 0; i < nconts; ++i)
+            {
+                if (conts[i].RegionId == reg)
+                {
+                    return conts[i];
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Iterates over the contour list
         /// </summary>
         public readonly IEnumerable<(int i, TileCacheContour c)> IterateContours()
@@ -67,7 +84,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
         }
-
 
         /// <summary>
         /// Gets the geometry configuration of the contour set

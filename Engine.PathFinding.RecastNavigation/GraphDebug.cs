@@ -70,10 +70,11 @@ namespace Engine.PathFinding.RecastNavigation
                 GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
                 GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
                 GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
-                GraphDebugTypes.RawContours => GetContours(buildData.CountourSet, true),
-                GraphDebugTypes.Contours => GetContours(buildData.CountourSet, false),
+                GraphDebugTypes.RawContours => GetContours(buildData.ContourSet, true),
+                GraphDebugTypes.Contours => GetContours(buildData.ContourSet, false),
                 GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
                 GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
+                GraphDebugTypes.TileCacheContours => GetTileCacheContours(buildData.TileCacheContourSet, buildData.Origin, buildData.CellSize, buildData.CellHeight),
                 GraphDebugTypes.TileCachePolyMesh => GetTileCachePolyMesh(buildData.TileCachePolyMesh, buildData.Origin, buildData.CellSize, buildData.CellHeight),
                 _ => []
             };
@@ -414,6 +415,120 @@ namespace Engine.PathFinding.RecastNavigation
                     if (cont2 != null)
                     {
                         var pos2 = cont2.GetContourCenter(orig, cs, ch);
+
+                        var arcPoints = Line3D.CreateArc(pos1, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
+
+                        lines.AddRange(arcPoints);
+                    }
+                }
+            }
+
+            if (lines.Count <= 0)
+            {
+                yield break;
+            }
+
+            Color4 color = new Color(32, 128, 128, 196);
+
+            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            {
+                { color, lines }
+            };
+            yield return ($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
+        }
+
+        /// <summary>
+        /// Gets the contour debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        /// <param name="drawRaw">Draw raw contour set</param>
+        private readonly List<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCacheContours(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
+        {
+            return
+            [
+                .. GetBounds(),
+                .. GetTileCacheContoursRegions(cset, orig, cs, ch),
+                .. GetTileCacheContourBorders(cset, orig, cs, ch, 0.75f),
+            ];
+        }
+        /// <summary>
+        /// Gets the contour borders debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCacheContourBorders(TileCacheContourSet cset, Vector3 orig, float cs, float ch, float alpha)
+        {
+            int a = (int)(alpha * 255.0f);
+            Color4 bseColor = new Color(255, 255, 255, a);
+
+            Dictionary<Color4, List<Vector3>> lines = [];
+
+            bool empty = true;
+            foreach (var (i, c) in cset.IterateContours())
+            {
+                if (!c.HasVertices())
+                {
+                    continue;
+                }
+
+                var regColor = Helper.IntToCol(c.RegionId, a);
+                var bColor = Color4.Lerp(regColor, bseColor, 0.5f);
+
+                foreach (var (va, vb) in c.IterateSegments())
+                {
+                    var colol = Contour.IsAreaBorder(va.Flag) ? regColor : bColor;
+                    lines.TryAdd(colol, []);
+
+                    float fx, fy, fz;
+                    fx = orig.X + va.X * cs;
+                    fy = orig.Y + (va.Y + 1 + (i & 1)) * ch;
+                    fz = orig.Z + va.Z * cs;
+
+                    lines[colol].Add(new(fx, fy, fz));
+
+                    fx = orig.X + vb.X * cs;
+                    fy = orig.Y + (vb.Y + 1 + (i & 1)) * ch;
+                    fz = orig.Z + vb.Z * cs;
+
+                    lines[colol].Add(new(fx, fy, fz));
+
+                    empty = false;
+                }
+            }
+
+            if (empty)
+            {
+                yield break;
+            }
+
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
+        }
+        /// <summary>
+        /// Gets the contour regions debug information
+        /// </summary>
+        /// <param name="cset">Contour set</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCacheContoursRegions(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
+        {
+            List<Vector3> lines = [];
+
+            // Draw centers
+            foreach (var (i, cont1) in cset.IterateContours())
+            {
+                var pos1 = cont1.GetContourCenter(orig, cs, ch);
+
+                foreach (var (j, v) in cont1.IterateVertices())
+                {
+                    var r = (int)(uint)v.Flag;
+
+                    if (v.Flag == 0 || r < cont1.RegionId)
+                    {
+                        continue;
+                    }
+
+                    var cont2 = cset.FindContour(r);
+                    if (cont2 != null)
+                    {
+                        var pos2 = cont2.Value.GetContourCenter(orig, cs, ch);
 
                         var arcPoints = Line3D.CreateArc(pos1, pos2, 0.25f, 8).SelectMany(a => new[] { a.Point1, a.Point2 });
 

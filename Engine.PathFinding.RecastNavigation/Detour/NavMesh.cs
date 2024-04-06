@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 nm.m_buildData = new()
                 {
                     Heightfield = solid,
-                    CountourSet = cset,
+                    ContourSet = cset,
                     PolyMesh = pmesh,
                     PolyMeshDetail = dmesh,
                 };
@@ -420,7 +420,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 meshData.BuildData = new()
                 {
                     Heightfield = solid,
-                    CountourSet = cset,
+                    ContourSet = cset,
                     PolyMesh = pmesh,
                     PolyMeshDetail = dmesh,
                 };

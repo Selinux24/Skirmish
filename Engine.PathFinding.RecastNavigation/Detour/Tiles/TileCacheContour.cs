@@ -9,15 +9,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     public struct TileCacheContour
     {
         /// <summary>
-        /// Stored direction mask
-        /// </summary>
-        public const int DT_NEI_DIR_MASK = 0xf8;
-        /// <summary>
-        /// Stored portal mask
-        /// </summary>
-        public const int DT_NEI_PORTAL_MASK = 0xff;
-
-        /// <summary>
         /// Vertex list
         /// </summary>
         private ContourVertex[] vertices;
@@ -179,17 +170,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                var v = verts[j];
-                var vn = verts[i];
-                int nei = vn.Nei; // The neighbour reg is stored at segment vertex of a segment. 
-                int lh = tcl.GetCornerHeight(v, walkableClimb, out bool shouldRemove);
+                var vi = verts[i];
+                var vj = verts[j];
+                int lh = tcl.GetCornerHeight(vj, walkableClimb, out bool shouldRemove);
 
-                // Store portal direction and remove status to the fourth component.
-                int flag = Edge.DT_PORTAL_FLAG;
-                if (nei != DT_NEI_PORTAL_MASK && nei >= DT_NEI_DIR_MASK)
-                {
-                    flag = nei - DT_NEI_DIR_MASK;
-                }
+                int flag = vi.CalculatePortalFlag();
+
                 if (shouldRemove)
                 {
                     flag |= Edge.DT_BORDER_VERTEX;
@@ -197,9 +183,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 vertices[j] = new()
                 {
-                    X = v.X,
+                    X = vj.X,
                     Y = lh,
-                    Z = v.Z,
+                    Z = vj.Z,
                     Flag = flag,
                 };
             }

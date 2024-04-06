@@ -651,6 +651,8 @@ namespace Engine.PathFinding.RecastNavigation
                     var p1 = polys[e.Poly[1]];
                     p0.adjacency[e.PolyEdge[0]] = e.Poly[1];
                     p1.adjacency[e.PolyEdge[1]] = e.Poly[0];
+
+                    continue;
                 }
 
                 if (!addOpenEdges)

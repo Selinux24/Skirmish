@@ -17,7 +17,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Contour set
         /// </summary>
-        public ContourSet CountourSet { get; set; }
+        public ContourSet ContourSet { get; set; }
         /// <summary>
         /// Polygon mesh
         /// </summary>
@@ -39,6 +39,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// Cell height
         /// </summary>
         public float CellHeight { get; set; }
+        /// <summary>
+        /// Tile-Cache layer
+        /// </summary>
+        public TileCacheLayer TileCacheLayer { get; set; }
+        /// <summary>
+        /// Tile-Cache contour set
+        /// </summary>
+        public TileCacheContourSet TileCacheContourSet { get; set; }
         /// <summary>
         /// Tile-Cache polygon mesh
         /// </summary>

@@ -777,6 +777,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     Origin = tile.Header.Bounds.Minimum,
                     CellSize = m_params.CellSize,
                     CellHeight = m_params.CellHeight,
+                    TileCacheLayer = tlayer,
+                    TileCacheContourSet = tcset,
                     TileCachePolyMesh = tmesh,
                 };
             }

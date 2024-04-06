@@ -548,13 +548,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polyList, polyCount, vertCount, true, TileCacheContour.DT_NEI_PORTAL_MASK);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polyList, polyCount, vertCount, true, VertexWithNeigbour.DT_NEI_PORTAL_MASK);
 
             // Mark portal edges.
             FindPortalEdges(cset, edges, edgeCount);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polyList, edges, edgeCount, true, TileCacheContour.DT_NEI_PORTAL_MASK);
+            IndexedPolygon.StoreAdjacency(polyList, edges, edgeCount, true, VertexWithNeigbour.DT_NEI_PORTAL_MASK);
         }
         /// <summary>
         /// Finds edges between portals
