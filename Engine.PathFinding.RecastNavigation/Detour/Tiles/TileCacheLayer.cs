@@ -360,37 +360,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var temp = new TempContour(tempVerts, maxTempVerts, tempPoly);
 
             // Find contours.
-            for (int y = 0; y < h; ++y)
+            foreach (var (x, y) in GridUtils.Iterate(w, h))
             {
-                for (int x = 0; x < w; ++x)
+                int idx = x + y * w;
+                int ri = regions[idx];
+                if (ri == LayerMonotoneRegion.NULL_ID)
                 {
-                    int idx = x + y * w;
-                    int ri = regions[idx];
-                    if (ri == LayerMonotoneRegion.NULL_ID)
-                    {
-                        continue;
-                    }
-
-                    var cont = cset.GetContour(ri);
-                    if (cont.HasVertices())
-                    {
-                        continue;
-                    }
-
-                    cont.RegionId = ri;
-                    cont.Area = areas[idx];
-
-                    if (!WalkContour(temp, x, y, maxError, out var verts))
-                    {
-                        // Too complex contour.
-                        throw new EngineException("Too complex contour, try increasing 'maxTempVerts'.");
-                    }
-
-                    // Store contour.
-                    cont.StoreVerts(verts, verts.Length, this, walkableClimb);
-
-                    cset.SetContour(ri, cont);
+                    continue;
                 }
+
+                var cont = cset.GetContour(ri);
+                if (cont.HasVertices())
+                {
+                    continue;
+                }
+
+                cont.RegionId = ri;
+                cont.Area = areas[idx];
+
+                if (!WalkContour(temp, x, y, maxError, out var verts))
+                {
+                    // Too complex contour.
+                    throw new EngineException("Too complex contour, try increasing 'maxTempVerts'.");
+                }
+
+                // Store contour.
+                cont.StoreVerts(verts, verts.Length, this, walkableClimb);
+
+                cset.SetContour(ri, cont);
             }
 
             return cset;
@@ -540,7 +537,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // No connection, return portal or hard edge.
                 if (IsPortalAtDirection(portal, dir))
                 {
-                    return TileCacheContour.DT_DIR_MASK + dir;
+                    return TileCacheContour.DT_NEI_DIR_MASK + dir;
                 }
                 return LayerMonotoneRegion.NULL_ID;
             }

@@ -241,6 +241,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     TileWidth = tileWidth,
                     TileHeight = tileHeight,
                     MaxObstacles = 128,
+
+                    EnableDebugInfo = settings.EnableDebugInfo,
                 };
             }
 

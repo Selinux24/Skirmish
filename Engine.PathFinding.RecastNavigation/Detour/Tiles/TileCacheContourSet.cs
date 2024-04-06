@@ -38,6 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             conts[index] = contour;
         }
+
         /// <summary>
         /// Iterates over the contour list
         /// </summary>
@@ -48,6 +49,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 yield return (i, conts[i]);
             }
         }
+        /// <summary>
+        /// Iterates over the vertex of echar contour in the list
+        /// </summary>
+        public readonly IEnumerable<(TileCacheContour c, ContourVertex va, ContourVertex vb)> IterateContoursVertices()
+        {
+            for (int i = 0; i < conts.Length; i++)
+            {
+                if (conts[i].GetVertexCount() < 3)
+                {
+                    continue;
+                }
+
+                foreach (var (va, vb) in conts[i].IterateSegments())
+                {
+                    yield return (conts[i], va, vb);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Gets the geometry configuration of the contour set

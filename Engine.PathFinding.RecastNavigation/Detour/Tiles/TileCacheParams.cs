@@ -62,6 +62,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Maximum obstacles
         /// </summary>
         public int MaxObstacles { get; set; }
+        /// <summary>
+        /// Enable debug info
+        /// </summary>
+        public bool EnableDebugInfo { get; set; }
 
         /// <summary>
         /// Iterates over the coordinates in the specified bounds

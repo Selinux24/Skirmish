@@ -2007,22 +2007,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return default;
             }
 
-            if (TileCache == null)
+            //Tiles build
+            var tile = GetTileAt(tx, ty, 0);
+            if (tile == null)
             {
-                //Tiles build
-                var tile = GetTileAt(tx, ty, 0);
-                if (tile == null)
-                {
-                    return default;
-                }
-
-                return tile.Data.BuildData;
-            }
-            else
-            {
-                //Tile cache build
                 return default;
             }
+
+            return tile.Data.BuildData;
         }
     }
 }

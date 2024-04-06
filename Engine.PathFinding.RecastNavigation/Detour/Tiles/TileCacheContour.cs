@@ -11,7 +11,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Stored direction mask
         /// </summary>
-        public const int DT_DIR_MASK = 0xf8;
+        public const int DT_NEI_DIR_MASK = 0xf8;
+        /// <summary>
+        /// Stored portal mask
+        /// </summary>
+        public const int DT_NEI_PORTAL_MASK = 0xff;
 
         /// <summary>
         /// Vertex list
@@ -182,9 +186,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 // Store portal direction and remove status to the fourth component.
                 int flag = Edge.DT_PORTAL_FLAG;
-                if (nei != Edge.DT_PORTAL_FLAG && nei >= DT_DIR_MASK)
+                if (nei != DT_NEI_PORTAL_MASK && nei >= DT_NEI_DIR_MASK)
                 {
-                    flag = nei - DT_DIR_MASK;
+                    flag = nei - DT_NEI_DIR_MASK;
                 }
                 if (shouldRemove)
                 {

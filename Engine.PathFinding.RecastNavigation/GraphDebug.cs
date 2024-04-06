@@ -6,6 +6,7 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
     using Engine.PathFinding.RecastNavigation.Recast;
 
     /// <summary>
@@ -73,6 +74,7 @@ namespace Engine.PathFinding.RecastNavigation
                 GraphDebugTypes.Contours => GetContours(buildData.CountourSet, false),
                 GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
                 GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
+                GraphDebugTypes.TileCachePolyMesh => GetTileCachePolyMesh(buildData.TileCachePolyMesh, buildData.Origin, buildData.CellSize, buildData.CellHeight),
                 _ => []
             };
             return new GraphDebugData(data);
@@ -558,6 +560,155 @@ namespace Engine.PathFinding.RecastNavigation
             float ch = pm.CellHeight;
             var orig = pm.Bounds.Minimum;
 
+            Dictionary<Color4, List<Vector3>> edges = [];
+
+            // Draw boundary edges
+            foreach (var (i0, i1, p) in pm.IteratePolySegments())
+            {
+                if (p.AdjacencyIsNull(i0))
+                {
+                    continue;
+                }
+
+                Color4 col = new Color(0, 48, 64, 255);
+                if (p.IsExternalLink(i0))
+                {
+                    col = new Color(255, 255, 255, 255);
+                }
+
+                edges.TryAdd(col, []);
+
+                int p0 = p.GetVertex(i0);
+                int p1 = p.GetVertex(i1);
+                int[] vi = [p0, p1];
+
+                for (int k = 0; k < vi.Length; ++k)
+                {
+                    var v = pm.GetVertex(vi[k]);
+                    float x = orig.X + v.X * cs;
+                    float y = orig.Y + (v.Y + 1) * ch + 0.1f;
+                    float z = orig.Z + v.Z * cs;
+
+                    edges[col].Add(new(x, y, z));
+                }
+            }
+
+            if (edges.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
+        }
+
+        /// <summary>
+        /// Gets the polygon mesh debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private readonly IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCachePolyMesh(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        {
+            return
+            [
+                .. GetBounds(),
+                .. GetTileCachePolyMeshTris(pm, orig, cs, ch),
+                .. GetTileCachePolyEdges(pm, orig, cs, ch),
+                .. GetTileCachePolyBoundaries(pm, orig, cs, ch),
+            ];
+        }
+        /// <summary>
+        /// Gets the polygon mesh triangles debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCachePolyMeshTris(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        {
+            Dictionary<Color4, List<Vector3>> tris = [];
+            foreach (var (p, t, poly, area) in pm.IteratePolyTriangles())
+            {
+                Color4 col;
+                if (area == SamplePolyAreas.Ground)
+                {
+                    col = new Color(0, 192, 255, 128);
+                }
+                else if (area == SamplePolyAreas.None)
+                {
+                    col = new Color(0, 0, 0, 128);
+                }
+                else
+                {
+                    col = AreaToCol(area, 128);
+                }
+
+                tris.TryAdd(col, []);
+
+                for (int k = 0; k < t.Length; ++k)
+                {
+                    float x = orig.X + t[k].X * cs;
+                    float y = orig.Y + (t[k].Y + 1) * ch;
+                    float z = orig.Z + t[k].Z * cs;
+
+                    tris[col].Add(new(x, y, z));
+                }
+            }
+
+            if (tris.Count <= 0)
+            {
+                yield break;
+            }
+
+            var dict = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
+            yield return ($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
+        }
+        /// <summary>
+        /// Gets the polygon mesh edges debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCachePolyEdges(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        {
+            List<Vector3> points = [];
+
+            // Draw neighbours edges
+            foreach (var (i0, i1, p) in pm.IteratePolySegments())
+            {
+                if (!p.AdjacencyIsNull(i0))
+                {
+                    continue;
+                }
+
+                int p0 = p.GetVertex(i0);
+                int p1 = p.GetVertex(i1);
+                int[] vi = [p0, p1];
+
+                for (int k = 0; k < vi.Length; ++k)
+                {
+                    var v = pm.GetVertex(vi[k]);
+                    float x = orig.X + v.X * cs;
+                    float y = orig.Y + (v.Y + 1) * ch + 0.1f;
+                    float z = orig.Z + v.Z * cs;
+
+                    points.Add(new(x, y, z));
+                }
+            }
+
+            if (points.Count <= 0)
+            {
+                yield break;
+            }
+
+            Color4 color = new Color(0, 48, 64, 255);
+
+            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            {
+                { color, points }
+            };
+            yield return ($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
+        }
+        /// <summary>
+        /// Gets the polygon mesh boundaries debug information
+        /// </summary>
+        /// <param name="pm">Polygon mesh</param>
+        private static IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetTileCachePolyBoundaries(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        {
             Dictionary<Color4, List<Vector3>> edges = [];
 
             // Draw boundary edges

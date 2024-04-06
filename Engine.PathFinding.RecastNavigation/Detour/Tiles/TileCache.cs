@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Obstacle list
         /// </summary>
-        private readonly TileCacheObstacle[] m_obstacles = [];
+        private readonly TileCacheObstacle[] m_obstacles;
         /// <summary>
         /// Next free obstacle
         /// </summary>
@@ -54,19 +54,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Compressed tile list
         /// </summary>
-        private readonly CompressedTile[] m_tiles = [];
+        private readonly CompressedTile[] m_tiles;
         /// <summary>
         /// Look up compressed tile list
         /// </summary>
-        private readonly CompressedTile[] m_posLookup = [];
+        private readonly CompressedTile[] m_posLookup;
         /// <summary>
         /// Next free tile
         /// </summary>
         private CompressedTile m_nextFreeTile = null;
-        /// <summary>
-        /// Tile bits
-        /// </summary>
-        private readonly int m_tileBits;
         /// <summary>
         /// Salt bits
         /// </summary>
@@ -102,8 +98,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Init tiles
-            var m_tileLutSize = Helper.NextPowerOfTwo(tcparams.MaxTiles / 4);
-            if (m_tileLutSize == 0) m_tileLutSize = 1;
+            var m_tileLutSize = Math.Max(1, Helper.NextPowerOfTwo(tcparams.MaxTiles / 4));
             m_tileLutMask = m_tileLutSize - 1;
 
             m_tiles = new CompressedTile[tcparams.MaxTiles];
@@ -120,10 +115,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Init ID generator values.
-            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
+            int tileBits = (int)Math.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
 
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
-            m_saltBits = Math.Min(31, 32 - m_tileBits);
+            m_saltBits = Math.Min(31, 32 - tileBits);
             if (m_saltBits < 10)
             {
                 throw new EngineException("NavMesh DT_INVALID_PARAM");
@@ -422,7 +417,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Reset tile.
-            if ((tile.Flags & CompressedTileFlagTypes.Free) != 0)
+            if (tile.Flags == CompressedTileFlagTypes.Free)
             {
                 // Owns data
                 tile.Data = TileCacheLayerData.Empty;
@@ -773,6 +768,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 // Leave the location empty.
                 return true;
+            }
+
+            if (m_params.EnableDebugInfo)
+            {
+                navData.BuildData = new()
+                {
+                    Origin = tile.Header.Bounds.Minimum,
+                    CellSize = m_params.CellSize,
+                    CellHeight = m_params.CellHeight,
+                    TileCachePolyMesh = tmesh,
+                };
             }
 
             // Add new tile

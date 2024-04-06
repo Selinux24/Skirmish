@@ -379,7 +379,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap03.json");
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap02.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
@@ -421,7 +421,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 64;
+            nmsettings.TileSize = 32;
 
             //Debugging
             nmsettings.EnableDebugInfo = true;

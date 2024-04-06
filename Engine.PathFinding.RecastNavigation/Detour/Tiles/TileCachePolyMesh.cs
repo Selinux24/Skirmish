@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -546,13 +548,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polyList, polyCount, vertCount, true, 0xff);
+            var (edges, edgeCount) = IndexedPolygon.BuildAdjacencyEdges(polyList, polyCount, vertCount, true, TileCacheContour.DT_NEI_PORTAL_MASK);
 
             // Mark portal edges.
             FindPortalEdges(cset, edges, edgeCount);
 
             // Store adjacency
-            IndexedPolygon.StoreAdjacency(polyList, edges, edgeCount, true, 0xff);
+            IndexedPolygon.StoreAdjacency(polyList, edges, edgeCount, true, TileCacheContour.DT_NEI_PORTAL_MASK);
         }
         /// <summary>
         /// Finds edges between portals
@@ -561,31 +563,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private readonly void FindPortalEdges(TileCacheContourSet cset, Edge[] edges, int edgeCount)
         {
             // Mark portal edges.
-            foreach (var (i, cont) in cset.IterateContours())
+            foreach (var (_, va, vb) in cset.IterateContoursVertices())
             {
-                if (cont.GetVertexCount() < 3)
+                if (!Edge.HasDirection(va.Flag))
                 {
                     continue;
                 }
 
-                foreach (var (va, vb) in cont.IterateSegments())
+                int dir = Edge.GetVertexDirection(va.Flag);
+                if (dir == 0 || dir == 2)
                 {
-                    if (!Edge.HasDirection(va.Flag))
-                    {
-                        continue;
-                    }
-
-                    int dir = Edge.GetVertexDirection(va.Flag);
-                    if (dir == 0 || dir == 2)
-                    {
-                        // Find matching horizontal edge
-                        FindMatchingHorizontalEdge(va, vb, edges, edgeCount, dir);
-                    }
-                    else
-                    {
-                        // Find matching vertical edge
-                        FindMatchingVerticalEdge(va, vb, edges, edgeCount, dir);
-                    }
+                    // Find matching vertical edge
+                    FindMatchingVerticalEdge(va, vb, edges, edgeCount, dir);
+                }
+                else
+                {
+                    // Find matching horizontal edge
+                    FindMatchingHorizontalEdge(va, vb, edges, edgeCount, dir);
                 }
             }
         }
@@ -604,7 +598,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int zmax = vb.Z;
             if (zmin > zmax)
             {
-                Helper.Swap(ref zmin, ref zmax);
+                (zmin, zmax) = (zmax, zmin);
             }
 
             for (int m = 0; m < edgeCount; ++m)
@@ -628,7 +622,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int ezmax = evb.Z;
                 if (ezmin > ezmax)
                 {
-                    Helper.Swap(ref ezmin, ref ezmax);
+                    (ezmin, ezmax) = (ezmax, ezmin);
                 }
 
                 if (Utils.OverlapRange(zmin, zmax, ezmin, ezmax))
@@ -653,7 +647,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int xmax = vb.X;
             if (xmin > xmax)
             {
-                Helper.Swap(ref xmin, ref xmax);
+                (xmin, xmax) = (xmax, xmin);
             }
 
             for (int m = 0; m < edgeCount; ++m)
@@ -677,7 +671,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int exmax = evb.X;
                 if (exmin > exmax)
                 {
-                    Helper.Swap(ref exmin, ref exmax);
+                    (exmin, exmax) = (exmax, exmin);
                 }
 
                 if (Utils.OverlapRange(xmin, xmax, exmin, exmax))
@@ -781,6 +775,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             return [.. vertList];
         }
+        /// <summary>
+        /// Gets the vertex at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public readonly Int3 GetVertex(int index)
+        {
+            return vertList[index];
+        }
 
         /// <summary>
         /// Gets the number of polygons
@@ -845,6 +847,57 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public readonly void SetFlag(int index, SamplePolyFlagTypes flag)
         {
             flagList[index] = flag;
+        }
+
+        /// <summary>
+        /// Iterates over the mesh segments
+        /// </summary>
+        /// <returns>Returns the polygon, and the two vertices of each segment</returns>
+        public readonly IEnumerable<(int i0, int i1, IndexedPolygon p)> IteratePolySegments()
+        {
+            for (int i = 0; i < polyCount; i++)
+            {
+                var p = polyList[i];
+
+                for (int i0 = 0; i0 < p.Capacity; i0++)
+                {
+                    if (p.VertexIsNull(i0))
+                    {
+                        continue;
+                    }
+
+                    int i1 = p.GetNextIndex(i0);
+
+                    yield return (i0, i1, p);
+                }
+            }
+        }
+        /// <summary>
+        /// Iterates over the mesh triangles
+        /// </summary>
+        /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
+        public readonly IEnumerable<(int i, Int3[] tri, IndexedPolygon p, SamplePolyAreas a)> IteratePolyTriangles()
+        {
+            for (int i = 0; i < polyCount; i++)
+            {
+                var p = polyList[i];
+
+                for (int iv = 2; iv < p.Capacity; iv++)
+                {
+                    if (p.VertexIsNull(iv))
+                    {
+                        continue;
+                    }
+
+                    int p0 = p.GetVertex(0);
+                    int p1 = p.GetVertex(iv - 1);
+                    int p2 = p.GetVertex(iv);
+                    int[] vi = [p0, p1, p2];
+                    var tri = vi.Select(GetVertex).ToArray();
+
+                    yield return (i, tri, p, areaList[i]);
+                }
+            }
         }
     }
 }
