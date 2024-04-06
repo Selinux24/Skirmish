@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 NavMeshData = [],
 
                 HasTileCache = navmesh.TileCache != null,
-                TileCacheParams = navmesh.TileCache?.GetParams() ?? new TileCacheParams(),
+                TileCacheParams = navmesh.TileCache?.GetParams() ?? default,
                 TileCacheData = []
             };
 
@@ -41,14 +41,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (navmesh.TileCache != null)
             {
                 // Store cache tiles.
-                var tileCount = navmesh.TileCache.GetTileCount();
+                var maxTileCount = navmesh.TileCache.GetMaxTileCount();
 
-                for (int i = 0; i < tileCount; ++i)
+                for (int i = 0; i < maxTileCount; ++i)
                 {
                     var tile = navmesh.TileCache.GetTile(i);
                     if (tile != null)
                     {
-                        file.TileCacheData.Add(new TileCacheData
+                        file.TileCacheData.Add(new()
                         {
                             Header = tile.Header,
                             Data = tile.Data
@@ -89,7 +89,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.Free);
                 }
             }
 

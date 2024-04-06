@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -61,6 +62,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Maximum obstacles
         /// </summary>
         public int MaxObstacles { get; set; }
+
+        /// <summary>
+        /// Iterates over the coordinates in the specified bounds
+        /// </summary>
+        /// <param name="bounds">Bounds</param>
+        /// <returns>Returns x and y tile coordinates</returns>
+        public readonly IEnumerable<(int tx, int ty)> IterateTilesInBounds(BoundingBox bounds)
+        {
+            float tw = Width * CellSize;
+            float th = Height * CellSize;
+            int tx0 = (int)Math.Floor((bounds.Minimum.X - Origin.X) / tw);
+            int tx1 = (int)Math.Floor((bounds.Maximum.X - Origin.X) / tw);
+            int ty0 = (int)Math.Floor((bounds.Minimum.Z - Origin.Z) / th);
+            int ty1 = (int)Math.Floor((bounds.Maximum.Z - Origin.Z) / th);
+
+            for (int ty = ty0; ty <= ty1; ++ty)
+            {
+                for (int tx = tx0; tx <= tx1; ++tx)
+                {
+                    yield return (tx, ty);
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public override readonly string ToString()

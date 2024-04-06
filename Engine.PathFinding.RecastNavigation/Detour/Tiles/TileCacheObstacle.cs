@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -18,6 +19,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Obstacle descriptor
         /// </summary>
         private readonly IObstacle obstacle = obstacle;
+        /// <summary>
+        /// Touched tile list
+        /// </summary>
+        private readonly List<CompressedTile> touched = [];
+        /// <summary>
+        /// Pending tile list
+        /// </summary>
+        private readonly List<CompressedTile> pending = [];
 
         /// <summary>
         /// Salt
@@ -31,14 +40,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Next obstacle in the queue
         /// </summary>
         public int Next { get; set; }
-        /// <summary>
-        /// Touched tile list
-        /// </summary>
-        public List<CompressedTile> Touched { get; set; } = [];
-        /// <summary>
-        /// Pending tile list
-        /// </summary>
-        public List<CompressedTile> Pending { get; set; } = [];
 
         /// <summary>
         /// Gets the obstacle descriptor bounds
@@ -72,10 +73,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public bool ProcessUpdate(CompressedTile r, int next)
         {
             // Remove handled tile from pending list.
-            Pending.Remove(r);
+            pending.Remove(r);
 
             // If all pending tiles processed, change state.
-            if (Pending.Count == 0)
+            if (pending.Count == 0)
             {
                 if (State == ObstacleState.DT_OBSTACLE_PROCESSING)
                 {
@@ -99,6 +100,94 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the touched tile list
+        /// </summary>
+        public CompressedTile[] GetTouched()
+        {
+            return [.. touched];
+        }
+        /// <summary>
+        /// Adds the specified tile list to the touched tile list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        public void AddTouchedTiles(IEnumerable<CompressedTile> tiles)
+        {
+            if (tiles?.Any() == false)
+            {
+                return;
+            }
+
+            touched.AddRange(tiles);
+        }
+        /// <summary>
+        /// Gets whether the specified tile is in the touched tile list
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        public bool ContainsTouched(CompressedTile tile)
+        {
+            if (tile == null)
+            {
+                return false;
+            }
+
+            return touched.Contains(tile);
+        }
+
+        /// <summary>
+        /// Adds the specified tile to the pending tile list
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        public void AddPendingTile(CompressedTile tile)
+        {
+            if (tile == null)
+            {
+                return;
+            }
+
+            pending.Add(tile);
+        }
+
+        /// <summary>
+        /// Begins the process request of the specified tile list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        public void BeginRequest(IEnumerable<CompressedTile> tiles)
+        {
+            pending.Clear();
+
+            if (tiles?.Any() == false)
+            {
+                return;
+            }
+
+            AddTouchedTiles(tiles);
+        }
+        /// <summary>
+        /// Begins the removal of the obstacle
+        /// </summary>
+        public void BeginRemove()
+        {
+            pending.Clear();
+
+            State = ObstacleState.DT_OBSTACLE_REMOVING;
+        }
+
+        /// <summary>
+        /// Gets whether the obstacle is untouched after its process
+        /// </summary>
+        public bool IsUntouched()
+        {
+            return State == ObstacleState.DT_OBSTACLE_PROCESSED && touched.Count == 0;
+        }
+        /// <summary>
+        /// Gets whether the obstacle is process pending
+        /// </summary>
+        public bool IsPending()
+        {
+            return State == ObstacleState.DT_OBSTACLE_PROCESSING || State == ObstacleState.DT_OBSTACLE_REMOVING;
         }
     }
 }
