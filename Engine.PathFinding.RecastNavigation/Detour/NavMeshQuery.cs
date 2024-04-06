@@ -499,7 +499,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 var pathNodes = path.GetPath();
 
-                for (int i = 0; i < path.Count; ++i)
+                int i = 0;
+                while (i < path.Count)
                 {
                     Vector3 left;
                     Vector3 right;
@@ -543,6 +544,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         // If starting really close the portal, advance.
                         if (i == 0 && Utils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
                         {
+                            i++;
                             continue;
                         }
                     }
@@ -608,6 +610,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Restart
                             i = apexIndex;
 
+                            i++;
                             continue;
                         }
                     }
@@ -667,6 +670,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             i = apexIndex;
                         }
                     }
+
+                    i++;
                 }
 
                 // Append portals along the current straight path segment.

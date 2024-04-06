@@ -135,10 +135,12 @@ namespace Engine.Physics.EPA
             // Keep track of edges we need to fix after removing faces
             int num_loose_edges = 0;
 
-            for (int i = 0; i < num_faces; i++)
+            int i = 0;
+            while (i < num_faces)
             {
                 if (Vector3.Dot(faces[i].Normal, p.Point - faces[i].A.Point) <= 0)
                 {
+                    i++;
                     continue;
                 }
 
@@ -170,7 +172,6 @@ namespace Engine.Physics.EPA
                 // Remove triangle i from list
                 faces[i] = faces[num_faces - 1];
                 num_faces--;
-                i--;
             }
 
             return (loose_edges, num_loose_edges);

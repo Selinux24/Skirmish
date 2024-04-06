@@ -71,7 +71,8 @@ namespace Engine.Coroutines
         /// </summary>
         internal void ProcessCoroutines()
         {
-            for (int i = 0; i < coroutines.Count;)
+            int i = 0;
+            while (i < coroutines.Count)
             {
                 var coroutine = coroutines[i];
                 if (coroutine.MoveNext())
