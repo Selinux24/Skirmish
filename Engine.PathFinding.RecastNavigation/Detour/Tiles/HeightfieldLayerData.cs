@@ -21,25 +21,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         const int NULL_ID = 0xff;
 
         /// <summary>
+        /// Source regions collection
+        /// </summary>
+        private int[] sourceRegions;
+        /// <summary>
+        /// Number of allocated regions
+        /// </summary>
+        private int nregions;
+        /// <summary>
+        /// Region collection
+        /// </summary>
+        private LayerRegion[] regions;
+        /// <summary>
         /// Compact heighfield
         /// </summary>
-        public CompactHeightfield Heightfield { get; private set; }
+        private CompactHeightfield heightfield;
         /// <summary>
         /// Border size
         /// </summary>
-        public int BorderSize { get; private set; }
+        private int borderSize;
         /// <summary>
         /// Walkable height
         /// </summary>
-        public int WalkableHeight { get; private set; }
+        private int walkableHeight;
+
         /// <summary>
-        /// Width
+        /// Layer id
         /// </summary>
-        public int Width { get; private set; }
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height { get; private set; }
+        public int LayerId { get; private set; }
         /// <summary>
         /// Layer width
         /// </summary>
@@ -49,26 +58,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int LayerHeight { get; private set; }
         /// <summary>
+        /// Width
+        /// </summary>
+        public int Width { get; private set; }
+        /// <summary>
+        /// Height
+        /// </summary>
+        public int Height { get; private set; }
+        /// <summary>
         /// Bounds
         /// </summary>
-        public BoundingBox BoundingBox { get; private set; }
+        public BoundingBox Bounds { get; private set; }
         /// <summary>
-        /// Region collection
+        /// Cell size
         /// </summary>
-        public LayerRegion[] Regions { get; private set; }
+        public float CellSize { get { return heightfield?.CellSize ?? 0f; } }
         /// <summary>
-        /// Number of regions
+        /// Cell height
         /// </summary>
-        public int NRegions { get; private set; }
-        /// <summary>
-        /// Source regions collection
-        /// </summary>
-        public int[] SourceRegions { get; private set; }
-
-        /// <summary>
-        /// Layer id
-        /// </summary>
-        public int LayerId { get; private set; }
+        public float CellHeight { get { return heightfield?.CellHeight ?? 0f; } }
 
         /// <summary>
         /// Creates the heighfield data
@@ -86,23 +94,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int lh = h - borderSize * 2;
 
             // Build contracted bbox for layers.
-            var bmin = chf.BoundingBox.Minimum;
-            var bmax = chf.BoundingBox.Maximum;
+            var bmin = chf.Bounds.Minimum;
+            var bmax = chf.Bounds.Maximum;
             bmin.X += borderSize * chf.CellSize;
             bmin.Z += borderSize * chf.CellSize;
             bmax.X -= borderSize * chf.CellSize;
             bmax.Z -= borderSize * chf.CellSize;
 
-            var ldata = new HeightfieldLayerData()
+            HeightfieldLayerData ldata = new()
             {
-                Heightfield = chf,
-                BorderSize = borderSize,
-                WalkableHeight = walkableHeight,
-                Width = w,
-                Height = h,
+                heightfield = chf,
+                borderSize = borderSize,
+                walkableHeight = walkableHeight,
+
                 LayerWidth = lw,
                 LayerHeight = lh,
-                BoundingBox = new BoundingBox(bmin, bmax),
+
+                Width = w,
+                Height = h,
+                Bounds = new(bmin, bmax),
             };
 
             // Partition walkable area into monotone regions.
@@ -165,18 +175,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private int GenerateRegions()
         {
-            SourceRegions = Helper.CreateArray(Heightfield.SpanCount, NULL_ID);
+            sourceRegions = Helper.CreateArray(heightfield.SpanCount, NULL_ID);
 
-            var sweeps = Helper.CreateArray(Heightfield.Width, () => LayerSweepSpan.Empty);
+            var sweeps = Helper.CreateArray(heightfield.Width, () => LayerSweepSpan.Empty);
 
             int regId = 0;
 
-            for (int y = BorderSize; y < Height - BorderSize; ++y)
+            for (int y = borderSize; y < Height - borderSize; ++y)
             {
                 int sweepId = 0;
                 int[] samples = Helper.CreateArray(256, 0);
 
-                for (int x = BorderSize; x < Width - BorderSize; ++x)
+                for (int x = borderSize; x < Width - borderSize; ++x)
                 {
                     GenerateRegionCell(x, y, sweepId, samples, sweeps, out sweepId);
                 }
@@ -197,9 +207,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             id = sweepId;
 
-            foreach (var (s, i) in Heightfield.IterateCellSpans(x, y))
+            foreach (var (s, i) in heightfield.IterateCellSpans(x, y))
             {
-                if (Heightfield.Areas[i] == AreaTypes.RC_NULL_AREA)
+                if (heightfield.Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
                     continue;
                 }
@@ -220,7 +230,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Store source region
-                SourceRegions[i] = sid;
+                sourceRegions[i] = sid;
             }
         }
         /// <summary>
@@ -239,9 +249,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return false;
             }
 
-            int ai = Heightfield.GetNeighbourCellIndex(x, y, 0, con);
-            int nr = SourceRegions[ai];
-            if (nr == NULL_ID || Heightfield.Areas[ai] == AreaTypes.RC_NULL_AREA)
+            int ai = heightfield.GetNeighbourCellIndex(x, y, 0, con);
+            int nr = sourceRegions[ai];
+            if (nr == NULL_ID || heightfield.Areas[ai] == AreaTypes.RC_NULL_AREA)
             {
                 return false;
             }
@@ -266,8 +276,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return false;
             }
 
-            int ai = Heightfield.GetNeighbourCellIndex(x, y, 3, con);
-            int nr = SourceRegions[ai];
+            int ai = heightfield.GetNeighbourCellIndex(x, y, 3, con);
+            int nr = sourceRegions[ai];
             if (nr == NULL_ID)
             {
                 return false;
@@ -282,15 +292,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private void RemapRegionIds(int y, LayerSweepSpan[] sweeps)
         {
-            for (int x = BorderSize; x < Width - BorderSize; ++x)
+            for (int x = borderSize; x < Width - borderSize; ++x)
             {
-                var c = Heightfield.Cells[x + y * Width];
+                var c = heightfield.Cells[x + y * Width];
 
                 for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
                 {
-                    if (SourceRegions[i] != NULL_ID)
+                    if (sourceRegions[i] != NULL_ID)
                     {
-                        SourceRegions[i] = sweeps[SourceRegions[i]].RegId;
+                        sourceRegions[i] = sweeps[sourceRegions[i]].RegId;
                     }
                 }
             }
@@ -301,8 +311,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private void AllocateRegions(int nregions)
         {
-            NRegions = nregions;
-            Regions = Helper.CreateArray(NRegions, () => LayerRegion.Default);
+            this.nregions = nregions;
+            regions = Helper.CreateArray(this.nregions, () => LayerRegion.Default);
 
             // Find region neighbours and overlapping regions.
             for (int y = 0; y < Height; ++y)
@@ -312,7 +322,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     var lregs = AllocateRegionCell(x, y);
 
                     // Update overlapping regions.
-                    UpdayeOverlappingRegions(lregs);
+                    UpdateOverlappingRegions(lregs);
                 }
             }
         }
@@ -323,16 +333,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             List<int> lregs = new(LayerRegion.MaxLayers);
 
-            foreach (var (s, i) in Heightfield.IterateCellSpans(x, y))
+            foreach (var (s, i) in heightfield.IterateCellSpans(x, y))
             {
-                int ri = SourceRegions[i];
+                int ri = sourceRegions[i];
                 if (ri == NULL_ID)
                 {
                     continue;
                 }
 
-                Regions[ri].YMin = Math.Min(Regions[ri].YMin, s.Y);
-                Regions[ri].YMax = Math.Max(Regions[ri].YMax, s.Y);
+                regions[ri].YMin = Math.Min(regions[ri].YMin, s.Y);
+                regions[ri].YMax = Math.Max(regions[ri].YMax, s.Y);
 
                 // Collect all region layers.
                 if (lregs.Count < LayerRegion.MaxLayers)
@@ -341,9 +351,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Update neighbours
-                foreach (var item in Heightfield.IterateSpanConnections(s, x, y))
+                foreach (var item in heightfield.IterateSpanConnections(s, x, y))
                 {
-                    int rai = SourceRegions[item.ai];
+                    int rai = sourceRegions[item.ai];
                     if (rai == NULL_ID || rai == ri)
                     {
                         continue;
@@ -352,7 +362,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     // Don't check return value -- if we cannot add the neighbor
                     // it will just cause a few more regions to be created, which
                     // is fine.
-                    Regions[ri].AddUniqueNei(rai);
+                    regions[ri].AddUniqueNei(rai);
                 }
             }
 
@@ -362,7 +372,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Update overlapping regions.
         /// </summary>
         /// <param name="lregs">Layer region list</param>
-        private void UpdayeOverlappingRegions(int[] lregs)
+        private void UpdateOverlappingRegions(int[] lregs)
         {
             for (int i = 0; i < lregs.Length - 1; ++i)
             {
@@ -373,7 +383,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         continue;
                     }
 
-                    if (!Regions[lregs[i]].AddUniqueLayer(lregs[j]) || !Regions[lregs[j]].AddUniqueLayer(lregs[i]))
+                    if (!regions[lregs[i]].AddUniqueLayer(lregs[j]) || !regions[lregs[j]].AddUniqueLayer(lregs[i]))
                     {
                         throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                     }
@@ -390,9 +400,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             List<int> stack = new(MaxStack);
 
-            for (int i = 0; i < NRegions; ++i)
+            for (int i = 0; i < nregions; ++i)
             {
-                var root = Regions[i];
+                var root = regions[i];
 
                 // Skip already visited.
                 if (root.LayerId != NULL_ID)
@@ -409,12 +419,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 while (stack.Count != 0)
                 {
                     // Pop front
-                    var reg = Regions[stack.PopFirst()];
+                    var reg = regions[stack.PopFirst()];
 
                     root = ProcessNeigbors(reg, layerId, root, stack);
                 }
 
-                Regions[i] = root;
+                regions[i] = root;
 
                 layerId++;
             }
@@ -444,13 +454,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Skip already visited.
-                if (Regions[nei].LayerId != NULL_ID)
+                if (regions[nei].LayerId != NULL_ID)
                 {
                     continue;
                 }
 
                 // Skip if the height range would become too large.
-                int h = LayerRegion.GetHeightRange(res, Regions[nei]);
+                int h = LayerRegion.GetHeightRange(res, regions[nei]);
                 if (h >= 255)
                 {
                     continue;
@@ -465,10 +475,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 stack.Add(nei);
 
                 // Mark layer id
-                Regions[nei].LayerId = layerId;
+                regions[nei].LayerId = layerId;
 
                 // Merge current layers to root.
-                if (!res.Merge(Regions[nei]))
+                if (!res.Merge(regions[nei]))
                 {
                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                 }
@@ -482,11 +492,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private void MergeCloseRegions()
         {
-            int mergeHeight = WalkableHeight * 4;
+            int mergeHeight = walkableHeight * 4;
 
-            for (int i = 0; i < NRegions; ++i)
+            for (int i = 0; i < nregions; ++i)
             {
-                var ri = Regions[i];
+                var ri = regions[i];
 
                 if (!ri.IsBase)
                 {
@@ -509,7 +519,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     MergeLayerRegion(ref ri, oldId, newId);
                 }
 
-                Regions[i] = ri;
+                regions[i] = ri;
             }
         }
         /// <summary>
@@ -519,14 +529,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             int oldId = NULL_ID;
 
-            for (int j = 0; j < NRegions; ++j)
+            for (int j = 0; j < nregions; ++j)
             {
                 if (layerIndex == j)
                 {
                     continue;
                 }
 
-                var rj = Regions[j];
+                var rj = regions[j];
                 if (!rj.IsBase)
                 {
                     continue;
@@ -569,9 +579,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             bool overlap = false;
 
             // Iterate over all regions which have the same layerId as 'rj'
-            for (int k = 0; k < NRegions; ++k)
+            for (int k = 0; k < nregions; ++k)
             {
-                if (Regions[k].LayerId != rj.LayerId)
+                if (regions[k].LayerId != rj.LayerId)
                 {
                     continue;
                 }
@@ -592,9 +602,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private void MergeLayerRegion(ref LayerRegion ri, int oldId, int newId)
         {
-            for (int j = 0; j < NRegions; ++j)
+            for (int j = 0; j < nregions; ++j)
             {
-                var rj = Regions[j];
+                var rj = regions[j];
 
                 if (rj.LayerId != oldId)
                 {
@@ -612,7 +622,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                 }
 
-                Regions[j] = rj;
+                regions[j] = rj;
             }
         }
 
@@ -625,9 +635,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Find number of unique layers.
             LayerId = 0;
-            for (int i = 0; i < NRegions; i++)
+            for (int i = 0; i < nregions; i++)
             {
-                remap[Regions[i].LayerId] = 1;
+                remap[regions[i].LayerId] = 1;
             }
 
             for (int i = 0; i < 256; i++)
@@ -643,25 +653,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Remap ids.
-            for (int i = 0; i < NRegions; ++i)
+            for (int i = 0; i < nregions; ++i)
             {
-                Regions[i].LayerId = remap[Regions[i].LayerId];
+                regions[i].LayerId = remap[regions[i].LayerId];
             }
         }
 
         /// <summary>
         /// Find layer height bounds.
         /// </summary>
-        public (int, int) FindLayerHeightBounds(int curId)
+        /// <param name="layerId">Layer id</param>
+        public (int, int) FindLayerHeightBounds(int layerId)
         {
             int hmin = 0;
             int hmax = 0;
 
-            for (int j = 0; j < NRegions; ++j)
+            for (int j = 0; j < nregions; ++j)
             {
-                var region = Regions[j];
+                var region = regions[j];
 
-                if (region.IsBase && region.LayerId == curId)
+                if (region.IsBase && region.LayerId == layerId)
                 {
                     hmin = region.YMin;
                     hmax = region.YMax;
@@ -687,9 +698,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int portal = 0;
             int con = 0;
 
-            foreach (var (dir, ax, ay, ai, area, ass) in Heightfield.IterateSpanConnections(s, x, y))
+            foreach (var (dir, ax, ay, ai, area, ass) in heightfield.IterateSpanConnections(s, x, y))
             {
-                int alid = SourceRegions[ai] != NULL_ID ? Regions[SourceRegions[ai]].LayerId : NULL_ID;
+                int alid = sourceRegions[ai] != NULL_ID ? regions[sourceRegions[ai]].LayerId : NULL_ID;
 
                 // Portal mask
                 if (area != AreaTypes.RC_NULL_AREA && layerId != alid)
@@ -706,8 +717,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 // Valid connection mask
                 if (area != AreaTypes.RC_NULL_AREA && layerId == alid)
                 {
-                    int nx = ax - BorderSize;
-                    int ny = ay - BorderSize;
+                    int nx = ax - borderSize;
+                    int ny = ay - borderSize;
                     if (nx >= 0 && ny >= 0 && nx < LayerWidth && ny < LayerHeight)
                     {
                         con |= 1 << dir;
@@ -716,6 +727,59 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             return portal << 4 | con;
+        }
+
+        /// <summary>
+        /// Gets the layer bounds
+        /// </summary>
+        /// <param name="layerId">Layer id</param>
+        /// <returns>Returns the layer bounds, the minimum and the maximum height values</returns>
+        public (BoundingBox Bounds, int HMin, int HMax) GetLayerBounds(int layerId)
+        {
+            // Find layer height bounds.
+            var (hmin, hmax) = FindLayerHeightBounds(layerId);
+
+            // Adjust the bbox to fit the heightfield.
+            var lbbox = Bounds;
+            lbbox.Minimum.Y = Bounds.Minimum.Y + hmin * heightfield.CellHeight;
+            lbbox.Maximum.Y = Bounds.Minimum.Y + hmax * heightfield.CellHeight;
+
+            return (lbbox, hmin, hmax);
+        }
+
+        /// <summary>
+        /// Iterates over the layer data spans
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="layerId">Layer id</param>
+        /// <returns>Returns each cell's x,y coordinates, the span and the area</returns>
+        public IEnumerable<(int, int, CompactSpan, AreaTypes)> IterateLayerCellSpans(int x, int y, int layerId)
+        {
+            int cx = borderSize + x;
+            int cy = borderSize + y;
+            var c = heightfield.Cells[cx + cy * Width];
+
+            for (int i = c.Index, nj = c.Index + c.Count; i < nj; i++)
+            {
+                // Skip unassigned regions.
+                if (sourceRegions[i] == NULL_ID)
+                {
+                    continue;
+                }
+
+                // Skip of does not belong to current layer.
+                int lid = regions[sourceRegions[i]].LayerId;
+                if (lid != layerId)
+                {
+                    continue;
+                }
+
+                var s = heightfield.Spans[i];
+                var a = heightfield.Areas[i];
+
+                yield return (cx, cy, s, a);
+            }
         }
     }
 }

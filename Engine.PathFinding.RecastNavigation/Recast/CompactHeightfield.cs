@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The minimum bounds in world space. [(x, y, z)]
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
@@ -161,7 +161,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new compact heightfield</returns>
         public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
         {
-            var bbox = hf.BoundingBox;
+            var bbox = hf.Bounds;
             bbox.Maximum.Y += walkableHeight * hf.CellHeight;
 
             // Fill in header.
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 MaxRegions = 0,
-                BoundingBox = bbox,
+                Bounds = bbox,
                 CellSize = hf.CellSize,
                 CellHeight = hf.CellHeight,
             };
@@ -272,9 +272,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var center = new Vector3
                 {
-                    X = BoundingBox.Minimum.X + (col + 0.5f) * CellSize,
+                    X = Bounds.Minimum.X + (col + 0.5f) * CellSize,
                     Y = sy,
-                    Z = BoundingBox.Minimum.Z + (row + 0.5f) * CellSize
+                    Z = Bounds.Minimum.Z + (row + 0.5f) * CellSize
                 };
 
                 yield return (i, center);
@@ -499,8 +499,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public BoundingBox GetBoundsWithBorder()
         {
-            var bmin = BoundingBox.Minimum;
-            var bmax = BoundingBox.Maximum;
+            var bmin = Bounds.Minimum;
+            var bmax = Bounds.Maximum;
             if (BorderSize <= 0)
             {
                 return new(bmin, bmax);
@@ -731,12 +731,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             min = new Int3();
             max = new Int3();
 
-            min.X = (int)((bbox.Minimum.X - BoundingBox.Minimum.X) / CellSize);
-            min.Y = (int)((bbox.Minimum.Y - BoundingBox.Minimum.Y) / CellHeight);
-            min.Z = (int)((bbox.Minimum.Z - BoundingBox.Minimum.Z) / CellSize);
-            max.X = (int)((bbox.Maximum.X - BoundingBox.Minimum.X) / CellSize);
-            max.Y = (int)((bbox.Maximum.Y - BoundingBox.Minimum.Y) / CellHeight);
-            max.Z = (int)((bbox.Maximum.Z - BoundingBox.Minimum.Z) / CellSize);
+            min.X = (int)((bbox.Minimum.X - Bounds.Minimum.X) / CellSize);
+            min.Y = (int)((bbox.Minimum.Y - Bounds.Minimum.Y) / CellHeight);
+            min.Z = (int)((bbox.Minimum.Z - Bounds.Minimum.Z) / CellSize);
+            max.X = (int)((bbox.Maximum.X - Bounds.Minimum.X) / CellSize);
+            max.Y = (int)((bbox.Maximum.Y - Bounds.Minimum.Y) / CellHeight);
+            max.Z = (int)((bbox.Maximum.Z - Bounds.Minimum.Z) / CellSize);
 
             if (max.X < 0) return false;
             if (max.Z < 0) return false;

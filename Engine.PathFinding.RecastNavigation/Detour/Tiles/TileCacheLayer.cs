@@ -9,42 +9,60 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <remarks>
     /// Constructor
     /// </remarks>
-    /// <param name="header">Tile cache header</param>
-    public struct TileCacheLayer(TileCacheLayerHeader header)
+    /// <param name="tile">Tile</param>
+    public struct TileCacheLayer(CompressedTile tile)
     {
         /// <summary>
-        /// Maximum neighbours
+        /// Number of allocated regions
         /// </summary>
-        const int MAX_NEIS = 16;
+        private int nregions;
         /// <summary>
-        /// Null id value
+        /// Region collection
         /// </summary>
-        const int NULL_ID = 0xff;
+        private int[] regions;
+        /// <summary>
+        /// Height map
+        /// </summary>
+        private readonly int[] heights = [.. tile?.Data.Heights ?? []];
+        /// <summary>
+        /// Areas
+        /// </summary>
+        private readonly AreaTypes[] areas = [.. tile?.Data.Areas ?? []];
+        /// <summary>
+        /// Connections
+        /// </summary>
+        private readonly int[] connections = [.. tile?.Data.Connections ?? []];
 
         /// <summary>
         /// Header
         /// </summary>
-        public TileCacheLayerHeader Header { get; private set; } = header;
+        public TileCacheLayerHeader Header { get; private set; } = tile?.Header ?? default;
+
         /// <summary>
-        /// Region count.
+        /// Gets the layer height at index
         /// </summary>
-        public int RegCount { get; set; }
+        /// <param name="index">Index</param>
+        public readonly int GetHeight(int index)
+        {
+            return heights[index];
+        }
         /// <summary>
-        /// Height map
+        /// Gets the layer area at index
         /// </summary>
-        public int[] Heights { get; set; }
+        /// <param name="index">Index</param>
+        public readonly AreaTypes GetArea(int index)
+        {
+            return areas[index];
+        }
         /// <summary>
-        /// Areas
+        /// Sets the layer area at index
         /// </summary>
-        public AreaTypes[] Areas { get; set; }
-        /// <summary>
-        /// Connections
-        /// </summary>
-        public int[] Cons { get; set; }
-        /// <summary>
-        /// Regions
-        /// </summary>
-        public int[] Regs { get; set; }
+        /// <param name="index">Index</param>
+        /// <param name="value">Area value</param>
+        public readonly void SetArea(int index, AreaTypes value)
+        {
+            areas[index] = value;
+        }
 
         /// <summary>
         /// Builds the region id list
@@ -54,8 +72,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             if (!BuildMonotoneRegions(walkableClimb, out var layerRegs, out int nregs))
             {
-                Regs = [];
-                RegCount = -1;
+                regions = [];
+                nregions = -1;
 
                 return false;
             }
@@ -66,8 +84,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Compact ids.
             CompactIds(regs, layerRegs, nregs);
 
-            Regs = layerRegs;
-            RegCount = nregs;
+            regions = layerRegs;
+            nregions = nregs;
 
             return true;
         }
@@ -82,7 +100,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = Header.Width;
             int h = Header.Height;
 
-            layerRegs = Helper.CreateArray(w * h, NULL_ID);
+            layerRegs = Helper.CreateArray(w * h, LayerMonotoneRegion.NULL_ID);
 
             int nsweeps = w;
             LayerSweepSpan[] sweeps = new LayerSweepSpan[nsweeps];
@@ -99,26 +117,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 for (int col = 0; col < w; ++col)
                 {
                     int idx = col + row * w;
-                    if (Areas[idx] == AreaTypes.RC_NULL_AREA)
+                    if (areas[idx] == AreaTypes.RC_NULL_AREA)
                     {
                         continue;
                     }
 
                     // -x
                     int sid = GetLayerRegX(col, row, w, walkableClimb, layerRegs);
-                    if (sid == NULL_ID)
+                    if (sid == LayerMonotoneRegion.NULL_ID)
                     {
                         sid = sweepCount++;
                         sweeps[sid] = new()
                         {
-                            NeiRegId = NULL_ID,
+                            NeiRegId = LayerMonotoneRegion.NULL_ID,
                             SampleCount = 0,
                         };
                     }
 
                     // -y
                     int layerReg = GetLayerRegY(col, row, w, walkableClimb, layerRegs);
-                    if (layerReg != NULL_ID)
+                    if (layerReg != LayerMonotoneRegion.NULL_ID)
                     {
                         sweeps[sid].Update(layerReg, samples);
                     }
@@ -151,7 +169,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 int idx = x + row * w;
 
-                if (layerRegs[idx] != NULL_ID)
+                if (layerRegs[idx] != LayerMonotoneRegion.NULL_ID)
                 {
                     layerRegs[idx] = sweeps[layerRegs[idx]].RegId;
                 }
@@ -164,53 +182,40 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="layerRegs">Layer regions</param>
         /// <param name="nregs">Region count</param>
         /// <returns>Returns the allocated region list</returns>
-        private LayerMonotoneRegion[] AllocateLayerRegions(int walkableClimb, int[] layerRegs, int nregs)
+        private readonly LayerMonotoneRegion[] AllocateLayerRegions(int walkableClimb, int[] layerRegs, int nregs)
         {
             int w = Header.Width;
             int h = Header.Height;
 
             // Allocate and init layer regions.
-            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, () =>
-            {
-                return new LayerMonotoneRegion()
-                {
-                    AreaId = 0,
-                    Neis = new int[MAX_NEIS],
-                    NNeis = 0,
-                    RegId = NULL_ID,
-                    Area = AreaTypes.RC_NULL_AREA,
-                };
-            });
+            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, () => { return new LayerMonotoneRegion(); });
 
             // Find region neighbours.
-            for (int row = 0; row < h; ++row)
+            foreach (var (col, row) in GridUtils.Iterate(w, h))
             {
-                for (int col = 0; col < w; ++col)
+                int idx = col + row * w;
+                int ri = layerRegs[idx];
+                if (ri == LayerMonotoneRegion.NULL_ID)
                 {
-                    int idx = col + row * w;
-                    int ri = layerRegs[idx];
-                    if (ri == NULL_ID)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    // Update area.
-                    regs[ri].AreaId++;
-                    regs[ri].Area = Areas[idx];
+                // Update area.
+                regs[ri].AreaId++;
+                regs[ri].Area = areas[idx];
 
-                    // Update neighbours
-                    int ymi = col + (row - 1) * w;
-                    if (row <= 0 || !IsConnected(idx, ymi, walkableClimb))
-                    {
-                        continue;
-                    }
+                // Update neighbours
+                int ymi = col + (row - 1) * w;
+                if (row <= 0 || !IsConnected(idx, ymi, walkableClimb))
+                {
+                    continue;
+                }
 
-                    int rai = layerRegs[ymi];
-                    if (rai != NULL_ID && rai != ri)
-                    {
-                        regs[ri].AddUniqueLast(rai);
-                        regs[rai].AddUniqueLast(ri);
-                    }
+                int rai = layerRegs[ymi];
+                if (rai != LayerMonotoneRegion.NULL_ID && rai != ri)
+                {
+                    regs[ri].AddUniqueLast(rai);
+                    regs[rai].AddUniqueLast(ri);
                 }
             }
 
@@ -228,13 +233,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="walkableClimb">Walkable climb value</param>
         private readonly bool IsConnected(int ia, int ib, int walkableClimb)
         {
-            if (Areas[ia] != Areas[ib])
+            if (areas[ia] != areas[ib])
             {
                 //Different areas
                 return false;
             }
 
-            if (Math.Abs(Heights[ia] - Heights[ib]) > walkableClimb)
+            if (Math.Abs(heights[ia] - heights[ib]) > walkableClimb)
             {
                 //Too height
                 return false;
@@ -276,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
             for (int i = 0; i < w * h; ++i)
             {
-                if (layerRegs[i] != NULL_ID)
+                if (layerRegs[i] != LayerMonotoneRegion.NULL_ID)
                 {
                     layerRegs[i] = regs[layerRegs[i]].RegId;
                 }
@@ -294,7 +299,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             if (col <= 0)
             {
-                return NULL_ID;
+                return LayerMonotoneRegion.NULL_ID;
             }
 
             int idx = col + row * w;
@@ -302,7 +307,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             if (!IsConnected(idx, xidx, walkableClimb))
             {
-                return NULL_ID;
+                return LayerMonotoneRegion.NULL_ID;
             }
 
             return layerRegs[xidx];
@@ -319,7 +324,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             if (row <= 0)
             {
-                return NULL_ID;
+                return LayerMonotoneRegion.NULL_ID;
             }
 
             int idx = col + row * w;
@@ -327,7 +332,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             if (!IsConnected(idx, yidx, walkableClimb))
             {
-                return NULL_ID;
+                return LayerMonotoneRegion.NULL_ID;
             }
 
             return layerRegs[yidx];
@@ -344,7 +349,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = Header.Width;
             int h = Header.Height;
 
-            TileCacheContourSet cset = new(RegCount);
+            TileCacheContourSet cset = new(nregions);
 
             // Allocate temp buffer for contour tracing.
             int maxTempVerts = (w + h) * 2 * 2; // Twice around the layer.
@@ -360,8 +365,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 for (int x = 0; x < w; ++x)
                 {
                     int idx = x + y * w;
-                    int ri = Regs[idx];
-                    if (ri == NULL_ID)
+                    int ri = regions[idx];
+                    if (ri == LayerMonotoneRegion.NULL_ID)
                     {
                         continue;
                     }
@@ -373,7 +378,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     }
 
                     cont.RegionId = ri;
-                    cont.Area = Areas[idx];
+                    cont.Area = areas[idx];
 
                     if (!WalkContour(temp, x, y, maxError, out var verts))
                     {
@@ -407,7 +412,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             int startCol = col;
             int startRow = row;
-            int startDir = GetStartWalkDirection(col, row, Regs[col + row * w]);
+            int startDir = GetStartWalkDirection(col, row, regions[col + row * w]);
             if (startDir == -1)
             {
                 verts = cont.SimplifyContour(maxError);
@@ -428,10 +433,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int ndir;
                 int idx = col + row * w;
 
-                if (rn != Regs[idx])
+                if (rn != regions[idx])
                 {
                     // Solid edge.
-                    var se = CreateSolidEdge(col, Heights[idx], row, rn, dir);
+                    var se = CreateSolidEdge(col, heights[idx], row, rn, dir);
 
                     // Try to merge with previous vertex.
                     if (!cont.AppendVertex(se))
@@ -525,7 +530,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             int w = Header.Width;
             int ia = col + row * w;
-            int con = Cons[ia];
+            int con = connections[ia];
 
             int conDir = Edge.GetVertexDirection(con);
             int portal = con >> 4;
@@ -537,14 +542,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     return TileCacheContour.DT_DIR_MASK + dir;
                 }
-                return NULL_ID;
+                return LayerMonotoneRegion.NULL_ID;
             }
 
             int bx = col + GridUtils.GetDirOffsetX(dir);
             int by = row + GridUtils.GetDirOffsetY(dir);
             int ib = bx + by * w;
 
-            return Regs[ib];
+            return regions[ib];
         }
         /// <summary>
         /// Gets the corner height
@@ -566,7 +571,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             int portal = Edge.DT_PORTAL_FLAG;
             int height = 0;
-            int preg = NULL_ID;
+            int preg = LayerMonotoneRegion.NULL_ID;
             bool allSameReg = true;
 
             for (int dz = -1; dz <= 0; ++dz)
@@ -581,19 +586,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     }
 
                     int idx = px + pz * w;
-                    int lh = Heights[idx];
-                    if (Math.Abs(lh - y) > walkableClimb || Areas[idx] == AreaTypes.RC_NULL_AREA)
+                    int lh = heights[idx];
+                    if (Math.Abs(lh - y) > walkableClimb || areas[idx] == AreaTypes.RC_NULL_AREA)
                     {
                         continue;
                     }
 
                     height = Math.Max(height, lh);
-                    portal &= Cons[idx] >> 4;
-                    if (preg != NULL_ID && preg != Regs[idx])
+                    portal &= connections[idx] >> 4;
+                    if (preg != LayerMonotoneRegion.NULL_ID && preg != regions[idx])
                     {
                         allSameReg = false;
                     }
-                    preg = Regs[idx];
+                    preg = regions[idx];
                     n++;
                 }
             }

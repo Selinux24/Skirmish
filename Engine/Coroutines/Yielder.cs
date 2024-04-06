@@ -13,7 +13,7 @@ namespace Engine.Coroutines
         /// <summary>
         /// coroutine list
         /// </summary>
-        private readonly List<Coroutine> coroutines = new();
+        private readonly List<Coroutine> coroutines = [];
 
         /// <inheritdoc/>
         public string Id { get; private set; }

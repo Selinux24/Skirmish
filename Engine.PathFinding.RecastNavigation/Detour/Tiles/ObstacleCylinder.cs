@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return new BoundingBox(bmin, bmax);
         }
         /// <inheritdoc/>
-        public readonly bool MarkArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
+        public readonly bool MarkArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             var bbox = GetBounds();
 
@@ -69,20 +69,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 for (int x = min.X; x <= max.X; ++x)
                 {
-                    float dx = (x + 0.5f) - px;
-                    float dz = (z + 0.5f) - pz;
+                    float dx = x + 0.5f - px;
+                    float dz = z + 0.5f - pz;
                     if (dx * dx + dz * dz > r2)
                     {
                         continue;
                     }
 
-                    int y = layer.Heights[x + z * w];
+                    int idx = x + z * w;
+
+                    int y = layer.GetHeight(idx);
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    layer.Areas[x + z * w] = area;
+                    layer.SetArea(idx, area);
                 }
             }
 

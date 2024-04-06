@@ -7,6 +7,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     public struct LayerMonotoneRegion
     {
         /// <summary>
+        /// Maximum neighbours
+        /// </summary>
+        const int MAX_NEIS = 16;
+        /// <summary>
+        /// Null id value
+        /// </summary>
+        public const int NULL_ID = 0xff;
+
+        /// <summary>
+        /// Neighbour list
+        /// </summary>
+        private readonly int[] neis;
+        /// <summary>
+        /// Number of Neighbours
+        /// </summary>
+        private int nneis;
+
+        /// <summary>
         /// Area
         /// </summary>
         public int AreaId { get; set; }
@@ -18,14 +36,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Region id
         /// </summary>
         public int RegId { get; set; }
+
         /// <summary>
-        /// Neighbour list
+        /// Constructor
         /// </summary>
-        public int[] Neis { get; set; }
-        /// <summary>
-        /// Number of Neighbours
-        /// </summary>
-        public int NNeis { get; set; }
+        public LayerMonotoneRegion()
+        {
+            AreaId = 0;
+            neis = new int[MAX_NEIS];
+            nneis = 0;
+            RegId = NULL_ID;
+            Area = AreaTypes.RC_NULL_AREA;
+        }
 
         /// <summary>
         /// Initializes region ids
@@ -77,9 +99,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             int merge = -1;
             int mergea = 0;
-            for (int j = 0; j < reg.NNeis; ++j)
+            for (int j = 0; j < reg.nneis; ++j)
             {
-                int nei = reg.Neis[j];
+                int nei = reg.neis[j];
                 var regn = regs[nei];
                 if (reg.RegId == regn.RegId)
                 {
@@ -115,10 +137,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     continue;
                 }
-                int nnei = reg.NNeis;
+                int nnei = reg.nneis;
                 for (int j = 0; j < nnei; ++j)
                 {
-                    if (regs[reg.Neis[j]].RegId == newRegId)
+                    if (regs[reg.neis[j]].RegId == newRegId)
                     {
                         count++;
                     }
@@ -132,18 +154,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="v">Value</param>
         public void AddUniqueLast(int v)
         {
-            int n = NNeis;
-            if (n > 0 && Neis[n - 1] == v)
+            int n = nneis;
+            if (n > 0 && neis[n - 1] == v)
             {
                 return;
             }
-            Neis[NNeis++] = v;
+            neis[nneis++] = v;
         }
 
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"AreaId: {AreaId}; Area: {Area}; RegionId: {RegId}; Neighbors: {NNeis}";
+            return $"AreaId: {AreaId}; Area: {Area}; RegionId: {RegId}; Neighbors: {neis?.Join(",") ?? "empty"}";
         }
     }
 }

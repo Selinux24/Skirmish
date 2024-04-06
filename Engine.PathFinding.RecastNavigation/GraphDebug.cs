@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             const string name = nameof(GetHeightfield);
 
-            var orig = hf.BoundingBox.Minimum;
+            var orig = hf.Bounds.Minimum;
             float cs = hf.CellSize;
             float ch = hf.CellHeight;
 

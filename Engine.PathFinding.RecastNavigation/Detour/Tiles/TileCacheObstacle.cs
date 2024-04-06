@@ -6,8 +6,31 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Tile-cache obstacle processor
     /// </summary>
-    public class TileCacheObstacle
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="obstacle">Obstacle</param>
+    /// <param name="salt">Salt value</param>
+    /// <param name="state">Initial state</param>
+    public class TileCacheObstacle(IObstacle obstacle, int salt, ObstacleState state = ObstacleState.DT_OBSTACLE_EMPTY)
     {
+        /// <summary>
+        /// Obstacle descriptor
+        /// </summary>
+        private readonly IObstacle obstacle = obstacle;
+
+        /// <summary>
+        /// Salt
+        /// </summary>
+        public int Salt { get; set; } = salt;
+        /// <summary>
+        /// State
+        /// </summary>
+        public ObstacleState State { get; set; } = state;
+        /// <summary>
+        /// Next obstacle in the queue
+        /// </summary>
+        public int Next { get; set; }
         /// <summary>
         /// Touched tile list
         /// </summary>
@@ -16,22 +39,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Pending tile list
         /// </summary>
         public List<CompressedTile> Pending { get; set; } = [];
-        /// <summary>
-        /// Salt
-        /// </summary>
-        public int Salt { get; set; }
-        /// <summary>
-        /// State
-        /// </summary>
-        public ObstacleState State { get; set; }
-        /// <summary>
-        /// Next obstacle in the queue
-        /// </summary>
-        public int Next { get; set; }
-        /// <summary>
-        /// Obstacle descriptor
-        /// </summary>
-        public IObstacle Obstacle { get; set; }
 
         /// <summary>
         /// Gets the obstacle descriptor bounds
@@ -39,28 +46,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns></returns>
         public BoundingBox GetObstacleBounds()
         {
-            return Obstacle.GetBounds();
+            return obstacle.GetBounds();
         }
         /// <summary>
         /// Rasterizes the obstacle descriptor
         /// </summary>
-        /// <param name="layer">Layer</param>
-        /// <param name="tile">Tile</param>
+        /// <param name="tlayer">Layer</param>
+        /// <param name="orig">Origin</param>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
-        public void Rasterize(TileCacheLayer layer, CompressedTile tile, float cellSize, float cellHeight)
+        public void Rasterize(ref TileCacheLayer tlayer, Vector3 orig, float cellSize, float cellHeight)
         {
             if (State == ObstacleState.DT_OBSTACLE_EMPTY || State == ObstacleState.DT_OBSTACLE_REMOVING)
             {
                 return;
             }
 
-            if (!Touched.Contains(tile))
-            {
-                return;
-            }
-
-            Obstacle.MarkArea(layer, tile.Header.Bounds.Minimum, cellSize, cellHeight, 0);
+            obstacle.MarkArea(ref tlayer, orig, cellSize, cellHeight, 0);
         }
         /// <summary>
         /// Process the obstacle

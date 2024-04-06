@@ -245,7 +245,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var nvParams = SoloConfig.GetNavMeshParams(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
-            nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
+            nm.AddTile(navData);
             progressCallback?.Invoke(13f / passCount);
 
             if (settings.EnableDebugInfo)
@@ -583,7 +583,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Remove any previous data (navmesh owns and deletes the data).
                     RemoveTile(x, y, 0);
                     // Let the navmesh own the data.
-                    AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
+                    AddTile(data);
                 }
 
                 progressCallback?.Invoke(++tile / totalTiles);
@@ -620,7 +620,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var data = BuildTileMesh(x, y, geometry, tiledCfg);
             if (data != null)
             {
-                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
+                AddTile(data);
             }
 
             if (TileCache == null)
@@ -659,7 +659,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="data">Mesh data</param>
         /// <param name="flags">Tile flags</param>
         /// <returns>Returns true if the tile was added</returns>
-        public bool AddTile(MeshData data, TileFlagTypes flags)
+        public bool AddTile(MeshData data, TileFlagTypes flags = TileFlagTypes.DT_TILE_FREE_DATA)
         {
             // Make sure the data is in right format.
             var header = data.Header;

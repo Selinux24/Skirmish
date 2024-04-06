@@ -21,6 +21,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="ch">Cell height</param>
         /// <param name="area">Area type</param>
         /// <returns>Returns true if all layer areas were marked</returns>
-        bool MarkArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area);
+        bool MarkArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area);
     }
 }

@@ -21,11 +21,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var file = new NavMeshFile
             {
                 NavMeshParams = navmesh.GetParams(),
-                NavMeshData = new List<MeshData>(),
+                NavMeshData = [],
 
                 HasTileCache = navmesh.TileCache != null,
                 TileCacheParams = navmesh.TileCache?.GetParams() ?? new TileCacheParams(),
-                TileCacheData = new List<TileCacheData>()
+                TileCacheData = []
             };
 
             // Store navmesh tiles.
@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA);
+                navmesh.AddTile(tile);
             }
 
             if (file.HasTileCache)

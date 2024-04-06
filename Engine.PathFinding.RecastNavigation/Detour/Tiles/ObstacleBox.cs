@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return bbox;
         }
         /// <inheritdoc/>
-        public bool MarkArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
+        public bool MarkArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             int w = layer.Header.Width;
             int h = layer.Header.Height;
@@ -57,13 +57,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 for (int x = min.X; x <= max.X; ++x)
                 {
-                    int y = layer.Heights[x + z * w];
+                    int idx = x + z * w;
+
+                    int y = layer.GetHeight(idx);
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    layer.Areas[x + z * w] = area;
+                    layer.SetArea(idx, area);
                 }
             }
 

@@ -94,9 +94,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             m_nextFreeObstacle = -1;
             for (int i = tcparams.MaxObstacles - 1; i >= 0; i--)
             {
-                m_obstacles[i] = new TileCacheObstacle
+                m_obstacles[i] = new (null, 1)
                 {
-                    Salt = 1,
                     Next = m_nextFreeObstacle
                 };
                 m_nextFreeObstacle = i;
@@ -112,7 +111,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             for (int i = tcparams.MaxTiles - 1; i >= 0; i--)
             {
-                m_tiles[i] = new CompressedTile
+                m_tiles[i] = new()
                 {
                     Salt = 1,
                     Next = m_nextFreeTile
@@ -426,9 +425,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 data = tile.Data;
             }
 
-            tile.Header = new TileCacheLayerHeader();
-            tile.Data = new TileCacheLayerData();
-            tile.Flags = 0;
+            tile.Header = new();
+            tile.Data = new();
+            tile.Flags = CompressedTileFlagTypes.DT_COMPRESSEDTILE_EMPTY_DATA;
 
             // Update salt, salt should never be zero.
             tile.Salt = (tile.Salt + 1) & ((1 << m_saltBits) - 1);
@@ -580,12 +579,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             int salt = m_obstacles[ob].Salt;
-            m_obstacles[ob] = new TileCacheObstacle
-            {
-                Salt = salt,
-                State = ObstacleState.DT_OBSTACLE_PROCESSING,
-                Obstacle = obstacle,
-            };
+            m_obstacles[ob] = new(obstacle, salt, ObstacleState.DT_OBSTACLE_PROCESSING);
 
             var req = new ObstacleRequest
             {
@@ -849,27 +843,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private bool BuildTile(CompressedTile tile)
         {
             // Decompress tile layer data.
-            var layer = tile.Decompress();
+            TileCacheLayer tlayer = new(tile);
 
             // Process obstacles
-            ProcessObstacles(tile, layer);
+            ProcessObstacles(ref tlayer, tile);
 
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Build navmesh
-            if (!layer.BuildRegions(walkableClimbVx))
+            if (!tlayer.BuildRegions(walkableClimbVx))
             {
                 return false;
             }
 
             // Build contour set
-            var cset = layer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
+            var tcset = tlayer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
 
             // Build polygon mesh
-            var mesh = TileCachePolyMesh.Build(cset, IndexedPolygon.DT_VERTS_PER_POLYGON);
+            var tmesh = TileCachePolyMesh.Build(tcset, IndexedPolygon.DT_VERTS_PER_POLYGON);
 
             // Early out if the mesh tile is empty.
-            if (mesh.GetPolyCount() == 0)
+            if (tmesh.GetPolyCount() == 0)
             {
                 // Remove existing tile.
                 m_navMesh.RemoveTile(tile.Header);
@@ -877,17 +871,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
-            mesh.UpdatePolyFlags();
+            tmesh.UpdatePolyFlags();
 
             var param = new NavMeshCreateParams
             {
-                VertCount = mesh.GetVertexCount(),
-                Verts = mesh.GetVertices(),
-                PolyCount = mesh.GetPolyCount(),
-                Polys = mesh.GetPolygons(),
-                PolyAreas = mesh.GetAreas(),
-                PolyFlags = mesh.GetFlags(),
-                NVP = mesh.NVP,
+                VertCount = tmesh.GetVertexCount(),
+                Verts = tmesh.GetVertices(),
+                PolyCount = tmesh.GetPolyCount(),
+                Polys = tmesh.GetPolygons(),
+                PolyAreas = tmesh.GetAreas(),
+                PolyFlags = tmesh.GetFlags(),
+                NVP = tmesh.NVP,
                 DetailMeshes = null,
                 DetailVerts = null,
                 DetailVertsCount = 0,
@@ -921,14 +915,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Add new tile
-            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
+            return m_navMesh.AddTile(navData);
         }
         /// <summary>
         /// Process obstacles
         /// </summary>
+        /// <param name="tlayer">Layer</param>
         /// <param name="tile">Tile</param>
-        /// <param name="layer">Layer</param>
-        private void ProcessObstacles(CompressedTile tile, TileCacheLayer layer)
+        private void ProcessObstacles(ref TileCacheLayer tlayer, CompressedTile tile)
         {
             // Reset untouched obstacles
             var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && o.Touched.Count == 0);
@@ -940,7 +934,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
-                m_obstacles[i].Rasterize(layer, tile, m_params.CellSize, m_params.CellHeight);
+                if (!m_obstacles[i].Touched.Contains(tile))
+                {
+                    continue;
+                }
+
+                m_obstacles[i].Rasterize(ref tlayer, tile.Header.Bounds.Minimum, m_params.CellSize, m_params.CellHeight);
             }
         }
 

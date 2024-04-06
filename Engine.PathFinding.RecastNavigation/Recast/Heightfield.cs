@@ -10,37 +10,38 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class Heightfield
     {
         /// <summary>
-        /// The width of the heightfield. (Along the x-axis in cell units.)
-        /// </summary>
-        public int Width;
-        /// <summary>
-        /// The height of the heightfield. (Along the z-axis in cell units.)
-        /// </summary>
-        public int Height;
-        /// <summary>
-        /// Bounds in world space. [(x, y, z)]
-        /// </summary>
-        public BoundingBox BoundingBox;
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CellSize;
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CellHeight;
-        /// <summary>
         /// Heightfield of spans (width*height).
         /// </summary>
-        public Span[] Spans;
+        private Span[] spans;
         /// <summary>
         /// Linked list of span pools.
         /// </summary>
-        public List<SpanPool> Pools = [];
+        private readonly List<SpanPool> pools = [];
         /// <summary>
         /// The next free span.
         /// </summary>
-        public Span FreeList;
+        private Span freeList;
+
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; private set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; private set; }
+        /// <summary>
+        /// Bounds in world space. [(x, y, z)]
+        /// </summary>
+        public BoundingBox Bounds { get; private set; }
+        /// <summary>
+        /// The width of the heightfield. (Along the x-axis in cell units.)
+        /// </summary>
+        public int Width { get; private set; }
+        /// <summary>
+        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// </summary>
+        public int Height { get; private set; }
 
         /// <summary>
         /// Builds a new empty heightfield
@@ -52,13 +53,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return new()
             {
-                BoundingBox = bounds,
+                CellSize = cfg.CellSize,
+                CellHeight = cfg.CellHeight,
+
+                Bounds = bounds,
 
                 Width = cfg.Width,
                 Height = cfg.Height,
-                CellSize = cfg.CellSize,
-                CellHeight = cfg.CellHeight,
-                Spans = new Span[cfg.Width * cfg.Height],
+
+                spans = new Span[cfg.Width * cfg.Height],
             };
         }
 
@@ -79,7 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Height = Height,
                 CellSize = CellSize,
                 CellHeight = CellHeight,
-                Bounds = BoundingBox,
+                Bounds = Bounds,
             };
 
             // Rasterize triangles.
@@ -99,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < Width; ++x)
                 {
-                    var span = Spans[x + y * Width];
+                    var span = spans[x + y * Width];
                     if (span == null)
                     {
                         // If there are no spans at this cell, just leave the data to index=0, count=0.
@@ -119,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < Width; ++x)
                 {
-                    for (var s = Spans[x + y * Width]; s != null; s = s.Next)
+                    for (var s = spans[x + y * Width]; s != null; s = s.Next)
                     {
                         yield return (x, y, s);
                     }
@@ -158,19 +161,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private Span AllocSpan(int smin, int smax, AreaTypes area)
         {
             // If running out of memory, allocate new page and update the freelist.
-            if (FreeList == null || FreeList.Next == null)
+            if (freeList == null || freeList.Next == null)
             {
                 // Create new page.
                 var pool = new SpanPool();
-                Pools.Add(pool);
+                pools.Add(pool);
 
                 // Add new items to the free list.
-                FreeList = pool.Add(FreeList);
+                freeList = pool.Add(freeList);
             }
 
             // Pop item from in front of the free list.
-            var s = FreeList;
-            FreeList = FreeList.Next;
+            var s = freeList;
+            freeList = freeList.Next;
             s.Initialize(smin, smax, area);
 
             return s;
@@ -184,8 +187,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (cur == null) return;
 
             // Add the node in front of the free list.
-            cur.Next = FreeList;
-            FreeList = cur;
+            cur.Next = freeList;
+            freeList = cur;
         }
         /// <summary>
         /// Adds a span to the heightfield
@@ -205,13 +208,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             Span s = AllocSpan(smin, smax, area);
 
             // Empty cell, add the first span.
-            if (Spans[idx] == null)
+            if (spans[idx] == null)
             {
-                Spans[idx] = s;
+                spans[idx] = s;
                 return;
             }
             Span prev = null;
-            Span cur = Spans[idx];
+            Span cur = spans[idx];
 
             // Insert and merge spans.
             while (cur != null)
@@ -243,7 +246,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
                 else
                 {
-                    Spans[idx] = next;
+                    spans[idx] = next;
                 }
 
                 cur = next;
@@ -257,8 +260,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             else
             {
-                s.Next = Spans[idx];
-                Spans[idx] = s;
+                s.Next = spans[idx];
+                spans[idx] = s;
             }
         }
 
@@ -361,7 +364,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                var ns = Spans[dx + dy * width];
+                var ns = spans[dx + dy * width];
                 var (MinHeight, AsMin, AsMax) = span.FindMinimumHeight(ns, walkableHeight, walkableClimb, minh, asmin, asmax);
                 minh = MinHeight;
                 asmin = AsMin;

@@ -24,20 +24,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 return new()
                 {
-                    Layers = [],
-                    NLayers = 0,
+                    layers = [],
+                    nlayers = 0,
                 };
             }
         }
 
         /// <summary>
+        /// Number of allocated layers
+        /// </summary>
+        private int nlayers;
+        /// <summary>
         /// Layer list
         /// </summary>
-        public HeightfieldLayer[] Layers { get; set; }
-        /// <summary>
-        /// Number of layers
-        /// </summary>
-        public int NLayers { get; set; }
+        private HeightfieldLayer[] layers;
 
         /// <summary>
         /// Builds a new heightfield layer set
@@ -56,32 +56,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             var lset = new HeightfieldLayerSet
             {
-                Layers = new HeightfieldLayer[ldata.LayerId],
-                NLayers = ldata.LayerId,
+                layers = new HeightfieldLayer[ldata.LayerId],
+                nlayers = ldata.LayerId,
             };
 
-            for (int i = 0; i < lset.NLayers; ++i)
+            for (int i = 0; i < lset.nlayers; ++i)
             {
-                var layer = lset.Layers[i];
+                var layer = lset.layers[i];
 
                 // Copy height and area from compact heightfield. 
-                layer.CopyToLayer(ldata, i);
+                layer.CopyFromLayerData(ldata, i);
 
-                lset.Layers[i] = layer;
+                lset.layers[i] = layer;
             }
 
             return lset;
         }
+       
         /// <summary>
         /// Allocates voxel heightfield where we rasterize our input data to 
         /// </summary>
         public IEnumerable<TileCacheData> AllocateTiles(int x, int y)
         {
-            int count = Math.Min(NLayers, MAX_LAYERS);
+            int count = Math.Min(nlayers, MAX_LAYERS);
 
             for (int i = 0; i < count; i++)
             {
-                yield return Layers[i].Create(x, y, i);
+                yield return layers[i].Create(x, y, i);
             }
         }
     }
