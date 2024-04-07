@@ -47,6 +47,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         DetailMesh,
         /// <summary>
+        /// Tile-cache layers areas
+        /// </summary>
+        TileCacheLayersAreas,
+        /// <summary>
+        /// Tile-cache layers regions
+        /// </summary>
+        TileCacheLayersRegions,
+        /// <summary>
         /// Tile-cache contours
         /// </summary>
         TileCacheContours,

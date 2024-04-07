@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
@@ -11,11 +10,11 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets the debug data value list
         /// </summary>
-        IEnumerable<(string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data)> GetValues();
+        IEnumerable<GraphDebugDataCollection> GetValues();
         /// <summary>
         /// Gets the debug data value list by name
         /// </summary>
         /// <param name="name">Value name</param>
-        (string Name, Topology Topology, Dictionary<Color4, IEnumerable<Vector3>> Data) GetValueByName(string name);
+        GraphDebugDataCollection GetValueByName(string name);
     }
 }

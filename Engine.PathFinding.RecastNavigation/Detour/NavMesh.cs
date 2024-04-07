@@ -242,7 +242,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException($"Bad header. {header.Magic}-{header.Version}");
             }
 
-            var nvParams = SoloConfig.GetNavMeshParams(header.Bounds, header.PolyCount);
+            var nvParams = NavMeshParams.GetNavMeshParamsSolo(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
             nm.AddTile(navData);
@@ -273,46 +273,45 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
-            var nmParams = TilesConfig.GetNavMeshParams(settings, bbox);
-            var nm = new NavMesh(nmParams);
-
-            int passes = 0;
-            if (settings.BuildAllTiles)
-            {
-                passes++;
-
-                if (settings.UseTileCache)
-                {
-                    passes++;
-                }
-            }
-
-            if (settings.BuildAllTiles)
-            {
-                nm.BuildAllTiles(geometry, settings, agent, (progress) =>
-                {
-                    progressCallback?.Invoke(progress / passes);
-                });
-            }
+            NavMesh nm;
 
             if (!settings.UseTileCache)
             {
-                return nm;
-            }
+                // Navigation mesh generation params
+                var nmParams = NavMeshParams.GetNavMeshParamsTiled(bbox, settings);
+                nm = new(nmParams);
 
-            // Init cache
-
-            // Generation params.
-            var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
-
-            nm.CreateTileCache(geometry, tileCacheCfg.TileCacheParams);
-
-            if (settings.BuildAllTiles)
-            {
-                nm.TileCache.BuildTileCache(geometry, tileCacheCfg, (progress) =>
+                if (settings.BuildAllTiles)
                 {
-                    progressCallback?.Invoke((progress / passes) + (1f / passes));
-                });
+                    // Tile generation params.
+                    var tilesCfg = TilesConfig.GetTilesConfig(settings, agent, bbox);
+
+                    nm.BuildAllTiles(geometry, tilesCfg, (progress) =>
+                    {
+                        progressCallback?.Invoke(progress / 1f);
+                    });
+                }
+            }
+            else
+            {
+                // Navigation mesh generation params
+                var nmParams = NavMeshParams.GetNavMeshParamsTiled(bbox, settings);
+                nm = new(nmParams);
+
+                // Init cache
+                var tileCacheParams = TileCacheParams.GetTileCacheParams(settings, agent, bbox);
+                nm.CreateTileCache(geometry, tileCacheParams);
+
+                if (settings.BuildAllTiles)
+                {
+                    // TileCache generation params.
+                    var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
+
+                    nm.TileCache.BuildAllTiles(geometry, tileCacheCfg, (progress) =>
+                    {
+                        progressCallback?.Invoke(progress / 1f);
+                    });
+                }
             }
 
             return nm;
@@ -334,9 +333,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Allocate voxel heightfield where we rasterize our input data to.
-            var solid = Heightfield.Build(cfg, cfg.Bounds);
+            var solid = Heightfield.Build(cfg, cfg.TileBounds);
 
-            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.Bounds);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.TileBounds);
             if (cid.Length == 0)
             {
                 return null; // empty
@@ -436,13 +435,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="bounds">Mesh bounds</param>
         /// <param name="x">Resulting x tile coordinate</param>
         /// <param name="y">Resulting y tile coordinate</param>
-        /// <param name="tileBounds">Tile bounds</param>
-        public static void GetTileAtPosition(Vector3 pos, float tileCellSize, BoundingBox bounds, out int x, out int y, out BoundingBox tileBounds)
+        public static void GetTileAtPosition(Vector3 pos, float tileCellSize, BoundingBox bounds, out int x, out int y)
         {
             x = (int)((pos.X - bounds.Minimum.X) / tileCellSize);
             y = (int)((pos.Z - bounds.Minimum.Z) / tileCellSize);
-
-            tileBounds = TilesConfig.GetTileBounds(x, y, tileCellSize, bounds);
         }
         /// <summary>
         /// Check for horizontal overlap.
@@ -560,22 +556,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="settings">Build settings</param>
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        private void BuildAllTiles(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
+        private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Action<float> progressCallback)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
-
-            // Tile generation params.
-            var tileParams = TilesConfig.GetTileParams(settings, bbox);
-
-            float totalTiles = tileParams.Height * tileParams.Width;
+            float totalTiles = tiledCfg.TileHeight * tiledCfg.TileWidth;
             int tile = 0;
 
-            foreach (var (x, y) in GridUtils.Iterate(tileParams.Width, tileParams.Height))
+            foreach (var (x, y) in GridUtils.Iterate(tiledCfg.TileWidth, tiledCfg.TileHeight))
             {
-                var tileBounds = TilesConfig.GetTileBounds(x, y, tileParams.TileCellSize, tileParams.Bounds);
-
-                // Init build configuration
-                var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, tileBounds);
+                tiledCfg.UpdateTileBounds(x, y);
 
                 var data = BuildTileMesh(x, y, geometry, tiledCfg);
                 if (data != null)
@@ -607,39 +595,37 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent</param>
         public void BuildTileAtPosition(UpdateTileData tileData, BuildSettings settings, InputGeometry geometry, Agent agent)
         {
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
             int x = tileData.TX;
             int y = tileData.TY;
-            var tileBounds = tileData.TileBounds;
-
-            // Remove any previous data (navmesh owns and deletes the data).
-            RemoveTiles(x, y);
-
-            var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, tileBounds);
-
-            // Add tile, or leave the location empty.
-            var data = BuildTileMesh(x, y, geometry, tiledCfg);
-            if (data != null)
-            {
-                AddTile(data);
-            }
 
             if (TileCache == null)
             {
-                return;
+                // Remove any previous data (navmesh owns and deletes the data).
+                RemoveTiles(x, y);
+
+                var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, bbox);
+                tiledCfg.UpdateTileBounds(x, y);
+
+                // Add tile, or leave the location empty.
+                var meshData = BuildTileMesh(x, y, geometry, tiledCfg);
+                if (meshData != null)
+                {
+                    AddTile(meshData);
+                }
             }
-
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
-
-            var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
-
-            var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
-
-            foreach (var tile in tiles)
+            else
             {
-                TileCache.AddTile(tile, CompressedTileFlagTypes.Free, false);
-            }
+                var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
 
-            TileCache.BuildTilesAt(x, y);
+                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
+                foreach (var tile in tiles)
+                {
+                    TileCache.AddTile(tile, CompressedTileFlagTypes.Free, false);
+                }
+
+                TileCache.BuildTilesAt(x, y);
+            }
         }
         /// <summary>
         /// Removes all tiles at specified tile coordinates

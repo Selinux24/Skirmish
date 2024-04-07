@@ -1,5 +1,6 @@
 ﻿using Engine.PathFinding.RecastNavigation.Recast;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -39,6 +40,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public TileCacheLayerHeader Header { get; private set; } = tile?.Header ?? default;
 
         /// <summary>
+        /// Iterates over the layer indices
+        /// </summary>
+        public readonly IEnumerable<(int index, int x, int y)> IterateLayer()
+        {
+            int w = Header.Width;
+            int h = Header.Height;
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    int idx = x + y * w;
+
+                    yield return (idx, x, y);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the layer region at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public readonly int GetRegion(int index)
+        {
+            return regions[index];
+        }
+        /// <summary>
         /// Gets the layer height at index
         /// </summary>
         /// <param name="index">Index</param>
@@ -62,6 +90,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public readonly void SetArea(int index, AreaTypes value)
         {
             areas[index] = value;
+        }
+        /// <summary>
+        /// Gets the layer connection at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public readonly int GetConnection(int index)
+        {
+            return connections[index];
         }
 
         /// <summary>
@@ -519,34 +555,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Gets the neighbour region id
         /// </summary>
-        /// <param name="col">Column index</param>
-        /// <param name="row">Row index</param>
+        /// <param name="x">Column index</param>
+        /// <param name="y">Row index</param>
         /// <param name="dir">Neighbour at direction</param>
         /// <returns>Returns the neighbour region id</returns>
-        private readonly int GetNeighbourRegionId(int col, int row, int dir)
+        private readonly int GetNeighbourRegionId(int x, int y, int dir)
         {
             int w = Header.Width;
-            int ia = col + row * w;
-            int con = connections[ia];
 
-            int conDir = Edge.GetVertexDirection(con);
-            int portal = con >> 4;
-
-            if (!IsPortalAtDirection(conDir, dir))
+            int con = connections[x + y * w];
+            if (VertexWithNeigbour.ReadPortalRegion(con, dir, out int regionId))
             {
-                // No connection, return portal or hard edge.
-                if (IsPortalAtDirection(portal, dir))
-                {
-                    return VertexWithNeigbour.DT_NEI_DIR_MASK + dir;
-                }
-                return LayerMonotoneRegion.NULL_ID;
+                return regionId;
             }
 
-            int bx = col + GridUtils.GetDirOffsetX(dir);
-            int by = row + GridUtils.GetDirOffsetY(dir);
-            int ib = bx + by * w;
+            int bx = x + GridUtils.GetDirOffsetX(dir);
+            int by = y + GridUtils.GetDirOffsetY(dir);
 
-            return regions[ib];
+            return regions[bx + by * w];
         }
         /// <summary>
         /// Gets the corner height
@@ -571,33 +597,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int preg = LayerMonotoneRegion.NULL_ID;
             bool allSameReg = true;
 
-            for (int dz = -1; dz <= 0; ++dz)
+            foreach (var (dx, dz) in GridUtils.Iterate(-1, -1, 2, 2))
             {
-                for (int dx = -1; dx <= 0; ++dx)
+                int px = x + dx;
+                int pz = z + dz;
+                if (px < 0 || pz < 0 || px >= w || pz >= h)
                 {
-                    int px = x + dx;
-                    int pz = z + dz;
-                    if (px < 0 || pz < 0 || px >= w || pz >= h)
-                    {
-                        continue;
-                    }
-
-                    int idx = px + pz * w;
-                    int lh = heights[idx];
-                    if (Math.Abs(lh - y) > walkableClimb || areas[idx] == AreaTypes.RC_NULL_AREA)
-                    {
-                        continue;
-                    }
-
-                    height = Math.Max(height, lh);
-                    portal &= connections[idx] >> 4;
-                    if (preg != LayerMonotoneRegion.NULL_ID && preg != regions[idx])
-                    {
-                        allSameReg = false;
-                    }
-                    preg = regions[idx];
-                    n++;
+                    continue;
                 }
+
+                int idx = px + pz * w;
+                int lh = heights[idx];
+                if (Math.Abs(lh - y) > walkableClimb || areas[idx] == AreaTypes.RC_NULL_AREA)
+                {
+                    continue;
+                }
+
+                height = Math.Max(height, lh);
+                portal &= connections[idx] >> 4;
+                if (preg != LayerMonotoneRegion.NULL_ID && preg != regions[idx])
+                {
+                    allSameReg = false;
+                }
+                preg = regions[idx];
+                n++;
             }
 
             shouldRemove = ShouldRemove(n, allSameReg, portal);
@@ -622,37 +645,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return false;
             }
 
-            int portalCount = GetPortalCount(con);
-
-            return portalCount == 1;
-        }
-        /// <summary>
-        /// Gets the portal count from the specified connection
-        /// </summary>
-        /// <param name="con">Connection</param>
-        public static int GetPortalCount(int con)
-        {
-            int portalCount = 0;
-            for (int dir = 0; dir < 4; ++dir)
-            {
-                if (IsPortalAtDirection(con, dir))
-                {
-                    portalCount++;
-                }
-            }
-
-            return portalCount;
-        }
-        /// <summary>
-        /// Gets whether the especified connection has a portal at the speficied direction
-        /// </summary>
-        /// <param name="con">Connection</param>
-        /// <param name="dir">Direction</param>
-        public static bool IsPortalAtDirection(int con, int dir)
-        {
-            int mask = 1 << dir;
-
-            return (con & mask) != 0;
+            return VertexWithNeigbour.GetPortalCount(con) == 1;
         }
     }
 }

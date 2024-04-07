@@ -164,13 +164,10 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int tx = txMin; tx <= txMax; tx++)
                 {
-                    var tileBounds = TilesConfig.GetTileBounds(tx, ty, Input, Settings);
-
                     tiles.Add(new()
                     {
                         TX = tx,
                         TY = ty,
-                        TileBounds = tileBounds,
                     });
                 }
             }
@@ -191,7 +188,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var position in positions)
             {
-                NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty, out var tileBounds);
+                NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty);
 
                 if (tiles.Exists(t => t.TX == tx && t.TY == ty))
                 {
@@ -202,7 +199,6 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     TX = tx,
                     TY = ty,
-                    TileBounds = tileBounds,
                 });
             }
 

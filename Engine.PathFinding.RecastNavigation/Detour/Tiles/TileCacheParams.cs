@@ -11,6 +11,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     public struct TileCacheParams
     {
         /// <summary>
+        /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
+        /// </summary>
+        public const int EXPECTED_LAYERS_PER_TILE = 4;
+
+        /// <summary>
         /// Origin
         /// </summary>
         public Vector3 Origin { get; set; }
@@ -88,6 +93,40 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     yield return (tx, ty);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the tile-cache creation parameters
+        /// </summary>
+        /// <param name="settings">Build settings</param>
+        /// <param name="agent">Agent</param>
+        /// <param name="generationBounds">Generation bounds</param>
+        public static TileCacheParams GetTileCacheParams(BuildSettings settings, Agent agent, BoundingBox generationBounds)
+        {
+            Config.CalcGridSize(generationBounds, settings.CellSize, out int gridWidth, out int gridHeight);
+            int tileSize = (int)settings.TileSize;
+            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
+            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
+
+            // Tile cache params.
+            return new()
+            {
+                Origin = generationBounds.Minimum,
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                Width = tileSize,
+                Height = tileSize,
+                WalkableHeight = agent.Height,
+                WalkableRadius = agent.Radius,
+                WalkableClimb = agent.MaxClimb,
+                MaxSimplificationError = settings.EdgeMaxError,
+                MaxTiles = tileWidth * tileHeight * EXPECTED_LAYERS_PER_TILE,
+                TileWidth = tileWidth,
+                TileHeight = tileHeight,
+                MaxObstacles = 128,
+                
+                EnableDebugInfo = settings.EnableDebugInfo,
+            };
         }
 
         /// <inheritdoc/>

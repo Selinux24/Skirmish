@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -9,19 +8,6 @@ namespace Engine.PathFinding.RecastNavigation
     [Serializable]
     public class BuildSettings : PathFinderSettings
     {
-        /// <summary>
-        /// Calculates the grid size
-        /// </summary>
-        /// <param name="bounds">Bounds</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="width">Resulting width</param>
-        /// <param name="height">Resulting height</param>
-        public static void CalcGridSize(BoundingBox bounds, float cellSize, out int width, out int height)
-        {
-            width = (int)((bounds.Maximum.X - bounds.Minimum.X) / cellSize + 0.5f);
-            height = (int)((bounds.Maximum.Z - bounds.Minimum.Z) / cellSize + 0.5f);
-        }
-
         /// <summary>
         /// Default settings
         /// </summary>

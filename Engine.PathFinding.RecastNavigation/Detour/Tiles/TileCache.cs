@@ -162,16 +162,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Builds the tile chache
         /// </summary>
         /// <param name="geometry">Input geometry</param>
-        /// <param name="cfg">Configuration</param>
+        /// <param name="tileCacheCfg">Configuration</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void BuildTileCache(InputGeometry geometry, TilesConfig cfg, Action<float> progressCallback)
+        public void BuildAllTiles(InputGeometry geometry, TilesConfig tileCacheCfg, Action<float> progressCallback)
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
 
             foreach (var (x, y) in GridUtils.Iterate(m_params.TileWidth, m_params.TileHeight))
             {
-                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, cfg);
+                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
                 foreach (var tile in tiles)
                 {
                     AddTile(tile, CompressedTileFlagTypes.Free);

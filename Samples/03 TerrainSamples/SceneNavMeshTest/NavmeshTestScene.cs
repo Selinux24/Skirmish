@@ -421,7 +421,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 32;
+            nmsettings.TileSize = 64;
 
             //Debugging
             nmsettings.EnableDebugInfo = true;
@@ -611,17 +611,19 @@ namespace TerrainSamples.SceneNavMeshTest
             int height;
             if (nmsettings.BuildMode == BuildModes.Solo)
             {
-                BuildSettings.CalcGridSize(graphBounds, nmsettings.CellSize, out width, out height);
+                Config.CalcGridSize(graphBounds, nmsettings.CellSize, out width, out height);
                 bounds = graphBounds;
             }
             else
             {
-                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty, out _);
-                var tileBounds = TilesConfig.GetTileBounds(tx, ty, nminput, nmsettings);
-                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, tileBounds);
+                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty);
+
+                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, graphBounds);
+                tiledCfg.UpdateTileBounds(tx, ty, nmsettings.UseTileCache);
+
                 width = tiledCfg.Width;
                 height = tiledCfg.Height;
-                bounds = tiledCfg.Bounds;
+                bounds = tiledCfg.TileBounds;
             }
 
             int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);

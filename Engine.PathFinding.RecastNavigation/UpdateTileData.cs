@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
@@ -15,15 +14,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// Y tile position
         /// </summary>
         public int TY { get; set; }
-        /// <summary>
-        /// Tile bounds
-        /// </summary>
-        public BoundingBox TileBounds { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"TX: {TX}; TY: {TY}; TileBounds: {TileBounds};";
+            return $"TX: {TX}; TY: {TY};";
         }
     }
 }

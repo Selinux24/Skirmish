@@ -26,11 +26,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float detailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist;
             float detailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError;
 
-            BuildSettings.CalcGridSize(generationBounds, settings.CellSize, out int width, out int height);
+            CalcGridSize(generationBounds, settings.CellSize, out int width, out int height);
             int borderSize = walkableRadius + 3;
 
             // Generation params.
-            var cfg = new SoloConfig()
+            return new()
             {
                 Agent = agent,
 
@@ -51,33 +51,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BorderSize = borderSize,
                 Width = width,
                 Height = height,
-
+                
                 FilterLedgeSpans = settings.FilterLedgeSpans,
                 FilterLowHangingObstacles = settings.FilterLowHangingObstacles,
                 FilterWalkableLowHeightSpans = settings.FilterWalkableLowHeightSpans,
                 PartitionType = settings.PartitionType,
 
                 EnableDebugInfo = settings.EnableDebugInfo,
-            };
-
-            return cfg;
-        }
-
-        /// <summary>
-        /// Gets the navigation mesh parameters for "solo" creation
-        /// </summary>
-        /// <param name="generationBounds">Generation bounds</param>
-        /// <param name="polyCount">Maximum polygon count</param>
-        /// <returns>Returns the navigation mesh parameters</returns>
-        public static NavMeshParams GetNavMeshParams(BoundingBox generationBounds, int polyCount)
-        {
-            return new NavMeshParams
-            {
-                Origin = generationBounds.Minimum,
-                TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
-                TileHeight = generationBounds.Maximum.Z - generationBounds.Minimum.Z,
-                MaxTiles = 1,
-                MaxPolys = polyCount,
             };
         }
     }
