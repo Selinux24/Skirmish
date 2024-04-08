@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.PathFinding.RecastNavigation.Recast;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Tile cache data
     /// </summary>
@@ -25,18 +24,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="x">X tile coordinate</param>
         /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
-        /// <param name="tileCacheCfg">Configuration</param>
-        public static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, TilesConfig tileCacheCfg)
+        /// <param name="tiledCfg">Configuration</param>
+        public static TileCacheData[] RasterizeTileLayers(int x, int y, InputGeometry geometry, TilesConfig tiledCfg)
         {
             var chunkyMesh = geometry.ChunkyMesh;
 
-            // Update and adjust tile bounds.
-            tileCacheCfg.UpdateTileBounds(x, y, true);
+            // Update tile bounds.
+            var tileBounds = tiledCfg.CalculateTileBounds(x, y);
 
             // Create heightfield
-            var solid = Heightfield.Build(tileCacheCfg, tileCacheCfg.TileBounds);
+            var solid = Heightfield.Build(tiledCfg, tileBounds);
 
-            var cid = chunkyMesh.GetChunksOverlappingRect(tileCacheCfg.TileBounds);
+            var cid = chunkyMesh.GetChunksOverlappingRect(tileBounds);
             if (cid.Length == 0)
             {
                 return []; // empty
@@ -45,26 +44,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                solid.Rasterize(tris, tileCacheCfg.WalkableSlopeAngle, tileCacheCfg.WalkableClimb);
+                solid.Rasterize(tris, tiledCfg.WalkableSlopeAngle, tiledCfg.WalkableClimb);
             }
 
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            solid.FilterHeightfield(tileCacheCfg);
+            solid.FilterHeightfield(tiledCfg);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = CompactHeightfield.Build(solid, tileCacheCfg.WalkableHeight, tileCacheCfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, tiledCfg.WalkableHeight, tiledCfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            chf.ErodeWalkableArea(tileCacheCfg.WalkableRadius);
+            chf.ErodeWalkableArea(tiledCfg.WalkableRadius);
 
             // Mark areas.
             chf.MarkAreas(geometry);
 
-            var lset = HeightfieldLayerSet.Build(chf, tileCacheCfg.BorderSize, tileCacheCfg.WalkableHeight);
+            var lset = HeightfieldLayerSet.Build(chf, tiledCfg.BorderSize, tiledCfg.WalkableHeight);
 
             // Allocate voxel heightfield where we rasterize our input data to.
             var tiles = lset.AllocateTiles(x, y);

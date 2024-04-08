@@ -5,7 +5,6 @@ using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour;
-using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -421,7 +420,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 64;
+            nmsettings.TileSize = 32;
 
             //Debugging
             nmsettings.EnableDebugInfo = true;
@@ -617,13 +616,11 @@ namespace TerrainSamples.SceneNavMeshTest
             else
             {
                 NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty);
-
                 var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, graphBounds);
-                tiledCfg.UpdateTileBounds(tx, ty, nmsettings.UseTileCache);
 
                 width = tiledCfg.Width;
                 height = tiledCfg.Height;
-                bounds = tiledCfg.TileBounds;
+                bounds = tiledCfg.CalculateTileBounds(tx, ty);
             }
 
             int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);

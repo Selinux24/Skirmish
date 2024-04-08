@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -64,17 +63,6 @@ namespace Engine.PathFinding.RecastNavigation
         public NavMeshQuery CreateQuery()
         {
             return new NavMeshQuery(NavMesh, MaxNodes);
-        }
-        /// <summary>
-        /// Removes the tiles in the list
-        /// </summary>
-        /// <param name="tiles">Tile list</param>
-        public void RemoveTiles(IEnumerable<UpdateTileData> tiles)
-        {
-            foreach (var tile in tiles)
-            {
-                NavMesh.RemoveTilesAtPosition(tile.TX, tile.TY);
-            }
         }
     }
 }

@@ -711,7 +711,6 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> res = [];
 
             var bmin = layer.Header.Bounds.Minimum;
-            var bmax = layer.Header.Bounds.Maximum;
 
             int idx = layer.Header.TLayer;
             Color color = (Color)Helper.IntToCol(idx + 1, 255);
@@ -745,9 +744,9 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 v2 = new(fx + cs, fy, fz + cs);
                 Vector3 v3 = new(fx + cs, fy, fz);
 
-                res.TryAdd(color, []);
-                res[color].AddRange([v0, v1, v2]);
-                res[color].AddRange([v0, v2, v3]);
+                res.TryAdd(col, []);
+                res[col].AddRange([v0, v1, v2]);
+                res[col].AddRange([v0, v2, v3]);
             }
 
             if (res.Count <= 0)
@@ -769,7 +768,6 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> res = [];
 
             var bmin = layer.Header.Bounds.Minimum;
-            var bmax = layer.Header.Bounds.Maximum;
 
             int idx = layer.Header.TLayer;
             Color color = (Color)Helper.IntToCol(idx + 1, 255);
@@ -792,9 +790,9 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 v2 = new(fx + cs, fy, fz + cs);
                 Vector3 v3 = new(fx + cs, fy, fz);
 
-                res.TryAdd(color, []);
-                res[color].AddRange([v0, v1, v2]);
-                res[color].AddRange([v0, v2, v3]);
+                res.TryAdd(col, []);
+                res[col].AddRange([v0, v1, v2]);
+                res[col].AddRange([v0, v2, v3]);
             }
 
             if (res.Count <= 0)

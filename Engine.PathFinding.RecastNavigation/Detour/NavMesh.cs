@@ -1,13 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using Engine.PathFinding.RecastNavigation.Recast;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Navigation mesh
     /// </summary>
@@ -271,45 +270,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the new created navigation mesh</returns>
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
+            var generationBounds = settings.Bounds ?? geometry.BoundingBox;
 
-            NavMesh nm;
+            var nmParams = NavMeshParams.GetNavMeshParamsTiled(generationBounds, settings);
+            var nm = new NavMesh(nmParams);
 
             if (!settings.UseTileCache)
             {
-                // Navigation mesh generation params
-                var nmParams = NavMeshParams.GetNavMeshParamsTiled(bbox, settings);
-                nm = new(nmParams);
-
                 if (settings.BuildAllTiles)
                 {
-                    // Tile generation params.
-                    var tilesCfg = TilesConfig.GetTilesConfig(settings, agent, bbox);
+                    var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 
-                    nm.BuildAllTiles(geometry, tilesCfg, (progress) =>
+                    nm.BuildAllTiles(geometry, tiledCfg, (progress) =>
                     {
-                        progressCallback?.Invoke(progress / 1f);
+                        progressCallback?.Invoke(progress);
                     });
                 }
             }
             else
             {
-                // Navigation mesh generation params
-                var nmParams = NavMeshParams.GetNavMeshParamsTiled(bbox, settings);
-                nm = new(nmParams);
-
                 // Init cache
-                var tileCacheParams = TileCacheParams.GetTileCacheParams(settings, agent, bbox);
+
+                // Generation params.
+                var tileCacheParams = TileCacheParams.GetTileCacheParams(settings, agent, generationBounds);
                 nm.CreateTileCache(geometry, tileCacheParams);
 
                 if (settings.BuildAllTiles)
                 {
-                    // TileCache generation params.
-                    var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
+                    var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 
-                    nm.TileCache.BuildAllTiles(geometry, tileCacheCfg, (progress) =>
+                    nm.TileCache.BuildAllTiles(geometry, tiledCfg, (progress) =>
                     {
-                        progressCallback?.Invoke(progress / 1f);
+                        progressCallback?.Invoke(progress);
                     });
                 }
             }
@@ -322,20 +314,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="x">X tile coordinate</param>
         /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
-        /// <param name="cfg">Configuration</param>
-        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig cfg)
+        /// <param name="tiledCfg">Configuration</param>
+        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig tiledCfg)
         {
-            if (cfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
+            if (tiledCfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
                 return null;
             }
 
             var chunkyMesh = geometry.ChunkyMesh;
 
-            // Allocate voxel heightfield where we rasterize our input data to.
-            var solid = Heightfield.Build(cfg, cfg.TileBounds);
+            var tileBounds = tiledCfg.CalculateTileBounds(x, y);
 
-            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.TileBounds);
+            // Allocate voxel heightfield where we rasterize our input data to.
+            var solid = Heightfield.Build(tiledCfg, tileBounds);
+
+            var cid = chunkyMesh.GetChunksOverlappingRect(tileBounds);
             if (cid.Length == 0)
             {
                 return null; // empty
@@ -344,38 +338,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                solid.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb);
+                solid.Rasterize(tris, tiledCfg.WalkableSlopeAngle, tiledCfg.WalkableClimb);
             }
 
             // Performs the heightfield filters
-            solid.FilterHeightfield(cfg);
+            solid.FilterHeightfield(tiledCfg);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, tiledCfg.WalkableHeight, tiledCfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            chf.ErodeWalkableArea(cfg.WalkableRadius);
+            chf.ErodeWalkableArea(tiledCfg.WalkableRadius);
 
             // Mark areas.
             chf.MarkAreas(geometry);
 
             // Sample partition
-            chf.SamplePartition(cfg);
+            chf.SamplePartition(tiledCfg);
 
             // Create contours.
-            var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
+            var cset = ContourSet.Build(chf, tiledCfg.MaxSimplificationError, tiledCfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
             if (!cset.HasContours())
             {
                 return null;
             }
 
             // Build polygon navmesh from the contours.
-            var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
+            var pmesh = PolyMesh.Build(cset, tiledCfg.MaxVertsPerPoly);
 
             // Build detail mesh.
-            var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
+            var dmesh = PolyMeshDetail.Build(pmesh, chf, tiledCfg.DetailSampleDist, tiledCfg.DetailSampleMaxError);
             if (dmesh == null)
             {
                 return null;
@@ -400,21 +394,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 DetailTriCount = dmesh.Triangles.Count,
                 OffMeshCon = geometry.GetConnections().ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
-                WalkableHeight = cfg.Agent.Height,
-                WalkableRadius = cfg.Agent.Radius,
-                WalkableClimb = cfg.Agent.MaxClimb,
+                WalkableHeight = tiledCfg.Agent.Height,
+                WalkableRadius = tiledCfg.Agent.Radius,
+                WalkableClimb = tiledCfg.Agent.MaxClimb,
                 TileX = x,
                 TileY = y,
                 TileLayer = 0,
                 Bounds = pmesh.Bounds,
-                CellSize = cfg.CellSize,
-                CellHeight = cfg.CellHeight,
+                CellSize = tiledCfg.CellSize,
+                CellHeight = tiledCfg.CellHeight,
                 BuildBvTree = true
             };
 
             var meshData = MeshData.CreateNavMeshData(param);
 
-            if (cfg.EnableDebugInfo)
+            if (tiledCfg.EnableDebugInfo)
             {
                 meshData.BuildData = new()
                 {
@@ -553,8 +547,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Builds all the tiles in the mesh
         /// </summary>
         /// <param name="geometry">Input geometry</param>
-        /// <param name="settings">Build settings</param>
-        /// <param name="agent">Agent type</param>
+        /// <param name="tiledCfg">Tiled config</param>
         /// <param name="progressCallback">Optional progress callback</param>
         private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Action<float> progressCallback)
         {
@@ -563,13 +556,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             foreach (var (x, y) in GridUtils.Iterate(tiledCfg.TileWidth, tiledCfg.TileHeight))
             {
-                tiledCfg.UpdateTileBounds(x, y);
-
                 var data = BuildTileMesh(x, y, geometry, tiledCfg);
                 if (data != null)
                 {
                     // Remove any previous data (navmesh owns and deletes the data).
-                    RemoveTile(x, y, 0);
+                    RemoveTileAt(x, y, 0);
                     // Let the navmesh own the data.
                     AddTile(data);
                 }
@@ -577,54 +568,35 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 progressCallback?.Invoke(++tile / totalTiles);
             }
         }
-
-        /// <summary>
-        /// Gets the navigation mesh parameters
-        /// </summary>
-        public NavMeshParams GetParams()
-        {
-            return m_params;
-        }
-
         /// <summary>
         /// Builds all tiles at specified tile coordinates
         /// </summary>
-        /// <param name="tileData">Tile data</param>
+        /// <param name="x">Tile x coordinate</param>
+        /// <param name="y">Tile y coordinate</param>
         /// <param name="settings">Build settings</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="agent">Agent</param>
-        public void BuildTileAtPosition(UpdateTileData tileData, BuildSettings settings, InputGeometry geometry, Agent agent)
+        public void BuildTileAt(int x, int y, BuildSettings settings, InputGeometry geometry, Agent agent)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
-            int x = tileData.TX;
-            int y = tileData.TY;
+            var generationBounds = settings.Bounds ?? geometry.BoundingBox;
+
+            var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 
             if (TileCache == null)
             {
                 // Remove any previous data (navmesh owns and deletes the data).
                 RemoveTiles(x, y);
 
-                var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, bbox);
-                tiledCfg.UpdateTileBounds(x, y);
-
                 // Add tile, or leave the location empty.
-                var meshData = BuildTileMesh(x, y, geometry, tiledCfg);
-                if (meshData != null)
+                var data = BuildTileMesh(x, y, geometry, tiledCfg);
+                if (data != null)
                 {
-                    AddTile(meshData);
+                    AddTile(data);
                 }
             }
             else
             {
-                var tileCacheCfg = TilesConfig.GetTileCacheConfig(settings, agent, bbox);
-
-                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
-                foreach (var tile in tiles)
-                {
-                    TileCache.AddTile(tile, CompressedTileFlagTypes.Free, false);
-                }
-
-                TileCache.BuildTilesAt(x, y);
+                TileCache.BuildTileAt(x, y, geometry, tiledCfg);
             }
         }
         /// <summary>
@@ -632,11 +604,63 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="x">X tile coordinate</param>
         /// <param name="y">Y tile coordinate</param>
-        public void RemoveTilesAtPosition(int x, int y)
+        public void RemoveTilesAt(int x, int y)
         {
-            RemoveTiles(x, y);
+            if (TileCache == null)
+            {
+                RemoveTiles(x, y);
+            }
+            else
+            {
+                TileCache.RemoveTilesAt(x, y);
+            }
+        }
+        /// <summary>
+        /// Removes the tiles in the list
+        /// </summary>
+        /// <param name="remTiles">Tile list</param>
+        public void RemoveTilesAt(IEnumerable<(int x, int y)> remTiles)
+        {
+            if (TileCache == null)
+            {
+                foreach (var (x, y) in remTiles)
+                {
+                    RemoveTiles(x, y);
+                }
+            }
+            else
+            {
+                foreach (var (x, y) in remTiles)
+                {
+                    TileCache.RemoveTilesAt(x, y);
+                }
+            }
+        }
+        /// <summary>
+        /// Removes the tile from the navigation mesh
+        /// </summary>
+        /// <param name="header">Tile cache layer header</param>
+        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
+        public bool RemoveTileAt(TileCacheLayerHeader header)
+        {
+            return RemoveTileAt(header.TX, header.TY, header.TLayer);
+        }
+        /// <summary>
+        /// Removes the tile from the navigation mesh
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="layer">Layer number</param>
+        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
+        private bool RemoveTileAt(int x, int y, int layer)
+        {
+            var meshTile = GetTileAt(x, y, layer);
+            if (meshTile == null)
+            {
+                return true;
+            }
 
-            TileCache?.RemoveTilesAt(x, y);
+            return RemoveTile(meshTile);
         }
 
         /// <summary>
@@ -757,35 +781,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Removes the tile from the navigation mesh
         /// </summary>
-        /// <param name="header">Tile cache layer header</param>
-        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
-        public bool RemoveTile(TileCacheLayerHeader header)
-        {
-            return RemoveTile(header.TX, header.TY, header.TLayer);
-        }
-        /// <summary>
-        /// Removes the tile from the navigation mesh
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="layer">Layer number</param>
-        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
-        public bool RemoveTile(int x, int y, int layer)
-        {
-            var meshTile = GetTileAt(x, y, layer);
-            if (meshTile == null)
-            {
-                return true;
-            }
-
-            return RemoveTile(meshTile);
-        }
-        /// <summary>
-        /// Removes the tile from the navigation mesh
-        /// </summary>
         /// <param name="tile">Tile to remove</param>
         /// <returns>Returns true if the tile was removed</returns>
-        public bool RemoveTile(MeshTile tile)
+        private bool RemoveTile(MeshTile tile)
         {
             if (tile == null)
             {
@@ -837,7 +835,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <returns>Returns true if all the tiles were removed or if the tiles not exists at all</returns>
-        public bool RemoveTiles(int x, int y)
+        private bool RemoveTiles(int x, int y)
         {
             bool res = true;
 
@@ -1973,6 +1971,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public void CreateTileCache(InputGeometry geometry, TileCacheParams cacheParams)
         {
             TileCache = new(this, geometry, cacheParams);
+        }
+
+        /// <summary>
+        /// Gets the navigation mesh parameters
+        /// </summary>
+        public NavMeshParams GetParams()
+        {
+            return m_params;
         }
 
         /// <summary>

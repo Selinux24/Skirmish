@@ -39,7 +39,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the navigation mesh parameters</returns>
         public static NavMeshParams GetNavMeshParamsSolo(BoundingBox generationBounds, int polyCount)
         {
-            return new NavMeshParams
+            return new()
             {
                 Origin = generationBounds.Minimum,
                 TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
@@ -76,7 +76,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int maxTiles = 1 << tileBits;
             int maxPolysPerTile = 1 << polyBits;
 
-            return new NavMeshParams
+            return new()
             {
                 Origin = generationBounds.Minimum,
                 TileWidth = tileCellSize,

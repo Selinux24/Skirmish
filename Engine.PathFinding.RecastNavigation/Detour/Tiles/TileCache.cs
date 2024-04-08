@@ -162,16 +162,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Builds the tile chache
         /// </summary>
         /// <param name="geometry">Input geometry</param>
-        /// <param name="tileCacheCfg">Configuration</param>
+        /// <param name="tiledCfg">Configuration</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void BuildAllTiles(InputGeometry geometry, TilesConfig tileCacheCfg, Action<float> progressCallback)
+        public void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Action<float> progressCallback)
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
 
             foreach (var (x, y) in GridUtils.Iterate(m_params.TileWidth, m_params.TileHeight))
             {
-                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tileCacheCfg);
+                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
                 foreach (var tile in tiles)
                 {
                     AddTile(tile, CompressedTileFlagTypes.Free);
@@ -187,6 +187,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 progressCallback?.Invoke(++curr / total);
             }
+        }
+        /// <summary>
+        /// Builds the tile at coordinates
+        /// </summary>
+        /// <param name="x">Tile x coordinate</param>
+        /// <param name="y">Tile y coordinate</param>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="tiledCfg">Configuration</param>
+        public void BuildTileAt(int x, int y, InputGeometry geometry, TilesConfig tiledCfg)
+        {
+            var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
+
+            foreach (var tile in tiles)
+            {
+                AddTile(tile, CompressedTileFlagTypes.Free, false);
+            }
+
+            BuildTilesAt(x, y);
         }
 
         /// <summary>
@@ -676,7 +694,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
-        public bool BuildTilesAt(int x, int y)
+        private bool BuildTilesAt(int x, int y)
         {
             // Get all tiles
             var tiles = GetTilesAt(x, y, 0);
@@ -722,7 +740,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (tmesh.GetPolyCount() == 0)
             {
                 // Remove existing tile.
-                m_navMesh.RemoveTile(tile.Header);
+                m_navMesh.RemoveTileAt(tile.Header);
 
                 return true;
             }
@@ -761,7 +779,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             };
 
             // Remove existing tile.
-            m_navMesh.RemoveTile(tile.Header);
+            m_navMesh.RemoveTileAt(tile.Header);
 
             var navData = MeshData.CreateNavMeshData(param);
             if (navData == null)

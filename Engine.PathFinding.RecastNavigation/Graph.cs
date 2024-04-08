@@ -146,29 +146,25 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a list of tiles</returns>
-        private List<UpdateTileData> LookupTiles(BoundingBox bbox)
+        private List<(int x, int y)> LookupTiles(BoundingBox bbox)
         {
             var points = bbox.GetVertices();
 
             var cornerTiles = LookupTiles(points);
 
-            int txMin = cornerTiles.Min(c => c.TX);
-            int txMax = cornerTiles.Max(c => c.TX);
+            int txMin = cornerTiles.Min(c => c.x);
+            int txMax = cornerTiles.Max(c => c.x);
 
-            int tyMin = cornerTiles.Min(c => c.TY);
-            int tyMax = cornerTiles.Max(c => c.TY);
+            int tyMin = cornerTiles.Min(c => c.y);
+            int tyMax = cornerTiles.Max(c => c.y);
 
-            List<UpdateTileData> tiles = [];
+            List<(int x, int y)> tiles = [];
 
             for (int ty = tyMin; ty <= tyMax; ty++)
             {
                 for (int tx = txMin; tx <= txMax; tx++)
                 {
-                    tiles.Add(new()
-                    {
-                        TX = tx,
-                        TY = ty,
-                    });
+                    tiles.Add((tx, ty));
                 }
             }
 
@@ -179,9 +175,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="positions">Position list</param>
         /// <returns>Returns a list of tiles</returns>
-        private List<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
+        private List<(int x, int y)> LookupTiles(IEnumerable<Vector3> positions)
         {
-            List<UpdateTileData> tiles = [];
+            List<(int x, int y)> tiles = [];
 
             var tileCellSize = Settings.TileCellSize;
             var bounds = Bounds;
@@ -190,16 +186,12 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 NavMesh.GetTileAtPosition(position, tileCellSize, bounds, out var tx, out var ty);
 
-                if (tiles.Exists(t => t.TX == tx && t.TY == ty))
+                if (tiles.Exists(t => t.x == tx && t.y == ty))
                 {
                     continue;
                 }
 
-                tiles.Add(new()
-                {
-                    TX = tx,
-                    TY = ty,
-                });
+                tiles.Add((tx, ty));
             }
 
             return tiles;
@@ -234,17 +226,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// Builds the tiles into the list
         /// </summary>
         /// <param name="agentQ">Agent query</param>
-        /// <param name="tiles">Tile list</param>
-        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<UpdateTileData> tiles, bool update)
+        /// <param name="updateTiles">Tile list</param>
+        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<(int x, int y)> updateTiles, bool update)
         {
-            foreach (var tile in tiles)
+            foreach (var (x, y) in updateTiles)
             {
-                if (update && agentQ.NavMesh.HasTilesAt(tile.TX, tile.TY))
+                if (update && agentQ.NavMesh.HasTilesAt(x, y))
                 {
                     continue;
                 }
 
-                agentQ.NavMesh.BuildTileAtPosition(tile, Settings, Input, agentQ.Agent);
+                agentQ.NavMesh.BuildTileAt(x, y, Settings, Input, agentQ.Agent);
             }
         }
         /// <summary>
@@ -257,7 +249,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var agentQ in agentQuerieFactories)
             {
-                agentQ.RemoveTiles(tiles);
+                agentQ.NavMesh.RemoveTilesAt(tiles);
             }
         }
         /// <summary>
@@ -270,7 +262,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var agentQ in agentQuerieFactories)
             {
-                agentQ.RemoveTiles(tiles);
+                agentQ.NavMesh.RemoveTilesAt(tiles);
             }
         }
 
