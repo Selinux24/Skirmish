@@ -139,25 +139,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the node list and the found node count</returns>
         public (Node[] nodes, int n) FindNodes(int nodeRef, int maxNodes)
         {
-            Node[] nodes = new Node[maxNodes];
+            Node[] res = new Node[maxNodes];
 
             int n = 0;
             int bucket = HashRef(nodeRef) & (hashSize - 1);
             int i = first[bucket];
             while (i != DT_NULL_IDX)
             {
-                if (this.nodes[i]?.Ref == nodeRef)
+                if (nodes[i]?.Ref == nodeRef)
                 {
                     if (n >= maxNodes)
                     {
                         break;
                     }
-                    nodes[n++] = this.nodes[i];
+                    res[n++] = nodes[i];
                 }
                 i = next[i];
             }
 
-            return (nodes, n);
+            return (res, n);
         }
 
         /// <summary>

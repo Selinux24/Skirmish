@@ -166,7 +166,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Returns portal points between two polygons.
         /// </summary>
-        private static Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
+        public static Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
         {
             left = new();
             right = new();
@@ -494,250 +494,60 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="options">Query options.</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindStraightPath(Vector3 startPos, Vector3 endPos, SimplePath path, int maxStraightPath, StraightPathOptions options, out StraightPath resultPath)
+        public (Status status, StraightPath resultPath) FindStraightPath(Vector3 startPos, Vector3 endPos, SimplePath path, int maxStraightPath, StraightPathOptions options)
         {
-            resultPath = new(maxStraightPath);
+            var vStatus = ValidateFindStraightPathParams(startPos, endPos, path, maxStraightPath, out var closestStartPos, out var closestEndPos);
+            if (vStatus != Status.DT_SUCCESS)
+            {
+                return (Status.DT_FAILURE | Status.DT_INVALID_PARAM, new(maxStraightPath));
+            }
+
+            StraighPathHelper pData = new(path, maxStraightPath, options);
+
+            var sStatus = pData.Initialize(closestStartPos, closestEndPos);
+            if (sStatus != Status.DT_IN_PROGRESS)
+            {
+                return (sStatus, pData.GetResultPath());
+            }
+
+            var cStatus = pData.CalculatePath(this, closestEndPos, endPos);
+
+            return (cStatus, pData.GetResultPath());
+        }
+        /// <summary>
+        /// Validates the find straight path parameters
+        /// </summary>
+        /// <param name="startPos">Path start position.</param>
+        /// <param name="endPos">Path end position.</param>
+        /// <param name="path">An array of polygon references that represent the path corridor.</param>
+        /// <param name="maxStraightPath">The maximum number of points the straight path arrays can hold.</param>
+        /// <param name="closestStartPos">Returns the closest start position</param>
+        /// <param name="closestEndPos">Returns the closest end position</param>
+        private Status ValidateFindStraightPathParams(Vector3 startPos, Vector3 endPos, SimplePath path, int maxStraightPath, out Vector3 closestStartPos, out Vector3 closestEndPos)
+        {
+            closestStartPos = Vector3.Zero;
+            closestEndPos = Vector3.Zero;
 
             if (path == null || path.Count <= 0 || maxStraightPath <= 0 || startPos.IsInfinity() || endPos.IsInfinity())
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            var fpStatus = ClosestPointOnPolyBoundary(path.Start, startPos, out Vector3 closestStartPos);
+            var fpStatus = ClosestPointOnPolyBoundary(path.Start, startPos, out closestStartPos);
             if (fpStatus.HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            var lpStatus = ClosestPointOnPolyBoundary(path.End, endPos, out Vector3 closestEndPos);
+            var lpStatus = ClosestPointOnPolyBoundary(path.End, endPos, out closestEndPos);
             if (lpStatus.HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            // Add start point.
-            var startPStatus = resultPath.AppendVertex(closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Start, maxStraightPath);
-            if (startPStatus != Status.DT_IN_PROGRESS)
-            {
-                return startPStatus;
-            }
-
-            if (path.Count <= 1)
-            {
-                // Ignore status return value as we're just about to return anyway.
-                resultPath.AppendVertex(closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath);
-
-                return Status.DT_SUCCESS | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
-            }
-
-            var portalApex = closestStartPos;
-            var portalLeft = portalApex;
-            var portalRight = portalApex;
-            int apexIndex = 0;
-            int leftIndex = 0;
-            int rightIndex = 0;
-
-            PolyTypes leftPolyType = 0;
-            PolyTypes rightPolyType = 0;
-
-            int leftPolyRef = path.Start;
-            int rightPolyRef = path.Start;
-
-            var pathNodes = path.GetPath();
-
-            int i = 0;
-            while (i < path.Count)
-            {
-                Vector3 left;
-                Vector3 right;
-                PolyTypes toType;
-
-                if (i + 1 < path.Count)
-                {
-                    // Next portal.
-                    var ppStatus = GetPortalPoints(
-                        pathNodes[i],
-                        pathNodes[i + 1],
-                        out left, out right, out _, out toType);
-
-                    if (ppStatus.HasFlag(Status.DT_FAILURE))
-                    {
-                        // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
-                        // Clamp the end point to path[i], and return the path so far.
-
-                        var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
-                        if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
-                        {
-                            // This should only happen when the first polygon is invalid.
-                            return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-                        }
-
-                        // Apeend portals along the current straight path segment.
-                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                        {
-                            // Ignore status return value as we're just about to return anyway.
-                            AppendPortals(
-                                apexIndex, i, closestEndPos, pathNodes, maxStraightPath, options,
-                                ref resultPath);
-                        }
-
-                        // Ignore status return value as we're just about to return anyway.
-                        resultPath.AppendVertex(closestEndPos, 0, pathNodes[i], maxStraightPath);
-
-                        return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
-                    }
-
-                    // If starting really close the portal, advance.
-                    if (i == 0 && Utils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
-                    {
-                        i++;
-                        continue;
-                    }
-                }
-                else
-                {
-                    // End of the path.
-                    left = closestEndPos;
-                    right = closestEndPos;
-
-                    toType = PolyTypes.Ground;
-                }
-
-                // Right vertex.
-                if (Utils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
-                {
-                    if (Utils.VClosest(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
-                    {
-                        portalRight = right;
-                        rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
-                        rightPolyType = toType;
-                        rightIndex = i;
-                    }
-                    else
-                    {
-                        // Append portals along the current straight path segment.
-                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                        {
-                            var appendStatus = AppendPortals(
-                                apexIndex, leftIndex, portalLeft, pathNodes, maxStraightPath, options,
-                                ref resultPath);
-                            if (appendStatus != Status.DT_IN_PROGRESS)
-                            {
-                                return appendStatus;
-                            }
-                        }
-
-                        portalApex = portalLeft;
-                        apexIndex = leftIndex;
-
-                        StraightPathFlagTypes flags = 0;
-                        if (leftPolyRef == 0)
-                        {
-                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
-                        }
-                        else if (leftPolyType == PolyTypes.OffmeshConnection)
-                        {
-                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                        }
-                        int r = leftPolyRef;
-
-                        // Append or update vertex
-                        var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
-                        if (stat != Status.DT_IN_PROGRESS)
-                        {
-                            return stat;
-                        }
-
-                        portalLeft = portalApex;
-                        portalRight = portalApex;
-                        leftIndex = apexIndex;
-                        rightIndex = apexIndex;
-
-                        // Restart
-                        i = apexIndex;
-
-                        i++;
-                        continue;
-                    }
-                }
-
-                // Left vertex.
-                if (Utils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
-                {
-                    if (Utils.VClosest(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
-                    {
-                        portalLeft = left;
-                        leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
-                        leftPolyType = toType;
-                        leftIndex = i;
-                    }
-                    else
-                    {
-                        // Append portals along the current straight path segment.
-                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                        {
-                            var appendStatus = AppendPortals(
-                                apexIndex, rightIndex, portalRight, pathNodes, maxStraightPath, options,
-                                ref resultPath);
-
-                            if (appendStatus != Status.DT_IN_PROGRESS)
-                            {
-                                return appendStatus;
-                            }
-                        }
-
-                        portalApex = portalRight;
-                        apexIndex = rightIndex;
-
-                        StraightPathFlagTypes flags = 0;
-                        if (rightPolyRef == 0)
-                        {
-                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
-                        }
-                        else if (rightPolyType == PolyTypes.OffmeshConnection)
-                        {
-                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                        }
-                        int r = rightPolyRef;
-
-                        // Append or update vertex
-                        var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
-                        if (stat != Status.DT_IN_PROGRESS)
-                        {
-                            return stat;
-                        }
-
-                        portalLeft = portalApex;
-                        portalRight = portalApex;
-                        leftIndex = apexIndex;
-                        rightIndex = apexIndex;
-
-                        // Restart
-                        i = apexIndex;
-                    }
-                }
-
-                i++;
-            }
-
-            // Append portals along the current straight path segment.
-            if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-            {
-                var stat = AppendPortals(
-                    apexIndex, path.Count - 1, closestEndPos, pathNodes, maxStraightPath, options,
-                    ref resultPath);
-
-                if (stat != Status.DT_IN_PROGRESS)
-                {
-                    return stat;
-                }
-            }
-
-            // Ignore status return value as we're just about to return anyway.
-            resultPath.AppendVertex(closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath);
-
-            return Status.DT_SUCCESS | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+            return Status.DT_SUCCESS;
         }
+
         /// <summary>
         /// Intializes a sliced path query.
         /// </summary>
@@ -3479,7 +3289,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Returns portal points between two polygons.
         /// </summary>
-        private Status GetPortalPoints(int from, int to, out Vector3 left, out Vector3 right, out PolyTypes fromType, out PolyTypes toType)
+        public Status GetPortalPoints(int from, int to, out Vector3 left, out Vector3 right, out PolyTypes fromType, out PolyTypes toType)
         {
             left = new();
             right = new();
@@ -3507,7 +3317,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Appends intermediate portal points to a straight path.
         /// </summary>
-        private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, int maxStraightPath, StraightPathOptions options, ref StraightPath straightPath)
+        public Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, int maxStraightPath, StraightPathOptions options, StraightPath straightPath)
         {
             var startPos = straightPath.EndPath;
 
@@ -3837,10 +3647,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 ClosestPointOnPoly(polys.End, end.Pos, out epos, out _);
             }
 
-            FindStraightPath(
+            var (_, straightPath) = FindStraightPath(
                 start.Pos, epos, polys,
-                MAX_POLYS, StraightPathOptions.AllCrossings,
-                out var straightPath);
+                MAX_POLYS, StraightPathOptions.AllCrossings);
 
             resultPath = straightPath.GetPath();
 
@@ -3867,10 +3676,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Find steer target.
             int MAX_STEER_POINTS = 3;
-            FindStraightPath(
+            var (_, steerPath) = FindStraightPath(
                 startPos, endPos, path,
-                MAX_STEER_POINTS, StraightPathOptions.None,
-                out var steerPath);
+                MAX_STEER_POINTS, StraightPathOptions.None);
 
             if (steerPath.Count == 0)
             {

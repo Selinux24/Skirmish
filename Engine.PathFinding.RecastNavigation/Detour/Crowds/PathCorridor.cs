@@ -48,14 +48,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="maxCorners">The maximum number of corners the buffers can hold.</param>
-        /// <param name="cornerPolys">The corner list.</param>
-        public void FindCorners(NavMeshQuery navquery, int maxCorners, out StraightPath cornerPolys)
+        /// <returns>Returns the corner list</returns>
+        public StraightPath FindCorners(NavMeshQuery navquery, int maxCorners)
         {
             float MIN_TARGET_DIST = 0.01f;
 
-            navquery.FindStraightPath(
-                m_pos, m_target, m_path, maxCorners, StraightPathOptions.None,
-                out cornerPolys);
+            var (_, cornerPolys) = navquery.FindStraightPath(
+                m_pos, m_target, m_path, maxCorners, StraightPathOptions.None);
 
             // Prune points in the beginning of the path which are too close.
             while (cornerPolys.Count > 0)
@@ -78,6 +77,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     break;
                 }
             }
+
+            return cornerPolys;
         }
         /// <summary>
         /// Attempts to optimize the path if the specified point is visible from the current position.
