@@ -641,9 +641,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="header">Tile cache layer header</param>
         /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
-        public bool RemoveTileAt(TileCacheLayerHeader header)
+        public void RemoveTileAt(TileCacheLayerHeader header)
         {
-            return RemoveTileAt(header.TX, header.TY, header.TLayer);
+            RemoveTileAt(header.TX, header.TY, header.TLayer);
         }
         /// <summary>
         /// Removes the tile from the navigation mesh
@@ -652,15 +652,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="y">Y coordinate</param>
         /// <param name="layer">Layer number</param>
         /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
-        private bool RemoveTileAt(int x, int y, int layer)
+        private void RemoveTileAt(int x, int y, int layer)
         {
             var meshTile = GetTileAt(x, y, layer);
             if (meshTile == null)
             {
-                return true;
+                return;
             }
 
-            return RemoveTile(meshTile);
+            RemoveTile(meshTile);
         }
 
         /// <summary>
@@ -783,11 +783,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="tile">Tile to remove</param>
         /// <returns>Returns true if the tile was removed</returns>
-        private bool RemoveTile(MeshTile tile)
+        private void RemoveTile(MeshTile tile)
         {
             if (tile == null)
             {
-                return false;
+                return;
             }
 
             // Remove tile from hash lookup.
@@ -826,8 +826,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Add to free list.
             tile.Next = m_nextFree;
             m_nextFree = tile;
-
-            return true;
         }
         /// <summary>
         /// Removes all the tiles in the coordinates
@@ -835,20 +833,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <returns>Returns true if all the tiles were removed or if the tiles not exists at all</returns>
-        private bool RemoveTiles(int x, int y)
+        private void RemoveTiles(int x, int y)
         {
-            bool res = true;
-
             var tiles = GetTilesAt(x, y, 32);
             foreach (var t in tiles)
             {
-                if (!RemoveTile(t))
-                {
-                    res = false;
-                }
+                RemoveTile(t);
             }
-
-            return res;
         }
         /// <summary>
         /// Removes the tile from the lookup

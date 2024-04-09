@@ -694,21 +694,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
-        private bool BuildTilesAt(int x, int y)
+        private void BuildTilesAt(int x, int y)
         {
             // Get all tiles
             var tiles = GetTilesAt(x, y, 0);
-
-            bool res = true;
             foreach (var tile in tiles)
             {
-                if (!BuildTile(tile))
-                {
-                    res = false;
-                }
+                BuildTile(tile);
             }
-
-            return res;
         }
         /// <summary>
         /// Builds the specified tile
