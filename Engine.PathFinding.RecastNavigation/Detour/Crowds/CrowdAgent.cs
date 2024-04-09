@@ -20,7 +20,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Neightbour list
         /// </summary>
-        private readonly List<CrowdNeighbour> neighbours = new();
+        private readonly List<CrowdNeighbour> neighbours = [];
 
         /// <summary>
         /// True if the agent is active, false if the agent is in an unused slot in the agent pool.
@@ -37,11 +37,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The path corridor the agent is using.
         /// </summary>
-        public PathCorridor Corridor { get; private set; } = new PathCorridor();
+        public PathCorridor Corridor { get; private set; } = new();
         /// <summary>
         /// The local boundary data for the agent.
         /// </summary>
-        public LocalBoundary Boundary { get; private set; } = new LocalBoundary();
+        public LocalBoundary Boundary { get; private set; } = new();
         /// <summary>
         /// Time since the agent's path corridor was optimized.
         /// </summary>
@@ -75,12 +75,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The agent's configuration parameters.
         /// </summary>
-        public CrowdAgentParameters Params { get; set; } = new CrowdAgentParameters();
+        public CrowdAgentParameters Params { get; set; } = new();
 
         /// <summary>
         /// The local path corridor corners for the agent.
         /// </summary>
-        public StraightPath Corners { get; private set; } = new StraightPath(DT_CROWDAGENT_MAX_CORNERS);
+        public StraightPath Corners { get; private set; } = new(DT_CROWDAGENT_MAX_CORNERS);
 
         /// <summary>
         /// State of the movement request.
@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public IEnumerable<CrowdNeighbour> GetNeighbours()
         {
-            return neighbours.ToArray();
+            return [.. neighbours];
         }
         /// <summary>
         /// Adds new neighbour to list, based on distance (nearest first)
@@ -401,7 +401,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Corridor.FindCorners(
                 query,
                 DT_CROWDAGENT_MAX_CORNERS,
-                out StraightPath straightPath);
+                out var straightPath);
 
             Corners = straightPath.Copy();
 

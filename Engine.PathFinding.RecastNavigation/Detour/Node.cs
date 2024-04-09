@@ -34,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Polygon ref the node corresponds to.
         /// </summary>
-        public int Id { get; set; }
+        public int Ref { get; set; }
         /// <summary>
         /// Gets whether the node is open or not
         /// </summary>
@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             get
             {
-                return (Flags & NodeFlagTypes.Open) != 0;
+                return Flags.HasFlag(NodeFlagTypes.Open);
             }
         }
         /// <summary>
@@ -52,8 +52,46 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             get
             {
-                return (Flags & NodeFlagTypes.Closed) != 0;
+                return Flags.HasFlag(NodeFlagTypes.Closed);
             }
+        }
+
+        /// <summary>
+        /// Clears the node flag
+        /// </summary>
+        public void Clear()
+        {
+            Flags = NodeFlagTypes.None;
+        }
+        /// <summary>
+        /// Removes the opened state
+        /// </summary>
+        public void RemoveOpened()
+        {
+            Flags &= ~NodeFlagTypes.Open;
+        }
+        /// <summary>
+        /// Sets the opened state
+        /// </summary>
+        public void SetOpened()
+        {
+            Flags &= ~NodeFlagTypes.Closed;
+            Flags |= NodeFlagTypes.Open;
+        }
+        /// <summary>
+        /// Removes de closed state
+        /// </summary>
+        public void RemoveClosed()
+        {
+            Flags &= ~NodeFlagTypes.Closed;
+        }
+        /// <summary>
+        /// Sets the closed state
+        /// </summary>
+        public void SetClosed()
+        {
+            Flags &= ~NodeFlagTypes.Open;
+            Flags |= NodeFlagTypes.Closed;
         }
     }
 }

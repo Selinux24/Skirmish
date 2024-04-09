@@ -2,14 +2,16 @@
 using System;
 using System.Linq;
 
-namespace Engine.PathFinding.RecastNavigation
+namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Straight path
     /// </summary>
-    public class StraightPath
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="maxStraightPath">Maximum path count</param>
+    public class StraightPath(int maxStraightPath = StraightPath.MaxStraightPath)
     {
         /// <summary>
         /// Maximum nodes
@@ -19,19 +21,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Maximum path elements
         /// </summary>
-        private readonly int maxSize;
+        private readonly int maxSize = maxStraightPath;
         /// <summary>
         /// Path position list
         /// </summary>
-        private Vector3[] pathPositions;
+        private Vector3[] pathPositions = new Vector3[maxStraightPath];
         /// <summary>
         /// Path flags
         /// </summary>
-        private StraightPathFlagTypes[] pathFlags;
+        private StraightPathFlagTypes[] pathFlags = new StraightPathFlagTypes[maxStraightPath];
         /// <summary>
         /// Path references
         /// </summary>
-        private int[] pathRefs;
+        private int[] pathRefs = new int[maxStraightPath];
 
         /// <summary>
         /// Start position value
@@ -96,27 +98,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Position count
         /// </summary>
-        public int Count { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public StraightPath() : this(MaxStraightPath)
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="maxStraightPath">Maximum path count</param>
-        public StraightPath(int maxStraightPath)
-        {
-            maxSize = maxStraightPath;
-            pathPositions = new Vector3[maxStraightPath];
-            pathFlags = new StraightPathFlagTypes[maxStraightPath];
-            pathRefs = new int[maxStraightPath];
-            Count = 0;
-        }
+        public int Count { get; private set; } = 0;
 
         /// <summary>
         /// Gets the current path
@@ -252,11 +234,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a new instance</returns>
         public StraightPath Copy()
         {
-            return new StraightPath
+            return new()
             {
-                pathPositions = pathPositions.ToArray(),
-                pathFlags = pathFlags.ToArray(),
-                pathRefs = pathRefs.ToArray(),
+                pathPositions = [.. pathPositions],
+                pathFlags = [.. pathFlags],
+                pathRefs = [.. pathRefs],
                 Count = Count,
             };
         }

@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             get
             {
-                return new TileRef();
+                return new();
             }
         }
 
@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="parentRef">Parent reference</param>
         /// <param name="navMesh">Navigation mesh</param>
         /// <param name="nodePool">Node pool</param>
-        public readonly IEnumerable<(int Ref, TileRef TileRef, Node NeighbourNode)> ItearatePolygonLinks(QueryFilter filter, int parentRef, NavMesh navMesh, NodePool nodePool)
+        public readonly IEnumerable<(TileRef TileRef, Node Node)> ItearatePolygonLinks(QueryFilter filter, TileRef parent, NavMesh navMesh, NodePool nodePool)
         {
             for (int i = Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = Tile.Links[i].Next)
             {
@@ -55,7 +55,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Do not expand back to where we came from.
-                if (neighbourRef == parentRef)
+                if (neighbourRef == parent.Ref)
                 {
                     continue;
                 }
@@ -77,9 +77,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // get the node
-                var neighbourNode = nodePool.GetNode(neighbourRef, crossSide);
+                var neighbourNode = nodePool.AllocateNode(neighbourRef, crossSide);
 
-                yield return (neighbourRef, neighbour, neighbourNode);
+                yield return (neighbour, neighbourNode);
             }
         }
     }

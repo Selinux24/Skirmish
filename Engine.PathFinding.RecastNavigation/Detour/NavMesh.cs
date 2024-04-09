@@ -1018,7 +1018,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the tile descriptor for the node</returns>
         public TileRef GetTileAndPolyByNode(Node node)
         {
-            TileRef res = GetTileAndPolyByRef(node.Id);
+            TileRef res = GetTileAndPolyByRef(node.Ref);
             res.Node = node;
             return res;
         }
@@ -1029,7 +1029,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the tile descriptor for the node</returns>
         public TileRef GetTileAndPolyByNodeUnsafe(Node node)
         {
-            TileRef res = GetTileAndPolyByRefUnsafe(node.Id);
+            TileRef res = GetTileAndPolyByRefUnsafe(node.Ref);
             res.Node = node;
             return res;
         }

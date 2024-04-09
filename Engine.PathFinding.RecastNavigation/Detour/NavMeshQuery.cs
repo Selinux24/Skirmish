@@ -77,14 +77,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             m_nav = nav;
 
-            if (m_nodePool == null || m_nodePool.GetMaxNodes() < maxNodes)
+            if (m_nodePool == null || m_nodePool.MaxNodes < maxNodes)
             {
-                if (m_nodePool != null)
-                {
-                    m_nodePool.Dispose();
-                    m_nodePool = null;
-                }
-
                 m_nodePool = new NodePool(maxNodes, Helper.NextPowerOfTwo(maxNodes / 4));
             }
             else
@@ -140,8 +134,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (disposing)
             {
-                m_nodePool?.Dispose();
-                m_tinyNodePool?.Dispose();
                 m_openList?.Dispose();
             }
         }
@@ -299,8 +291,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            var startNode = m_nodePool.GetNode(start.Ref, 0);
-            startNode.Id = start.Ref;
+            var startNode = m_nodePool.AllocateNode(start.Ref, 0);
+            startNode.Ref = start.Ref;
             startNode.Pos = start.Pos;
             startNode.Flags = NodeFlagTypes.Open;
             startNode.PIdx = 0;
@@ -317,122 +309,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Remove node from open list and put it in closed list.
                 var bestNode = m_openList.Pop();
-                bestNode.Flags &= ~NodeFlagTypes.Open;
-                bestNode.Flags |= NodeFlagTypes.Closed;
+                bestNode.SetClosed();
 
                 // Reached the goal, stop searching.
-                if (bestNode.Id == end.Ref)
+                if (bestNode.Ref == end.Ref)
                 {
                     lastBestNode = bestNode;
                     break;
                 }
 
-                // Get current poly and tile.
-                // The API input has been cheked already, skip checking internal data.
-                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Id);
-
-                // Get parent poly and tile.
-                int parentRef = 0;
-                TileRef parent = TileRef.Null;
-                if (bestNode.PIdx != 0)
+                Status pStatus = ProcessOpenList(filter, end, bestNode, ref lastBestNode, ref lastBestNodeCost, out outOfNodes);
+                if (pStatus == Status.DT_IN_PROGRESS)
                 {
-                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
-                }
-                if (parentRef != 0)
-                {
-                    parent = m_nav.GetTileAndPolyByRefUnsafe(parentRef);
+                    continue;
                 }
 
-                foreach (var (neighbourRef, neighbour, neighbourNode) in best.ItearatePolygonLinks(filter, parentRef, m_nav, m_nodePool))
-                {
-                    if (neighbourNode == null)
-                    {
-                        outOfNodes = true;
-                        continue;
-                    }
-
-                    // If the node is visited the first time, calculate node position.
-                    if (neighbourNode.Flags == NodeFlagTypes.None)
-                    {
-                        var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
-
-                        if (midPointRes != Status.DT_SUCCESS)
-                        {
-                            Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
-                            return midPointRes;
-                        }
-
-                        neighbourNode.Pos = pos;
-                    }
-
-                    // Calculate cost and heuristic.
-                    float cost;
-                    float heuristic;
-
-                    // Special case for last node.
-                    if (neighbourRef == end.Ref)
-                    {
-                        // Cost
-                        float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
-                        float endCost = filter.GetCost(neighbourNode.Pos, end.Pos, best, neighbour, TileRef.Null);
-
-                        cost = bestNode.Cost + curCost + endCost;
-                        heuristic = 0;
-                    }
-                    else
-                    {
-                        // Cost
-                        float curCost = filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
-
-                        cost = bestNode.Cost + curCost;
-                        heuristic = Vector3.Distance(neighbourNode.Pos, end.Pos) * H_SCALE;
-                    }
-
-                    float total = cost + heuristic;
-
-                    // The node is already in open list and the new result is worse, skip.
-                    if (neighbourNode.IsOpen && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-
-                    // The node is already visited and process, and the new result is worse, skip.
-                    if (neighbourNode.IsClosed && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-
-                    // Add or update the node.
-                    neighbourNode.PIdx = m_nodePool.GetNodeIdx(bestNode);
-                    neighbourNode.Id = neighbourRef;
-                    neighbourNode.Flags &= ~NodeFlagTypes.Closed;
-                    neighbourNode.Cost = cost;
-                    neighbourNode.Total = total;
-
-                    if (neighbourNode.IsOpen)
-                    {
-                        // Already in open, update node location.
-                        m_openList.Modify(neighbourNode);
-                    }
-                    else
-                    {
-                        // Put the node in open list.
-                        neighbourNode.Flags |= NodeFlagTypes.Open;
-                        m_openList.Push(neighbourNode);
-                    }
-
-                    // Update nearest node to target so far.
-                    if (heuristic < lastBestNodeCost)
-                    {
-                        lastBestNodeCost = heuristic;
-                        lastBestNode = neighbourNode;
-                    }
-                }
+                return pStatus;
             }
 
             Status status = GetPathToNode(lastBestNode, maxPath, out resultPath);
 
-            if (lastBestNode.Id != end.Ref)
+            if (lastBestNode.Ref != end.Ref)
             {
                 status |= Status.DT_PARTIAL_RESULT;
             }
@@ -444,6 +341,149 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return status;
         }
+        /// <summary>
+        /// Process open list
+        /// </summary>
+        /// <param name="filter">Query filter</param>
+        /// <param name="target">Target point</param>
+        /// <param name="bestNode">Best node</param>
+        /// <param name="lastBestNode">Updates the last best node</param>
+        /// <param name="lastBestNodeCost">Updates the last best node cost</param>
+        /// <param name="outOfNodes">Returns whether the path is out of nodes</param>
+        /// <returns>Process results</returns>
+        private Status ProcessOpenList(QueryFilter filter, PathPoint target, Node bestNode, ref Node lastBestNode, ref float lastBestNodeCost, out bool outOfNodes)
+        {
+            outOfNodes = false;
+
+            // Get current poly and tile.
+            // The API input has been cheked already, skip checking internal data.
+            var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Ref);
+
+            // Get parent poly and tile.
+            TileRef parent = GetParentTileRef(bestNode);
+
+            foreach (var (neighbour, neighbourNode) in best.ItearatePolygonLinks(filter, parent, m_nav, m_nodePool))
+            {
+                if (neighbourNode == null)
+                {
+                    outOfNodes = true;
+                    continue;
+                }
+
+                // If the node is visited the first time, calculate node position.
+                if (neighbourNode.Flags == NodeFlagTypes.None)
+                {
+                    var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
+                    if (midPointRes != Status.DT_SUCCESS)
+                    {
+                        Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
+                        return midPointRes;
+                    }
+
+                    neighbourNode.Pos = pos;
+                }
+
+                // Calculate cost and heuristic.
+                var (isBest, heuristic) = CalculateCostAndHeuristics(filter, target, bestNode, neighbourNode, parent, best, neighbour);
+                if (!isBest)
+                {
+                    continue;
+                }
+
+                // Update nearest node to target so far.
+                if (heuristic < lastBestNodeCost)
+                {
+                    lastBestNodeCost = heuristic;
+                    lastBestNode = neighbourNode;
+                }
+            }
+
+            return Status.DT_IN_PROGRESS;
+        }
+        /// <summary>
+        /// Calculates cost and heuristics
+        /// </summary>
+        /// <param name="filter">Query filter</param>
+        /// <param name="target">Target point</param>
+        /// <param name="pa">Current node</param>
+        /// <param name="pb">Next node</param>
+        /// <param name="prev">Previuos tile</param>
+        /// <param name="cur">Current tile</param>
+        /// <param name="next">Next tile</param>
+        /// <returns>Returns whether the next node has best cost, and the heuristics value</returns>
+        private (bool isBest, float heuristic) CalculateCostAndHeuristics(QueryFilter filter, PathPoint target, Node pa, Node pb, TileRef prev, TileRef cur, TileRef next)
+        {
+            float curCost = filter.GetCost(pa.Pos, pb.Pos, prev, cur, next);
+            float cost = pa.Cost + curCost;
+            float heuristic = Vector3.Distance(pb.Pos, target.Pos) * H_SCALE;
+
+            if (next.Ref == target.Ref)
+            {
+                // Special case for last node.
+                float endCost = filter.GetCost(pb.Pos, target.Pos, cur, next, TileRef.Null);
+
+                // Cost
+                cost += endCost;
+                heuristic = 0;
+            }
+
+            float total = cost + heuristic;
+
+            // The node is already in open list and the new result is worse, skip.
+            if (pb.IsOpen && total >= pb.Total)
+            {
+                return (false, 0);
+            }
+
+            // The node is already visited and process, and the new result is worse, skip.
+            if (pb.IsClosed && total >= pb.Total)
+            {
+                return (false, 0);
+            }
+
+            // Add or update the node.
+            pb.PIdx = m_nodePool.GetNodeIdx(pa);
+            pb.Ref = next.Ref;
+            pb.Cost = cost;
+            pb.Total = total;
+            pb.RemoveClosed();
+
+            if (pb.IsOpen)
+            {
+                // Already in open, update node location.
+                m_openList.Modify(pb);
+            }
+            else
+            {
+                // Put the node in open list.
+                pb.SetOpened();
+                m_openList.Push(pb);
+            }
+
+            return (true, heuristic);
+        }
+        /// <summary>
+        /// Gets the parent tile reference of the specified node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns the parent tile reference</returns>
+        private TileRef GetParentTileRef(Node node)
+        {
+            // Get parent poly and tile.
+            if (node.PIdx == 0)
+            {
+                return TileRef.Null;
+            }
+
+            int parentRef = m_nodePool.GetNodeAtIdx(node.PIdx).Ref;
+            if (parentRef == 0)
+            {
+                return TileRef.Null;
+            }
+
+            return m_nav.GetTileAndPolyByRefUnsafe(parentRef);
+        }
+
         /// <summary>
         /// Finds the straight path from the start to the end position within the polygon corridor.
         /// </summary>
@@ -482,209 +522,214 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return startPStatus;
             }
 
-            if (path.Count > 1)
+            if (path.Count <= 1)
             {
-                var portalApex = closestStartPos;
-                var portalLeft = portalApex;
-                var portalRight = portalApex;
-                int apexIndex = 0;
-                int leftIndex = 0;
-                int rightIndex = 0;
+                // Ignore status return value as we're just about to return anyway.
+                resultPath.AppendVertex(closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath);
 
-                PolyTypes leftPolyType = 0;
-                PolyTypes rightPolyType = 0;
+                return Status.DT_SUCCESS | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+            }
 
-                int leftPolyRef = path.Start;
-                int rightPolyRef = path.Start;
+            var portalApex = closestStartPos;
+            var portalLeft = portalApex;
+            var portalRight = portalApex;
+            int apexIndex = 0;
+            int leftIndex = 0;
+            int rightIndex = 0;
 
-                var pathNodes = path.GetPath();
+            PolyTypes leftPolyType = 0;
+            PolyTypes rightPolyType = 0;
 
-                int i = 0;
-                while (i < path.Count)
+            int leftPolyRef = path.Start;
+            int rightPolyRef = path.Start;
+
+            var pathNodes = path.GetPath();
+
+            int i = 0;
+            while (i < path.Count)
+            {
+                Vector3 left;
+                Vector3 right;
+                PolyTypes toType;
+
+                if (i + 1 < path.Count)
                 {
-                    Vector3 left;
-                    Vector3 right;
-                    PolyTypes toType;
+                    // Next portal.
+                    var ppStatus = GetPortalPoints(
+                        pathNodes[i],
+                        pathNodes[i + 1],
+                        out left, out right, out _, out toType);
 
-                    if (i + 1 < path.Count)
+                    if (ppStatus.HasFlag(Status.DT_FAILURE))
                     {
-                        // Next portal.
-                        var ppStatus = GetPortalPoints(
-                            pathNodes[i],
-                            pathNodes[i + 1],
-                            out left, out right, out _, out toType);
+                        // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
+                        // Clamp the end point to path[i], and return the path so far.
 
-                        if (ppStatus.HasFlag(Status.DT_FAILURE))
+                        var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
+                        if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
                         {
-                            // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
-                            // Clamp the end point to path[i], and return the path so far.
+                            // This should only happen when the first polygon is invalid.
+                            return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                        }
 
-                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
-                            if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
-                            {
-                                // This should only happen when the first polygon is invalid.
-                                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-                            }
-
-                            // Apeend portals along the current straight path segment.
-                            if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                            {
-                                // Ignore status return value as we're just about to return anyway.
-                                AppendPortals(
-                                    apexIndex, i, closestEndPos, pathNodes, maxStraightPath, options,
-                                    ref resultPath);
-                            }
-
+                        // Apeend portals along the current straight path segment.
+                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
+                        {
                             // Ignore status return value as we're just about to return anyway.
-                            resultPath.AppendVertex(closestEndPos, 0, pathNodes[i], maxStraightPath);
-
-                            return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+                            AppendPortals(
+                                apexIndex, i, closestEndPos, pathNodes, maxStraightPath, options,
+                                ref resultPath);
                         }
 
-                        // If starting really close the portal, advance.
-                        if (i == 0 && Utils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
-                        {
-                            i++;
-                            continue;
-                        }
+                        // Ignore status return value as we're just about to return anyway.
+                        resultPath.AppendVertex(closestEndPos, 0, pathNodes[i], maxStraightPath);
+
+                        return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+                    }
+
+                    // If starting really close the portal, advance.
+                    if (i == 0 && Utils.DistancePtSegSqr2D(portalApex, left, right) < (0.001f * 0.001f))
+                    {
+                        i++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    // End of the path.
+                    left = closestEndPos;
+                    right = closestEndPos;
+
+                    toType = PolyTypes.Ground;
+                }
+
+                // Right vertex.
+                if (Utils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
+                {
+                    if (Utils.VClosest(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
+                    {
+                        portalRight = right;
+                        rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
+                        rightPolyType = toType;
+                        rightIndex = i;
                     }
                     else
                     {
-                        // End of the path.
-                        left = closestEndPos;
-                        right = closestEndPos;
+                        // Append portals along the current straight path segment.
+                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
+                        {
+                            var appendStatus = AppendPortals(
+                                apexIndex, leftIndex, portalLeft, pathNodes, maxStraightPath, options,
+                                ref resultPath);
+                            if (appendStatus != Status.DT_IN_PROGRESS)
+                            {
+                                return appendStatus;
+                            }
+                        }
 
-                        toType = PolyTypes.Ground;
+                        portalApex = portalLeft;
+                        apexIndex = leftIndex;
+
+                        StraightPathFlagTypes flags = 0;
+                        if (leftPolyRef == 0)
+                        {
+                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
+                        }
+                        else if (leftPolyType == PolyTypes.OffmeshConnection)
+                        {
+                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
+                        }
+                        int r = leftPolyRef;
+
+                        // Append or update vertex
+                        var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
+                        if (stat != Status.DT_IN_PROGRESS)
+                        {
+                            return stat;
+                        }
+
+                        portalLeft = portalApex;
+                        portalRight = portalApex;
+                        leftIndex = apexIndex;
+                        rightIndex = apexIndex;
+
+                        // Restart
+                        i = apexIndex;
+
+                        i++;
+                        continue;
                     }
-
-                    // Right vertex.
-                    if (Utils.TriArea2D(portalApex, portalRight, right) <= 0.0f)
-                    {
-                        if (Utils.VClosest(portalApex, portalRight) || Utils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
-                        {
-                            portalRight = right;
-                            rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
-                            rightPolyType = toType;
-                            rightIndex = i;
-                        }
-                        else
-                        {
-                            // Append portals along the current straight path segment.
-                            if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                            {
-                                var appendStatus = AppendPortals(
-                                    apexIndex, leftIndex, portalLeft, pathNodes, maxStraightPath, options,
-                                    ref resultPath);
-                                if (appendStatus != Status.DT_IN_PROGRESS)
-                                {
-                                    return appendStatus;
-                                }
-                            }
-
-                            portalApex = portalLeft;
-                            apexIndex = leftIndex;
-
-                            StraightPathFlagTypes flags = 0;
-                            if (leftPolyRef == 0)
-                            {
-                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
-                            }
-                            else if (leftPolyType == PolyTypes.OffmeshConnection)
-                            {
-                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                            }
-                            int r = leftPolyRef;
-
-                            // Append or update vertex
-                            var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
-                            if (stat != Status.DT_IN_PROGRESS)
-                            {
-                                return stat;
-                            }
-
-                            portalLeft = portalApex;
-                            portalRight = portalApex;
-                            leftIndex = apexIndex;
-                            rightIndex = apexIndex;
-
-                            // Restart
-                            i = apexIndex;
-
-                            i++;
-                            continue;
-                        }
-                    }
-
-                    // Left vertex.
-                    if (Utils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
-                    {
-                        if (Utils.VClosest(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
-                        {
-                            portalLeft = left;
-                            leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
-                            leftPolyType = toType;
-                            leftIndex = i;
-                        }
-                        else
-                        {
-                            // Append portals along the current straight path segment.
-                            if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
-                            {
-                                var appendStatus = AppendPortals(
-                                    apexIndex, rightIndex, portalRight, pathNodes, maxStraightPath, options,
-                                    ref resultPath);
-
-                                if (appendStatus != Status.DT_IN_PROGRESS)
-                                {
-                                    return appendStatus;
-                                }
-                            }
-
-                            portalApex = portalRight;
-                            apexIndex = rightIndex;
-
-                            StraightPathFlagTypes flags = 0;
-                            if (rightPolyRef == 0)
-                            {
-                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
-                            }
-                            else if (rightPolyType == PolyTypes.OffmeshConnection)
-                            {
-                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                            }
-                            int r = rightPolyRef;
-
-                            // Append or update vertex
-                            var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
-                            if (stat != Status.DT_IN_PROGRESS)
-                            {
-                                return stat;
-                            }
-
-                            portalLeft = portalApex;
-                            portalRight = portalApex;
-                            leftIndex = apexIndex;
-                            rightIndex = apexIndex;
-
-                            // Restart
-                            i = apexIndex;
-                        }
-                    }
-
-                    i++;
                 }
 
-                // Append portals along the current straight path segment.
-                if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
+                // Left vertex.
+                if (Utils.TriArea2D(portalApex, portalLeft, left) >= 0.0f)
                 {
-                    var stat = AppendPortals(
-                        apexIndex, path.Count - 1, closestEndPos, pathNodes, maxStraightPath, options,
-                        ref resultPath);
-
-                    if (stat != Status.DT_IN_PROGRESS)
+                    if (Utils.VClosest(portalApex, portalLeft) || Utils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                     {
-                        return stat;
+                        portalLeft = left;
+                        leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
+                        leftPolyType = toType;
+                        leftIndex = i;
                     }
+                    else
+                    {
+                        // Append portals along the current straight path segment.
+                        if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
+                        {
+                            var appendStatus = AppendPortals(
+                                apexIndex, rightIndex, portalRight, pathNodes, maxStraightPath, options,
+                                ref resultPath);
+
+                            if (appendStatus != Status.DT_IN_PROGRESS)
+                            {
+                                return appendStatus;
+                            }
+                        }
+
+                        portalApex = portalRight;
+                        apexIndex = rightIndex;
+
+                        StraightPathFlagTypes flags = 0;
+                        if (rightPolyRef == 0)
+                        {
+                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
+                        }
+                        else if (rightPolyType == PolyTypes.OffmeshConnection)
+                        {
+                            flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
+                        }
+                        int r = rightPolyRef;
+
+                        // Append or update vertex
+                        var stat = resultPath.AppendVertex(portalApex, flags, r, maxStraightPath);
+                        if (stat != Status.DT_IN_PROGRESS)
+                        {
+                            return stat;
+                        }
+
+                        portalLeft = portalApex;
+                        portalRight = portalApex;
+                        leftIndex = apexIndex;
+                        rightIndex = apexIndex;
+
+                        // Restart
+                        i = apexIndex;
+                    }
+                }
+
+                i++;
+            }
+
+            // Append portals along the current straight path segment.
+            if ((options & (StraightPathOptions.AreaCrossings | StraightPathOptions.AllCrossings)) != 0)
+            {
+                var stat = AppendPortals(
+                    apexIndex, path.Count - 1, closestEndPos, pathNodes, maxStraightPath, options,
+                    ref resultPath);
+
+                if (stat != Status.DT_IN_PROGRESS)
+                {
+                    return stat;
                 }
             }
 
@@ -747,12 +792,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            var startNode = m_nodePool.GetNode(start.Ref, 0);
+            var startNode = m_nodePool.AllocateNode(start.Ref, 0);
             startNode.Pos = start.Pos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = Vector3.Distance(start.Pos, end.Pos) * H_SCALE;
-            startNode.Id = start.Ref;
+            startNode.Ref = start.Ref;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
@@ -795,7 +840,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 bestNode.Flags |= NodeFlagTypes.Closed;
 
                 // Reached the goal, stop searching.
-                if (bestNode.Id == m_query.EndRef)
+                if (bestNode.Ref == m_query.EndRef)
                 {
                     m_query.LastBestNode = bestNode;
                     Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
@@ -855,12 +900,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 parentNode = m_nodePool.GetNodeAtIdx(node.PIdx);
                 if (parentNode.PIdx != 0)
                 {
-                    grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
+                    grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Ref;
                 }
             }
 
             TileRef parent = TileRef.Null;
-            if (parentNode?.Id > 0)
+            if (parentNode?.Ref > 0)
             {
                 parent = m_nav.GetTileAndPolyByNode(parentNode);
                 if (parent.Ref == 0 || (grandpaRef.HasValue && !m_nav.IsValidPolyRef(grandpaRef.Value)))
@@ -880,7 +925,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private bool UseLOS(Node parentNode, Node node)
         {
             if ((m_query.Options & FindPathOptions.AnyAngle) != 0 &&
-                ((parentNode?.Id ?? 0) != 0) &&
+                ((parentNode?.Ref ?? 0) != 0) &&
                 (Vector3.DistanceSquared(parentNode.Pos, node.Pos) < m_query.RaycastLimitSqr))
             {
                 return true;
@@ -906,7 +951,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 int neighbourRef = best.Tile.Links[i].NRef;
 
                 // Skip invalid ids and do not expand back to where we came from.
-                if (neighbourRef == 0 || neighbourRef == parentNode?.Id)
+                if (neighbourRef == 0 || neighbourRef == parentNode?.Ref)
                 {
                     continue;
                 }
@@ -921,7 +966,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // get the neighbor node
-                Node neighbourNode = m_nodePool.GetNode(neighbourRef, 0);
+                Node neighbourNode = m_nodePool.AllocateNode(neighbourRef, 0);
                 if (neighbourNode == null)
                 {
                     m_query.Status |= Status.DT_OUT_OF_NODES;
@@ -992,7 +1037,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Add or update the node.
             neighbour.Node.PIdx = foundShortCut ? best.Node.PIdx : m_nodePool.GetNodeIdx(best.Node);
-            neighbour.Node.Id = neighbour.Ref;
+            neighbour.Node.Ref = neighbour.Ref;
             neighbour.Node.Flags = neighbour.Node.Flags & ~(NodeFlagTypes.Closed | NodeFlagTypes.ParentDetached);
             neighbour.Node.Cost = cost;
             neighbour.Node.Total = total;
@@ -1133,7 +1178,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else
             {
                 // Reverse the path.
-                if (m_query.LastBestNode.Id != m_query.EndRef)
+                if (m_query.LastBestNode.Ref != m_query.EndRef)
                 {
                     m_query.Status |= Status.DT_PARTIAL_RESULT;
                 }
@@ -1189,7 +1234,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Node node = null;
                 for (int i = existing.Length - 1; i >= 0; --i)
                 {
-                    m_nodePool.FindNodes(existing[i], 1, out Node[] nodes);
+                    var (nodes, _) = m_nodePool.FindNodes(existing[i], 1);
                     if (nodes != null)
                     {
                         node = nodes[0];
@@ -1272,7 +1317,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             node = prev;
             do
             {
-                if (!visited.Add(node.Id))
+                if (!visited.Add(node.Ref))
                 {
                     return false;
                 }
@@ -1332,7 +1377,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var request = new RaycastRequest
                 {
-                    StartRef = node.Id,
+                    StartRef = node.Ref,
                     StartPos = node.Pos,
                     EndPos = next.Pos,
                     Filter = m_query.Filter,
@@ -1347,14 +1392,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // raycast ends on poly boundary and the path might include the next poly boundary.
-                if (pathList.Count > 0 && pathList[^1] == next.Id)
+                if (pathList.Count > 0 && pathList[^1] == next.Ref)
                 {
                     pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
                 }
             }
             else
             {
-                pathList.Add(node.Id);
+                pathList.Add(node.Ref);
 
                 if (pathList.Count >= maxPath)
                 {
@@ -1394,12 +1439,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            var startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.AllocateNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
@@ -1415,14 +1460,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Id);
+                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Ref);
 
                 // Get parent poly and tile.
                 int parentRef = 0;
                 var parent = TileRef.Null;
                 if (bestNode.PIdx != 0)
                 {
-                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
+                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Ref;
                 }
                 if (parentRef != 0)
                 {
@@ -1490,12 +1535,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             centerPos *= 1.0f / verts.Length;
 
-            var startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.AllocateNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
@@ -1511,14 +1556,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Id);
+                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Ref);
 
                 // Get parent poly and tile.
                 int parentRef = 0;
                 var parent = TileRef.Null;
                 if (bestNode.PIdx != 0)
                 {
-                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
+                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Ref;
                 }
                 if (parentRef != 0)
                 {
@@ -1614,7 +1659,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Get the node
-            neighbour.Node = m_nodePool.GetNode(neighbour.Ref, 0);
+            neighbour.Node = m_nodePool.AllocateNode(neighbour.Ref, 0);
             if (neighbour.Node == null)
             {
                 outOfNodes = true;
@@ -1642,7 +1687,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            neighbour.Node.Id = neighbour.Ref;
+            neighbour.Node.Ref = neighbour.Ref;
             neighbour.Node.PIdx = m_nodePool.GetNodeIdx(best.Node);
             neighbour.Node.Total = total;
 
@@ -1682,7 +1727,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            if (m_nodePool.FindNodes(endRef, 1, out var endNodes) != 1 || (endNodes[0].Flags & NodeFlagTypes.Closed) == 0)
+            var (endNodes, nEndNodes) = m_nodePool.FindNodes(endRef, 1);
+            if (nEndNodes != 1 || (endNodes[0].Flags & NodeFlagTypes.Closed) == 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1795,9 +1841,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             m_tinyNodePool.Clear();
 
-            Node startNode = m_tinyNodePool.GetNode(startRef, 0);
+            Node startNode = m_tinyNodePool.AllocateNode(startRef, 0);
             startNode.PIdx = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Closed;
             stack[nstack++] = startNode;
 
@@ -1811,7 +1857,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int n = 0;
             if (n < maxResult)
             {
-                result.Refs[n] = startNode.Id;
+                result.Refs[n] = startNode.Ref;
                 result.Parents[n] = 0;
                 ++n;
             }
@@ -1832,7 +1878,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var cur = m_nav.GetTileAndPolyByRefUnsafe(curNode.Id);
+                var cur = m_nav.GetTileAndPolyByRefUnsafe(curNode.Ref);
 
                 for (int i = cur.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
                 {
@@ -1845,7 +1891,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // Skip if cannot alloca more nodes.
-                    var neighbourNode = m_tinyNodePool.GetNode(neighbourRef, 0);
+                    var neighbourNode = m_tinyNodePool.AllocateNode(neighbourRef, 0);
                     if (neighbourNode == null)
                     {
                         continue;
@@ -1993,11 +2039,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             m_tinyNodePool.Clear();
 
-            var startNode = m_tinyNodePool.GetNode(startRef, 0);
+            var startNode = m_tinyNodePool.AllocateNode(startRef, 0);
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Closed;
 
             stack.Add(startNode);
@@ -2019,7 +2065,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var cur = m_nav.GetTileAndPolyByRefUnsafe(curNode.Id);
+                var cur = m_nav.GetTileAndPolyByRefUnsafe(curNode.Ref);
 
                 // Collect vertices.
                 var verts = cur.Tile.GetPolyVerts(cur.Poly);
@@ -2085,7 +2131,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         foreach (var nei in neis)
                         {
                             // Skip if no node can be allocated.
-                            var neighbourNode = m_tinyNodePool.GetNode(nei, 0);
+                            var neighbourNode = m_tinyNodePool.AllocateNode(nei, 0);
                             if (neighbourNode == null)
                             {
                                 continue;
@@ -2417,12 +2463,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            var startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.AllocateNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Open;
             m_openList.Push(startNode);
 
@@ -2438,13 +2484,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Id);
+                var best = m_nav.GetTileAndPolyByRefUnsafe(bestNode.Ref);
 
                 // Get parent poly and tile.
                 int parentRef = 0;
                 if (bestNode.PIdx != 0)
                 {
-                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
+                    parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Ref;
                 }
 
                 // Hit test walls.
@@ -2615,7 +2661,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return status;
             }
 
-            neighbour.Node = m_nodePool.GetNode(neighbour.Ref, 0);
+            neighbour.Node = m_nodePool.AllocateNode(neighbour.Ref, 0);
             if (neighbour.Node == null)
             {
                 status |= Status.DT_OUT_OF_NODES;
@@ -2649,7 +2695,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return status;
             }
 
-            neighbour.Node.Id = neighbour.Ref;
+            neighbour.Node.Ref = neighbour.Ref;
             neighbour.Node.Flags = neighbour.Node.Flags & ~NodeFlagTypes.Closed;
             neighbour.Node.PIdx = m_nodePool.GetNodeIdx(best.Node);
             neighbour.Node.Total = total;
@@ -3009,12 +3055,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            var startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.AllocateNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
-            startNode.Id = startRef;
+            startNode.Ref = startRef;
             startNode.Flags = NodeFlagTypes.Open;
 
             m_openList.Push(startNode);
@@ -3070,7 +3116,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private void EvaluateTiles(TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter)
         {
             // Get parent poly and tile.
-            int parentRef = m_nodePool.GetNodeAtIdx(best.Node.PIdx)?.Id ?? 0;
+            int parentRef = m_nodePool.GetNodeAtIdx(best.Node.PIdx)?.Ref ?? 0;
 
             for (int i = best.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
@@ -3105,7 +3151,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                var neighbourNode = m_nodePool.GetNode(neighbour.Ref, 0);
+                var neighbourNode = m_nodePool.AllocateNode(neighbour.Ref, 0);
                 if (neighbourNode == null)
                 {
                     continue;
@@ -3144,7 +3190,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            neighbour.Node.Id = neighbour.Ref;
+            neighbour.Node.Ref = neighbour.Ref;
             neighbour.Node.Flags = (neighbour.Node.Flags & ~NodeFlagTypes.Closed);
             neighbour.Node.PIdx = m_nodePool.GetNodeIdx(best.Node);
             neighbour.Node.Total = total;
@@ -3298,7 +3344,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (m_nodePool == null) return false;
 
-            int n = m_nodePool.FindNodes(r, DT_MAX_STATES_PER_NODE, out Node[] nodes);
+            var (nodes, n) = m_nodePool.FindNodes(r, DT_MAX_STATES_PER_NODE);
 
             for (int i = 0; i < n; i++)
             {
@@ -3537,7 +3583,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             List<int> tmp = [];
             for (int i = writeCount - 1; i >= 0; i--)
             {
-                tmp.Insert(0, curNode.Id);
+                tmp.Insert(0, curNode.Ref);
                 curNode = m_nodePool.GetNodeAtIdx(curNode.PIdx);
             }
 
