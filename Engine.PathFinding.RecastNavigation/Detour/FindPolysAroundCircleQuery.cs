@@ -5,16 +5,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// <summary>
     /// Find polygons around a circle
     /// </summary>
-    public class FindPolysAroundCircleQuery : IFindPolysQuery
+    public class FindPolysAroundCircleQuery(Vector3 center, float radius) : IFindPolysQuery
     {
         /// <summary>
         /// Circle center
         /// </summary>
-        public Vector3 Center { get; set; }
+        public Vector3 Center { get; set; } = center;
         /// <summary>
         /// Circle radius
         /// </summary>
-        public float Radius { get; set; }
+        public float Radius { get; set; } = radius;
 
         /// <inheritdoc/>
         public bool Contains(Vector3 va, Vector3 vb)

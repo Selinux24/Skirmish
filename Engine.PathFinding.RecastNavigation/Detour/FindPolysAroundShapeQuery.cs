@@ -5,21 +5,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// <summary>
     /// Find polygons around a shape query
     /// </summary>
-    public class FindPolysAroundShapeQuery : IFindPolysQuery
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="vertices"></param>
+    public class FindPolysAroundShapeQuery(Vector3[] vertices) : IFindPolysQuery
     {
         /// <summary>
         /// Shape vertices (polygon)
         /// </summary>
-        private readonly Vector3[] vertices;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="vertices"></param>
-        public FindPolysAroundShapeQuery(Vector3[] vertices)
-        {
-            this.vertices = vertices;
-        }
+        private readonly Vector3[] vertices = vertices;
 
         /// <inheritdoc/>
         public bool Contains(Vector3 va, Vector3 vb)

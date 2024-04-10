@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -38,49 +39,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Iterates the tile polygon links
         /// </summary>
-        /// <param name="filter">Query filter</param>
-        /// <param name="parentRef">Parent reference</param>
-        /// <param name="navMesh">Navigation mesh</param>
-        /// <param name="nodePool">Node pool</param>
-        public readonly IEnumerable<(TileRef TileRef, Node Node)> ItearatePolygonLinks(QueryFilter filter, TileRef parent, NavMesh navMesh, NodePool nodePool)
+        /// <returns></returns>
+        public readonly IEnumerable<Link> IteratePolygonLinks()
         {
             for (int i = Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = Tile.Links[i].Next)
             {
-                int neighbourRef = Tile.Links[i].NRef;
-
-                // Skip invalid ids
-                if (neighbourRef == 0)
-                {
-                    continue;
-                }
-
-                // Do not expand back to where we came from.
-                if (neighbourRef == parent.Ref)
-                {
-                    continue;
-                }
-
-                // Get neighbour poly and tile.
-                // The API input has been cheked already, skip checking internal data.
-                var neighbour = navMesh.GetTileAndPolyByRefUnsafe(neighbourRef);
-
-                if (!filter.PassFilter(neighbour.Poly.Flags))
-                {
-                    continue;
-                }
-
-                // deal explicitly with crossing tile boundaries
-                int crossSide = 0;
-                if (Tile.Links[i].Side != 0xff)
-                {
-                    crossSide = Tile.Links[i].Side >> 1;
-                }
-
-                // get the node
-                var neighbourNode = nodePool.AllocateNode(neighbourRef, crossSide);
-
-                yield return (neighbour, neighbourNode);
+                yield return Tile.Links[i];
             }
+        }
+
+        /// <summary>
+        /// Gets the tile polygon vertex list
+        /// </summary>
+        public readonly Vector3[] GetPolyVertices()
+        {
+            int n = Poly.VertCount;
+
+            Vector3[] verts = new Vector3[n];
+
+            for (int k = 0; k < n; ++k)
+            {
+                verts[k] = Tile.Verts[Poly.Verts[k]];
+            }
+
+            return verts;
         }
     }
 }
