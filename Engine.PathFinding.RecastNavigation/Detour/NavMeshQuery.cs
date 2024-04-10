@@ -39,14 +39,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Maximum smooth points in the query
         /// </summary>
         const int MAX_SMOOTH = 2048;
-        /// <summary>
-        /// Maximum stack items
-        /// </summary>
-        const int MAX_STACK = 48;
-        /// <summary>
-        /// Maximum neighbours
-        /// </summary>
-        const int MAX_NEIS = 8;
 
         /// <summary>
         /// Navmesh data.
@@ -1643,7 +1635,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nav.CalcTileLoc(bmin, out int minx, out int miny);
             m_nav.CalcTileLoc(bmax, out int maxx, out int maxy);
 
-            int MAX_NEIS = 32;
+            const int MAX_NEIS = 32;
 
             for (int y = miny; y <= maxy; y++)
             {
@@ -1684,6 +1676,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
+            const int MAX_STACK = 48;
+
             Stack<Node> stack = new(MAX_STACK);
 
             m_tinyNodePool.Clear();
@@ -1702,7 +1696,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             while (stack.Count > 0)
             {
-                if (!ProcessFindLocalNeighbourhoodStack(result, stack, centerPos, radiusSqr, filter))
+                if (!ProcessFindLocalNeighbourhoodStack(stack, MAX_STACK, result, centerPos, radiusSqr, filter))
                 {
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
@@ -1713,12 +1707,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Process the stack
         /// </summary>
-        /// <param name="result">Polygon reference result</param>
         /// <param name="stack">Stack</param>
+        /// <param name="maxStackCount">Maximum stack count</param>
+        /// <param name="result">Polygon reference result</param>
         /// <param name="centerPos">Center position</param>
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
-        private bool ProcessFindLocalNeighbourhoodStack(PolyRefs result, Stack<Node> stack, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private bool ProcessFindLocalNeighbourhoodStack(Stack<Node> stack, int maxStackCount, PolyRefs result, Vector3 centerPos, float radiusSqr, QueryFilter filter)
         {
             bool gResult = true;
 
@@ -1770,7 +1765,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     gResult = false;
                 }
 
-                if (stack.Count < MAX_STACK)
+                if (stack.Count < maxStackCount)
                 {
                     stack.Push(neighbourNode);
                 }
@@ -1901,6 +1896,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             Status status = Status.DT_SUCCESS;
 
+            const int MAX_STACK = 48;
+
             var stack = new Stack<Node>(MAX_STACK);
 
             m_tinyNodePool.Clear();
@@ -1950,21 +1947,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var vj = verts[j];
                     var vi = verts[i];
 
-                    if (neis.Count != 0)
+                    if (neis.Count == 0)
                     {
-                        ProcessTileNeighbours(stack, neis, vi, vj, searchRadSqr, searchPos, curNode);
+                        // Wall edge, calc distance.
+                        float distSqr = Utils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
+                        if (distSqr < bestDist)
+                        {
+                            // Update nearest distance.
+                            bestPos = Vector3.Lerp(vj, vi, tseg);
+                            bestDist = distSqr;
+                            bestNode = curNode;
+                        }
 
                         continue;
                     }
 
-                    // Wall edge, calc distance.
-                    float distSqr = Utils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
-                    if (distSqr < bestDist)
+                    foreach (var neiNode in ProcessTileNeighbours(neis, vi, vj, searchRadSqr, searchPos, curNode))
                     {
-                        // Update nearest distance.
-                        bestPos = Vector3.Lerp(vj, vi, tseg);
-                        bestDist = distSqr;
-                        bestNode = curNode;
+                        if (stack.Count < MAX_STACK)
+                        {
+                            stack.Push(neiNode);
+                        }
                     }
                 }
             }
@@ -1988,6 +1991,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Return the neighbour references list</returns>
         private List<int> FindTileNeigbours(TileRef tile, int polyIndex, QueryFilter filter)
         {
+            const int MAX_NEIS = 8;
+
             var neis = new List<int>(MAX_NEIS);
 
             if (tile.Poly.NeighbourIsExternalLink(polyIndex))
@@ -2021,14 +2026,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Process the node stack
         /// </summary>
-        /// <param name="stack">Stack</param>
         /// <param name="neis">Neighbour reference list</param>
         /// <param name="vi">Segment point i</param>
         /// <param name="vj">Segment point j</param>
         /// <param name="searchRadSqr">Squared search radius</param>
         /// <param name="searchPos">Search position</param>
         /// <param name="curNode">Current node</param>
-        private void ProcessTileNeighbours(Stack<Node> stack, List<int> neis, Vector3 vi, Vector3 vj, float searchRadSqr, Vector3 searchPos, Node curNode)
+        private IEnumerable<Node> ProcessTileNeighbours(List<int> neis, Vector3 vi, Vector3 vj, float searchRadSqr, Vector3 searchPos, Node curNode)
         {
             foreach (var nei in neis)
             {
@@ -2052,12 +2056,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Mark as the node as visited and push to queue.
-                if (stack.Count < MAX_STACK)
-                {
-                    neighbourNode.PIdx = m_tinyNodePool.GetNodeIdx(curNode);
-                    neighbourNode.Flags |= NodeFlagTypes.Closed;
-                    stack.Push(neighbourNode);
-                }
+                neighbourNode.PIdx = m_tinyNodePool.GetNodeIdx(curNode);
+                neighbourNode.Flags |= NodeFlagTypes.Closed;
+
+                yield return neighbourNode;
             }
         }
 
