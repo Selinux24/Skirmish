@@ -53,7 +53,7 @@ namespace Engine.Physics
             var positionTwoWorld = Two.PositionWorld;
 
             float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (Math.Abs(distance) <= Length)
+            if (MathF.Abs(distance) <= Length)
             {
                 // Valid joint
                 return false;

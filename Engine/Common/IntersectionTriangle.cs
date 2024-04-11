@@ -532,9 +532,9 @@ namespace Engine.Common
             Vector2 q2;
             Vector2 r2;
 
-            float nX = Math.Abs(n1.X);
-            float nY = Math.Abs(n1.Y);
-            float nZ = Math.Abs(n1.Z);
+            float nX = MathF.Abs(n1.X);
+            float nY = MathF.Abs(n1.Y);
+            float nZ = MathF.Abs(n1.Z);
 
             // Projection of the triangles in 3D onto 2D such that the area of the projection is maximized.
 

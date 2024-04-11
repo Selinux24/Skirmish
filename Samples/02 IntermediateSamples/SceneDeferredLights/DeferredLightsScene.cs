@@ -557,7 +557,7 @@ namespace IntermediateSamples.SceneDeferredLights
             {
                 spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
 
-                spotLight.Intensity = Math.Max(0f, spotLight.Intensity);
+                spotLight.Intensity = MathF.Max(0f, spotLight.Intensity);
             }
         }
 

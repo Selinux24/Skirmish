@@ -159,11 +159,11 @@ namespace Engine.UI
 
             foreach (var p in vertices.Select(v => v.Position))
             {
-                maxX = Math.Max(maxX, p.X);
-                maxY = Math.Max(maxY, -p.Y);
+                maxX = MathF.Max(maxX, p.X);
+                maxY = MathF.Max(maxY, -p.Y);
 
-                minX = Math.Min(minX, p.X);
-                minY = Math.Min(minY, -p.Y);
+                minX = MathF.Min(minX, p.X);
+                minY = MathF.Min(minY, -p.Y);
             }
 
             return new Vector2(maxX - minX, maxY - minY);
@@ -582,11 +582,11 @@ namespace Engine.UI
                 MapChar(chr, chrColor, pos, vertList, indexList);
 
                 //Move the cursor position to the next character
-                float d = (float)(chr.Width - Math.Sqrt(chr.Width));
+                float d = chr.Width - MathF.Sqrt(chr.Width);
                 pos.X += d;
 
                 //Store maximum height
-                height = Math.Max(height, chr.Height);
+                height = MathF.Max(height, chr.Height);
             }
 
             return new FontMapWordDescriptor

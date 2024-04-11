@@ -86,7 +86,7 @@ namespace TerrainSamples.SceneRts.Controllers
             var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, Axis.Y);
             float futureAngle = Helper.Angle(rotation, futureRotation);
             float maxRot = MathUtil.PiOverTwo;
-            futureAngle = Math.Min(futureAngle, maxRot);
+            futureAngle = MathF.Min(futureAngle, maxRot);
             float velDelta = 1.0f - (futureAngle / maxRot);
 
             //Apply delta to velocity

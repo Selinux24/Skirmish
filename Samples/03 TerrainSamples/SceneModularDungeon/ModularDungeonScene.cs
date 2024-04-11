@@ -1007,7 +1007,7 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void UpdatePlayerState(IGameTime gameTime)
         {
-            postProcessingState.VignetteInner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
+            postProcessingState.VignetteInner = 0.66f + (MathF.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
         }
         private void UpdateSelection()
         {

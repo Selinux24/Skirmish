@@ -104,7 +104,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Search constraints
             var searchPos = Vector3.Lerp(startPos, endPos, 0.5f);
-            float searchRadSqr = (float)Math.Pow(Vector3.Distance(startPos, endPos) / 2.0f + 0.001f, 2);
+            float searchRadSqr = MathF.Pow(Vector3.Distance(startPos, endPos) / 2.0f + 0.001f, 2);
 
             while (stack.Count != 0)
             {

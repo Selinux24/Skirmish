@@ -243,7 +243,7 @@ namespace Engine
         /// <param name="count">Number of entries, from the last one</param>
         public static IEnumerable<LogEntry> Read(Func<LogEntry, bool> predicate, int count = 0)
         {
-            var logEntries = predicate == null ? log.ToList() : log.Where(predicate).ToList();
+            var logEntries = predicate == null ? [.. log] : log.Where(predicate).ToList();
 
             int take = count <= 0 ? logEntries.Count : Math.Min(count, logEntries.Count);
             int skip = Math.Max(0, logEntries.Count - take);

@@ -86,7 +86,7 @@ namespace Tanks
             }
             else
             {
-                return (verticalVelocity + (float)Math.Sqrt((verticalVelocity * verticalVelocity) + 2f * g * h)) / g;
+                return (verticalVelocity + MathF.Sqrt((verticalVelocity * verticalVelocity) + 2f * g * h)) / g;
             }
         }
 

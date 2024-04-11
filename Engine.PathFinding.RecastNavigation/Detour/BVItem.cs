@@ -180,8 +180,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Remap y
-            itBMin.Y = (int)Math.Floor(BMin.Y * ch / cs);
-            itBMax.Y = (int)Math.Ceiling(BMax.Y * ch / cs);
+            itBMin.Y = (int)MathF.Floor(BMin.Y * ch / cs);
+            itBMax.Y = (int)MathF.Ceiling(BMax.Y * ch / cs);
 
             BMin = itBMin;
             BMax = itBMax;

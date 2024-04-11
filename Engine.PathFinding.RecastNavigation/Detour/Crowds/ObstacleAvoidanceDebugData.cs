@@ -12,8 +12,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float maxPen = float.MinValue;
             for (int i = 0; i < n; ++i)
             {
-                minPen = Math.Min(minPen, arr[i]);
-                maxPen = Math.Max(maxPen, arr[i]);
+                minPen = MathF.Min(minPen, arr[i]);
+                maxPen = MathF.Max(maxPen, arr[i]);
             }
 
             float penRange = maxPen - minPen;

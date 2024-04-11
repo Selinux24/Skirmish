@@ -706,7 +706,7 @@ namespace Engine
             dot /= one.Length() * two.Length();
 
             //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)Math.Acos(dot);
+            return MathF.Acos(dot);
         }
         /// <summary>
         /// Gets the angle between two quaternions
@@ -718,7 +718,7 @@ namespace Engine
         {
             float dot = Quaternion.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
+            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f)) * 2f;
         }
         /// <summary>
         /// Gets the angle between two vectors
@@ -730,7 +730,7 @@ namespace Engine
         {
             float dot = Vector3.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f));
+            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f));
         }
         /// <summary>
         /// Gets the signed angle between two vectors
@@ -740,7 +740,7 @@ namespace Engine
         /// <returns>Returns the angle value in radians</returns>
         public static float AngleSigned(Vector2 one, Vector2 two)
         {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
+            return MathF.Atan2(Cross(one, two), Vector2.Dot(one, two));
         }
         /// <summary>
         /// Gets the signed angle between two vectors
@@ -752,7 +752,7 @@ namespace Engine
         {
             float dot = Vector3.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(dot, 1f));
+            return MathF.Acos(MathF.Min(dot, 1f));
         }
         /// <summary>
         /// Gets the angle between two vectors in the same plane
@@ -767,7 +767,7 @@ namespace Engine
 
             float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
-            float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
+            float angle = MathF.Acos(MathUtil.Clamp(dot, 0, 1));
 
             var cross = Vector3.Cross(one, two);
 
@@ -786,20 +786,20 @@ namespace Engine
         /// <param name="pitch">Pitch value</param>
         public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
-            yaw = (float)Math.Atan2(vec.X, vec.Y);
+            yaw = MathF.Atan2(vec.X, vec.Y);
 
             if (yaw < 0.0f)
             {
                 yaw += MathUtil.TwoPi;
             }
 
-            if (Math.Abs(vec.X) > Math.Abs(vec.Y))
+            if (MathF.Abs(vec.X) > MathF.Abs(vec.Y))
             {
-                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.X));
+                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.X));
             }
             else
             {
-                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.Y));
+                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.Y));
             }
 
             if (vec.Z < 0.0f)
@@ -918,7 +918,7 @@ namespace Engine
                 return to;
             }
 
-            float delta = Math.Min(1f, maxDelta / angle);
+            float delta = MathF.Min(1f, maxDelta / angle);
 
             return Quaternion.Slerp(from, to, delta);
         }
@@ -931,7 +931,7 @@ namespace Engine
         public static Quaternion RotateFromDirection(Vector3 direction, Vector3 up)
         {
             var a = Vector3.Cross(direction, up);
-            var w = (float)Math.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
+            var w = MathF.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
             Quaternion q = new(a, w);
             q.Normalize();
 
@@ -1175,9 +1175,9 @@ namespace Engine
         /// <returns>Return vector description</returns>
         public static string GetDescription(this Vector3 vector)
         {
-            vector.X = (float)Math.Round(vector.X, 3);
-            vector.Y = (float)Math.Round(vector.Y, 3);
-            vector.Z = (float)Math.Round(vector.Z, 3);
+            vector.X = MathF.Round(vector.X, 3);
+            vector.Y = MathF.Round(vector.Y, 3);
+            vector.Z = MathF.Round(vector.Z, 3);
 
             return string.Format("X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}", vector.X, vector.Y, vector.Z);
         }

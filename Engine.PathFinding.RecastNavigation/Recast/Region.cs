@@ -7,70 +7,57 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// <summary>
     /// Region
     /// </summary>
-    public class Region
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="id">Region id</param>
+    public class Region(int id)
     {
         /// <summary>
         /// Connection list
         /// </summary>
-        private readonly List<int> connections = new();
+        private readonly List<int> connections = [];
         /// <summary>
         /// Floor list
         /// </summary>
-        private readonly List<int> floors = new();
+        private readonly List<int> floors = [];
 
         /// <summary>
         /// ID of the region
         /// </summary>
-        public int Id { get; set; }
+        public int Id { get; set; } = id;
         /// <summary>
         /// Number of spans belonging to this region
         /// </summary>
-        public int SpanCount { get; set; }
+        public int SpanCount { get; set; } = 0;
         /// <summary>
         /// Area type.
         /// </summary>
-        public AreaTypes AreaType { get; set; }
+        public AreaTypes AreaType { get; set; } = AreaTypes.RC_NULL_AREA;
         /// <summary>
         /// Remap flag
         /// </summary>
-        public bool Remap { get; set; }
+        public bool Remap { get; set; } = false;
         /// <summary>
         /// Visited flag
         /// </summary>
-        public bool Visited { get; set; }
+        public bool Visited { get; set; } = false;
         /// <summary>
         /// Overlap flag
         /// </summary>
-        public bool Overlap { get; set; }
+        public bool Overlap { get; set; } = false;
         /// <summary>
         /// Connect to border flag
         /// </summary>
-        public bool ConnectsToBorder { get; set; }
+        public bool ConnectsToBorder { get; set; } = false;
         /// <summary>
         /// Minimum height
         /// </summary>
-        public int YMin { get; set; }
+        public int YMin { get; set; } = int.MaxValue;
         /// <summary>
         /// Maximum height
         /// </summary>
-        public int YMax { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="id">Region id</param>
-        public Region(int id)
-        {
-            Id = id;
-            SpanCount = 0;
-            AreaType = AreaTypes.RC_NULL_AREA;
-            Remap = false;
-            Visited = false;
-            Overlap = false;
-            ConnectsToBorder = false;
-            YMin = int.MaxValue;
-            YMax = 0;
-        }
+        public int YMax { get; set; } = 0;
 
         /// <summary>
         /// Initializes a region list
@@ -581,7 +568,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the list of connections</returns>
         public int[] GetConnections()
         {
-            return connections.ToArray();
+            return [.. connections];
         }
         /// <summary>
         /// Gets the connection count
@@ -597,7 +584,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the list of floors</returns>
         public int[] GetFloors()
         {
-            return floors.ToArray();
+            return [.. floors];
         }
         /// <summary>
         /// Gets the floor count

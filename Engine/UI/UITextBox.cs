@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// Text box
     /// </summary>
-    public sealed class UITextBox : UIControl<UITextBoxDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextBox(Scene scene, string id, string name) : UIControl<UITextBoxDescription>(scene, id, name)
     {
         /// <summary>
         /// Focus flag
@@ -35,18 +41,6 @@ namespace Engine.UI
         /// Enables multi line text
         /// </summary>
         public bool MultiLine { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextBox(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override async Task ReadAssets(UITextBoxDescription description)

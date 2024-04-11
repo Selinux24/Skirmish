@@ -146,8 +146,8 @@ namespace Engine
             for (int i = 0; i < segments; ++i)
             {
                 float a = i / (float)segments * MathUtil.TwoPi;
-                dir[i * 2 + 0] = (float)Math.Cos(a);
-                dir[i * 2 + 1] = (float)Math.Sin(a);
+                dir[i * 2 + 0] = MathF.Cos(a);
+                dir[i * 2 + 1] = MathF.Sin(a);
             }
 
             for (int i = 0, j = segments - 1; i < segments; j = i++)

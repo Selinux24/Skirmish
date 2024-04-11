@@ -186,7 +186,7 @@ namespace Tanks
 
             if (value.Id == loadGroupSceneObjects)
             {
-                progressValue = Math.Max(progressValue, value.Progress);
+                progressValue = MathF.Max(progressValue, value.Progress);
 
                 loadingBar.ProgressValue = progressValue;
                 loadingBar.Caption.Text = $"{loadGroupSceneObjects} {(int)(progressValue * 100f)}%";
@@ -1385,7 +1385,7 @@ You will lost all the game progress.",
             Vector3 position = Shooter.Manipulator.Position;
 
             ShooterStatus.CurrentMove -= Vector3.Distance(prevPosition, position);
-            ShooterStatus.CurrentMove = Math.Max(0, ShooterStatus.CurrentMove);
+            ShooterStatus.CurrentMove = MathF.Max(0f, ShooterStatus.CurrentMove);
         }
         private void UpdateInputShooting(IGameTime gameTime)
         {
@@ -1565,8 +1565,8 @@ You will lost all the game progress.",
 
             // Perpendicular to diff
             Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3.Up, diffV));
-            float y = Math.Max(100f, dist * 0.5f);
-            float z = Math.Max(200f, dist);
+            float y = MathF.Max(100f, dist * 0.5f);
+            float z = MathF.Max(200f, dist);
             Vector3 position = interest + (perp * z) + (Vector3.Up * y);
 
             if (firstUpdate)

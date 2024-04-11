@@ -177,18 +177,18 @@ namespace Engine.UI
 
             if (fitType == GridFitTypes.Width || fitType == GridFitTypes.Height || fitType == GridFitTypes.Uniform)
             {
-                float sqrt = (float)Math.Sqrt(controls.Count());
-                rows = (int)Math.Ceiling(sqrt);
-                cols = (int)Math.Ceiling(sqrt);
+                float sqrt = MathF.Sqrt(controls.Count());
+                rows = (int)MathF.Ceiling(sqrt);
+                cols = (int)MathF.Ceiling(sqrt);
             }
 
             if (fitType == GridFitTypes.Width || fitType == GridFitTypes.FixedColumns)
             {
-                rows = (int)Math.Ceiling(controls.Count() / (float)cols);
+                rows = (int)MathF.Ceiling(controls.Count() / (float)cols);
             }
             else if (fitType == GridFitTypes.Height || fitType == GridFitTypes.FixedRows)
             {
-                cols = (int)Math.Ceiling(controls.Count() / (float)rows);
+                cols = (int)MathF.Ceiling(controls.Count() / (float)rows);
             }
 
             float cellWidth = (bounds.Width / cols) - (spacing.Horizontal / cols * (cols - 1)) - (padding.Left / cols) - (padding.Right / cols);

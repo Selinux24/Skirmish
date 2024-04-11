@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 tileBitSize = tileWidth * tileHeight;
             }
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tileBitSize), 2), 14);
+            int tileBits = Math.Min((int)MathF.Log(Helper.NextPowerOfTwo(tileBitSize), 2), 14);
             int polyBits = 22 - tileBits;
             int maxTiles = 1 << tileBits;
             int maxPolysPerTile = 1 << polyBits;

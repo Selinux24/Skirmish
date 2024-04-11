@@ -260,8 +260,8 @@ namespace TerrainSamples.ScenePerlinNoise
                 updateMap = true;
             }
 
-            mapOffset.X = Math.Max(mapOffset.X, 1f);
-            mapOffset.Y = Math.Max(mapOffset.Y, 1f);
+            mapOffset.X = MathF.Max(mapOffset.X, 1f);
+            mapOffset.Y = MathF.Max(mapOffset.Y, 1f);
 
             if (Game.Input.KeyJustPressed(Keys.X))
             {
@@ -416,7 +416,7 @@ namespace TerrainSamples.ScenePerlinNoise
 
                 if (pb == pbOctaves)
                 {
-                    pb.ProgressValue = (float)Math.Round(mouse / rect.Width, 1);
+                    pb.ProgressValue = MathF.Round(mouse / rect.Width, 1);
                 }
                 else
                 {

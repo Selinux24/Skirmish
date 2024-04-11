@@ -345,7 +345,7 @@ namespace Engine.Common
         /// <returns>Returns the texture size</returns>
         protected static int GetTextureSize(int pixelCount)
         {
-            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
+            int texWidth = (int)MathF.Sqrt(pixelCount) + 1;
             int texHeight = 1;
             while (texHeight < texWidth)
             {

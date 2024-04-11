@@ -273,7 +273,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             bool endOfPath = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
             if (endOfPath)
             {
-                return Math.Min(Utils.Distance2D(NPos, Corners.EndPath), range);
+                return MathF.Min(Utils.Distance2D(NPos, Corners.EndPath), range);
             }
 
             return range;
@@ -351,7 +351,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 // Check for overlap.
                 var diff = pos - ag.NPos;
-                if (Math.Abs(diff.Y) >= (height + ag.Params.Height) / 2.0f)
+                if (MathF.Abs(diff.Y) >= (height + ag.Params.Height) / 2.0f)
                 {
                     continue;
                 }
@@ -488,7 +488,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     continue;
                 }
-                float dist = (float)Math.Sqrt(distSqr);
+                float dist = MathF.Sqrt(distSqr);
                 float dDiv = dist * invSeparationDist;
                 float weight = separationWeight * (1.0f - (dDiv * dDiv));
 

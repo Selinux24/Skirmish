@@ -119,7 +119,7 @@ namespace Engine.Content
         /// <returns>Returns the light radius</returns>
         private static float GetRadius(float quadraticAtt, float minLight)
         {
-            return (float)Math.Sqrt(1.0f / (quadraticAtt * minLight));
+            return MathF.Sqrt(1.0f / (quadraticAtt * minLight));
         }
     }
 }

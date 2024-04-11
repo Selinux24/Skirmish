@@ -154,25 +154,25 @@ namespace Engine.PathFinding.AStar
             float minX = float.MaxValue;
             float minZ = float.MaxValue;
 
-            maxX = Math.Max(maxX, p0.X);
-            maxX = Math.Max(maxX, p1.X);
-            maxX = Math.Max(maxX, p2.X);
-            maxX = Math.Max(maxX, p3.X);
+            maxX = MathF.Max(maxX, p0.X);
+            maxX = MathF.Max(maxX, p1.X);
+            maxX = MathF.Max(maxX, p2.X);
+            maxX = MathF.Max(maxX, p3.X);
 
-            maxZ = Math.Max(maxZ, p0.Z);
-            maxZ = Math.Max(maxZ, p1.Z);
-            maxZ = Math.Max(maxZ, p2.Z);
-            maxZ = Math.Max(maxZ, p3.Z);
+            maxZ = MathF.Max(maxZ, p0.Z);
+            maxZ = MathF.Max(maxZ, p1.Z);
+            maxZ = MathF.Max(maxZ, p2.Z);
+            maxZ = MathF.Max(maxZ, p3.Z);
 
-            minX = Math.Min(minX, p0.X);
-            minX = Math.Min(minX, p1.X);
-            minX = Math.Min(minX, p2.X);
-            minX = Math.Min(minX, p3.X);
+            minX = MathF.Min(minX, p0.X);
+            minX = MathF.Min(minX, p1.X);
+            minX = MathF.Min(minX, p2.X);
+            minX = MathF.Min(minX, p3.X);
 
-            minZ = Math.Min(minZ, p0.Z);
-            minZ = Math.Min(minZ, p1.Z);
-            minZ = Math.Min(minZ, p2.Z);
-            minZ = Math.Min(minZ, p3.Z);
+            minZ = MathF.Min(minZ, p0.Z);
+            minZ = MathF.Min(minZ, p1.Z);
+            minZ = MathF.Min(minZ, p2.Z);
+            minZ = MathF.Min(minZ, p3.Z);
 
             var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
             var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
@@ -208,7 +208,7 @@ namespace Engine.PathFinding.AStar
 
                 float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
                 float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
-                float diff = Math.Abs(fmax - fmin);
+                float diff = MathF.Abs(fmax - fmin);
 
                 if (diff <= nodeSize)
                 {

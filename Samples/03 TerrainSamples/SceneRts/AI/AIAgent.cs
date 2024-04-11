@@ -518,7 +518,7 @@ namespace TerrainSamples.SceneRts.AI
                 return;
             }
 
-            var refineDelta = refine ? Math.Max(speed * 0.1f, 0.25f) : 0f;
+            var refineDelta = refine ? MathF.Max(speed * 0.1f, 0.25f) : 0f;
 
             Task.Run(async () =>
             {

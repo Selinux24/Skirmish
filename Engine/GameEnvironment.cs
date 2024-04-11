@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Degree of paralelism
         /// </summary>
-        public static readonly int DegreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
+        public static readonly int DegreeOfParalelism = (int)MathF.Ceiling(Environment.ProcessorCount * 0.75f * 2.0f);
 
         /// <summary>
         /// Frame time

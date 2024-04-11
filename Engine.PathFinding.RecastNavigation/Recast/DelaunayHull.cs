@@ -8,7 +8,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// <summary>
     /// Delaunay hull
     /// </summary>
-    class DelaunayHull
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="maxEdges">Max edges</param>
+    class DelaunayHull(int maxEdges)
     {
         /// <summary>
         /// Unidefined
@@ -22,39 +26,31 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Delaunay edge
         /// </summary>
-        class DelaunayEdge
+        /// <remarks>
+        /// Constructor
+        /// </remarks>
+        /// <param name="point0">First point index</param>
+        /// <param name="point1">Second point index</param>
+        /// <param name="face0">First face index</param>
+        /// <param name="face1">Second face index</param>
+        class DelaunayEdge(int point0, int point1, int face0, int face1)
         {
             /// <summary>
             /// First point index
             /// </summary>
-            public int Point0 { get; set; }
+            public int Point0 { get; set; } = point0;
             /// <summary>
             /// Second point index
             /// </summary>
-            public int Point1 { get; set; }
+            public int Point1 { get; set; } = point1;
             /// <summary>
             /// First face index (triangle)
             /// </summary>
-            public int Face0 { get; set; }
+            public int Face0 { get; set; } = face0;
             /// <summary>
             /// Second face index (triangle)
             /// </summary>
-            public int Face1 { get; set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="point0">First point index</param>
-            /// <param name="point1">Second point index</param>
-            /// <param name="face0">First face index</param>
-            /// <param name="face1">Second face index</param>
-            public DelaunayEdge(int point0, int point1, int face0, int face1)
-            {
-                Point0 = point0;
-                Point1 = point1;
-                Face0 = face0;
-                Face1 = face1;
-            }
+            public int Face1 { get; set; } = face1;
 
             /// <summary>
             /// Updates the left face
@@ -157,24 +153,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Maximum edges
         /// </summary>
-        private readonly int maxEdges;
+        private readonly int maxEdges = maxEdges;
         /// <summary>
         /// Edge list
         /// </summary>
-        private readonly List<DelaunayEdge> edges = new();
+        private readonly List<DelaunayEdge> edges = [];
         /// <summary>
         /// Number of faces
         /// </summary>
         private int faces;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="maxEdges">Max edges</param>
-        public DelaunayHull(int maxEdges)
-        {
-            this.maxEdges = maxEdges;
-        }
 
         /// <summary>
         /// Builds a hull
@@ -245,7 +232,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var v3 = Vector3.Subtract(p3, p1);
 
             float cp = Utils.VCross2D(v1, v2, v3);
-            if (Math.Abs(cp) <= Utils.ZeroTolerance)
+            if (MathF.Abs(cp) <= Utils.ZeroTolerance)
             {
                 return (p1, 0);
             }

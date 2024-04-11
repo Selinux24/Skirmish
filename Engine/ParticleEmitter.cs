@@ -22,20 +22,20 @@ namespace Engine
             //Initial position
             var initialPos = Vector3.Zero;
             var velocity = emitter.Velocity * systemParams.EmitterVelocitySensitivity;
-            float horizontalVelocity = Math.Max(systemParams.HorizontalVelocity.X, systemParams.HorizontalVelocity.Y);
+            float horizontalVelocity = MathF.Max(systemParams.HorizontalVelocity.X, systemParams.HorizontalVelocity.Y);
 
             //Max v velocity
             var vVelocity = velocity;
-            vVelocity.Y *= Math.Max(systemParams.VerticalVelocity.X, systemParams.VerticalVelocity.Y);
+            vVelocity.Y *= MathF.Max(systemParams.VerticalVelocity.X, systemParams.VerticalVelocity.Y);
 
             //Max h velocity
             var hVelocity1 = velocity;
-            hVelocity1.X *= horizontalVelocity * (float)Math.Cos(0);
-            hVelocity1.Z *= horizontalVelocity * (float)Math.Sin(0);
+            hVelocity1.X *= horizontalVelocity * MathF.Cos(0);
+            hVelocity1.Z *= horizontalVelocity * MathF.Sin(0);
 
             var hVelocity2 = velocity;
-            hVelocity2.X *= horizontalVelocity * (float)Math.Cos(1);
-            hVelocity2.Z *= horizontalVelocity * (float)Math.Sin(1);
+            hVelocity2.X *= horizontalVelocity * MathF.Cos(1);
+            hVelocity2.Z *= horizontalVelocity * MathF.Sin(1);
 
             //Final positions
             var finalPosV = ComputeParticlePosition(
@@ -293,8 +293,8 @@ namespace Engine
 
             float horizontalAngle = hAngleVariance * MathUtil.TwoPi;
 
-            velocity.X += horizontalVelocity * (float)Math.Cos(horizontalAngle);
-            velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
+            velocity.X += horizontalVelocity * MathF.Cos(horizontalAngle);
+            velocity.Z += horizontalVelocity * MathF.Sin(horizontalAngle);
 
             velocity.Y += MathUtil.Lerp(
                 parameters.VerticalVelocity.X,

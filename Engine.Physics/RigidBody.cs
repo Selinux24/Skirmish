@@ -261,8 +261,8 @@ namespace Engine.Physics
             }
 
             // Get the bounce coefficients for this time interval
-            float linearDampingOnTime = (float)Math.Pow(linearDamping, time);
-            float angularDampingOnTime = (float)Math.Pow(angularDamping, time);
+            float linearDampingOnTime = MathF.Pow(linearDamping, time);
+            float angularDampingOnTime = MathF.Pow(angularDamping, time);
 
             // Calculate the linear acceleration from the forces
             LastFrameAcceleration = Acceleration;
@@ -316,7 +316,7 @@ namespace Engine.Physics
 
             // Calculate current kinetic energy
             float currentMotion = Vector3.Dot(LinearVelocity, LinearVelocity) + Vector3.Dot(AngularVelocity, AngularVelocity);
-            float bias = (float)Math.Pow(0.5f, time);
+            float bias = MathF.Pow(0.5f, time);
 
             motionAcum = bias * motionAcum + (1f - bias) * currentMotion;
 

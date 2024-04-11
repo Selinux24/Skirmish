@@ -56,8 +56,7 @@ namespace BasicSamples.SceneLights
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeFloorAsphalt(),
                     InitializeBuildingObelisk(),
                     InitializeTree(),
@@ -66,7 +65,7 @@ namespace BasicSamples.SceneLights
                     InitializeLights(),
                     InitializeVolumeDrawer(),
                     InitializeBufferDrawer()
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeFloorAsphalt()
@@ -74,19 +73,19 @@ namespace BasicSamples.SceneLights
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
+            VertexData[] vertices =
+            [
                 new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
                 new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
@@ -295,9 +294,9 @@ namespace BasicSamples.SceneLights
             float av = 0.5f;
             float s = MathUtil.Pi;
 
-            position.X = r * (float)Math.Cos(av * Game.GameTime.TotalSeconds);
-            position.Y = hv * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
-            position.Z = r * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
+            position.X = r * MathF.Cos(av * Game.GameTime.TotalSeconds);
+            position.Y = hv * MathF.Sin(av * Game.GameTime.TotalSeconds);
+            position.Z = r * MathF.Sin(av * Game.GameTime.TotalSeconds);
 
             var pPos = (position * +1) + new Vector3(0, h, 0);
             lightEmitters[0].Manipulator.SetPosition(pPos);
@@ -311,9 +310,9 @@ namespace BasicSamples.SceneLights
             Lights.SpotLights[0].Position = sPos1;
             Lights.SpotLights[0].Direction = sDir1;
 
-            position.X = r * (float)Math.Cos(av * (Game.GameTime.TotalSeconds + s));
-            position.Y = hv * (float)Math.Sin(av * (Game.GameTime.TotalSeconds + s));
-            position.Z = r * (float)Math.Sin(av * (Game.GameTime.TotalSeconds + s));
+            position.X = r * MathF.Cos(av * (Game.GameTime.TotalSeconds + s));
+            position.Y = hv * MathF.Sin(av * (Game.GameTime.TotalSeconds + s));
+            position.Z = r * MathF.Sin(av * (Game.GameTime.TotalSeconds + s));
 
             var sPos2 = (position * +1) + new Vector3(0, h, 0);
             var sDir2 = -Vector3.Normalize(new Vector3(sPos2.X, sPos2.Y, sPos2.Z));

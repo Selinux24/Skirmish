@@ -757,7 +757,7 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
                 });
 
@@ -782,7 +782,7 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
                 });
         }
@@ -805,23 +805,23 @@ namespace Engine.Audio
             if (!reverbPreset.HasValue && reverb.HasValue)
             {
                 // Play the wave using a source voice that sends to both the submix and mastering voices
-                VoiceSendDescriptor[] sendDescriptors = new[]
-                {
+                VoiceSendDescriptor[] sendDescriptors =
+                [
                     // LPF direct-path
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
                     // LPF reverb-path -- omit for better performance at the cost of less realistic occlusion
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = submixVoice },
-                };
+                ];
                 sourceVoice.SetOutputVoices(sendDescriptors);
             }
             else if (!reverb.HasValue)
             {
                 // Play the wave using a source voice that sends to both the submix and mastering voices
-                VoiceSendDescriptor[] sendDescriptors = new[]
-                {
+                VoiceSendDescriptor[] sendDescriptors =
+                [
                     // LPF direct-path
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
-                };
+                ];
                 sourceVoice.SetOutputVoices(sendDescriptors);
 
                 submixVoice.DisableEffect(0);
@@ -845,7 +845,7 @@ namespace Engine.Audio
         /// <returns>Returns an array of floats from 0 to 1.</returns>
         public float[] GetOutputMatrix()
         {
-            return panOutputMatrix.ToArray();
+            return [.. panOutputMatrix];
         }
         /// <summary>
         /// Initializes the output matrix

@@ -107,7 +107,7 @@ namespace Engine.Physics
         public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration)
         {
             float restitution = (one?.Restitution ?? 1f + two?.Restitution ?? 1f) * 0.5f;
-            float friction = Math.Max(one?.Friction ?? 0f, two?.Friction ?? 0f);
+            float friction = MathF.Max(one?.Friction ?? 0f, two?.Friction ?? 0f);
 
             AddContact(one, two, position, normal, penetration, restitution, friction);
         }
@@ -128,7 +128,7 @@ namespace Engine.Physics
                 return;
             }
 
-            if(CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
+            if (CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
             {
                 currentContactIndex++;
             }
@@ -153,7 +153,7 @@ namespace Engine.Physics
         {
             if (ContactCount <= 0)
             {
-                return Enumerable.Empty<Contact>();
+                return [];
             }
 
             return contacts.Take(ContactCount).ToArray();

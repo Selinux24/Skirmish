@@ -192,7 +192,7 @@ namespace BasicSamples.SceneWater
             }
 
             float gradient = (-Vector3.Dot(Lights.KeyLight.Direction, Camera.Direction) + 1f) * 0.5f;
-            gradient = Math.Min(0.5f, gradient);
+            gradient = MathF.Min(0.5f, gradient);
             Renderer.PostProcessingObjectsEffects.BloomForce = ScaleFuncs.CubicEaseIn(gradient);
         }
 

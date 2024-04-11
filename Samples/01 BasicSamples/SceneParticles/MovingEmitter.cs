@@ -25,9 +25,9 @@ namespace BasicSamples.SceneParticles
         private static Vector3 GetPosition(float v, float d, float time)
         {
             Vector3 position = Vector3.Zero;
-            position.X = d * (float)Math.Cos(v * time);
+            position.X = d * MathF.Cos(v * time);
             position.Y = 1f;
-            position.Z = d * (float)Math.Sin(v * time);
+            position.Z = d * MathF.Sin(v * time);
 
             return position;
         }

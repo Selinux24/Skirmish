@@ -303,13 +303,13 @@ namespace Engine.Animation
                 float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
 
                 //This is the item
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.Found,
                     PathItemDuration = targetTime - acumDuration,
                     PathItemInterpolationValue = interpolationValue % item.Duration,
                     AtEnd = false,
-                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                    LoopCount = (int)MathF.Ceiling(interpolationValue / item.Duration),
                 };
             }
             else if (item.Loop)
@@ -317,19 +317,19 @@ namespace Engine.Animation
                 float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
 
                 //Do loop, continue path
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.InLoop,
                     PathItemDuration = targetTime - acumDuration,
                     PathItemInterpolationValue = interpolationValue % item.Duration,
                     AtEnd = false,
-                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                    LoopCount = (int)MathF.Ceiling(interpolationValue / item.Duration),
                 };
             }
             else if (targetTime - acumDuration >= itemTotalDuration && isLastItem)
             {
                 //Item passed, it's the end item
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.Found,
                     PathItemDuration = targetTime - acumDuration,
@@ -341,7 +341,7 @@ namespace Engine.Animation
             else
             {
                 //Not in time
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.NotFound,
                     PathItemDuration = itemTotalDuration,

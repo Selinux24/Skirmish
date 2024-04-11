@@ -75,16 +75,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_bounds = new RectangleF()
             {
-                Left = Math.Min(m_bounds.Left, min.X),
-                Top = Math.Min(m_bounds.Top, min.Y),
-                Right = Math.Max(m_bounds.Right, max.X),
-                Bottom = Math.Max(m_bounds.Bottom, max.Y)
+                Left = MathF.Min(m_bounds.Left, min.X),
+                Top = MathF.Min(m_bounds.Top, min.Y),
+                Right = MathF.Max(m_bounds.Right, max.X),
+                Bottom = MathF.Max(m_bounds.Bottom, max.Y)
             };
 
-            int iminx = (int)Math.Floor(min.X * m_invCellSize);
-            int iminy = (int)Math.Floor(min.Y * m_invCellSize);
-            int imaxx = (int)Math.Floor(max.X * m_invCellSize);
-            int imaxy = (int)Math.Floor(max.Y * m_invCellSize);
+            int iminx = (int)MathF.Floor(min.X * m_invCellSize);
+            int iminy = (int)MathF.Floor(min.Y * m_invCellSize);
+            int imaxx = (int)MathF.Floor(max.X * m_invCellSize);
+            int imaxy = (int)MathF.Floor(max.Y * m_invCellSize);
 
             for (int y = iminy; y <= imaxy; ++y)
             {
@@ -159,10 +159,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var itemList = new List<T>();
             var pItemList = new List<ProximityGridItem<T>>();
 
-            int iminx = (int)Math.Floor(min.X * m_invCellSize);
-            int iminy = (int)Math.Floor(min.Y * m_invCellSize);
-            int imaxx = (int)Math.Floor(max.X * m_invCellSize);
-            int imaxy = (int)Math.Floor(max.Y * m_invCellSize);
+            int iminx = (int)MathF.Floor(min.X * m_invCellSize);
+            int iminy = (int)MathF.Floor(min.Y * m_invCellSize);
+            int imaxx = (int)MathF.Floor(max.X * m_invCellSize);
+            int imaxy = (int)MathF.Floor(max.Y * m_invCellSize);
 
             for (int y = iminy; y <= imaxy; ++y)
             {
@@ -186,9 +186,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            items = pItemList.ToArray();
+            items = [.. pItemList];
 
-            return itemList.ToArray();
+            return [.. itemList];
         }
         /// <summary>
         /// Gets the item count at proximity grid coordinates

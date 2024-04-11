@@ -4,7 +4,12 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
-    public class ObstacleAvoidanceQuery
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="maxCircles">Max circles</param>
+    /// <param name="maxSegments">Max segments</param>
+    public class ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
     {
         public const int DT_MAX_PATTERN_DIVS = 32;  ///< Max numver of adaptive divs.
         public const int DT_MAX_PATTERN_RINGS = 4;  ///< Max number of adaptive rings.
@@ -33,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             a = 1.0f / a;
-            float rd = (float)Math.Sqrt(d);
+            float rd = MathF.Sqrt(d);
             tmin = (b - rd) * a;
             tmax = (b + rd) * a;
 
@@ -46,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Vector3 v = bq - bp;
             Vector3 w = ap - bp;
             float d = Vector2.Dot(u.XZ(), v.XZ());
-            if (Math.Abs(d) < Utils.ZeroTolerance)
+            if (MathF.Abs(d) < Utils.ZeroTolerance)
             {
                 return false;
             }
@@ -86,8 +91,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns></returns>
         public static Vector3 Rorate2D(Vector3 v, float ang)
         {
-            float c = (float)Math.Cos(ang);
-            float s = (float)Math.Sin(ang);
+            float c = MathF.Cos(ang);
+            float s = MathF.Sin(ang);
 
             Vector3 dest = Vector3.Zero;
             dest.X = v.X * c - v.Z * s;
@@ -97,26 +102,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             return dest;
         }
 
-        private readonly int m_maxCircles;
-        private readonly List<ObstacleCircle> m_circles = new();
+        private readonly int m_maxCircles = maxCircles;
+        private readonly List<ObstacleCircle> m_circles = [];
 
-        private readonly int m_maxSegments;
-        private readonly List<ObstacleSegment> m_segments = new();
+        private readonly int m_maxSegments = maxSegments;
+        private readonly List<ObstacleSegment> m_segments = [];
 
         private ObstacleAvoidanceParams m_params;
         private float m_invHorizTime;
         private float m_invVmax;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="maxCircles">Max circles</param>
-        /// <param name="maxSegments">Max segments</param>
-        public ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
-        {
-            m_maxCircles = maxCircles;
-            m_maxSegments = maxSegments;
-        }
 
         public void AddCircle(Vector3 pos, float rad, Vector3 vel, Vector3 dvel)
         {
@@ -152,11 +146,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public IEnumerable<ObstacleCircle> GetObstacleCircles()
         {
-            return m_circles.ToArray();
+            return [.. m_circles];
         }
         public IEnumerable<ObstacleSegment> GetObstacleSegments()
         {
-            return m_segments.ToArray();
+            return [.. m_segments];
         }
         public void Reset()
         {
@@ -253,18 +247,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int nd = MathUtil.Clamp(ndivs, 1, DT_MAX_PATTERN_DIVS);
             int nr = MathUtil.Clamp(nrings, 1, DT_MAX_PATTERN_RINGS);
-            float da = (1.0f / nd) * MathUtil.TwoPi;
-            float ca = (float)Math.Cos(da);
-            float sa = (float)Math.Sin(da);
+            float da = 1.0f / nd * MathUtil.TwoPi;
+            float ca = MathF.Cos(da);
+            float sa = MathF.Sin(da);
 
             // desired direction
             Vector3 ddir1 = Normalize2D(dvel);
             Vector3 ddir2 = Rorate2D(ddir1, da * 0.5f); // rotated by da/2
-            Vector3[] ddir = new Vector3[]
-            {
-                ddir1,
-                ddir2
-            };
+            Vector3[] ddir = [ddir1, ddir2];
 
             // Always add sample at zero
             pat[npat + 0] = Vector2.Zero;
@@ -273,7 +263,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             for (int j = 0; j < nr; ++j)
             {
-                float r = (float)(nr - j) / (float)nr;
+                float r = (nr - j) / (float)nr;
 
                 float vX = ddir[j % 2].X * r;
                 float vZ = ddir[j % 2].Z * r;
@@ -462,7 +452,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 vab -= cir.Vel;
 
                 // Side
-                side += MathUtil.Clamp(Math.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
+                side += MathUtil.Clamp(MathF.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
                 nside++;
 
                 if (!SweepCircleCircle(req.Pos, req.Rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))

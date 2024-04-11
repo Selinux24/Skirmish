@@ -294,7 +294,7 @@ namespace BasicSamples.SceneTest
             scenery = await AddComponentGround<Scenery, GroundDescription>("Scenery", "Scenery", sDesc);
             var bbox = scenery.GetBoundingBox();
 
-            var waterDesc = WaterDescription.CreateCalm(Math.Max(bbox.Width, bbox.Depth), waterHeight);
+            var waterDesc = WaterDescription.CreateCalm(MathF.Max(bbox.Width, bbox.Depth), waterHeight);
             waterDesc.BaseColor = waterBaseColor;
             waterDesc.WaterColor = waterColor;
 
@@ -813,7 +813,7 @@ namespace BasicSamples.SceneTest
 
         public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value.Progress);
+            progressValue = MathF.Max(progressValue, value.Progress);
 
             if (progressBar != null)
             {
@@ -859,7 +859,7 @@ namespace BasicSamples.SceneTest
                 Lights.HemisphericLigth.AmbientDown = waterColor.RGB() * 1.5f;
 
                 float depth = waterHeight - Camera.Position.Y;
-                Lights.EnableFog(1, Math.Max((1 - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);
+                Lights.EnableFog(1, MathF.Max((1f - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);
                 GameEnvironment.Background = waterColor * 0.26f;
                 skydom.Visible = false;
                 skyPlane.Visible = false;
@@ -971,7 +971,7 @@ namespace BasicSamples.SceneTest
         }
         private void UpdateSkyEffects()
         {
-            skyPlane.Velocity = Math.Min(1f, MathUtil.Lerp(skyPlane.Velocity, wind.Length() / 100f, 0.001f));
+            skyPlane.Velocity = MathF.Min(1f, MathUtil.Lerp(skyPlane.Velocity, wind.Length() / 100f, 0.001f));
         }
         private void UpdateParticles()
         {

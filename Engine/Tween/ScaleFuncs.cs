@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.Tween
 {
@@ -27,7 +28,7 @@ namespace Engine.Tween
     /// </remarks>
     public static class ScaleFuncs
     {
-        private const float Pi = (float)Math.PI;
+        private const float Pi = MathUtil.Pi;
         private const float HalfPi = Pi / 2f;
 
         /// <summary>
@@ -115,38 +116,38 @@ namespace Engine.Tween
 
         private static float EaseInPower(float progress, int power)
         {
-            return (float)Math.Pow(progress, power);
+            return MathF.Pow(progress, power);
         }
         private static float EaseOutPower(float progress, int power)
         {
             int sign = power % 2 == 0 ? -1 : 1;
-            return (float)(sign * (Math.Pow(progress - 1, power) + sign));
+            return sign * (MathF.Pow(progress - 1, power) + sign);
         }
         private static float EaseInOutPower(float progress, int power)
         {
             progress *= 2;
             if (progress < 1)
             {
-                return (float)Math.Pow(progress, power) / 2f;
+                return MathF.Pow(progress, power) / 2f;
             }
             else
             {
                 int sign = power % 2 == 0 ? -1 : 1;
-                return (float)(sign / 2.0 * (Math.Pow(progress - 2, power) + sign * 2));
+                return sign / 2f * (MathF.Pow(progress - 2, power) + sign * 2f);
             }
         }
 
         private static float SineEaseInImpl(float progress)
         {
-            return (float)Math.Sin(progress * HalfPi - HalfPi) + 1;
+            return MathF.Sin(progress * HalfPi - HalfPi) + 1f;
         }
         private static float SineEaseOutImpl(float progress)
         {
-            return (float)Math.Sin(progress * HalfPi);
+            return MathF.Sin(progress * HalfPi);
         }
         private static float SineEaseInOutImpl(float progress)
         {
-            return (float)(Math.Sin(progress * Pi - HalfPi) + 1) / 2;
+            return (MathF.Sin(progress * Pi - HalfPi) + 1f) / 2f;
         }
     }
 }

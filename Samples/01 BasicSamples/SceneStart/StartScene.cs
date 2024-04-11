@@ -212,8 +212,8 @@ namespace BasicSamples.SceneStart
             float vy = 0.25f;
 
             Vector3 position = Vector3.Zero;
-            position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * Game.GameTime.TotalSeconds)));
-            position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * Game.GameTime.TotalSeconds)));
+            position.X = +((xmouse * d) + (0.2f * MathF.Cos(vx * Game.GameTime.TotalSeconds)));
+            position.Y = -((ymouse * d) + (0.1f * MathF.Sin(vy * Game.GameTime.TotalSeconds)));
 
             Camera.SetPosition(new Vector3(0, 0, -5f));
             Camera.LookTo(position);

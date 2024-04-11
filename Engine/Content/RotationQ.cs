@@ -206,8 +206,8 @@ namespace Engine.Content
             Direction3.Normalize(ref axis, out var normalized);
 
             float half = angle * 0.5f;
-            float sin = (float)Math.Sin(half);
-            float cos = (float)Math.Cos(half);
+            float sin = MathF.Sin(half);
+            float cos = MathF.Cos(half);
 
             result = Identity;
             result.X = normalized.X * sin;

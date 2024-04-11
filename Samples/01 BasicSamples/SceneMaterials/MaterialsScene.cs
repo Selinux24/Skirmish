@@ -178,7 +178,7 @@ namespace BasicSamples.SceneMaterials
             int n = 32;
             int colorCount = 256;
             int e = colorCount / n;
-            int totalSpheres = (int)Math.Pow(e, 3);
+            int totalSpheres = (int)MathF.Pow(e, 3);
             float distance = 3f;
 
             var mapParams = new MaterialParams
@@ -507,9 +507,9 @@ namespace BasicSamples.SceneMaterials
             float d1 = 0.5f;
             float v1 = 0.8f;
             Vector3 position1 = Vector3.Zero;
-            position1.X = r1 * d1 * (float)Math.Cos(v1 * totalSeconds);
-            position1.Y = 5f + (2f * (1f + (float)Math.Sin(totalSeconds)));
-            position1.Z = r1 * d1 * (float)Math.Sin(v1 * totalSeconds);
+            position1.X = r1 * d1 * MathF.Cos(v1 * totalSeconds);
+            position1.Y = 5f + (2f * (1f + MathF.Sin(totalSeconds)));
+            position1.Z = r1 * d1 * MathF.Sin(v1 * totalSeconds);
 
             lightEmitter1.Manipulator.SetPosition(position1);
             movingLight1.Position = position1;
@@ -518,7 +518,7 @@ namespace BasicSamples.SceneMaterials
             float d2 = 0.5f;
             float v2 = 0.6f;
             Vector3 position2 = Vector3.Zero;
-            position2.X = r2 * d2 * (float)Math.Cos(v2 * totalSeconds);
+            position2.X = r2 * d2 * MathF.Cos(v2 * totalSeconds);
             position2.Y = 8f;
             position2.Z = 24;
 

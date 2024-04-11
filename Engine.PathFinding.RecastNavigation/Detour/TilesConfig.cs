@@ -41,9 +41,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public static TilesConfig GetTilesConfig(BuildSettings settings, Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
-            int walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
-            int walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
-            int walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
+            int walkableHeight = (int)MathF.Ceiling(agent.Height / settings.CellHeight);
+            int walkableClimb = (int)MathF.Floor(agent.MaxClimb / settings.CellHeight);
+            int walkableRadius = (int)MathF.Ceiling(agent.Radius / settings.CellSize);
             int maxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize);
             int minRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize);
             int mergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize);

@@ -243,7 +243,7 @@ namespace Engine.Content
         /// </remarks>
         public readonly float Length()
         {
-            return (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            return MathF.Sqrt(X * X + Y * Y + Z * Z);
         }
         /// <summary>
         /// Calculates the squared length of the vector.

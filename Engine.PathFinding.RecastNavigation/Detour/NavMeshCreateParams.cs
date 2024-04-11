@@ -161,8 +161,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < DetailVertsCount; ++i)
                 {
                     var h = DetailVerts[i].Y;
-                    hmin = Math.Min(hmin, h);
-                    hmax = Math.Max(hmax, h);
+                    hmin = MathF.Min(hmin, h);
+                    hmax = MathF.Max(hmax, h);
                 }
             }
             else
@@ -171,8 +171,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var iv = Verts[i];
                     float h = Bounds.Minimum.Y + iv.Y * CellHeight;
-                    hmin = Math.Min(hmin, h);
-                    hmax = Math.Max(hmax, h);
+                    hmin = MathF.Min(hmin, h);
+                    hmax = MathF.Max(hmax, h);
                 }
             }
             hmin -= WalkableClimb;

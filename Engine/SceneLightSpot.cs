@@ -89,7 +89,7 @@ namespace Engine
         /// <returns>Returns the transform matrix</returns>
         public static Matrix CreateFromPositionDirection(Vector3 position, Vector3 direction)
         {
-            float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
+            float f = MathF.Abs(Vector3.Dot(direction, Vector3.Up));
             Vector3 up = MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
             return Helper.CreateWorld(position, direction, up);
         }
@@ -217,7 +217,7 @@ namespace Engine
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
 
             //Then move and rotate the cone to light position and direction
-            float f = Math.Abs(Vector3.Dot(Direction, Vector3.Up));
+            float f = MathF.Abs(Vector3.Dot(Direction, Vector3.Up));
             Matrix trn = Helper.CreateWorld(Position, Direction, MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);

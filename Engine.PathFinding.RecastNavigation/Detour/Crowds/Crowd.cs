@@ -894,7 +894,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     continue;
                 }
 
-                dist = (float)Math.Sqrt(dist);
+                dist = MathF.Sqrt(dist);
                 float pen = diffRad - dist;
                 if (dist < 0.0001f)
                 {

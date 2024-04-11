@@ -87,7 +87,7 @@ namespace Engine
 
                 Random rnd = new(description.Seed);
                 var bbox = node.BoundingBox;
-                int count = (int)Math.Min(MAX, MAX * description.Saturation);
+                int count = (int)MathF.Min(MAX, MAX * description.Saturation);
 
                 Parallel.For(0, count, (index) =>
                 {
@@ -945,11 +945,11 @@ namespace Engine
             if (foliageQuadtree == null || foliageQuadtree.BoundingBox != bbox)
             {
                 //Creates the quad-tree if not exists, or if the reference bounding box has changed
-                float sizeParts = Math.Max(bbox.Width, bbox.Depth) / nodeSize;
+                float sizeParts = MathF.Max(bbox.Width, bbox.Depth) / nodeSize;
 
-                int levels = Math.Max(1, (int)Math.Log(sizeParts, 2));
+                int levels = Math.Max(1, (int)MathF.Log(sizeParts, 2));
 
-                foliageQuadtree = new QuadTree(bbox, levels);
+                foliageQuadtree = new(bbox, levels);
             }
         }
         /// <summary>

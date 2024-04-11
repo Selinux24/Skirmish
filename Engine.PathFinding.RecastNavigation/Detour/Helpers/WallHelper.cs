@@ -134,7 +134,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
             hitNormal = Vector3.Subtract(centerPos, hitPos);
             hitNormal.Normalize();
 
-            hitDist = (float)Math.Sqrt(radiusSqr);
+            hitDist = MathF.Sqrt(radiusSqr);
 
             return status;
         }

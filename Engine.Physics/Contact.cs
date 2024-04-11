@@ -95,10 +95,10 @@ namespace Engine.Physics
             Vector3 contactTangent2;
 
             // Check if the Z axis is closer to the X axis or the Y axis
-            if (Math.Abs(contactNormal.X) > Math.Abs(contactNormal.Y))
+            if (MathF.Abs(contactNormal.X) > MathF.Abs(contactNormal.Y))
             {
                 // Get a scaling factor to make sure the results are normalized
-                float s = 1.0f / (float)Math.Sqrt(contactNormal.Z * contactNormal.Z + contactNormal.X * contactNormal.X);
+                float s = 1f / MathF.Sqrt(contactNormal.Z * contactNormal.Z + contactNormal.X * contactNormal.X);
 
                 // The new X axis is 90 degrees to the Y axis of the world
                 contactTangent1.X = contactNormal.Z * s;
@@ -113,7 +113,7 @@ namespace Engine.Physics
             else
             {
                 // Get a scaling factor to make sure the results are normalized
-                float s = 1.0f / (float)Math.Sqrt(contactNormal.Z * contactNormal.Z + contactNormal.Y * contactNormal.Y);
+                float s = 1.0f / MathF.Sqrt(contactNormal.Z * contactNormal.Z + contactNormal.Y * contactNormal.Y);
 
                 // The new X axis is 90 degrees to the X axis of the world
                 contactTangent1.X = 0;
@@ -272,7 +272,7 @@ namespace Engine.Physics
 
             // If the speed is very slow, it is necessary to limit the restitution
             float thisRestitution = restitution;
-            if (Math.Abs(velocity.X) < velocityLimit)
+            if (MathF.Abs(velocity.X) < velocityLimit)
             {
                 thisRestitution = 0.0f;
             }
@@ -602,7 +602,7 @@ namespace Engine.Physics
             impulseContact = impulseMatrix.Transform(velKill);
 
             // Check for excessive friction
-            float planarImpulse = (float)Math.Sqrt(impulseContact.Y * impulseContact.Y + impulseContact.Z * impulseContact.Z);
+            float planarImpulse = MathF.Sqrt(impulseContact.Y * impulseContact.Y + impulseContact.Z * impulseContact.Z);
             if (planarImpulse > impulseContact.X * friction)
             {
                 // Need to use dynamic friction

@@ -11,7 +11,13 @@ namespace Engine
     /// <summary>
     /// Scattered sky
     /// </summary>
-    public sealed class SkyScattering : Drawable<SkyScatteringDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class SkyScattering(Scene scene, string id, string name) : Drawable<SkyScatteringDescription>(scene, id, name)
     {
         /// <summary>
         /// Vernier scale
@@ -22,7 +28,7 @@ namespace Engine
         {
             float icos = 1.0f - cos;
 
-            return 0.25f * (float)Math.Exp(-0.00287f + icos * (0.459f + icos * (3.83f + icos * (-6.80f + (icos * 5.25f)))));
+            return 0.25f * MathF.Exp(-0.00287f + icos * (0.459f + icos * (3.83f + icos * (-6.80f + (icos * 5.25f)))));
         }
         /// <summary>
         /// Mie phase
@@ -35,7 +41,7 @@ namespace Engine
             float g = -0.991f;
             float gg = g * g;
 
-            return 1.5f * ((1.0f - gg) / (2.0f + gg)) * (1.0f + coscos) / (float)Math.Pow(Math.Abs(1.0f + gg - 2.0f * g * cos), 1.5f);
+            return 1.5f * ((1.0f - gg) / (2.0f + gg)) * (1.0f + coscos) / MathF.Pow(MathF.Abs(1.0f + gg - 2.0f * g * cos), 1.5f);
         }
 
         /// <summary>
@@ -151,9 +157,9 @@ namespace Engine
             {
                 wavelength = value;
                 InvWaveLength4 = new Color3(
-                    1f / (float)Math.Pow(value.Red, 4.0f),
-                    1f / (float)Math.Pow(value.Green, 4.0f),
-                    1f / (float)Math.Pow(value.Blue, 4.0f));
+                    1f / MathF.Pow(value.Red, 4.0f),
+                    1f / MathF.Pow(value.Green, 4.0f),
+                    1f / MathF.Pow(value.Blue, 4.0f));
             }
         }
         /// <summary>
@@ -226,17 +232,6 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public SkyScattering(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -449,7 +444,7 @@ namespace Engine
             var sampleRay = eyeDirection * sampleLength;
             float startAngle = Vector3.Dot(eyeDirection, eyePosition);
 
-            float scaleDepth = (float)Math.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
+            float scaleDepth = MathF.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
             float startOffset = scaleDepth * VernierScale(startAngle);
 
             var samplePoint = eyePosition + sampleRay * 0.5f;
@@ -458,18 +453,18 @@ namespace Engine
 
             for (uint i = 0; i < 2; i++)
             {
-                float depth = (float)Math.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
+                float depth = MathF.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
 
                 float height = samplePoint.Length();
                 float lightAngle = Vector3.Dot(-lightDirection, samplePoint) / height;
                 float cameraAngle = Vector3.Dot(eyeDirection, samplePoint) / height;
 
-                float scatter = (startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle)));
+                float scatter = startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle));
 
                 var attenuate = Color3.Black;
-                attenuate[0] = (float)Math.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
-                attenuate[1] = (float)Math.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
-                attenuate[2] = (float)Math.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
+                attenuate[0] = MathF.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
+                attenuate[1] = MathF.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
+                attenuate[2] = MathF.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
 
                 frontColor += attenuate * depth * scaledLength;
 
@@ -485,9 +480,9 @@ namespace Engine
             var color = rayleighColor + (miePhase * mieColor);
 
             var expColor = Vector3.Zero;
-            expColor.X = 1.0f - (float)Math.Exp(-HDRExposure * color.Red);
-            expColor.Y = 1.0f - (float)Math.Exp(-HDRExposure * color.Green);
-            expColor.Z = 1.0f - (float)Math.Exp(-HDRExposure * color.Blue);
+            expColor.X = 1.0f - MathF.Exp(-HDRExposure * color.Red);
+            expColor.Y = 1.0f - MathF.Exp(-HDRExposure * color.Green);
+            expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Blue);
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);

@@ -1420,8 +1420,8 @@ namespace TerrainSamples.SceneHeightmap
             float d = 1f;
             float v = 5f;
 
-            var x = d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
-            var z = d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
+            var x = d * MathF.Cos(v * Game.GameTime.TotalSeconds);
+            var z = d * MathF.Sin(v * Game.GameTime.TotalSeconds);
 
             spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
             spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));

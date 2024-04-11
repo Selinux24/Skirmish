@@ -330,7 +330,7 @@ namespace Engine
             else if (tangentInType == CurveTangent.Smooth)
             {
                 var pn = p1 - p0;
-                if (Math.Abs(pn) < float.Epsilon)
+                if (MathF.Abs(pn) < float.Epsilon)
                 {
                     key.TangentIn = 0;
                 }
@@ -351,7 +351,7 @@ namespace Engine
             else if (tangentOutType == CurveTangent.Smooth)
             {
                 var pn = p1 - p0;
-                if (Math.Abs(pn) < float.Epsilon)
+                if (MathF.Abs(pn) < float.Epsilon)
                 {
                     key.TangentOut = 0;
                 }

@@ -400,7 +400,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Make sure the segments are always handled in same order
             // using lexological sort or else there will be seams.
-            if (Math.Abs(vb.X - va.X) < Utils.ZeroTolerance)
+            if (MathF.Abs(vb.X - va.X) < Utils.ZeroTolerance)
             {
                 if (vb.Z > va.Z)
                 {
@@ -1530,10 +1530,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var bbox = Utils.GetPolygonBounds(polygon);
             float h = (bbox.Maximum.Y + bbox.Minimum.Y) * 0.5f;
 
-            int x0 = (int)Math.Floor(bbox.Minimum.X / sampleDist);
-            int x1 = (int)Math.Ceiling(bbox.Maximum.X / sampleDist);
-            int z0 = (int)Math.Floor(bbox.Minimum.Z / sampleDist);
-            int z1 = (int)Math.Ceiling(bbox.Maximum.Z / sampleDist);
+            int x0 = (int)MathF.Floor(bbox.Minimum.X / sampleDist);
+            int x1 = (int)MathF.Ceiling(bbox.Maximum.X / sampleDist);
+            int z0 = (int)MathF.Floor(bbox.Minimum.Z / sampleDist);
+            int z1 = (int)MathF.Ceiling(bbox.Maximum.Z / sampleDist);
 
             float cs = CellSize;
             float ch = CellHeight;

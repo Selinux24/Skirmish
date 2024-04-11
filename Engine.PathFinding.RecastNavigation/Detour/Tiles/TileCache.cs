@@ -98,7 +98,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Init tiles
-            var m_tileLutSize = Math.Max(1, Helper.NextPowerOfTwo(tcparams.MaxTiles / 4));
+            int m_tileLutSize = Math.Max(1, Helper.NextPowerOfTwo(tcparams.MaxTiles / 4));
             m_tileLutMask = m_tileLutSize - 1;
 
             m_tiles = new CompressedTile[tcparams.MaxTiles];
@@ -115,7 +115,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Init ID generator values.
-            int tileBits = (int)Math.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
+            int tileBits = (int)MathF.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
 
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
             m_saltBits = Math.Min(31, 32 - tileBits);

@@ -22,13 +22,13 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public static InputElement[] Input(int slot)
         {
-            return new InputElement[]
-            {
+            return
+            [
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, slot, InputClassification.PerVertexData, 0),
                 new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 40, slot, InputClassification.PerVertexData, 0 ),
-            };
+            ];
         }
         /// <summary>
         /// Converts a vertex data list to a vertex array

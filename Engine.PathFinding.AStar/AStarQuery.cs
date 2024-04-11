@@ -13,7 +13,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Constant for second diagonal distance method
         /// </summary>
-        private static readonly float ChebisevCnt = (float)Math.Sqrt(2) - 2f;
+        private static readonly float ChebisevCnt = MathF.Sqrt(2) - 2f;
 
         /// <summary>
         /// Cached paths
@@ -209,15 +209,15 @@ namespace Engine.PathFinding.AStar
             {
                 float dx = end.X - start.X;
                 float dz = end.Z - start.Z;
-                float h = (float)Math.Sqrt(dx * dx + dz * dz);
+                float h = MathF.Sqrt(dx * dx + dz * dz);
 
                 return h;
             }
 
             if (heuristicMethod == HeuristicMethods.Manhattan)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
                 float h = dx + dz;
 
                 return h;
@@ -225,18 +225,18 @@ namespace Engine.PathFinding.AStar
 
             if (heuristicMethod == HeuristicMethods.DiagonalDistance1)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
-                float h = Math.Max(dx, dz);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
+                float h = MathF.Max(dx, dz);
 
                 return h;
             }
 
             if (heuristicMethod == HeuristicMethods.DiagonalDistance2)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
-                float h = dx + dz + ChebisevCnt * Math.Min(dx, dz);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
+                float h = dx + dz + ChebisevCnt * MathF.Min(dx, dz);
 
                 return h;
             }
@@ -246,7 +246,7 @@ namespace Engine.PathFinding.AStar
                 float dx = start.X - end.X;
                 float dy = start.Y - end.Y;
                 float dz = dx - dy;
-                float h = Math.Max(Math.Abs(dx), Math.Max(Math.Abs(dy), Math.Abs(dz)));
+                float h = MathF.Max(MathF.Abs(dx), MathF.Max(MathF.Abs(dy), MathF.Abs(dz)));
 
                 return h;
             }

@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <inheritdoc/>
         public readonly BoundingBox GetBounds()
         {
-            float maxr = 1.41f * Math.Max(halfExtents.X, halfExtents.Z);
+            float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
 
             Vector3 bmin;
             Vector3 bmax;
@@ -173,8 +173,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <remarks>{ cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }</remarks>
         private readonly Vector2 GetRotAux()
         {
-            float coshalf = (float)Math.Cos(0.5f * yRadians);
-            float sinhalf = (float)Math.Sin(-0.5f * yRadians);
+            float coshalf = MathF.Cos(0.5f * yRadians);
+            float sinhalf = MathF.Sin(-0.5f * yRadians);
             return new Vector2(coshalf * sinhalf, coshalf * coshalf - 0.5f);
         }
         /// <summary>
@@ -182,13 +182,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
         {
-            float maxr = 1.41f * Math.Max(halfExtents.X, halfExtents.Z);
-            int minx = (int)Math.Floor(cx - maxr * ics);
-            int maxx = (int)Math.Floor(cx + maxr * ics);
-            int minz = (int)Math.Floor(cz - maxr * ics);
-            int maxz = (int)Math.Floor(cz + maxr * ics);
-            int miny = (int)Math.Floor((center.Y - halfExtents.Y - orig.Y) * ich);
-            int maxy = (int)Math.Floor((center.Y + halfExtents.Y - orig.Y) * ich);
+            float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
+            int minx = (int)MathF.Floor(cx - maxr * ics);
+            int maxx = (int)MathF.Floor(cx + maxr * ics);
+            int minz = (int)MathF.Floor(cz - maxr * ics);
+            int maxz = (int)MathF.Floor(cz + maxr * ics);
+            int miny = (int)MathF.Floor((center.Y - halfExtents.Y - orig.Y) * ich);
+            int maxy = (int)MathF.Floor((center.Y + halfExtents.Y - orig.Y) * ich);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

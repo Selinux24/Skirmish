@@ -46,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var bbox = GetBounds();
 
-            float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
+            float r2 = MathF.Pow(radius / cs + 0.5f, 2.0f);
 
             int w = layer.Header.Width;
             int h = layer.Header.Height;
@@ -101,12 +101,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="ich">Cell height</param>
         private static BoundingBoxInt? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
         {
-            int minx = (int)Math.Floor((bbox.Minimum.X - orig.X) * ics);
-            int miny = (int)Math.Floor((bbox.Minimum.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((bbox.Minimum.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((bbox.Maximum.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((bbox.Maximum.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((bbox.Maximum.Z - orig.Z) * ics);
+            int minx = (int)MathF.Floor((bbox.Minimum.X - orig.X) * ics);
+            int miny = (int)MathF.Floor((bbox.Minimum.Y - orig.Y) * ich);
+            int minz = (int)MathF.Floor((bbox.Minimum.Z - orig.Z) * ics);
+            int maxx = (int)MathF.Floor((bbox.Maximum.X - orig.X) * ics);
+            int maxy = (int)MathF.Floor((bbox.Maximum.Y - orig.Y) * ich);
+            int maxz = (int)MathF.Floor((bbox.Maximum.Z - orig.Z) * ics);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

@@ -57,8 +57,7 @@ namespace IntermediateSamples.SceneInstancing
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeTweener(),
                     InitializeTexts(),
                     InitializeSky(),
@@ -66,7 +65,7 @@ namespace IntermediateSamples.SceneInstancing
                     InitializeTrees(),
                     InitializeTroops(),
                     InitializeWall()
-                },
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTweener()
@@ -105,8 +104,8 @@ namespace IntermediateSamples.SceneInstancing
         }
         private async Task InitializeSky()
         {
-            string[] paths = new[]
-            {
+            string[] paths =
+            [
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_1_4096.jpg",
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_3_4096.jpg",
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_4_4096.jpg",
@@ -118,7 +117,7 @@ namespace IntermediateSamples.SceneInstancing
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_15_4096.jpg",
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_18_4096.jpg",
                 @"SceneInstancing/resources/skyboxes/Sky_horiz_22_4096.jpg",
-            };
+            ];
 
             skyboxesCount = (uint)paths.Length;
 
@@ -132,19 +131,19 @@ namespace IntermediateSamples.SceneInstancing
             float h = 0f;
             int side = 5;
 
-            VertexData[] vertices = new VertexData[]
-            {
+            VertexData[] vertices =
+            [
                 new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
                 new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneInstancing/resources/ground/gravel_01_diffuse.jpg";
@@ -237,7 +236,7 @@ namespace IntermediateSamples.SceneInstancing
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
             troops.MaximumCount = -1;
 
-            Dictionary<string, AnimationPlan> animations = new();
+            Dictionary<string, AnimationPlan> animations = [];
 
             var sp1 = new AnimationPath();
             sp1.AddLoop("idle1");
@@ -247,7 +246,7 @@ namespace IntermediateSamples.SceneInstancing
             sp2.AddLoop("idle2");
             animations.Add("soldier_idle2", new AnimationPlan(sp2));
 
-            string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
+            string[] anim = ["soldier_idle1", "soldier_idle2"];
 
             var rnd = Helper.NewGenerator(1);
             float l = 5;

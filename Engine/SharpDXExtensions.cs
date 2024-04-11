@@ -272,8 +272,8 @@ namespace Engine
 
             var min = newBox.Minimum;
             var max = newBox.Maximum;
-            newBox.Minimum = new Vector3(Math.Min(max.X, min.X), Math.Min(max.Y, min.Y), Math.Min(max.Z, min.Z));
-            newBox.Maximum = new Vector3(Math.Max(max.X, min.X), Math.Max(max.Y, min.Y), Math.Max(max.Z, min.Z));
+            newBox.Minimum = new(MathF.Min(max.X, min.X), MathF.Min(max.Y, min.Y), MathF.Min(max.Z, min.Z));
+            newBox.Maximum = new(MathF.Max(max.X, min.X), MathF.Max(max.Y, min.Y), MathF.Max(max.Z, min.Z));
 
             return newBox;
         }
@@ -297,7 +297,7 @@ namespace Engine
             }
 
             // Adjust the radius
-            var radius = sphere.Radius * Math.Max(Math.Max(scale.X, scale.Y), scale.Z);
+            var radius = sphere.Radius * MathF.Max(MathF.Max(scale.X, scale.Y), scale.Z);
 
             // Gets the new position
             var center = Vector3.TransformCoordinate(sphere.Center, transform);
@@ -786,9 +786,9 @@ namespace Engine
             var zAxis = trn.Backward;
 
             return
-                extents.X * Math.Abs(Vector3.Dot(vector, xAxis)) +
-                extents.Y * Math.Abs(Vector3.Dot(vector, yAxis)) +
-                extents.Z * Math.Abs(Vector3.Dot(vector, zAxis));
+                extents.X * MathF.Abs(Vector3.Dot(vector, xAxis)) +
+                extents.Y * MathF.Abs(Vector3.Dot(vector, yAxis)) +
+                extents.Z * MathF.Abs(Vector3.Dot(vector, zAxis));
         }
 
         /// <summary>

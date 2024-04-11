@@ -84,7 +84,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     var controller = item[i].AnimationController;
 
                     controller.TimeDelta += 0.1f;
-                    controller.TimeDelta = Math.Min(5, controller.TimeDelta);
+                    controller.TimeDelta = MathF.Min(5f, controller.TimeDelta);
                 }
             };
         }
@@ -97,7 +97,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     var controller = item[i].AnimationController;
 
                     controller.TimeDelta -= 0.1f;
-                    controller.TimeDelta = Math.Max(0, controller.TimeDelta);
+                    controller.TimeDelta = MathF.Max(0f, controller.TimeDelta);
                 }
             };
         }

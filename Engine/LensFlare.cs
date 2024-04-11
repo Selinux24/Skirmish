@@ -10,7 +10,13 @@ namespace Engine
     /// <summary>
     /// Lens flare
     /// </summary>
-    public sealed class LensFlare : Drawable<LensFlareDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class LensFlare(Scene scene, string id, string name) : Drawable<LensFlareDescription>(scene, id, name)
     {
         /// <summary>
         /// Glow sprite
@@ -36,17 +42,6 @@ namespace Engine
             return distance * -2f * direction;
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public LensFlare(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -89,7 +84,7 @@ namespace Engine
                     ContentPath = Description.ContentPath,
                     Height = 100,
                     Width = 100,
-                    Textures = new string[] { Description.GlowTexture },
+                    Textures = [Description.GlowTexture],
                     BlendMode = Description.BlendMode,
                 });
             glowSprite = gl;
@@ -107,7 +102,7 @@ namespace Engine
                         ContentPath = Description.ContentPath,
                         Height = 100,
                         Width = 100,
-                        Textures = new string[] { flareDesc.Texture },
+                        Textures = [flareDesc.Texture],
                         BlendMode = Description.BlendMode,
                     };
 
@@ -144,7 +139,7 @@ namespace Engine
                 return;
             }
 
-            float dot = Math.Max(0, Vector3.Dot(camera.Direction, -keyLight.Direction));
+            float dot = MathF.Max(0f, Vector3.Dot(camera.Direction, -keyLight.Direction));
             float scale = dot * keyLight.Brightness;
             if (scale <= 0)
             {

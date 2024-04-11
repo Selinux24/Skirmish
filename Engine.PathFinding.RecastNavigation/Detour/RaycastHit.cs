@@ -69,7 +69,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             HitEdgeIndex = segMax;
 
             // Keep track of furthest t so far.
-            T = Math.Max(T, tmax);
+            T = MathF.Max(T, tmax);
 
             // Store visited polygons.
             if (n < MaxPath)

@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
                 // so it is enough to compute it from the first tile.
                 var tile = m_nav.GetTileByRef(start.Ref);
                 float agentRadius = tile.Header.WalkableRadius;
-                m_query.RaycastLimitSqr = (float)Math.Pow(agentRadius * DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
+                m_query.RaycastLimitSqr = MathF.Pow(agentRadius * DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
             }
 
             if (start.Ref == end.Ref)

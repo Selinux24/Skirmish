@@ -169,7 +169,7 @@ namespace Engine
                 if (!c)
                 {
                     cull = false;
-                    minDistance = Math.Min(d, minDistance);
+                    minDistance = MathF.Min(d, minDistance);
                 }
             });
 

@@ -81,12 +81,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="ich">Cell height</param>
         private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float ics, float ich)
         {
-            int minx = (int)Math.Floor((bbox.Minimum.X - orig.X) * ics);
-            int miny = (int)Math.Floor((bbox.Minimum.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((bbox.Minimum.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((bbox.Maximum.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((bbox.Maximum.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((bbox.Maximum.Z - orig.Z) * ics);
+            int minx = (int)MathF.Floor((bbox.Minimum.X - orig.X) * ics);
+            int miny = (int)MathF.Floor((bbox.Minimum.Y - orig.Y) * ich);
+            int minz = (int)MathF.Floor((bbox.Minimum.Z - orig.Z) * ics);
+            int maxx = (int)MathF.Floor((bbox.Maximum.X - orig.X) * ics);
+            int maxy = (int)MathF.Floor((bbox.Maximum.Y - orig.Y) * ich);
+            int maxz = (int)MathF.Floor((bbox.Maximum.Z - orig.Z) * ics);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

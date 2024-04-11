@@ -134,11 +134,11 @@ namespace Engine
                         {
                             Array.Sort(displayModeList, (d1, d2) =>
                             {
-                                float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+                                float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
 
-                                f1 = Math.Abs(refreshRate - f1);
-                                f2 = Math.Abs(refreshRate - f2);
+                                f1 = MathF.Abs(refreshRate - f1);
+                                f2 = MathF.Abs(refreshRate - f2);
 
                                 return f1.CompareTo(f2);
                             });
@@ -147,8 +147,8 @@ namespace Engine
                         {
                             Array.Sort(displayModeList, (d1, d2) =>
                             {
-                                float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+                                float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
 
                                 return f2.CompareTo(f1);
                             });

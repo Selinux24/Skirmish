@@ -12,7 +12,13 @@ namespace Engine
     /// <summary>
     /// Sky plane
     /// </summary>
-    public sealed class SkyPlane : Drawable<SkyPlaneDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class SkyPlane(Scene scene, string id, string name) : Drawable<SkyPlaneDescription>(scene, id, name)
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -118,17 +124,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public SkyPlane(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-        /// <summary>
         /// Destructor
         /// </summary>
         ~SkyPlane()
@@ -198,7 +193,7 @@ namespace Engine
             var lights = Scene.Lights;
             if (lights.KeyLight != null)
             {
-                brightness = Math.Min(MaxBrightness, lights.KeyLight.Brightness + MinBrightness);
+                brightness = MathF.Min(MaxBrightness, lights.KeyLight.Brightness + MinBrightness);
             }
 
             color = (CloudsBaseColor + lights.SunColor) * 0.5f;

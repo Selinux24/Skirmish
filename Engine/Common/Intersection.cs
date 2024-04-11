@@ -207,27 +207,27 @@ namespace Engine.Common
 
             // Test first 3 edges
             var edge1 = triangle.GetEdge1();
-            float fex = Math.Abs(edge1.X);
-            float fey = Math.Abs(edge1.Y);
-            float fez = Math.Abs(edge1.Z);
+            float fex = MathF.Abs(edge1.X);
+            float fey = MathF.Abs(edge1.Y);
+            float fez = MathF.Abs(edge1.Z);
             if (!AxisTestX02(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
             if (!AxisTestY02(boxExtents, origTri, edge1.Z, edge1.X, fez, fex)) return false;
             if (!AxisTestZ12(boxExtents, origTri, edge1.Y, edge1.X, fey, fex)) return false;
 
             // Test second 3 edges
             var edge2 = triangle.GetEdge2();
-            fex = Math.Abs(edge2.X);
-            fey = Math.Abs(edge2.Y);
-            fez = Math.Abs(edge2.Z);
+            fex = MathF.Abs(edge2.X);
+            fey = MathF.Abs(edge2.Y);
+            fez = MathF.Abs(edge2.Z);
             if (!AxisTestX02(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
             if (!AxisTestY02(boxExtents, origTri, edge2.Z, edge2.X, fez, fex)) return false;
             if (!AxisTestZ01(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
 
             // Test third 3 edges
             var edge3 = triangle.GetEdge3();
-            fex = Math.Abs(edge3.X);
-            fey = Math.Abs(edge3.Y);
-            fez = Math.Abs(edge3.Z);
+            fex = MathF.Abs(edge3.X);
+            fey = MathF.Abs(edge3.Y);
+            fez = MathF.Abs(edge3.Z);
             if (!AxisTestX01(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
             if (!AxisTestY01(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
             if (!AxisTestZ12(boxExtents, origTri, edge3.Y, edge3.X, fey, fex)) return false;
@@ -1517,7 +1517,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue))
+            if (!inDistance.HasValue || MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1551,7 +1551,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue))
+            if (!inDistance.HasValue || MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1592,13 +1592,13 @@ namespace Engine.Common
 
             bool intoSegmentBounds = false;
 
-            if (inDistance.HasValue && !MathUtil.NearEqual(Math.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
+            if (inDistance.HasValue && !MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
             {
                 enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
                 intoSegmentBounds = true;
             }
 
-            if (outDistance.HasValue && !MathUtil.NearEqual(Math.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
+            if (outDistance.HasValue && !MathUtil.NearEqual(MathF.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
             {
                 exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
                 intoSegmentBounds = true;

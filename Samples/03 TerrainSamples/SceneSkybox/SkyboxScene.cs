@@ -618,9 +618,9 @@ namespace TerrainSamples.SceneSkybox
 
             float totalSeconds = gameTime.TotalSeconds;
             Vector3 position = Vector3.Zero;
-            position.X = r * d * (float)Math.Cos(v * totalSeconds);
-            position.Y = h + (0.25f * (1f + (float)Math.Sin(totalSeconds)));
-            position.Z = r * d * (float)Math.Sin(v * totalSeconds);
+            position.X = r * d * MathF.Cos(v * totalSeconds);
+            position.Y = h + (0.25f * (1f + MathF.Sin(totalSeconds)));
+            position.Z = r * d * MathF.Sin(v * totalSeconds);
 
             movingFire.Manipulator.SetPosition(position);
             movingFireEmitter.Position = position;

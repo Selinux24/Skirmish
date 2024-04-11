@@ -81,10 +81,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             float tw = Width * CellSize;
             float th = Height * CellSize;
-            int tx0 = (int)Math.Floor((bounds.Minimum.X - Origin.X) / tw);
-            int tx1 = (int)Math.Floor((bounds.Maximum.X - Origin.X) / tw);
-            int ty0 = (int)Math.Floor((bounds.Minimum.Z - Origin.Z) / th);
-            int ty1 = (int)Math.Floor((bounds.Maximum.Z - Origin.Z) / th);
+            int tx0 = (int)MathF.Floor((bounds.Minimum.X - Origin.X) / tw);
+            int tx1 = (int)MathF.Floor((bounds.Maximum.X - Origin.X) / tw);
+            int ty0 = (int)MathF.Floor((bounds.Minimum.Z - Origin.Z) / th);
+            int ty1 = (int)MathF.Floor((bounds.Maximum.Z - Origin.Z) / th);
 
             for (int ty = ty0; ty <= ty1; ++ty)
             {

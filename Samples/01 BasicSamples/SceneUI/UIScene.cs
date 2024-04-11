@@ -325,7 +325,7 @@ namespace BasicSamples.SceneUI
 
         public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value.Progress);
+            progressValue = MathF.Max(progressValue, value.Progress);
 
             if (progressBar != null)
             {

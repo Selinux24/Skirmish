@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -90,7 +89,7 @@ namespace Engine
 
                 for (int i = 0; i < Channels.Length; i++)
                 {
-                    vRadius = Math.Max(vRadius, Channels[i].EndRadius);
+                    vRadius = MathF.Max(vRadius, Channels[i].EndRadius);
                 }
 
                 return vRadius;
@@ -119,14 +118,12 @@ namespace Engine
         {
             get
             {
-                var channels = new List<Channel>
-                {
+                return
+                [
                     ChannelRed,
                     ChannelGreen,
                     ChannelBlue
-                };
-
-                return channels.ToArray();
+                ];
             }
         }
         /// <summary>

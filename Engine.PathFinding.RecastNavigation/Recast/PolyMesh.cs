@@ -302,15 +302,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var pmesh in meshes)
             {
-                int ox = (int)Math.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.X) / mesh.CellSize + 0.5f);
-                int oz = (int)Math.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.Z) / mesh.CellSize + 0.5f);
+                int ox = (int)MathF.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.X) / mesh.CellSize + 0.5f);
+                int oz = (int)MathF.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.Z) / mesh.CellSize + 0.5f);
 
                 RemapParams remapParams = new()
                 {
                     IsMinX = ox == 0,
                     IsMinZ = oz == 0,
-                    IsMaxX = ((int)Math.Floor((mesh.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / mesh.CellSize + 0.5f)) == 0,
-                    IsMaxZ = ((int)Math.Floor((mesh.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / mesh.CellSize + 0.5f)) == 0,
+                    IsMaxX = ((int)MathF.Floor((mesh.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / mesh.CellSize + 0.5f)) == 0,
+                    IsMaxZ = ((int)MathF.Floor((mesh.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / mesh.CellSize + 0.5f)) == 0,
                 };
 
                 for (int j = 0; j < pmesh.vertCount; ++j)

@@ -62,8 +62,8 @@ namespace Engine
                         frequency *= lacunarity;
                     }
 
-                    maxNoiseHeight = Math.Max(maxNoiseHeight, noiseHeight);
-                    minNoiseHeight = Math.Min(minNoiseHeight, noiseHeight);
+                    maxNoiseHeight = MathF.Max(maxNoiseHeight, noiseHeight);
+                    minNoiseHeight = MathF.Min(minNoiseHeight, noiseHeight);
 
                     noiseMap[x, y] = noiseHeight;
                 }

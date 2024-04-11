@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     static class Utils
     {
-        static readonly float EqualityTHR = (float)Math.Pow(1.0f / 16384.0f, 2);
+        static readonly float EqualityTHR = MathF.Pow(1.0f / 16384.0f, 2);
 
         /// <summary>
         /// Zero tolerance step
@@ -212,7 +212,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             float dx = b.X - a.X;
             float dz = b.Z - a.Z;
-            return (float)Math.Sqrt(dx * dx + dz * dz);
+            return MathF.Sqrt(dx * dx + dz * dz);
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 float y = a.Y + v0.Y * u + v1.Y * v;
 
-                return Math.Abs(y - pt.Y);
+                return MathF.Abs(y - pt.Y);
             }
 
             return float.MaxValue;
@@ -336,7 +336,7 @@ namespace Engine.PathFinding.RecastNavigation
                     c = !c;
                 }
 
-                dmin = Math.Min(dmin, DistancePtSegSqr2D(p, vj, vi));
+                dmin = MathF.Min(dmin, DistancePtSegSqr2D(p, vj, vi));
             }
 
             return c ? -dmin : dmin;
@@ -432,7 +432,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var diff = Vector3.Subtract(a, polygon[j]);
                 float n = VPerp2D(edge, diff);
                 float d = VPerp2D(dir, edge);
-                if (Math.Abs(d) < eps)
+                if (MathF.Abs(d) < eps)
                 {
                     // S is nearly parallel to this edge
                     if (n < 0)
@@ -503,7 +503,7 @@ namespace Engine.PathFinding.RecastNavigation
             var w = Vector3.Subtract(a, c);
 
             float z = VPerp2D(u, v);
-            if (Math.Abs(z) < ZeroTolerance)
+            if (MathF.Abs(z) < ZeroTolerance)
             {
                 return false;
             }
@@ -529,8 +529,8 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 1; i < npoly; ++i)
             {
                 float d = Vector2.Dot(axis.XZ(), polygon[i].XZ());
-                rmin = Math.Min(rmin, d);
-                rmax = Math.Max(rmax, d);
+                rmin = MathF.Min(rmin, d);
+                rmax = MathF.Max(rmax, d);
             }
         }
         /// <summary>
@@ -585,13 +585,13 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     float d = DistancePtSegSqr2D(polygon[j], p1, p2);
-                    maxEdgeDist = Math.Max(maxEdgeDist, d);
+                    maxEdgeDist = MathF.Max(maxEdgeDist, d);
                 }
 
-                minDist = Math.Min(minDist, maxEdgeDist);
+                minDist = MathF.Min(minDist, maxEdgeDist);
             }
 
-            return (float)Math.Sqrt(minDist);
+            return MathF.Sqrt(minDist);
         }
 
         /// <summary>
@@ -613,7 +613,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Compute scaled barycentric coordinates
             float denom = v0.X * v1.Z - v0.Z * v1.X;
-            if (Math.Abs(denom) < ZeroTolerance)
+            if (MathF.Abs(denom) < ZeroTolerance)
             {
                 return false;
             }
@@ -681,7 +681,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 2; i < polygon.Length; i++)
             {
                 var area = TriArea2D(polygon[0], polygon[i - 1], polygon[i]);
-                areasum += Math.Max(0.001f, area);
+                areasum += MathF.Max(0.001f, area);
                 areas.Add(area);
             }
 
@@ -702,7 +702,7 @@ namespace Engine.PathFinding.RecastNavigation
                 acc += dacc;
             }
 
-            float v = (float)Math.Sqrt(t);
+            float v = MathF.Sqrt(t);
 
             float a = 1 - v;
             float b = (1 - u) * v;
@@ -768,7 +768,7 @@ namespace Engine.PathFinding.RecastNavigation
             float dy = b.Y - a.Y;
             float dz = b.Z - a.Z;
 
-            return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
+            return (dx * dx + dz * dz) < (radius * radius) && MathF.Abs(dy) < height;
         }
 
         /// <summary>

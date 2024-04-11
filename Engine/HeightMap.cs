@@ -133,7 +133,7 @@ namespace Engine
                     float pX = x / (float)width * 2 - 1;
                     float pY = y / (float)width * 2 - 1;
 
-                    float value = Math.Max(Math.Abs(pX), Math.Abs(pY));
+                    float value = MathF.Max(MathF.Abs(pX), MathF.Abs(pY));
 
                     res[x, y] = EvaluateFalloff(value, a, b);
                 }
@@ -149,7 +149,7 @@ namespace Engine
         /// <param name="b">Curve param B</param>
         private static float EvaluateFalloff(float value, float a, float b)
         {
-            return (float)(Math.Pow(value, a) / (Math.Pow(value, a) + Math.Pow(b - b * value, a)));
+            return MathF.Pow(value, a) / (MathF.Pow(value, a) + MathF.Pow(b - b * value, a));
         }
         /// <summary>
         /// Generates the height map normals
@@ -472,15 +472,15 @@ namespace Engine
             long index3 = (Depth * (depth + 1)) + (width + 0); // bottom left
             long index4 = (Depth * (depth + 1)) + (width + 1); // bottom right
 
-            uint[] quad = new[]
-            {
+            uint[] quad =
+            [
                 (uint)index1,
                 (uint)index2,
                 (uint)index3,
                 (uint)index2,
                 (uint)index4,
                 (uint)index3,
-            };
+            ];
 
             return (vertexIndex, quad);
         }
@@ -491,7 +491,7 @@ namespace Engine
         /// <returns>Returns the number of triangles of the note for the specified partition level</returns>
         public int CalcTrianglesPerNode(int partitionLevel)
         {
-            int side = ((int)Math.Sqrt(DataLength) - 1) / ((int)Math.Pow(2, partitionLevel));
+            int side = ((int)MathF.Sqrt(DataLength) - 1) / ((int)MathF.Pow(2, partitionLevel));
 
             return side * side * 2;
         }

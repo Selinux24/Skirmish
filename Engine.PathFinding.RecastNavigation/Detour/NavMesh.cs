@@ -106,8 +106,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Init ID generator values.
-            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxTiles), 2);
-            m_polyBits = (int)Math.Log(Helper.NextPowerOfTwo(m_params.MaxPolys), 2);
+            m_tileBits = (int)MathF.Log(Helper.NextPowerOfTwo(m_params.MaxTiles), 2);
+            m_polyBits = (int)MathF.Log(Helper.NextPowerOfTwo(m_params.MaxPolys), 2);
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
             m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
 
@@ -442,8 +442,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Check for horizontal overlap.
             // The segment is shrunken a little so that slabs which touch
             // at end points are not connected.
-            float minx = Math.Max(amin.X + px, bmin.X + px);
-            float maxx = Math.Min(amax.X - px, bmax.X - px);
+            float minx = MathF.Max(amin.X + px, bmin.X + px);
+            float maxx = MathF.Min(amax.X - px, bmax.X - px);
             if (minx > maxx)
             {
                 return false;
@@ -468,7 +468,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Check for overlap at endpoints.
-            float thr = (float)Math.Sqrt(py * 2);
+            float thr = MathF.Sqrt(py * 2);
             if (dmin * dmin <= thr || dmax * dmax <= thr)
             {
                 return true;
@@ -907,8 +907,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="y">Resulting Y coordinate</param>
         public void CalcTileLoc(Vector3 pos, out int x, out int y)
         {
-            x = (int)Math.Floor((pos.X - m_orig.X) / m_tileWidth);
-            y = (int)Math.Floor((pos.Z - m_orig.Z) / m_tileHeight);
+            x = (int)MathF.Floor((pos.X - m_orig.X) / m_tileWidth);
+            y = (int)MathF.Floor((pos.Z - m_orig.Z) / m_tileHeight);
         }
         /// <summary>
         /// Gets whether exists or not tiles at location
@@ -1348,7 +1348,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     float bpos = GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
-                    if (Math.Abs(apos - bpos) > 0.01f)
+                    if (MathF.Abs(apos - bpos) > 0.01f)
                     {
                         continue;
                     }
@@ -1364,7 +1364,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Add return value.
                     if (conList.Count < maxcon)
                     {
-                        conareaList.Add(new Vector2(Math.Max(amin.X, bmin.X), Math.Min(amax.X, bmax.X)));
+                        conareaList.Add(new(MathF.Max(amin.X, bmin.X), MathF.Min(amax.X, bmax.X)));
                         conList.Add(bse | i);
                     }
 
@@ -1443,7 +1443,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // findNearestPoly may return too optimistic results, further check to make sure. 
-                if (Math.Sqrt(nearestPt.X - con.Start.X) + Math.Sqrt(nearestPt.Z - con.Start.Z) > Math.Sqrt(con.Rad))
+                if (MathF.Sqrt(nearestPt.X - con.Start.X) + MathF.Sqrt(nearestPt.Z - con.Start.Z) > MathF.Sqrt(con.Rad))
                 {
                     continue;
                 }
@@ -1664,7 +1664,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // findNearestPoly may return too optimistic results, further check to make sure. 
-            if (Math.Sqrt(nearestPt.X - p.X) + Math.Sqrt(nearestPt.Z - p.Z) > Math.Sqrt(targetCon.Rad))
+            if (MathF.Sqrt(nearestPt.X - p.X) + MathF.Sqrt(nearestPt.Z - p.Z) > MathF.Sqrt(targetCon.Rad))
             {
                 return;
             }
@@ -1901,7 +1901,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var diff = Vector3.Subtract(center, closestPtPoly);
                 if (posOverPoly)
                 {
-                    d = Math.Abs(diff.Y) - tile.Header.WalkableClimb;
+                    d = MathF.Abs(diff.Y) - tile.Header.WalkableClimb;
                     d = d > 0 ? d * d : 0;
                 }
                 else

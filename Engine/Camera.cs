@@ -1300,7 +1300,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var bsph = new BoundingSphere(position, Math.Max(1f, CameraRadius));
+            var bsph = new BoundingSphere(position, MathF.Max(1f, CameraRadius));
             if (bsph.Intersects(sphere))
             {
                 float distance = Vector3.Distance(position, sphere.Position);

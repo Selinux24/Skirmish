@@ -109,10 +109,10 @@ namespace Engine.Animation
         {
             if (SkinningData == null)
             {
-                return new AnimationPlan();
+                return new();
             }
 
-            var path = new AnimationPath()
+            AnimationPath path = new()
             {
                 Name = clip,
             };
@@ -129,7 +129,7 @@ namespace Engine.Animation
             else
             {
                 float loopTime = planTime;
-                int fullLoops = (int)Math.Ceiling(loopTime);
+                int fullLoops = (int)MathF.Ceiling(loopTime);
                 float loopDelta = 1f;
                 if (fullLoops - loopTime > 0f)
                 {
@@ -142,7 +142,7 @@ namespace Engine.Animation
                 path.UpdateItems(SkinningData);
             }
 
-            return new AnimationPlan(path);
+            return new(path);
         }
 
         /// <summary>

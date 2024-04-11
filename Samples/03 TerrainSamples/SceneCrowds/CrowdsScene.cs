@@ -141,7 +141,7 @@ namespace TerrainSamples.SceneCrowds
             tankAgentType = new Agent()
             {
                 Height = tankbbox.Height,
-                Radius = Math.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
+                Radius = MathF.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
                 MaxClimb = tankbbox.Height * 0.55f,
             };
 

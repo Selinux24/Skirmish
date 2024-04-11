@@ -168,7 +168,7 @@ namespace Engine
         {
             float dt = next.Position - prev.Position;
             float dv = next.Value - prev.Value;
-            if (Math.Abs(dv) < float.Epsilon)
+            if (MathF.Abs(dv) < float.Epsilon)
             {
                 curr.TangentIn = 0;
                 curr.TangentOut = 0;
@@ -311,7 +311,7 @@ namespace Engine
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return [.. returnPath];
         }
     }
 }

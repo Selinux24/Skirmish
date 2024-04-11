@@ -23,7 +23,7 @@ namespace PhysicsSamples.ScenePhysics
         private Joint joint;
         private Rod rod;
 
-        private readonly Simulator simulator = new(new BoundingBox(Vector3.One * -floorSize, Vector3.One * floorSize), 8) { Velocity = 1f };
+        private readonly Simulator simulator = new(new BoundingBox(Vector3.One * -floorSize, Vector3.One * floorSize), 8) { Velocity = 1f, SimulationIterations = 6 };
         private readonly float bodyTime = 60f;
         private readonly float bodyDistance = floorSize * floorSize;
 
@@ -610,7 +610,7 @@ namespace PhysicsSamples.ScenePhysics
         }
         private void UpdateText()
         {
-            runtimeText.Text = $"Explosion time: {Math.Round(lastExplosion?.TotalElapsedTime ?? 0, 2)}; Phase: {lastExplosion?.CurrentPhase}; Active: {lastExplosion?.IsActive}";
+            runtimeText.Text = $"Explosion time: {MathF.Round(lastExplosion?.TotalElapsedTime ?? 0, 2)}; Phase: {lastExplosion?.CurrentPhase}; Active: {lastExplosion?.IsActive}";
         }
 
         public override void GameGraphicsResized()

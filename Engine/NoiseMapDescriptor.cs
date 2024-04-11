@@ -48,12 +48,12 @@ namespace Engine
         {
             MapWidth = Math.Max(1, MapWidth);
             MapHeight = Math.Max(1, MapHeight);
-            Scale = Math.Max(0.0001f, Scale);
+            Scale = MathF.Max(0.0001f, Scale);
             Octaves = Math.Max(1, Octaves);
             Persistance = MathUtil.Clamp(Persistance, 0, 1);
-            Lacunarity = Math.Max(1, Lacunarity);
+            Lacunarity = MathF.Max(1f, Lacunarity);
             Seed = Math.Max(0, Seed);
-            Offset = new Vector2(Math.Max(1, Offset.X), Math.Max(1, Offset.Y));
+            Offset = new Vector2(MathF.Max(1f, Offset.X), MathF.Max(1f, Offset.Y));
         }
     }
 }

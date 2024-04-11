@@ -99,7 +99,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Overshoot a little. This helps to optimize open fields in tiled meshes.
-            dist = Math.Min(dist + 0.01f, pathOptimizationRange);
+            dist = MathF.Min(dist + 0.01f, pathOptimizationRange);
 
             // Adjust ray length.
             var delta = goal - m_pos;

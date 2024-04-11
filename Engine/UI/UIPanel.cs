@@ -175,7 +175,7 @@ namespace Engine.UI
         public void ScrollUp(float amount)
         {
             ScrollVerticalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Max(0, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Max(0f, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollDown(float amount)
@@ -183,7 +183,7 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumVerticalOffset();
 
             ScrollVerticalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Min(maxOffset, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Min(maxOffset, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollLeft(float amount)
@@ -191,13 +191,13 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumHorizontalOffset();
 
             ScrollHorizontalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Min(maxOffset, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Min(maxOffset, ScrollHorizontalOffset);
         }
         /// <inheritdoc/>
         public void ScrollRight(float amount)
         {
             ScrollHorizontalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Max(0f, ScrollHorizontalOffset);
         }
 
         /// <inheritdoc/>

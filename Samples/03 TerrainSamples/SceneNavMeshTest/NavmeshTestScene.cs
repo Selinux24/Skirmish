@@ -454,7 +454,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
-            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
+            float maxD = MathF.Max(MathF.Max(bbox.Width, bbox.Height), bbox.Depth);
 
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1f, 1.2f, 1f) * maxD * 0.8f);
@@ -623,7 +623,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 bounds = tiledCfg.CalculateTileBounds(tx, ty);
             }
 
-            int walkableClimb = (int)Math.Floor(agent.MaxClimb / nmsettings.CellHeight);
+            int walkableClimb = (int)MathF.Floor(agent.MaxClimb / nmsettings.CellHeight);
 
             RasterizerSettings settings = new()
             {

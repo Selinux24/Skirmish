@@ -45,12 +45,12 @@ namespace Engine.Common
         public static IEnumerable<uint> GenerateIndices(LevelOfDetail lod, IndexBufferShapes bufferShape, int triangles)
         {
             uint offset = (uint)lod;
-            uint fullSide = (uint)Math.Sqrt(triangles / 2f);
+            uint fullSide = (uint)MathF.Sqrt(triangles / 2f);
 
-            int tris = triangles / (int)Math.Pow(offset, 2);
+            int tris = triangles / (int)MathF.Pow(offset, 2);
 
             int nodes = tris / 2;
-            uint side = (uint)Math.Sqrt(nodes);
+            uint side = (uint)MathF.Sqrt(nodes);
             uint sideLoss = side / 2;
 
             bool topSide =
@@ -550,9 +550,9 @@ namespace Engine.Common
 
                     //Spherical to Cartesian
                     var position = new Vector3(
-                        radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
-                        radius * (float)Math.Cos(phi),
-                        radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
+                        radius * MathF.Sin(phi) * MathF.Cos(theta),
+                        radius * MathF.Cos(phi),
+                        radius * MathF.Sin(phi) * MathF.Sin(theta));
 
                     vertList.Add(position + center);
                 }
@@ -599,13 +599,13 @@ namespace Engine.Common
                 {
                     float theta = sl * thetaStep;
 
-                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    float y = (float)Math.Cos(phi);
-                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
+                    float x = MathF.Sin(phi) * MathF.Cos(theta);
+                    float y = MathF.Cos(phi);
+                    float z = MathF.Sin(phi) * MathF.Sin(theta);
 
-                    float tX = -(float)Math.Sin(phi) * (float)Math.Sin(theta);
-                    float tY = 0.0f;
-                    float tZ = +(float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    float tX = -MathF.Sin(phi) * MathF.Sin(theta);
+                    float tY = 0f;
+                    float tZ = +MathF.Sin(phi) * MathF.Cos(theta);
 
                     var position = radius * new Vector3(x, y, z);
                     var normal = new Vector3(x, y, z);
@@ -783,10 +783,10 @@ namespace Engine.Common
                 {
                     float theta = sl * thetaStep;
 
-                    float sinPhi = (float)Math.Sin(phi);
-                    float cosPhi = (float)Math.Cos(phi);
-                    float sinTheta = (float)Math.Sin(theta);
-                    float cosTheta = (float)Math.Cos(theta);
+                    float sinPhi = MathF.Sin(phi);
+                    float cosPhi = MathF.Cos(phi);
+                    float sinTheta = MathF.Sin(theta);
+                    float cosTheta = MathF.Cos(theta);
 
                     float x = sinPhi * cosTheta;
                     float y = cosPhi;
@@ -830,10 +830,10 @@ namespace Engine.Common
                 {
                     float theta = sl * thetaStep;
 
-                    float sinPhi = (float)Math.Sin(phi);
-                    float cosPhi = (float)Math.Cos(phi);
-                    float sinTheta = (float)Math.Sin(theta);
-                    float cosTheta = (float)Math.Cos(theta);
+                    float sinPhi = MathF.Sin(phi);
+                    float cosPhi = MathF.Cos(phi);
+                    float sinTheta = MathF.Sin(theta);
+                    float cosTheta = MathF.Cos(theta);
 
                     float x = sinPhi * cosTheta;
                     float y = cosPhi;
@@ -1204,7 +1204,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateConeCupAngle(Topology topology, float cupAngle, float height, int sliceCount)
         {
-            float baseRadius = (float)Math.Tan(cupAngle) * height;
+            float baseRadius = MathF.Tan(cupAngle) * height;
 
             return CreateConeBaseRadius(topology, baseRadius, height, sliceCount);
         }
@@ -1245,9 +1245,9 @@ namespace Engine.Common
                 float theta = sl * thetaStep;
 
                 var position = new Vector3(
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
+                    baseRadius * MathF.Sin(MathUtil.PiOverTwo) * MathF.Cos(theta),
                     -height,
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
+                    baseRadius * MathF.Sin(MathUtil.PiOverTwo) * MathF.Sin(theta));
 
                 vertList.Add(position);
             }
@@ -2149,8 +2149,8 @@ namespace Engine.Common
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = (j / (float)sliceCount) * 2 * (float)Math.PI;
-                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+                    float theta = j / (float)sliceCount * 2 * MathUtil.Pi;
+                    float st = MathF.Sin(theta), ct = MathF.Cos(theta);
 
                     verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
                 }
@@ -2494,8 +2494,8 @@ namespace Engine.Common
             for (int i = 0; i < stackCount; i++)
             {
                 float a = i / (float)stackCount * MathUtil.TwoPi;
-                float x = (float)Math.Cos(a) * radius;
-                float z = (float)Math.Sin(a) * radius;
+                float x = MathF.Cos(a) * radius;
+                float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
 
                 verts.Add(v + center);

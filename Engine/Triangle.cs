@@ -540,7 +540,7 @@ namespace Engine
         {
             Vector3 center = GetCenter();
 
-            return Math.Max(Vector3.Distance(center, Point1), Math.Max(Vector3.Distance(center, Point2), Vector3.Distance(center, Point3)));
+            return MathF.Max(Vector3.Distance(center, Point1), MathF.Max(Vector3.Distance(center, Point2), Vector3.Distance(center, Point3)));
         }
         /// <summary>
         /// Gets the triangle area
@@ -555,7 +555,7 @@ namespace Engine
             float p = (a + b + c) * 0.5f;
             float z = p * (p - a) * (p - b) * (p - c);
 
-            return (float)Math.Sqrt(z);
+            return MathF.Sqrt(z);
         }
         /// <summary>
         /// Gets the triangle geometric center

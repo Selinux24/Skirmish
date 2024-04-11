@@ -47,14 +47,13 @@ namespace BasicSamples.SceneStencilPass
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                new[]
-                {
+                [
                     InitializeFloorAsphalt(),
                     InitializeBuildingObelisk(),
                     InitializeEmitter(),
                     InitializeLights(),
                     InitializeLightsDrawer()
-                },
+                ],
                 (res) => { res.ThrowExceptions(); });
         }
         private async Task InitializeFloorAsphalt()
@@ -62,19 +61,19 @@ namespace BasicSamples.SceneStencilPass
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
+            VertexData[] vertices =
+            [
                 new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
                 new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
                 new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            ];
 
-            uint[] indices = new uint[]
-            {
+            uint[] indices =
+            [
                 0, 1, 2,
                 1, 3, 2,
-            };
+            ];
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
@@ -217,9 +216,9 @@ namespace BasicSamples.SceneStencilPass
             float hv = 1.0f;
             float av = 1f;
 
-            position.X = r * (float)Math.Cos(av * Game.GameTime.TotalSeconds);
-            position.Y = hv * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
-            position.Z = r * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
+            position.X = r * MathF.Cos(av * Game.GameTime.TotalSeconds);
+            position.Y = hv * MathF.Sin(av * Game.GameTime.TotalSeconds);
+            position.Z = r * MathF.Sin(av * Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
             var col1 = animateLightColors ? new Color3(pos1.X, pos1.Y, pos1.Z) : Color3.White;
