@@ -405,12 +405,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Check to see if the corner after the next corner is directly visible, and short cut to there.
             if (Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_VIS) && Corners.Count > 0)
             {
-                Vector3 target = Corners.GetPathPosition(Math.Min(1, Corners.Count - 1));
-                Corridor.OptimizePathVisibility(
-                    target,
-                    Params.PathOptimizationRange,
-                    query,
-                    filter);
+                var target = Corners.GetPathPosition(Math.Min(1, Corners.Count - 1));
+                Corridor.OptimizePathVisibility(query.GetAttachedNavMesh(), filter, target, Params.PathOptimizationRange);
 
                 // Copy data for debug purposes.
                 if (d != null)

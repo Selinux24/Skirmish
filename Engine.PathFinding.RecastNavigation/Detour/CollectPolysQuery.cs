@@ -7,37 +7,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// <summary>
     /// Collect polygon guery
     /// </summary>
-    public class CollectPolysQuery : IPolyQuery
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="polys">Polygon list</param>
+    /// <param name="maxPolys">Maximum polygon count</param>
+    public class CollectPolysQuery(int[] polys, int maxPolys) : IPolyQuery
     {
         /// <summary>
         /// Polygon list
         /// </summary>
-        public int[] Polys { get; protected set; }
+        private readonly int[] polys = polys;
         /// <summary>
         /// Maximum number of polygons
         /// </summary>
-        public int MaxPolys { get; protected set; }
+        private readonly int maxPolys = maxPolys;
         /// <summary>
         /// Number of collected polygons
         /// </summary>
-        public int NumCollected { get; protected set; }
-        /// <summary>
-        /// Overflow flag
-        /// </summary>
-        public bool Overflow { get; protected set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="polys">Polygon list</param>
-        /// <param name="maxPolys">Maximum polygon count</param>
-        public CollectPolysQuery(int[] polys, int maxPolys)
-        {
-            Polys = polys;
-            MaxPolys = maxPolys;
-            NumCollected = 0;
-            Overflow = false;
-        }
+        private int numCollected = 0;
 
         /// <inheritdoc/>
         public void Process(MeshTile tile, IEnumerable<int> refs)
@@ -47,17 +35,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            int numLeft = MaxPolys - NumCollected;
+            int numLeft = maxPolys - numCollected;
             int toCopy = refs.Count();
             if (toCopy > numLeft)
             {
-                Overflow = true;
                 toCopy = numLeft;
             }
 
-            Array.Copy(refs.ToArray(), 0, Polys, NumCollected, toCopy);
+            Array.Copy(refs.ToArray(), 0, polys, numCollected, toCopy);
 
-            NumCollected += toCopy;
+            numCollected += toCopy;
         }
     }
 }

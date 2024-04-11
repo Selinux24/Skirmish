@@ -1927,10 +1927,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="pos">Position</param>
         /// <param name="closest">Resulting closest position</param>
         /// <param name="posOverPoly">Returns true if the resulting position is over de polygon</param>
-        public void ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
+        public Status ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
         {
             closest = pos;
             posOverPoly = false;
+
+            if (!IsValidPolyRef(r) || pos.IsInfinity())
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
 
             var tileRef = GetTileAndPolyByRefUnsafe(r);
 
@@ -1938,7 +1943,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 closest.Y = h;
                 posOverPoly = true;
-                return;
+
+                return Status.DT_SUCCESS;
             }
 
             // Off-mesh connections don't have detail polygons.
@@ -1948,14 +1954,420 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var v1 = tileRef.Tile.Verts[tileRef.Poly.Verts[1]];
                 Utils.DistancePtSegSqr2D(pos, v0, v1, out var t);
                 closest = Vector3.Lerp(v0, v1, t);
-                return;
+
+                return Status.DT_SUCCESS;
             }
 
             // Outside poly that is not an offmesh connection.
             tileRef.Tile.ClosestPointOnDetailEdges(tileRef.Poly, pos, true, out closest);
+
+            return Status.DT_SUCCESS;
         }
         /// <summary>
-        /// Creates the tile caché
+        /// Returns a point on the boundary closest to the source point if the source point is outside the polygon's xz-bounds.
+        /// </summary>
+        /// <param name="r">The reference id to the polygon.</param>
+        /// <param name="pos">The position to check.</param>
+        /// <param name="closest">The closest point.</param>
+        /// <returns>The status flags for the query.</returns>
+        public Status ClosestPointOnPolyBoundary(int r, Vector3 pos, out Vector3 closest)
+        {
+            closest = new Vector3();
+
+            var cur = GetTileAndPolyByRef(r);
+            if (cur.Ref == 0)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+            if (pos.IsInfinity())
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            // Collect vertices.
+            var verts = cur.Tile.GetPolyVerts(cur.Poly);
+
+            bool inside = Utils.PointInPolygon2D(pos, verts, out var edged, out var edget);
+            if (inside)
+            {
+                // Point is inside the polygon, return the point.
+                closest = pos;
+            }
+            else
+            {
+                // Point is outside the polygon, dtClamp to nearest edge.
+                closest = Utils.ClosestPointOutsidePoly(verts, edged, edget);
+            }
+
+            return Status.DT_SUCCESS;
+        }
+
+        /// <summary>
+        /// Gets whether the request is valid or not
+        /// </summary>
+        /// <param name="request">Raycast request</param>
+        public bool IsValid(RaycastRequest request)
+        {
+            // Validate input
+            if (request.Filter == null ||
+                request.StartPos.IsInfinity() ||
+                request.EndPos.IsInfinity() ||
+                !IsValidPolyRef(request.StartRef) ||
+                request.PrevReference.HasValue && !IsValidPolyRef(request.PrevReference.Value))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Get current, previous and next tile references from the start reference
+        /// </summary>
+        /// <param name="request">Raycast request</param>
+        public (TileRef cur, TileRef prev, TileRef next) GetTiles(RaycastRequest request)
+        {
+            var cur = GetTileAndPolyByRefUnsafe(request.StartRef);
+            var prev = cur;
+            var next = cur;
+
+            if (request.PrevReference.HasValue)
+            {
+                prev = GetTileAndPolyByRefUnsafe(request.PrevReference.Value);
+            }
+
+            return (cur, prev, next);
+        }
+
+        /// <summary>
+        /// Gets the height of the polygon at the provided position using the height detail. (Most accurate.)
+        /// </summary>
+        /// <param name="r">The reference id of the polygon.</param>
+        /// <param name="pos">A position within the xz-bounds of the polygon.</param>
+        /// <param name="height">The height at the surface of the polygon.</param>
+        /// <returns>The status flags for the query.</returns>
+        public Status GetPolyHeight(int r, Vector3 pos, out float height)
+        {
+            height = 0;
+
+            var cur = GetTileAndPolyByRef(r);
+            if (cur.Ref == 0)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+            if (pos.XZ().IsInfinity())
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            // We used to return success for offmesh connections, but the
+            // getPolyHeight in DetourNavMesh does not do this, so special
+            // case it here.
+            if (cur.Poly.Type == PolyTypes.OffmeshConnection)
+            {
+                var v0 = cur.Tile.Verts[cur.Poly.Verts[0]];
+                var v1 = cur.Tile.Verts[cur.Poly.Verts[1]];
+                Utils.DistancePtSegSqr2D(pos, v0, v1, out float t);
+                height = v0.Y + (v1.Y - v0.Y) * t;
+
+                return Status.DT_SUCCESS;
+            }
+
+            return cur.Tile.GetPolyHeight(cur.Poly, pos, out height) ?
+                Status.DT_SUCCESS :
+                Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+        }
+        /// <summary>
+        /// Pick random tile
+        /// </summary>
+        /// <returns>Returns the picked tile</returns>
+        public MeshTile PickTile()
+        {
+            MeshTile tile = null;
+            float areaSum = 0.0f;
+
+            for (int i = 0; i < MaxTiles; i++)
+            {
+                var tl = Tiles[i];
+                if (tl == null || !tl.Header.IsValid())
+                {
+                    continue;
+                }
+
+                // Choose random tile using reservoi sampling.
+                float area = 1.0f; // Could be tile area too.
+                areaSum += area;
+                float u = Helper.RandomGenerator.NextFloat(0, 1);
+                if (u * areaSum <= area)
+                {
+                    tile = tl;
+                }
+            }
+
+            return tile;
+        }
+
+        /// <summary>
+        /// Casts a 'walkability' ray along the surface of the navigation mesh from the start position toward the end position.
+        /// </summary>
+        /// <param name="request">Ray cast request</param>
+        /// <param name="hit">Pointer to a raycast hit structure which will be filled by the results.</param>
+        public Status Raycast(RaycastRequest request, out RaycastHit hit)
+        {
+            hit = new()
+            {
+                HitNormal = Vector3.Zero,
+                MaxPath = request.MaxPath,
+                T = 0,
+                PathCost = 0
+            };
+
+            // Validate input
+            if (!IsValid(request))
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            var startPos = request.StartPos;
+            var endPos = request.EndPos;
+            var filter = request.Filter;
+            bool useCosts = request.Options.HasFlag(RaycastOptions.DT_RAYCAST_USE_COSTS);
+
+            var curPos = startPos;
+            var dir = Vector3.Subtract(endPos, startPos);
+
+            Status status = Status.DT_SUCCESS;
+            Vector3 lastPos;
+            int n = 0;
+
+            // The API input has been checked already, skip checking internal data.
+            var (cur, prev, next) = GetTiles(request);
+
+            while (cur.Ref != 0)
+            {
+                // Cast ray against current polygon.
+                next.Poly = cur.Poly;
+
+                // Collect vertices.
+                var verts = cur.Tile.GetPolyVerts(cur.Poly);
+
+                if (!Utils.IntersectSegmentPoly2D(startPos, endPos, verts, out _, out float tmax, out _, out int segMax))
+                {
+                    // Could not hit the polygon, keep the old t and report hit.
+                    hit.Cut(n);
+
+                    return status;
+                }
+
+                if (!hit.PrepareHitData(ref n, cur, tmax, segMax))
+                {
+                    status |= Status.DT_BUFFER_TOO_SMALL;
+                }
+
+                // Ray end is completely inside the polygon.
+                if (segMax == -1)
+                {
+                    hit.T = float.MaxValue;
+                    hit.Cut(n);
+
+                    // add the cost
+                    if (useCosts)
+                    {
+                        hit.PathCost += filter.GetCost(curPos, endPos, prev, cur, cur);
+                    }
+
+                    return status;
+                }
+
+                // Follow neighbours.
+                next.Ref = 0;
+
+                RayCastLinks(cur, filter, startPos, endPos, tmax, segMax, ref next);
+
+                // add the cost
+                if (useCosts)
+                {
+                    // compute the intersection point at the furthest end of the polygon
+                    // and correct the height (since the raycast moves in 2d)
+                    lastPos = curPos;
+                    curPos = Vector3.Add(startPos, dir) * hit.T;
+                    curPos.Y = CalculateHeight(curPos, verts, segMax);
+
+                    hit.PathCost += filter.GetCost(lastPos, curPos, prev, cur, next);
+                }
+
+                if (next.Ref == 0)
+                {
+                    // No neighbour, we hit a wall.
+
+                    // Calculate hit normal.
+                    hit.HitNormal = CalculateHitNormal(verts, segMax);
+                    hit.Cut(n);
+
+                    return status;
+                }
+
+                // No hit, advance to neighbour polygon.
+                prev = cur;
+                cur = next;
+
+                // Maintain reference
+                hit.PrevReference = prev.Ref;
+            }
+
+            hit.Cut(n);
+
+            return status;
+        }
+        /// <summary>
+        /// Calculates the position height
+        /// </summary>
+        /// <param name="pos">Position (2D)</param>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="index">Vertex index</param>
+        /// <returns>Returns the Y value</returns>
+        private static float CalculateHeight(Vector3 pos, Vector3[] verts, int index)
+        {
+            var e1 = verts[index];
+            var e2 = verts[(index + 1) % verts.Length];
+            var eDir = Vector3.Subtract(e2, e1);
+            var diff = Vector3.Subtract(pos, e1);
+            float s = (eDir.X * eDir.X) > (eDir.Z * eDir.Z) ? diff.X / eDir.X : diff.Z / eDir.Z;
+            return e1.Y + eDir.Y * s;
+        }
+        /// <summary>
+        /// Calculates the hit normal
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="index">Vertex index</param>
+        /// <returns>Returns the hit normal (XZ)</returns>
+        private static Vector3 CalculateHitNormal(Vector3[] verts, int index)
+        {
+            var e1 = verts[index];
+            var e2 = verts[(index + 1) % verts.Length];
+            float dx = e2.X - e1.X;
+            float dz = e2.Z - e1.Z;
+            return Vector3.Normalize(new(dz, 0, -dx));
+        }
+        /// <summary>
+        /// Ray cast to the linked tiles
+        /// </summary>
+        /// <param name="cur">Tile to iterate links</param>
+        /// <param name="filter">Query filter</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="tmax">Maximum distance</param>
+        /// <param name="segMax">Maximum segment</param>
+        /// <param name="next">Updates the next tile to test</param>
+        private void RayCastLinks(TileRef cur, QueryFilter filter, Vector3 startPos, Vector3 endPos, float tmax, int segMax, ref TileRef next)
+        {
+            for (int i = cur.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
+            {
+                var link = cur.Tile.Links[i];
+
+                // Find link which contains this edge.
+                if (link.Edge != segMax)
+                {
+                    continue;
+                }
+
+                // Get pointer to the next polygon.
+                next = GetTileAndPolyByRefUnsafe(link.NRef);
+
+                // Skip off-mesh connections.
+                if (next.Poly.Type == PolyTypes.OffmeshConnection)
+                {
+                    continue;
+                }
+
+                // Skip links based on filter.
+                if (!filter.PassFilter(next.Poly.Flags))
+                {
+                    continue;
+                }
+
+                // If the link is internal, just return the ref.
+                if (link.Side == 0xff)
+                {
+                    next.Ref = link.NRef;
+                    break;
+                }
+
+                // If the link is at tile boundary,
+
+                // Check if the link spans the whole edge, and accept.
+                if (link.ExcedBoundaries())
+                {
+                    next.Ref = link.NRef;
+                    break;
+                }
+
+                // Check for partial edge links.
+                if (!CheckEdgeLinks(link, cur, startPos, endPos, tmax))
+                {
+                    next.Ref = link.NRef;
+                    break;
+                }
+            }
+        }
+        /// <summary>
+        /// Checks edge links
+        /// </summary>
+        /// <param name="link">Link</param>
+        /// <param name="cur">Tile</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <param name="tmax">Maximum distance</param>
+        private static bool CheckEdgeLinks(Link link, TileRef cur, Vector3 startPos, Vector3 endPos, float tmax)
+        {
+            // Check for partial edge links.
+            int v0 = cur.Poly.Verts[link.Edge];
+            int v1 = cur.Poly.Verts[(link.Edge + 1) % cur.Poly.VertCount];
+            var left = cur.Tile.Verts[v0];
+            var right = cur.Tile.Verts[v1];
+
+            // Check that the intersection lies inside the link portal.
+            if (link.Side == 0 || link.Side == 4)
+            {
+                // Calculate link size.
+                const float s = 1.0f / 255.0f;
+                float lmin = left.Z + (right.Z - left.Z) * (link.BMin * s);
+                float lmax = left.Z + (right.Z - left.Z) * (link.BMax * s);
+                if (lmin > lmax)
+                {
+                    Helper.Swap(ref lmin, ref lmax);
+                }
+
+                // Find Z intersection.
+                float z = startPos.Z + (endPos.Z - startPos.Z) * tmax;
+                if (z >= lmin && z <= lmax)
+                {
+                    return false;
+                }
+            }
+            else if (link.Side == 2 || link.Side == 6)
+            {
+                // Calculate link size.
+                const float s = 1.0f / 255.0f;
+                float lmin = left.X + (right.X - left.X) * (link.BMin * s);
+                float lmax = left.X + (right.X - left.X) * (link.BMax * s);
+                if (lmin > lmax)
+                {
+                    Helper.Swap(ref lmin, ref lmax);
+                }
+
+                // Find X intersection.
+                float x = startPos.X + (endPos.X - startPos.X) * tmax;
+                if (x >= lmin && x <= lmax)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates the tile cache
         /// </summary>
         /// <param name="geometry">Input geometry</param>
         /// <param name="cacheParams">Parameters</param>

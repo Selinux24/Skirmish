@@ -31,6 +31,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private PolyRefs m_polys = null;
 
         /// <summary>
+        /// Bonudary polygon count
+        /// </summary>
+        public int PolyCount { get => m_polys?.Count ?? 0; }
+
+        /// <summary>
+        /// Gets the polygon reference by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public int GetPolygonReference(int index)
+        {
+            return m_polys?.GetReference(index) ?? -1;
+        }
+
+        /// <summary>
         /// Reset the local boundary
         /// </summary>
         public void Reset()
@@ -44,9 +58,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="r">Reference</param>
         /// <param name="pos">Position</param>
         /// <param name="collisionQueryRange">Collision range</param>
-        /// <param name="query">Query</param>
+        /// <param name="navQuery">Query</param>
         /// <param name="filter">Query filter</param>
-        public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery query, QueryFilter filter)
+        public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navQuery, QueryFilter filter)
         {
             if (r <= 0)
             {
@@ -59,12 +73,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float collisionQueryRangeSq = collisionQueryRange * collisionQueryRange;
 
             // First query non-overlapping polygons.
-            query.FindLocalNeighbourhood(r, pos, collisionQueryRange, filter, MAX_LOCAL_POLYS, out m_polys);
+            navQuery.FindLocalNeighbourhood(r, pos, collisionQueryRange, filter, MAX_LOCAL_POLYS, out m_polys);
 
             // Secondly, store all polygon edges.
             for (int j = 0; j < m_polys.Count; ++j)
             {
-                query.GetPolyWallSegments(m_polys.GetReference(j), filter, MAX_SEGS_PER_POLY, out var segs);
+                navQuery.GetPolyWallSegments(m_polys.GetReference(j), filter, MAX_SEGS_PER_POLY, out var segs);
 
                 foreach (var seg in segs)
                 {
@@ -94,29 +108,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 return s1.D.CompareTo(s2.D);
             });
-        }
-        /// <summary>
-        /// Gets whether the local boundary is valid
-        /// </summary>
-        /// <param name="query">Query</param>
-        /// <param name="filter">Query filter</param>
-        public bool IsValid(NavMeshQuery query, QueryFilter filter)
-        {
-            if (m_polys.Count <= 0)
-            {
-                return false;
-            }
-
-            // Check that all polygons still pass query filter.
-            for (int i = 0; i < m_polys.Count; ++i)
-            {
-                if (!query.IsValidPolyRef(m_polys.GetReference(i), filter))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         /// <summary>

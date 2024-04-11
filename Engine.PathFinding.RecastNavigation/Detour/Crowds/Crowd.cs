@@ -106,25 +106,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Larger than agent radius because it is also used for agent recovery.
             m_agentPlacementHalfExtents = new Vector3(settings.MaxAgentRadius * 2.0f, settings.MaxAgentRadius * 1.5f, settings.MaxAgentRadius * 2.0f);
 
-            m_grid = new ProximityGrid<CrowdAgent>(1000, settings.MaxAgentRadius * 3);
+            m_grid = new(1000, settings.MaxAgentRadius * 3);
 
-            m_obstacleQuery = new ObstacleAvoidanceQuery(6, 8);
+            m_obstacleQuery = new(6, 8);
 
             // Init filters
             for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
             {
-                var filter = new QueryFilter()
+                m_filters.Add(new()
                 {
                     IncludeFlags = SamplePolyFlagTypes.Walk,
-                };
-
-                m_filters.Add(filter);
+                });
             }
 
             // Init obstacle query params.
             for (int i = 0; i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS; i++)
             {
-                var param = new ObstacleAvoidanceParams
+                m_obstacleQueryParams.Add(new()
                 {
                     VelBias = 0.4f,
                     WeightDesVel = 2.0f,
@@ -136,16 +134,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     AdaptiveDivs = 7,
                     AdaptiveRings = 2,
                     AdaptiveDepth = 5
-                };
-
-                m_obstacleQueryParams.Add(param);
+                });
             }
 
             // Allocate temp buffer for merging paths.
-            m_pathq = new PathQueue(nav, m_maxPathResult, MAX_PATHQUEUE_NODES);
+            m_pathq = new(nav, m_maxPathResult, MAX_PATHQUEUE_NODES);
 
             // The navquery is mostly used for local searches, no need for large node pool.
-            m_navquery = new NavMeshQuery(nav, MAX_COMMON_NODES);
+            m_navquery = new(nav, MAX_COMMON_NODES);
         }
 
         /// <summary>
@@ -412,7 +408,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // If nearby corridor is not valid, replan.
-            if (!ag.Corridor.IsValid(CHECK_LOOKAHEAD, m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]))
+            if (!ag.Corridor.IsValid(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex], CHECK_LOOKAHEAD))
             {
                 replan = true;
             }
@@ -530,7 +526,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 if (reqPath.End != ag.TargetRef)
                 {
                     // Partial path, constrain target position inside the last polygon.
-                    Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.End, ag.TargetPos, out reqPos);
+                    Status cStatus = m_navquery.GetAttachedNavMesh().ClosestPointOnPoly(reqPath.End, ag.TargetPos, out reqPos, out _);
                     if (cStatus != Status.DT_SUCCESS)
                     {
                         reqPath.Clear();
@@ -643,7 +639,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             if (res.End != ag.TargetRef)
             {
                 // Partial path, constrain target position inside the last polygon.
-                Status cStatus = m_navquery.ClosestPointOnPoly(res.End, targetPos, out Vector3 nearest);
+                Status cStatus = m_navquery.GetAttachedNavMesh().ClosestPointOnPoly(res.End, targetPos, out Vector3 nearest, out _);
                 if (cStatus == Status.DT_SUCCESS)
                 {
                     targetPos = nearest;
@@ -718,7 +714,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // if it has become invalid.
                 float updateThr = ag.Params.CollisionQueryRange * 0.25f;
                 float distSqr = Utils.DistanceSqr2D(ag.NPos, ag.Boundary.GetCenter());
-                if (distSqr > updateThr * updateThr || !ag.Boundary.IsValid(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]))
+                if (distSqr > updateThr * updateThr || !m_navquery.IsValid(ag.Boundary, m_filters[ag.Params.QueryFilterTypeIndex]))
                 {
                     ag.Boundary.Update(
                         ag.Corridor.GetFirstPoly(),
@@ -934,7 +930,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             foreach (var ag in walkingAgents)
             {
                 // Move along navmesh.
-                ag.Corridor.MovePosition(ag.NPos, m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]);
+                ag.Corridor.MovePosition(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex], ag.NPos);
                 // Get valid constrained position back.
                 ag.NPos = ag.Corridor.GetPos();
 

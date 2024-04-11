@@ -53,8 +53,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             float MIN_TARGET_DIST = 0.01f;
 
-            var (_, cornerPolys) = navquery.FindStraightPath(
-                m_pos, m_target, m_path, maxCorners, StraightPathOptions.None);
+            navquery.FindStraightPath(m_pos, m_target, m_path, maxCorners, StraightPathOptions.None, out var cornerPolys);
 
             // Prune points in the beginning of the path which are too close.
             while (cornerPolys.Count > 0)
@@ -85,9 +84,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="target">The point to search toward. [(x, y, z])</param>
         /// <param name="pathOptimizationRange">The maximum range to search. [Limit: > 0]</param>
-        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="navMesh">Navigation mesh.</param>
         /// <param name="filter">The filter to apply to the operation.</param>
-        public void OptimizePathVisibility(Vector3 target, float pathOptimizationRange, NavMeshQuery navquery, QueryFilter filter)
+        public void OptimizePathVisibility(NavMesh navMesh, QueryFilter filter, Vector3 target, float pathOptimizationRange)
         {
             // Clamp the ray to max distance.
             var goal = target;
@@ -114,7 +113,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 Filter = filter,
                 MaxPath = 32,
             };
-            navquery.Raycast(request, out var res);
+            navMesh.Raycast(request, out var res);
 
             if (res.PathCount > 1 && res.T > 0.99f)
             {
@@ -216,11 +215,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Tims invalid path
         /// </summary>
-        /// <param name="safeRef">Safe reference</param>
-        /// <param name="safePos">Safe position</param>
         /// <param name="navquery">Navigation query</param>
         /// <param name="filter">Query filter</param>
-        public bool TrimInvalidPath(int safeRef, Vector3 safePos, NavMeshQuery navquery, QueryFilter filter)
+        /// <param name="safeRef">Safe reference</param>
+        /// <param name="safePos">Safe position</param>
+        public bool TrimInvalidPath(NavMeshQuery navquery, QueryFilter filter, int safeRef, Vector3 safePos)
         {
             // Keep valid path as far as possible.
             int n = 0;
@@ -248,18 +247,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Clamp target pos to last poly
-            navquery.ClosestPointOnPolyBoundary(m_path.End, m_target, out m_target);
+            navquery.GetAttachedNavMesh().ClosestPointOnPolyBoundary(m_path.End, m_target, out m_target);
 
             return true;
         }
         /// <summary>
         /// Checks the current corridor path to see if its polygon references remain valid.
         /// </summary>
+        /// <param name="navquery">Navigation mesh.</param>
         /// <param name="maxLookAhead">The number of polygons from the beginning of the corridor to search.</param>
-        /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="filter">The filter to apply to the operation.</param>
         /// <returns></returns>
-        public bool IsValid(int maxLookAhead, NavMeshQuery navquery, QueryFilter filter)
+        public bool IsValid(NavMeshQuery navquery, QueryFilter filter, int maxLookAhead)
         {
             // Check that all polygons still pass query filter.
             int n = Math.Min(m_path.Count, maxLookAhead);
@@ -277,11 +276,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Moves the position from the current location to the desired location, adjusting the corridor as needed to reflect the change.
         /// </summary>
-        /// <param name="npos">The desired new position. [(x, y, z)]</param>
         /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="npos">The desired new position. [(x, y, z)]</param>
         /// <param name="filter">The filter to apply to the operation.</param>
         /// <returns>Returns true if move succeeded.</returns>
-        public bool MovePosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
+        public bool MovePosition(NavMeshQuery navquery, QueryFilter filter, Vector3 npos)
         {
             if (m_path.Count <= 0)
             {
@@ -299,7 +298,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 SimplePath.MergeCorridorStartMoved(m_path, visited);
 
                 // Adjust the position to stay on top of the navmesh.
-                navquery.GetPolyHeight(m_path.Start, result, out float h);
+                navquery.GetAttachedNavMesh().GetPolyHeight(m_path.Start, result, out float h);
                 result.Y = h;
                 m_pos = result;
 
@@ -315,7 +314,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="filter">The filter to apply to the operation.</param>
         /// <returns>Returns true if move succeeded.</returns>
-        public bool MoveTargetPosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
+        public bool MoveTargetPosition(NavMeshQuery navquery, QueryFilter filter, Vector3 npos)
         {
             if (m_path.Count <= 0)
             {

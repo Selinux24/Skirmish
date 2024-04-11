@@ -437,7 +437,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Copy old path in the beginning.
             var tmp = new List<int>(referenceList);
             tmp.InsertRange(0, rlist);
-            referenceList = tmp.ToArray();
+            referenceList = [.. tmp];
             Count += count - 1;
 
             // Remove trackbacks
@@ -527,7 +527,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new SimplePath(maxSize)
                 {
-                    referenceList = referenceList.ToArray(),
+                    referenceList = [.. referenceList],
                     Count = Count,
                 };
             }
@@ -555,7 +555,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return new SimplePath(max)
             {
-                referenceList = referenceList.ToArray(),
+                referenceList = [.. referenceList],
                 Count = Count,
             };
         }
