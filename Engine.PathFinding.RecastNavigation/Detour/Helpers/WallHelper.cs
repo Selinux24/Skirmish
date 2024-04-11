@@ -36,6 +36,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
             m_openList = new(maxNodes);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~WallHelper()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
@@ -47,7 +55,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// Dispose resources
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
-        private void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {

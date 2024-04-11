@@ -237,11 +237,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>True if the polygon is in closed list.</returns>
         public bool IsInClosedList(int r, int maxNodes)
         {
-            var (nodes, n) = FindNodes(r, maxNodes);
+            var (nList, n) = FindNodes(r, maxNodes);
 
             for (int i = 0; i < n; i++)
             {
-                if (nodes[i].IsClosed)
+                if (nList[i].IsClosed)
                 {
                     return true;
                 }

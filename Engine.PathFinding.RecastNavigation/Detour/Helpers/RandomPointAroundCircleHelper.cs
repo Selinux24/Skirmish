@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -183,10 +184,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
             // Get parent poly and tile.
             int parentRef = m_nodePool.GetNodeAtIdx(tile.Node.PIdx)?.Ref ?? 0;
 
-            foreach (var link in tile.IteratePolygonLinks())
+            foreach (var neighbourRef in tile.IteratePolygonLinks().Select(link => link.NRef))
             {
-                int neighbourRef = link.NRef;
-
                 // Skip invalid neighbours and do not follow back to parent.
                 if (neighbourRef == 0 || neighbourRef == parentRef)
                 {
