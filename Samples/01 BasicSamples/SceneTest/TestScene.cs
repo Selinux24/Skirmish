@@ -698,7 +698,7 @@ namespace BasicSamples.SceneTest
             float size = 1f;
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
-            var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+            var cubeTris = Triangle.ComputeTriangleList(bbox);
             cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
             var desc = new PrimitiveListDrawerDescription<Triangle>()
@@ -743,7 +743,7 @@ namespace BasicSamples.SceneTest
             ];
 
             var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
-            var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+            var cubeTris = Triangle.ComputeTriangleList(bbox);
 
             particlePlumes = new IParticleSystem[positions.Length];
             List<Triangle> markers = [];

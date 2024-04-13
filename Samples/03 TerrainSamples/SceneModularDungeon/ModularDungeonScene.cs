@@ -1689,15 +1689,15 @@ namespace TerrainSamples.SceneModularDungeon
 
                 if (obstacle is BoundingCylinder bc)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bc, 32);
+                    obstacleTris = Triangle.ComputeTriangleList(bc, 32);
                 }
                 else if (obstacle is BoundingBox bbox)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+                    obstacleTris = Triangle.ComputeTriangleList(bbox);
                 }
                 else if (obstacle is OrientedBoundingBox obb)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, obb);
+                    obstacleTris = Triangle.ComputeTriangleList(obb);
                 }
 
                 if (obstacleTris?.Any() == true)

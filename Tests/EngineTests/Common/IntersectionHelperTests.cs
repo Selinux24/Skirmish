@@ -95,11 +95,11 @@ namespace Engine.Common.Tests
             box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Minimum, bbox5.Maximum);
 
 
-            tmesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1).ToArray();
-            tmesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box2).ToArray();
-            tmesh3 = Triangle.ComputeTriangleList(Topology.TriangleList, box3).ToArray();
-            tmesh4 = Triangle.ComputeTriangleList(Topology.TriangleList, box4).ToArray();
-            tmesh5 = Triangle.ComputeTriangleList(Topology.TriangleList, box5).ToArray();
+            tmesh1 = Triangle.ComputeTriangleList(box1).ToArray();
+            tmesh2 = Triangle.ComputeTriangleList(box2).ToArray();
+            tmesh3 = Triangle.ComputeTriangleList(box3).ToArray();
+            tmesh4 = Triangle.ComputeTriangleList(box4).ToArray();
+            tmesh5 = Triangle.ComputeTriangleList(box5).ToArray();
 
             mesh1 = new IntersectionVolumeMesh(tmesh1);
             mesh2 = new IntersectionVolumeMesh(tmesh2);
@@ -388,7 +388,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh(Array.Empty<Triangle>()); });
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh([]); });
         }
 
         [TestMethod()]

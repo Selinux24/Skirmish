@@ -131,6 +131,12 @@ namespace Engine
 
             return CreateFromVertices(geometry);
         }
+        public static IEnumerable<Line3D> CreateCylinder(BoundingCylinder cylinder, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateCylinder(Topology.LineList, cylinder, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
         public static IEnumerable<Line3D> CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
         {
             var geometry = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);

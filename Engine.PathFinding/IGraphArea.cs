@@ -14,7 +14,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Area type
         /// </summary>
-        GraphAreaTypes AreaType { get; set; }
+        GraphConnectionAreaTypes AreaType { get; set; }
 
         /// <summary>
         /// Gets the area bounds

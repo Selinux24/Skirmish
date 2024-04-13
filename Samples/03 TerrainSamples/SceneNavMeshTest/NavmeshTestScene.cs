@@ -95,10 +95,13 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.5f);
         private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.5f);
         private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.5f);
-        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.5f);
+        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.15f);
+        private readonly Color4 obsStrongColor = new(Color.Yellow.RGB(), 0.35f);
+        private readonly Color4 areaColor = new(Color.GreenYellow.RGB(), 0.15f);
+        private readonly Color4 areaStrongColor = new(Color.GreenYellow.RGB(), 0.35f);
 
         private readonly List<ObstacleMarker> obstacles = [];
-        private readonly List<AreaMarker> areas = [];
+        private readonly List<IAreaMarker> areas = [];
         private GraphDebugTypes debugType = GraphDebugTypes.NavMesh;
 
         private string pathFinderStartMessage = null;
@@ -434,7 +437,8 @@ namespace TerrainSamples.SceneNavMeshTest
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 100000,
-                DepthEnabled = true,
+                DepthEnabled = false,
+                BlendMode = BlendModes.Alpha,
             };
             lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
 
@@ -442,6 +446,7 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 Count = 100000,
                 DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
             };
             triangleDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
         }
@@ -472,8 +477,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             DrawGraphNodes(agent);
 
-            obstacles.Clear();
-            DrawGraphObjects();
+            DrawGraphObstaclesAndAreas();
 
             gameReady = true;
         }
@@ -742,13 +746,12 @@ namespace TerrainSamples.SceneNavMeshTest
             var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
             var cy = new BoundingCylinder(center, 0.5f, h);
             int id = NavigationGraph.AddObstacle(cy);
-            var obs = new ObstacleMarker()
+            obstacles.Add(new()
             {
                 Id = id,
                 Obstacle = cy,
-            };
-            obstacles.Add(obs);
-            DrawGraphObjects();
+            });
+            DrawGraphObstaclesAndAreas();
 
             NavigationGraph.UpdateAt(p);
 
@@ -765,7 +768,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 {
                     NavigationGraph.RemoveObstacle(obs.Id);
                     obstacles.Remove(obs);
-                    DrawGraphObjects();
+                    DrawGraphObstaclesAndAreas();
 
                     NavigationGraph.UpdateAt(obs.Obstacle.Center);
 
@@ -804,21 +807,19 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            float hmin = 0.1f;
-            float hmax = 6f;
+            float hmin = -0.5f;
+            float hmax = 1f;
+
             var center = r.PickingResult.Position;
             center.Y = 0;
             float radius = 2.5f;
             var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
-            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(circle.Vertices, -hmin, hmax - hmin) { AreaType = GraphAreaTypes.Walkable, });
-            var area = new AreaMarker()
-            {
-                Id = id,
-                Center = center,
-                Radius = radius,
-            };
-            areas.Add(area);
-            DrawGraphObjects();
+            Vector3[] verts = [.. circle.Vertices];
+            //Vector3[] verts = [new Vector3(-1, 0, -1), new Vector3(1, 0, -1), new Vector3(1, 0, 1), new Vector3(-1, 0, 1)]
+
+            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(verts, hmin, hmax) { AreaType = GraphConnectionAreaTypes.Grass });
+            areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });
+
             EnqueueGraph();
 
             stateManager.StartState(States.Default);
@@ -830,21 +831,32 @@ namespace TerrainSamples.SceneNavMeshTest
 
             foreach (var area in areas)
             {
-                var center = area.Center;
-                var radius = area.Radius;
-                var plane = new Plane(center, Vector3.Up);
-                if (!plane.Intersects(ref ray, out Vector3 p))
+                if (area is CylinderAreaMarker cylMarker)
                 {
-                    continue;
+                    var center = cylMarker.Center;
+                    var radius = cylMarker.Radius;
+                    var plane = new Plane(center, Vector3.Up);
+                    if (!plane.Intersects(ref ray, out Vector3 p))
+                    {
+                        continue;
+                    }
+                    if (Vector3.Distance(p, center) > radius)
+                    {
+                        continue;
+                    }
                 }
-                if (Vector3.Distance(p, center) > radius)
+                else if (area is ConvexAreaMarker cvMarker)
                 {
-                    continue;
+                    var cvBox = cvMarker.GetBounds();
+                    if (!cvBox.Intersects(ref ray))
+                    {
+                        continue;
+                    }
                 }
 
                 PathFinderDescription.Input.RemoveArea(area.Id);
                 areas.Remove(area);
-                DrawGraphObjects();
+
                 EnqueueGraph();
 
                 stateManager.StartState(States.Default);
@@ -1184,7 +1196,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawPolygonFill(IEnumerable<Vector3> points, Color4 color)
         {
             var poly = GeometryUtil.CreatePolygon(Topology.TriangleList, points);
-            triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(Topology.TriangleList, poly.Vertices, poly.Indices));
+            triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(poly.Vertices, poly.Indices));
         }
         private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
@@ -1239,20 +1251,44 @@ namespace TerrainSamples.SceneNavMeshTest
 
             LoadResourcesAsync(LoadDebugModel(agent, debugType));
         }
-        private void DrawGraphObjects()
+        private void DrawGraphObstaclesAndAreas()
         {
-            triangleDrawer.Clear();
-
-            foreach (var obs in obstacles)
-            {
-                triangleDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, obs.Obstacle, 12));
-            }
+            triangleDrawer.Clear(areaColor);
+            lineDrawer.Clear(areaStrongColor);
 
             foreach (var area in areas)
             {
-                var g = GeometryUtil.CreateCircle(Topology.TriangleList, area.Center, area.Radius, 12);
+                if (area is CylinderAreaMarker cylMarker)
+                {
+                    var gt = GeometryUtil.CreateCylinder(Topology.TriangleList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
+                    var gl = GeometryUtil.CreateCylinder(Topology.LineList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
 
-                triangleDrawer.AddPrimitives(obsColor, Triangle.ComputeTriangleList(Topology.TriangleList, g.Vertices, g.Indices));
+                    triangleDrawer.AddPrimitives(areaColor, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                    lineDrawer.AddPrimitives(areaStrongColor, Line3D.CreateLineList(gl.Vertices));
+                }
+                else if (area is ConvexAreaMarker cvMarker)
+                {
+                    foreach (var (poly, ccw) in cvMarker.GetPolygons())
+                    {
+                        var gt = GeometryUtil.CreatePolygon(Topology.TriangleList, poly, ccw);
+                        var gl = GeometryUtil.CreatePolygon(Topology.LineList, poly, ccw);
+
+                        triangleDrawer.AddPrimitives(areaColor, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                        lineDrawer.AddPrimitives(areaStrongColor, Line3D.CreateLineList(gl.Vertices));
+                    }
+                }
+            }
+
+            triangleDrawer.Clear(obsColor);
+            lineDrawer.Clear(obsStrongColor);
+
+            foreach (var obs in obstacles)
+            {
+                var gt = Triangle.ComputeTriangleList(obs.Obstacle, 12);
+                var gl = Line3D.CreateCylinder(obs.Obstacle, 12);
+
+                triangleDrawer.AddPrimitives(obsColor, gt);
+                lineDrawer.AddPrimitives(obsStrongColor, gl);
             }
         }
         private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
@@ -1357,6 +1393,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void EnqueueGraph()
         {
             mainPanel.Visible = false;
+
+            obstacles.Clear();
 
             lastElapsedSeconds = null;
             loadState = "Updating navigation graph.";

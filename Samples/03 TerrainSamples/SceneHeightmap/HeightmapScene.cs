@@ -1025,10 +1025,10 @@ namespace TerrainSamples.SceneHeightmap
             var a2Lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, gardenerArea2.Value));
             bboxesDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
 
-            var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
+            var tris1 = Triangle.ComputeTriangleList(gardenerArea.Value);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.ReverseNormal(tris1));
-            var tris2 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea2.Value);
+            var tris2 = Triangle.ComputeTriangleList(gardenerArea2.Value);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.ReverseNormal(tris2));
         }

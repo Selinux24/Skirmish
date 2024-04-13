@@ -6,7 +6,6 @@ using System.Linq;
 namespace Engine
 {
     using Engine.Common;
-    using SharpDX.Direct2D1;
 
     /// <summary>
     /// Triangle
@@ -51,133 +50,108 @@ namespace Engine
         /// <summary>
         /// Generate a triangle list from vertices
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices)
+        public static IEnumerable<Triangle> ComputeTriangleList(IEnumerable<Vector3> vertices)
         {
             if (vertices?.Any() != true)
             {
                 yield break;
             }
 
-            if (topology == Topology.TriangleList)
-            {
-                var tmpVerts = vertices.ToArray();
+            var tmpVerts = vertices.ToArray();
 
-                for (int i = 0; i < tmpVerts.Length; i += 3)
-                {
-                    Triangle tri = new(
-                        tmpVerts[i + 0],
-                        tmpVerts[i + 1],
-                        tmpVerts[i + 2]);
-
-                    yield return tri;
-                }
-            }
-            else
+            for (int i = 0; i < tmpVerts.Length; i += 3)
             {
-                throw new NotImplementedException();
+                yield return new(
+                    tmpVerts[i + 0],
+                    tmpVerts[i + 1],
+                    tmpVerts[i + 2]);
             }
         }
         /// <summary>
         /// Generate a triangle list from vertices and indices
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
+        public static IEnumerable<Triangle> ComputeTriangleList(IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
         {
             if (vertices?.Any() != true || indices?.Any() != true)
             {
                 yield break;
             }
 
-            if (topology == Topology.TriangleList)
-            {
-                var tmpVerts = vertices.ToArray();
-                var tmpIndxs = indices.ToArray();
+            var tmpVerts = vertices.ToArray();
+            var tmpIndxs = indices.ToArray();
 
-                for (int i = 0; i < tmpIndxs.Length; i += 3)
-                {
-                    Triangle tri = new(
-                        tmpVerts[tmpIndxs[i + 0]],
-                        tmpVerts[tmpIndxs[i + 1]],
-                        tmpVerts[tmpIndxs[i + 2]]);
-
-                    yield return tri;
-                }
-            }
-            else
+            for (int i = 0; i < tmpIndxs.Length; i += 3)
             {
-                throw new NotImplementedException();
+                yield return new(
+                    tmpVerts[tmpIndxs[i + 0]],
+                    tmpVerts[tmpIndxs[i + 1]],
+                    tmpVerts[tmpIndxs[i + 2]]);
             }
         }
         /// <summary>
         /// Generate a triangle list from AABB
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="bbox">AABB</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingBox bbox)
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingBox bbox)
         {
-            var geom = GeometryUtil.CreateBox(topology, bbox);
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, bbox);
 
-            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from OBB
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="obb">OBB</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
+        public static IEnumerable<Triangle> ComputeTriangleList(OrientedBoundingBox obb)
         {
-            var geom = GeometryUtil.CreateBox(topology, obb);
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, obb);
 
-            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from sphere
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="sph">Sphere</param>
         /// <param name="sliceCount">Slices</param>
         /// <param name="stackCount">Stacks</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, int sliceCount, int stackCount)
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingSphere sph, int sliceCount, int stackCount)
         {
-            var geom = GeometryUtil.CreateSphere(topology, sph, sliceCount, stackCount);
+            var geom = GeometryUtil.CreateSphere(Topology.TriangleList, sph, sliceCount, stackCount);
 
-            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from cylinder
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="cylinder">Cylinder</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int stackCount)
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingCylinder cylinder, int stackCount)
         {
-            var geom = GeometryUtil.CreateCylinder(topology, cylinder, stackCount);
+            var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, cylinder, stackCount);
 
-            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from capsule
         /// </summary>
-        /// <param name="topology">Topology</param>
         /// <param name="capsule">Capsule</param>
         /// <param name="sliceCount">Slices</param>
         /// <param name="stackCount">Stacks</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCapsule capsule, int sliceCount, int stackCount)
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingCapsule capsule, int sliceCount, int stackCount)
         {
-            var geom = GeometryUtil.CreateCapsule(topology, capsule, sliceCount, stackCount);
+            var geom = GeometryUtil.CreateCapsule(Topology.TriangleList, capsule, sliceCount, stackCount);
 
-            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Transform triangle coordinates
@@ -377,32 +351,17 @@ namespace Engine
 
         }
 
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
+        /// <inheritdoc/>
         public readonly bool Intersects(PickingRay ray)
         {
             return Intersects(ray, out _, out _);
         }
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
+        /// <inheritdoc/>
         public readonly bool Intersects(PickingRay ray, out float distance)
         {
             return Intersects(ray, out _, out distance);
         }
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="point">Intersection point, if any</param>
-        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
+        /// <inheritdoc/>
         public readonly bool Intersects(PickingRay ray, out Vector3 point, out float distance)
         {
             if (ray.FacingOnly)
@@ -444,28 +403,19 @@ namespace Engine
             return maxPoint - minPoint;
         }
 
-        /// <summary>
-        /// Retrieves the three vertices of the triangle.
-        /// </summary>
-        /// <returns>An array of points representing the three vertices of the triangle.</returns>
+        /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
             yield return Point1;
             yield return Point2;
             yield return Point3;
         }
-        /// <summary>
-        /// Gets the vertex list stride
-        /// </summary>
-        /// <returns>Returns the list stride</returns>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
             return 3;
         }
-        /// <summary>
-        /// Gets the vertex list topology
-        /// </summary>
-        /// <returns>Returns the list topology</returns>
+        /// <inheritdoc/>
         public readonly Topology GetTopology()
         {
             return Topology.TriangleList;

@@ -23,7 +23,7 @@ namespace Engine.PathFinding
         /// <inheritdoc/>
         public int Id { get; private set; }
         /// <inheritdoc/>
-        public GraphAreaTypes AreaType { get; set; }
+        public GraphConnectionAreaTypes AreaType { get; set; }
 
         /// <summary>
         /// Constructor

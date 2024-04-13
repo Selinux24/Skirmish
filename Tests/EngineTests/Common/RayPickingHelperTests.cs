@@ -93,9 +93,9 @@ namespace Engine.Common.Tests
             bbox2 = SharpDXExtensions.BoundingBoxFromPoints(p2);
             bbox3 = SharpDXExtensions.BoundingBoxFromPoints(p3);
 
-            var bbox1Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox1);
-            var bbox2Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox2);
-            var bbox3Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox3);
+            var bbox1Tris = Triangle.ComputeTriangleList(bbox1);
+            var bbox2Tris = Triangle.ComputeTriangleList(bbox2);
+            var bbox3Tris = Triangle.ComputeTriangleList(bbox3);
 
             toQuad1Position = new Vector3(0, 0, 1);
             toQuad2Position = new Vector3(0, 0, 2);

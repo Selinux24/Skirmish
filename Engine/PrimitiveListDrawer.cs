@@ -14,7 +14,13 @@ namespace Engine
     /// Primitive list drawer
     /// </summary>
     /// <typeparam name="T">Primitive list type</typeparam>
-    public sealed class PrimitiveListDrawer<T> : Drawable<PrimitiveListDrawerDescription<T>> where T : IVertexList
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class PrimitiveListDrawer<T>(Scene scene, string id, string name) : Drawable<PrimitiveListDrawerDescription<T>>(scene, id, name) where T : IVertexList
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -43,7 +49,7 @@ namespace Engine
         /// <summary>
         /// Buffer exchange data list
         /// </summary>
-        private List<VertexPositionColor> bufferData = new();
+        private List<VertexPositionColor> bufferData = [];
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -61,17 +67,6 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public PrimitiveListDrawer(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -137,7 +132,7 @@ namespace Engine
         /// <param name="primitive">Primitive</param>
         public void SetPrimitives(Color4 color, T primitive)
         {
-            SetPrimitives(color, new[] { primitive });
+            SetPrimitives(color, [primitive]);
         }
         /// <summary>
         /// Set primitives list
@@ -150,7 +145,7 @@ namespace Engine
             {
                 if (!dictionary.TryGetValue(color, out var values))
                 {
-                    values = new();
+                    values = [];
                     dictionary.TryAdd(color, values);
                 }
                 else
@@ -190,7 +185,7 @@ namespace Engine
         /// <param name="primitive">primitive</param>
         public void AddPrimitives(Color4 color, T primitive)
         {
-            AddPrimitives(color, new[] { primitive });
+            AddPrimitives(color, [primitive]);
         }
         /// <summary>
         /// Add primitives to list
@@ -201,7 +196,7 @@ namespace Engine
         {
             if (!dictionary.ContainsKey(color))
             {
-                dictionary.TryAdd(color, new List<T>());
+                dictionary.TryAdd(color, []);
             }
 
             dictionary[color].AddRange(primitives);

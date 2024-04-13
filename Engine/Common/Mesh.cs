@@ -8,7 +8,15 @@ namespace Engine.Common
     /// <summary>
     /// Mesh
     /// </summary>
-    public class Mesh : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Mesh name</param>
+    /// <param name="topology">Topology</param>
+    /// <param name="transform">World transform</param>
+    /// <param name="vertices">Vertices</param>
+    /// <param name="indices">Indices</param>
+    public class Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices) : IDisposable
     {
         /// <summary>
         /// Static id counter
@@ -26,11 +34,11 @@ namespace Engine.Common
         /// <summary>
         /// Vertices cache
         /// </summary>
-        private readonly IEnumerable<IVertexData> vertices = Array.Empty<IVertexData>();
+        private readonly IEnumerable<IVertexData> vertices = vertices ?? [];
         /// <summary>
         /// Indices cache
         /// </summary>
-        private readonly IEnumerable<uint> indices = Array.Empty<uint>();
+        private readonly IEnumerable<uint> indices = indices ?? [];
         /// <summary>
         /// Position list cache
         /// </summary>
@@ -43,28 +51,28 @@ namespace Engine.Common
         /// <summary>
         /// Mesh id
         /// </summary>
-        public int Id { get; set; }
+        public int Id { get; set; } = GetNextId();
         /// <summary>
         /// Indexed model
         /// </summary>
-        public bool Indexed { get; set; } = false;
+        public bool Indexed { get; set; } = indices?.Any() == true;
 
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = name;
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertextType { get; private set; }
+        public VertexTypes VertextType { get; private set; } = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
         /// <summary>
         /// Topology
         /// </summary>
-        public Topology Topology { get; private set; }
+        public Topology Topology { get; private set; } = topology;
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Matrix Transform { get; set; } = transform;
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -101,25 +109,6 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Mesh name</param>
-        /// <param name="topology">Topology</param>
-        /// <param name="transform">World transform</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="indices">Indices</param>
-        public Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)
-        {
-            Id = GetNextId();
-            Name = name;
-            Topology = topology;
-            Transform = transform;
-            this.vertices = vertices ?? Array.Empty<IVertexData>();
-            VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-            this.indices = indices ?? Array.Empty<uint>();
-            Indexed = indices?.Any() == true;
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -225,13 +214,13 @@ namespace Engine.Common
 
             if (!vertices.Any())
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             var first = vertices.First();
             if (!first.HasChannel(VertexDataChannels.Position))
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             positionCache = vertices.Select(v =>
@@ -263,7 +252,7 @@ namespace Engine.Common
 
             if (!vertices.Any())
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             var first = vertices.First();
@@ -271,7 +260,7 @@ namespace Engine.Common
                 !first.HasChannel(VertexDataChannels.BoneIndices) ||
                 !first.HasChannel(VertexDataChannels.Weights))
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             positionCache = vertices.Select(v =>
@@ -300,16 +289,16 @@ namespace Engine.Common
             var positions = GetPoints(refresh);
             if (!positions.Any())
             {
-                return Enumerable.Empty<Triangle>();
+                return [];
             }
 
             if (!indices.Any())
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions);
+                triangleCache = Triangle.ComputeTriangleList(positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions, indices);
+                triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
             return triangleCache.ToArray();
@@ -330,16 +319,16 @@ namespace Engine.Common
             var positions = GetPoints(boneTransforms, refresh);
             if (!positions.Any())
             {
-                return Enumerable.Empty<Triangle>();
+                return [];
             }
 
             if (!indices.Any())
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions);
+                triangleCache = Triangle.ComputeTriangleList(positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(Topology, positions, indices);
+                triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
             return triangleCache.ToArray();

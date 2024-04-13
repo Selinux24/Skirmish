@@ -367,7 +367,7 @@ namespace Engine
 
             if (hull.HasFlag(PickingHullTypes.Coarse))
             {
-                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
+                return Triangle.ComputeTriangleList(boundsHelper.GetOrientedBoundingBox(Manipulator));
             }
 
             if (hull.HasFlag(PickingHullTypes.Hull))

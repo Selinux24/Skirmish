@@ -16,7 +16,13 @@ namespace Engine
     /// <summary>
     /// Terrain class
     /// </summary>
-    public sealed class Terrain : Ground<GroundDescription>, IUseMaterials
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class Terrain(Scene scene, string id, string name) : Ground<GroundDescription>(scene, id, name), IUseMaterials
     {
         #region Helper classes
 
@@ -72,11 +78,11 @@ namespace Engine
             /// <summary>
             /// Vertex buffer description dictionary
             /// </summary>
-            private Dictionary<int, BufferDescriptor> dictVB = new();
+            private Dictionary<int, BufferDescriptor> dictVB = [];
             /// <summary>
             /// Index buffer description dictionary
             /// </summary>
-            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new();
+            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = [];
             /// <summary>
             /// Tree
             /// </summary>
@@ -145,9 +151,9 @@ namespace Engine
                 {
                     foreach (var shape in shapeList)
                     {
-                        var id = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
+                        var sid = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
 
-                        res.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
+                        res.dictIB.Add(sid, CreateDescriptor(sid, trianglesPerNode, game.BufferManager));
                     }
                 }
 
@@ -694,17 +700,6 @@ namespace Engine
         private Vector2 slopeRanges = Vector2.Zero;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public Terrain(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-        /// <summary>
         /// Destructor
         /// </summary>
         ~Terrain()
@@ -787,7 +782,6 @@ namespace Engine
 
             // Compute triangles for ray - mesh picking
             var tris = Triangle.ComputeTriangleList(
-                Topology.TriangleList,
                 Vertices.Select(v => v.Position.Value).ToArray(),
                 Indices.ToArray());
 
@@ -937,7 +931,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            return terrainMaterial != null ? new[] { terrainMaterial } : Enumerable.Empty<IMeshMaterial>();
+            return terrainMaterial != null ? [terrainMaterial] : [];
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

@@ -2560,15 +2560,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Polygon vertices</param>
+        /// <param name="ccw">Assume CCW triangle sort for normals</param>
         /// <returns>Returns a geometry descriptor</returns>
         /// <remarks>Triangle topology must be convex</remarks>
-        public static GeometryDescriptor CreatePolygon(Topology topology, IEnumerable<Vector3> vertices)
+        public static GeometryDescriptor CreatePolygon(Topology topology, IEnumerable<Vector3> vertices, bool ccw = true)
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(vertices.Count(), 3);
 
             return topology switch
             {
-                Topology.TriangleList => CreatePolygonTriangleList(vertices),
+                Topology.TriangleList => CreatePolygonTriangleList(vertices, ccw),
                 Topology.LineList => CreatePolygonLineList(vertices),
                 _ => throw new NotImplementedException()
             };
@@ -2579,18 +2580,20 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         /// <param name="center">Polygon center</param>
         /// <param name="vertices">Polygon vertices</param>
+        /// <param name="ccw">Assume CCW triangle sort for normals</param>
         /// <returns>Returns a geometry descriptor</returns>
         /// <remarks>Triangle topology must be convex</remarks>
-        public static GeometryDescriptor CreatePolygon(Topology topology, Vector3 center, IEnumerable<Vector3> vertices)
+        public static GeometryDescriptor CreatePolygon(Topology topology, Vector3 center, IEnumerable<Vector3> vertices, bool ccw = true)
         {
-            return CreatePolygon(topology, vertices.Select(v => v + center));
+            return CreatePolygon(topology, vertices.Select(v => v + center), ccw);
         }
         /// <summary>
         /// Creates a triangle list polygon
         /// </summary>
         /// <param name="vertices">Polygon vertices</param>
+        /// <param name="ccw">Assume CCW triangle sort for normals</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices)
+        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw)
         {
             int count = vertices.Count();
 
@@ -2599,8 +2602,8 @@ namespace Engine.Common
             for (int i = 2; i < count; i++)
             {
                 indexList.Add(0);
-                indexList.Add((uint)i);
-                indexList.Add((uint)i - 1);
+                indexList.Add(ccw ? (uint)i : (uint)i - 1);
+                indexList.Add(ccw ? (uint)i - 1 : (uint)i);
             }
 
             return new GeometryDescriptor()
