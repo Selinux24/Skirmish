@@ -53,7 +53,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 sideFace[i++] = new(v[s].X, v[s].Y + minY, v[s].Z);
                 sideFace[i++] = new(v[ns].X, v[ns].Y + minY, v[ns].Z);
                 sideFace[i++] = new(v[ns].X, v[ns].Y + maxY, v[ns].Z);
-                sideFace[i++] = new(v[s].X, v[s].Y + maxY, v[s].Z);
+                sideFace[i] = new(v[s].X, v[s].Y + maxY, v[s].Z);
 
                 yield return ([.. sideFace], true);
             }

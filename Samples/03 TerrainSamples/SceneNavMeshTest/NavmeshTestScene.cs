@@ -1282,10 +1282,10 @@ namespace TerrainSamples.SceneNavMeshTest
             triangleDrawer.Clear(obsColor);
             lineDrawer.Clear(obsStrongColor);
 
-            foreach (var obs in obstacles)
+            foreach (var obs in obstacles.Select(o => o.Obstacle))
             {
-                var gt = Triangle.ComputeTriangleList(obs.Obstacle, 12);
-                var gl = Line3D.CreateCylinder(obs.Obstacle, 12);
+                var gt = Triangle.ComputeTriangleList(obs, 12);
+                var gl = Line3D.CreateCylinder(obs, 12);
 
                 triangleDrawer.AddPrimitives(obsColor, gt);
                 lineDrawer.AddPrimitives(obsStrongColor, gl);
