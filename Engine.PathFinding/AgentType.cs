@@ -19,6 +19,10 @@ namespace Engine.PathFinding
         /// Gets or sets the height of the agent
         /// </summary>
         public float Height { get; set; }
+        /// <summary>
+        /// Path filter
+        /// </summary>
+        public GraphPathFilter PathFilter { get; set; }
 
         /// <summary>
         /// Constructor

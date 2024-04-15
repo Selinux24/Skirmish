@@ -10,12 +10,15 @@ namespace Engine.PathFinding.AStar
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid : IGraph
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class Grid(GridGenerationSettings settings, PathFinderInput input) : IGraph
     {
         /// <summary>
         /// Node list
         /// </summary>
-        private readonly List<GridNode> nodes = new();
+        private readonly List<GridNode> nodes = [];
 
         /// <inheritdoc/>
         public event EventHandler Updating;
@@ -29,11 +32,11 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Geometry input
         /// </summary>
-        public PathFinderInput Input { get; private set; }
+        public PathFinderInput Input { get; private set; } = input ?? throw new ArgumentNullException(nameof(input), "Must specify the path finder input helper.");
         /// <summary>
         /// Build settings
         /// </summary>
-        public GridGenerationSettings Settings { get; private set; }
+        public GridGenerationSettings Settings { get; private set; } = settings ?? throw new ArgumentNullException(nameof(settings), "Must specify the grid generation settings.");
         /// <summary>
         /// Graph node list
         /// </summary>
@@ -97,7 +100,7 @@ namespace Engine.PathFinding.AStar
                     }
                     else
                     {
-                        info = Array.Empty<GridCollisionInfo>();
+                        info = [];
                     }
 
                     dictionary.Add(new Vector2(x, z), info);
@@ -145,14 +148,6 @@ namespace Engine.PathFinding.AStar
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Grid(GridGenerationSettings settings, PathFinderInput input)
-        {
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings), "Must specify the grid generation settings.");
-            Input = input ?? throw new ArgumentNullException(nameof(input), "Must specify the path finder input helper.");
-        }
         /// <summary>
         /// Destructor
         /// </summary>

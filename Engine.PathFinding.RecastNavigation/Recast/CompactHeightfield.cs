@@ -250,14 +250,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Enumerates the specified compact cell list, if is contained into the bounds
         /// </summary>
-        /// <param name="minColumn">Minimum x bound's coordinate</param>
-        /// <param name="minRow">Minimum y bound's coordinate</param>
-        /// <param name="maxColumn">Maximum x bound's coordinate</param>
-        /// <param name="maxRow">Maximum y bound's coordinate</param>
+        /// <param name="min">Minimum cell bounds</param>
+        /// <param name="max">Maximum cell bounds</param>
         /// <returns>Returns each span index and span center to evaluate</returns>
-        private IEnumerable<(int SpanIndex, Vector3 SpanCenter)> IterateCellsSpansAreas(int minColumn, int minRow, int maxColumn, int maxRow)
+        private IEnumerable<(int SpanIndex, Vector3 SpanCenter)> IterateCellsSpansAreas(Int3 min, Int3 max)
         {
-            foreach (var (col, row, i) in IterateCellsSpans(minColumn, minRow, maxColumn, maxRow))
+            foreach (var (col, row, i) in IterateCellsSpans(min.X, min.Z, max.X, max.Z))
             {
                 if (Areas[i] == AreaTypes.RC_NULL_AREA)
                 {
@@ -265,7 +263,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 var sy = Spans[i].Y;
-                if (sy < minRow || sy > maxRow)
+                if (sy < min.Y || sy > max.Y)
                 {
                     continue;
                 }
@@ -708,14 +706,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var area in areas)
             {
-                var bbox = area.GetBounds();
-
-                if (!GetAreaBounds(bbox, out var min, out var max))
+                if (!GetAreaBounds(area, out var min, out var max))
                 {
                     return;
                 }
 
-                MarkArea(area, min, max, (AreaTypes)area.AreaType);
+                MarkArea(area, min, max, area.AreaType);
             }
 
             MedianFilterWalkableArea();
@@ -723,11 +719,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the area bounds
         /// </summary>
-        /// <param name="bbox">Bounding box</param>
+        /// <param name="area">Graph area</param>
         /// <param name="min">Resulting bounds min</param>
         /// <param name="max">Resulting bounds max</param>
-        private bool GetAreaBounds(BoundingBox bbox, out Int3 min, out Int3 max)
+        private bool GetAreaBounds(IGraphArea area, out Int3 min, out Int3 max)
         {
+            var bbox = area.GetBounds();
+
             min = new Int3();
             max = new Int3();
 
@@ -757,7 +755,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="min">Minimum bound limits</param>
         /// <param name="max">Maximum bound limits</param>
         /// <param name="areaId">Area value to mark</param>
-        private void MarkArea(IGraphArea graphArea, Int3 min, Int3 max, AreaTypes areaId)
+        private void MarkArea(IGraphArea graphArea, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
         {
             switch (graphArea)
             {
@@ -781,11 +779,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkBoxArea(Int3 min, Int3 max, AreaTypes areaId)
+        private void MarkBoxArea(Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
         {
-            foreach (var (i, _) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
+            foreach (var (i, _) in IterateCellsSpansAreas(min, max))
             {
-                Areas[i] = areaId;
+                Areas[i] = (AreaTypes)areaId;
             }
         }
         /// <summary>
@@ -799,13 +797,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The value of spacial parameters are in world units.
         /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
         /// </remarks>
-        private void MarkConvexPolyArea(Vector3[] vertices, Int3 min, Int3 max, AreaTypes areaId)
+        private void MarkConvexPolyArea(Vector3[] vertices, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
         {
-            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
+            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min, max))
             {
                 if (Utils.PointInPolygon2D(spanCenter, vertices))
                 {
-                    Areas[i] = areaId;
+                    Areas[i] = (AreaTypes)areaId;
                 }
             }
         }
@@ -820,18 +818,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkCylinderArea(Vector3 center, float r, Int3 min, Int3 max, AreaTypes areaId)
+        private void MarkCylinderArea(Vector3 center, float r, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
         {
             float r2 = r * r;
 
-            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min.X, min.Z, max.X, max.Z))
+            foreach (var (i, spanCenter) in IterateCellsSpansAreas(min, max))
             {
                 float dx = spanCenter.X - center.X;
                 float dz = spanCenter.Z - center.Z;
 
                 if (dx * dx + dz * dz < r2)
                 {
-                    Areas[i] = areaId;
+                    Areas[i] = (AreaTypes)areaId;
                 }
             }
         }

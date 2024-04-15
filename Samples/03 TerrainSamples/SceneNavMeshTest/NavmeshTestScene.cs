@@ -47,17 +47,6 @@ namespace TerrainSamples.SceneNavMeshTest
         public InputEntry GSave { get; set; }
         public InputEntry GLoad { get; set; }
 
-        private readonly Player agent = new()
-        {
-            Name = "Player",
-            Height = 0.2f,
-            Radius = 0.1f,
-            MaxClimb = 0.5f,
-            MaxSlope = 50f,
-            Velocity = 3f,
-            VelocitySlow = 1f,
-        };
-
         private UIControlTweener uiTweener;
         private Sprite panel = null;
         private UITextArea title = null;
@@ -76,8 +65,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private Model inputGeometry = null;
         private Model debugGeometry = null;
-        private readonly BuildSettings nmsettings = BuildSettings.Default;
         private InputGeometry nminput = null;
+        private Player agent;
+        private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -97,8 +87,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.5f);
         private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.15f);
         private readonly Color4 obsStrongColor = new(Color.Yellow.RGB(), 0.35f);
-        private readonly Color4 areaColor = new(Color.GreenYellow.RGB(), 0.15f);
-        private readonly Color4 areaStrongColor = new(Color.GreenYellow.RGB(), 0.35f);
+        private readonly Color4 areaColor = new(Color.GreenYellow.RGB(), 0.1f);
+        private readonly Color4 areaStrongColor = new(Color.GreenYellow.RGB(), 0.15f);
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<IAreaMarker> areas = [];
@@ -392,6 +382,23 @@ namespace TerrainSamples.SceneNavMeshTest
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
+
+            var pathFilter = new GraphPathFilter();
+            pathFilter.SetCost(GraphConnectionAreaTypes.Ground, 2f);
+            pathFilter.SetCost(GraphConnectionAreaTypes.Grass, 5f);
+            pathFilter.SetCost(GraphConnectionAreaTypes.Road, 1f);
+
+            agent = new()
+            {
+                Name = "Player",
+                Height = 0.2f,
+                Radius = 0.1f,
+                MaxClimb = 0.5f,
+                MaxSlope = 50f,
+                Velocity = 3f,
+                VelocitySlow = 1f,
+                PathFilter = pathFilter,
+            };
 
             //Rasterization
             nmsettings.CellSize = 0.1f;
@@ -815,7 +822,6 @@ namespace TerrainSamples.SceneNavMeshTest
             float radius = 2.5f;
             var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
             Vector3[] verts = [.. circle.Vertices];
-            //Vector3[] verts = [new Vector3(-1, 0, -1), new Vector3(1, 0, -1), new Vector3(1, 0, 1), new Vector3(-1, 0, 1)]
 
             int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(verts, hmin, hmax) { AreaType = GraphConnectionAreaTypes.Grass });
             areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });

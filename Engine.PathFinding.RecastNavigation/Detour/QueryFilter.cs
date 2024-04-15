@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -41,6 +42,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             IncludeFlags = SamplePolyFlagTypes.Walk;
             ExcludeFlags = SamplePolyFlagTypes.None;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="filter">Path filter</param>
+        public QueryFilter(GraphPathFilter filter)
+        {
+            AreaCost = Helper.CreateArray(DT_MAX_AREAS, 1.0f);
+
+            IncludeFlags = SamplePolyFlagTypes.Walk;
+            ExcludeFlags = SamplePolyFlagTypes.None;
+
+            ArgumentNullException.ThrowIfNull(filter);
+
+            foreach (var (area, cost) in filter.GetAreaCosts())
+            {
+                SetAreaCost((SamplePolyAreas)area, cost);
+            }
         }
 
         /// <summary>

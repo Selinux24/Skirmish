@@ -274,7 +274,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return null;
             }
 
-            var status = query.FindRandomPoint(new QueryFilter(), out _, out var pt);
+            var status = query.FindRandomPoint(new QueryFilter(agent.PathFilter), out _, out var pt);
             if (status == Status.DT_SUCCESS)
             {
                 return pt;
@@ -291,7 +291,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return null;
             }
 
-            var filter = new QueryFilter();
+            var filter = new QueryFilter(agent.PathFilter);
 
             var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
             if (fStatus != Status.DT_SUCCESS)
@@ -339,7 +339,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             var status = query.CalcPath(
-                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Straight,
+                new QueryFilter(agent.PathFilter), new Vector3(2, 4, 2), PathFindingMode.Straight,
                 from, to, out var result);
 
             if (!status.HasFlag(Status.DT_SUCCESS))
