@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -27,13 +28,47 @@ namespace Engine.PathFinding
         /// Connection direction
         /// </summary>
         int Direction { get; set; }
+
         /// <summary>
-        /// Area type
+        /// Gets the area type
         /// </summary>
-        GraphConnectionAreaTypes AreaType { get; set; }
+        int GetAreaType();
         /// <summary>
-        /// Area flags
+        /// Gets the area type enum
         /// </summary>
-        GraphConnectionFlagTypes FlagTypes { get; set; }
+        /// <typeparam name="T">Enum type</typeparam>
+        T GetAreaType<T>() where T : Enum;
+        /// <summary>
+        /// Sets the area type
+        /// </summary>
+        /// <param name="area">Area value</param>
+        void SetAreaType(int area);
+        /// <summary>
+        /// Gets the area type enum
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        /// <param name="area">Area value</param>
+        void SetAreaType<T>(T area) where T : Enum;
+
+        /// <summary>
+        /// Gets the flag type
+        /// </summary>
+        int GetFlagType();
+        /// <summary>
+        /// Gets the flag type enum
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        T GetFlagType<T>() where T : Enum;
+        /// <summary>
+        /// Sets the flag type
+        /// </summary>
+        /// <param name="flag">Flag value</param>
+        void SetFlagType(int flag);
+        /// <summary>
+        /// Gets the flag type enum
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        /// <param name="flag">Flag value</param>
+        void SetFlagType<T>(T flag) where T : Enum;
     }
 }

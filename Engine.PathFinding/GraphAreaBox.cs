@@ -45,7 +45,7 @@ namespace Engine.PathFinding
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id} => AreaType {AreaType}; BMin {BMin} BMax {BMax}";
+            return $"{Id} => AreaType {GetAreaType()}; BMin {BMin} BMax {BMax}";
         }
     }
 }

@@ -138,7 +138,7 @@ namespace Engine.PathFinding
         /// <param name="area">Area type</param>
         /// <param name="flags">Area flags</param>
         /// <returns>Returns the connection id</returns>
-        public int AddConnection(Vector3 spos, Vector3 epos, float rad, int bidir, GraphConnectionAreaTypes area, GraphConnectionFlagTypes flags)
+        public int AddConnection<T, Y>(Vector3 spos, Vector3 epos, float rad, int bidir, T area, Y flags) where T : Enum where Y : Enum
         {
             if (connections.Count >= MaxConnections) return -1;
 
@@ -146,11 +146,12 @@ namespace Engine.PathFinding
             {
                 Radius = rad,
                 Direction = bidir,
-                AreaType = area,
-                FlagTypes = flags,
                 Start = spos,
                 End = epos,
             };
+
+            connection.SetAreaType(area);
+            connection.SetFlagType(flags);
 
             connections.Add(connection);
 

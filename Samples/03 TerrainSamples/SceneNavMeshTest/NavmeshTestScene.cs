@@ -384,9 +384,9 @@ namespace TerrainSamples.SceneNavMeshTest
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
             var pathFilter = new GraphPathFilter();
-            pathFilter.SetCost(GraphConnectionAreaTypes.Ground, 2f);
-            pathFilter.SetCost(GraphConnectionAreaTypes.Grass, 5f);
-            pathFilter.SetCost(GraphConnectionAreaTypes.Road, 1f);
+            pathFilter.SetCost(NavAreaTypes.Ground, 2f);
+            pathFilter.SetCost(NavAreaTypes.Grass, 5f);
+            pathFilter.SetCost(NavAreaTypes.Road, 1f);
 
             agent = new()
             {
@@ -823,7 +823,10 @@ namespace TerrainSamples.SceneNavMeshTest
             var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
             Vector3[] verts = [.. circle.Vertices];
 
-            int id = PathFinderDescription.Input.AddArea(new GraphAreaPolygon(verts, hmin, hmax) { AreaType = GraphConnectionAreaTypes.Grass });
+            GraphAreaPolygon p = new(verts, hmin, hmax);
+            p.SetAreaType(NavAreaTypes.Grass);
+
+            int id = PathFinderDescription.Input.AddArea(p);
             areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });
 
             EnqueueGraph();

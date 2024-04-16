@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -20,10 +21,13 @@ namespace Engine.PathFinding
             return ID++;
         }
 
+        /// <summary>
+        /// Area type
+        /// </summary>
+        private int areaType;
+
         /// <inheritdoc/>
         public int Id { get; private set; }
-        /// <inheritdoc/>
-        public GraphConnectionAreaTypes AreaType { get; set; }
 
         /// <summary>
         /// Constructor
@@ -31,6 +35,27 @@ namespace Engine.PathFinding
         protected GraphArea()
         {
             Id = GetNextId();
+        }
+
+        /// <inheritdoc/>
+        public int GetAreaType()
+        {
+            return areaType;
+        }
+        /// <inheritdoc/>
+        public T GetAreaType<T>() where T : Enum
+        {
+            return (T)(object)areaType;
+        }
+        /// <inheritdoc/>
+        public void SetAreaType(int area)
+        {
+            areaType = area;
+        }
+        /// <inheritdoc/>
+        public void SetAreaType<T>(T area) where T : Enum
+        {
+            areaType = (int)(object)area;
         }
 
         /// <inheritdoc/>

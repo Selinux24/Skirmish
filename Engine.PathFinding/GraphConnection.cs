@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -21,33 +22,24 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
-        /// Connection Id
-        /// </summary>
-        public int Id { get; private set; }
-        /// <summary>
-        /// Start point
-        /// </summary>
-        public Vector3 Start { get; set; }
-        /// <summary>
-        /// End point
-        /// </summary>
-        public Vector3 End { get; set; }
-        /// <summary>
-        /// Points radius
-        /// </summary>
-        public float Radius { get; set; }
-        /// <summary>
-        /// Connection direction
-        /// </summary>
-        public int Direction { get; set; }
-        /// <summary>
         /// Area type
         /// </summary>
-        public GraphConnectionAreaTypes AreaType { get; set; }
+        private int areaType;
         /// <summary>
-        /// Area flags
+        /// Flag type
         /// </summary>
-        public GraphConnectionFlagTypes FlagTypes { get; set; }
+        private int flagType;
+
+        /// <inheritdoc/>
+        public int Id { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Start { get; set; }
+        /// <inheritdoc/>
+        public Vector3 End { get; set; }
+        /// <inheritdoc/>
+        public float Radius { get; set; }
+        /// <inheritdoc/>
+        public int Direction { get; set; }
 
         /// <summary>
         /// Constructor
@@ -55,6 +47,48 @@ namespace Engine.PathFinding
         public GraphConnection()
         {
             Id = GetNextId();
+        }
+
+        /// <inheritdoc/>
+        public int GetAreaType()
+        {
+            return areaType;
+        }
+        /// <inheritdoc/>
+        public T GetAreaType<T>() where T : Enum
+        {
+            return (T)(object)areaType;
+        }
+        /// <inheritdoc/>
+        public void SetAreaType(int area)
+        {
+            areaType = area;
+        }
+        /// <inheritdoc/>
+        public void SetAreaType<T>(T area) where T : Enum
+        {
+            areaType = (int)(object)area;
+        }
+
+        /// <inheritdoc/>
+        public int GetFlagType()
+        {
+            return flagType;
+        }
+        /// <inheritdoc/>
+        public T GetFlagType<T>() where T : Enum
+        {
+            return (T)(object)flagType;
+        }
+        /// <inheritdoc/>
+        public void SetFlagType(int flag)
+        {
+            flagType = flag;
+        }
+        /// <inheritdoc/>
+        public void SetFlagType<T>(T flag) where T : Enum
+        {
+            flagType = (int)(object)flag;
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Engine.PathFinding
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id} => AreaType {AreaType}; Center {Center} Radius {Radius} Height {Height}";
+            return $"{Id} => AreaType {GetAreaType()}; Center {Center} Radius {Radius} Height {Height}";
         }
     }
 }

@@ -113,10 +113,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Init filters
             for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
             {
-                m_filters.Add(new()
-                {
-                    IncludeFlags = SamplePolyFlagTypes.Walk,
-                });
+                m_filters.Add(new());
             }
 
             // Init obstacle query params.

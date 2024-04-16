@@ -1503,16 +1503,16 @@ namespace TerrainSamples.SceneModularDungeon
                     new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
                     1,
                     1,
-                    GraphConnectionAreaTypes.Jump,
-                    GraphConnectionFlagTypes.All);
+                    DungeonAreaTypes.Jump,
+                    AgentAcionTypes.All);
 
                 PathFinderDescription.Input.AddConnection(
                     new Vector3(17, 0, -14),
                     new Vector3(16, 0, -15),
                     0.15f,
                     0,
-                    GraphConnectionAreaTypes.Ground,
-                    GraphConnectionFlagTypes.All);
+                    DungeonAreaTypes.Ground,
+                    AgentAcionTypes.All);
             }
 
             PaintConnections();

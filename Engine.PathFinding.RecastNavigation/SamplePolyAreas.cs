@@ -6,30 +6,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// None
         /// </summary>
-        None = GraphConnectionAreaTypes.None,
+        None,
         /// <summary>
         /// SAMPLE_POLYAREA_GROUND
         /// </summary>
-        Ground = GraphConnectionAreaTypes.Ground,
+        Ground,
         /// <summary>
         /// SAMPLE_POLYAREA_WATER
         /// </summary>
-        Water = GraphConnectionAreaTypes.Water,
+        Water,
         /// <summary>
         /// SAMPLE_POLYAREA_ROAD
         /// </summary>
-        Road = GraphConnectionAreaTypes.Road,
+        Road,
         /// <summary>
         /// SAMPLE_POLYAREA_DOOR
         /// </summary>
-        Door = GraphConnectionAreaTypes.Door,
+        Door,
         /// <summary>
         /// SAMPLE_POLYAREA_GRASS
         /// </summary>
-        Grass = GraphConnectionAreaTypes.Grass,
+        Grass,
         /// <summary>
         /// SAMPLE_POLYAREA_JUMP
         /// </summary>
-        Jump = GraphConnectionAreaTypes.Jump,
+        Jump,
     }
 }

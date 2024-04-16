@@ -711,7 +711,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     return;
                 }
 
-                MarkArea(area, min, max, area.AreaType);
+                MarkArea(area, min, max, area.GetAreaType());
             }
 
             MedianFilterWalkableArea();
@@ -755,7 +755,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="min">Minimum bound limits</param>
         /// <param name="max">Maximum bound limits</param>
         /// <param name="areaId">Area value to mark</param>
-        private void MarkArea(IGraphArea graphArea, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
+        private void MarkArea(IGraphArea graphArea, Int3 min, Int3 max, int areaId)
         {
             switch (graphArea)
             {
@@ -779,7 +779,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkBoxArea(Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
+        private void MarkBoxArea(Int3 min, Int3 max, int areaId)
         {
             foreach (var (i, _) in IterateCellsSpansAreas(min, max))
             {
@@ -797,7 +797,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The value of spacial parameters are in world units.
         /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
         /// </remarks>
-        private void MarkConvexPolyArea(Vector3[] vertices, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
+        private void MarkConvexPolyArea(Vector3[] vertices, Int3 min, Int3 max, int areaId)
         {
             foreach (var (i, spanCenter) in IterateCellsSpansAreas(min, max))
             {
@@ -818,7 +818,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkCylinderArea(Vector3 center, float r, Int3 min, Int3 max, GraphConnectionAreaTypes areaId)
+        private void MarkCylinderArea(Vector3 center, float r, Int3 min, Int3 max, int areaId)
         {
             float r2 = r * r;
 

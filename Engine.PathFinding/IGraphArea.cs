@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -11,10 +12,27 @@ namespace Engine.PathFinding
         /// Area id
         /// </summary>
         int Id { get; }
+
         /// <summary>
-        /// Area type
+        /// Gets the area type
         /// </summary>
-        GraphConnectionAreaTypes AreaType { get; set; }
+        int GetAreaType();
+        /// <summary>
+        /// Gets the area type enum
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        T GetAreaType<T>() where T : Enum;
+        /// <summary>
+        /// Sets the area type
+        /// </summary>
+        /// <param name="area">Area value</param>
+        void SetAreaType(int area);
+        /// <summary>
+        /// Gets the area type enum
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        /// <param name="area">Area value</param>
+        void SetAreaType<T>(T area) where T : Enum;
 
         /// <summary>
         /// Gets the area bounds

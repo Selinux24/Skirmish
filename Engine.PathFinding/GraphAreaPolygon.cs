@@ -76,7 +76,7 @@ namespace Engine.PathFinding
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id} => AreaType {AreaType}; MinHeight {MinHeight} MaxHeight {MaxHeight} -> {(Vertices != null ? string.Join(" ", Vertices) : "")}";
+            return $"{Id} => AreaType {GetAreaType()}; MinHeight {MinHeight} MaxHeight {MaxHeight} -> {(Vertices != null ? string.Join(" ", Vertices) : "")}";
         }
     }
 }

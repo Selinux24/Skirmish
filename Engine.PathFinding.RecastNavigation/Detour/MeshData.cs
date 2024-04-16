@@ -506,8 +506,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var p = Poly.CreateOffMesh(
                         start,
                         end,
-                        (SamplePolyFlagTypes)param.OffMeshCon[i].FlagTypes,
-                        (SamplePolyAreas)param.OffMeshCon[i].AreaType);
+                        param.OffMeshCon[i].GetFlagType<SamplePolyFlagTypes>(),
+                        param.OffMeshCon[i].GetAreaType<SamplePolyAreas>());
 
                     NavPolys.Add(p);
                     n++;
