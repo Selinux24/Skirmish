@@ -1,5 +1,6 @@
 ﻿using Engine.Common;
 using Engine.PathFinding.RecastNavigation;
+using EngineTests.PathFinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpDX;
@@ -40,8 +41,8 @@ namespace Engine.PathFinding.Tests
 
             float rDefault = 0.5f;
 
-            agentDefault = new Agent() { Radius = rDefault, Height = hOne * 0.5f };
-            agentInclined = new Agent() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
+            agentDefault = new Agent() { Radius = rDefault, Height = hOne * 0.5f, PathFilter = new TestQueryFilter() };
+            agentInclined = new Agent() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f, PathFilter = new TestQueryFilter() };
 
             var pZero = GeometryUtil.CreateXZPlane(10, hZero);
             zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
