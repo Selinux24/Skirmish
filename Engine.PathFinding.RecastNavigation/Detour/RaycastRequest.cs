@@ -8,17 +8,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public struct RaycastRequest
     {
         /// <summary>
-        /// Start reference
-        /// </summary>
-        public int StartRef { get; set; }
-        /// <summary>
         /// Start position
         /// </summary>
         public Vector3 StartPos { get; set; }
         /// <summary>
+        /// Start reference
+        /// </summary>
+        public int StartRef { get; set; }
+        /// <summary>
         /// End position
         /// </summary>
         public Vector3 EndPos { get; set; }
+
         /// <summary>
         /// Query filter
         /// </summary>
@@ -27,6 +28,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Raycast options
         /// </summary>
         public RaycastOptions Options { get; set; }
+
         /// <summary>
         /// Maximum nodes in result path
         /// </summary>

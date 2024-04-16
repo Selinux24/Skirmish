@@ -196,26 +196,11 @@ namespace Engine.PathFinding.RecastNavigation
             return tiles;
         }
         /// <summary>
-        /// Builds the tiles in the specified position
+        /// Builds the tiles in the list
         /// </summary>
-        /// <param name="position">Position</param>
-        private void BuildTiles(IEnumerable<Vector3> positions, bool update)
+        /// <param name="tiles">Tile list</param>
+        private void BuildTiles(List<(int x, int y)> tiles, bool update)
         {
-            var tiles = LookupTiles(positions);
-
-            foreach (var agentQ in agentQuerieFactories)
-            {
-                BuildTiles(agentQ, tiles, update);
-            }
-        }
-        /// <summary>
-        /// Builds the tiles into the bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        private void BuildTiles(BoundingBox bbox, bool update)
-        {
-            var tiles = LookupTiles(bbox);
-
             foreach (var agentQ in agentQuerieFactories)
             {
                 BuildTiles(agentQ, tiles, update);
@@ -239,26 +224,11 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
-        /// Removes the tiles in the specified position list
+        /// Removes the tile list
         /// </summary>
-        /// <param name="positions">Position list</param>
-        private void RemoveTiles(IEnumerable<Vector3> positions)
+        /// <param name="tiles">Tile list</param>
+        private void RemoveTiles(List<(int x, int y)> tiles)
         {
-            var tiles = LookupTiles(positions);
-
-            foreach (var agentQ in agentQuerieFactories)
-            {
-                agentQ.NavMesh.RemoveTilesAt(tiles);
-            }
-        }
-        /// <summary>
-        /// Removes the tiles into the bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        private void RemoveTiles(BoundingBox bbox)
-        {
-            var tiles = LookupTiles(bbox);
-
             foreach (var agentQ in agentQuerieFactories)
             {
                 agentQ.NavMesh.RemoveTilesAt(tiles);
@@ -274,7 +244,9 @@ namespace Engine.PathFinding.RecastNavigation
                 return null;
             }
 
-            var status = query.FindRandomPoint(new QueryFilter(agent.PathFilter), out _, out var pt);
+            var agentFilter = agent.PathFilter;
+
+            var status = query.FindRandomPoint(agentFilter, out _, out var pt);
             if (status == Status.DT_SUCCESS)
             {
                 return pt;
@@ -291,15 +263,16 @@ namespace Engine.PathFinding.RecastNavigation
                 return null;
             }
 
-            var filter = new QueryFilter(agent.PathFilter);
+            var agentExtents = new Vector3(agent.Height);
+            var agentFilter = agent.PathFilter;
 
-            var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
+            var fStatus = query.FindNearestPoly(position, agentExtents, agentFilter, out int startRef, out var nearestPt);
             if (fStatus != Status.DT_SUCCESS)
             {
                 return null;
             }
 
-            var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
+            var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, agentFilter, out _, out var pt);
             if (pStatus != Status.DT_SUCCESS)
             {
                 return null;
@@ -338,10 +311,10 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            var status = query.CalcPath(
-                new QueryFilter(agent.PathFilter), new Vector3(2, 4, 2), PathFindingMode.Straight,
-                from, to, out var result);
+            var agentExtents = new Vector3(agent.Height);
+            var agentFilter = agent.PathFilter;
 
+            var status = query.CalcPath(agentFilter, agentExtents, PathFindingMode.Straight, from, to, out var result);
             if (!status.HasFlag(Status.DT_SUCCESS))
             {
                 return [];
@@ -373,11 +346,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             //Set extents based upon agent height
             var agentExtents = new Vector3(agent.Height);
+            var agentFilter = agent.PathFilter;
 
-            var status = query.FindNearestPoly(
-                position, agentExtents, new(),
-                out int nRef, out var nPoint);
-
+            var status = query.FindNearestPoly(position, agentExtents, agentFilter, out int nRef, out var nPoint);
             if (nRef == 0 || status.HasFlag(Status.DT_FAILURE))
             {
                 return false;
@@ -393,137 +364,102 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool CreateAt(Vector3 position)
         {
-            Updating?.Invoke(this, new EventArgs());
-
-            BuildTiles([position], false);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return CreateAt(LookupTiles([position]));
         }
         /// <inheritdoc/>
         public bool CreateAt(BoundingBox bbox)
         {
-            if (LookupTiles(bbox).Count != 0)
-            {
-                return false;
-            }
-
-            Updating?.Invoke(this, new EventArgs());
-
-            BuildTiles(bbox, false);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return CreateAt(LookupTiles(bbox));
         }
         /// <inheritdoc/>
         public bool CreateAt(IEnumerable<Vector3> positions)
         {
-            if (LookupTiles(positions).Count != 0)
+            return CreateAt(LookupTiles(positions));
+        }
+        /// <summary>
+        /// Creates the tile list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        private bool CreateAt(List<(int x, int y)> tiles)
+        {
+            if (tiles.Count == 0)
             {
-                return false;
+                return true;
             }
 
             Updating?.Invoke(this, new EventArgs());
 
-            BuildTiles(positions, false);
+            BuildTiles(tiles, false);
 
             Updated?.Invoke(this, new EventArgs());
 
             return true;
         }
+
         /// <inheritdoc/>
         public bool UpdateAt(Vector3 position)
         {
-            if (LookupTiles([position]).Count == 0)
-            {
-                return false;
-            }
-
-            Updating?.Invoke(this, new EventArgs());
-
-            BuildTiles([position], true);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return UpdateAt(LookupTiles([position]));
         }
         /// <inheritdoc/>
         public bool UpdateAt(BoundingBox bbox)
         {
-            if (LookupTiles(bbox).Count == 0)
-            {
-                return false;
-            }
-
-            Updating?.Invoke(this, new EventArgs());
-
-            BuildTiles(bbox, true);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return UpdateAt(LookupTiles(bbox));
         }
         /// <inheritdoc/>
         public bool UpdateAt(IEnumerable<Vector3> positions)
         {
-            if (LookupTiles(positions).Count == 0)
+            return UpdateAt(LookupTiles(positions));
+        }
+        /// <summary>
+        /// Updates the tile list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        private bool UpdateAt(List<(int x, int y)> tiles)
+        {
+            if (tiles.Count == 0)
             {
-                return false;
+                return true;
             }
 
             Updating?.Invoke(this, new EventArgs());
 
-            BuildTiles(positions, true);
+            BuildTiles(tiles, true);
 
             Updated?.Invoke(this, new EventArgs());
 
             return true;
         }
+
         /// <inheritdoc/>
         public bool RemoveAt(Vector3 position)
         {
-            if (LookupTiles([position]).Count == 0)
-            {
-                return false;
-            }
-
-            Updating?.Invoke(this, new EventArgs());
-
-            RemoveTiles([position]);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return RemoveAt(LookupTiles([position]));
         }
         /// <inheritdoc/>
         public bool RemoveAt(BoundingBox bbox)
         {
-            if (LookupTiles(bbox).Count == 0)
-            {
-                return false;
-            }
-
-            Updating?.Invoke(this, new EventArgs());
-
-            RemoveTiles(bbox);
-
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+            return RemoveAt(LookupTiles(bbox));
         }
         /// <inheritdoc/>
         public bool RemoveAt(IEnumerable<Vector3> positions)
         {
-            if (LookupTiles(positions).Count == 0)
+            return RemoveAt(LookupTiles(positions));
+        }
+        /// <summary>
+        /// Removes the tile list
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        private bool RemoveAt(List<(int x, int y)> tiles)
+        {
+            if (tiles.Count == 0)
             {
-                return false;
+                return true;
             }
 
             Updating?.Invoke(this, new EventArgs());
 
-            RemoveTiles(positions);
+            RemoveTiles(tiles);
 
             Updated?.Invoke(this, new EventArgs());
 

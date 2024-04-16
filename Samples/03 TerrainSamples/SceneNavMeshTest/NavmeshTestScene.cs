@@ -383,10 +383,10 @@ namespace TerrainSamples.SceneNavMeshTest
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
-            var pathFilter = new GraphPathFilter();
-            pathFilter.SetCost(NavAreaTypes.Ground, 2f);
-            pathFilter.SetCost(NavAreaTypes.Grass, 5f);
-            pathFilter.SetCost(NavAreaTypes.Road, 1f);
+            var pathFilter = new QueryFilter();
+            pathFilter.SetAreaCost(NavAreaTypes.Ground, 2f);
+            pathFilter.SetAreaCost(NavAreaTypes.Grass, 5f);
+            pathFilter.SetAreaCost(NavAreaTypes.Road, 1f);
 
             agent = new()
             {

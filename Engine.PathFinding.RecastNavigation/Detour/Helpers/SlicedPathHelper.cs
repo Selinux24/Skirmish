@@ -34,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <summary>
         /// Sliced query state.
         /// </summary>
-        private QueryData m_query = null;
+        private SlicedPathQueryData m_query = null;
 
         /// <summary>
         /// Constructor
