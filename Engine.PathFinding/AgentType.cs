@@ -22,7 +22,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path filter
         /// </summary>
-        public QueryFilter PathFilter { get; set; }
+        public IGraphQueryFilter PathFilter { get; set; }
 
         /// <summary>
         /// Constructor

@@ -161,7 +161,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxPath">The maximum number of polygons the @p path array can hold.</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPath(PathPoint start, PathPoint end, QueryFilter filter, int maxPath, out SimplePath resultPath)
+        public Status FindPath(PathPoint start, PathPoint end, IGraphQueryFilter filter, int maxPath, out SimplePath resultPath)
         {
             return FindPathHelper.FindPath(start, end, filter, maxPath, out resultPath);
         }
@@ -195,7 +195,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// -# Call UpdateSlicedFindPath() until it returns complete.
         /// -# Call FinalizeSlicedFindPath() to get the path.
         /// </example>
-        public Status InitSlicedFindPath(QueryFilter filter, PathPoint start, PathPoint end, FindPathOptions options = FindPathOptions.AnyAngle)
+        public Status InitSlicedFindPath(IGraphQueryFilter filter, PathPoint start, PathPoint end, FindPathOptions options = FindPathOptions.AnyAngle)
         {
             return SlicedPathHelper.InitSlicedFindPath(filter, start, end, options);
         }
@@ -241,7 +241,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             return FindPolysHelper.FindPolysAroundCircle(startRef, centerPos, radius, filter, maxResult, out result);
         }
@@ -255,7 +255,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             return FindPolysHelper.FindPolysAroundShape(startRef, verts, filter, maxResult, out result);
         }
@@ -268,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="nearestRef">The reference id of the nearest polygon.</param>
         /// <param name="nearestPt">The nearest point on the polygon.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindNearestPoly(Vector3 center, Vector3 halfExtents, QueryFilter filter, out int nearestRef, out Vector3 nearestPt)
+        public Status FindNearestPoly(Vector3 center, Vector3 halfExtents, IGraphQueryFilter filter, out int nearestRef, out Vector3 nearestPt)
         {
             return FindPolysHelper.FindNearestPoly(center, halfExtents, filter, out nearestRef, out nearestPt);
         }
@@ -283,7 +283,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons in the local neighbourhood.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             return FindLocalNeighbourhoodHelper.FindLocalNeighbourhood(startRef, centerPos, radius, filter, maxResult, out result);
         }
@@ -298,7 +298,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <remarks>
         /// Polygons are chosen weighted by area. The search runs in linear related to number of polygon.
         /// </remarks>
-        public Status FindRandomPoint(QueryFilter filter, out int randomRef, out Vector3 randomPt)
+        public Status FindRandomPoint(IGraphQueryFilter filter, out int randomRef, out Vector3 randomPt)
         {
             randomRef = -1;
             randomPt = Vector3.Zero;
@@ -372,7 +372,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="boundary">Local boundary</param>
         /// <param name="filter">Query filter</param>
-        public bool IsValid(LocalBoundary boundary, QueryFilter filter)
+        public bool IsValid(LocalBoundary boundary, IGraphQueryFilter filter)
         {
             if (boundary.PolyCount <= 0)
             {
@@ -396,7 +396,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">The polygon reference to check.</param>
         /// <param name="filter">The filter to apply.</param>
         /// <returns>Returns true if the polygon reference is valid and passes the filter restrictions.</returns>
-        public bool IsValidPolyRef(int r, QueryFilter filter)
+        public bool IsValidPolyRef(int r, IGraphQueryFilter filter)
         {
             var cur = m_nav.GetTileAndPolyByRef(r);
             if (cur.Ref == 0)
@@ -425,7 +425,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
+        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, IGraphQueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
         {
             return MoveAlongSurfaceHelper.MoveAlongSurface(startRef, startPos, endPos, filter, maxVisitedSize, out resultPos, out visited);
         }
@@ -444,7 +444,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Polygons are chosen weighted by area. The search runs in linear related to number of polygon.
         /// The location is not exactly constrained by the circle, but it limits the visited polygons.
         /// </remarks>
-        public Status FindRandomPointAroundCircle(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out int randomRef, out Vector3 randomPt)
+        public Status FindRandomPointAroundCircle(int startRef, Vector3 centerPos, float maxRadius, IGraphQueryFilter filter, out int randomRef, out Vector3 randomPt)
         {
             return RandomPointAroundCircleHelper.FindRandomPointAroundCircle(startRef, centerPos, maxRadius, filter, out randomRef, out randomPt);
         }
@@ -460,7 +460,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="hitPos">The nearest position on the wall that was hit.</param>
         /// <param name="hitNormal">The normalized ray formed from the wall point to the source point.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindDistanceToWall(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
+        public Status FindDistanceToWall(int startRef, Vector3 centerPos, float maxRadius, IGraphQueryFilter filter, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
         {
             return WallHelper.FindDistanceToWall(startRef, centerPos, maxRadius, filter, out hitDist, out hitPos, out hitNormal);
         }
@@ -474,7 +474,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="segmentCount">The number of segments returned.</param>
         /// <param name="maxSegments">The maximum number of segments the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status GetPolyWallSegments(int startRef, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
+        public Status GetPolyWallSegments(int startRef, IGraphQueryFilter filter, int maxSegments, out Segment[] segmentsRes)
         {
             return WallHelper.GetPolyWallSegments(startRef, filter, maxSegments, out segmentsRes);
         }
@@ -489,7 +489,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="endPos">End position</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>Returns the status of the path calculation</returns>
-        public Status CalcPath(QueryFilter filter, Vector3 polyPickExt, PathFindingMode mode, Vector3 startPos, Vector3 endPos, out IEnumerable<Vector3> resultPath)
+        public Status CalcPath(IGraphQueryFilter filter, Vector3 polyPickExt, PathFindingMode mode, Vector3 startPos, Vector3 endPos, out IEnumerable<Vector3> resultPath)
         {
             resultPath = null;
 
@@ -543,7 +543,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="start">Start position</param>
         /// <param name="end">End position</param>
         /// <param name="resultPath">Resulting path</param>
-        private bool CalcPathFollow(QueryFilter filter, PathPoint start, PathPoint end, out List<Vector3> resultPath)
+        private bool CalcPathFollow(IGraphQueryFilter filter, PathPoint start, PathPoint end, out List<Vector3> resultPath)
         {
             resultPath = null;
 
@@ -582,7 +582,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="smoothPath">Smooth path</param>
         /// <param name="iterPath">Path to iterate</param>
         /// <param name="iterPos">Current iteration position</param>
-        private bool IterPathFollow(QueryFilter filter, Vector3 targetPos, List<Vector3> smoothPath, SimplePath iterPath, ref Vector3 iterPos)
+        private bool IterPathFollow(IGraphQueryFilter filter, Vector3 targetPos, List<Vector3> smoothPath, SimplePath iterPath, ref Vector3 iterPos)
         {
             float SLOP = 0.01f;
 
@@ -727,7 +727,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="start">Start position</param>
         /// <param name="end">End position</param>
         /// <param name="resultPath">Resulting path</param>
-        private bool CalcPathStraigh(QueryFilter filter, PathPoint start, PathPoint end, out Vector3[] resultPath)
+        private bool CalcPathStraigh(IGraphQueryFilter filter, PathPoint start, PathPoint end, out Vector3[] resultPath)
         {
             FindPath(start, end, filter, MAX_POLYS, out var polys);
             if (polys.Count < 0)

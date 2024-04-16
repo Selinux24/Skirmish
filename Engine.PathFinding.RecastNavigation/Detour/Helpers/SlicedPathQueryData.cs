@@ -45,7 +45,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <summary>
         /// Query filter
         /// </summary>
-        public QueryFilter Filter { get; set; }
+        public IGraphQueryFilter Filter { get; set; }
         /// <summary>
         /// Find path options
         /// </summary>

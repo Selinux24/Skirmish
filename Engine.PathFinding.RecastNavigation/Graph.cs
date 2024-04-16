@@ -545,16 +545,16 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var tcs = agentQuerieFactories
                 .Where(a => a.NavMesh?.TileCache != null)
-                .Select(a => a.NavMesh.TileCache);
+                .Select(a => (a.Agent, a.NavMesh.TileCache));
 
-            foreach (var tc in tcs)
+            foreach (var (agent, tc) in tcs)
             {
                 if (tc.Updating())
                 {
                     Updating?.Invoke(this, EventArgs.Empty);
                 }
 
-                var status = tc.Update(out bool upToDate, out bool cacheUpdated);
+                var status = tc.Update(agent, out bool upToDate, out bool cacheUpdated);
                 if (updated == upToDate || !status.HasFlag(Status.DT_SUCCESS))
                 {
                     continue;

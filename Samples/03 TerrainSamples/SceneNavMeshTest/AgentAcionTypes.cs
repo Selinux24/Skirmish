@@ -2,25 +2,25 @@
 namespace TerrainSamples.SceneNavMeshTest
 {
     /// <summary>
-    /// Navigation area types
+    /// Agent actions
     /// </summary>
-    enum NavAreaTypes
+    enum AgentAcionTypes
     {
         /// <summary>
         /// None
         /// </summary>
         None,
         /// <summary>
-        /// Rock
+        /// Walk
         /// </summary>
-        Rock,
+        Walk,
         /// <summary>
-        /// Grass
+        /// Jump
         /// </summary>
-        Grass,
+        Jump,
         /// <summary>
-        /// Soil
+        /// All actions
         /// </summary>
-        Soil,
+        All = Walk | Jump,
     }
 }

@@ -3,35 +3,28 @@
     /// <summary>
     /// Edge with region and area definition of a PolyMesh
     /// </summary>
-    struct IndexedRegionEdge
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    struct IndexedRegionEdge(int edgeIndexA, int edgeIndexB, int region, int area)
     {
         /// <summary>
         /// Edge index A
         /// </summary>
-        public int EdgeIndexA;
+        public int EdgeIndexA = edgeIndexA;
         /// <summary>
         /// Edge index B
         /// </summary>
-        public int EdgeIndexB;
+        public int EdgeIndexB = edgeIndexB;
         /// <summary>
         /// Region
         /// </summary>
-        public int Region;
+        public int Region = region;
         /// <summary>
         /// Area
         /// </summary>
-        public SamplePolyAreas Area;
+        public int Area = area;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public IndexedRegionEdge(int edgeIndexA, int edgeIndexB, int region, SamplePolyAreas area)
-        {
-            EdgeIndexA = edgeIndexA;
-            EdgeIndexB = edgeIndexB;
-            Region = region;
-            Area = area;
-        }
         /// <summary>
         /// Decrement by one the edge indices greater than rem
         /// </summary>

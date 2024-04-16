@@ -69,7 +69,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
+        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, IGraphQueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
         {
             resultPos = Vector3.Zero;
             visited = new(maxVisitedSize);
@@ -170,7 +170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="polyIndex">Polygon index</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Return the neighbour references list</returns>
-        private List<int> FindTileNeigbours(TileRef tile, int polyIndex, QueryFilter filter)
+        private List<int> FindTileNeigbours(TileRef tile, int polyIndex, IGraphQueryFilter filter)
         {
             const int MAX_NEIS = 8;
 

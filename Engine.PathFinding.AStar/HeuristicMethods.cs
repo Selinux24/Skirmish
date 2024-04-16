@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.PathFinding
+namespace Engine.PathFinding.AStar
 {
     /// <summary>
     /// Calculation methods for PathFinder

@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="collisionQueryRange">Collision range</param>
         /// <param name="navQuery">Query</param>
         /// <param name="filter">Query filter</param>
-        public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navQuery, QueryFilter filter)
+        public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navQuery, IGraphQueryFilter filter)
         {
             if (r <= 0)
             {

@@ -203,7 +203,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pareas">Area list</param>
         /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns the resulting merged polygon</returns>
-        public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, SamplePolyAreas[] pareas, int[] pregs, Int3[] verts)
+        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, int[] pareas, int[] pregs, Int3[] verts)
         {
             if ((polys?.Length ?? 0) == 0)
             {
@@ -276,7 +276,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="hreg">Region id list</param>
         /// <param name="harea">Area list</param>
         /// <returns>Returns the indexed polygons, regions and areas</returns>
-        public static (IndexedPolygon[] Polys, SamplePolyAreas[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Int3[] tris, SamplePolyAreas[] harea, int[] hreg)
+        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Int3[] tris, int[] harea, int[] hreg)
         {
             if ((tris?.Length ?? 0) == 0)
             {
@@ -289,7 +289,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Merge the hole triangles back to polygons.
             int ntris = tris.Length;
             var polys = new IndexedPolygon[ntris];
-            var pareas = new SamplePolyAreas[ntris];
+            var pareas = new int[ntris];
             var pregs = new int[ntris];
 
             // Build initial polygons.

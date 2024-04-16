@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons in the local neighbourhood.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new(maxResult);
 
@@ -115,7 +115,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="centerPos">Center position</param>
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
-        private bool ProcessFindLocalNeighbourhoodStack(FixedStack<Node> stack, PolyRefs result, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private bool ProcessFindLocalNeighbourhoodStack(FixedStack<Node> stack, PolyRefs result, Vector3 centerPos, float radiusSqr, IGraphQueryFilter filter)
         {
             bool gResult = true;
 
@@ -179,7 +179,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="filter">Query filter</param>
         /// <param name="neighbour">Neighbour tile</param>
         /// <param name="neighbourNode">Neighbour node</param>
-        private bool GetNeighbour(int nref, QueryFilter filter, out TileRef neighbour, out Node neighbourNode)
+        private bool GetNeighbour(int nref, IGraphQueryFilter filter, out TileRef neighbour, out Node neighbourNode)
         {
             neighbour = TileRef.Null;
             neighbourNode = null;

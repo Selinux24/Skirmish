@@ -47,7 +47,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             /// <summary>
             /// Query filter
             /// </summary>
-            public QueryFilter Filter { get; set; }
+            public IGraphQueryFilter Filter { get; set; }
         };
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="endPos">Ending position</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the path index</returns>
-        public int Request(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter)
+        public int Request(int startRef, int endRef, Vector3 startPos, Vector3 endPos, IGraphQueryFilter filter)
         {
             // Find empty slot
             int slot = -1;

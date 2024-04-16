@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="hitPos">The nearest position on the wall that was hit.</param>
         /// <param name="hitNormal">The normalized ray formed from the wall point to the source point.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindDistanceToWall(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
+        public Status FindDistanceToWall(int startRef, Vector3 centerPos, float maxRadius, IGraphQueryFilter filter, out float hitDist, out Vector3 hitPos, out Vector3 hitNormal)
         {
             hitDist = 0;
             hitPos = Vector3.Zero;
@@ -146,7 +146,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="centerPos">Circle center position</param>
         /// <param name="radiusSqr">Circle squared radius</param>
         /// <returns>Returns the closest hit position</returns>
-        private Vector3 HitTestWalls(TileRef best, QueryFilter filter, Vector3 centerPos, float radiusSqr)
+        private Vector3 HitTestWalls(TileRef best, IGraphQueryFilter filter, Vector3 centerPos, float radiusSqr)
         {
             var hitPos = Vector3.Zero;
 
@@ -198,7 +198,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="j">Border neighbour</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns true if the border is solid</returns>
-        private bool BorderIsSolid(TileRef best, int j, QueryFilter filter)
+        private bool BorderIsSolid(TileRef best, int j, IGraphQueryFilter filter)
         {
             bool solid = true;
 
@@ -230,7 +230,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the partial status</returns>
-        private Status ProcessLinksFindDistance(TileRef best, int parentRef, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private Status ProcessLinksFindDistance(TileRef best, int parentRef, Vector3 centerPos, float radiusSqr, IGraphQueryFilter filter)
         {
             Status status = Status.DT_SUCCESS;
 
@@ -262,7 +262,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the partial result</returns>
-        private Status ProcessLinksNeighbourFindDistance(Link link, TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private Status ProcessLinksNeighbourFindDistance(Link link, TileRef best, Vector3 centerPos, float radiusSqr, IGraphQueryFilter filter)
         {
             Status status = Status.DT_SUCCESS;
 
@@ -353,7 +353,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="segmentCount">The number of segments returned.</param>
         /// <param name="maxSegments">The maximum number of segments the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
+        public Status GetPolyWallSegments(int r, IGraphQueryFilter filter, int maxSegments, out Segment[] segmentsRes)
         {
             segmentsRes = [];
 
@@ -417,7 +417,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="cur">Current tile reference</param>
         /// <param name="ints">Interval list</param>
         /// <param name="maxInterval">Maximum number of intervals in the list</param>
-        private void SkipExternalLink(QueryFilter filter, int j, TileRef cur, List<SegInterval> ints, int maxInterval)
+        private void SkipExternalLink(IGraphQueryFilter filter, int j, TileRef cur, List<SegInterval> ints, int maxInterval)
         {
             // Tile border.
             for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
@@ -444,7 +444,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="segments">Segment list</param>
         /// <param name="maxSegments">Maximum segments in the list</param>
         /// <returns>Returns false if the segment buffer is too small</returns>
-        private bool SkipInternalEdge(QueryFilter filter, int j, TileRef cur, Vector3 vi, Vector3 vj, List<Segment> segments, int maxSegments)
+        private bool SkipInternalEdge(IGraphQueryFilter filter, int j, TileRef cur, Vector3 vi, Vector3 vj, List<Segment> segments, int maxSegments)
         {
             // Internal edge
             int neij = cur.Poly.Neis[j];

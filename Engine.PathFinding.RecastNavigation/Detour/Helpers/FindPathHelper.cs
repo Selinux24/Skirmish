@@ -80,7 +80,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="maxPath">The maximum number of polygons the @p path array can hold.</param>
         /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPath(PathPoint start, PathPoint end, QueryFilter filter, int maxPath, out SimplePath resultPath)
+        public Status FindPath(PathPoint start, PathPoint end, IGraphQueryFilter filter, int maxPath, out SimplePath resultPath)
         {
             resultPath = new(maxPath);
 
@@ -159,7 +159,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="lastBestNodeCost">Updates the last best node cost</param>
         /// <param name="outOfNodes">Returns whether the path is out of nodes</param>
         /// <returns>Process results</returns>
-        private Status ProcessOpenList(QueryFilter filter, PathPoint target, Node bestNode, ref Node lastBestNode, ref float lastBestNodeCost, out bool outOfNodes)
+        private Status ProcessOpenList(IGraphQueryFilter filter, PathPoint target, Node bestNode, ref Node lastBestNode, ref float lastBestNodeCost, out bool outOfNodes)
         {
             outOfNodes = false;
 
@@ -216,7 +216,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="neighbour">Resulting neighbour tile</param>
         /// <param name="neighbourNode">Resulting neighbour node</param>
         /// <param name="outOfNodes">Gets whether the pool is out of nodes</param>
-        private bool ValidateNeighbourNode(Link link, QueryFilter filter, TileRef parent, out TileRef neighbour, out Node neighbourNode, out bool outOfNodes)
+        private bool ValidateNeighbourNode(Link link, IGraphQueryFilter filter, TileRef parent, out TileRef neighbour, out Node neighbourNode, out bool outOfNodes)
         {
             neighbour = TileRef.Null;
             neighbourNode = null;
@@ -274,7 +274,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="cur">Current tile</param>
         /// <param name="next">Next tile</param>
         /// <returns>Returns whether the next node has best cost, and the heuristics value</returns>
-        private (bool isBest, float heuristic) CalculateCostAndHeuristics(QueryFilter filter, PathPoint target, Node pa, Node pb, TileRef prev, TileRef cur, TileRef next)
+        private (bool isBest, float heuristic) CalculateCostAndHeuristics(IGraphQueryFilter filter, PathPoint target, Node pa, Node pb, TileRef prev, TileRef cur, TileRef next)
         {
             float curCost = filter.GetCost(pa.Pos, pb.Pos, prev, cur, next);
             float cost = pa.Cost + curCost;

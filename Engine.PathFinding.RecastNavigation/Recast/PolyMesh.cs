@@ -142,11 +142,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The area id assigned to each polygon. [Length: #<see cref="MaxPolys"/>]
         /// </summary>
-        private SamplePolyAreas[] areaList;
+        private int[] areaList;
         /// <summary>
         /// The user defined flags for each polygon. [Length: #<see cref="MaxPolys"/>]
         /// </summary>
-        private SamplePolyFlagTypes[] flagList;
+        private int[] flagList;
 
         /// <summary>
         /// The maximum number of vertices per polygon.
@@ -195,8 +195,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 polyCount = 0,
                 polyList = new IndexedPolygon[maxPolys],
                 regionList = Helper.CreateArray(maxPolys, -1),
-                areaList = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
-                flagList = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
+                areaList = Helper.CreateArray(maxPolys, 0),
+                flagList = Helper.CreateArray(maxPolys, 0),
 
                 NVP = nvp,
 
@@ -293,8 +293,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             mesh.polyCount = 0;
             mesh.polyList = new IndexedPolygon[maxPolys];
             mesh.regionList = new int[maxPolys];
-            mesh.areaList = new SamplePolyAreas[maxPolys];
-            mesh.flagList = new SamplePolyFlagTypes[maxPolys];
+            mesh.areaList = new int[maxPolys];
+            mesh.flagList = new int[maxPolys];
 
             int[] nextVert = Helper.CreateArray(maxVerts, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -706,7 +706,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             polyList[polyCount - 1] = null;
             regionList[polyCount - 1] = NULL_IDX;
-            areaList[polyCount - 1] = SamplePolyAreas.None;
+            areaList[polyCount - 1] = 0;
 
             polyCount--;
         }
@@ -745,10 +745,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hreg">Hole regions</param>
         /// <param name="harea">Hole areas</param>
         /// <returns>Retusn the triangulated vertices and the triangulated hole</returns>
-        private (Int3[] TriVerts, int[] TriHole, int[] hole, SamplePolyAreas[] harea, int[] hreg) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
+        private (Int3[] TriVerts, int[] TriHole, int[] hole, int[] harea, int[] hreg) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
         {
             var hole = new int[numRemovedVerts * NVP];
-            var harea = new SamplePolyAreas[numRemovedVerts * NVP];
+            var harea = new int[numRemovedVerts * NVP];
             var hreg = new int[numRemovedVerts * NVP];
 
             int nhole = 0;
@@ -878,7 +878,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="pregs">Region id list</param>
         /// <param name="pareas">Area list</param>
         /// <param name="maxPolys">Maximum number of polygons to store</param>
-        private bool StorePolygons(IndexedPolygon[] polys, int npolys, SamplePolyAreas[] pareas, int[] pregs, int maxPolys)
+        private bool StorePolygons(IndexedPolygon[] polys, int npolys, int[] pareas, int[] pregs, int maxPolys)
         {
             for (int i = 0; i < npolys; ++i)
             {
@@ -915,7 +915,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var p = new IndexedPolygon(NVP, true);
                 p.CopyVertices(polys[i]);
 
-                StorePolygon(p, (SamplePolyAreas)(int)cont.Area, cont.RegionId);
+                StorePolygon(p, (int)cont.Area, cont.RegionId);
             }
 
             return true;
@@ -926,7 +926,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="p">Indexed polygon</param>
         /// <param name="reg">Region id</param>
         /// <param name="area">Area type</param>
-        private void StorePolygon(IndexedPolygon p, SamplePolyAreas area, int reg)
+        private void StorePolygon(IndexedPolygon p, int area, int reg)
         {
             polyList[polyCount] = p;
             areaList[polyCount] = area;
@@ -937,23 +937,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Updates the polygon flags
         /// </summary>
-        public void UpdatePolyFlags()
+        public void UpdatePolyFlags(IGraphQueryFilter filter)
         {
             for (int i = 0; i < polyCount; ++i)
             {
-                if ((int)areaList[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if (areaList[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    areaList[i] = SamplePolyAreas.Ground;
+                    areaList[i] = filter.GetDefaultWalkableAreaType();
                 }
 
-                flagList[i] = SamplePolyFlagTypesExtents.EvaluateArea(areaList[i]);
+                flagList[i] = filter.EvaluateArea(areaList[i]);
             }
         }
 
         /// <summary>
         /// Iterates over the mesh polygons
         /// </summary>
-        public IEnumerable<(int i, IndexedPolygon p, int r, SamplePolyAreas a)> IteratePolygons()
+        public IEnumerable<(int i, IndexedPolygon p, int r, int a)> IteratePolygons()
         {
             for (int p = 0; p < polyCount; p++)
             {
@@ -987,7 +987,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Iterates over the mesh triangles
         /// </summary>
         /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
-        public IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int r, SamplePolyAreas a)> IteratePolyTriangles()
+        public IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int r, int a)> IteratePolyTriangles()
         {
             for (int i = 0; i < polyCount; i++)
             {
@@ -1067,14 +1067,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Return Areas
         /// </summary>
-        public SamplePolyAreas[] GetAreas()
+        public int[] GetAreas()
         {
             return [.. areaList];
         }
         /// <summary>
         /// Return flags
         /// </summary>
-        public SamplePolyFlagTypes[] GetFlags()
+        public int[] GetFlags()
         {
             return [.. flagList];
         }

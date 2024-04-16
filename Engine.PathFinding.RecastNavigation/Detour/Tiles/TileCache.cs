@@ -162,9 +162,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Builds the tile chache
         /// </summary>
         /// <param name="geometry">Input geometry</param>
+        /// <param name="agent">Agent</param>
         /// <param name="tiledCfg">Configuration</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Action<float> progressCallback)
+        public void BuildAllTiles(InputGeometry geometry, Agent agent, TilesConfig tiledCfg, Action<float> progressCallback)
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
@@ -183,7 +184,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Build initial meshes
             foreach (var (x, y) in GridUtils.Iterate(m_params.TileWidth, m_params.TileHeight))
             {
-                BuildTilesAt(x, y);
+                BuildTilesAt(x, y, agent);
 
                 progressCallback?.Invoke(++curr / total);
             }
@@ -194,8 +195,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="x">Tile x coordinate</param>
         /// <param name="y">Tile y coordinate</param>
         /// <param name="geometry">Input geometry</param>
+        /// <param name="agent">Agent</param>
         /// <param name="tiledCfg">Configuration</param>
-        public void BuildTileAt(int x, int y, InputGeometry geometry, TilesConfig tiledCfg)
+        public void BuildTileAt(int x, int y, InputGeometry geometry, Agent agent, TilesConfig tiledCfg)
         {
             var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
 
@@ -204,7 +206,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 AddTile(tile, CompressedTileFlagTypes.Free, false);
             }
 
-            BuildTilesAt(x, y);
+            BuildTilesAt(x, y, agent);
         }
 
         /// <summary>
@@ -534,8 +536,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Updates the tile-cache
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
-        public Status Update(out bool upToDate, out bool cacheUpdated)
+        /// <param name="cacheUpdated">Returns true if the instance tile cahche is up to date (No requests to perform)</param>
+        public Status Update(Agent agent, out bool upToDate, out bool cacheUpdated)
         {
             bool updating = Updating();
 
@@ -545,7 +549,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 ProcessRequests();
             }
 
-            Status status = ProcessUpdates();
+            Status status = ProcessUpdates(agent);
 
             upToDate = m_update.Count == 0 && m_reqs.Count == 0;
             cacheUpdated = updating != Updating();
@@ -649,7 +653,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Process updates
         /// </summary>
-        private Status ProcessUpdates()
+        /// <param name="agent">Agent</param>
+        private Status ProcessUpdates(Agent agent)
         {
             // Process updates
             if (m_update.Count == 0)
@@ -661,7 +666,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Build mesh
             var r = m_update[0];
-            if (!BuildTile(r))
+            if (!BuildTile(r, agent))
             {
                 status = Status.DT_FAILURE;
             }
@@ -694,20 +699,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
-        private void BuildTilesAt(int x, int y)
+        /// <param name="agent">Agent</param>
+        private void BuildTilesAt(int x, int y, Agent agent)
         {
             // Get all tiles
             var tiles = GetTilesAt(x, y, 0);
             foreach (var tile in tiles)
             {
-                BuildTile(tile);
+                BuildTile(tile, agent);
             }
         }
         /// <summary>
         /// Builds the specified tile
         /// </summary>
         /// <param name="tile">Tile</param>
-        private bool BuildTile(CompressedTile tile)
+        /// <param name="agent">Agent</param>
+        private bool BuildTile(CompressedTile tile, Agent agent)
         {
             // Decompress tile layer data.
             TileCacheLayer tlayer = new(tile);
@@ -738,7 +745,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
-            tmesh.UpdatePolyFlags();
+            tmesh.UpdatePolyFlags(agent.PathFilter);
 
             var param = new NavMeshCreateParams
             {

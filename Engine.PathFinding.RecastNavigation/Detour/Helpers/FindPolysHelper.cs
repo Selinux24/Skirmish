@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new(maxResult);
 
@@ -150,7 +150,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, IGraphQueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new(maxResult);
 
@@ -229,7 +229,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="query">Query</param>
         /// <param name="filter">Query filter</param>
         /// <param name="outOfNodes">Return true if the query is out of available nodes</param>
-        private void ProcessTileLinksQuery(TileRef best, TileRef parent, IFindPolysQuery query, QueryFilter filter, out bool outOfNodes)
+        private void ProcessTileLinksQuery(TileRef best, TileRef parent, IFindPolysQuery query, IGraphQueryFilter filter, out bool outOfNodes)
         {
             outOfNodes = false;
 
@@ -259,7 +259,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="query">Query</param>
         /// <param name="filter">Query filter</param>
         /// <param name="outOfNodes">Return true if the query is out of available nodes</param>
-        private void ProcessTileLinkNeighbourQuery(Link link, TileRef best, TileRef parent, IFindPolysQuery query, QueryFilter filter, out bool outOfNodes)
+        private void ProcessTileLinkNeighbourQuery(Link link, TileRef best, TileRef parent, IFindPolysQuery query, IGraphQueryFilter filter, out bool outOfNodes)
         {
             outOfNodes = false;
 
@@ -337,7 +337,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="nearestRef">The reference id of the nearest polygon.</param>
         /// <param name="nearestPt">The nearest point on the polygon.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindNearestPoly(Vector3 center, Vector3 halfExtents, QueryFilter filter, out int nearestRef, out Vector3 nearestPt)
+        public Status FindNearestPoly(Vector3 center, Vector3 halfExtents, IGraphQueryFilter filter, out int nearestRef, out Vector3 nearestPt)
         {
             nearestRef = 0;
             nearestPt = Vector3.Zero;
@@ -371,7 +371,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="filter">The polygon filter to apply to the query.</param>
         /// <param name="query">The query. Polygons found will be batched together and passed to this query.</param>
         /// <returns>The status flags for the query.</returns>
-        private Status QueryPolygons(Vector3 center, Vector3 halfExtents, QueryFilter filter, IPolyQuery query)
+        private Status QueryPolygons(Vector3 center, Vector3 halfExtents, IGraphQueryFilter filter, IPolyQuery query)
         {
             if (center.IsInfinity() ||
                 halfExtents.IsInfinity() ||
@@ -408,7 +408,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <summary>
         ///  Queries polygons within a tile.
         /// </summary>
-        private void QueryPolygonsInTile(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query)
+        private void QueryPolygonsInTile(MeshTile tile, BoundingBox bounds, IGraphQueryFilter filter, IPolyQuery query)
         {
             if (tile.BvTree?.Length > 0)
             {
@@ -422,7 +422,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <summary>
         ///  Queries polygons within a tile using a BVtree.
         /// </summary>
-        private void QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query, int batchSize = 32)
+        private void QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, IGraphQueryFilter filter, IPolyQuery query, int batchSize = 32)
         {
             List<int> polyRefs = new(batchSize);
 
@@ -471,7 +471,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <summary>
         ///  Queries polygons within a tile reference by reference.
         /// </summary>
-        private void QueryPolygonsInTileByRef(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query)
+        private void QueryPolygonsInTileByRef(MeshTile tile, BoundingBox bounds, IGraphQueryFilter filter, IPolyQuery query)
         {
             int batchSize = 32;
             List<int> polyRefs = new(batchSize);

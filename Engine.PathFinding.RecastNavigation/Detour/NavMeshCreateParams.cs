@@ -28,11 +28,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The user defined flags assigned to each polygon. [Size: #polyCount]
         /// </summary>
-        public SamplePolyFlagTypes[] PolyFlags { get; set; }
+        public int[] PolyFlags { get; set; }
         /// <summary>
         /// The user defined area ids assigned to each polygon. [Size: #polyCount]
         /// </summary>
-        public SamplePolyAreas[] PolyAreas { get; set; }
+        public int[] PolyAreas { get; set; }
         /// <summary>
         /// Number of polygons in the mesh. [Limit: >= 1]
         /// </summary>

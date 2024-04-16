@@ -143,6 +143,7 @@ namespace TerrainSamples.SceneCrowds
                 Height = tankbbox.Height,
                 Radius = MathF.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
                 MaxClimb = tankbbox.Height * 0.55f,
+                PathFilter = new CrowdQueryFilter(),
             };
 
             for (int i = 0; i < tanks.InstanceCount; i++)

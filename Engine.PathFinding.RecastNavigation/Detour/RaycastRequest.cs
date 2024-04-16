@@ -23,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Query filter
         /// </summary>
-        public QueryFilter Filter { get; set; }
+        public IGraphQueryFilter Filter { get; set; }
         /// <summary>
         /// Raycast options
         /// </summary>

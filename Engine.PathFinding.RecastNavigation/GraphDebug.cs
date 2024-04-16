@@ -1174,14 +1174,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<(Color4, Vector3)> ReadTris(Int3[] t, SamplePolyAreas area, Vector3 orig, float cs, float ch)
+        private static IEnumerable<(Color4, Vector3)> ReadTris(Int3[] t, int area, Vector3 orig, float cs, float ch)
         {
             Color4 col;
-            if (area == SamplePolyAreas.Ground)
-            {
-                col = new Color(0, 192, 255, 128);
-            }
-            else if (area == SamplePolyAreas.None)
+            if (area == 0)
             {
                 col = new Color(0, 0, 0, 128);
             }
@@ -1228,9 +1224,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="area">Area value</param>
         /// <param name="alpha">Alpha value</param>
-        private static Color4 AreaToCol(SamplePolyAreas area, int alpha)
+        private static Color4 AreaToCol(int area, int alpha)
         {
-            if (area == SamplePolyAreas.None)
+            if (area == 0)
             {
                 // Treat zero area type as default.
                 return new Color(0, 192, 255, 255);

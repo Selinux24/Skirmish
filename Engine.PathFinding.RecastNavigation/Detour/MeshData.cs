@@ -497,23 +497,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int n = 0;
             for (int i = 0; i < param.OffMeshConCount; i++)
             {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == NULL_OFFMESH)
+                if (offMeshConClass[i].X != NULL_OFFMESH)
                 {
-                    int start = offMeshVertsBase + (n * 2) + 0;
-                    int end = offMeshVertsBase + (n * 2) + 1;
-
-                    var p = Poly.CreateOffMesh(
-                        start,
-                        end,
-                        param.OffMeshCon[i].GetFlagType<SamplePolyFlagTypes>(),
-                        param.OffMeshCon[i].GetAreaType<SamplePolyAreas>());
-
-                    NavPolys.Add(p);
-                    n++;
+                    // Only store connections which start from this tile.
+                    continue;
                 }
-            }
 
+                int start = offMeshVertsBase + (n * 2) + 0;
+                int end = offMeshVertsBase + (n * 2) + 1;
+
+                var p = Poly.CreateOffMesh(
+                    start,
+                    end,
+                    param.OffMeshCon[i].GetFlagType(),
+                    param.OffMeshCon[i].GetAreaType());
+
+                NavPolys.Add(p);
+                n++;
+            }
         }
         /// <summary>
         /// Stores detail meshes from creation parameters

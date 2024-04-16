@@ -79,7 +79,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// Polygons are chosen weighted by area. The search runs in linear related to number of polygon.
         /// The location is not exactly constrained by the circle, but it limits the visited polygons.
         /// </remarks>
-        public Status FindRandomPointAroundCircle(int startRef, Vector3 centerPos, float maxRadius, QueryFilter filter, out int randomRef, out Vector3 randomPt)
+        public Status FindRandomPointAroundCircle(int startRef, Vector3 centerPos, float maxRadius, IGraphQueryFilter filter, out int randomRef, out Vector3 randomPt)
         {
             randomRef = 0;
             randomPt = new Vector3();
@@ -187,7 +187,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <param name="centerPos">Center position</param>
         /// <param name="radiusSqr">Squared radius</param>
         /// <param name="filter">Query filter</param>
-        private void EvaluateTileLinks(TileRef tile, Vector3 centerPos, float radiusSqr, QueryFilter filter)
+        private void EvaluateTileLinks(TileRef tile, Vector3 centerPos, float radiusSqr, IGraphQueryFilter filter)
         {
             // Get parent poly and tile.
             int parentRef = m_nodePool.GetNodeAtIdx(tile.Node.PIdx)?.Ref ?? 0;

@@ -49,7 +49,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Filter list
         /// </summary>
-        private readonly List<QueryFilter> m_filters = [];
+        private readonly List<IGraphQueryFilter> m_filters = [];
         /// <summary>
         /// Obstacle query list
         /// </summary>
@@ -113,7 +113,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Init filters
             for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
             {
-                m_filters.Add(new());
+                m_filters.Add(settings.Agent.PathFilter);
             }
 
             // Init obstacle query params.
@@ -989,7 +989,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="i">Filter index</param>
         /// <returns>The filter used by the crowd.</returns>
-        public QueryFilter GetFilter(int i)
+        public IGraphQueryFilter GetFilter(int i)
         {
             return (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE) ? m_filters[i] : null;
         }
@@ -998,7 +998,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="i">The index</param>
         /// <param name="filter">The new filter</param>
-        public void SetFilter(int i, QueryFilter filter)
+        public void SetFilter(int i, IGraphQueryFilter filter)
         {
             if (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE)
             {

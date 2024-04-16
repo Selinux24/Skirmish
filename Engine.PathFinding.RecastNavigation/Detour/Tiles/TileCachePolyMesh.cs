@@ -42,11 +42,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Per polygon flags.
         /// </summary>
-        private SamplePolyFlagTypes[] flagList;
+        private int[] flagList;
         /// <summary>
         /// Area ID of polygons.
         /// </summary>
-        private SamplePolyAreas[] areaList;
+        private int[] areaList;
 
         /// <summary>
         /// The maximum number of vertices per polygon.
@@ -69,8 +69,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 polyCount = 0,
                 polyList = new IndexedPolygon[maxPolys],
-                areaList = Helper.CreateArray(maxPolys, SamplePolyAreas.None),
-                flagList = Helper.CreateArray(maxPolys, SamplePolyFlagTypes.None),
+                areaList = Helper.CreateArray(maxPolys, 0),
+                flagList = Helper.CreateArray(maxPolys, 0),
 
                 NVP = nvp,
             };
@@ -404,7 +404,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             areaList[rem] = areaList[polyCount - 1];
 
             polyList[polyCount - 1] = null;
-            areaList[polyCount - 1] = SamplePolyAreas.None;
+            areaList[polyCount - 1] = 0;
 
             polyCount--;
         }
@@ -442,10 +442,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="nedges">Number of edges</param>
         /// <param name="numRemovedVerts">Number of removed vertices</param>
         /// <returns>Returns the triangulated vertices and the triangulated hole</returns>
-        private readonly (bool Result, Int3[] TriVerts, int[] TriHole, int[] Hole, SamplePolyAreas[] HArea) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
+        private readonly (bool Result, Int3[] TriVerts, int[] TriHole, int[] Hole, int[] HArea) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
         {
             var hole = new int[numRemovedVerts * NVP];
-            var harea = new SamplePolyAreas[numRemovedVerts * NVP];
+            var harea = new int[numRemovedVerts * NVP];
 
             int nhole = 0;
             int nharea = 0;
@@ -459,7 +459,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 if (nhole >= MAX_REM_EDGES)
                 {
-                    return (false, Array.Empty<Int3>(), Array.Empty<int>(), Array.Empty<int>(), Array.Empty<SamplePolyAreas>());
+                    return (false, [], [], [], []);
                 }
 
                 if (!match)
@@ -489,7 +489,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="nhole">Number of indices in the hole</param>
         /// <param name="harea">Hole areas</param>
         /// <param name="nharea">Number of areas in the hole</param>
-        private static bool MatchEdge(IndexedRegionEdge[] edges, ref int nedges, int[] hole, ref int nhole, SamplePolyAreas[] harea, ref int nharea)
+        private static bool MatchEdge(IndexedRegionEdge[] edges, ref int nedges, int[] hole, ref int nhole, int[] harea, ref int nharea)
         {
             bool match = false;
 
@@ -685,17 +685,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Update polygon flags
         /// </summary>
-        public readonly void UpdatePolyFlags()
+        public readonly void UpdatePolyFlags(IGraphQueryFilter filter)
         {
             // Update poly flags from areas.
             for (int i = 0; i < polyCount; ++i)
             {
-                if ((int)areaList[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if (areaList[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    areaList[i] = SamplePolyAreas.Ground;
+                    areaList[i] = filter.GetDefaultWalkableAreaType();
                 }
 
-                flagList[i] = SamplePolyFlagTypesExtents.EvaluateArea(areaList[i]);
+                flagList[i] = filter.EvaluateArea(areaList[i]);
             }
         }
 
@@ -706,7 +706,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="npolys">Number of polygon indices</param>
         /// <param name="pareas">Area list</param>
         /// <param name="maxPolys">Maximum number of polygons to store</param>
-        private bool StorePolygons(IndexedPolygon[] polys, int npolys, SamplePolyAreas[] pareas, int maxPolys)
+        private bool StorePolygons(IndexedPolygon[] polys, int npolys, int[] pareas, int maxPolys)
         {
             for (int i = 0; i < npolys; ++i)
             {
@@ -744,7 +744,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 var p = new IndexedPolygon(NVP, true);
                 p.CopyVertices(polys[i]);
 
-                StorePolygon(p, (SamplePolyAreas)(int)cont.Area);
+                StorePolygon(p, (int)cont.Area);
             }
 
             return true;
@@ -754,7 +754,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="p">Indexed polygon</param>
         /// <param name="area">Area type</param>
-        private void StorePolygon(IndexedPolygon p, SamplePolyAreas area)
+        private void StorePolygon(IndexedPolygon p, int area)
         {
             polyList[polyCount] = p;
             areaList[polyCount] = area;
@@ -802,7 +802,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Return Areas
         /// </summary>
-        public readonly SamplePolyAreas[] GetAreas()
+        public readonly int[] GetAreas()
         {
             return [.. areaList];
         }
@@ -810,7 +810,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the area at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly SamplePolyAreas GetArea(int index)
+        public readonly int GetArea(int index)
         {
             return areaList[index];
         }
@@ -819,7 +819,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="index">Index</param>
         /// <param name="area">Area value</param>
-        public readonly void SetArea(int index, SamplePolyAreas area)
+        public readonly void SetArea(int index, int area)
         {
             areaList[index] = area;
         }
@@ -827,7 +827,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Return flags
         /// </summary>
-        public readonly SamplePolyFlagTypes[] GetFlags()
+        public readonly int[] GetFlags()
         {
             return [.. flagList];
         }
@@ -835,7 +835,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the flag at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly SamplePolyFlagTypes GetFlag(int index)
+        public readonly int GetFlag(int index)
         {
             return flagList[index];
         }
@@ -844,7 +844,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="index"></param>
         /// <param name="flag"></param>
-        public readonly void SetFlag(int index, SamplePolyFlagTypes flag)
+        public readonly void SetFlag(int index, int flag)
         {
             flagList[index] = flag;
         }
@@ -876,7 +876,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Iterates over the mesh triangles
         /// </summary>
         /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
-        public readonly IEnumerable<(int i, Int3[] tri, IndexedPolygon p, SamplePolyAreas a)> IteratePolyTriangles()
+        public readonly IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int a)> IteratePolyTriangles()
         {
             for (int i = 0; i < polyCount; i++)
             {

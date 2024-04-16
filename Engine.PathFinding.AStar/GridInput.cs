@@ -7,17 +7,12 @@ namespace Engine.PathFinding.AStar
     /// <summary>
     /// Grid input geometry
     /// </summary>
-    public class GridInput : PathFinderInput
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="fnc">Get triangles function</param>
+    public class GridInput(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="fnc">Get triangles function</param>
-        public GridInput(Func<IEnumerable<Triangle>> fnc) : base(fnc)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
         {

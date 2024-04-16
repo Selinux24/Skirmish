@@ -395,7 +395,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="query">Agent query</param>
         /// <param name="filter">Query filter</param>
         /// <param name="d">Debug info</param>
-        public void FindNextCorner(NavMeshQuery query, QueryFilter filter, CrowdAgentDebugInfo d)
+        public void FindNextCorner(NavMeshQuery query, IGraphQueryFilter filter, CrowdAgentDebugInfo d)
         {
             // Find corners for steering
             var straightPath = Corridor.FindCorners(query, DT_CROWDAGENT_MAX_CORNERS);

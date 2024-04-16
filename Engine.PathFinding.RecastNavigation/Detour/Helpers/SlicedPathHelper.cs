@@ -92,7 +92,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// -# Call UpdateSlicedFindPath() until it returns complete.
         /// -# Call FinalizeSlicedFindPath() to get the path.
         /// </example>
-        public Status InitSlicedFindPath(QueryFilter filter, PathPoint start, PathPoint end, FindPathOptions options = FindPathOptions.AnyAngle)
+        public Status InitSlicedFindPath(IGraphQueryFilter filter, PathPoint start, PathPoint end, FindPathOptions options = FindPathOptions.AnyAngle)
         {
             // Init path state.
             m_query = new()

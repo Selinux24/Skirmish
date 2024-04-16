@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The user defined polygon flags.
         /// </summary>
-        public SamplePolyFlagTypes Flags { get; set; }
+        public int Flags { get; set; }
         /// <summary>
         /// The number of vertices in the polygon.
         /// </summary>
@@ -32,7 +32,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Polygon area
         /// </summary>
-        public SamplePolyAreas Area { get; set; }
+        public int Area { get; set; }
         /// <summary>
         /// Polygon type
         /// </summary>
@@ -45,7 +45,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="end">End reference</param>
         /// <param name="flags">Connection flags</param>
         /// <param name="area">Area flags</param>
-        public static Poly CreateOffMesh(int start, int end, SamplePolyFlagTypes flags, SamplePolyAreas area)
+        public static Poly CreateOffMesh(int start, int end, int flags, int area)
         {
             var p = new Poly
             {
@@ -65,7 +65,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="flags">Sample flags</param>
         /// <param name="area">Sample area</param>
         /// <param name="nvp">Maximum vertices per poligon</param>
-        public static Poly Create(IndexedPolygon polygon, SamplePolyFlagTypes flags, SamplePolyAreas area, int nvp)
+        public static Poly Create(IndexedPolygon polygon, int flags, int area, int nvp)
         {
             int[] verts = new int[nvp];
             int[] neis = new int[nvp];

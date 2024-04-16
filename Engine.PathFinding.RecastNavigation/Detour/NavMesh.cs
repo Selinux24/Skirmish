@@ -203,7 +203,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             progressCallback?.Invoke(10f / passCount);
 
             // Update poly flags from areas.
-            pmesh.UpdatePolyFlags();
+            pmesh.UpdatePolyFlags(agent.PathFilter);
             progressCallback?.Invoke(11f / passCount);
 
             var param = new NavMeshCreateParams
@@ -281,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 
-                    nm.BuildAllTiles(geometry, tiledCfg, (progress) =>
+                    nm.BuildAllTiles(geometry, tiledCfg, agent, (progress) =>
                     {
                         progressCallback?.Invoke(progress);
                     });
@@ -299,7 +299,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 
-                    nm.TileCache.BuildAllTiles(geometry, tiledCfg, (progress) =>
+                    nm.TileCache.BuildAllTiles(geometry, agent, tiledCfg, (progress) =>
                     {
                         progressCallback?.Invoke(progress);
                     });
@@ -315,7 +315,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="y">Y tile coordinate</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Configuration</param>
-        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig tiledCfg)
+        /// <param name="agent">Agent</param>
+        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig tiledCfg, Agent agent)
         {
             if (tiledCfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
@@ -376,7 +377,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Update poly flags from areas.
-            pmesh.UpdatePolyFlags();
+            pmesh.UpdatePolyFlags(agent.PathFilter);
 
             var param = new NavMeshCreateParams
             {
@@ -548,15 +549,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Tiled config</param>
+        /// <param name="agent">Agent</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Action<float> progressCallback)
+        private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Agent agent, Action<float> progressCallback)
         {
             float totalTiles = tiledCfg.TileHeight * tiledCfg.TileWidth;
             int tile = 0;
 
             foreach (var (x, y) in GridUtils.Iterate(tiledCfg.TileWidth, tiledCfg.TileHeight))
             {
-                var data = BuildTileMesh(x, y, geometry, tiledCfg);
+                var data = BuildTileMesh(x, y, geometry, tiledCfg, agent);
                 if (data != null)
                 {
                     // Remove any previous data (navmesh owns and deletes the data).
@@ -588,7 +590,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 RemoveTiles(x, y);
 
                 // Add tile, or leave the location empty.
-                var data = BuildTileMesh(x, y, geometry, tiledCfg);
+                var data = BuildTileMesh(x, y, geometry, tiledCfg, agent);
                 if (data != null)
                 {
                     AddTile(data);
@@ -596,7 +598,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             else
             {
-                TileCache.BuildTileAt(x, y, geometry, tiledCfg);
+                TileCache.BuildTileAt(x, y, geometry, agent, tiledCfg);
             }
         }
         /// <summary>
@@ -1148,7 +1150,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">Polygon reference</param>
         /// <param name="flags">Polygon flags</param>
         /// <returns>Returns true if the polygon were found</returns>
-        public bool SetPolyFlags(int r, SamplePolyFlagTypes flags)
+        public bool SetPolyFlags(int r, int flags)
         {
             if (!IsValidPolyRef(r, out int it, out int ip))
             {
@@ -1168,7 +1170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">Polygon reference</param>
         /// <param name="resultFlags">Resulting flags</param>
         /// <returns>Returns true if the polygon were found</returns>
-        public bool GetPolyFlags(int r, out SamplePolyFlagTypes resultFlags)
+        public bool GetPolyFlags(int r, out int resultFlags)
         {
             resultFlags = 0;
 
@@ -1190,7 +1192,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">Polygon reference</param>
         /// <param name="area">Sample area</param>
         /// <returns>Returns true if the polygon were found</returns>
-        public bool SetPolyArea(int r, SamplePolyAreas area)
+        public bool SetPolyArea(int r, int area)
         {
             if (!IsValidPolyRef(r, out int it, out int ip))
             {
@@ -1209,7 +1211,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">Polygon reference</param>
         /// <param name="resultArea">Resulting sample area</param>
         /// <returns>Returns true if the polygon were found</returns>
-        public bool GetPolyArea(int r, out SamplePolyAreas resultArea)
+        public bool GetPolyArea(int r, out int resultArea)
         {
             resultArea = 0;
 
@@ -2258,7 +2260,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="tmax">Maximum distance</param>
         /// <param name="segMax">Maximum segment</param>
         /// <param name="next">Updates the next tile to test</param>
-        private void RayCastLinks(TileRef cur, QueryFilter filter, Vector3 startPos, Vector3 endPos, float tmax, int segMax, ref TileRef next)
+        private void RayCastLinks(TileRef cur, IGraphQueryFilter filter, Vector3 startPos, Vector3 endPos, float tmax, int segMax, ref TileRef next)
         {
             for (int i = cur.Poly.FirstLink; i != MeshTile.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
             {
