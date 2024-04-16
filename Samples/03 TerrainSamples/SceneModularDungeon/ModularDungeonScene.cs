@@ -1504,7 +1504,7 @@ namespace TerrainSamples.SceneModularDungeon
                     1,
                     1,
                     DungeonAreaTypes.Jump,
-                    AgentAcionTypes.All);
+                    AgentActionTypes.All);
 
                 PathFinderDescription.Input.AddConnection(
                     new Vector3(17, 0, -14),
@@ -1512,7 +1512,7 @@ namespace TerrainSamples.SceneModularDungeon
                     0.15f,
                     0,
                     DungeonAreaTypes.Ground,
-                    AgentAcionTypes.All);
+                    AgentActionTypes.All);
             }
 
             PaintConnections();

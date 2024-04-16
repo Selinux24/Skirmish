@@ -1,10 +1,12 @@
-﻿
-namespace TerrainSamples.SceneNavMeshTest
+﻿using System;
+
+namespace TerrainSamples.SceneModularDungeon
 {
     /// <summary>
     /// Agent actions
     /// </summary>
-    enum AgentAcionTypes
+    [Flags]
+    enum AgentActionTypes
     {
         /// <summary>
         /// None

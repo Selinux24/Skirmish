@@ -20,8 +20,8 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             return area switch
             {
-                (int)NavAreaTypes.Soil or (int)NavAreaTypes.Grass or (int)NavAreaTypes.Rock => (int)(AgentAcionTypes.Walk | AgentAcionTypes.Jump),
-                _ => (int)AgentAcionTypes.None
+                (int)NavAreaTypes.Soil or (int)NavAreaTypes.Grass or (int)NavAreaTypes.Rock => (int)(AgentActionTypes.Walk | AgentActionTypes.Jump),
+                _ => (int)AgentActionTypes.None
             };
         }
         /// <inheritdoc/>

@@ -732,7 +732,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
                 else
                 {
-                    col = Color.Lerp(color, (Color)AreaToCol(area), 32);
+                    col = Color.Lerp(color, (Color)AreaToCol((int)area), 32);
                 }
 
                 float fx = bmin.X + x * cs;
@@ -1224,33 +1224,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="area">Area value</param>
         /// <param name="alpha">Alpha value</param>
-        private static Color4 AreaToCol(int area, int alpha)
+        private static Color4 AreaToCol(int area, int alpha = 255)
         {
             if (area == 0)
             {
                 // Treat zero area type as default.
-                return new Color(0, 192, 255, 255);
+                return new Color(0, 192, 255, alpha);
             }
             else
             {
-                return Helper.IntToCol((int)area, alpha);
-            }
-        }
-        /// <summary>
-        /// Converts the area value to color
-        /// </summary>
-        /// <param name="area">Area value</param>
-        /// <returns></returns>
-        private static Color4 AreaToCol(AreaTypes area)
-        {
-            if (area == AreaTypes.RC_NULL_AREA)
-            {
-                // Treat zero area type as default.
-                return new Color(0, 192, 255, 255);
-            }
-            else
-            {
-                return Helper.IntToCol((int)area, 255);
+                return Helper.IntToCol(area, alpha);
             }
         }
     }
