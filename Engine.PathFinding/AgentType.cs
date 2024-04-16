@@ -31,6 +31,7 @@ namespace Engine.PathFinding
         {
             Name = defaultAgentTypeString;
             Height = 2.0f;
+            PathFilter = new BasicQueryFilter();
         }
 
         /// <summary>

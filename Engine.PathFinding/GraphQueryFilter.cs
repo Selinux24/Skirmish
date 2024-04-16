@@ -9,6 +9,7 @@ namespace Engine.PathFinding
     /// <remarks>
     /// Constructor
     /// </remarks>
+    [Serializable]
     public abstract class GraphQueryFilter(int defaultWalkableArea) : IGraphQueryFilter
     {
         /// <summary>

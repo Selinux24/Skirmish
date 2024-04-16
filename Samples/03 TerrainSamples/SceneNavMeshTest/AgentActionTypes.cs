@@ -11,15 +11,15 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// None
         /// </summary>
-        None,
+        None = 0,
         /// <summary>
         /// Walk
         /// </summary>
-        Walk,
+        Walk = 1,
         /// <summary>
         /// Jump
         /// </summary>
-        Jump,
+        Jump = 2,
         /// <summary>
         /// All actions
         /// </summary>

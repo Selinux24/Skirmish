@@ -1,10 +1,12 @@
 ﻿using Engine.PathFinding;
+using System;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
     /// <summary>
     /// Navigation query filter
     /// </summary>
+    [Serializable]
     class NavQueryFilter : GraphQueryFilter
     {
         /// <summary>

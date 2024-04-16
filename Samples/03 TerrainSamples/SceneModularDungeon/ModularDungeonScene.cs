@@ -1441,7 +1441,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", ChangeToLevelAsync(name));
 
-            _ = LoadResourcesAsync(resourceGroup);
+            _ = LoadResourcesAsync(resourceGroup, ChangeToLevelResults);
         }
         private async Task ChangeToLevelAsync(string name)
         {
@@ -1457,6 +1457,22 @@ namespace TerrainSamples.SceneModularDungeon
             ConfigureNavigationGraph();
 
             EnqueueNavigationGraphUpdate();
+        }
+        private void ChangeToLevelResults(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+            }
         }
         private void ChangeToLevelCompleted()
         {

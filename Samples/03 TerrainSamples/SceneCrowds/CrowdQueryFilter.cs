@@ -1,10 +1,12 @@
 ﻿using Engine.PathFinding;
+using System;
 
 namespace TerrainSamples.SceneCrowds
 {
     /// <summary>
     /// Crowd query filter
     /// </summary>
+    [Serializable]
     class CrowdQueryFilter : GraphQueryFilter
     {
         /// <summary>
@@ -20,9 +22,9 @@ namespace TerrainSamples.SceneCrowds
         {
             return area switch
             {
-                (int)TerrainAreaTypes.Dirt or (int)TerrainAreaTypes.Grass => (int)AgentAcionTypes.Move,
                 (int)TerrainAreaTypes.Mud => (int)AgentAcionTypes.SlowMove,
-                (int)TerrainAreaTypes.Road => (int)AgentAcionTypes.FastMove,
+                (int)TerrainAreaTypes.Dirt or (int)TerrainAreaTypes.Grass => (int)(AgentAcionTypes.SlowMove | AgentAcionTypes.Move),
+                (int)TerrainAreaTypes.Road => (int)(AgentAcionTypes.SlowMove | AgentAcionTypes.Move | AgentAcionTypes.FastMove),
                 _ => (int)AgentAcionTypes.None,
             };
         }
@@ -64,23 +66,24 @@ namespace TerrainSamples.SceneCrowds
     /// <summary>
     /// Agent action types
     /// </summary>
+    [Flags]
     enum AgentAcionTypes
     {
         /// <summary>
         /// None
         /// </summary>
-        None,
+        None = 0,
         /// <summary>
         /// Normal move
         /// </summary>
-        Move,
+        Move = 1,
         /// <summary>
         /// Slow move
         /// </summary>
-        SlowMove,
+        SlowMove = 2,
         /// <summary>
         /// Fast move
         /// </summary>
-        FastMove,
+        FastMove = 4,
     }
 }
