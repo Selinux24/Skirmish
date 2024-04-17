@@ -45,7 +45,7 @@ namespace TerrainSamples.SceneRts
         private readonly float walkerVelocity = 8f;
         private ISceneObject followTarget;
         private bool follow = false;
-        private Agent walkerAgentType = null;
+        private GraphAgentType walkerAgentType = null;
 
         private bool useDebugTex = false;
         private SceneRendererResults shadowResult = SceneRendererResults.ShadowMapDirectional;
@@ -68,7 +68,7 @@ namespace TerrainSamples.SceneRts
 
         private Model tankP1 = null;
         private Model tankP2 = null;
-        private Agent tankAgentType = null;
+        private GraphAgentType tankAgentType = null;
         private Vector3 tankLeftCat = Vector3.Zero;
         private Vector3 tankRightCat = Vector3.Zero;
 
@@ -300,7 +300,7 @@ namespace TerrainSamples.SceneRts
 
             await Task.Run(() =>
             {
-                walkerAgentType = new Agent()
+                walkerAgentType = new GraphAgentType()
                 {
                     Name = "Walker type",
                     Height = 1f,
@@ -543,7 +543,7 @@ namespace TerrainSamples.SceneRts
             tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
 
             // Initialize agent
-            tankAgentType = new Agent()
+            tankAgentType = new GraphAgentType()
             {
                 Name = "Tank type",
                 Height = tankbbox.Height,
@@ -1085,7 +1085,7 @@ namespace TerrainSamples.SceneRts
             var navSettings = BuildSettings.Default;
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(navSettings, nvInput, [walkerAgentType, tankAgentType]);
+            PathFinderDescription = new(navSettings, nvInput, [walkerAgentType, tankAgentType]);
 
             sw.Stop();
 

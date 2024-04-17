@@ -10,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Agent type
         /// </summary>
-        public Agent Agent { get; set; }
+        public GraphAgentType Agent { get; set; }
 
         /// <summary>
         /// The width of the field along the x-axis. [Limit: >= 0] [Units: vx]

@@ -125,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        public static NavMesh Build(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback = null)
+        public static NavMesh Build(BuildSettings settings, InputGeometry geometry, GraphAgentType agent, Action<float> progressCallback = null)
         {
             if (settings.BuildMode == BuildModes.Solo)
             {
@@ -148,9 +148,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildSolo(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback)
+        private static NavMesh BuildSolo(BuildSettings settings, InputGeometry geometry, GraphAgentType agent, Action<float> progressCallback)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
+            var bbox = geometry.BoundingBox;
 
             // Progress -> pass count
             const int passCount = 13;
@@ -220,7 +220,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 DetailVertsCount = dmesh.Vertices.Count,
                 DetailTris = [.. dmesh.Triangles],
                 DetailTriCount = dmesh.Triangles.Count,
-                OffMeshCon = geometry.GetConnections()?.ToArray(),
+                OffMeshCon = geometry.GetConnections(),
                 OffMeshConCount = geometry.GetConnectionCount(),
                 WalkableHeight = cfg.Agent.Height,
                 WalkableRadius = cfg.Agent.Radius,
@@ -268,9 +268,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildTiled(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback)
+        private static NavMesh BuildTiled(BuildSettings settings, InputGeometry geometry, GraphAgentType agent, Action<float> progressCallback)
         {
-            var generationBounds = settings.Bounds ?? geometry.BoundingBox;
+            var generationBounds = geometry.BoundingBox;
 
             var nmParams = NavMeshParams.GetNavMeshParamsTiled(generationBounds, settings);
             var nm = new NavMesh(nmParams);
@@ -316,7 +316,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Configuration</param>
         /// <param name="agent">Agent</param>
-        private static MeshData BuildTileMesh(int x, int y, TilesConfig tiledCfg, InputGeometry geometry, Agent agent)
+        private static MeshData BuildTileMesh(int x, int y, TilesConfig tiledCfg, InputGeometry geometry, GraphAgentType agent)
         {
             if (tiledCfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
@@ -393,7 +393,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 DetailVertsCount = dmesh.Vertices.Count,
                 DetailTris = [.. dmesh.Triangles],
                 DetailTriCount = dmesh.Triangles.Count,
-                OffMeshCon = geometry.GetConnections().ToArray(),
+                OffMeshCon = geometry.GetConnections(),
                 OffMeshConCount = geometry.GetConnectionCount(),
                 WalkableHeight = tiledCfg.Agent.Height,
                 WalkableRadius = tiledCfg.Agent.Radius,
@@ -551,7 +551,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="tiledCfg">Tiled config</param>
         /// <param name="agent">Agent</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, Agent agent, Action<float> progressCallback)
+        private void BuildAllTiles(InputGeometry geometry, TilesConfig tiledCfg, GraphAgentType agent, Action<float> progressCallback)
         {
             float totalTiles = tiledCfg.TileHeight * tiledCfg.TileWidth;
             int tile = 0;
@@ -578,9 +578,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="settings">Build settings</param>
         /// <param name="geometry">Input geometry</param>
         /// <param name="agent">Agent</param>
-        public void BuildTileAt(int x, int y, BuildSettings settings, InputGeometry geometry, Agent agent)
+        public void BuildTileAt(int x, int y, BuildSettings settings, InputGeometry geometry, GraphAgentType agent)
         {
-            var generationBounds = settings.Bounds ?? geometry.BoundingBox;
+            var generationBounds = geometry.BoundingBox;
 
             var tiledCfg = TilesConfig.GetTilesConfig(settings, agent, generationBounds);
 

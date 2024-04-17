@@ -81,8 +81,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public TileCache(NavMesh navMesh, InputGeometry geometry, TileCacheParams tcparams)
         {
-            m_navMesh = navMesh;
-            m_geom = geometry;
+            m_navMesh = navMesh ?? throw new ArgumentNullException(nameof(navMesh));
+            m_geom = geometry ?? throw new ArgumentNullException(nameof(geometry));
             m_params = tcparams;
 
             // Alloc space for obstacles.
@@ -165,7 +165,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="agent">Agent</param>
         /// <param name="tiledCfg">Configuration</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void BuildAllTiles(InputGeometry geometry, Agent agent, TilesConfig tiledCfg, Action<float> progressCallback)
+        public void BuildAllTiles(InputGeometry geometry, GraphAgentType agent, TilesConfig tiledCfg, Action<float> progressCallback)
         {
             float total = m_params.TileHeight * m_params.TileWidth * 2;
             int curr = 0;
@@ -197,7 +197,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="geometry">Input geometry</param>
         /// <param name="agent">Agent</param>
         /// <param name="tiledCfg">Configuration</param>
-        public void BuildTileAt(int x, int y, InputGeometry geometry, Agent agent, TilesConfig tiledCfg)
+        public void BuildTileAt(int x, int y, InputGeometry geometry, GraphAgentType agent, TilesConfig tiledCfg)
         {
             var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
 
@@ -539,7 +539,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="agent">Agent</param>
         /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
         /// <param name="cacheUpdated">Returns true if the instance tile cahche is up to date (No requests to perform)</param>
-        public Status Update(Agent agent, out bool upToDate, out bool cacheUpdated)
+        public Status Update(GraphAgentType agent, out bool upToDate, out bool cacheUpdated)
         {
             bool updating = Updating();
 
@@ -654,7 +654,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Process updates
         /// </summary>
         /// <param name="agent">Agent</param>
-        private Status ProcessUpdates(Agent agent)
+        private Status ProcessUpdates(GraphAgentType agent)
         {
             // Process updates
             if (m_update.Count == 0)
@@ -700,7 +700,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <param name="agent">Agent</param>
-        private void BuildTilesAt(int x, int y, Agent agent)
+        private void BuildTilesAt(int x, int y, GraphAgentType agent)
         {
             // Get all tiles
             var tiles = GetTilesAt(x, y, 0);
@@ -714,7 +714,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="tile">Tile</param>
         /// <param name="agent">Agent</param>
-        private bool BuildTile(CompressedTile tile, Agent agent)
+        private bool BuildTile(CompressedTile tile, GraphAgentType agent)
         {
             // Decompress tile layer data.
             TileCacheLayer tlayer = new(tile);
@@ -774,8 +774,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileLayer = tile.Header.TLayer,
 
                 // Pass in off-mesh connections.
-                OffMeshConCount = m_geom?.GetConnectionCount() ?? 0,
-                OffMeshCon = m_geom?.GetConnections().ToArray() ?? [],
+                OffMeshConCount = m_geom.GetConnectionCount(),
+                OffMeshCon = m_geom.GetConnections(),
             };
 
             // Remove existing tile.

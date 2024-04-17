@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-
     /// <summary>
     /// Walkable scene
     /// </summary>
@@ -354,15 +352,6 @@ namespace Engine.PathFinding
 
             var navTris = allTris.Distinct();
 
-            var bounds = PathFinderDescription.Settings.Bounds;
-            if (bounds.HasValue)
-            {
-                navTris = navTris.Where(t =>
-                {
-                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
-                });
-            }
-
             return navTris.ToArray();
         }
 
@@ -645,11 +634,11 @@ namespace Engine.PathFinding
         {
             if (PathFinderDescription == null)
             {
-                await Task.CompletedTask;
+                return;
             }
 
             // Refresh source geometry
-            await PathFinderDescription.Input.RefreshAsync();
+            await PathFinderDescription.RefreshAsync();
 
             // Update navigation graph
             NavigationGraph?.UpdateAt(position);
@@ -667,11 +656,11 @@ namespace Engine.PathFinding
 
             if (PathFinderDescription == null)
             {
-                await Task.CompletedTask;
+                return;
             }
 
             // Refresh source geometry
-            await PathFinderDescription.Input.RefreshAsync();
+            await PathFinderDescription.RefreshAsync();
 
             // Update navigation graph
             NavigationGraph?.UpdateAt(positions);
@@ -683,7 +672,7 @@ namespace Engine.PathFinding
         public void UpdateGraph(Vector3 position)
         {
             // Refresh source geometry
-            PathFinderDescription?.Input.Refresh();
+            PathFinderDescription?.Refresh();
 
             // Update navigation graph
             NavigationGraph?.UpdateAt(position);
@@ -700,7 +689,7 @@ namespace Engine.PathFinding
             }
 
             // Refresh source geometry
-            PathFinderDescription?.Input.Refresh();
+            PathFinderDescription?.Refresh();
 
             // Update navigation graph
             NavigationGraph?.UpdateAt(positions);

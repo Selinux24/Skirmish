@@ -38,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent</param>
         /// <param name="generationBounds">Tile bounds</param>
         /// <returns>Returns the new configuration</returns>
-        public static TilesConfig GetTilesConfig(BuildSettings settings, Agent agent, BoundingBox generationBounds)
+        public static TilesConfig GetTilesConfig(BuildSettings settings, GraphAgentType agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
             int walkableHeight = (int)MathF.Ceiling(agent.Height / settings.CellHeight);

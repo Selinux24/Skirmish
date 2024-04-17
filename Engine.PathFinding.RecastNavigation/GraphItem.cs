@@ -28,7 +28,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Index list per agent
         /// </summary>
-        public Tuple<Agent, int>[] Indices { get; set; }
+        public Tuple<GraphAgentType, int>[] Indices { get; set; }
 
         /// <summary>
         /// Constructor

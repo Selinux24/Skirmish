@@ -5,7 +5,7 @@ using System;
 namespace TerrainSamples.SceneModularDungeon
 {
     [Serializable]
-    public class Player : Agent
+    public class Player : GraphAgentType
     {
         public float Velocity { get; set; }
         public float VelocitySlow { get; set; }

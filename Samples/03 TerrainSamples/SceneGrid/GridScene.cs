@@ -382,7 +382,7 @@ namespace TerrainSamples.SceneGrid
             {
                 NodeSize = 5f,
             };
-            PathFinderDescription = new PathFinderDescription(settings, input, []);
+            PathFinderDescription = new(settings, input, []);
 
             EnqueueNavigationGraphUpdate();
         }

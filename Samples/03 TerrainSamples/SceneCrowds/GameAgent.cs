@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-using System;
 using System.Collections.Generic;
 
 namespace TerrainSamples.SceneCrowds
@@ -10,33 +10,43 @@ namespace TerrainSamples.SceneCrowds
     /// <summary>
     /// Game agent class
     /// </summary>
-    public class GameAgent<T> : IUpdatable, IAgent where T : ManipulatorController
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    /// <param name="agentType">Agent type</param>
+    /// <param name="model">Model</param>
+    /// <param name="controller">Controller</param>
+    public class GameAgent<TAgent, TController>(string id, string name, TAgent agentType, TController controller, ModelInstance model) : IUpdatable, IAgent<TAgent>
+        where TAgent : GraphAgentType
+        where TController : ManipulatorController
     {
         /// <summary>
         /// Model
         /// </summary>
-        private readonly ModelInstance model;
+        private readonly ModelInstance model = model;
         /// <summary>
         /// Controller
         /// </summary>
-        private readonly T controller;
+        private readonly TController controller = controller;
 
         /// <inheritdoc/>
-        public string Id { get; private set; }
+        public string Id { get; private set; } = id;
         /// <inheritdoc/>
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         /// <inheritdoc/>
         public Scene Scene { get; private set; }
         /// <inheritdoc/>
-        public SceneObjectUsages Usage { get; set; }
+        public SceneObjectUsages Usage { get; set; } = SceneObjectUsages.Agent;
         /// <inheritdoc/>
-        public int Layer { get; set; }
+        public int Layer { get; set; } = 0;
         /// <inheritdoc/>
         public bool HasOwner { get { return Owner != null; } }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
         /// <inheritdoc/>
-        public AgentType AgentType { get; set; }
+        public TAgent AgentType { get; set; } = agentType;
         /// <summary>
         /// Agent identifier
         /// </summary>
@@ -104,27 +114,8 @@ namespace TerrainSamples.SceneCrowds
         {
             get
             {
-                return model?.Lights ?? Array.Empty<ISceneLight>();
+                return model?.Lights ?? [];
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="agentType">Agent type</param>
-        /// <param name="model">Model</param>
-        /// <param name="controller">Controller</param>
-        public GameAgent(string id, string name, AgentType agentType, ModelInstance model, T controller)
-        {
-            Id = id;
-            Name = name;
-            AgentType = agentType;
-            Usage = SceneObjectUsages.Agent;
-            Layer = 0;
-            this.model = model;
-            this.controller = controller;
         }
 
         /// <inheritdoc/>

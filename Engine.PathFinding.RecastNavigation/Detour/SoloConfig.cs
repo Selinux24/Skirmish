@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent</param>
         /// <param name="generationBounds">Generation bounds</param>
         /// <returns>Returns the new configuration</returns>
-        public static SoloConfig GetConfig(BuildSettings settings, Agent agent, BoundingBox generationBounds)
+        public static SoloConfig GetConfig(BuildSettings settings, GraphAgentType agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
             int walkableHeight = (int)MathF.Ceiling(agent.Height / settings.CellHeight);

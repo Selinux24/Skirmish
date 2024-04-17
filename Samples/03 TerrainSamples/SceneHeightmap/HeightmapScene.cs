@@ -95,7 +95,7 @@ namespace TerrainSamples.SceneHeightmap
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
 
-        private readonly Agent agent = new()
+        private readonly GraphAgentType agent = new()
         {
             Name = "Soldier",
             MaxSlope = 45,
@@ -1059,7 +1059,7 @@ namespace TerrainSamples.SceneHeightmap
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nminput, [agent]);
+            PathFinderDescription = new(nmsettings, nminput, [agent]);
 
             EnqueueNavigationGraphUpdate();
         }

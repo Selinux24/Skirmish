@@ -750,7 +750,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new(nmsettings, nminput, new[] { playerAgentType, ratAgentType });
+            PathFinderDescription = new(nmsettings, nminput, [playerAgentType, ratAgentType]);
         }
         private void InitializeLights()
         {
@@ -1507,11 +1507,11 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void ConfigureNavigationGraph()
         {
-            PathFinderDescription.Input.ClearConnections();
+            PathFinderDescription.ClearConnections();
 
             if (scenery.CurrentLevel.Name == "Lvl1")
             {
-                PathFinderDescription.Input.AddConnection(
+                PathFinderDescription.AddConnection(
                     new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
                     new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
                     1,
@@ -1519,7 +1519,7 @@ namespace TerrainSamples.SceneModularDungeon
                     DungeonAreaTypes.Jump,
                     AgentActionTypes.All);
 
-                PathFinderDescription.Input.AddConnection(
+                PathFinderDescription.AddConnection(
                     new Vector3(17, 0, -14),
                     new Vector3(16, 0, -15),
                     0.15f,
@@ -1723,7 +1723,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             connectionDrawer.Clear(connectionColor);
 
-            var conns = PathFinderDescription.Input.GetConnections();
+            var conns = PathFinderDescription.GetConnections();
 
             foreach (var conn in conns)
             {

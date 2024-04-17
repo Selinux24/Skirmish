@@ -7,18 +7,18 @@ namespace Engine.PathFinding.RecastNavigation
     /// Agent description
     /// </summary>
     [Serializable]
-    public class Agent : AgentType
+    public class GraphAgentType : AgentType
     {
-        private const string agentDefaultString = "Agent";
+        private const string agentDefaultString = "Graph-Agent";
 
         /// <summary>
         /// Default agent
         /// </summary>
-        public static Agent Default
+        public static GraphAgentType Default
         {
             get
             {
-                return new Agent()
+                return new GraphAgentType()
                 {
                     Name = agentDefaultString,
                     Height = 2.0f,
@@ -45,7 +45,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Constructor
         /// </summary>
-        public Agent() : base()
+        public GraphAgentType() : base()
         {
             Radius = 0.6f;
             MaxClimb = 0.9f;
@@ -57,7 +57,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (!base.Equals(obj)) return false;
 
-            if (obj is Agent other)
+            if (obj is GraphAgentType other)
             {
                 return
                     MathUtil.NearEqual(other.Radius, Radius) &&

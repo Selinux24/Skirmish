@@ -59,7 +59,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return Settings.Bounds ?? Input.BoundingBox;
+                return Input.BoundingBox;
             }
         }
 
@@ -106,7 +106,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="navMesh">Navigation mesh</param>
-        public void AddAgent(Agent agent, NavMesh navMesh)
+        public void AddAgent(GraphAgentType agent, NavMesh navMesh)
         {
             agentQuerieFactories.Add(new GraphAgentQueryFactory
             {
@@ -118,7 +118,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the agent list
         /// </summary>
-        public IEnumerable<(Agent Agent, NavMesh NavMesh)> GetAgents()
+        public IEnumerable<(GraphAgentType Agent, NavMesh NavMesh)> GetAgents()
         {
             return agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh)).ToArray();
         }
@@ -471,7 +471,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             updated = false;
 
-            var obstacles = new List<Tuple<Agent, int>>();
+            var obstacles = new List<Tuple<GraphAgentType, int>>();
 
             foreach (var agentQ in agentQuerieFactories)
             {
@@ -480,7 +480,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     cache.AddObstacle(obstacle, out int res);
 
-                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
+                    obstacles.Add(new Tuple<GraphAgentType, int>(agentQ.Agent, res));
                 }
             }
 

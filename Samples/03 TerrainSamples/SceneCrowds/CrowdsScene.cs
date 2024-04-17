@@ -27,8 +27,8 @@ namespace TerrainSamples.SceneCrowds
         private UITextArea help = null;
         private Sprite upperPanel = null;
 
-        private Agent tankAgentType = null;
-        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = [];
+        private GraphAgentType tankAgentType = null;
+        private readonly List<GameAgent<GraphAgentType, SteerManipulatorController>> tankAgents = [];
 
         private Graph graph = null;
         private Crowd crowd = null;
@@ -138,7 +138,7 @@ namespace TerrainSamples.SceneCrowds
             tanks[0].Manipulator.SetScaling(0.2f);
             var tankbbox = tanks[0].GetBoundingBox();
 
-            tankAgentType = new Agent()
+            tankAgentType = new GraphAgentType()
             {
                 Height = tankbbox.Height,
                 Radius = MathF.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
@@ -162,12 +162,12 @@ namespace TerrainSamples.SceneCrowds
                 ArrivingRadius = 7.5f,
             };
 
-            var tankAgent = new GameAgent<SteerManipulatorController>(
+            var tankAgent = new GameAgent<GraphAgentType, SteerManipulatorController>(
                 $"tankAgent.{tank.Id}",
                 $"tankAgent",
                 tankAgentType,
-                tank,
-                tankController);
+                tankController,
+                tank);
 
             tankAgents.Add(tankAgent);
 
@@ -250,7 +250,7 @@ namespace TerrainSamples.SceneCrowds
 
             var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nmInput, [tankAgentType]);
+            PathFinderDescription = new(nmsettings, nmInput, [tankAgentType]);
 
             EnqueueNavigationGraphUpdate((progress) =>
             {
@@ -556,7 +556,7 @@ namespace TerrainSamples.SceneCrowds
                 graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }
         }
-        private void UpdateGraphNodes(Agent agent)
+        private void UpdateGraphNodes(GraphAgentType agent)
         {
             terrainGraphDrawer.Clear();
 

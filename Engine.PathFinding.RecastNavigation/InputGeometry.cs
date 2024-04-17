@@ -16,60 +16,36 @@ namespace Engine.PathFinding.RecastNavigation
     /// <param name="fnc">Triangle function</param>
     public class InputGeometry(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
-        private const string ErrorCreatingGraphString = "Error creating the graph.";
-
         /// <summary>
         /// Chunky mesh
         /// </summary>
         public ChunkyTriMesh ChunkyMesh { get; private set; }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
         {
-            var triangles = await GetTrianglesAsync();
-
-            try
-            {
-                return Create(settings, agents, triangles, progressCallback);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ErrorCreatingGraphString, ex);
-
-                throw;
-            }
+            return Create(settings, agentTypes, await GetTrianglesAsync(settings.Bounds), progressCallback);
         }
         /// <inheritdoc/>
-        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
+        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
         {
-            var triangles = GetTriangles();
-
-            try
-            {
-                return Create(settings, agents, triangles, progressCallback);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ErrorCreatingGraphString, ex);
-
-                throw;
-            }
+            return Create(settings, agentTypes, GetTriangles(settings.Bounds), progressCallback);
         }
         /// <summary>
         /// Creates a new graph from current geometry input
         /// </summary>
         /// <param name="settings">Settings</param>
-        /// <param name="agents">Agent list</param>
+        /// <param name="agentTypes">Agent type list</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new graph</returns>
-        private Graph Create(PathFinderSettings settings, AgentType[] agents, IEnumerable<Triangle> triangles, Action<float> progressCallback)
+        private Graph Create(PathFinderSettings settings, AgentType[] agentTypes, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
             var buildSettings = settings as BuildSettings;
-            ArgumentNullException.ThrowIfNull(buildSettings, nameof(settings));
+            ArgumentNullException.ThrowIfNull(buildSettings);
 
-            var agentList = agents?.Cast<Agent>()?.ToArray() ?? [];
-            ArgumentOutOfRangeException.ThrowIfZero(agentList.Length, nameof(agents));
+            var agentList = agentTypes?.Cast<GraphAgentType>().ToArray() ?? [];
+            ArgumentOutOfRangeException.ThrowIfZero(agentList.Length);
 
             if (!triangles.Any())
             {
@@ -109,51 +85,25 @@ namespace Engine.PathFinding.RecastNavigation
             return graph;
         }
         /// <inheritdoc/>
-        public override async Task RefreshAsync()
+        public override async Task RefreshAsync(PathFinderSettings settings)
         {
-            var triangles = await GetTrianglesAsync();
-
-            try
-            {
-                ChunkyMesh = ChunkyTriMesh.Build(triangles);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ErrorCreatingGraphString, ex);
-
-                throw;
-            }
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync(settings.Bounds));
         }
         /// <inheritdoc/>
-        public override void Refresh()
+        public override void Refresh(PathFinderSettings settings)
         {
-            var triangles = GetTriangles();
-
-            try
-            {
-                ChunkyMesh = ChunkyTriMesh.Build(triangles);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ErrorCreatingGraphString, ex);
-
-                throw;
-            }
+            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles(settings.Bounds));
         }
 
         /// <inheritdoc/>
         public override async Task<string> GetHashAsync(PathFinderSettings settings)
         {
-            var triangles = await GetTrianglesAsync();
-
-            return GraphFile.GetHash(settings, triangles);
+            return GraphFile.GetHash(settings, await GetTrianglesAsync(settings.Bounds));
         }
         /// <inheritdoc/>
         public override string GetHash(PathFinderSettings settings)
         {
-            var triangles = GetTriangles();
-
-            return GraphFile.GetHash(settings, triangles);
+            return GraphFile.GetHash(settings, GetTriangles(settings.Bounds));
         }
         /// <inheritdoc/>
         public override async Task<IGraph> LoadAsync(string fileName, string hash = null)
@@ -171,7 +121,7 @@ namespace Engine.PathFinding.RecastNavigation
             var graph = await GraphFile.FromGraphFileAsync(file, this);
 
             // Initialize the input data
-            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync());
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync(graph.Settings.Bounds));
 
             return graph;
         }
@@ -191,7 +141,7 @@ namespace Engine.PathFinding.RecastNavigation
             var graph = GraphFile.FromGraphFile(file, this);
 
             // Initialize the input data
-            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles());
+            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles(graph.Settings.Bounds));
 
             return graph;
         }

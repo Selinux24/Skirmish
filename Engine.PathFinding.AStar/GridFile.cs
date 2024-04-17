@@ -20,7 +20,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the hash string</returns>
         public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
-            List<byte> buffer = new();
+            List<byte> buffer = [];
 
             var tris = triangles.ToList();
             tris.Sort((t1, t2) =>
@@ -50,7 +50,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the graph file</returns>
         public static async Task<GridFile> FromGridAsync(Grid grid)
         {
-            var tris = await grid.Input.GetTrianglesAsync();
+            var tris = await grid.Input.GetTrianglesAsync(grid.Settings.Bounds);
 
             //Calculate hash
             string hash = GetHash(grid.Settings, tris);
@@ -71,7 +71,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the graph file</returns>
         public static GridFile FromGrid(Grid grid)
         {
-            var tris = grid.Input.GetTriangles();
+            var tris = grid.Input.GetTriangles(grid.Settings.Bounds);
 
             //Calculate hash
             string hash = GetHash(grid.Settings, tris);

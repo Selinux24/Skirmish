@@ -14,27 +14,27 @@ namespace Engine.PathFinding.AStar
     public class GridInput(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
         {
-            var triangles = await GetTrianglesAsync();
+            var triangles = await GetTrianglesAsync(settings.Bounds);
 
             return await Task.Run(() => Grid.CreateGrid(settings, this, triangles, progressCallback));
         }
         /// <inheritdoc/>
-        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
+        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
         {
-            var triangles = GetTriangles();
+            var triangles = GetTriangles(settings.Bounds);
 
             return Grid.CreateGrid(settings, this, triangles, progressCallback);
         }
 
         /// <inheritdoc/>
-        public override async Task RefreshAsync()
+        public override async Task RefreshAsync(PathFinderSettings settings)
         {
             await Task.CompletedTask;
         }
         /// <inheritdoc/>
-        public override void Refresh()
+        public override void Refresh(PathFinderSettings settings)
         {
             //Not applicable
         }
@@ -42,13 +42,13 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public override async Task<string> GetHashAsync(PathFinderSettings settings)
         {
-            var tris = await GetTrianglesAsync();
+            var tris = await GetTrianglesAsync(settings.Bounds);
             return GridFile.GetHash(settings, tris);
         }
         /// <inheritdoc/>
         public override string GetHash(PathFinderSettings settings)
         {
-            var tris = GetTriangles();
+            var tris = GetTriangles(settings.Bounds);
             return GridFile.GetHash(settings, tris);
         }
         /// <inheritdoc/>

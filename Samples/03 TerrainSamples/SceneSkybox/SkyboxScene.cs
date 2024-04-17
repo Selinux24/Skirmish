@@ -52,7 +52,7 @@ namespace TerrainSamples.SceneSkybox
             Quaternion.Identity,
         ];
 
-        private readonly Agent walker = new()
+        private readonly GraphAgentType walker = new()
         {
             Name = "Walker",
             Height = 1.7f,
@@ -410,7 +410,7 @@ namespace TerrainSamples.SceneSkybox
             nvSettings.PartitionType = SamplePartitionTypes.Monotone;
 
             //Generate the path finder description
-            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput, [walker]);
+            PathFinderDescription = new(nvSettings, nvInput, [walker]);
 
             EnqueueNavigationGraphUpdate((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }

@@ -5,7 +5,7 @@ using System;
 namespace TerrainSamples.SceneNavMeshTest
 {
     [Serializable]
-    public class Player : Agent
+    public class Player : GraphAgentType
     {
         public float Velocity { get; set; }
         public float VelocitySlow { get; set; }

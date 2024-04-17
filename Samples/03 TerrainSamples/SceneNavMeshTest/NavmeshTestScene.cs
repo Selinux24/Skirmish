@@ -432,9 +432,9 @@ namespace TerrainSamples.SceneNavMeshTest
             //Debugging
             nmsettings.EnableDebugInfo = true;
 
-            nminput = new InputGeometry(GetTrianglesForNavigationGraph);
+            nminput = new(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nminput, new[] { agent });
+            PathFinderDescription = new(nmsettings, nminput, [agent]);
         }
         private async Task InitializeDebug()
         {
@@ -612,19 +612,18 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            var graphBounds = nmsettings.Bounds ?? nminput.BoundingBox;
             BoundingBox bounds;
             int width;
             int height;
             if (nmsettings.BuildMode == BuildModes.Solo)
             {
-                Config.CalcGridSize(graphBounds, nmsettings.CellSize, out width, out height);
-                bounds = graphBounds;
+                Config.CalcGridSize(nminput.BoundingBox, nmsettings.CellSize, out width, out height);
+                bounds = nminput.BoundingBox;
             }
             else
             {
-                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, graphBounds, out var tx, out var ty);
-                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, graphBounds);
+                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, nminput.BoundingBox, out var tx, out var ty);
+                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, nminput.BoundingBox);
 
                 width = tiledCfg.Width;
                 height = tiledCfg.Height;
@@ -823,7 +822,7 @@ namespace TerrainSamples.SceneNavMeshTest
             GraphAreaPolygon p = new(verts, hmin, hmax);
             p.SetAreaType(NavAreaTypes.Grass);
 
-            int id = PathFinderDescription.Input.AddArea(p);
+            int id = PathFinderDescription.AddArea(p);
             areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });
 
             EnqueueGraph();
@@ -860,7 +859,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     }
                 }
 
-                PathFinderDescription.Input.RemoveArea(area.Id);
+                PathFinderDescription.RemoveArea(area.Id);
                 areas.Remove(area);
 
                 EnqueueGraph();

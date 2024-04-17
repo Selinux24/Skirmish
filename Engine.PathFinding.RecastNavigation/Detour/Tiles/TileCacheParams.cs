@@ -101,7 +101,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="settings">Build settings</param>
         /// <param name="agent">Agent</param>
         /// <param name="generationBounds">Generation bounds</param>
-        public static TileCacheParams GetTileCacheParams(BuildSettings settings, Agent agent, BoundingBox generationBounds)
+        public static TileCacheParams GetTileCacheParams(BuildSettings settings, GraphAgentType agent, BoundingBox generationBounds)
         {
             Config.CalcGridSize(generationBounds, settings.CellSize, out int gridWidth, out int gridHeight);
             int tileSize = (int)settings.TileSize;

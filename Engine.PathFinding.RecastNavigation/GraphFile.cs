@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the hash string</returns>
         public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
-            List<byte> buffer = new();
+            List<byte> buffer = [];
 
             var tris = triangles.ToList();
             tris.Sort((t1, t2) =>
@@ -53,7 +53,7 @@ namespace Engine.PathFinding.RecastNavigation
         public static async Task<GraphFile> FromGraphAsync(Graph graph)
         {
             //Calculate hash
-            var tris = await graph.Input.GetTrianglesAsync();
+            var tris = await graph.Input.GetTrianglesAsync(graph.Settings.Bounds);
             string hash = GetHash(graph.Settings, tris);
 
             var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
@@ -73,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
         public static GraphFile FromGraph(Graph graph)
         {
             //Calculate hash
-            var tris = graph.Input.GetTriangles();
+            var tris = graph.Input.GetTriangles(graph.Settings.Bounds);
             string hash = GetHash(graph.Settings, tris);
 
             var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
@@ -230,7 +230,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Graph list
         /// </summary>
-        public List<(Agent Agent, NavMeshFile NavMesh)> GraphList { get; set; }
+        public List<(GraphAgentType Agent, NavMeshFile NavMesh)> GraphList { get; set; }
         /// <summary>
         /// File source hash
         /// </summary>

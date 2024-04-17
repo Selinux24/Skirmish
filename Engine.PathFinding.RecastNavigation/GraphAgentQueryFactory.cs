@@ -12,7 +12,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Agent
         /// </summary>
-        public Agent Agent { get; set; }
+        public GraphAgentType Agent { get; set; }
         /// <summary>
         /// Navigation mesh
         /// </summary>

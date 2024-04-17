@@ -1,12 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-
     /// <summary>
     /// Path finder input
     /// </summary>
@@ -26,10 +26,6 @@ namespace Engine.PathFinding
         public const int MaxConnections = 256;
 
         /// <summary>
-        /// Get triangle function
-        /// </summary>
-        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = fnc;
-        /// <summary>
         /// Area list
         /// </summary>
         private readonly List<IGraphArea> areas = new(MaxAreas);
@@ -38,6 +34,10 @@ namespace Engine.PathFinding
         /// </summary>
         private readonly List<IGraphConnection> connections = new(MaxConnections);
         /// <summary>
+        /// Get triangle function
+        /// </summary>
+        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = fnc;
+        /// <summary>
         /// Bounding box
         /// </summary>
         public BoundingBox BoundingBox { get; protected set; }
@@ -45,8 +45,8 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets the triangle list
         /// </summary>
-        /// <returns></returns>
-        public async Task<IEnumerable<Triangle>> GetTrianglesAsync()
+        /// <param name="bounds">Bounding box to filter the triangle list</param>
+        public async Task<IEnumerable<Triangle>> GetTrianglesAsync(BoundingBox? bounds)
         {
             if (getTrianglesFnc == null)
             {
@@ -54,28 +54,47 @@ namespace Engine.PathFinding
             }
 
             IEnumerable<Triangle> tris = null;
+            BoundingBox bbox = default;
 
             await Task.Run(() =>
             {
                 tris = getTrianglesFnc() ?? [];
+
+                if (bounds.HasValue)
+                {
+                    tris = tris.Where(t =>
+                    {
+                        return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                    });
+                }
+
+                bbox = GeometryUtil.CreateBoundingBox(tris);
             });
 
-            BoundingBox = GeometryUtil.CreateBoundingBox(tris);
+            BoundingBox = bbox;
 
             return tris;
         }
         /// <summary>
         /// Gets the triangle list
         /// </summary>
-        /// <returns></returns>
-        public IEnumerable<Triangle> GetTriangles()
+        /// <param name="bounds">Bounding box to filter the triangle list</param>
+        public IEnumerable<Triangle> GetTriangles(BoundingBox? bounds)
         {
             if (getTrianglesFnc == null)
             {
                 return [];
             }
 
-            IEnumerable<Triangle> tris = getTrianglesFnc() ?? [];
+            var tris = getTrianglesFnc() ?? [];
+
+            if (bounds.HasValue)
+            {
+                tris = tris.Where(t =>
+                {
+                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                });
+            }
 
             BoundingBox = GeometryUtil.CreateBoundingBox(tris);
 
@@ -89,6 +108,8 @@ namespace Engine.PathFinding
         /// <returns>Returns the area id</returns>
         public int AddArea(IGraphArea graphArea)
         {
+            if (graphArea == null) return -1;
+
             if (areas.Count >= MaxAreas) return -1;
 
             areas.Add(graphArea);
@@ -170,7 +191,7 @@ namespace Engine.PathFinding
         /// Deletes a connection by id
         /// </summary>
         /// <param name="id">Connection id</param>
-        public void DeleteConnection(int id)
+        public void RemoveConnection(int id)
         {
             connections.RemoveAll(c => c.Id == id);
         }
@@ -178,7 +199,7 @@ namespace Engine.PathFinding
         /// Gets the connection list
         /// </summary>
         /// <returns>Returns the connection list</returns>
-        public IEnumerable<IGraphConnection> GetConnections()
+        public IGraphConnection[] GetConnections()
         {
             return [.. connections];
         }
@@ -202,26 +223,28 @@ namespace Engine.PathFinding
         /// Creates a new graph from current input
         /// </summary>
         /// <param name="settings">Creation settings</param>
-        /// <param name="agents">Agent list</param>
+        /// <param name="agentTypes">Agent type list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null);
+        public abstract Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null);
         /// <summary>
         /// Creates a new graph from current input
         /// </summary>
         /// <param name="settings">Creation settings</param>
-        /// <param name="agents">Agent list</param>
+        /// <param name="agentTypes">Agent type list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null);
+        public abstract IGraph CreateGraph(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null);
         /// <summary>
         /// Refresh
         /// </summary>
-        public abstract Task RefreshAsync();
+        /// <param name="settings">Creation settings</param>
+        public abstract Task RefreshAsync(PathFinderSettings settings);
         /// <summary>
         /// Refresh
         /// </summary>
-        public abstract void Refresh();
+        /// <param name="settings">Creation settings</param>
+        public abstract void Refresh(PathFinderSettings settings);
 
         /// <summary>
         /// Gets the input hash
