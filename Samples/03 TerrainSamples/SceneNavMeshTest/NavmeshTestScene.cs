@@ -92,6 +92,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<IAreaMarker> areas = [];
+        private readonly List<ConnectionMarker> connections = [];
         private GraphDebugTypes debugType = GraphDebugTypes.NavMesh;
 
         private string pathFinderStartMessage = null;
@@ -102,6 +103,12 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color pathFindingColorPath = new(128, 0, 255, 255);
         private readonly Color pathFindingColorStart = new(97, 0, 255, 255);
         private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
+        private string addConnectionStartMessage = null;
+        private Vector3? addConnectionStart = null;
+        private Vector3? addConnectionEnd = null;
+        private readonly Color connectionColor = Color.LightPink;
+        private readonly Color connectionColorStart = Color.Pink;
+        private readonly Color connectionColorEnd = Color.DeepPink;
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -191,10 +198,11 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.AddObstacle);
             });
             var btnArea = await InitializeButton("btnArea", "Areas", btnDesc, () => stateManager.StartState(States.AddArea));
+            var btnConn = await InitializeButton("btnConn", "Connections", btnDesc, () => stateManager.StartState(States.AddConnection));
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
             var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnBuild, btnRasterizer, btnTiles, btnObstacle, btnArea, btnPathFinding, btnDebug];
+            UIButton[] mainBtns = [btnBuild, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -279,6 +287,7 @@ namespace TerrainSamples.SceneNavMeshTest
             stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
             stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
+            stateManager.InitializeState(States.AddConnection, StartAddConnectionState, UpdateGameStateAddConnection);
             stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
             stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
 
@@ -352,6 +361,8 @@ namespace TerrainSamples.SceneNavMeshTest
 
             pathFinderStartMessage = $"Press {GContac1Point} to add the start point. Then, press {GContac1Point} to add the end point.";
             pathFinderHelpMessage = $"Press {GContac1Point} to add the end point. {GContac2Point} to change the start point. {GameExit} to close the path finding tool.";
+
+            addConnectionStartMessage = $"Press {GContac1Point} to add the start point. Then, press {GContac1Point} to add the end point.";
         }
         private void InitializeLights()
         {
@@ -371,7 +382,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap03.json");
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap04.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
@@ -481,7 +492,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             DrawGraphNodes(agent);
 
-            DrawGraphObstaclesAndAreas();
+            DrawGraphObstaclesAreasAndConnections();
 
             gameReady = true;
         }
@@ -754,7 +765,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 Id = id,
                 Obstacle = cy,
             });
-            DrawGraphObstaclesAndAreas();
+            DrawGraphObstaclesAreasAndConnections();
 
             NavigationGraph.UpdateAt(p);
 
@@ -771,7 +782,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 {
                     NavigationGraph.RemoveObstacle(obs.Id);
                     obstacles.Remove(obs);
-                    DrawGraphObstaclesAndAreas();
+                    DrawGraphObstaclesAreasAndConnections();
 
                     NavigationGraph.UpdateAt(obs.Obstacle.Center);
 
@@ -838,22 +849,14 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 if (area is CylinderAreaMarker cylMarker)
                 {
-                    var center = cylMarker.Center;
-                    var radius = cylMarker.Radius;
-                    var plane = new Plane(center, Vector3.Up);
-                    if (!plane.Intersects(ref ray, out Vector3 p))
-                    {
-                        continue;
-                    }
-                    if (Vector3.Distance(p, center) > radius)
+                    if (!cylMarker.IntersectsRay(ray))
                     {
                         continue;
                     }
                 }
                 else if (area is ConvexAreaMarker cvMarker)
                 {
-                    var cvBox = cvMarker.GetBounds();
-                    if (!cvBox.Intersects(ref ray))
+                    if (!cvMarker.IntersectsRay(ray))
                     {
                         continue;
                     }
@@ -861,6 +864,81 @@ namespace TerrainSamples.SceneNavMeshTest
 
                 PathFinderDescription.RemoveArea(area.Id);
                 areas.Remove(area);
+
+                EnqueueGraph();
+
+                stateManager.StartState(States.Default);
+                break;
+            }
+        }
+        private void UpdateGameStateAddConnection()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateConnectionRemove();
+            }
+            else
+            {
+                UpdateConnectionAdd();
+            }
+        }
+        private void UpdateConnectionAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            float rad = 0.5f;
+
+            if (addConnectionStart == null)
+            {
+                addConnectionStart = r.PickingResult.Position;
+                DrawCircle(addConnectionStart.Value, rad, connectionColorStart);
+
+                return;
+            }
+
+            addConnectionEnd = r.PickingResult.Position;
+            DrawCircle(addConnectionEnd.Value, rad, connectionColorEnd);
+
+            bool bidir = Game.Input.ControlPressed;
+            int id = PathFinderDescription.AddConnection(addConnectionStart.Value, addConnectionEnd.Value, rad, bidir, NavAreaTypes.Rock, AgentActionTypes.Jump);
+            connections.Add(new() { Id = id, From = addConnectionStart.Value, To = addConnectionEnd.Value, Radius = rad, BiDirectional = bidir });
+
+            EnqueueGraph();
+
+            lineDrawer.Clear(connectionColorStart);
+            lineDrawer.Clear(connectionColorEnd);
+
+            stateManager.StartState(States.Default);
+        }
+        private void UpdateConnectionRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var con in connections)
+            {
+                if (!con.IntersectsRay(ray))
+                {
+                    continue;
+                }
+
+                PathFinderDescription.RemoveConnection(con.Id);
+                connections.Remove(con);
 
                 EnqueueGraph();
 
@@ -1216,6 +1294,52 @@ namespace TerrainSamples.SceneNavMeshTest
             var cylinder = Line3D.CreateCylinder(basePosition, agent.Radius, agent.Height, 12);
             lineDrawer.AddPrimitives(color, cylinder);
         }
+        private void DrawArea(IAreaMarker area, Color4 color, Color4 strongColor)
+        {
+            if (area is CylinderAreaMarker cylMarker)
+            {
+                var gt = GeometryUtil.CreateCylinder(Topology.TriangleList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
+                var gl = GeometryUtil.CreateCylinder(Topology.LineList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
+
+                triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                lineDrawer.AddPrimitives(strongColor, Line3D.CreateLineList(gl.Vertices));
+            }
+            else if (area is ConvexAreaMarker cvMarker)
+            {
+                foreach (var (poly, ccw) in cvMarker.GetPolygons())
+                {
+                    var gt = GeometryUtil.CreatePolygon(Topology.TriangleList, poly, ccw);
+                    var gl = GeometryUtil.CreatePolygon(Topology.LineList, poly, ccw);
+
+                    triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                    lineDrawer.AddPrimitives(strongColor, Line3D.CreateLineList(gl.Vertices));
+                }
+            }
+        }
+        private void DrawObstacle(ObstacleMarker obs, Color4 color, Color4 strongColor)
+        {
+            var gt = Triangle.ComputeTriangleList(obs.Obstacle, 12);
+            var gl = Line3D.CreateCylinder(obs.Obstacle, 12);
+
+            triangleDrawer.AddPrimitives(color, gt);
+            lineDrawer.AddPrimitives(strongColor, gl);
+        }
+        private void DrawConnection(ConnectionMarker con, Color4 color)
+        {
+            var dir = Vector3.Normalize(con.From - con.To);
+
+            var gl = Line3D.CreateArc(con.From, con.To, 0.1f, 32);
+            var glStart = Line3D.CreateCircle(con.From, con.Radius, 12);
+            var glEnd = Line3D.CreateCircle(con.To, con.Radius, 12);
+            var glArrow = Line3D.CreateArrow(con.To, -dir, Vector3.Up, 0.25f);
+            lineDrawer.AddPrimitives(color, [.. gl, .. glStart, .. glEnd, .. glArrow]);
+
+            if (con.BiDirectional)
+            {
+                var glArrowB = Line3D.CreateArrow(con.From, dir, Vector3.Up, 0.25f);
+                lineDrawer.AddPrimitives(color, [.. glArrowB]);
+            }
+        }
         private void DrawPath(PathFindingPath path, Color4 color)
         {
             var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
@@ -1256,44 +1380,29 @@ namespace TerrainSamples.SceneNavMeshTest
 
             LoadResourcesAsync(LoadDebugModel(agent, debugType));
         }
-        private void DrawGraphObstaclesAndAreas()
+        private void DrawGraphObstaclesAreasAndConnections()
         {
             triangleDrawer.Clear(areaColor);
             lineDrawer.Clear(areaStrongColor);
 
             foreach (var area in areas)
             {
-                if (area is CylinderAreaMarker cylMarker)
-                {
-                    var gt = GeometryUtil.CreateCylinder(Topology.TriangleList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
-                    var gl = GeometryUtil.CreateCylinder(Topology.LineList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
-
-                    triangleDrawer.AddPrimitives(areaColor, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
-                    lineDrawer.AddPrimitives(areaStrongColor, Line3D.CreateLineList(gl.Vertices));
-                }
-                else if (area is ConvexAreaMarker cvMarker)
-                {
-                    foreach (var (poly, ccw) in cvMarker.GetPolygons())
-                    {
-                        var gt = GeometryUtil.CreatePolygon(Topology.TriangleList, poly, ccw);
-                        var gl = GeometryUtil.CreatePolygon(Topology.LineList, poly, ccw);
-
-                        triangleDrawer.AddPrimitives(areaColor, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
-                        lineDrawer.AddPrimitives(areaStrongColor, Line3D.CreateLineList(gl.Vertices));
-                    }
-                }
+                DrawArea(area, areaColor, areaStrongColor);
             }
 
             triangleDrawer.Clear(obsColor);
             lineDrawer.Clear(obsStrongColor);
 
-            foreach (var obs in obstacles.Select(o => o.Obstacle))
+            foreach (var obs in obstacles)
             {
-                var gt = Triangle.ComputeTriangleList(obs, 12);
-                var gl = Line3D.CreateCylinder(obs, 12);
+                DrawObstacle(obs, obsColor, obsStrongColor);
+            }
 
-                triangleDrawer.AddPrimitives(obsColor, gt);
-                lineDrawer.AddPrimitives(obsStrongColor, gl);
+            lineDrawer.Clear(connectionColor);
+
+            foreach (var con in connections)
+            {
+                DrawConnection(con, connectionColor);
             }
         }
         private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
@@ -1466,6 +1575,19 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
+        }
+        private void StartAddConnectionState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+
+            addConnectionStart = null;
+            addConnectionEnd = null;
+
+            lineDrawer.Clear(connectionColorStart);
+            lineDrawer.Clear(connectionColorEnd);
+
+            ShowMessage(addConnectionStartMessage);
         }
         private void StartPathFindingState()
         {

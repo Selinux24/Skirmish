@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Collections.Generic;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -15,6 +16,16 @@ namespace TerrainSamples.SceneNavMeshTest
         public float Radius { get; set; }
         public float MinH { get; set; }
         public float MaxH { get; set; }
+
+        public readonly bool IntersectsRay(Ray ray)
+        {
+            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3.Up, Radius))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 
     struct ConvexAreaMarker : IAreaMarker
@@ -27,6 +38,13 @@ namespace TerrainSamples.SceneNavMeshTest
         public readonly BoundingBox GetBounds()
         {
             return BoundingBox.FromPoints(Vertices);
+        }
+
+        public readonly bool IntersectsRay(Ray ray)
+        {
+            var cvBox = GetBounds();
+
+            return cvBox.Intersects(ref ray);
         }
 
         public readonly IEnumerable<(Vector3[] verts, bool ccw)> GetPolygons()

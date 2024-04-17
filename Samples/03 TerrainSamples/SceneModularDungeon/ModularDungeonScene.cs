@@ -1515,7 +1515,7 @@ namespace TerrainSamples.SceneModularDungeon
                     new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
                     new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
                     1,
-                    1,
+                    true,
                     DungeonAreaTypes.Jump,
                     AgentActionTypes.All);
 
@@ -1523,7 +1523,7 @@ namespace TerrainSamples.SceneModularDungeon
                     new Vector3(17, 0, -14),
                     new Vector3(16, 0, -15),
                     0.15f,
-                    0,
+                    false,
                     DungeonAreaTypes.Ground,
                     AgentActionTypes.All);
             }
@@ -1733,7 +1733,7 @@ namespace TerrainSamples.SceneModularDungeon
                 var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
                 connectionDrawer.AddPrimitives(connectionColor, cirlinesF);
 
-                if (conn.Direction == 1)
+                if (conn.BiDirectional)
                 {
                     var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
                     connectionDrawer.AddPrimitives(connectionColor, cirlinesT);

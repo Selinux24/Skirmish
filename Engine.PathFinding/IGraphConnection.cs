@@ -27,7 +27,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Connection direction
         /// </summary>
-        int Direction { get; set; }
+        bool BiDirectional { get; set; }
 
         /// <summary>
         /// Gets the area type

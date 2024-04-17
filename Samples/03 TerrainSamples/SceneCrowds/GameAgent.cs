@@ -18,7 +18,7 @@ namespace TerrainSamples.SceneCrowds
     /// <param name="agentType">Agent type</param>
     /// <param name="model">Model</param>
     /// <param name="controller">Controller</param>
-    public class GameAgent<TAgent, TController>(string id, string name, TAgent agentType, TController controller, ModelInstance model) : IUpdatable, IAgent<TAgent>
+    public class GameAgent<TAgent, TController>(string id, string name, TAgent agentType, TController controller, ModelInstance model) : IAgent<TAgent>, IUpdatable, IControllable, ITransformable3D
         where TAgent : GraphAgentType
         where TController : ManipulatorController
     {

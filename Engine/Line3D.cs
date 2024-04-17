@@ -244,10 +244,9 @@ namespace Engine
 
             var d = to - from;
             float len = d.Length();
+            var prev = from;
 
-            EvalArc(from, d, len * h, pad, out var prev);
-
-            for (int i = 1; i <= points; i++)
+            for (int i = 0; i <= points; i++)
             {
                 float u = pad + i * scale;
                 EvalArc(from, d, len * h, u, out var pt);
@@ -256,6 +255,8 @@ namespace Engine
 
                 prev = pt;
             }
+
+            lines.Add(new(prev, to));
 
             return lines;
         }
@@ -270,19 +271,24 @@ namespace Engine
                 .SelectMany(a => CreateArc(a.from, a.to, h, points))
                 .AsEnumerable();
         }
-        public static IEnumerable<Line3D> CreateArrow(Vector3 position, Vector3 point, float edgeSize)
+        public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, float edgeSize)
+        {
+            return CreateArrow(point, direction, Vector3.Up, edgeSize);
+        }
+        public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, Vector3 up, float edgeSize)
         {
             var lines = new List<Line3D>();
 
-            float eps = 0.001f;
-            if (Vector3.DistanceSquared(point, position) >= eps * eps)
-            {
-                var az = Vector3.Normalize(position - point);
-                var ax = Vector3.Cross(Vector3.Up, az);
+            var az = Vector3.Normalize(direction);
+            var ax = Vector3.Cross(up, az);
+            az *= edgeSize;
+            ax *= edgeSize / 3f;
 
-                lines.Add(new(point, new(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
-                lines.Add(new(point, new(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
-            }
+            Vector3 pl = new(point.X - az.X + ax.X, point.Y - az.Y + ax.Y, point.Z - az.Z + ax.Z);
+            Vector3 pr = new(point.X - az.X - ax.X, point.Y - az.Y - ax.Y, point.Z - az.Z - ax.Z);
+
+            lines.Add(new(point, pl));
+            lines.Add(new(point, pr));
 
             return lines;
         }

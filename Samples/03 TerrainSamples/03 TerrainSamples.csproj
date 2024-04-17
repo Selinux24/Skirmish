@@ -1417,6 +1417,9 @@
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap04.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1424,6 +1427,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap04.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneNavMeshTest\Resources\testSimpleMap04.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneRts\Resources\Buildings\Building_1.json">

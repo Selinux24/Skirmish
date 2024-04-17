@@ -1679,5 +1679,28 @@ namespace Engine.Common
             // If no intersection found, must be a containment result
             return ContainmentType.Contains;
         }
+
+        /// <summary>
+        /// Gets whether the ray intersects the specified circle in 3D
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="center">Circle center</param>
+        /// <param name="normal">Circle normal</param>
+        /// <param name="radius">Circle radius</param>
+        public static bool RayIntersectsCircle3D(ref Ray ray, Vector3 center, Vector3 normal, float radius)
+        {
+            var pFrom = new Plane(center, normal);
+            if (!pFrom.Intersects(ref ray, out Vector3 p))
+            {
+                return false;
+            }
+
+            if (Vector3.Distance(center, p) > radius)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

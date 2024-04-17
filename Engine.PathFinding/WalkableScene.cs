@@ -131,26 +131,36 @@ namespace Engine.PathFinding
         /// <param name="fileName">File name</param>
         public void LoadNavigationGraphFromFile(string fileName)
         {
-            if (File.Exists(fileName))
+            if (!File.Exists(fileName))
             {
-                try
-                {
-                    string hash = PathFinderDescription.GetHash();
+                return;
+            }
 
-                    var graph = PathFinderDescription.Load(fileName, hash);
-                    if (graph != null)
-                    {
-                        SetNavigationGraph(graph);
+            string hash = PathFinderDescription.GetHash();
 
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError(this, $"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
+            var graph = PathFinderDescription.Load(fileName, hash);
+            if (graph != null)
+            {
+                SetNavigationGraph(graph);
+            }
+        }
+        /// <summary>
+        /// Loads a navigation graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public async Task LoadNavigationGraphFromFileAsync(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                return;
+            }
 
-                    throw;
-                }
+            string hash = await PathFinderDescription.GetHashAsync();
+
+            var graph = await PathFinderDescription.LoadAsync(fileName, hash);
+            if (graph != null)
+            {
+                SetNavigationGraph(graph);
             }
         }
         /// <summary>
@@ -159,18 +169,19 @@ namespace Engine.PathFinding
         /// <param name="fileName">File name</param>
         public void SaveNavigationGraphToFile(string fileName)
         {
-            try
-            {
-                Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+            Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
-                PathFinderDescription.Save(fileName, NavigationGraph);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+            PathFinderDescription.Save(fileName, NavigationGraph);
+        }
+        /// <summary>
+        /// Saves a navigation graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public async Task SaveNavigationGraphToFileAsync(string fileName)
+        {
+            Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
-                throw;
-            }
+            await PathFinderDescription.SaveAsync(fileName, NavigationGraph);
         }
 
         /// <summary>

@@ -622,7 +622,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     Poly = offMeshPolyBase + n,
                     Rad = param.OffMeshCon[i].Radius,
-                    Direction = (OffMeshConnectionDirections)param.OffMeshCon[i].Direction,
+                    Direction = param.OffMeshCon[i].BiDirectional ? OffMeshConnectionDirections.Bidirectional : OffMeshConnectionDirections.Unique,
                     Side = offMeshConClass[i].Y,
                     Start = param.OffMeshCon[i].Start,
                     End = param.OffMeshCon[i].End,

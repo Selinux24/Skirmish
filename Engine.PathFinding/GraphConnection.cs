@@ -39,7 +39,7 @@ namespace Engine.PathFinding
         /// <inheritdoc/>
         public float Radius { get; set; }
         /// <inheritdoc/>
-        public int Direction { get; set; }
+        public bool BiDirectional { get; set; }
 
         /// <summary>
         /// Constructor

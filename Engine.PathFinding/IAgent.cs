@@ -5,8 +5,7 @@ namespace Engine.PathFinding
     /// Agent interface
     /// </summary>
     /// <typeparam name="T">Agent type</typeparam>
-    public interface IAgent<T> : IControllable, ITransformable3D
-        where T : AgentType
+    public interface IAgent<out T> where T : AgentType
     {
         /// <summary>
         /// Agent type
