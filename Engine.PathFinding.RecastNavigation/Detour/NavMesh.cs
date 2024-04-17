@@ -125,15 +125,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback = null)
+        public static NavMesh Build(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback = null)
         {
             if (settings.BuildMode == BuildModes.Solo)
             {
-                return BuildSolo(geometry, settings, agent, progressCallback);
+                return BuildSolo(settings, geometry, agent, progressCallback);
             }
             else if (settings.BuildMode == BuildModes.Tiled)
             {
-                return BuildTiled(geometry, settings, agent, progressCallback);
+                return BuildTiled(settings, geometry, agent, progressCallback);
             }
             else
             {
@@ -148,7 +148,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
+        private static NavMesh BuildSolo(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback)
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
@@ -268,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="agent">Agent type</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
+        private static NavMesh BuildTiled(BuildSettings settings, InputGeometry geometry, Agent agent, Action<float> progressCallback)
         {
             var generationBounds = settings.Bounds ?? geometry.BoundingBox;
 
@@ -316,7 +316,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="tiledCfg">Configuration</param>
         /// <param name="agent">Agent</param>
-        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, TilesConfig tiledCfg, Agent agent)
+        private static MeshData BuildTileMesh(int x, int y, TilesConfig tiledCfg, InputGeometry geometry, Agent agent)
         {
             if (tiledCfg.MaxVertsPerPoly > IndexedPolygon.DT_VERTS_PER_POLYGON)
             {
@@ -558,7 +558,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             foreach (var (x, y) in GridUtils.Iterate(tiledCfg.TileWidth, tiledCfg.TileHeight))
             {
-                var data = BuildTileMesh(x, y, geometry, tiledCfg, agent);
+                var data = BuildTileMesh(x, y, tiledCfg, geometry, agent);
                 if (data != null)
                 {
                     // Remove any previous data (navmesh owns and deletes the data).
@@ -590,7 +590,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 RemoveTiles(x, y);
 
                 // Add tile, or leave the location empty.
-                var data = BuildTileMesh(x, y, geometry, tiledCfg, agent);
+                var data = BuildTileMesh(x, y, tiledCfg, geometry, agent);
                 if (data != null)
                 {
                     AddTile(data);

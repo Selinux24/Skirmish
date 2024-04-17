@@ -74,7 +74,7 @@ namespace Engine.PathFinding.Tests
 
             var mockInput = new Mock<PathFinderInput>([() => { return zeroPlaneTris; }]);
 
-            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
+            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object, [agentDefault]);
 
             Assert.IsNotNull(pfDesc);
             Assert.IsNotNull(pfDesc.Settings);
@@ -89,9 +89,9 @@ namespace Engine.PathFinding.Tests
             var mockInput = new Mock<PathFinderInput>([() => { return zeroPlaneTris; }]);
 
             var mockGraph = new Mock<IGraph>();
-            mockInput.Setup(i => i.CreateGraphAsync(It.IsAny<PathFinderSettings>(), null)).ReturnsAsync(mockGraph.Object);
+            mockInput.Setup(i => i.CreateGraphAsync(It.IsAny<PathFinderSettings>(), It.IsAny<AgentType[]>(), null)).ReturnsAsync(mockGraph.Object);
 
-            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
+            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object, [agentDefault]);
             var res = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             Assert.IsNotNull(res);
@@ -104,9 +104,9 @@ namespace Engine.PathFinding.Tests
             var mockInput = new Mock<PathFinderInput>([() => { return zeroPlaneTris; }]);
 
             var mockGraph = new Mock<IGraph>();
-            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>(), null)).Returns(mockGraph.Object);
+            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>(), It.IsAny<AgentType[]>(), null)).Returns(mockGraph.Object);
 
-            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
+            var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object, [agentDefault]);
             var res = pfDesc.Build();
 
             Assert.IsNotNull(res);
@@ -116,10 +116,9 @@ namespace Engine.PathFinding.Tests
         public void BuildNavmeshZeroTest()
         {
             var settings = BuildSettings.Default;
-            settings.Agents = [agentDefault];
             var input = new InputGeometry(() => { return zeroPlaneTris; });
 
-            var pfDesc = new PathFinderDescription(settings, input);
+            var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
@@ -139,10 +138,9 @@ namespace Engine.PathFinding.Tests
         public void BuildNavmeshOneTest()
         {
             var settings = BuildSettings.Default;
-            settings.Agents = [agentDefault];
             var input = new InputGeometry(() => { return hOnePlaneTris; });
 
-            var pfDesc = new PathFinderDescription(settings, input);
+            var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
@@ -162,10 +160,9 @@ namespace Engine.PathFinding.Tests
         public void BuildNavmeshTwoTest()
         {
             var settings = BuildSettings.Default;
-            settings.Agents = [agentDefault];
             var input = new InputGeometry(() => { return hTwoPlaneTris; });
 
-            var pfDesc = new PathFinderDescription(settings, input);
+            var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
@@ -185,10 +182,9 @@ namespace Engine.PathFinding.Tests
         public void BuildNavmeshSceneryTest()
         {
             var settings = BuildSettings.Default;
-            settings.Agents = [agentDefault];
             var input = new InputGeometry(() => { return sceneryTris; });
 
-            var pfDesc = new PathFinderDescription(settings, input);
+            var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
@@ -208,10 +204,9 @@ namespace Engine.PathFinding.Tests
         public void BuildNavmeshInclinedTest()
         {
             var settings = BuildSettings.Default;
-            settings.Agents = [agentInclined];
             var input = new InputGeometry(() => { return inclinedPlaneTris; });
 
-            var pfDesc = new PathFinderDescription(settings, input);
+            var pfDesc = new PathFinderDescription(settings, input, [agentInclined]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
             var walkable1 = graph.IsWalkable(agentInclined, pointZero, 0.5f, out var n1);

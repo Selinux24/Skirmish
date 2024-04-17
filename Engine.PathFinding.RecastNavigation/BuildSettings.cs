@@ -56,27 +56,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int VertsPerPoly { get; set; } = 6;
         /// <summary>
-        /// Partition type
-        /// </summary>
-        public SamplePartitionTypes PartitionType { get; set; } = SamplePartitionTypes.Watershed;
-        /// <summary>
-        /// Agents list
-        /// </summary>
-        public Agent[] Agents { get; set; } = [new()];
-
-        /// <summary>
         /// Navigation mesh building mode
         /// </summary>
         public BuildModes BuildMode { get; set; } = BuildModes.Tiled;
         /// <summary>
+        /// Partition type
+        /// </summary>
+        public SamplePartitionTypes PartitionType { get; set; } = SamplePartitionTypes.Watershed;
+        /// <summary>
+        /// Filter low hanging obstacles when generation
+        /// </summary>
+        public bool FilterLowHangingObstacles { get; set; } = true;
+        /// <summary>
+        /// Filter ledge spans when generation
+        /// </summary>
+        public bool FilterLedgeSpans { get; set; } = true;
+        /// <summary>
+        /// Filter walkable low hight spans when generation
+        /// </summary>
+        public bool FilterWalkableLowHeightSpans { get; set; } = true;
+
+        /// <summary>
         /// Tile size (if tiled mode)
         /// </summary>
         public float TileSize { get; set; } = 32;
-        /// <summary>
-        /// Maximum number of nodes
-        /// </summary>
-        public int MaxNodes { get; set; } = 2048;
-
         /// <summary>
         /// Use tile cache
         /// </summary>
@@ -97,16 +100,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Filter low hanging obstacles when generation
+        /// Maximum number of nodes
         /// </summary>
-        public bool FilterLowHangingObstacles { get; set; } = true;
-        /// <summary>
-        /// Filter ledge spans when generation
-        /// </summary>
-        public bool FilterLedgeSpans { get; set; } = true;
-        /// <summary>
-        /// Filter walkable low hight spans when generation
-        /// </summary>
-        public bool FilterWalkableLowHeightSpans { get; set; } = true;
+        public int MaxNodes { get; set; } = 2048;
     }
 }

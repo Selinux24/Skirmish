@@ -14,14 +14,14 @@ namespace Engine.PathFinding.AStar
     public class GridInput(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
         {
             var triangles = await GetTrianglesAsync();
 
             return await Task.Run(() => Grid.CreateGrid(settings, this, triangles, progressCallback));
         }
         /// <inheritdoc/>
-        public override IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
         {
             var triangles = GetTriangles();
 

@@ -24,13 +24,13 @@ namespace Engine.PathFinding.RecastNavigation
         public ChunkyTriMesh ChunkyMesh { get; private set; }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
         {
             var triangles = await GetTrianglesAsync();
 
             try
             {
-                return Create(settings, triangles, progressCallback);
+                return Create(settings, agents, triangles, progressCallback);
             }
             catch (Exception ex)
             {
@@ -40,13 +40,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <inheritdoc/>
-        public override IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
+        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null)
         {
             var triangles = GetTriangles();
 
             try
             {
-                return Create(settings, triangles, progressCallback);
+                return Create(settings, agents, triangles, progressCallback);
             }
             catch (Exception ex)
             {
@@ -59,14 +59,21 @@ namespace Engine.PathFinding.RecastNavigation
         /// Creates a new graph from current geometry input
         /// </summary>
         /// <param name="settings">Settings</param>
+        /// <param name="agents">Agent list</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new graph</returns>
-        private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles, Action<float> progressCallback)
+        private Graph Create(PathFinderSettings settings, AgentType[] agents, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
+            var buildSettings = settings as BuildSettings;
+            ArgumentNullException.ThrowIfNull(buildSettings, nameof(settings));
+
+            var agentList = agents?.Cast<Agent>()?.ToArray() ?? [];
+            ArgumentOutOfRangeException.ThrowIfZero(agentList.Length, nameof(agents));
+
             if (!triangles.Any())
             {
-                return new Graph
+                return new()
                 {
                     Input = this,
                     Settings = settings as BuildSettings,
@@ -80,17 +87,16 @@ namespace Engine.PathFinding.RecastNavigation
             var graph = new Graph()
             {
                 Input = this,
-                Settings = settings as BuildSettings,
+                Settings = buildSettings,
             };
 
             // Generate navigation meshes and gueries for each agent
-            var agentList = graph.Settings.Agents;
             var agentCount = agentList.Length;
             for (int i = 0; i < agentCount; i++)
             {
                 var agent = agentList[i];
 
-                var nm = NavMesh.Build(this, graph.Settings, agent, (progress) =>
+                var nm = NavMesh.Build(graph.Settings, this, agent, (progress) =>
                 {
                     progressCallback?.Invoke(progress * (i + 1) / agentCount);
                 });

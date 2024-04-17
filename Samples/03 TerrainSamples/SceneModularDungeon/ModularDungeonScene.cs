@@ -737,9 +737,6 @@ namespace TerrainSamples.SceneModularDungeon
             nmsettings.CellSize = 0.2f;
             nmsettings.CellHeight = 0.2f;
 
-            //Agents
-            nmsettings.Agents = new[] { playerAgentType, ratAgentType };
-
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Layers;
 
@@ -753,7 +750,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+            PathFinderDescription = new(nmsettings, nminput, new[] { playerAgentType, ratAgentType });
         }
         private void InitializeLights()
         {

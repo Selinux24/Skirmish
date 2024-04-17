@@ -243,7 +243,6 @@ namespace TerrainSamples.SceneCrowds
             var nmsettings = BuildSettings.Default;
             nmsettings.CellSize = 0.5f;
             nmsettings.CellHeight = 1f;
-            nmsettings.Agents = [tankAgentType];
             nmsettings.PartitionType = SamplePartitionTypes.Layers;
             nmsettings.EdgeMaxError = 1.0f;
             nmsettings.BuildMode = BuildModes.Tiled;
@@ -251,7 +250,7 @@ namespace TerrainSamples.SceneCrowds
 
             var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
+            PathFinderDescription = new PathFinderDescription(nmsettings, nmInput, [tankAgentType]);
 
             EnqueueNavigationGraphUpdate((progress) =>
             {

@@ -408,10 +408,9 @@ namespace TerrainSamples.SceneSkybox
             nvSettings.CellSize = 0.05f;
             nvSettings.CellHeight = 0.02f;
             nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = walker;
 
             //Generate the path finder description
-            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
+            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput, [walker]);
 
             EnqueueNavigationGraphUpdate((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }

@@ -202,16 +202,18 @@ namespace Engine.PathFinding
         /// Creates a new graph from current input
         /// </summary>
         /// <param name="settings">Creation settings</param>
+        /// <param name="agents">Agent list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract Task<IGraph> CreateGraphAsync(PathFinderSettings settings, Action<float> progressCallback = null);
+        public abstract Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null);
         /// <summary>
         /// Creates a new graph from current input
         /// </summary>
         /// <param name="settings">Creation settings</param>
+        /// <param name="agents">Agent list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract IGraph CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null);
+        public abstract IGraph CreateGraph(PathFinderSettings settings, AgentType[] agents, Action<float> progressCallback = null);
         /// <summary>
         /// Refresh
         /// </summary>

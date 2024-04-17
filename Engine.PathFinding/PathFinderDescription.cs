@@ -11,7 +11,7 @@ namespace Engine.PathFinding
     /// </remarks>
     /// <param name="settings">Settings</param>
     /// <param name="input">Geometry input</param>
-    public class PathFinderDescription(PathFinderSettings settings, PathFinderInput input)
+    public class PathFinderDescription(PathFinderSettings settings, PathFinderInput input, AgentType[] agents)
     {
         /// <summary>
         /// Graph type
@@ -21,6 +21,10 @@ namespace Engine.PathFinding
         /// Path finder input
         /// </summary>
         public PathFinderInput Input { get; protected set; } = input ?? throw new ArgumentNullException(nameof(input));
+        /// <summary>
+        /// Agent list
+        /// </summary>
+        public AgentType[] Agents { get; protected set; } = agents ?? throw new ArgumentNullException(nameof(agents));
 
         /// <summary>
         /// Builds a graph from this settings
@@ -29,7 +33,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph</returns>
         public async Task<IGraph> BuildAsync(Action<float> progressCallback = null)
         {
-            return await Input.CreateGraphAsync(Settings, progressCallback);
+            return await Input.CreateGraphAsync(Settings, agents, progressCallback);
         }
         /// <summary>
         /// Builds a graph from this settings
@@ -38,7 +42,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph</returns>
         public IGraph Build(Action<float> progressCallback = null)
         {
-            return Input.CreateGraph(Settings, progressCallback);
+            return Input.CreateGraph(Settings, agents, progressCallback);
         }
 
         /// <summary>

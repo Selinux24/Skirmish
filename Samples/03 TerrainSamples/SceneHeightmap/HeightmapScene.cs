@@ -1048,9 +1048,6 @@ namespace TerrainSamples.SceneHeightmap
             nmsettings.CellSize = 0.2f;
             nmsettings.CellHeight = 0.2f;
 
-            //Agents
-            nmsettings.Agents = [agent];
-
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
@@ -1062,7 +1059,7 @@ namespace TerrainSamples.SceneHeightmap
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+            PathFinderDescription = new PathFinderDescription(nmsettings, nminput, [agent]);
 
             EnqueueNavigationGraphUpdate();
         }

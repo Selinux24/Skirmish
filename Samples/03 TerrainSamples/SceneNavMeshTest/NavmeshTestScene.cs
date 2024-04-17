@@ -404,9 +404,6 @@ namespace TerrainSamples.SceneNavMeshTest
             nmsettings.CellSize = 0.1f;
             nmsettings.CellHeight = 0.1f;
 
-            //Agents
-            nmsettings.Agents = new[] { agent };
-
             //Region
             nmsettings.RegionMinSize = 8;
             nmsettings.RegionMergeSize = 20;
@@ -437,7 +434,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+            PathFinderDescription = new PathFinderDescription(nmsettings, nminput, new[] { agent });
         }
         private async Task InitializeDebug()
         {

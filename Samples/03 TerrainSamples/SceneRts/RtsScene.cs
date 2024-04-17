@@ -1083,10 +1083,9 @@ namespace TerrainSamples.SceneRts
             Parallel.ForEach(actionList, options, a => a());
 
             var navSettings = BuildSettings.Default;
-            navSettings.Agents = [walkerAgentType, tankAgentType];
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
+            PathFinderDescription = new PathFinderDescription(navSettings, nvInput, [walkerAgentType, tankAgentType]);
 
             sw.Stop();
 
