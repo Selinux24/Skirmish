@@ -122,7 +122,7 @@ namespace Engine.Common
 
             //Dispose mesh resources and clear the mesh collection
             var bufferManager = Game.BufferManager;
-            meshes.Values.ToList().ForEach(mCollection => mCollection.DisposeResources(bufferManager));
+            meshes.Values.ToList().ForEach(mCollection => mCollection?.DisposeResources(bufferManager));
             meshes.Clear();
 
             //Clear the material list
@@ -263,9 +263,14 @@ namespace Engine.Common
         /// </summary>
         public IEnumerable<(string MaterialName, IMeshMaterial MeshMaterial, string MeshName, Mesh Mesh)> IterateMaterials()
         {
-            foreach (string meshName in meshes.Keys)
+            foreach ((var meshName, var meshValue) in meshes)
             {
-                foreach ((string materialName, var mesh) in meshes[meshName])
+                if (meshValue == null)
+                {
+                    continue;
+                }
+
+                foreach ((string materialName, var mesh) in meshValue)
                 {
                     if (!mesh.Ready)
                     {
@@ -286,6 +291,11 @@ namespace Engine.Common
         {
             foreach (var meshMaterial in meshes.Values)
             {
+                if (meshMaterial == null)
+                {
+                    continue;
+                }
+
                 foreach (var mesh in meshMaterial)
                 {
                     yield return mesh;

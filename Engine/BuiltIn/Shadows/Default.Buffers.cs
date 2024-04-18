@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 namespace Engine.BuiltIn.Shadows
 {
     using Engine.Common;
+    using System;
 
     /// <summary>
     /// Per-shadow casting light data structure
@@ -23,8 +24,8 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="context">Draw context</param>
         public static PerCastingLight Build(DrawContextShadows context)
         {
-            var viewProjection = context.ShadowMap?.LightSource.FromLightVP;
-            int length = viewProjection?.Length ?? 0;
+            var viewProjection = context.ShadowMap?.LightSource.FromLightVP ?? [];
+            int length = Math.Min(MaxCount, viewProjection.Length);
 
             if (length > MaxCount)
             {

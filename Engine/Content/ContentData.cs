@@ -947,7 +947,9 @@ namespace Engine.Content
 
             Dictionary<string, MeshByMaterialCollection> meshes = [];
 
-            foreach (var meshName in geometryContent.Keys)
+            var meshNames = geometryContent.Keys.ToArray();
+
+            foreach (var meshName in meshNames)
             {
                 var mesh = await CreateGeometryMesh(meshName, loadAnimation, loadNormalMaps, constraint);
 
@@ -1120,25 +1122,24 @@ namespace Engine.Content
                 {
                     foreach (string material in materialContent.Keys)
                     {
-                        OptimizeSkinnedMesh(geometryContent, skin, material);
+                        OptimizeSkinnedMesh(skin, material);
                     }
                 }
             }
 
             foreach (string material in materialContent.Keys)
             {
-                OptimizeStaticMesh(geometryContent, material);
+                OptimizeStaticMesh(material);
             }
         }
         /// <summary>
         /// Optimizes the skinned mesh
         /// </summary>
-        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="skin">Skin name</param>
         /// <param name="material">Material name</param>
-        private void OptimizeSkinnedMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string skin, string material)
+        private void OptimizeSkinnedMesh(string skin, string material)
         {
-            var skinnedM = ComputeSubmeshContent(geometry, skin, skin, material);
+            var skinnedM = ComputeSubmeshContent(skin, skin, material);
             if (skinnedM != null)
             {
                 OptimizeSubmeshContent(skin, material, [skinnedM]);
@@ -1147,21 +1148,22 @@ namespace Engine.Content
         /// <summary>
         /// Optimizes the static mesh
         /// </summary>
-        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="material">Material name</param>
-        private void OptimizeStaticMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string material)
+        private void OptimizeStaticMesh(string material)
         {
             var staticM = new List<SubMeshContent>();
 
-            foreach (string mesh in geometry.Keys)
+            var meshNames = geometryContent.Keys.ToArray();
+
+            foreach (string meshName in meshNames)
             {
                 var skins = GetControllerSkins();
-                if (Array.Exists(skins, s => s == mesh))
+                if (Array.Exists(skins, s => s == meshName))
                 {
                     continue;
                 }
 
-                var submesh = ComputeSubmeshContent(geometry, mesh, StaticMesh, material);
+                var submesh = ComputeSubmeshContent(meshName, StaticMesh, material);
                 if (submesh != null)
                 {
                     staticM.Add(submesh);
@@ -1176,14 +1178,13 @@ namespace Engine.Content
         /// <summary>
         /// Computes the specified source mesh
         /// </summary>
-        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="sourceMesh">Source mesh name</param>
         /// <param name="targetMesh">Target mesh name</param>
         /// <param name="material">Material name</param>
         /// <returns>Returns a submesh content if source mesh isn't a hull</returns>
-        private SubMeshContent ComputeSubmeshContent(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string sourceMesh, string targetMesh, string material)
+        private SubMeshContent ComputeSubmeshContent(string sourceMesh, string targetMesh, string material)
         {
-            if (!geometry.TryGetValue(sourceMesh, out var dict))
+            if (!geometryContent.TryGetValue(sourceMesh, out var dict))
             {
                 return null;
             }
@@ -1360,7 +1361,9 @@ namespace Engine.Content
                 TryAddController(controller, ref modelContent);
             }
 
-            foreach (var mesh in modelContent.geometryContent.Keys)
+            var meshNames = modelContent.geometryContent.Keys.ToArray();
+
+            foreach (var mesh in meshNames)
             {
                 TryAddLights(mesh.Replace(MeshString, ""), ref modelContent);
             }
@@ -1612,7 +1615,9 @@ namespace Engine.Content
         {
             var meshes = new List<Triangle>();
 
-            foreach (var meshName in geometryContent.Keys)
+            var meshNames = geometryContent.Keys.ToArray();
+
+            foreach (var meshName in meshNames)
             {
                 meshes.AddRange(GetHullMesh(meshName));
             }
