@@ -264,11 +264,10 @@ namespace Tanks
         {
             InitializePlayers();
 
-            List<Task> taskList = [.. InitializeUI(), .. InitializeModels()];
-
-            var loadingGroup = LoadResourceGroup.FromTasks(loadGroupSceneObjects, taskList);
-
-            LoadResourcesAsync(loadingGroup, LoadUICompleted);
+            LoadResourcesAsync(
+                [.. InitializeUI(), .. InitializeModels()], 
+                LoadUICompleted, 
+                loadGroupSceneObjects);
         }
 
         private Task[] InitializeUI()

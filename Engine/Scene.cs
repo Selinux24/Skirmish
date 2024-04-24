@@ -304,80 +304,69 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="task">Task</param>
-        public Task LoadResourcesAsync(Task task)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
         /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup)
+        public Task LoadResourcesAsync(ILoadResourceGroup taskGroup)
         {
             return Game.LoadResourcesAsync(taskGroup);
         }
+
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="task">Task</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback)
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(Task task, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task), callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task, null, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="tasks">Task list</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback)
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(IEnumerable<Task> tasks, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks, null, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(Task task, Func<LoadResourcesResult, Task> callback)
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task), callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task, callback, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="tasks">Task list</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Func<LoadResourcesResult, Task> callback)
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks), callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks, callback, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(Task task, Func<LoadResourcesResult, Task> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(taskGroup, callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task, callback, id));
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="tasks">Task list</param>
+        /// <param name="callback">Callback</param>
+        /// <param name="id">Group id</param>
+        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Func<LoadResourcesResult, Task> callback, string id = null)
+        {
+            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks, callback, id));
         }
 
         /// <summary>
@@ -385,27 +374,20 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="task">Task</param>
-        public Task LoadResourcesAsync<T>(Task<T> task)
+        /// <param name="callback">Callback</param>
+        public Task LoadResourcesAsync<T>(Task<T> task, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task));
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task, null, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks)
+        /// <param name="callback">Callback</param>
+        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            return Game.LoadResourcesAsync(taskGroup);
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks, null, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -413,9 +395,9 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback)
+        public Task LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task), callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task, callback, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -423,19 +405,9 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="tasks">Task list</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback)
+        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks, callback, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -443,9 +415,9 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(Task<T> task, Func<LoadResourcesResult<T>, Task> callback)
+        public Task LoadResourcesAsync<T>(Task<T> task, Func<LoadResourcesResult<T>, Task> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task), callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task, callback, id));
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -453,19 +425,9 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="tasks">Task list</param>
         /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Func<LoadResourcesResult<T>, Task> callback)
+        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Func<LoadResourcesResult<T>, Task> callback, string id = null)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
+            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks, callback, id));
         }
 
         /// <summary>

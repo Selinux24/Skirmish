@@ -409,9 +409,8 @@ namespace TerrainSamples.SceneModularDungeon
                 InitializeNPCs(),
                 InitializeAudio(),
             };
-            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", tasks);
-
-            LoadResourcesAsync(resourceGroup, LoadAssetsCompleted);
+            
+            LoadResourcesAsync(tasks, LoadAssetsCompleted, "LoadAssets");
         }
         private async Task InitializeDebug()
         {
@@ -1436,9 +1435,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             SetSelectedItem(null);
 
-            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", ChangeToLevelAsync(name));
-
-            _ = LoadResourcesAsync(resourceGroup, ChangeToLevelResults);
+            _ = LoadResourcesAsync(ChangeToLevelAsync(name), ChangeToLevelResults, "LoadAssets");
         }
         private async Task ChangeToLevelAsync(string name)
         {

@@ -1,16 +1,15 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.UI;
+using SharpDX;
 using SharpDX.DXGI;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.UI;
-
     /// <summary>
     /// Game class
     /// </summary>
@@ -68,6 +67,14 @@ namespace Engine
         /// Game paused
         /// </summary>
         private bool paused = false;
+        /// <summary>
+        /// Resource request queue
+        /// </summary>
+        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
+        /// <summary>
+        /// Resource integration running flag
+        /// </summary>
+        private bool integratingResources = false;
 
         /// <summary>
         /// Name
@@ -615,274 +622,105 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            Action<LoadResourcesResult<T>> callback = null;
-
-            return LoadResourcesAsync(taskGroup, callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
+        public async Task LoadResourcesAsync(ILoadResourceGroup taskGroup)
         {
-            return Task.Run(async () =>
+            while (true)
             {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
+                if (ResourceLoadRuning)
                 {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
+                    await Task.Delay(100);
 
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
+                    continue;
                 }
 
-                callback?.Invoke(result);
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
+                ResourceLoadRuning = true;
+                try
                 {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
+                    await taskGroup.Process(Progress);
 
-                        continue;
-                    }
+                    RequestIntegrateResources(taskGroup);
 
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
+                    break;
                 }
-
-                await callback?.Invoke(result);
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            Action<LoadResourcesResult> callback = null;
-
-            return LoadResourcesAsync(taskGroup, callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
+                finally
                 {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
+                    ResourceLoadRuning = false;
                 }
-
-                callback?.Invoke(result);
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                await callback?.Invoke(result);
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            List<TaskResult<T>> loadResult = [];
-
-            var taskList = taskGroup.Tasks.ToList();
-
-            int totalTasks = taskList.Count;
-            int currentTask = 0;
-            while (taskList.Count != 0)
-            {
-                var t = await Task.WhenAny(taskList);
-
-                taskList.Remove(t);
-
-                bool completedOk = t.Status == TaskStatus.RanToCompletion;
-
-                TaskResult<T> res = new()
-                {
-                    Completed = completedOk,
-                    Exception = t.Exception, // Store the excetion
-                    Result = completedOk ? (await t) : default, // Avoid throwing the exception now
-                };
-
-                loadResult.Add(res);
-
-                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
-
-            await IntegrateResources(taskGroup.Id);
-
-            return new LoadResourcesResult<T>
-            {
-                Results = loadResult,
-            };
         }
+
         /// <summary>
-        /// Executes a list of resource load tasks
+        /// Requests a resource group integration
         /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
+        /// <param name="resourceGroup">Resource group</param>
+        private void RequestIntegrateResources(ILoadResourceGroup resourceGroup)
         {
-            List<TaskResult> loadResult = [];
-
-            var taskList = taskGroup.Tasks.ToList();
-
-            int totalTasks = taskList.Count;
-            int currentTask = 0;
-            while (taskList.Count != 0)
-            {
-                var t = await Task.WhenAny(taskList);
-
-                taskList.Remove(t);
-
-                TaskResult res = new()
-                {
-                    Completed = t.Status == TaskStatus.RanToCompletion,
-                    Exception = t.Exception, // Store the excetion
-                };
-
-                loadResult.Add(res);
-
-                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
-            }
-
-            await IntegrateResources(taskGroup.Id);
-
-            return new LoadResourcesResult
-            {
-                Results = loadResult,
-            };
+            resourceRequests.Enqueue(resourceGroup);
         }
-
         /// <summary>
         /// Integrates the requested resources into the resource manager
         /// </summary>
         /// <param name="id">Resource group id</param>
-        private async Task IntegrateResources(string id)
+        private void IntegrateResources()
         {
+            if (integratingResources)
+            {
+                return;
+            }
+
+            if (resourceRequests.IsEmpty && !ResourceManager.HasRequests)
+            {
+                return;
+            }
+
+            integratingResources = true;
+
+            var groups = Task.Run(IntegrateResourcesAsync).ConfigureAwait(false).GetAwaiter().GetResult();
+            foreach (var gr in groups)
+            {
+                gr.End();
+            }
+        }
+        /// <summary>
+        /// Integrates the resource groups in the resource queue
+        /// </summary>
+        /// <returns>Returns the integrated resource groups</returns>
+        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
+        {
+            List<ILoadResourceGroup> res = [];
+
             try
             {
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => BufferManager: Recreating buffers");
-                await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => BufferManager: Buffers recreated");
+                while (resourceRequests.TryDequeue(out var loadResourceGroup))
+                {
+                    string logText = $"{nameof(Game)}.{nameof(IntegrateResources)}.{loadResourceGroup.Id ?? NoIdString}";
 
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => ResourceManager: New resources created");
+                    Logger.WriteInformation(this, $"{logText} => BufferManager: Recreating buffers");
+                    await BufferManager.CreateBuffersAsync(loadResourceGroup.Id, ProgressBuffers);
+                    Logger.WriteInformation(this, $"{logText} => BufferManager: Buffers recreated");
+
+                    Logger.WriteInformation(this, $"{logText} => ResourceManager: Creating new resources");
+                    ResourceManager.CreateResources(loadResourceGroup.Id, ProgressBuffers);
+                    Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
+
+                    res.Add(loadResourceGroup);
+                }
+
+                if (ResourceManager.HasRequests)
+                {
+                    Logger.WriteInformation(this, "ResourceManager: Creating new resources");
+                    ResourceManager.CreateResources($"ResourceManager.Frame{FrameCounters.FrameCount}", null);
+                    Logger.WriteInformation(this, "ResourceManager: New resources created");
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? NoIdString} => error: {ex.Message}", ex);
-
-                throw;
+                integratingResources = false;
             }
+
+            return [.. res];
         }
 
         /// <summary>
@@ -952,12 +790,7 @@ namespace Engine
             LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
             Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
 
-            if (ResourceManager.HasRequests)
-            {
-                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources($"ResourceManager.Frame{FrameCounters.FrameCount}", null);
-                Logger.WriteInformation(this, "ResourceManager: New resources created");
-            }
+            IntegrateResources();
 
             FrameCounters.FramesPerSecond++;
             FrameCounters.FrameTime += GameTime.ElapsedSeconds;
