@@ -113,9 +113,9 @@ namespace TerrainSamples.SceneSkybox
 #endif
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeCamera();
 
@@ -134,20 +134,20 @@ namespace TerrainSamples.SceneSkybox
 
         private void InitializeResources()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeUI(),
-                    InitializeSkydom(),
-                    InitializeLakeBottom(),
-                    InitializeTorchs(),
-                    InitializeObelisks(),
-                    InitializeFountain(),
-                    InitializeRuins(),
-                    InitializeWater(),
-                    InitializeParticles(),
-                    InitializeEmitter(),
-                    InitializeDecalEmitter(),
-                    InitializeDebug(),
+                    InitializeUI,
+                    InitializeSkydom,
+                    InitializeLakeBottom,
+                    InitializeTorchs,
+                    InitializeObelisks,
+                    InitializeFountain,
+                    InitializeRuins,
+                    InitializeWater,
+                    InitializeParticles,
+                    InitializeEmitter,
+                    InitializeDecalEmitter,
+                    InitializeDebug,
                 ],
                 InitializeResourcesCompleted);
         }

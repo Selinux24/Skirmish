@@ -122,20 +122,20 @@ namespace TerrainSamples.SceneNavMeshTest
             Camera.MovementDelta = 25f;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeText(),
-                    InitializeUI(),
+                    InitializeTweener,
+                    InitializeText,
+                    InitializeUI,
                 ],
                 InitializeComponentsCompleted);
         }
@@ -373,10 +373,10 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void InitializeMapData()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeNavmesh(),
-                    InitializeDebug()
+                    InitializeNavmesh,
+                    InitializeDebug,
                 ],
                 InitializeMapDataCompleted);
         }
@@ -1378,7 +1378,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             Components.RemoveComponent(debugGeometry);
 
-            LoadResourcesAsync(LoadDebugModel(agent, debugType));
+            LoadResources(() => LoadDebugModel(agent, debugType));
         }
         private void DrawGraphObstaclesAreasAndConnections()
         {

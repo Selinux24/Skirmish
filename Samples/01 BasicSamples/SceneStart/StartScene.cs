@@ -43,27 +43,27 @@ namespace BasicSamples.SceneStart
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            var assetTasks = new[]
-            {
-                InitializeTweener(),
-                InitializeCursor(),
-                InitializeBackground(),
-                InitializeTitle(),
-                InitializeButtonPanel(),
-                InitializeMusic(),
-            };
+            Func<Task>[] tasks =
+            [
+                InitializeTweener,
+                InitializeCursor,
+                InitializeBackground,
+                InitializeTitle,
+                InitializeButtonPanel,
+                InitializeMusic,
+            ];
 
-            LoadResourcesAsync(
-                assetTasks,
+            LoadResources(
+                tasks,
                 InitializeComponentsCompleted);
         }
         private async Task InitializeTweener()
@@ -259,7 +259,7 @@ namespace BasicSamples.SceneStart
             buttonPanel.Anchor = Anchors.HorizontalCenter;
             buttonPanel.Top = Game.Form.RenderHeight / h * hv - buttonPanel.Height;
 
-            sceneButtons.ForEach(button => { button.Visible = true; });
+            sceneButtons.ForEach(button => button.Visible = true);
         }
 
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)

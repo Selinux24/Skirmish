@@ -194,19 +194,19 @@ namespace Tanks
             }
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             LoadLoadingUI();
         }
 
         private void LoadLoadingUI()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeLoadingUI()
+                    InitializeTweener,
+                    InitializeLoadingUI,
                 ],
                 LoadLoadingUICompleted);
         }
@@ -264,26 +264,31 @@ namespace Tanks
         {
             InitializePlayers();
 
-            LoadResourcesAsync(
-                [.. InitializeUI(), .. InitializeModels()], 
-                LoadUICompleted, 
+            LoadResources(
+                [
+                    InitializeUIGameMessages,
+                    InitializeUIModalDialog,
+                    InitializeUIPlayers,
+                    InitializeUITurn,
+                    InitializeUIKeyPanel,
+                    InitializeUIFire,
+                    InitializeUIMinimap,
+                    InitializeUIShotPath,
+
+                    InitializeModelsTanks,
+                    InitializeModelsTerrain,
+                    InitializeModelsTrees,
+                    InitializeModelProjectile,
+                    InitializeParticleManager,
+                    InitializeDecalDrawer,
+                    InitializeAudio,
+                    InitializeLights,
+                    InitializeDebugDrawer,
+                ],
+                LoadUICompleted,
                 loadGroupSceneObjects);
         }
 
-        private Task[] InitializeUI()
-        {
-            return
-            [
-                InitializeUIGameMessages(),
-                InitializeUIModalDialog(),
-                InitializeUIPlayers(),
-                InitializeUITurn(),
-                InitializeUIKeyPanel(),
-                InitializeUIFire(),
-                InitializeUIMinimap(),
-                InitializeUIShotPath(),
-            ];
-        }
         private async Task InitializeUIGameMessages()
         {
             gameMessage = await AddComponentUI<UITextArea, UITextAreaDescription>("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
@@ -509,21 +514,6 @@ namespace Tanks
             }
         }
 
-        private Task[] InitializeModels()
-        {
-            return
-            [
-                InitializeModelsTanks(),
-                InitializeModelsTerrain(),
-                InitializeModelsTrees(),
-                InitializeModelProjectile(),
-                InitializeParticleManager(),
-                InitializeDecalDrawer(),
-                InitializeAudio(),
-                InitializeLights(),
-                InitializeDebugDrawer(),
-            ];
-        }
         private async Task InitializeModelsTanks()
         {
             var tDesc = new ModelInstancedDescription()
@@ -1123,8 +1113,8 @@ namespace Tanks
                 Components.RemoveComponent(terrain);
                 decalDrawer.Clear();
 
-                LoadResourcesAsync(
-                    InitializeModelsTerrain(),
+                LoadResources(
+                    InitializeModelsTerrain,
                     LoadNewGameCompleted);
             });
         }

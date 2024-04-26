@@ -18,6 +18,12 @@ namespace Engine
         private const string LogLineString = "**************************************************************************";
         private const string NoIdString = "no-id";
 
+        private static int loadResourceId = 0;
+        private static int GetLoadResourceId()
+        {
+            return ++loadResourceId;
+        }
+
         /// <summary>
         /// Images helper static instance
         /// </summary>
@@ -188,10 +194,6 @@ namespace Engine
         /// Buffer progress reporter
         /// </summary>
         public readonly IProgress<LoadResourceProgress> ProgressBuffers;
-        /// <summary>
-        /// Gets wheter a resource loading is running
-        /// </summary>
-        public bool ResourceLoadRuning { get; private set; } = false;
         /// <summary>
         /// Game status
         /// </summary>
@@ -553,24 +555,17 @@ namespace Engine
             toDispose.ForEach(s => s.Dispose());
             toDispose.Clear();
 
-            _ = StartScene(sceneToLoad);
+            StartScene(sceneToLoad);
 
             scenes.Add(sceneToLoad);
-            scenes.Sort(
-                delegate (Scene p1, Scene p2)
-                {
-                    return p2.Order.CompareTo(p1.Order);
-                });
+            scenes.Sort((p1, p2) => p2.Order.CompareTo(p1.Order));
         }
         /// <summary>
         /// Adds a scene to the internal scene collection
         /// </summary>
         /// <param name="scene">New scene</param>
-        private async Task StartScene(Scene scene)
+        private void StartScene(Scene scene)
         {
-            // Start background thread
-            await Task.Delay(1).ConfigureAwait(false);
-
             Logger.WriteInformation(this, "Game: Begin StartScene");
 
             try
@@ -578,7 +573,7 @@ namespace Engine
                 scene.Active = false;
 
                 Logger.WriteInformation(this, "Scene: Initialize start");
-                await scene.Initialize();
+                scene.Initialize();
                 Logger.WriteInformation(this, "Scene: Initialize end");
 
                 scene.Active = true;
@@ -620,49 +615,22 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task LoadResourcesAsync(ILoadResourceGroup taskGroup)
+        public void LoadResources(ILoadResourceGroup taskGroup)
         {
-            while (true)
+            if (taskGroup == null)
             {
-                if (ResourceLoadRuning)
-                {
-                    await Task.Delay(100);
-
-                    continue;
-                }
-
-                ResourceLoadRuning = true;
-                try
-                {
-                    await taskGroup.Process(Progress);
-
-                    RequestIntegrateResources(taskGroup);
-
-                    break;
-                }
-                finally
-                {
-                    ResourceLoadRuning = false;
-                }
+                return;
             }
+
+            taskGroup.Id ??= $"{GetLoadResourceId()}_{taskGroup.GetType()}";
+
+            resourceRequests.Enqueue(taskGroup);
         }
 
-        /// <summary>
-        /// Requests a resource group integration
-        /// </summary>
-        /// <param name="resourceGroup">Resource group</param>
-        private void RequestIntegrateResources(ILoadResourceGroup resourceGroup)
-        {
-            resourceRequests.Enqueue(resourceGroup);
-        }
         /// <summary>
         /// Integrates the requested resources into the resource manager
         /// </summary>
-        /// <param name="id">Resource group id</param>
         private void IntegrateResources()
         {
             if (integratingResources)
@@ -677,7 +645,9 @@ namespace Engine
 
             integratingResources = true;
 
-            var groups = Task.Run(IntegrateResourcesAsync).ConfigureAwait(false).GetAwaiter().GetResult();
+            var progress = Progress;
+
+            var groups = Task.Run(async () => await IntegrateResourcesAsync(progress)).ConfigureAwait(false).GetAwaiter().GetResult();
             foreach (var gr in groups)
             {
                 gr.End();
@@ -686,8 +656,9 @@ namespace Engine
         /// <summary>
         /// Integrates the resource groups in the resource queue
         /// </summary>
+        /// <param name="progress">Progress</param>
         /// <returns>Returns the integrated resource groups</returns>
-        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
+        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync(IProgress<LoadResourceProgress> progress)
         {
             List<ILoadResourceGroup> res = [];
 
@@ -696,6 +667,8 @@ namespace Engine
                 while (resourceRequests.TryDequeue(out var loadResourceGroup))
                 {
                     string logText = $"{nameof(Game)}.{nameof(IntegrateResources)}.{loadResourceGroup.Id ?? NoIdString}";
+
+                    await loadResourceGroup.Process(progress);
 
                     Logger.WriteInformation(this, $"{logText} => BufferManager: Recreating buffers");
                     await BufferManager.CreateBuffersAsync(loadResourceGroup.Id, ProgressBuffers);

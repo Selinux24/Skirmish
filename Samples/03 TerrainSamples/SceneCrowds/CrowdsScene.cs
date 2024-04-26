@@ -53,19 +53,19 @@ namespace TerrainSamples.SceneCrowds
             Game.LockMouse = false;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
-            await InitializeUIComponents();
+            InitializeUIComponents();
         }
 
-        private async Task InitializeUIComponents()
+        private void InitializeUIComponents()
         {
-            await LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeCursor(),
-                    InitializeUI()
+                    InitializeCursor,
+                    InitializeUI,
                 ],
                 InitializeUIComponentsComplete);
         }
@@ -104,18 +104,18 @@ namespace TerrainSamples.SceneCrowds
 
             UpdateLayout();
 
-            _ = Task.Run(InitializeSceneComponents);
+            InitializeSceneComponents();
         }
 
-        private async Task InitializeSceneComponents()
+        private void InitializeSceneComponents()
         {
-            await LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeSkydom(),
-                    InitializeTanks(),
-                    InitializeTerrain(),
-                    InitializeTrees(),
-                    InitializeDebug()
+                    InitializeSkydom,
+                    InitializeTanks,
+                    InitializeTerrain,
+                    InitializeTrees,
+                    InitializeDebug,
                 ],
                 InitializeSceneComponentsCompleted);
         }
@@ -516,8 +516,6 @@ namespace TerrainSamples.SceneCrowds
 
         public override void NavigationGraphLoaded()
         {
-            gameReady = true;
-
             help.Text = "Point & click over terrain to move the crowd. Press F1 to show the Navigation mesh.";
 
             UpdateGraphNodes(tankAgentType);
@@ -555,6 +553,8 @@ namespace TerrainSamples.SceneCrowds
 
                 graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }
+
+            gameReady = true;
         }
         private void UpdateGraphNodes(GraphAgentType agent)
         {

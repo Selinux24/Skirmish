@@ -47,24 +47,24 @@ namespace IntermediateSamples.SceneInstancing
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeTexts(),
-                    InitializeSky(),
-                    InitializeFloor(),
-                    InitializeTrees(),
-                    InitializeTroops(),
-                    InitializeWall()
+                    InitializeTweener,
+                    InitializeTexts,
+                    InitializeSky,
+                    InitializeFloor,
+                    InitializeTrees,
+                    InitializeTroops,
+                    InitializeWall,
                 ],
                 InitializeComponentsCompleted);
         }

@@ -124,17 +124,17 @@ namespace IntermediateSamples.SceneSimpleAnimation
             GameEnvironment.Background = Color.CornflowerBlue;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeUI();
         }
 
         private void InitializeUI()
         {
-            LoadResourcesAsync(
-                InitializeUITitle(),
+            LoadResources(
+                InitializeUITitle,
                 InitializeUICompleted);
         }
         private async Task InitializeUITitle()
@@ -176,16 +176,16 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeLadder(),
-                    InitializeLadder2(),
-                    InitializeSoldier(),
-                    InitializeRat(),
-                    InitializeDoors(),
-                    InitializeJails(),
-                    InitializeFloor(),
-                    InitializeDebug()
+                    InitializeLadder,
+                    InitializeLadder2,
+                    InitializeSoldier,
+                    InitializeRat,
+                    InitializeDoors,
+                    InitializeJails,
+                    InitializeFloor,
+                    InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
         }

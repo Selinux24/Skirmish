@@ -44,27 +44,27 @@ namespace PhysicsSamples.ScenePhysics
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTexts(),
-                    InitializeLineDrawer(),
-                    InitializeTerrain(),
-                    InitializeSpheres(),
-                    InitializeBoxes(),
-                    InitializeCylinders(),
-                    InitializePyramids(),
-                    InitializeCapsules(),
-                    InitializeJoint(),
-                    InitializeRod(),
+                    InitializeTexts,
+                    InitializeLineDrawer,
+                    InitializeTerrain,
+                    InitializeSpheres,
+                    InitializeBoxes,
+                    InitializeCylinders,
+                    InitializePyramids,
+                    InitializeCapsules,
+                    InitializeJoint,
+                    InitializeRod,
                 ],
                 InitializeComponentsCompleted);
         }

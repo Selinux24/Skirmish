@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Group identifier
         /// </summary>
-        string Id { get; }
+        string Id { get; set; }
 
         /// <summary>
         /// Process the load resource group

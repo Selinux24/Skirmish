@@ -892,6 +892,9 @@ namespace Engine
                 }
             });
         }
+
+        private int[] lastNodeIds = [];
+
         /// <summary>
         /// Updates patches state
         /// </summary>
@@ -913,6 +916,14 @@ namespace Engine
             {
                 return;
             }
+
+            var visibleIds = visibleNodes.Select(n => n.Id).ToArray();
+            if (Helper.CompareEnumerables(visibleIds, lastNodeIds))
+            {
+                return;
+            }
+
+            lastNodeIds = visibleIds;
 
             bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 

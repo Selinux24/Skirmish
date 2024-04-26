@@ -171,9 +171,9 @@ namespace TerrainSamples.SceneRts
             base.Dispose(disposing);
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -183,8 +183,8 @@ namespace TerrainSamples.SceneRts
 
         private void InitializeUI()
         {
-            LoadResourcesAsync(
-                InitializeUITitle(),
+            LoadResources(
+                InitializeUITitle,
                 InitializeUICompleted);
         }
         private async Task<TaskResult> InitializeUITitle()
@@ -269,27 +269,27 @@ namespace TerrainSamples.SceneRts
 
         private void InitializeModels()
         {
-            List<Task> loadTasks =
+            Func<Task>[] loadTasks =
             [
-                InitializeWalker(),
-                InitializeDebug(),
-                InitializeParticles(),
-                InitializeLensFlare(),
-                InitializeHelicopter(),
-                InitializeTanks(),
-                InitializeHeliport(),
-                InitializeGarage(),
-                InitializeBuildings(),
-                InitializeObelisk(),
-                InitializeRocks(),
-                InitializeTrees(),
-                InitializeSkydom(),
-                InitializeClouds(),
-                InitializeTerrain(),
-                InitializeGardener(),
+                InitializeWalker,
+                InitializeDebug,
+                InitializeParticles,
+                InitializeLensFlare,
+                InitializeHelicopter,
+                InitializeTanks,
+                InitializeHeliport,
+                InitializeGarage,
+                InitializeBuildings,
+                InitializeObelisk,
+                InitializeRocks,
+                InitializeTrees,
+                InitializeSkydom,
+                InitializeClouds,
+                InitializeTerrain,
+                InitializeGardener,
             ];
 
-            LoadResourcesAsync(
+            LoadResources(
                 loadTasks,
                 InitializeModelsCompleted);
         }

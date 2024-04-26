@@ -39,21 +39,21 @@ namespace PhysicsSamples.SceneStart
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeCursor(),
-                    InitializeBackground(),
-                    InitializeAssets(),
+                    InitializeTweener,
+                    InitializeCursor,
+                    InitializeBackground,
+                    InitializeAssets,
                 ],
                 InitializeComponentsCompleted);
         }

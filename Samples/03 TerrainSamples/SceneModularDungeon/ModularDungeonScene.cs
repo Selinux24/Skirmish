@@ -150,9 +150,9 @@ namespace TerrainSamples.SceneModularDungeon
             return scenery?.CurrentLevel.Name + nmFile;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             LoadUI();
         }
@@ -304,11 +304,11 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void LoadUI()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeUI(),
-                    InitializeMapTexture()
+                    InitializeTweener,
+                    InitializeUI,
+                    InitializeMapTexture,
                 ],
                 LoadUICompleted);
         }
@@ -401,16 +401,16 @@ namespace TerrainSamples.SceneModularDungeon
         {
             pbLevels.Visible = true;
 
-            var tasks = new[]
-            {
-                InitializeDebug(),
-                InitializeDungeon(),
-                InitializePlayer(),
-                InitializeNPCs(),
-                InitializeAudio(),
-            };
-            
-            LoadResourcesAsync(tasks, LoadAssetsCompleted, "LoadAssets");
+            LoadResources(
+                [
+                    InitializeDebug,
+                    InitializeDungeon,
+                    InitializePlayer,
+                    InitializeNPCs,
+                    InitializeAudio,
+                ],
+                LoadAssetsCompleted,
+                "LoadAssets");
         }
         private async Task InitializeDebug()
         {
@@ -1435,7 +1435,10 @@ namespace TerrainSamples.SceneModularDungeon
 
             SetSelectedItem(null);
 
-            _ = LoadResourcesAsync(ChangeToLevelAsync(name), ChangeToLevelResults, "LoadAssets");
+            LoadResources(
+                () => ChangeToLevelAsync(name), 
+                ChangeToLevelResults, 
+                "LoadAssets");
         }
         private async Task ChangeToLevelAsync(string name)
         {

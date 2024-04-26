@@ -122,9 +122,9 @@ namespace TerrainSamples.SceneHeightmap
 #endif
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             Camera.SetPosition(new Vector3(10000, 10000, 10000));
             Camera.SetInterest(new Vector3(10001, 10000, 10000));
@@ -134,10 +134,10 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskUI()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeUIAssets()
+                    InitializeTweener,
+                    InitializeUIAssets,
                 ],
                 LoadingTaskUICompleted);
         }
@@ -210,29 +210,26 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskGameAssets()
         {
-            var loadTasks = new[]
-            {
-                InitializeRocks(),
-                InitializeTrees(),
-                InitializeTrees2(),
-                InitializeSoldier(),
-                InitializeTroops(),
-                InitializeM24(),
-                InitializeBradley(),
-                InitializeBuildings(),
-                InitializeWatchTower(),
-                InitializeContainers(),
-                InitializeTorchs(),
-                InitializeTerrain(),
-                InitializeLensFlare(),
-                InitializeSkydom(),
-                InitializeClouds(),
-                InitializeParticles(),
-                InitializeDebugAssets(),
-            };
-
-            LoadResourcesAsync(
-                loadTasks,
+            LoadResources(
+                [
+                    InitializeRocks,
+                    InitializeTrees,
+                    InitializeTrees2,
+                    InitializeSoldier,
+                    InitializeTroops,
+                    InitializeM24,
+                    InitializeBradley,
+                    InitializeBuildings,
+                    InitializeWatchTower,
+                    InitializeContainers,
+                    InitializeTorchs,
+                    InitializeTerrain,
+                    InitializeLensFlare,
+                    InitializeSkydom,
+                    InitializeClouds,
+                    InitializeParticles,
+                    InitializeDebugAssets,
+                ],
                 LoadingTaskGameAssetsCompleted);
         }
         private async Task InitializeRocks()
@@ -520,16 +517,13 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskTerrainObjects()
         {
-            var loadTasks = new[]
-            {
-                InitializeGardener(),
-                InitializeGardener2(),
-                SetAnimationDictionaries(),
-                SetPositionOverTerrain(),
-            };
-
-            LoadResourcesAsync(
-                loadTasks,
+            LoadResources(
+                [
+                    InitializeGardener,
+                    InitializeGardener2,
+                    SetAnimationDictionaries,
+                    SetPositionOverTerrain,
+                ],
                 LoadingTaskTerrainObjectsCompleted);
         }
         private async Task InitializeGardener()

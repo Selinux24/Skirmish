@@ -98,6 +98,7 @@ namespace TerrainSamples.ScenePerlinNoise
         }
 
         IUIControl capturedCtrl = null;
+        private bool gameReady = false;
 
         public PerlinNoiseScene(Game game) : base(game)
         {
@@ -105,16 +106,22 @@ namespace TerrainSamples.ScenePerlinNoise
             Game.LockMouse = false;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
-            await LoadResourcesAsync(InitializeUI(), (res) => { res.ThrowExceptions(); });
+            LoadResources(InitializeUI, (res) =>
+            {
+                res.ThrowExceptions();
+                ResizeUI();
+            });
 
-            await LoadResourcesAsync(InitializeTextureRenderer(), (res) => { res.ThrowExceptions(); });
-
-            ResizeTextureRenderer();
-            ResizeUI();
+            LoadResources(InitializeTextureRenderer, (res) =>
+            {
+                res.ThrowExceptions();
+                ResizeTextureRenderer();
+                gameReady = true;
+            });
         }
         public async Task InitializeUI()
         {
@@ -211,6 +218,11 @@ namespace TerrainSamples.ScenePerlinNoise
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<StartScene>();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (UpdateInput(gameTime))

@@ -171,32 +171,39 @@ namespace Engine
         /// </summary>
         /// <param name="ctrl">Control</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void AddChild(IUIControl ctrl, bool fitToParent = true);
+        bool AddChild(IUIControl ctrl, bool fitToParent = true);
         /// <summary>
         /// Adds a children list to the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true);
+        bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true);
         /// <summary>
         /// Removes a child from the children collection
         /// </summary>
         /// <param name="ctrl">Control</param>
         /// <param name="dispose">Removes from collection and disposes</param>
-        void RemoveChild(IUIControl ctrl, bool dispose = false);
+        bool RemoveChild(IUIControl ctrl, bool dispose = false);
         /// <summary>
         /// Removes a children list from the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="dispose">Removes from collection and disposes</param>
-        void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
+        bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
         /// <summary>
         /// Inserts a child at the specified index
         /// </summary>
         /// <param name="index">Index</param>
         /// <param name="ctrl">Control</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void InsertChild(int index, IUIControl ctrl, bool fitToParent = true);
+        bool InsertChild(int index, IUIControl ctrl, bool fitToParent = true);
+        /// <summary>
+        /// Inserts a children list at the specified index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="controls">Control list</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = true);
 
         /// <summary>
         /// Gets whether the control contains the point or not

@@ -16,6 +16,8 @@ namespace BasicSamples.SceneLights
     {
         private const float spaceSize = 20;
 
+        private bool gameReady = false;
+
         private ModelInstanced buildingObelisks = null;
         private ModelInstanced lightEmitters = null;
         private ModelInstanced lanterns = null;
@@ -46,25 +48,25 @@ namespace BasicSamples.SceneLights
             Camera.LookTo(0, 0, 0);
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeFloorAsphalt(),
-                    InitializeBuildingObelisk(),
-                    InitializeTree(),
-                    InitializeEmitter(),
-                    InitializeLanterns(),
-                    InitializeLights(),
-                    InitializeVolumeDrawer(),
-                    InitializeBufferDrawer()
+                    InitializeFloorAsphalt,
+                    InitializeBuildingObelisk,
+                    InitializeTree,
+                    InitializeEmitter,
+                    InitializeLanterns,
+                    InitializeLights,
+                    InitializeVolumeDrawer,
+                    InitializeBufferDrawer
                 ],
                 InitializeComponentsCompleted);
         }
@@ -217,6 +219,8 @@ namespace BasicSamples.SceneLights
             buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
             buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
             buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
+
+            gameReady = true;
         }
 
         public override void Update(IGameTime gameTime)
@@ -226,6 +230,11 @@ namespace BasicSamples.SceneLights
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.StartScene>();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (Game.Input.KeyJustReleased(Keys.R))

@@ -62,24 +62,24 @@ namespace BasicSamples.SceneMaterials
             GameEnvironment.Background = Color.CornflowerBlue;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTextBoxes(),
-                    InitializeSkyEffects(),
-                    InitializeFloor(),
-                    InitializeEmitters(),
-                    InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
-                    InitializeBuiltInList(),
-                    InitializeMetallicList(),
+                    InitializeTextBoxes,
+                    InitializeSkyEffects,
+                    InitializeFloor,
+                    InitializeEmitters,
+                    () => InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
+                    InitializeBuiltInList,
+                    InitializeMetallicList,
                 ],
                 InitializeComponentsCompleted);
         }
@@ -527,21 +527,25 @@ namespace BasicSamples.SceneMaterials
         }
         private void UpdateInput()
         {
-            if (Game.Input.KeyJustReleased(Keys.Tab))
+            if (!Game.Input.KeyJustReleased(Keys.Tab))
             {
-                spheres1.Active = false;
-                spheres2.Active = false;
-
-                Components.RemoveComponent(spheres1);
-                Components.RemoveComponent(spheres2);
-
-                currentAlgorithm++;
-                currentAlgorithm %= algorithmCount;
-
-                var t = InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}");
-
-                LoadResourcesAsync(t, (res) => { res.ThrowExceptions(); });
+                return;
             }
+
+            spheres1.Active = false;
+            spheres2.Active = false;
+
+            Components.RemoveComponent(spheres1);
+            Components.RemoveComponent(spheres2);
+
+            currentAlgorithm++;
+            currentAlgorithm %= algorithmCount;
+
+            var t = InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}");
+
+            LoadResources(
+                () => t,
+                (res) => { res.ThrowExceptions(); });
         }
 
         public override void GameGraphicsResized()

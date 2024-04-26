@@ -445,7 +445,7 @@ namespace Engine
             }
 
             // Detect nodes without assigned patch
-            List<Task<SceneryPatchTask>> taskList = [];
+            List<Func<Task<SceneryPatchTask>>> taskList = [];
 
             foreach (var node in visibleNodes)
             {
@@ -460,7 +460,7 @@ namespace Engine
                 patchDictionary.TryAdd(node.Id, null);
 
                 // Add creation task
-                taskList.Add(SceneryPatch.CreatePatch(Game, Name, content, node));
+                taskList.Add(() => SceneryPatch.CreatePatch(Game, Name, content, node));
             }
 
             // Launch creation tasks
@@ -524,19 +524,21 @@ namespace Engine
         /// Launch an async resource load with the task list
         /// </summary>
         /// <param name="taskList">Task list to launch</param>
-        private void LoadPatches(IEnumerable<Task<SceneryPatchTask>> taskList)
+        private void LoadPatches(IEnumerable<Func<Task<SceneryPatchTask>>> taskList)
         {
             if (!taskList.Any())
             {
                 return;
             }
 
+            const string loadTaskName = nameof(LoadPatches);
+
             // Fire and forget
-            Logger.WriteTrace(this, $"LoadPatches Init: {taskList.Count()} tasks.");
+            Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
 
-            Scene.LoadResourcesAsync(taskList, LoadPatchesCompleted);
+            Scene.LoadResources(taskList, LoadPatchesCompleted, $"{loadTaskName}");
 
-            Logger.WriteTrace(this, "LoadPatches End.");
+            Logger.WriteTrace(this, $"{loadTaskName} End.");
         }
         /// <summary>
         /// Load patches callback

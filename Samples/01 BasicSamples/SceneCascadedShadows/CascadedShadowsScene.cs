@@ -19,6 +19,8 @@ namespace BasicSamples.SceneCascadedShadows
         private const string Flare3String = "lfFlare3.png";
         private const string Flare4String = "lfFlare4.png";
 
+        private bool gameReady = false;
+
         private UITextArea title = null;
         private UITextArea help = null;
         private Sprite backPanel = null;
@@ -63,24 +65,24 @@ namespace BasicSamples.SceneCascadedShadows
             Camera.LookTo(0, 0, 0);
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeUI();
         }
         private void InitializeUI()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeUITitle(),
-                    InitializeUILevelsControl(),
-                    InitializeUIDrawers(),
-                    InitializeFloorAsphalt(),
-                    InitializeBuildingObelisk(),
-                    InitializeTree(),
-                    InitializeSkyEffects(),
-                    InitializeLights(),
+                    InitializeUITitle,
+                    InitializeUILevelsControl,
+                    InitializeUIDrawers,
+                    InitializeFloorAsphalt,
+                    InitializeBuildingObelisk,
+                    InitializeTree,
+                    InitializeSkyEffects,
+                    InitializeLights,
                 ],
                 InitializeUICompleted);
         }
@@ -159,6 +161,8 @@ namespace BasicSamples.SceneCascadedShadows
             buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
             buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
             buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
+
+            gameReady = true;
         }
 
         private async Task InitializeFloorAsphalt()
@@ -260,6 +264,11 @@ namespace BasicSamples.SceneCascadedShadows
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.StartScene>();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (Game.Input.KeyJustReleased(Keys.R))

@@ -87,15 +87,15 @@ namespace BasicSamples.SceneTest
             Camera.MovementDelta = 500f;
         }
 
-        public override Task Initialize()
+        public override void Initialize()
         {
-            return LoadUserInterface();
+            base.Initialize();
+
+            LoadUserInterface();
         }
 
-        public async Task LoadUserInterface()
+        public void LoadUserInterface()
         {
-            await base.Initialize();
-
             Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
 
             InitializeComponents();
@@ -103,10 +103,10 @@ namespace BasicSamples.SceneTest
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeUI()
+                    InitializeTweener,
+                    InitializeUI,
                 ],
                 InitializeComponentsCompleted);
         }
@@ -207,27 +207,27 @@ namespace BasicSamples.SceneTest
 
         private void LoadControls()
         {
-            var taskList = new Task[]
-            {
-                InitializeSkyEffects(),
-                InitializeScenery(),
-                InitializeTrees(),
-                InitializeFloorAsphalt(),
-                InitializeBuildingObelisk(),
-                InitializeCharacterSoldier(),
-                InitializeVehicles(),
-                InitializeLamps(),
-                InitializeStreetLamps(),
-                InitializeContainers(),
-                InitializeTestCube(),
-                InitializeParticles(),
-                InitializeDebug(),
-            };
+            Func<Task>[] taskList = 
+            [
+                InitializeSkyEffects,
+                InitializeScenery,
+                InitializeTrees,
+                InitializeFloorAsphalt,
+                InitializeBuildingObelisk,
+                InitializeCharacterSoldier,
+                InitializeVehicles,
+                InitializeLamps,
+                InitializeStreetLamps,
+                InitializeContainers,
+                InitializeTestCube,
+                InitializeParticles,
+                InitializeDebug,
+            ];
 
             progressBar.ProgressValue = 0;
             uiTweener.Show(progressBar, 1000);
 
-            LoadResourcesAsync(
+            LoadResources(
                 taskList,
                 async (res) =>
                 {

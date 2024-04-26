@@ -20,6 +20,8 @@ namespace BasicSamples.SceneWater
         private readonly float terrainSize = 1000f;
         private readonly float terrainHeight = 20;
 
+        private bool gameReady = false;
+
         public WaterScene(Game game)
             : base(game)
         {
@@ -37,9 +39,9 @@ namespace BasicSamples.SceneWater
             Camera.LookTo(0, 0, 0);
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             Lights.BaseFogColor = Color.White;
 
@@ -51,14 +53,19 @@ namespace BasicSamples.SceneWater
         }
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
             [
-                InitializeLensFlare(),
-                InitializeSky(),
-                InitializeWater(),
-                InitializeSeaBottom(),
+                InitializeLensFlare,
+                InitializeSky,
+                InitializeWater,
+                InitializeSeaBottom,
             ],
-            (res) => { res.ThrowExceptions(); });
+            (res) =>
+            {
+                res.ThrowExceptions();
+
+                gameReady = true;
+            });
         }
         private async Task InitializeLensFlare()
         {
@@ -144,6 +151,11 @@ namespace BasicSamples.SceneWater
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.StartScene>();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F))

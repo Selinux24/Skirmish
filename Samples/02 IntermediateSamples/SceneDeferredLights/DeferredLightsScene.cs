@@ -48,6 +48,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
+        private bool uiReady = false;
         private bool gameReady = false;
 
         private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
@@ -64,11 +65,11 @@ namespace IntermediateSamples.SceneDeferredLights
 #endif
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
-            await LoadingTaskUI();
+            LoadingTaskUI();
         }
         private static async Task<double> InitializeAndTrace(Func<Task> action)
         {
@@ -79,12 +80,12 @@ namespace IntermediateSamples.SceneDeferredLights
             return sw.Elapsed.TotalSeconds;
         }
 
-        private async Task LoadingTaskUI()
+        private void LoadingTaskUI()
         {
-            await LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeCursor(),
-                    InitializeUIComponents()
+                    InitializeCursor,
+                    InitializeUIComponents
                 ],
                 LoadingTaskUICompleted);
         }
@@ -117,7 +118,7 @@ namespace IntermediateSamples.SceneDeferredLights
             bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
         }
-        private async Task LoadingTaskUICompleted(LoadResourcesResult res)
+        private void LoadingTaskUICompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -130,19 +131,21 @@ namespace IntermediateSamples.SceneDeferredLights
 
             UpdateLayout();
 
-            await LoadingTaskObjects();
+            LoadingTaskObjects();
+
+            uiReady = true;
         }
 
-        private async Task LoadingTaskObjects()
+        private void LoadingTaskObjects()
         {
-            await LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeAndTrace(InitializeSkydom),
-                    InitializeAndTrace(InitializeHelicopters),
-                    InitializeAndTrace(InitializeTerrain),
-                    InitializeAndTrace(InitializeGardener),
-                    InitializeAndTrace(InitializeTrees),
-                    InitializeDebug()
+                    ()=>InitializeAndTrace(InitializeSkydom),
+                    ()=>InitializeAndTrace(InitializeHelicopters),
+                    ()=>InitializeAndTrace(InitializeTerrain),
+                    ()=>InitializeAndTrace(InitializeGardener),
+                    ()=>InitializeAndTrace(InitializeTrees),
+                    InitializeDebug,
                 ],
                 LoadingTaskObjectsCompleted);
         }
@@ -748,6 +751,11 @@ namespace IntermediateSamples.SceneDeferredLights
         public override void Draw(IGameTime gameTime)
         {
             base.Draw(gameTime);
+
+            if (!uiReady)
+            {
+                return;
+            }
 
             if (Game.Form.IsFullscreen)
             {

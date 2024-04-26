@@ -34,22 +34,21 @@ namespace BasicSamples.SceneNormalMap
 #endif
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
-                new[]
-                {
-                    InitializeText(),
-                    InitializeDungeon(),
-                    InitializeEmitter()
-                },
+            LoadResources(
+                [
+                    InitializeText,
+                    InitializeDungeon,
+                    InitializeEmitter,
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeText()

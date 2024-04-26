@@ -132,9 +132,9 @@ namespace TerrainSamples.SceneGrid
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             NewGame();
 
@@ -152,11 +152,11 @@ namespace TerrainSamples.SceneGrid
         }
         private void InitializeUI()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeHUD(),
-                    InitializeText(),
-                    InitializeMinimap(),
+                    InitializeHUD,
+                    InitializeText,
+                    InitializeMinimap,
                 ],
                 InitializeUICompleted);
         }
@@ -330,10 +330,10 @@ namespace TerrainSamples.SceneGrid
 
         private void InitializeResources()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeModels(),
-                    InitializeDebug()
+                    InitializeModels,
+                    InitializeDebug,
                 ],
                 InitializeResourcesCompleted);
         }

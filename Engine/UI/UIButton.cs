@@ -1,13 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using Engine.Common;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sprite button
     /// </summary>
-    public sealed class UIButton : UIControl<UIButtonDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIButton(Scene scene, string id, string name) : UIControl<UIButtonDescription>(scene, id, name)
     {
         /// <summary>
         /// Pressed sprite button
@@ -50,18 +55,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIButton(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task ReadAssets(UIButtonDescription description)
         {
@@ -92,7 +85,7 @@ namespace Engine.UI
 
             if (!string.IsNullOrEmpty(Description.TextureReleased))
             {
-                spriteDesc.Textures = new[] { Description.TextureReleased };
+                spriteDesc.Textures = [Description.TextureReleased];
                 spriteDesc.UVMap = Description.TextureReleasedUVMap;
             }
 
@@ -112,7 +105,7 @@ namespace Engine.UI
 
             if (!string.IsNullOrEmpty(Description.TexturePressed))
             {
-                spriteDesc.Textures = new[] { Description.TexturePressed };
+                spriteDesc.Textures = [Description.TexturePressed];
                 spriteDesc.UVMap = Description.TexturePressedUVMap;
             }
 

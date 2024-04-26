@@ -51,21 +51,21 @@ namespace BasicSamples.SceneUI
             Game.LockMouse = false;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             LoadUserInterface();
         }
 
         private void LoadUserInterface()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTweener(),
-                    InitializeConsole(),
-                    InitializeBackground(),
-                    InitializeProgressbar()
+                    InitializeTweener,
+                    InitializeConsole,
+                    InitializeBackground,
+                    InitializeProgressbar,
                 ],
                 LoadUserInterfaceCompleted);
         }
@@ -122,13 +122,13 @@ namespace BasicSamples.SceneUI
 
         private void LoadControls()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeSmiley(),
-                    InitializeStaticPan(),
-                    InitializeDynamicPan(),
-                    InitializeButtonTest(),
-                    InitializeScroll(),
+                    InitializeSmiley,
+                    InitializeStaticPan,
+                    InitializeDynamicPan,
+                    InitializeButtonTest,
+                    InitializeScroll,
                 ],
                 LoadControlsCompleted);
         }

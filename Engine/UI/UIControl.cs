@@ -869,103 +869,237 @@ namespace Engine.UI
             children.ForEach(c => c.Resize());
         }
 
-        /// <inheritdoc/>
-        public void AddChild(IUIControl ctrl, bool fitToParent = true)
+
+        private bool ValidateAddChild(IUIControl ctrl)
         {
             if (ctrl == null)
             {
-                return;
+                return false;
             }
 
             if (ctrl == this)
             {
-                return;
-            }
-
-            ctrl.Parent = this;
-            ctrl.FitWithParent = fitToParent;
-            ctrl.PivotAnchor = PivotAnchors.Default;
-
-            if (!children.Contains(ctrl))
-            {
-                children.Add(ctrl);
-
-                Invalidate();
-                ctrl.Invalidate();
-            }
-        }
-        /// <inheritdoc/>
-        public void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true)
-        {
-            if (!controls.Any())
-            {
-                return;
-            }
-
-            foreach (var ctrl in controls)
-            {
-                AddChild(ctrl, fitToParent);
-            }
-        }
-        /// <inheritdoc/>
-        public void RemoveChild(IUIControl ctrl, bool dispose = false)
-        {
-            if (ctrl == null)
-            {
-                return;
+                return false;
             }
 
             if (children.Contains(ctrl))
             {
-                ctrl.Parent = null;
-                ctrl.FitWithParent = false;
-
-                children.Remove(ctrl);
-
-                if (dispose && ctrl is IDisposable ctrlDisposable)
-                {
-                    ctrlDisposable.Dispose();
-                }
-
-                Invalidate();
+                return false;
             }
+
+            return true;
         }
-        /// <inheritdoc/>
-        public void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
+        private bool ValidateAddChildren(IEnumerable<IUIControl> controls)
         {
             if (!controls.Any())
             {
-                return;
+                return false;
             }
 
-            foreach (var ctrl in controls)
+            if (controls.Any(ctrl => !ValidateAddChild(ctrl)))
             {
-                RemoveChild(ctrl, dispose);
+                return false;
             }
+
+            return true;
         }
-        /// <inheritdoc/>
-        public void InsertChild(int index, IUIControl ctrl, bool fitToParent = true)
+        private bool ValidateRemoveChild(IUIControl ctrl)
         {
             if (ctrl == null)
             {
-                return;
+                return false;
+            }
+
+            if (!children.Contains(ctrl))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private bool ValidateRemoveChildren(IEnumerable<IUIControl> controls)
+        {
+            if (!controls.Any())
+            {
+                return false;
+            }
+
+            if (controls.Any(ctrl => !ValidateRemoveChild(ctrl)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private bool ValidateInsertChild(IUIControl ctrl)
+        {
+            if (ctrl == null)
+            {
+                return false;
             }
 
             if (ctrl == this)
             {
-                return;
+                return false;
             }
 
+            if (children.Contains(ctrl))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private bool ValidateInsertChildren(IEnumerable<IUIControl> controls)
+        {
+            if (!controls.Any())
+            {
+                return false;
+            }
+
+            foreach (var ctrl in controls)
+            {
+                if (!ValidateInsertChild(ctrl))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void AddChildInternal(IUIControl ctrl, bool fitToParent = true)
+        {
             ctrl.Parent = this;
             ctrl.FitWithParent = fitToParent;
+            ctrl.PivotAnchor = PivotAnchors.Default;
 
-            if (!children.Contains(ctrl))
+            children.Add(ctrl);
+        }
+        private void RemoveChildInternal(IUIControl ctrl, bool dispose = false)
+        {
+            ctrl.Parent = null;
+            ctrl.FitWithParent = false;
+
+            children.Remove(ctrl);
+
+            if (dispose && ctrl is IDisposable ctrlDisposable)
             {
-                children.Insert(index, ctrl);
-
-                Invalidate();
-                ctrl.Invalidate();
+                ctrlDisposable.Dispose();
             }
+        }
+        private void InsertChildInternal(int index, IUIControl ctrl, bool fitToParent = true)
+        {
+            ctrl.Parent = this;
+            ctrl.FitWithParent = fitToParent;
+            ctrl.PivotAnchor = PivotAnchors.Default;
+
+            children.Insert(index, ctrl);
+        }
+
+        /// <inheritdoc/>
+        public bool AddChild(IUIControl ctrl, bool fitToParent = true)
+        {
+            if (!ValidateAddChild(ctrl))
+            {
+                return false;
+            }
+
+            AddChildInternal(ctrl, fitToParent);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true)
+        {
+            if (!ValidateAddChildren(controls))
+            {
+                return false;
+            }
+
+            foreach (var ctrl in controls)
+            {
+                AddChildInternal(ctrl, fitToParent);
+            }
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool RemoveChild(IUIControl ctrl, bool dispose = false)
+        {
+            if (!ValidateRemoveChild(ctrl))
+            {
+                return false;
+            }
+
+            RemoveChildInternal(ctrl, dispose);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
+        {
+            if (!ValidateRemoveChildren(controls))
+            {
+                return false;
+            }
+
+            foreach (var ctrl in controls)
+            {
+                RemoveChildInternal(ctrl, dispose);
+            }
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool InsertChild(int index, IUIControl ctrl, bool fitToParent = true)
+        {
+            if (index < 0 || index >= children.Count)
+            {
+                return false;
+            }
+
+            if (!ValidateInsertChild(ctrl))
+            {
+                return false;
+            }
+
+            InsertChildInternal(index, ctrl, fitToParent);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = true)
+        {
+            if (index < 0 || index >= children.Count)
+            {
+                return false;
+            }
+
+            if (!ValidateInsertChildren(controls))
+            {
+                return false;
+            }
+
+            int i = index;
+            foreach (var ctrl in controls)
+            {
+                InsertChildInternal(i++, ctrl, fitToParent);
+            }
+
+            UpdateInternalState();
+
+            return true;
         }
 
         /// <inheritdoc/>

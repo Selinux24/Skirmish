@@ -40,17 +40,17 @@ namespace IntermediateSamples.SceneAnimationParts
             GameEnvironment.Background = Color.CornflowerBlue;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeUI();
         }
 
         private void InitializeUI()
         {
-            LoadResourcesAsync(
-                InitializeUITitle(),
+            LoadResources(
+                InitializeUITitle,
                 InitializeUICompleted);
         }
         private async Task InitializeUITitle()
@@ -83,11 +83,11 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeTank(),
-                    InitializeFloor(),
-                    InitializeDebug()
+                    InitializeTank,
+                    InitializeFloor,
+                    InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
         }

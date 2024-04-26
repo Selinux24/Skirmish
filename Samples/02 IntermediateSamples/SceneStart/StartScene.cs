@@ -34,25 +34,25 @@ namespace IntermediateSamples.SceneStart
             GameEnvironment.Background = Color.Black;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeUI();
         }
 
         private void InitializeUI()
         {
-            var assetTasks = new[] {
-                InitializeTweener(),
-                InitializeCursor(),
-                InitializeBackground(),
-                InitializeTitle(),
-                InitializeMainPanel(),
-                InitializeMusic(),
-            };
-
-            LoadResourcesAsync(assetTasks, PrepareAssets);
+            LoadResources(
+                [
+                    InitializeTweener,
+                    InitializeCursor,
+                    InitializeBackground,
+                    InitializeTitle,
+                    InitializeMainPanel,
+                    InitializeMusic,
+                ],
+                PrepareAssets);
         }
         private async Task InitializeTweener()
         {

@@ -11,6 +11,8 @@ namespace BasicSamples.SceneStencilPass
     {
         private readonly float spaceSize = 10;
 
+        private bool gameReady = false;
+
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
 
@@ -37,24 +39,29 @@ namespace BasicSamples.SceneStencilPass
             Camera.LookTo(0, 0, 0);
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeComponents();
         }
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeFloorAsphalt(),
-                    InitializeBuildingObelisk(),
-                    InitializeEmitter(),
-                    InitializeLights(),
-                    InitializeLightsDrawer()
+                    InitializeFloorAsphalt,
+                    InitializeBuildingObelisk,
+                    InitializeEmitter,
+                    InitializeLights,
+                    InitializeLightsDrawer,
                 ],
-                (res) => { res.ThrowExceptions(); });
+                (res) =>
+                {
+                    res.ThrowExceptions();
+
+                    gameReady = true;
+                });
         }
         private async Task InitializeFloorAsphalt()
         {
@@ -147,6 +154,11 @@ namespace BasicSamples.SceneStencilPass
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.StartScene>();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (Game.Input.KeyJustReleased(Keys.R))

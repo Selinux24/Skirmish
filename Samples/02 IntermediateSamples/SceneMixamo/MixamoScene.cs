@@ -35,17 +35,17 @@ namespace IntermediateSamples.SceneMixamo
             GameEnvironment.Background = Color.CornflowerBlue;
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             InitializeUI();
         }
 
         private void InitializeUI()
         {
-            LoadResourcesAsync(
-                InitializeUITitle(),
+            LoadResources(
+                InitializeUITitle,
                 InitializeUICompleted);
         }
         private async Task InitializeUITitle()
@@ -85,12 +85,11 @@ namespace IntermediateSamples.SceneMixamo
 
         private void InitializeComponents()
         {
-            LoadResourcesAsync(
-                new[]
-                {
-                    InitializeFloor(),
-                    InitializeModel(),
-                },
+            LoadResources(
+                [
+                    InitializeFloor,
+                    InitializeModel,
+                ],
                 InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
@@ -98,19 +97,19 @@ namespace IntermediateSamples.SceneMixamo
             float l = 50f;
             float h = 0f;
 
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            };
+            VertexData[] vertices =
+            [
+                new (){ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
+                new (){ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
+                new (){ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
+                new (){ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
+            ];
 
-            uint[] indices = new uint[]
-            {
-                    0, 1, 2,
-                    1, 3, 2,
-            };
+            uint[] indices =
+            [
+                0, 1, 2,
+                1, 3, 2,
+            ];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneMixamo/resources/d_road_asphalt_stripes_diffuse.dds";

@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task
         /// </summary>
-        public static LoadResourceGroup FromTasks(Task task, Action<LoadResourcesResult> callback = null, string id = null)
+        public static LoadResourceGroup FromTasks(Func<Task> task, Action<LoadResourcesResult> callback = null, string id = null)
         {
             return new LoadResourceGroup
             {
-                Tasks = [task],
+                tasks = [task],
                 actionCallback = callback,
                 Id = id,
             };
@@ -25,11 +25,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task list
         /// </summary>
-        public static LoadResourceGroup FromTasks(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null, string id = null)
+        public static LoadResourceGroup FromTasks(IEnumerable<Func<Task>> tasks, Action<LoadResourcesResult> callback = null, string id = null)
         {
             return new LoadResourceGroup
             {
-                Tasks = [.. tasks],
+                tasks = tasks,
                 actionCallback = callback,
                 Id = id,
             };
@@ -37,11 +37,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task
         /// </summary>
-        public static LoadResourceGroup FromTasks(Task task, Func<LoadResourcesResult, Task> callback = null, string id = null)
+        public static LoadResourceGroup FromTasks(Func<Task> task, Func<LoadResourcesResult, Task> callback = null, string id = null)
         {
             return new LoadResourceGroup
             {
-                Tasks = [task],
+                tasks = [task],
                 funcCallback = callback,
                 Id = id,
             };
@@ -49,11 +49,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task list
         /// </summary>
-        public static LoadResourceGroup FromTasks(IEnumerable<Task> tasks, Func<LoadResourcesResult, Task> callback = null, string id = null)
+        public static LoadResourceGroup FromTasks(IEnumerable<Func<Task>> tasks, Func<LoadResourcesResult, Task> callback = null, string id = null)
         {
             return new LoadResourceGroup
             {
-                Tasks = [.. tasks],
+                tasks = tasks,
                 funcCallback = callback,
                 Id = id,
             };
@@ -71,20 +71,20 @@ namespace Engine
         /// Callback function
         /// </summary>
         private Func<LoadResourcesResult, Task> funcCallback;
+        /// <summary>
+        /// Function list
+        /// </summary>
+        private IEnumerable<Func<Task>> tasks = [];
 
         /// <inheritdoc/>
         public string Id { get; set; } = null;
-        /// <summary>
-        /// Task list
-        /// </summary>
-        public IEnumerable<Task> Tasks { get; set; } = [];
 
         /// <inheritdoc/>
         public async Task Process(IProgress<LoadResourceProgress> progress)
         {
             List<TaskResult> loadResult = [];
 
-            var taskList = Tasks.ToList();
+            List<Task> taskList = new(tasks.Select(fnc => fnc.Invoke()));
 
             int totalTasks = taskList.Count;
             int currentTask = 0;
@@ -125,11 +125,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task
         /// </summary>
-        public static LoadResourceGroup<T> FromTasks(Task<T> task, Action<LoadResourcesResult<T>> callback = null, string id = null)
+        public static LoadResourceGroup<T> FromTasks(Func<Task<T>> task, Action<LoadResourcesResult<T>> callback = null, string id = null)
         {
             return new LoadResourceGroup<T>
             {
-                Tasks = [task],
+                tasks = [task],
                 actionCallback = callback,
                 Id = id,
             };
@@ -137,11 +137,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task list
         /// </summary>
-        public static LoadResourceGroup<T> FromTasks(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null, string id = null)
+        public static LoadResourceGroup<T> FromTasks(IEnumerable<Func<Task<T>>> tasks, Action<LoadResourcesResult<T>> callback = null, string id = null)
         {
             return new LoadResourceGroup<T>
             {
-                Tasks = [.. tasks],
+                tasks = tasks,
                 actionCallback = callback,
                 Id = id,
             };
@@ -149,11 +149,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task
         /// </summary>
-        public static LoadResourceGroup<T> FromTasks(Task<T> task, Func<LoadResourcesResult<T>, Task> callback = null, string id = null)
+        public static LoadResourceGroup<T> FromTasks(Func<Task<T>> task, Func<LoadResourcesResult<T>, Task> callback = null, string id = null)
         {
             return new LoadResourceGroup<T>
             {
-                Tasks = [task],
+                tasks = [task],
                 funcCallback = callback,
                 Id = id,
             };
@@ -161,11 +161,11 @@ namespace Engine
         /// <summary>
         /// Creates a load resource group from a task list
         /// </summary>
-        public static LoadResourceGroup<T> FromTasks(IEnumerable<Task<T>> tasks, Func<LoadResourcesResult<T>, Task> callback = null, string id = null)
+        public static LoadResourceGroup<T> FromTasks(IEnumerable<Func<Task<T>>> tasks, Func<LoadResourcesResult<T>, Task> callback = null, string id = null)
         {
             return new LoadResourceGroup<T>
             {
-                Tasks = [.. tasks],
+                tasks = tasks,
                 funcCallback = callback,
                 Id = id,
             };
@@ -183,20 +183,20 @@ namespace Engine
         /// Callback function
         /// </summary>
         private Func<LoadResourcesResult<T>, Task> funcCallback;
-
-        /// <inheritdoc/>
-        public string Id { get; set; } = null;
         /// <summary>
         /// Task list
         /// </summary>
-        public IEnumerable<Task<T>> Tasks { get; set; } = [];
+        private IEnumerable<Func<Task<T>>> tasks = [];
+
+        /// <inheritdoc/>
+        public string Id { get; set; } = null;
 
         /// <inheritdoc/>
         public async Task Process(IProgress<LoadResourceProgress> progress)
         {
             List<TaskResult<T>> loadResult = [];
 
-            var taskList = Tasks.ToList();
+            List<Task<T>> taskList = new(tasks.Select(fnc => fnc.Invoke()));
 
             int totalTasks = taskList.Count;
             int currentTask = 0;

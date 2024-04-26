@@ -49,9 +49,9 @@ namespace BasicSamples.SceneParticles
 #endif
         }
 
-        public override async Task Initialize()
+        public override void Initialize()
         {
-            await base.Initialize();
+            base.Initialize();
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
@@ -65,7 +65,7 @@ namespace BasicSamples.SceneParticles
 
         private void InitializeUIObjects()
         {
-            LoadResourcesAsync(InitializeUI(), InitializeUIObjectsCompleted);
+            LoadResources(InitializeUI, InitializeUIObjectsCompleted);
         }
         private async Task InitializeUI()
         {
@@ -107,11 +107,11 @@ namespace BasicSamples.SceneParticles
 
         private void InitializeSceneObjects()
         {
-            LoadResourcesAsync(
+            LoadResources(
                 [
-                    InitializeFloor(),
-                    InitializeModels(),
-                    InitializeParticleVolumeDrawer()
+                    InitializeFloor,
+                    InitializeModels,
+                    InitializeParticleVolumeDrawer,
                 ],
                 InitializeSceneObjectsCompleted);
         }
