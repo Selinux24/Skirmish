@@ -119,9 +119,75 @@ namespace Engine
                 new(v3, v0)
             ];
         }
+        public static IEnumerable<Line3D> CreatePyramid(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreatePyramid(Topology.LineList, center, width, height, depth);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBox(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateBox(Topology.LineList, center, width, height, depth);
+
+            return CreateFromVertices(geometry);
+        }
         public static IEnumerable<Line3D> CreateBox(BoundingBox bbox)
         {
             var geometry = GeometryUtil.CreateBox(Topology.LineList, bbox);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBox(OrientedBoundingBox obb)
+        {
+            var geometry = GeometryUtil.CreateBox(Topology.LineList, obb);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBoxes(IEnumerable<BoundingBox> bboxes)
+        {
+            var geometry = GeometryUtil.CreateBoxes(Topology.LineList, bboxes);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBoxes(IEnumerable<OrientedBoundingBox> obbs)
+        {
+            var geometry = GeometryUtil.CreateBoxes(Topology.LineList, obbs);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSphere(BoundingSphere sph, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSphere(Topology.LineList, sph, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSphere(Vector3 center, float radius, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSphere(Topology.LineList, center, radius, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSpheres(IEnumerable<BoundingSphere> sphList, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSpheres(Topology.LineList, sphList, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateFrustum(BoundingFrustum frustum)
+        {
+            var geometry = GeometryUtil.CreateFrustum(Topology.LineList, frustum);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateConeCupAngle(float cupAngle, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateConeCupAngle(Topology.LineList, cupAngle, height, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateConeBaseRadius(float baseRadius, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateConeBaseRadius(Topology.LineList, baseRadius, height, sliceCount);
 
             return CreateFromVertices(geometry);
         }
@@ -140,6 +206,12 @@ namespace Engine
         public static IEnumerable<Line3D> CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
         {
             var geometry = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateCapsule(Topology.LineList, center, radius, height, sliceCount, stackCount);
 
             return CreateFromVertices(geometry);
         }

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Helpers;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn
 {
-    using Engine.Common;
-    using Engine.Helpers;
-
     /// <summary>
     /// Built-in shaders resource helper
     /// </summary>
@@ -19,27 +19,27 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader list
         /// </summary>
-        private static readonly List<IEngineShader> shaders = [];
+        private static readonly ConcurrentDictionary<string, IEngineShader> shaders = [];
         /// <summary>
         /// Constant buffer list
         /// </summary>
-        private static readonly List<IEngineConstantBuffer> constantBuffers = [];
+        private static readonly ConcurrentDictionary<string, IEngineConstantBuffer> constantBuffers = [];
         /// <summary>
         /// Sampler state list
         /// </summary>
-        private static readonly List<EngineSamplerState> samplerStates = [];
+        private static readonly ConcurrentBag<EngineSamplerState> samplerStates = [];
         /// <summary>
         /// Vertex shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineVertexShader>> vertexShaders = [];
+        private static readonly ConcurrentBag<IBuiltInShader<EngineVertexShader>> vertexShaders = [];
         /// <summary>
         /// Hull shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineHullShader>> hullShaders = [];
+        private static readonly ConcurrentBag<IBuiltInShader<EngineHullShader>> hullShaders = [];
         /// <summary>
         /// Domain shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineDomainShader>> domainShaders = [];
+        private static readonly ConcurrentBag<IBuiltInShader<EngineDomainShader>> domainShaders = [];
         /// <summary>
         /// Geometry shader list
         /// </summary>
@@ -47,15 +47,15 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Pixel shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EnginePixelShader>> pixelShaders = [];
+        private static readonly ConcurrentBag<IBuiltInShader<EnginePixelShader>> pixelShaders = [];
         /// <summary>
         /// Compute shader list
         /// </summary>
-        private static readonly List<IBuiltInShader<EngineComputeShader>> computeShaders = [];
+        private static readonly ConcurrentBag<IBuiltInShader<EngineComputeShader>> computeShaders = [];
         /// <summary>
         /// Drawer list
         /// </summary>
-        private static readonly List<IBuiltInDrawer> drawers = [];
+        private static readonly ConcurrentBag<IBuiltInDrawer> drawers = [];
 
         /// <summary>
         /// Sampler point
@@ -112,13 +112,13 @@ namespace Engine.BuiltIn
         /// </summary>
         public static void DisposeResources()
         {
-            samplerStates.ForEach(cb => cb?.Dispose());
+            samplerStates.ToList().ForEach(cb => cb?.Dispose());
             samplerStates.Clear();
 
-            constantBuffers.ForEach(cb => cb?.Dispose());
+            constantBuffers.ToList().ForEach(cb => cb.Value?.Dispose());
             constantBuffers.Clear();
 
-            shaders.ForEach(sh => sh?.Dispose());
+            shaders.ToList().ForEach(sh => sh.Value?.Dispose());
             shaders.Clear();
 
             drawers.OfType<IDisposable>().ToList().ForEach(dr => dr?.Dispose());
@@ -146,6 +146,29 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
         /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        /// <param name="name">Shader name in the shader cache</param>
+        /// <param name="compiler">Compiler function</param>
+        /// <returns>Returns the compiled shader</returns>
+        /// <exception cref="EngineException">Throws an exception when the shader cannot be added to the shader cache</exception>
+        private static T CompileShader<T>(string name, Func<T> compiler) where T : class, IEngineShader
+        {
+            if (shaders.TryGetValue(name, out var sh))
+            {
+                return sh as T;
+            }
+
+            sh = compiler.Invoke();
+            if (shaders.TryAdd(name, sh))
+            {
+                return sh as T;
+            }
+
+            throw new EngineException($"Error adding shader to collection in {nameof(CompileShader)}");
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
         /// <typeparam name="T">Type of shader</typeparam>
         /// <param name="entryPoint">Entry point function name</param>
         /// <param name="byteCode">Shader byte code</param>
@@ -154,15 +177,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineVertexShader sh = shaders.OfType<EngineVertexShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileVertexShader(name, entryPoint, byteCode, profile ?? HelperShaders.VSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileVertexShader(name, entryPoint, byteCode, profile ?? HelperShaders.VSProfile));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -175,15 +190,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineHullShader sh = shaders.OfType<EngineHullShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileHullShader(name, entryPoint, byteCode, profile ?? HelperShaders.HSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileHullShader(name, entryPoint, byteCode, profile ?? HelperShaders.HSProfile));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -196,15 +203,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineDomainShader sh = shaders.OfType<EngineDomainShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileDomainShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileDomainShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -217,15 +216,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineGeometryShader sh = shaders.OfType<EngineGeometryShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileGeometryShader(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileGeometryShader(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -239,15 +230,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineGeometryShader sh = shaders.OfType<EngineGeometryShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileGeometryShaderWithStreamOut(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile, so);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileGeometryShaderWithStreamOut(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile, so));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -260,15 +243,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EnginePixelShader sh = shaders.OfType<EnginePixelShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompilePixelShader(name, entryPoint, byteCode, profile ?? HelperShaders.PSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompilePixelShader(name, entryPoint, byteCode, profile ?? HelperShaders.PSProfile));
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache
@@ -281,15 +256,7 @@ namespace Engine.BuiltIn
         {
             string name = typeof(T).FullName;
 
-            EngineComputeShader sh = shaders.OfType<EngineComputeShader>().FirstOrDefault(s => s.Name == name);
-            if (sh != null)
-            {
-                return sh;
-            }
-
-            sh = graphics.CompileComputeShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile);
-            shaders.Add(sh);
-            return sh;
+            return CompileShader(name, () => graphics.CompileComputeShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile));
         }
 
         /// <summary>
@@ -299,21 +266,25 @@ namespace Engine.BuiltIn
         /// <param name="singleton">Use one instance</param>
         public static EngineConstantBuffer<T> GetConstantBuffer<T>(bool singleton = true) where T : struct, IBufferData
         {
+            string name = nameof(BuiltInShaders) + "." + typeof(T).FullName;
+
             if (!singleton)
             {
-                return new EngineConstantBuffer<T>(graphics, nameof(BuiltInShaders) + "." + typeof(T).Name);
+                return new(graphics, name);
             }
 
-            EngineConstantBuffer<T> cb = constantBuffers.OfType<EngineConstantBuffer<T>>().FirstOrDefault();
-            if (cb != null)
+            if (constantBuffers.TryGetValue(name, out var cb))
             {
-                return cb;
+                return cb as EngineConstantBuffer<T>;
             }
 
-            cb = new EngineConstantBuffer<T>(graphics, nameof(BuiltInShaders) + "." + typeof(T).Name);
-            constantBuffers.Add(cb);
+            cb = new EngineConstantBuffer<T>(graphics, name);
+            if (constantBuffers.TryAdd(name, cb))
+            {
+                return cb as EngineConstantBuffer<T>;
+            }
 
-            return cb;
+            throw new EngineException($"Error adding constant buffer to collection in {nameof(GetConstantBuffer)}");
         }
 
         /// <summary>

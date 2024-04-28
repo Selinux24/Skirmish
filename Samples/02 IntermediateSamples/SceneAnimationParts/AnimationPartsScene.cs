@@ -336,9 +336,9 @@ namespace IntermediateSamples.SceneAnimationParts
             itemTris.SetPrimitives(obbTrisColor, Triangle.ComputeTriangleList(obb));
             itemTris.Active = itemTris.Visible = true;
 
-            itemLines.SetPrimitives(sphLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 20, 20)));
-            itemLines.SetPrimitives(boxLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box)));
-            itemLines.SetPrimitives(obbLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, obb)));
+            itemLines.SetPrimitives(sphLinesColor, Line3D.CreateSphere(sph, 20, 20));
+            itemLines.SetPrimitives(boxLinesColor, Line3D.CreateBox(box));
+            itemLines.SetPrimitives(obbLinesColor, Line3D.CreateBox(obb));
             itemLines.Active = itemLines.Visible = true;
         }
 

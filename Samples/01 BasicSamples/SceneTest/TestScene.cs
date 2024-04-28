@@ -207,7 +207,7 @@ namespace BasicSamples.SceneTest
 
         private void LoadControls()
         {
-            Func<Task>[] taskList = 
+            Func<Task>[] taskList =
             [
                 InitializeSkyEffects,
                 InitializeScenery,
@@ -1004,7 +1004,7 @@ namespace BasicSamples.SceneTest
             }
 
             var pBoxes = pManager.ParticleSystems.Select(s => s.Emitter.GetBoundingBox());
-            var pLines = Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, pBoxes));
+            var pLines = Line3D.CreateBoxes(pBoxes);
             volumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
             volumeDrawer.Active = volumeDrawer.Visible = true;
         }
@@ -1014,14 +1014,14 @@ namespace BasicSamples.SceneTest
 
             foreach (var spot in Lights.SpotLights)
             {
-                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 12, 5));
+                var lines = Line3D.CreateSphere(spot.BoundingSphere, 12, 5);
 
                 volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
-                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 12, 5));
+                var lines = Line3D.CreateSphere(point.BoundingSphere, 12, 5);
 
                 volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
@@ -1034,7 +1034,7 @@ namespace BasicSamples.SceneTest
 
             var cameraFrustum = Camera.Frustum;
 
-            var cameraLines = Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, cameraFrustum));
+            var cameraLines = Line3D.CreateFrustum(cameraFrustum);
             volumeDrawer.AddPrimitives(Color.White, cameraLines);
 
             AddModelCullingVolumes(cameraFrustum);
@@ -1055,7 +1055,7 @@ namespace BasicSamples.SceneTest
                 {
                     var box = model.GetBoundingBox();
 
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box));
+                    var lines = Line3D.CreateBox(box);
 
                     var contains = cameraFrustum.Contains(box);
 
@@ -1065,7 +1065,7 @@ namespace BasicSamples.SceneTest
                 {
                     var sph = model.GetBoundingSphere();
 
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 16, 3));
+                    var lines = Line3D.CreateSphere(sph, 16, 3);
 
                     var contains = cameraFrustum.Contains(sph);
 
@@ -1083,7 +1083,7 @@ namespace BasicSamples.SceneTest
                 {
                     var box = model.GetBoundingBox();
 
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box));
+                    var lines = Line3D.CreateBox(box);
 
                     var contains = cameraFrustum.Contains(box);
 
@@ -1093,7 +1093,7 @@ namespace BasicSamples.SceneTest
                 {
                     var sph = model.GetBoundingSphere();
 
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 16, 3));
+                    var lines = Line3D.CreateSphere(sph, 16, 3);
 
                     var contains = cameraFrustum.Contains(sph);
 

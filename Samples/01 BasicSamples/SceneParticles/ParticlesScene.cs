@@ -488,9 +488,8 @@ namespace BasicSamples.SceneParticles
             for (int i = 0; i < count; i++)
             {
                 var bbox = pManager.GetParticleSystem(i).Emitter.GetBoundingBox();
-                var geom = GeometryUtil.CreateBox(Topology.LineList, bbox);
 
-                lines.AddRange(Line3D.CreateFromVertices(geom));
+                lines.AddRange(Line3D.CreateBox(bbox));
             }
 
             pManagerLineDrawer.SetPrimitives(Color.Red, [.. lines]);

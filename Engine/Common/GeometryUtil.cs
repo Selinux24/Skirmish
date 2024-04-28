@@ -709,7 +709,7 @@ namespace Engine.Common
 
             List<int> indexList = [];
 
-            int index = 0;
+            int index = 1;
             for (int st = 1; st < (stackCount + 1); ++st)
             {
                 for (int sl = 0; sl <= sliceCount; ++sl)

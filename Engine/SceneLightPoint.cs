@@ -1,11 +1,8 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Point light
     /// </summary>
@@ -124,7 +121,7 @@ namespace Engine
         {
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
-            FromLightVP = Array.Empty<Matrix>();
+            FromLightVP = [];
         }
         /// <inheritdoc/>
         public override void SetShadowParameters(Camera camera, int assignedShadowMap)
@@ -142,15 +139,15 @@ namespace Engine
             // Orthogonal projection from center
             var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, Radius);
 
-            return new Matrix[]
-            {
+            return
+            [
                 GetFromPointLightViewProjection(Position, Vector3.Right,      Vector3.Up)         * projection,
                 GetFromPointLightViewProjection(Position, Vector3.Left,       Vector3.Up)         * projection,
                 GetFromPointLightViewProjection(Position, Vector3.Up,         Vector3.BackwardLH) * projection,
                 GetFromPointLightViewProjection(Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
                 GetFromPointLightViewProjection(Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
                 GetFromPointLightViewProjection(Position, Vector3.BackwardLH, Vector3.Up)         * projection,
-            };
+            ];
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()
@@ -185,7 +182,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
-            return Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, BoundingSphere, sliceCount, stackCount));
+            return Line3D.CreateSphere(BoundingSphere, sliceCount, stackCount);
         }
 
         /// <inheritdoc/>

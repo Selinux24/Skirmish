@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtObj;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.Tween;
@@ -88,9 +89,10 @@ namespace TerrainSamples.SceneHeightmap
         private Model watchTower = null;
         private ModelInstanced containers = null;
 
+        private PrimitiveListDrawer<Line3D> lightsDrawer = null;
+        private bool drawLights = false;
         private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
-        private bool drawDrawVolumes = false;
-        private bool drawCullVolumes = false;
+        private bool drawLightsVolumes = false;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
@@ -113,13 +115,30 @@ namespace TerrainSamples.SceneHeightmap
         public HeightmapScene(Game game)
             : base(game)
         {
+            SetMouse(false);
+        }
+        private void SetMouse(bool visible)
+        {
+            if (visible)
+            {
 #if DEBUG
-            Game.VisibleMouse = false;
-            Game.LockMouse = false;
+                Game.VisibleMouse = true;
+                Game.LockMouse = false;
 #else
-            Game.VisibleMouse = false;
-            Game.LockMouse = true;
+                Game.VisibleMouse = true;
+                Game.LockMouse = false;
 #endif
+            }
+            else
+            {
+#if DEBUG
+                Game.VisibleMouse = false;
+                Game.LockMouse = false;
+#else
+                Game.VisibleMouse = false;
+                Game.LockMouse = true;
+#endif
+            }
         }
 
         public override void Initialize()
@@ -237,6 +256,7 @@ namespace TerrainSamples.SceneHeightmap
             var rDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Hull,
                 Instances = 250,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Rocks", @"boulder.json"),
                 StartsVisible = false,
@@ -248,6 +268,7 @@ namespace TerrainSamples.SceneHeightmap
             var treeDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees", @"tree.json"),
@@ -260,6 +281,7 @@ namespace TerrainSamples.SceneHeightmap
             var tree2Desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees2", @"tree.json"),
@@ -294,6 +316,7 @@ namespace TerrainSamples.SceneHeightmap
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Fast,
                 Instances = 3,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/m24", @"m24.json"),
                 StartsVisible = false,
@@ -305,6 +328,7 @@ namespace TerrainSamples.SceneHeightmap
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Fast,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Bradley", @"Bradley.json"),
                 StartsVisible = false,
@@ -316,6 +340,7 @@ namespace TerrainSamples.SceneHeightmap
             var mDesc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Default,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/buildings", @"Affgan1.json"),
                 StartsVisible = false,
@@ -327,6 +352,7 @@ namespace TerrainSamples.SceneHeightmap
             var mDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Default,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Watch Tower", @"Watch Tower.json"),
                 StartsVisible = false,
             };
@@ -337,6 +363,7 @@ namespace TerrainSamples.SceneHeightmap
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
+                PathFindingHull = PickingHullTypes.Fast,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/container", "Container.json"),
@@ -446,47 +473,32 @@ namespace TerrainSamples.SceneHeightmap
             bboxesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Terrain nodes bounding boxes",
                 "DEBUG++ Terrain nodes bounding boxes",
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    Dynamic = true,
-                    Count = 50000,
-                    StartsVisible = false,
-                });
+                new() { Dynamic = true, Count = 50000, StartsVisible = false, });
 
             bboxesTriDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DEBUG++ Terrain nodes bounding boxes faces",
                 "DEBUG++ Terrain nodes bounding boxes faces",
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Count = 1000,
-                    StartsVisible = false,
-                });
+                new() { Count = 1000, StartsVisible = false, });
 
             linesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Lines drawer",
                 "DEBUG++ Lines drawer",
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    Count = 1000,
-                    StartsVisible = false,
-                });
+                new() { Count = 1000, StartsVisible = false, });
+
+            lightsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DEBUG++ Lights",
+                "DEBUG++ Lights",
+                new() { Count = 50000, StartsVisible = false, DepthEnabled = true });
 
             lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Light Volumes",
                 "DEBUG++ Light Volumes",
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    Count = 10000,
-                    StartsVisible = false,
-                });
+                new() { Count = 50000, StartsVisible = false, });
 
             graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DEBUG++ Graph",
                 "DEBUG++ Graph",
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Count = 50000,
-                });
+                new() { Count = 50000, });
         }
         private void LoadingTaskGameAssetsCompleted(LoadResourcesResult res)
         {
@@ -572,6 +584,8 @@ namespace TerrainSamples.SceneHeightmap
                     WindEffect = 1f,
                     Instances = GroundGardenerPatchInstances.Default,
                 },
+                StartsActive = false,
+                StartsVisible = false,
             };
             gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
         }
@@ -615,6 +629,8 @@ namespace TerrainSamples.SceneHeightmap
                     Seed = 3,
                     WindEffect = 1f,
                 },
+                StartsActive = false,
+                StartsVisible = false,
             };
             gardener2 = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Flowers", "Flowers", vDesc2);
         }
@@ -1010,13 +1026,12 @@ namespace TerrainSamples.SceneHeightmap
         private void SetDebugInfo()
         {
             var terrainBoxes = terrain.GetBoundingBoxes(5);
-            var terrainBoxesDesc = GeometryUtil.CreateBoxes(Topology.LineList, terrainBoxes);
-            var listBoxes = Line3D.CreateFromVertices(terrainBoxesDesc);
+            var listBoxes = Line3D.CreateBoxes(terrainBoxes);
             bboxesDrawer.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
 
-            var a1Lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, gardenerArea.Value));
+            var a1Lines = Line3D.CreateBox(gardenerArea.Value);
             bboxesDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
-            var a2Lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, gardenerArea2.Value));
+            var a2Lines = Line3D.CreateBox(gardenerArea2.Value);
             bboxesDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
 
             var tris1 = Triangle.ComputeTriangleList(gardenerArea.Value);
@@ -1030,24 +1045,24 @@ namespace TerrainSamples.SceneHeightmap
         {
             //Agent
             var sbbox = soldier.GetBoundingBox();
-            agent.Height = sbbox.Height;
-            agent.Radius = sbbox.Width * 0.5f;
-            agent.MaxClimb = sbbox.Height * 0.75f;
+            agent.Radius = MathF.Round(sbbox.Width * 0.5f, 1);
+            agent.Height = MathF.Round(sbbox.Height, 1);
+            agent.MaxClimb = MathF.Round(sbbox.Height * 0.75f, 1);
             agent.MaxSlope = 45;
 
             //Navigation settings
             var nmsettings = BuildSettings.Default;
 
             //Rasterization
-            nmsettings.CellSize = 0.2f;
-            nmsettings.CellHeight = 0.2f;
+            nmsettings.CellSize = MathF.Min(1f, agent.Radius);
+            nmsettings.CellHeight = MathF.Min(1f, agent.Height);
 
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 64;
+            nmsettings.TileSize = 128;
             nmsettings.UseTileCache = true;
             nmsettings.BuildAllTiles = false;
 
@@ -1262,6 +1277,8 @@ namespace TerrainSamples.SceneHeightmap
 
             UpdateInputDrawers();
 
+            UpdateInputNavigation();
+
             UpdateInputLights();
 
             UpdateInputFog();
@@ -1300,24 +1317,50 @@ namespace TerrainSamples.SceneHeightmap
 
             if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                drawDrawVolumes = !drawDrawVolumes;
-                drawCullVolumes = false;
+                drawLights = !drawLights;
+
+                lightsDrawer.Active = lightsDrawer.Visible = drawLights;
+                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumes = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F4))
             {
-                drawCullVolumes = !drawCullVolumes;
-                drawDrawVolumes = false;
-            }
+                drawLightsVolumes = !drawLightsVolumes;
 
+                lightsDrawer.Active = lightsDrawer.Visible = drawLights = false;
+                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumes;
+            }
+        }
+        private void UpdateInputNavigation()
+        {
             if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = false;
+                graphDrawer.Visible = !graphDrawer.Visible;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F6))
             {
-                graphDrawer.Visible = !graphDrawer.Visible;
+                //Save navigation triangles
+                SetMouse(true);
+
+                try
+                {
+                    System.Windows.Forms.SaveFileDialog dlg = new()
+                    {
+                        Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
+                        FilterIndex = 1,
+                        RestoreDirectory = true
+                    };
+
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        LoaderObj.Save(GetTrianglesForNavigationGraph(), dlg.FileName);
+                    }
+                }
+                finally
+                {
+                    SetMouse(false);
+                }
             }
         }
         private void UpdateInputLights()
@@ -1357,29 +1400,33 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateInputBuffers()
         {
-            if (Game.Input.KeyJustReleased(Keys.F8))
+            if (!Game.Input.KeyJustReleased(Keys.F8))
             {
-                var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
-                if (shadowMap != null)
-                {
-                    bufferDrawer.Texture = shadowMap;
-                    bufferDrawer.Channel = ColorChannels.Red;
+                return;
+            }
 
-                    if (Game.Input.ShiftPressed)
-                    {
-                        uint tIndex = bufferDrawer.TextureIndex;
+            var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+            if (shadowMap == null)
+            {
+                return;
+            }
 
-                        tIndex++;
-                        tIndex %= 3;
+            bufferDrawer.Texture = shadowMap;
+            bufferDrawer.Channel = ColorChannels.Red;
 
-                        bufferDrawer.TextureIndex = tIndex;
-                    }
-                    else
-                    {
-                        bufferDrawer.Visible = !bufferDrawer.Visible;
-                        bufferDrawer.TextureIndex = 0;
-                    }
-                }
+            if (Game.Input.ShiftPressed)
+            {
+                uint tIndex = bufferDrawer.TextureIndex;
+
+                tIndex++;
+                tIndex %= 3;
+
+                bufferDrawer.TextureIndex = tIndex;
+            }
+            else
+            {
+                bufferDrawer.Visible = !bufferDrawer.Visible;
+                bufferDrawer.TextureIndex = 0;
             }
         }
 
@@ -1504,12 +1551,12 @@ namespace TerrainSamples.SceneHeightmap
                 UpdateSoldierTris();
             }
 
-            if (drawDrawVolumes)
+            if (drawLights)
             {
-                UpdateLightDrawingVolumes();
+                UpdateLightDrawing();
             }
 
-            if (drawCullVolumes)
+            if (drawLightsVolumes)
             {
                 UpdateLightCullingVolumes();
             }
@@ -1545,7 +1592,7 @@ namespace TerrainSamples.SceneHeightmap
                 troops[3].GetBoundingBox(true),
             };
 
-            var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, bboxes));
+            var lines = Line3D.CreateBoxes(bboxes);
 
             if (soldierLines == null)
             {
@@ -1562,45 +1609,45 @@ namespace TerrainSamples.SceneHeightmap
                 soldierLines.SetPrimitives(color, lines);
             }
         }
-        private void UpdateLightDrawingVolumes()
+        private void UpdateLightDrawing()
         {
-            lightsVolumeDrawer.Clear();
+            lightsDrawer.Clear();
 
             foreach (var spot in Lights.SpotLights)
             {
-                var lines = spot.GetVolume(10);
+                var lines = spot.GetVolume(12);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
-                var lines = point.GetVolume(12, 5);
+                var lines = point.GetVolume(6, 12);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
             }
-
-            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
         {
             lightsVolumeDrawer.Clear();
 
-            foreach (var spot in Lights.SpotLights)
+            var lColor = new Color4(Color.MediumPurple.RGB(), 0.15f);
+
+            BoundingSphere[] sphList =
+            [
+                .. Lights.SpotLights.Select(s => s.BoundingSphere).ToArray(),
+                .. Lights.PointLights.Select(s => s.BoundingSphere).ToArray(),
+            ];
+
+            foreach (var sph in sphList)
             {
-                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 12, 5));
+                int slices = Math.Clamp((int)(sph.Radius * 3), 3, 10);
+                int stacks = Math.Clamp((int)(sph.Radius * 3), 3, 10);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                var lines = Line3D.CreateSphere(sph, slices, stacks);
+
+                lightsVolumeDrawer.AddPrimitives(lColor, lines);
             }
-
-            foreach (var point in Lights.PointLights)
-            {
-                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 12, 5));
-
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
-            }
-
-            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
 
         public override void NavigationGraphLoaded()

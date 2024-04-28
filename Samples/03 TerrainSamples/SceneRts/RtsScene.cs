@@ -2506,9 +2506,7 @@ namespace TerrainSamples.SceneRts
                 Lights.SpotLights.Select(l => l.BoundingSphere)
                 .Concat(Lights.PointLights.Select(l => l.BoundingSphere));
 
-            var g = GeometryUtil.CreateSpheres(Topology.LineList, spheres, 10, 10);
-
-            lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), Line3D.CreateFromVertices(g));
+            lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), Line3D.CreateSpheres(spheres, 10, 10));
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
@@ -2535,7 +2533,7 @@ namespace TerrainSamples.SceneRts
 
             List<Line3D> lines =
             [
-                .. Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)),
+                .. Line3D.CreateBoxes(boxes),
                 .. Line3D.CreateTriangle(tris),
             ];
 
@@ -2553,12 +2551,12 @@ namespace TerrainSamples.SceneRts
             var hsph = helicopter.GetBoundingSphere();
             var t1sph = tankP1.GetBoundingSphere();
             var t2sph = tankP2.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, [hsph, t1sph, t2sph], 50, 20)));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateSpheres([hsph, t1sph, t2sph], 50, 20));
 
             var hbox = helicopter.GetOrientedBoundingBox();
             var t1box = tankP1.GetOrientedBoundingBox();
             var t2box = tankP2.GetOrientedBoundingBox();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, new[] { hbox, t1box, t2box, })));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateBoxes([hbox, t1box, t2box]));
         }
     }
 }

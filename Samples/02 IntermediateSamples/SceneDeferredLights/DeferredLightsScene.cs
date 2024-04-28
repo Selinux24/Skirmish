@@ -417,7 +417,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
             if (Game.Input.KeyPressed(Keys.Tab))
             {
-                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum)));
+                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateFrustum(Camera.Frustum));
                 lineDrawer.Visible = true;
             }
         }

@@ -706,7 +706,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 var bbox = selectedItem.GetBoundingBox();
 
                 itemTris.SetPrimitives(itemTrisColor, tris);
-                itemLines.SetPrimitives(itemLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, bbox)));
+                itemLines.SetPrimitives(itemLinesColor, Line3D.CreateBox(bbox));
 
                 itemTris.Active = itemTris.Visible = true;
                 itemLines.Active = itemLines.Visible = true;

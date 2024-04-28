@@ -237,19 +237,19 @@ namespace Engine
             /// <param name="eyePosition">Eye position</param>
             public void Update(Vector3 eyePosition)
             {
-                if (!updatingNodes)
+                if (updatingNodes)
                 {
-                    var task = Task.Run(() =>
-                    {
-                        updatingNodes = true;
-                        UpdateNodes(eyePosition);
-                    });
-
-                    task.ContinueWith((t) =>
-                    {
-                        updatingNodes = false;
-                    });
+                    return;
                 }
+
+                updatingNodes = true;
+
+                Task.Run(() =>
+                {
+                    UpdateNodes(eyePosition);
+              
+                    updatingNodes = false;
+                });
             }
             /// <summary>
             /// Update terrain nodes
@@ -259,104 +259,106 @@ namespace Engine
             {
                 var node = drawingQuadTree.FindNode(eyePosition);
 
-                if (node != null && lastNode != node)
+                if (node == null || lastNode == node)
                 {
-                    lastNode = node;
-
-                    NodesHigh[0].Set(LevelOfDetail.High, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, node, dictVB, dictIB);
-                    NodesHigh[1].Set(LevelOfDetail.High, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, node, dictVB, dictIB);
-                    NodesHigh[2].Set(LevelOfDetail.High, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, node, dictVB, dictIB);
-                    NodesHigh[3].Set(LevelOfDetail.High, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, node, dictVB, dictIB);
-                    NodesHigh[4].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.CornerTopLeft, node, dictVB, dictIB);
-                    NodesHigh[5].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopRight, IndexBufferShapes.CornerTopRight, node, dictVB, dictIB);
-                    NodesHigh[6].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.CornerBottomLeft, node, dictVB, dictIB);
-                    NodesHigh[7].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.CornerBottomRight, node, dictVB, dictIB);
-                    NodesHigh[8].Set(LevelOfDetail.High, IndexBufferShapes.Full, IndexBufferShapes.Full, node, dictVB, dictIB);
-
-                    NodesMedium[0].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesHigh[0].Node, dictVB, dictIB);
-                    NodesMedium[1].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMedium[0].Node, dictVB, dictIB);
-                    NodesMedium[2].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMedium[1].Node, dictVB, dictIB);
-                    NodesMedium[3].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMedium[0].Node, dictVB, dictIB);
-                    NodesMedium[4].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMedium[3].Node, dictVB, dictIB);
-
-                    NodesMedium[5].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesHigh[1].Node, dictVB, dictIB);
-                    NodesMedium[6].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMedium[5].Node, dictVB, dictIB);
-                    NodesMedium[7].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMedium[6].Node, dictVB, dictIB);
-                    NodesMedium[8].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMedium[5].Node, dictVB, dictIB);
-                    NodesMedium[9].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMedium[8].Node, dictVB, dictIB);
-
-                    NodesMedium[10].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesHigh[2].Node, dictVB, dictIB);
-                    NodesMedium[11].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMedium[10].Node, dictVB, dictIB);
-                    NodesMedium[12].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMedium[10].Node, dictVB, dictIB);
-
-                    NodesMedium[13].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesHigh[3].Node, dictVB, dictIB);
-                    NodesMedium[14].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMedium[13].Node, dictVB, dictIB);
-                    NodesMedium[15].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMedium[13].Node, dictVB, dictIB);
-
-                    NodesLow[0].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesMedium[0].Node, dictVB, dictIB);
-                    NodesLow[1].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[0].Node, dictVB, dictIB);
-                    NodesLow[2].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[1].Node, dictVB, dictIB);
-                    NodesLow[3].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesLow[2].Node, dictVB, dictIB);
-                    NodesLow[4].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[0].Node, dictVB, dictIB);
-                    NodesLow[5].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[4].Node, dictVB, dictIB);
-                    NodesLow[6].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesLow[5].Node, dictVB, dictIB);
-
-                    NodesLow[7].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesMedium[5].Node, dictVB, dictIB);
-                    NodesLow[8].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[7].Node, dictVB, dictIB);
-                    NodesLow[9].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[8].Node, dictVB, dictIB);
-                    NodesLow[10].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesLow[9].Node, dictVB, dictIB);
-                    NodesLow[11].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[7].Node, dictVB, dictIB);
-                    NodesLow[12].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[11].Node, dictVB, dictIB);
-                    NodesLow[13].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesLow[12].Node, dictVB, dictIB);
-
-                    NodesLow[14].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesMedium[10].Node, dictVB, dictIB);
-                    NodesLow[15].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[14].Node, dictVB, dictIB);
-                    NodesLow[16].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[15].Node, dictVB, dictIB);
-                    NodesLow[17].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[14].Node, dictVB, dictIB);
-                    NodesLow[18].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[17].Node, dictVB, dictIB);
-
-                    NodesLow[19].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesMedium[13].Node, dictVB, dictIB);
-                    NodesLow[20].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[19].Node, dictVB, dictIB);
-                    NodesLow[21].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[20].Node, dictVB, dictIB);
-                    NodesLow[22].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[19].Node, dictVB, dictIB);
-                    NodesLow[23].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[22].Node, dictVB, dictIB);
-
-                    NodesMinimum[0].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesLow[0].Node, dictVB, dictIB);
-                    NodesMinimum[1].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[0].Node, dictVB, dictIB);
-                    NodesMinimum[2].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[1].Node, dictVB, dictIB);
-                    NodesMinimum[3].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[2].Node, dictVB, dictIB);
-                    NodesMinimum[4].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMinimum[3].Node, dictVB, dictIB);
-                    NodesMinimum[5].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[0].Node, dictVB, dictIB);
-                    NodesMinimum[6].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[5].Node, dictVB, dictIB);
-                    NodesMinimum[7].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[6].Node, dictVB, dictIB);
-                    NodesMinimum[8].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMinimum[7].Node, dictVB, dictIB);
-
-                    NodesMinimum[9].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesLow[7].Node, dictVB, dictIB);
-                    NodesMinimum[10].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[9].Node, dictVB, dictIB);
-                    NodesMinimum[11].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[10].Node, dictVB, dictIB);
-                    NodesMinimum[12].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[11].Node, dictVB, dictIB);
-                    NodesMinimum[13].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMinimum[12].Node, dictVB, dictIB);
-                    NodesMinimum[14].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[9].Node, dictVB, dictIB);
-                    NodesMinimum[15].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[14].Node, dictVB, dictIB);
-                    NodesMinimum[16].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[15].Node, dictVB, dictIB);
-                    NodesMinimum[17].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMinimum[16].Node, dictVB, dictIB);
-
-                    NodesMinimum[18].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesLow[14].Node, dictVB, dictIB);
-                    NodesMinimum[19].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[18].Node, dictVB, dictIB);
-                    NodesMinimum[20].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[19].Node, dictVB, dictIB);
-                    NodesMinimum[21].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[20].Node, dictVB, dictIB);
-                    NodesMinimum[22].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[18].Node, dictVB, dictIB);
-                    NodesMinimum[23].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[22].Node, dictVB, dictIB);
-                    NodesMinimum[24].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[23].Node, dictVB, dictIB);
-
-                    NodesMinimum[25].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesLow[19].Node, dictVB, dictIB);
-                    NodesMinimum[26].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[25].Node, dictVB, dictIB);
-                    NodesMinimum[27].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[26].Node, dictVB, dictIB);
-                    NodesMinimum[28].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[27].Node, dictVB, dictIB);
-                    NodesMinimum[29].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[25].Node, dictVB, dictIB);
-                    NodesMinimum[30].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[29].Node, dictVB, dictIB);
-                    NodesMinimum[31].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[30].Node, dictVB, dictIB);
+                    return;
                 }
+
+                lastNode = node;
+
+                NodesHigh[0].Set(LevelOfDetail.High, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, node, dictVB, dictIB);
+                NodesHigh[1].Set(LevelOfDetail.High, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, node, dictVB, dictIB);
+                NodesHigh[2].Set(LevelOfDetail.High, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, node, dictVB, dictIB);
+                NodesHigh[3].Set(LevelOfDetail.High, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, node, dictVB, dictIB);
+                NodesHigh[4].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.CornerTopLeft, node, dictVB, dictIB);
+                NodesHigh[5].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopRight, IndexBufferShapes.CornerTopRight, node, dictVB, dictIB);
+                NodesHigh[6].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.CornerBottomLeft, node, dictVB, dictIB);
+                NodesHigh[7].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.CornerBottomRight, node, dictVB, dictIB);
+                NodesHigh[8].Set(LevelOfDetail.High, IndexBufferShapes.Full, IndexBufferShapes.Full, node, dictVB, dictIB);
+
+                NodesMedium[0].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesHigh[0].Node, dictVB, dictIB);
+                NodesMedium[1].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMedium[0].Node, dictVB, dictIB);
+                NodesMedium[2].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMedium[1].Node, dictVB, dictIB);
+                NodesMedium[3].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMedium[0].Node, dictVB, dictIB);
+                NodesMedium[4].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMedium[3].Node, dictVB, dictIB);
+
+                NodesMedium[5].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesHigh[1].Node, dictVB, dictIB);
+                NodesMedium[6].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMedium[5].Node, dictVB, dictIB);
+                NodesMedium[7].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMedium[6].Node, dictVB, dictIB);
+                NodesMedium[8].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMedium[5].Node, dictVB, dictIB);
+                NodesMedium[9].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMedium[8].Node, dictVB, dictIB);
+
+                NodesMedium[10].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesHigh[2].Node, dictVB, dictIB);
+                NodesMedium[11].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMedium[10].Node, dictVB, dictIB);
+                NodesMedium[12].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMedium[10].Node, dictVB, dictIB);
+
+                NodesMedium[13].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesHigh[3].Node, dictVB, dictIB);
+                NodesMedium[14].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMedium[13].Node, dictVB, dictIB);
+                NodesMedium[15].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMedium[13].Node, dictVB, dictIB);
+
+                NodesLow[0].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesMedium[0].Node, dictVB, dictIB);
+                NodesLow[1].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[0].Node, dictVB, dictIB);
+                NodesLow[2].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[1].Node, dictVB, dictIB);
+                NodesLow[3].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesLow[2].Node, dictVB, dictIB);
+                NodesLow[4].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[0].Node, dictVB, dictIB);
+                NodesLow[5].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[4].Node, dictVB, dictIB);
+                NodesLow[6].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesLow[5].Node, dictVB, dictIB);
+
+                NodesLow[7].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesMedium[5].Node, dictVB, dictIB);
+                NodesLow[8].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[7].Node, dictVB, dictIB);
+                NodesLow[9].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[8].Node, dictVB, dictIB);
+                NodesLow[10].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesLow[9].Node, dictVB, dictIB);
+                NodesLow[11].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[7].Node, dictVB, dictIB);
+                NodesLow[12].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[11].Node, dictVB, dictIB);
+                NodesLow[13].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesLow[12].Node, dictVB, dictIB);
+
+                NodesLow[14].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesMedium[10].Node, dictVB, dictIB);
+                NodesLow[15].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[14].Node, dictVB, dictIB);
+                NodesLow[16].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[15].Node, dictVB, dictIB);
+                NodesLow[17].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[14].Node, dictVB, dictIB);
+                NodesLow[18].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[17].Node, dictVB, dictIB);
+
+                NodesLow[19].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesMedium[13].Node, dictVB, dictIB);
+                NodesLow[20].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[19].Node, dictVB, dictIB);
+                NodesLow[21].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[20].Node, dictVB, dictIB);
+                NodesLow[22].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[19].Node, dictVB, dictIB);
+                NodesLow[23].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[22].Node, dictVB, dictIB);
+
+                NodesMinimum[0].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesLow[0].Node, dictVB, dictIB);
+                NodesMinimum[1].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[0].Node, dictVB, dictIB);
+                NodesMinimum[2].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[1].Node, dictVB, dictIB);
+                NodesMinimum[3].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[2].Node, dictVB, dictIB);
+                NodesMinimum[4].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMinimum[3].Node, dictVB, dictIB);
+                NodesMinimum[5].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[0].Node, dictVB, dictIB);
+                NodesMinimum[6].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[5].Node, dictVB, dictIB);
+                NodesMinimum[7].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[6].Node, dictVB, dictIB);
+                NodesMinimum[8].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMinimum[7].Node, dictVB, dictIB);
+
+                NodesMinimum[9].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesLow[7].Node, dictVB, dictIB);
+                NodesMinimum[10].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[9].Node, dictVB, dictIB);
+                NodesMinimum[11].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[10].Node, dictVB, dictIB);
+                NodesMinimum[12].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[11].Node, dictVB, dictIB);
+                NodesMinimum[13].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMinimum[12].Node, dictVB, dictIB);
+                NodesMinimum[14].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[9].Node, dictVB, dictIB);
+                NodesMinimum[15].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[14].Node, dictVB, dictIB);
+                NodesMinimum[16].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[15].Node, dictVB, dictIB);
+                NodesMinimum[17].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMinimum[16].Node, dictVB, dictIB);
+
+                NodesMinimum[18].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesLow[14].Node, dictVB, dictIB);
+                NodesMinimum[19].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[18].Node, dictVB, dictIB);
+                NodesMinimum[20].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[19].Node, dictVB, dictIB);
+                NodesMinimum[21].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[20].Node, dictVB, dictIB);
+                NodesMinimum[22].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[18].Node, dictVB, dictIB);
+                NodesMinimum[23].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[22].Node, dictVB, dictIB);
+                NodesMinimum[24].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[23].Node, dictVB, dictIB);
+
+                NodesMinimum[25].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesLow[19].Node, dictVB, dictIB);
+                NodesMinimum[26].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[25].Node, dictVB, dictIB);
+                NodesMinimum[27].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[26].Node, dictVB, dictIB);
+                NodesMinimum[28].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[27].Node, dictVB, dictIB);
+                NodesMinimum[29].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[25].Node, dictVB, dictIB);
+                NodesMinimum[30].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[29].Node, dictVB, dictIB);
+                NodesMinimum[31].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[30].Node, dictVB, dictIB);
             }
             /// <summary>
             /// Cull non contained nodes

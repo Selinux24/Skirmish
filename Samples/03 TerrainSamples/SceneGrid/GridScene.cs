@@ -808,7 +808,7 @@ namespace TerrainSamples.SceneGrid
 
         private void SetFrustum()
         {
-            lineDrawer.SetPrimitives(frstColor, Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum)));
+            lineDrawer.SetPrimitives(frstColor, Line3D.CreateFrustum(Camera.Frustum));
         }
 
         protected void NewGame()
@@ -935,7 +935,7 @@ namespace TerrainSamples.SceneGrid
             BoundingSphere bsph = soldierModels[soldier].GetBoundingSphere();
 
             Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            lineDrawer.SetPrimitives(bsphColor, Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, bsph, bsphSlices, bsphStacks)));
+            lineDrawer.SetPrimitives(bsphColor, Line3D.CreateSphere(bsph, bsphSlices, bsphStacks));
         }
         protected void UpdateSoldierStates()
         {

@@ -1492,7 +1492,7 @@ You will lost all the game progress.",
             {
                 var sphList = treeModel.GetBoundingSpheres(true);
 
-                lines.AddRange(Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, sphList, 4, 4)));
+                lines.AddRange(Line3D.CreateSpheres(sphList, 4, 4));
             }
 
             boundsDrawer.Clear();

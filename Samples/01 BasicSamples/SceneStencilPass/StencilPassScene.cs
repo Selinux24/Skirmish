@@ -294,14 +294,14 @@ namespace BasicSamples.SceneStencilPass
 
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 24, 24));
+                    var lines = Line3D.CreateSphere(spot.BoundingSphere, 24, 24);
 
                     lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 24, 24));
+                    var lines = Line3D.CreateSphere(point.BoundingSphere, 24, 24);
 
                     lightsVolumeDrawer.AddPrimitives(color, lines);
                 }

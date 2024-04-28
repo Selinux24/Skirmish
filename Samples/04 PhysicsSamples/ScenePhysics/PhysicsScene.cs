@@ -118,7 +118,6 @@ namespace PhysicsSamples.ScenePhysics
             int slices = 16;
             int stacks = 16;
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 2f, slices, stacks);
-            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 2f, slices * 2, stacks * 2);
 
             var desc = new ModelDescription()
             {
@@ -150,8 +149,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData sphere1 = new(rbState1, sphere1Model);
             ColliderData sphere2 = new(rbState2, sphere2Model);
 
-            sphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
-            sphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
+            var wiredSphere = Line3D.CreateSphere(Vector3.Zero, 2f, slices * 2, stacks * 2);
+            sphere1.Lines = [.. wiredSphere];
+            sphere2.Lines = [.. wiredSphere];
 
             colliders.Add(sphere1);
             colliders.Add(sphere2);
@@ -162,7 +162,6 @@ namespace PhysicsSamples.ScenePhysics
             mat.EmissiveColor = Color3.White;
 
             var box = GeometryUtil.CreateBox(Topology.TriangleList, 2f, 2f, 2f);
-            var wiredBox = GeometryUtil.CreateBox(Topology.LineList, 2f, 2f, 2f);
 
             var desc = new ModelDescription()
             {
@@ -194,8 +193,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData box1 = new(rbState1, box1Model);
             ColliderData box2 = new(rbState2, box2Model);
 
-            box1.Lines = Line3D.CreateFromVertices(wiredBox);
-            box2.Lines = Line3D.CreateFromVertices(wiredBox);
+            var wiredBox = Line3D.CreateBox(Vector3.Zero, 2f, 2f, 2f);
+            box1.Lines = [.. wiredBox];
+            box2.Lines = [.. wiredBox];
 
             colliders.Add(box1);
             colliders.Add(box2);
@@ -210,7 +210,6 @@ namespace PhysicsSamples.ScenePhysics
             Vector3 center = Vector3.Zero;
             int sliceCount = 16;
             var cylinder = GeometryUtil.CreateCylinder(Topology.TriangleList, center, radius, height, sliceCount);
-            var wiredCylinder = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);
 
             var desc = new ModelDescription()
             {
@@ -242,8 +241,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData cylinder1 = new(rbState1, cylinder1Model);
             ColliderData cylinder2 = new(rbState2, cylinder2Model);
 
-            cylinder1.Lines = Line3D.CreateFromVertices(wiredCylinder);
-            cylinder2.Lines = Line3D.CreateFromVertices(wiredCylinder);
+            var wiredCylinder = Line3D.CreateCylinder(center, radius, height, sliceCount);
+            cylinder1.Lines = [.. wiredCylinder];
+            cylinder2.Lines = [.. wiredCylinder];
 
             colliders.Add(cylinder1);
             colliders.Add(cylinder2);
@@ -259,7 +259,6 @@ namespace PhysicsSamples.ScenePhysics
             int sliceCount = 16;
             int stackCount = 8;
             var capsule = GeometryUtil.CreateCapsule(Topology.TriangleList, center, radius, height, sliceCount, stackCount);
-            var wiredCapsule = GeometryUtil.CreateCapsule(Topology.LineList, center, radius, height, sliceCount, stackCount);
 
             var desc = new ModelDescription()
             {
@@ -291,8 +290,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData capsule1 = new(rbState1, capsule1Model);
             ColliderData capsule2 = new(rbState2, capsule2Model);
 
-            capsule1.Lines = Line3D.CreateFromVertices(wiredCapsule);
-            capsule2.Lines = Line3D.CreateFromVertices(wiredCapsule);
+            var wiredCapsule = Line3D.CreateCapsule(center, radius, height, sliceCount, stackCount);
+            capsule1.Lines = [.. wiredCapsule];
+            capsule2.Lines = [.. wiredCapsule];
 
             colliders.Add(capsule1);
             colliders.Add(capsule2);
@@ -303,7 +303,6 @@ namespace PhysicsSamples.ScenePhysics
             mat.EmissiveColor = Color3.White;
 
             var pyramid3d = GeometryUtil.CreatePyramid(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
-            var pyramid2d = GeometryUtil.CreatePyramid(Topology.LineList, Vector3.Zero, 2f, 2f, 2f);
 
             var desc = new ModelDescription()
             {
@@ -335,8 +334,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData pyramid1 = new(rbState1, pyramid1Model);
             ColliderData pyramid2 = new(rbState2, pyramid2Model);
 
-            pyramid1.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
-            pyramid2.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
+            var pyramid2d = Line3D.CreatePyramid(Vector3.Zero, 2f, 2f, 2f);
+            pyramid1.Lines = [.. pyramid2d];
+            pyramid2.Lines = [.. pyramid2d];
 
             colliders.Add(pyramid1);
             colliders.Add(pyramid2);
@@ -349,7 +349,6 @@ namespace PhysicsSamples.ScenePhysics
             int slices = 16;
             int stacks = 8;
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, slices, stacks);
-            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 0.5f, slices * 2, stacks * 2);
 
             var desc = new ModelDescription()
             {
@@ -382,8 +381,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData jsphere1 = new(rbState1, jsphere1Model);
             ColliderData jsphere2 = new(rbState2, jsphere2Model);
 
-            jsphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
-            jsphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
+            var wiredSphere = Line3D.CreateSphere(Vector3.Zero, 0.5f, slices * 2, stacks * 2);
+            jsphere1.Lines = [.. wiredSphere];
+            jsphere2.Lines = [.. wiredSphere];
 
             colliders.Add(jsphere1);
             colliders.Add(jsphere2);
@@ -402,7 +402,6 @@ namespace PhysicsSamples.ScenePhysics
             int slices = 16;
             int stacks = 8;
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, slices, stacks);
-            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 0.5f, slices * 2, stacks * 2);
 
             var desc = new ModelDescription()
             {
@@ -435,8 +434,9 @@ namespace PhysicsSamples.ScenePhysics
             ColliderData rsphere1 = new(rbState1, rsphere1Model);
             ColliderData rsphere2 = new(rbState2, rsphere2Model);
 
-            rsphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
-            rsphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
+            var wiredSphere = Line3D.CreateSphere(Vector3.Zero, 0.5f, slices * 2, stacks * 2);
+            rsphere1.Lines = [.. wiredSphere];
+            rsphere2.Lines = [.. wiredSphere];
 
             colliders.Add(rsphere1);
             colliders.Add(rsphere2);

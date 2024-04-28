@@ -803,7 +803,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
 
             var boxes = items.Select(i => i.GetBoundingBox());
-            bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
+            bboxesDrawer.SetPrimitives(color, Line3D.CreateBoxes(boxes));
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {
@@ -916,7 +916,7 @@ namespace TerrainSamples.SceneModularDungeon
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 //Frustum
-                var frustum = Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum));
+                var frustum = Line3D.CreateFrustum(Camera.Frustum);
 
                 bboxesDrawer.SetPrimitives(Color.White, frustum);
             }
@@ -1072,7 +1072,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var bbox = rat.GetBoundingBox();
 
-                ratDrawer.SetPrimitives(Color.White, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, bbox)));
+                ratDrawer.SetPrimitives(Color.White, Line3D.CreateBox(bbox));
             }
         }
         private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)
@@ -1436,8 +1436,8 @@ namespace TerrainSamples.SceneModularDungeon
             SetSelectedItem(null);
 
             LoadResources(
-                () => ChangeToLevelAsync(name), 
-                ChangeToLevelResults, 
+                () => ChangeToLevelAsync(name),
+                ChangeToLevelResults,
                 "LoadAssets");
         }
         private async Task ChangeToLevelAsync(string name)
