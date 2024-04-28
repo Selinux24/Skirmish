@@ -38,6 +38,13 @@ namespace Engine
         Matrix Local { get; }
 
         /// <summary>
+        /// Test the light shadow casting based on the viewer position
+        /// </summary>
+        /// <param name="environment">Game environment</param>
+        /// <param name="eyePosition">Viewer eye position</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
+        /// <summary>
         /// Gets the light volume
         /// </summary>
         /// <param name="sliceCount">Cone slice count</param>

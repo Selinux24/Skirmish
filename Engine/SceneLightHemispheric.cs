@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
@@ -61,25 +60,18 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
-        {
-            CastShadowsMarked = false;
-
-            return CastShadowsMarked;
-        }
-        /// <inheritdoc/>
         public override void ClearShadowParameters()
         {
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
-            FromLightVP = Array.Empty<Matrix>();
+            FromLightVP = [];
         }
         /// <inheritdoc/>
         public override void SetShadowParameters(Camera camera, int assignedShadowMap)
         {
             ShadowMapIndex = assignedShadowMap;
             ShadowMapCount = 1;
-            FromLightVP = new[] { Matrix.Identity };
+            FromLightVP = [Matrix.Identity];
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()

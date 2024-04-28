@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
@@ -148,7 +147,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
+        public bool MarkForShadowCasting(GameEnvironment environment)
         {
             CastShadowsMarked = CastShadow;
 
@@ -159,7 +158,7 @@ namespace Engine
         {
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
-            FromLightVP = Array.Empty<Matrix>();
+            FromLightVP = [];
             ToShadowSpace = Matrix.Identity;
             ToCascadeOffsetX = Vector4.Zero;
             ToCascadeOffsetY = Vector4.Zero;

@@ -37,6 +37,12 @@ namespace Engine
         Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
+        /// Test the light shadow casting based on the viewer position
+        /// </summary>
+        /// <param name="environment">Game environment</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        bool MarkForShadowCasting(GameEnvironment environment);
+        /// <summary>
         /// Updates internal state 
         /// </summary>
         /// <param name="size">Map size</param>

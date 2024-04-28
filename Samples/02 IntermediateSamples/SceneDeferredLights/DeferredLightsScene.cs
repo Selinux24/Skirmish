@@ -768,7 +768,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 Lights.DirectionalLights.Length,
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
-                Lights.GetDirectionalShadowCastingLights(GameEnvironment, Camera.Position).Count());
+                Lights.GetDirectionalShadowCastingLights(GameEnvironment).Count());
 
             if (FrameCounters.Statistics.Length == 0)
             {

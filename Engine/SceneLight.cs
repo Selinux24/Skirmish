@@ -91,8 +91,6 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public abstract bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
-        /// <inheritdoc/>
         public abstract void ClearShadowParameters();
         /// <inheritdoc/>
         public abstract void SetShadowParameters(Camera camera, int assignedShadowMap);

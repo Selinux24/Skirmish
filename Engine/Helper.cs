@@ -556,7 +556,7 @@ namespace Engine
         /// <typeparam name="T">Element type</typeparam>
         /// <param name="enum1">First enumerable list</param>
         /// <param name="enum2">Second enumerable list</param>
-        /// <returns></returns>
+        /// <returns>Returns true if both enumerables contains the same elements</returns>
         private static bool CompareEnumerableElements<T>(IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
             for (int i = 0; i < enum1.Count(); i++)

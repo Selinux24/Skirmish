@@ -50,7 +50,11 @@ namespace TerrainSamples.SceneHeightmap
         private UITextArea help2 = null;
 
         private SkyScattering skydom = null;
+
         private Terrain terrain = null;
+        private bool showTerrainDEBUG = false;
+        private bool terrainInitializedDEBUG = false;
+
         private GroundGardener gardener = null;
         private GroundGardener gardener2 = null;
         private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
@@ -59,6 +63,7 @@ namespace TerrainSamples.SceneHeightmap
         private const float gardenerAreaSize = 512;
         private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(0, gardenerAreaSize, gardenerAreaSize));
         private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
+        private bool showGardenerDEBUG = false;
 
         private ModelInstanced torchs = null;
         private SceneLightSpot spotLight1 = null;
@@ -80,6 +85,7 @@ namespace TerrainSamples.SceneHeightmap
         private PrimitiveListDrawer<Triangle> soldierTris = null;
         private PrimitiveListDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
+        private Color4 soldierColorDEBUG = new(Color.Orange.ToColor3(), 0.6f);
 
         private ModelInstanced troops = null;
 
@@ -90,9 +96,9 @@ namespace TerrainSamples.SceneHeightmap
         private ModelInstanced containers = null;
 
         private PrimitiveListDrawer<Line3D> lightsDrawer = null;
-        private bool drawLights = false;
+        private bool drawLightsDEBUG = false;
         private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
-        private bool drawLightsVolumes = false;
+        private bool drawLightsVolumesDEBUG = false;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
@@ -321,7 +327,7 @@ namespace TerrainSamples.SceneHeightmap
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/m24", @"m24.json"),
                 StartsVisible = false,
             };
-            helicopterI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
+            helicopterI = await AddComponent<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
         }
         private async Task InitializeBradley()
         {
@@ -333,7 +339,7 @@ namespace TerrainSamples.SceneHeightmap
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Bradley", @"Bradley.json"),
                 StartsVisible = false,
             };
-            bradleyI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
+            bradleyI = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
         }
         private async Task InitializeBuildings()
         {
@@ -379,7 +385,7 @@ namespace TerrainSamples.SceneHeightmap
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Scenery/Objects", @"torch.json"),
                 StartsVisible = false,
             };
-            torchs = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
+            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
         }
         private async Task InitializeParticles()
         {
@@ -470,35 +476,35 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeDebugAssets()
         {
-            bboxesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "DEBUG++ Terrain nodes bounding boxes",
-                "DEBUG++ Terrain nodes bounding boxes",
-                new() { Dynamic = true, Count = 50000, StartsVisible = false, });
+            bboxesDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DEBUG++ bounding boxes",
+                "DEBUG++ bounding boxes",
+                new() { Count = 50000, StartsVisible = false, }, LayerUI - 1);
 
-            bboxesTriDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
-                "DEBUG++ Terrain nodes bounding boxes faces",
-                "DEBUG++ Terrain nodes bounding boxes faces",
-                new() { Count = 1000, StartsVisible = false, });
+            bboxesTriDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DEBUG++ bounding boxes faces",
+                "DEBUG++ bounding boxes faces",
+                new() { Count = 1000, DepthEnabled = true, StartsVisible = false, }, LayerUI - 1);
 
             linesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Lines drawer",
                 "DEBUG++ Lines drawer",
-                new() { Count = 1000, StartsVisible = false, });
+                new() { Count = 1000, StartsVisible = false, }, LayerEffects + 1);
 
-            lightsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Lights",
                 "DEBUG++ Lights",
-                new() { Count = 50000, StartsVisible = false, DepthEnabled = true });
+                new() { Count = 50000, StartsVisible = false, DepthEnabled = true }, LayerEffects + 1);
 
-            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Light Volumes",
                 "DEBUG++ Light Volumes",
-                new() { Count = 50000, StartsVisible = false, });
+                new() { Count = 50000, StartsVisible = false, }, LayerEffects + 1);
 
-            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DEBUG++ Graph",
                 "DEBUG++ Graph",
-                new() { Count = 50000, });
+                new() { Count = 50000, }, LayerEffects + 1);
         }
         private void LoadingTaskGameAssetsCompleted(LoadResourcesResult res)
         {
@@ -584,8 +590,6 @@ namespace TerrainSamples.SceneHeightmap
                     WindEffect = 1f,
                     Instances = GroundGardenerPatchInstances.Default,
                 },
-                StartsActive = false,
-                StartsVisible = false,
             };
             gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
         }
@@ -1019,27 +1023,7 @@ namespace TerrainSamples.SceneHeightmap
             lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
             Lights.Add(lantern);
 
-            SetDebugInfo();
-
             SetPathFindingInfo();
-        }
-        private void SetDebugInfo()
-        {
-            var terrainBoxes = terrain.GetBoundingBoxes(5);
-            var listBoxes = Line3D.CreateBoxes(terrainBoxes);
-            bboxesDrawer.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
-
-            var a1Lines = Line3D.CreateBox(gardenerArea.Value);
-            bboxesDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
-            var a2Lines = Line3D.CreateBox(gardenerArea2.Value);
-            bboxesDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
-
-            var tris1 = Triangle.ComputeTriangleList(gardenerArea.Value);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.ReverseNormal(tris1));
-            var tris2 = Triangle.ComputeTriangleList(gardenerArea2.Value);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.ReverseNormal(tris2));
         }
         private void SetPathFindingInfo()
         {
@@ -1303,8 +1287,10 @@ namespace TerrainSamples.SceneHeightmap
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                bboxesDrawer.Visible = !bboxesDrawer.Visible;
-                bboxesTriDrawer.Visible = !bboxesTriDrawer.Visible;
+                showTerrainDEBUG = !showTerrainDEBUG;
+
+                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
+                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
@@ -1317,28 +1303,36 @@ namespace TerrainSamples.SceneHeightmap
 
             if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                drawLights = !drawLights;
+                drawLightsDEBUG = !drawLightsDEBUG;
 
-                lightsDrawer.Active = lightsDrawer.Visible = drawLights;
-                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumes = false;
+                lightsDrawer.Active = lightsDrawer.Visible = drawLightsDEBUG;
+                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumesDEBUG = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F4))
             {
-                drawLightsVolumes = !drawLightsVolumes;
+                drawLightsVolumesDEBUG = !drawLightsVolumesDEBUG;
 
-                lightsDrawer.Active = lightsDrawer.Visible = drawLights = false;
-                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumes;
+                lightsDrawer.Active = lightsDrawer.Visible = drawLightsDEBUG = false;
+                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = drawLightsVolumesDEBUG;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F5))
+            {
+                showGardenerDEBUG = !showGardenerDEBUG;
+
+                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
+                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
             }
         }
         private void UpdateInputNavigation()
         {
-            if (Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F6))
             {
                 graphDrawer.Visible = !graphDrawer.Visible;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.F6))
+            if (Game.Input.KeyJustReleased(Keys.F8))
             {
                 //Save navigation triangles
                 SetMouse(true);
@@ -1400,7 +1394,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateInputBuffers()
         {
-            if (!Game.Input.KeyJustReleased(Keys.F8))
+            if (!Game.Input.KeyJustReleased(Keys.F9))
             {
                 return;
             }
@@ -1546,25 +1540,102 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateDrawers()
         {
+            if (showTerrainDEBUG)
+            {
+                UpdateDebugTerrain();
+            }
+
+            if (showGardenerDEBUG)
+            {
+                UpdateDebugGardeners();
+            }
+
             if (showSoldierDEBUG)
             {
-                UpdateSoldierTris();
+                UpdateDebugSoldierTris();
             }
 
-            if (drawLights)
+            if (drawLightsDEBUG)
             {
-                UpdateLightDrawing();
+                UpdateDebugLightDrawing();
             }
 
-            if (drawLightsVolumes)
+            if (drawLightsVolumesDEBUG)
             {
-                UpdateLightCullingVolumes();
+                UpdateDebugLightCullingVolumes();
             }
         }
-        private void UpdateSoldierTris()
+        private void UpdateDebugTerrain()
         {
-            var color = new Color(Color.Red.ToColor3(), 0.6f);
+            if (terrainInitializedDEBUG)
+            {
+                return;
+            }
 
+            bboxesDrawer.Clear();
+            bboxesTriDrawer.Clear();
+
+            var terrainBoxes = terrain.GetBoundingBoxes(5);
+            var listBoxes = Line3D.CreateBoxes(terrainBoxes);
+            bboxesDrawer.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
+
+            terrainInitializedDEBUG = true;
+        }
+        private void UpdateDebugGardeners()
+        {
+            terrainInitializedDEBUG = false;
+
+            bboxesDrawer.Clear();
+            bboxesTriDrawer.Clear();
+
+            if (gardener.Visible)
+            {
+                UpdateDebugGardener(gardener);
+            }
+
+            if (gardener2.Visible)
+            {
+                UpdateDebugGardener(gardener2);
+            }
+        }
+        private void UpdateDebugGardener(GroundGardener g)
+        {
+            float minY = float.MaxValue;
+
+            var nodes = g.GetVisibleNodes();
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                //Adjust box
+                var box = nodes[i].BoundingBox;
+                var vedges = box.GetEdges().Skip(8).ToArray();
+                if (!FindTopGroundPosition<Triangle>(vedges[0].Point1.X, vedges[0].Point1.Z, out var p0)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
+                var abox = SharpDX.BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
+
+                var colL = Helper.IntToCol(nodes[i].Id, 128);
+                var colT = Helper.IntToCol(nodes[i].Id, 64);
+
+                var lines = Line3D.CreateBox(abox);
+                bboxesDrawer.AddPrimitives(colL, lines);
+
+                var tris = Triangle.ComputeTriangleList(abox);
+                bboxesTriDrawer.AddPrimitives(colT, tris);
+                bboxesTriDrawer.AddPrimitives(colT, Triangle.ReverseNormal(tris));
+
+                minY = Math.Min(minY, abox.Minimum.Y);
+            }
+
+            //Adjust gbox
+            var gbbox = g.GetPlantingBounds();
+            gbbox.Minimum.Y = minY;
+            var col = Helper.IntToCol(0, 128);
+            var glines = Line3D.CreateBox(gbbox);
+            bboxesDrawer.AddPrimitives(col, glines);
+        }
+        private void UpdateDebugSoldierTris()
+        {
             var tris = soldier.GetGeometry();
 
             if (soldierTris == null)
@@ -1573,14 +1644,14 @@ namespace TerrainSamples.SceneHeightmap
                 {
                     DepthEnabled = false,
                     Primitives = tris.ToArray(),
-                    Color = color
+                    Color = soldierColorDEBUG
                 };
                 var t = AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
                 soldierTris = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else
             {
-                soldierTris.SetPrimitives(color, tris);
+                soldierTris.SetPrimitives(soldierColorDEBUG, tris);
             }
 
             var bboxes = new[]
@@ -1599,17 +1670,17 @@ namespace TerrainSamples.SceneHeightmap
                 var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Primitives = lines.ToArray(),
-                    Color = color
+                    Color = soldierColorDEBUG
                 };
                 var t = AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
                 soldierLines = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else
             {
-                soldierLines.SetPrimitives(color, lines);
+                soldierLines.SetPrimitives(soldierColorDEBUG, lines);
             }
         }
-        private void UpdateLightDrawing()
+        private void UpdateDebugLightDrawing()
         {
             lightsDrawer.Clear();
 
@@ -1627,7 +1698,7 @@ namespace TerrainSamples.SceneHeightmap
                 lightsDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
             }
         }
-        private void UpdateLightCullingVolumes()
+        private void UpdateDebugLightCullingVolumes()
         {
             lightsVolumeDrawer.Clear();
 

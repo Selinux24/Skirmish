@@ -113,6 +113,23 @@ namespace Engine.Common
         protected const int NextPass = 4;
 
         /// <summary>
+        /// Directional shadows pass string
+        /// </summary>
+        private const string strShadowsDirectionalPass = "Directional light pass";
+        /// <summary>
+        /// Spot shadows pass string
+        /// </summary>
+        private const string strShadowsSpotPass = "Spot light pass";
+        /// <summary>
+        /// Point shadows pass string
+        /// </summary>
+        private const string strShadowsPointPass = "Point light pass";
+        /// <summary>
+        /// Merge to screen pass string
+        /// </summary>
+        private const string strMergeScreenPass = "Merge to Screen pass";
+
+        /// <summary>
         /// Cull index for objects
         /// </summary>
         protected const int CullObjects = 0;
@@ -773,10 +790,10 @@ namespace Engine.Common
         {
             passLists.Clear();
 
-            AddPassContext(ShadowsDirectionalPass, "Directional Shadows");
-            AddPassContext(ShadowsSpotPass, "Spot Shadows");
-            AddPassContext(ShadowsPointPass, "Point Shadows");
-            AddPassContext(MergeScreenPass, "Merge to Screen");
+            AddPassContext(ShadowsDirectionalPass, strShadowsDirectionalPass);
+            AddPassContext(ShadowsSpotPass, strShadowsSpotPass);
+            AddPassContext(ShadowsPointPass, strShadowsPointPass);
+            AddPassContext(MergeScreenPass, strMergeScreenPass);
         }
         /// <summary>
         /// Adds a new pass to the pass list collection
@@ -937,28 +954,28 @@ namespace Engine.Common
             int cullIndexPoint = cullIndexDir + Scene.Lights.DirectionalLights.Length;
             int cullIndexSpot = cullIndexPoint + Scene.Lights.PointLights.Length;
 
-            var camPosition = Scene.Camera.Position;
-
             //Get directional lights which cast shadows
-            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, camPosition);
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment);
             //Get the object list affected by directional shadows
             var dirObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
             //Draw shadow map
-            DoShadowMapping(ShadowsDirectionalPass, "Directional", ShadowMapperDirectional, dirLights, dirObjs, cullIndexDir);
+            DoShadowMapping(ShadowsDirectionalPass, strShadowsDirectionalPass, ShadowMapperDirectional, dirLights, dirObjs, cullIndexDir);
+
+            var eyePosition = Scene.Camera.Position;
 
             //Get point lights which cast shadows
-            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, camPosition);
+            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, eyePosition);
             //Get the object list affected by point shadows
             var pointObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
             //Draw shadow map
-            DoShadowMapping(ShadowsPointPass, "Point", ShadowMapperPoint, pointLights, pointObjs, cullIndexPoint);
+            DoShadowMapping(ShadowsPointPass, strShadowsPointPass, ShadowMapperPoint, pointLights, pointObjs, cullIndexPoint);
 
             //Get spot lights which cast shadows
-            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, camPosition);
+            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, eyePosition);
             //Get the object list affected by spot shadows
             var spotObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
             //Draw shadow map
-            DoShadowMapping(ShadowsSpotPass, "Spot", ShadowMapperSpot, spotLights, spotObjs, cullIndexSpot);
+            DoShadowMapping(ShadowsSpotPass, strShadowsSpotPass, ShadowMapperSpot, spotLights, spotObjs, cullIndexSpot);
 
 #if DEBUG
             if (Scene.Game.CollectGameStatus)
@@ -1538,7 +1555,7 @@ namespace Engine.Common
         /// </summary>
         private void AssignLightShadowMapsDirectional()
         {
-            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment).ToArray();
             if (dirLights.Length == 0)
             {
                 return;

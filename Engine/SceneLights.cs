@@ -485,13 +485,12 @@ namespace Engine
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
         /// <param name="environment">Game environment</param>
-        /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
+        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment)
         {
             return visibleLights
                 .OfType<ISceneLightDirectional>()
-                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment))
                 .ToArray();
         }
         /// <summary>
