@@ -869,7 +869,10 @@ namespace Engine.UI
             children.ForEach(c => c.Resize());
         }
 
-
+        /// <summary>
+        /// Validates the control for adding to the children list
+        /// </summary>
+        /// <param name="ctrl">Control</param>
         private bool ValidateAddChild(IUIControl ctrl)
         {
             if (ctrl == null)
@@ -889,6 +892,10 @@ namespace Engine.UI
 
             return true;
         }
+        /// <summary>
+        /// Validates the control list for adding to the children list
+        /// </summary>
+        /// <param name="controls">Control list</param>
         private bool ValidateAddChildren(IEnumerable<IUIControl> controls)
         {
             if (!controls.Any())
@@ -903,6 +910,10 @@ namespace Engine.UI
 
             return true;
         }
+        /// <summary>
+        /// Validates the control for removing from the children list
+        /// </summary>
+        /// <param name="ctrl">Control</param>
         private bool ValidateRemoveChild(IUIControl ctrl)
         {
             if (ctrl == null)
@@ -917,6 +928,10 @@ namespace Engine.UI
 
             return true;
         }
+        /// <summary>
+        /// Validates the control list for removing from the children list
+        /// </summary>
+        /// <param name="controls">Control list</param>
         private bool ValidateRemoveChildren(IEnumerable<IUIControl> controls)
         {
             if (!controls.Any())
@@ -931,43 +946,12 @@ namespace Engine.UI
 
             return true;
         }
-        private bool ValidateInsertChild(IUIControl ctrl)
-        {
-            if (ctrl == null)
-            {
-                return false;
-            }
 
-            if (ctrl == this)
-            {
-                return false;
-            }
-
-            if (children.Contains(ctrl))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        private bool ValidateInsertChildren(IEnumerable<IUIControl> controls)
-        {
-            if (!controls.Any())
-            {
-                return false;
-            }
-
-            foreach (var ctrl in controls)
-            {
-                if (!ValidateInsertChild(ctrl))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
+        /// <summary>
+        /// Adds the control to the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fits to parent</param>
         private void AddChildInternal(IUIControl ctrl, bool fitToParent = true)
         {
             ctrl.Parent = this;
@@ -976,6 +960,11 @@ namespace Engine.UI
 
             children.Add(ctrl);
         }
+        /// <summary>
+        /// Removes the control from the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="dispose">Disposes the control, if possible</param>
         private void RemoveChildInternal(IUIControl ctrl, bool dispose = false)
         {
             ctrl.Parent = null;
@@ -988,6 +977,12 @@ namespace Engine.UI
                 ctrlDisposable.Dispose();
             }
         }
+        /// <summary>
+        /// Inserts the control to the children collection at position
+        /// </summary>
+        /// <param name="index">Position index</param>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fits to parent</param>
         private void InsertChildInternal(int index, IUIControl ctrl, bool fitToParent = true)
         {
             ctrl.Parent = this;
@@ -1067,7 +1062,7 @@ namespace Engine.UI
                 return false;
             }
 
-            if (!ValidateInsertChild(ctrl))
+            if (!ValidateAddChild(ctrl))
             {
                 return false;
             }
@@ -1086,7 +1081,7 @@ namespace Engine.UI
                 return false;
             }
 
-            if (!ValidateInsertChildren(controls))
+            if (!ValidateAddChildren(controls))
             {
                 return false;
             }

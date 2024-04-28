@@ -105,7 +105,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
         private string addConnectionStartMessage = null;
         private Vector3? addConnectionStart = null;
-        private Vector3? addConnectionEnd = null;
         private readonly Color connectionColor = Color.LightPink;
         private readonly Color connectionColorStart = Color.Pink;
         private readonly Color connectionColorEnd = Color.DeepPink;
@@ -845,23 +844,8 @@ namespace TerrainSamples.SceneNavMeshTest
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
             var ray = (Ray)pRay;
 
-            foreach (var area in areas)
+            foreach (var area in areas.Where(a => a.IntersectsRay(ray)))
             {
-                if (area is CylinderAreaMarker cylMarker)
-                {
-                    if (!cylMarker.IntersectsRay(ray))
-                    {
-                        continue;
-                    }
-                }
-                else if (area is ConvexAreaMarker cvMarker)
-                {
-                    if (!cvMarker.IntersectsRay(ray))
-                    {
-                        continue;
-                    }
-                }
-
                 PathFinderDescription.RemoveArea(area.Id);
                 areas.Remove(area);
 
@@ -911,12 +895,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            addConnectionEnd = r.PickingResult.Position;
-            DrawCircle(addConnectionEnd.Value, rad, connectionColorEnd);
+            var addConnectionEnd = r.PickingResult.Position;
+            DrawCircle(addConnectionEnd, rad, connectionColorEnd);
 
             bool bidir = Game.Input.ControlPressed;
-            int id = PathFinderDescription.AddConnection(addConnectionStart.Value, addConnectionEnd.Value, rad, bidir, NavAreaTypes.Rock, AgentActionTypes.Jump);
-            connections.Add(new() { Id = id, From = addConnectionStart.Value, To = addConnectionEnd.Value, Radius = rad, BiDirectional = bidir });
+            int id = PathFinderDescription.AddConnection(addConnectionStart.Value, addConnectionEnd, rad, bidir, NavAreaTypes.Rock, AgentActionTypes.Jump);
+            connections.Add(new() { Id = id, From = addConnectionStart.Value, To = addConnectionEnd, Radius = rad, BiDirectional = bidir });
 
             EnqueueGraph();
 
@@ -1582,7 +1566,6 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
 
             addConnectionStart = null;
-            addConnectionEnd = null;
 
             lineDrawer.Clear(connectionColorStart);
             lineDrawer.Clear(connectionColorEnd);

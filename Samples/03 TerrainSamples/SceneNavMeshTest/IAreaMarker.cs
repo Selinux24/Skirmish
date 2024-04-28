@@ -7,6 +7,8 @@ namespace TerrainSamples.SceneNavMeshTest
     interface IAreaMarker
     {
         int Id { get; set; }
+
+        bool IntersectsRay(Ray ray);
     }
 
     struct CylinderAreaMarker : IAreaMarker
