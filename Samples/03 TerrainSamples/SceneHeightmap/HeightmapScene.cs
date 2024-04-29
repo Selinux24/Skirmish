@@ -555,7 +555,7 @@ namespace TerrainSamples.SceneHeightmap
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["grass_v.dds"],
-                    Saturation = 1f,
+                    Density = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
                     MinSize = new Vector2(0.5f, 0.5f),
@@ -568,7 +568,7 @@ namespace TerrainSamples.SceneHeightmap
                 {
                     VegetationTextures = ["grass_d.dds"],
                     VegetationNormalMaps = ["grass_n.dds"],
-                    Saturation = 1f,
+                    Density = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
                     MinSize = new Vector2(0.5f, 0.5f),
@@ -580,7 +580,7 @@ namespace TerrainSamples.SceneHeightmap
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["grass1.png"],
-                    Saturation = 0.1f,
+                    Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
                     MinSize = new Vector2(0.5f, 0.5f),
@@ -603,7 +603,7 @@ namespace TerrainSamples.SceneHeightmap
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["flower0.dds"],
-                    Saturation = 1f,
+                    Density = 1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
                     MinSize = new Vector2(1f, 1f) * 0.15f,
@@ -614,7 +614,7 @@ namespace TerrainSamples.SceneHeightmap
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["flower1.dds"],
-                    Saturation = 0.1f,
+                    Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
                     MinSize = new Vector2(1f, 1f) * 0.15f,
@@ -625,7 +625,7 @@ namespace TerrainSamples.SceneHeightmap
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["flower2.dds"],
-                    Saturation = 0.1f,
+                    Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
                     MinSize = new Vector2(1f, 1f) * 0.15f,

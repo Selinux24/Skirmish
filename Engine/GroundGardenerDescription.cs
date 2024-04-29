@@ -44,9 +44,9 @@ namespace Engine
             /// </summary>
             public int Seed { get; set; } = 0;
             /// <summary>
-            /// Vegetation saturation per triangle
+            /// Vegetation density per triangle
             /// </summary>
-            public float Saturation { get; set; } = 0.1f;
+            public float Density { get; set; } = 0.1f;
             /// <summary>
             /// Wind effect
             /// </summary>
@@ -67,6 +67,10 @@ namespace Engine
             /// X and Z values only applies to additional instances
             /// </remarks>
             public Vector3 Delta { get; set; } = new Vector3(0.5f, 0.0f, 0.5f);
+            /// <summary>
+            /// Tint color
+            /// </summary>
+            public Color4 TintColor { get; set; } = Color4.White;
         }
 
         /// <summary>

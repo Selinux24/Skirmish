@@ -775,7 +775,7 @@ namespace TerrainSamples.SceneRts
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["grass_v.dds"],
-                    Saturation = 10f,
+                    Density = 10f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = new Vector2(0.25f, 0.25f),

@@ -214,7 +214,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = ["grass.png"],
-                    Saturation = 20f,
+                    Density = 20f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = Vector2.One * 0.20f,

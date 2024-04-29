@@ -23,493 +23,6 @@ namespace Engine
     /// <param name="name">Name</param>
     public sealed class GroundGardener(Scene scene, string id, string name) : Drawable<GroundGardenerDescription>(scene, id, name), IUseMaterials
     {
-        #region Helper classes
-
-        /// <summary>
-        /// Foliage patch
-        /// </summary>
-        class FoliagePatch : IDisposable
-        {
-            /// <summary>
-            /// Maximum number of elements in patch
-            /// </summary>
-            public const int MAX = 1024 * 8;
-
-            /// <summary>
-            /// Foliage generated data
-            /// </summary>
-            private IEnumerable<VertexBillboard> foliageData = [];
-
-            /// <summary>
-            /// Foliage populating flag
-            /// </summary>
-            public bool Planting { get; protected set; }
-            /// <summary>
-            /// Foliage populated flag
-            /// </summary>
-            public bool Planted { get; protected set; }
-            /// <summary>
-            /// Foliage map channel
-            /// </summary>
-            public int Channel { get; protected set; }
-            /// <summary>
-            /// Returns true if the path has foliage data
-            /// </summary>
-            public bool HasData
-            {
-                get
-                {
-                    return foliageData.Any();
-                }
-            }
-
-            /// <summary>
-            /// Planting task
-            /// </summary>
-            /// <param name="scene">Scene</param>
-            /// <param name="map">Foliage map</param>
-            /// <param name="description">Vegetation task</param>
-            /// <param name="gbbox">Global bounding box</param>
-            /// <param name="nbbox">Node bounding box</param>
-            /// <returns>Returns generated vertex data</returns>
-            private static List<VertexBillboard> PlantNode(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
-            {
-                List<VertexBillboard> vertexData = new(MAX);
-
-                Random rnd = new(description.Seed);
-                int count = (int)MathF.Min(MAX, MAX * description.Saturation);
-
-                Parallel.For(0, count, (index) =>
-                {
-                    var v = CalculatePoint(scene, map, description, gbbox, nbbox, rnd);
-                    if (v.HasValue)
-                    {
-                        vertexData.Add(v.Value);
-                    }
-                });
-
-                return vertexData;
-            }
-            /// <summary>
-            /// Calculates a planting point
-            /// </summary>
-            /// <param name="scene">Scene</param>
-            /// <param name="map">Foliage map</param>
-            /// <param name="description">Vegetation task</param>
-            /// <param name="gbbox">Relative bounding box to plant</param>
-            /// <param name="nbbox">Node box</param>
-            /// <param name="rnd">Randomizer</param>
-            /// <returns>Returns the planting point</returns>
-            private static VertexBillboard? CalculatePoint(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd)
-            {
-                VertexBillboard? result = null;
-
-                Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
-                Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
-
-                //Attempts
-                for (int i = 0; i < 3; i++)
-                {
-                    Vector3 pos = new(
-                        rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
-                        nbbox.Maximum.Y + 1f,
-                        rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
-
-                    bool plant = false;
-                    if (map != null)
-                    {
-                        var c = map.GetRelative(pos, min, max);
-
-                        if (c[description.Index] > 0)
-                        {
-                            plant = rnd.NextFloat(0, 1) < c[description.Index];
-                        }
-                    }
-                    else
-                    {
-                        plant = true;
-                    }
-
-                    if (plant)
-                    {
-                        Vector2 size = new(
-                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
-
-                        var planted = Plant(scene, pos, size, out var res);
-                        if (planted)
-                        {
-                            result = res;
-
-                            break;
-                        }
-                    }
-                }
-
-                return result;
-            }
-            /// <summary>
-            /// Plants one item
-            /// </summary>
-            /// <param name="scene">Scene</param>
-            /// <param name="pos">Position</param>
-            /// <param name="size">Size</param>
-            /// <param name="res">Resulting item</param>
-            /// <returns>Returns true if an item has been planted</returns>
-            private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
-            {
-                var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
-
-                bool found = scene.PickFirst<Triangle>(ray, SceneObjectUsages.Ground, out var r);
-                if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
-                {
-                    res = new VertexBillboard()
-                    {
-                        Position = r.PickingResult.Position,
-                        Size = size,
-                    };
-
-                    return true;
-                }
-
-                res = new VertexBillboard();
-
-                return false;
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public FoliagePatch()
-            {
-                Planted = false;
-                Planting = false;
-
-                Channel = -1;
-            }
-            /// <summary>
-            /// Destructor
-            /// </summary>
-            ~FoliagePatch()
-            {
-                // Finalizer calls Dispose(false)  
-                Dispose(false);
-            }
-            /// <summary>
-            /// Dispose resources
-            /// </summary>
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-            /// <summary>
-            /// Resource disposal
-            /// </summary>
-            protected virtual void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    foliageData = null;
-                }
-            }
-
-            /// <summary>
-            /// Launches foliage population asynchronous task
-            /// </summary>
-            /// <param name="scene">Scene</param>
-            /// <param name="map">Foliage map</param>
-            /// <param name="description">Terrain vegetation description</param>
-            /// <param name="gbbox">Global bounding box</param>
-            /// <param name="nbbox">Node bounding box</param>
-            public async Task PlantAsync(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
-            {
-                if (Planting)
-                {
-                    return;
-                }
-
-                //Start planting task
-                Planting = true;
-
-                try
-                {
-                    Channel = description.Index;
-
-                    foliageData = await Task.Run(() => PlantNode(scene, map, description, gbbox, nbbox));
-
-                    Planted = true;
-                }
-                finally
-                {
-                    Planting = false;
-                }
-            }
-            /// <summary>
-            /// Get foliage data
-            /// </summary>
-            /// <param name="eyePosition">Eye position</param>
-            /// <param name="transparent">Use transparency</param>
-            /// <returns>Returns the foliage data ordered by distance to eye position. Far first if transparency specified, near first otherwise</returns>
-            public IEnumerable<VertexBillboard> GetData(Vector3 eyePosition, bool transparent)
-            {
-                if (!foliageData.Any())
-                {
-                    return [];
-                }
-
-                //Sort data
-                foliageData = foliageData
-                    .OrderBy(obj => (transparent ? -1 : 1) * Vector3.DistanceSquared(obj.Position, eyePosition));
-
-                return foliageData;
-            }
-        }
-        /// <summary>
-        /// Foliage map channel
-        /// </summary>
-        class FoliageMapChannel : IDisposable
-        {
-            /// <summary>
-            /// Channel index
-            /// </summary>
-            public int Index;
-            /// <summary>
-            /// Random seed
-            /// </summary>
-            public int Seed;
-            /// <summary>
-            /// Point saturation
-            /// </summary>
-            public float Saturation;
-            /// <summary>
-            /// Billboard minimum size
-            /// </summary>
-            public Vector2 MinSize;
-            /// <summary>
-            /// Billboard maximum size
-            /// </summary>
-            public Vector2 MaxSize;
-            /// <summary>
-            /// Delta
-            /// </summary>
-            public Vector3 Delta;
-            /// <summary>
-            /// Foliage textures
-            /// </summary>
-            public EngineShaderResourceView Textures;
-            /// <summary>
-            /// Foliage normal maps
-            /// </summary>
-            public EngineShaderResourceView NormalMaps;
-            /// <summary>
-            /// Foliage texture count
-            /// </summary>
-            public uint TextureCount;
-            /// <summary>
-            /// Foliage normal map count
-            /// </summary>
-            public uint NormalMapCount;
-            /// <summary>
-            /// Foliage start radius
-            /// </summary>
-            public float StartRadius;
-            /// <summary>
-            /// Foliage end radius
-            /// </summary>
-            public float EndRadius;
-            /// <summary>
-            /// Wind effect
-            /// </summary>
-            public float WindEffect;
-            /// <summary>
-            /// Geometry output count
-            /// </summary>
-            public BuiltInFoliageInstances Count;
-
-            /// <summary>
-            /// Destructor
-            /// </summary>
-            ~FoliageMapChannel()
-            {
-                // Finalizer calls Dispose(false)  
-                Dispose(false);
-            }
-            /// <summary>
-            /// Dispose resources
-            /// </summary>
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-            /// <summary>
-            /// Resource disposal
-            /// </summary>
-            protected virtual void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    if (Textures != null)
-                    {
-                        Textures.Dispose();
-                        Textures = null;
-                    }
-                    if (NormalMaps != null)
-                    {
-                        NormalMaps.Dispose();
-                        NormalMaps = null;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Foliage buffer
-        /// </summary>
-        class FoliageBuffer : IDisposable
-        {
-            /// <summary>
-            /// Foliage buffer id static counter
-            /// </summary>
-            private static int ID = 0;
-            /// <summary>
-            /// Gets the next instance Id
-            /// </summary>
-            /// <returns>Returns the next Instance Id</returns>
-            private static int GetID()
-            {
-                return ++ID;
-            }
-
-            /// <summary>
-            /// Vertex count
-            /// </summary>
-            private int vertexDrawCount = 0;
-
-            /// <summary>
-            /// Buffer manager
-            /// </summary>
-            protected BufferManager BufferManager = null;
-
-            /// <summary>
-            /// Buffer id
-            /// </summary>
-            public readonly int Id = 0;
-            /// <summary>
-            /// Foliage attached to buffer flag
-            /// </summary>
-            public bool Attached { get; protected set; }
-            /// <summary>
-            /// Vertex buffer descriptor
-            /// </summary>
-            public BufferDescriptor VertexBuffer = null;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="name">Name</param>
-            public FoliageBuffer(BufferManager bufferManager, string name)
-            {
-                BufferManager = bufferManager;
-                Id = GetID();
-                Attached = false;
-                VertexBuffer = bufferManager.AddVertexData(string.Format("{1}.{0}", Id, name), true, new VertexBillboard[FoliagePatch.MAX]);
-            }
-            /// <summary>
-            /// Destructor
-            /// </summary>
-            ~FoliageBuffer()
-            {
-                // Finalizer calls Dispose(false)  
-                Dispose(false);
-            }
-            /// <summary>
-            /// Dispose resources
-            /// </summary>
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-            /// <summary>
-            /// Resource disposal
-            /// </summary>
-            protected virtual void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    //Remove data from buffer manager
-                    BufferManager?.RemoveVertexData(VertexBuffer);
-                }
-            }
-
-            /// <summary>
-            /// Attaches the specified patch to buffer
-            /// </summary>
-            /// <param name="dc">Device context</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="data">Vertex data</param>
-            public void WriteData(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<VertexBillboard> data)
-            {
-                vertexDrawCount = 0;
-                Attached = false;
-
-                //Get the data
-                if (!data.Any())
-                {
-                    return;
-                }
-
-                //Attach data to buffer
-                if (!bufferManager.WriteVertexBuffer(dc, VertexBuffer, data))
-                {
-                    return;
-                }
-
-                vertexDrawCount = data.Count();
-                Attached = true;
-            }
-            /// <summary>
-            /// Frees the buffer
-            /// </summary>
-            public void Free()
-            {
-                vertexDrawCount = 0;
-                Attached = false;
-            }
-            /// <summary>
-            /// Draws the foliage data
-            /// </summary>
-            /// <param name="dc">Device context</param>
-            /// <param name="drawer">Drawer</param>
-            public bool DrawFoliage(IEngineDeviceContext dc, BuiltInDrawer drawer)
-            {
-                if (vertexDrawCount <= 0)
-                {
-                    return false;
-                }
-
-                return drawer.Draw(dc, BufferManager, new DrawOptions
-                {
-                    VertexBuffer = VertexBuffer,
-                    VertexDrawCount = vertexDrawCount,
-                    Topology = Topology.PointList,
-                });
-            }
-
-            /// <summary>
-            /// Gets the text representation of the buffer
-            /// </summary>
-            /// <returns>Returns the text representation of the buffer</returns>
-            public override string ToString()
-            {
-                return $"{Id} => Attached: {Attached}";
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Maximum number of active buffer for foliage drawing
         /// </summary>
@@ -518,6 +31,11 @@ namespace Engine
         /// Maximum number of cached patches for foliage data
         /// </summary>
         public const int MaxFoliagePatches = MaxFoliageBuffers * 2;
+
+        /// <summary>
+        /// Initialized flag
+        /// </summary>
+        private bool initialized = false;
 
         /// <summary>
         /// Last visible node collection
@@ -535,8 +53,6 @@ namespace Engine
         /// Assigned patches list
         /// </summary>
         private readonly Dictionary<FoliagePatch, FoliageBuffer> assignedPatches = [];
-
-        private bool planting = false;
 
         /// <summary>
         /// Random texture
@@ -567,10 +83,6 @@ namespace Engine
         /// </summary>
         private float lastSortingElapsedSeconds = 0;
         /// <summary>
-        /// Initialized flag
-        /// </summary>
-        private bool initialized = false;
-        /// <summary>
         /// Foliage drawer
         /// </summary>
         private BuiltInFoliage foliageDrawer = null;
@@ -597,21 +109,15 @@ namespace Engine
         {
             if (disposing)
             {
+                foliagePatches.Clear();
+                assignedPatches.Clear();
+
                 for (int i = 0; i < foliageBuffers.Count; i++)
                 {
                     foliageBuffers[i]?.Dispose();
                     foliageBuffers[i] = null;
                 }
                 foliageBuffers.Clear();
-
-                foreach (var item in foliagePatches.Values)
-                {
-                    foreach (var value in item)
-                    {
-                        value?.Dispose();
-                    }
-                }
-                foliagePatches.Clear();
 
                 foliageMap?.Dispose();
                 foliageMap = null;
@@ -709,7 +215,7 @@ namespace Engine
             {
                 Index = index,
                 Seed = channel.Seed,
-                Saturation = channel.Saturation,
+                Density = channel.Density,
                 MinSize = channel.MinSize,
                 MaxSize = channel.MaxSize,
                 Delta = channel.Delta,
@@ -719,6 +225,7 @@ namespace Engine
                 NormalMapCount = (uint)normalMapCount,
                 Textures = foliageTextures,
                 NormalMaps = foliageNormalMaps,
+                TintColor = channel.TintColor,
                 WindEffect = channel.WindEffect,
                 Count = (BuiltInFoliageInstances)channel.Instances,
             };
@@ -749,89 +256,70 @@ namespace Engine
                 return;
             }
 
-            UpdatePatchesAsync(context);
-        }
-        /// <summary>
-        /// Updates patches state
-        /// </summary>
-        /// <param name="context">Updating context</param>
-        private void UpdatePatchesAsync(UpdateContext context)
-        {
-            UpdatePatches(context);
-        }
-        /// <summary>
-        /// Updates patches state
-        /// </summary>
-        /// <param name="context">Updating context</param>
-        private void UpdatePatches(UpdateContext context)
-        {
-            if (planting)
+            //Sort nodes by distance from camera position
+            SortVisibleNodes(context.GameTime, Scene.Camera.Position);
+
+            if (!UpdateVisibleNodes())
             {
                 return;
             }
 
+            UpdatePatches();
+        }
+        /// <summary>
+        /// Sorts the visible nodes
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <remarks>Sorts nodes every second</remarks>
+        private void SortVisibleNodes(IGameTime gameTime, Vector3 eyePosition)
+        {
+            lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
+
+            if (lastSortingElapsedSeconds < 1f)
+            {
+                return;
+            }
+
+            lastSortingElapsedSeconds = 0f;
+
+            bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
+
+            Array.Sort(visibleNodes, (n1, n2) =>
+            {
+                int f = transparent ? -1 : 1;
+                float d1 = f * Vector3.DistanceSquared(n1.Center, eyePosition);
+                float d2 = f * Vector3.DistanceSquared(n2.Center, eyePosition);
+                return d1.CompareTo(d2);
+            });
+        }
+        /// <summary>
+        /// Update visible nodes
+        /// </summary>
+        /// <returns>Returns whether the visibility has changed or not</returns>
+        private bool UpdateVisibleNodes()
+        {
             foliageSphere.Center = Scene.Camera.Position;
 
             var newVisible = GetFoliageNodes((IntersectionVolumeFrustum)Scene.Camera.Frustum, foliageSphere);
-            if (newVisible.Length == 0)
-            {
-                return;
-            }
 
             bool allNewNodesIn = EnumerableContains(visibleNodes, newVisible, out var remNodes);
+            bool nodesOut = remNodes.Any();
 
-            if (remNodes.Any())
+            visibleNodes = newVisible;
+
+            if (nodesOut)
             {
                 FreeBuffers(remNodes);
             }
 
-            visibleNodes = newVisible;
-
-            if (allNewNodesIn)
+            if (allNewNodesIn && !nodesOut)
             {
-                return;
+                //No changes
+                return false;
             }
 
-            //Sort nodes by distance from camera position
-            SortVisibleNodes(context.GameTime, Scene.Camera.Position);
-
-            planting = true;
-
-            List<FoliagePatch> toAssign = [];
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    int channelCount = foliageMapChannels.Count;
-                    for (int i = 0; i < visibleNodes.Length; i++)
-                    {
-                        var node = visibleNodes[i];
-
-                        bool init = GetNodePatches(node, channelCount, out var fPatchList);
-                        if (!init)
-                        {
-                            toAssign.AddRange(await DoPlantAsync(node, fPatchList));
-                        }
-                    }
-                }
-                finally
-                {
-                    planting = false;
-                }
-            }).ConfigureAwait(false).GetAwaiter().GetResult();
-
-            foreach (var patch in toAssign)
-            {
-                var freeBuffer = GetNextFreeBuffer();
-
-                if (assignedPatches.TryAdd(patch, freeBuffer))
-                {
-                    continue;
-                }
-
-                assignedPatches[patch] = freeBuffer;
-            }
+            return true;
         }
         /// <summary>
         /// Gets the node list suitable for foliage planting
@@ -898,25 +386,38 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Sorts the visible nodes
+        /// Updates patches state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="eyePosition">Eye position</param>
-        /// <remarks>Sorts nodes every second</remarks>
-        private void SortVisibleNodes(IGameTime gameTime, Vector3 eyePosition)
+        private void UpdatePatches()
         {
-            lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
+            List<FoliagePatch> toAssign = [];
 
-            if (lastSortingElapsedSeconds < 1f)
+            var gbbox = foliageQuadtree.BoundingBox;
+
+            int channelCount = foliageMapChannels.Count;
+            for (int i = 0; i < visibleNodes.Length; i++)
             {
-                return;
+                var node = visibleNodes[i];
+                var nbbox = node.BoundingBox;
+
+                bool init = GetNodePatches(node, channelCount, out var fPatchList);
+                if (!init)
+                {
+                    toAssign.AddRange(DoPlant(fPatchList, gbbox, nbbox));
+                }
             }
 
-            lastSortingElapsedSeconds = 0f;
+            foreach (var patch in toAssign)
+            {
+                var freeBuffer = GetNextFreeBuffer();
 
-            bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
+                if (assignedPatches.TryAdd(patch, freeBuffer))
+                {
+                    continue;
+                }
 
-            visibleNodes = [.. visibleNodes.OrderBy(obj => (transparent ? -1 : 1) * Vector3.DistanceSquared(obj.Center, eyePosition))];
+                assignedPatches[patch] = freeBuffer;
+            }
         }
         /// <summary>
         /// Gets node patches
@@ -944,6 +445,9 @@ namespace Engine
         /// <summary>
         /// Updates the patch list state and finds a list of patches with assigned data
         /// </summary>
+        /// <param name="patches">Patch list</param>
+        /// <param name="gbbox">Global bounding box</param>
+        /// <param name="nbbox">Node bounding box</param>
         /// <returns>Returns a list of patches</returns>
         /// <remarks>
         /// For each high LOD visible node, look for planted foliagePatches.
@@ -952,30 +456,49 @@ namespace Engine
         ///   - If not, add to toAssign list
         /// - If not planted, launch planting task y do nothing more. The node will be processed next time
         /// </remarks>
-        private async Task<IEnumerable<FoliagePatch>> DoPlantAsync(QuadTreeNode node, List<FoliagePatch> patches)
+        private IEnumerable<FoliagePatch> DoPlant(List<FoliagePatch> patches, BoundingBox gbbox, BoundingBox nbbox)
         {
-            List<FoliagePatch> toAssign = [];
-
-            var gbbox = foliageQuadtree.BoundingBox;
-            var nbbox = node.BoundingBox;
-
             for (int i = 0; i < patches.Count; i++)
             {
-                var fPatch = patches[i];
-                if (!fPatch.Planted)
+                var patch = patches[i];
+                if (!patch.Planted)
                 {
                     //Do the planting task
-                    await fPatch.PlantAsync(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox);
+                    Task.Run(async () => await patch.PlantAsync(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox))
+                        .ConfigureAwait(false)
+                        .GetAwaiter()
+                        .GetResult();
                 }
-                else if (!fPatch.HasData || assignedPatches.ContainsKey(fPatch))
+                else if (!patch.HasData || assignedPatches.ContainsKey(patch))
                 {
                     continue;
                 }
 
-                toAssign.Add(fPatch);
+                yield return patch;
+            }
+        }
+        /// <summary>
+        /// Gets the next free buffer
+        /// </summary>
+        private FoliageBuffer GetNextFreeBuffer()
+        {
+            foreach (var buffer in foliageBuffers)
+            {
+                if (assignedPatches.Any(pb => pb.Value == buffer))
+                {
+                    continue;
+                }
+
+                return buffer;
             }
 
-            return toAssign;
+            var free = assignedPatches.Select(pb => pb.Value).FirstOrDefault(b => b != null && !b.Attached);
+            if (free != null)
+            {
+                return free;
+            }
+
+            return null;
         }
 
         /// <inheritdoc/>
@@ -1023,9 +546,8 @@ namespace Engine
         /// </remarks>
         private void WritePatches(IEngineDeviceContext dc, Vector3 eyePosition, bool transparent)
         {
-            foreach (var patch in assignedPatches.Keys)
+            foreach (var (patch, buffer) in assignedPatches)
             {
-                var buffer = assignedPatches[patch];
                 if (buffer == null)
                 {
                     continue;
@@ -1039,29 +561,6 @@ namespace Engine
                 var data = patch.GetData(eyePosition, transparent);
                 buffer.WriteData(dc, BufferManager, data);
             }
-        }
-        /// <summary>
-        /// Gets the next free buffer
-        /// </summary>
-        private FoliageBuffer GetNextFreeBuffer()
-        {
-            foreach (var buffer in foliageBuffers)
-            {
-                if (assignedPatches.Any(pb => pb.Value == buffer))
-                {
-                    continue;
-                }
-
-                return buffer;
-            }
-
-            var free = assignedPatches.Select(pb => pb.Value).FirstOrDefault(b => b != null && b.Attached == false);
-            if (free != null)
-            {
-                return free;
-            }
-
-            return null;
         }
         /// <summary>
         /// Draws the visible patch list
@@ -1080,20 +579,23 @@ namespace Engine
 
                     var state = new BuiltInFoliageState
                     {
+                        TintColor = Color4.White,
+
                         StartRadius = channelData.StartRadius,
                         EndRadius = channelData.EndRadius,
-                        TintColor = Color4.White,
-                        MaterialIndex = foliageMaterial.ResourceIndex,
                         TextureCount = channelData.TextureCount,
                         NormalMapCount = channelData.NormalMapCount,
-                        RandomTexture = textureRandom,
                         Texture = channelData.Textures,
                         NormalMaps = channelData.NormalMaps,
-                        WindDirection = WindDirection,
-                        WindStrength = WindStrength * channelData.WindEffect,
                         Delta = channelData.Delta,
                         WindEffect = channelData.WindEffect,
                         Instances = channelData.Count,
+
+                        MaterialIndex = foliageMaterial.ResourceIndex,
+                        RandomTexture = textureRandom,
+
+                        WindDirection = WindDirection,
+                        WindStrength = WindStrength * channelData.WindEffect,
                     };
 
                     foliageDrawer.UpdateFoliage(dc, state);

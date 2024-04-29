@@ -844,16 +844,18 @@ namespace TerrainSamples.SceneNavMeshTest
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
             var ray = (Ray)pRay;
 
-            foreach (var area in areas.Where(a => a.IntersectsRay(ray)))
+            var area = areas.Find(a => a.IntersectsRay(ray));
+            if (area == null)
             {
-                PathFinderDescription.RemoveArea(area.Id);
-                areas.Remove(area);
-
-                EnqueueGraph();
-
-                stateManager.StartState(States.Default);
-                break;
+                return;
             }
+
+            PathFinderDescription.RemoveArea(area.Id);
+            areas.Remove(area);
+
+            EnqueueGraph();
+
+            stateManager.StartState(States.Default);
         }
         private void UpdateGameStateAddConnection()
         {
