@@ -42,19 +42,15 @@ namespace Engine
         /// <summary>
         /// Patch id
         /// </summary>
-        public readonly int Id = 0;
+        public readonly int Id = GetID();
         /// <summary>
         /// Foliage map channel
         /// </summary>
-        public int Channel { get; protected set; }
-        /// <summary>
-        /// Foliage populating flag
-        /// </summary>
-        public bool Planting { get; protected set; }
+        public int Channel { get; protected set; } = -1;
         /// <summary>
         /// Foliage populated flag
         /// </summary>
-        public bool Planted { get; protected set; }
+        public bool Planted { get; protected set; } = false;
         /// <summary>
         /// Returns true if the path has foliage data
         /// </summary>
@@ -67,7 +63,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Planting task
+        /// Calculates a list of points in the specified bounds
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="map">Foliage map</param>
@@ -75,7 +71,7 @@ namespace Engine
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
         /// <returns>Returns generated vertex data</returns>
-        private static VertexBillboard[] PlantNode(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
+        private static VertexBillboard[] CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
         {
             List<VertexBillboard> vertexData = new(MAX);
 
@@ -84,17 +80,16 @@ namespace Engine
 
             Parallel.For(0, count, (index) =>
             {
-                var v = CalculatePoint(scene, map, description, gbbox, nbbox, rnd);
-                if (v.HasValue)
+                if (CalculatePoint(scene, map, description, gbbox, nbbox, rnd, out var v))
                 {
-                    vertexData.Add(v.Value);
+                    vertexData.Add(v);
                 }
             });
 
             return [.. vertexData];
         }
         /// <summary>
-        /// Calculates a planting point
+        /// Calculates a point
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="map">Foliage map</param>
@@ -102,11 +97,10 @@ namespace Engine
         /// <param name="gbbox">Relative bounding box to plant</param>
         /// <param name="nbbox">Node box</param>
         /// <param name="rnd">Randomizer</param>
-        /// <returns>Returns the planting point</returns>
-        private static VertexBillboard? CalculatePoint(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd)
+        /// <param name="res">Returns the planting point if any</param>
+        /// <returns>Returns true if found</returns>
+        private static bool CalculatePoint(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd, out VertexBillboard res)
         {
-            VertexBillboard? result = null;
-
             Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
             Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
 
@@ -139,34 +133,36 @@ namespace Engine
                         rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
                         rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
 
-                    var planted = Plant(scene, pos, size, out var res);
+                    var planted = FindGroundPosition(scene, pos, size, out var v);
                     if (planted)
                     {
-                        result = res;
+                        res = v;
 
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return result;
+            res = default;
+
+            return false;
         }
         /// <summary>
-        /// Plants one item
+        /// Finds the ground position of the specified point in the scene
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="pos">Position</param>
         /// <param name="size">Size</param>
         /// <param name="res">Resulting item</param>
-        /// <returns>Returns true if an item has been planted</returns>
-        private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
+        /// <returns>Returns true if found</returns>
+        private static bool FindGroundPosition(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
         {
             var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
 
             bool found = scene.PickFirst<Triangle>(ray, SceneObjectUsages.Ground, out var r);
             if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
             {
-                res = new VertexBillboard()
+                res = new()
                 {
                     Position = r.PickingResult.Position,
                     Size = size,
@@ -175,7 +171,7 @@ namespace Engine
                 return true;
             }
 
-            res = new VertexBillboard();
+            res = default;
 
             return false;
         }
@@ -185,46 +181,27 @@ namespace Engine
         /// </summary>
         public FoliagePatch()
         {
-            Id = GetID();
-            Planted = false;
-            Planting = false;
 
-            Channel = -1;
         }
 
         /// <summary>
-        /// Launches foliage population asynchronous task
+        /// Launches foliage population
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="map">Foliage map</param>
         /// <param name="description">Terrain vegetation description</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
-        public async Task PlantAsync(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
+        public void Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
         {
-            if (Planting)
-            {
-                return;
-            }
+            Channel = description.Index;
 
-            //Start planting task
-            Planting = true;
+            var data = CalculatePoints(scene, map, description, gbbox, nbbox);
 
-            try
-            {
-                Channel = description.Index;
+            foliageCount = data.Length;
+            Array.Copy(data, foliageData, foliageCount);
 
-                var data = await Task.Run(() => PlantNode(scene, map, description, gbbox, nbbox));
-
-                foliageCount = data.Length;
-                Array.Copy(data, foliageData, foliageCount);
-
-                Planted = true;
-            }
-            finally
-            {
-                Planting = false;
-            }
+            Planted = true;
         }
         /// <summary>
         /// Get foliage data
@@ -256,7 +233,7 @@ namespace Engine
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id}.Channle_{Channel} => Planting: {Planting} / Planted: {Planted}; HasData: {HasData}; Instances: {foliageCount}";
+            return $"{Id}.Channel_{Channel} => Planted: {Planted}; HasData: {HasData}; Instances: {foliageCount}";
         }
     }
 }

@@ -60,8 +60,8 @@ namespace Engine
                 name,
                 sizeInBytes,
                 dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
-                EngineBindFlags.VertexBuffer,
-                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
+                EngineBinds.VertexBuffer,
+                dynamic ? EngineCpuAccess.Write : EngineCpuAccess.None);
         }
         /// <summary>
         /// Creates a vertex buffer
@@ -78,8 +78,8 @@ namespace Engine
                 name,
                 data,
                 dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
-                EngineBindFlags.VertexBuffer,
-                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
+                EngineBinds.VertexBuffer,
+                dynamic ? EngineCpuAccess.Write : EngineCpuAccess.None);
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace Engine
                 name,
                 data,
                 dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
-                EngineBindFlags.IndexBuffer,
-                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
+                EngineBinds.IndexBuffer,
+                dynamic ? EngineCpuAccess.Write : EngineCpuAccess.None);
         }
 
         /// <summary>
@@ -115,8 +115,8 @@ namespace Engine
                 name,
                 data,
                 EngineResourceUsage.Default,
-                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
-                EngineCpuAccessFlags.None);
+                EngineBinds.VertexBuffer | EngineBinds.StreamOutput,
+                EngineCpuAccess.None);
         }
         /// <summary>
         /// Creates a stream-out buffer
@@ -130,8 +130,8 @@ namespace Engine
                 name,
                 sizeInBytes,
                 EngineResourceUsage.Default,
-                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
-                EngineCpuAccessFlags.None);
+                EngineBinds.VertexBuffer | EngineBinds.StreamOutput,
+                EngineCpuAccess.None);
         }
         /// <summary>
         /// Creates a stream-out buffer
@@ -147,8 +147,8 @@ namespace Engine
                 name,
                 length,
                 EngineResourceUsage.Default,
-                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
-                EngineCpuAccessFlags.None);
+                EngineBinds.VertexBuffer | EngineBinds.StreamOutput,
+                EngineCpuAccess.None);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
+        public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
             FrameCounters.RegBuffer(name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
@@ -216,7 +216,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
@@ -245,7 +245,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();

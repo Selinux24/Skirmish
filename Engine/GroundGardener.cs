@@ -36,6 +36,14 @@ namespace Engine
         /// Initialized flag
         /// </summary>
         private bool initialized = false;
+        /// <summary>
+        /// Updating nodes flag
+        /// </summary>
+        private bool updatingNodes = false;
+        /// <summary>
+        /// Update pending flag
+        /// </summary>
+        private bool updatePending = false;
 
         /// <summary>
         /// Last visible node collection
@@ -48,11 +56,7 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = [];
-        /// <summary>
-        /// Assigned patches list
-        /// </summary>
-        private readonly Dictionary<FoliagePatch, FoliageBuffer> assignedPatches = [];
+        private readonly Dictionary<QuadTreeNode, FoliageNode[]> foliagePatches = [];
 
         /// <summary>
         /// Random texture
@@ -83,10 +87,18 @@ namespace Engine
         /// </summary>
         private float lastSortingElapsedSeconds = 0;
         /// <summary>
+        /// Last eye position for node sorting
+        /// </summary>
+        private Vector3 lastSortingEyePosition = Vector3.One * float.MaxValue;
+        /// <summary>
         /// Foliage drawer
         /// </summary>
         private BuiltInFoliage foliageDrawer = null;
 
+        /// <summary>
+        /// Time between node sorting
+        /// </summary>
+        public float NodeSortingSeconds { get; set; } = 5f;
         /// <summary>
         /// Wind direction
         /// </summary>
@@ -110,7 +122,6 @@ namespace Engine
             if (disposing)
             {
                 foliagePatches.Clear();
-                assignedPatches.Clear();
 
                 for (int i = 0; i < foliageBuffers.Count; i++)
                 {
@@ -133,6 +144,11 @@ namespace Engine
                 textureRandom = null;
             }
         }
+
+        /// <summary>
+        /// Gets whether the selected blend mode has transparency
+        /// </summary>
+        private bool IsTransparent() => BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 
         /// <inheritdoc/>
         public override async Task ReadAssets(GroundGardenerDescription description)
@@ -173,7 +189,7 @@ namespace Engine
 
             for (int i = 0; i < MaxFoliageBuffers; i++)
             {
-                foliageBuffers.Add(new FoliageBuffer(BufferManager, Name));
+                foliageBuffers.Add(new(BufferManager, Name));
             }
 
             foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();
@@ -256,52 +272,99 @@ namespace Engine
                 return;
             }
 
-            //Sort nodes by distance from camera position
-            SortVisibleNodes(context.GameTime, Scene.Camera.Position);
-
-            if (!UpdateVisibleNodes())
+            if (updatingNodes)
             {
+                //Node update task runing
                 return;
             }
 
-            UpdatePatches();
+            updatingNodes = true;
+
+            //Copy variables for the async task
+            float time = context.GameTime.ElapsedSeconds;
+            var eyePosition = Scene.Camera.Position;
+            foliageSphere.Center = eyePosition;
+            var frustum = Scene.Camera.Frustum;
+            var sph = foliageSphere;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    //Sort nodes
+                    SortVisibleNodes(time, eyePosition);
+
+                    //Update node visibility
+                    if (!UpdateNodeVisibility(frustum, sph))
+                    {
+                        return;
+                    }
+
+                    //Update visible patches data
+                    UpdatePatches(eyePosition);
+                }
+                finally
+                {
+                    updatingNodes = false;
+
+                    //Enque an update
+                    updatePending = true;
+                }
+            }).ConfigureAwait(false);
+
+            if (updatePending)
+            {
+                //Writes data into graphics device
+                WritePatches();
+
+                updatePending = false;
+            }
         }
+
         /// <summary>
         /// Sorts the visible nodes
         /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <param name="time">Elapsed time in seconds</param>
         /// <param name="eyePosition">Eye position</param>
         /// <remarks>Sorts nodes every second</remarks>
-        private void SortVisibleNodes(IGameTime gameTime, Vector3 eyePosition)
+        private void SortVisibleNodes(float time, Vector3 eyePosition)
         {
-            lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
+            lastSortingElapsedSeconds += time;
 
-            if (lastSortingElapsedSeconds < 1f)
+            if (lastSortingElapsedSeconds < NodeSortingSeconds)
             {
+                //Perform sorting every NodeSortingSeconds
+                return;
+            }
+
+            if (Vector3.DistanceSquared(eyePosition, lastSortingEyePosition) < foliageSphere.Radius * foliageSphere.Radius)
+            {
+                //Perform sorting if eye position moves away of the foliage sphere radius
                 return;
             }
 
             lastSortingElapsedSeconds = 0f;
+            lastSortingEyePosition = eyePosition;
 
-            bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
+            int f = IsTransparent() ? -1 : 1;
 
             Array.Sort(visibleNodes, (n1, n2) =>
             {
-                int f = transparent ? -1 : 1;
                 float d1 = f * Vector3.DistanceSquared(n1.Center, eyePosition);
                 float d2 = f * Vector3.DistanceSquared(n2.Center, eyePosition);
                 return d1.CompareTo(d2);
             });
         }
-        /// <summary>
-        /// Update visible nodes
-        /// </summary>
-        /// <returns>Returns whether the visibility has changed or not</returns>
-        private bool UpdateVisibleNodes()
-        {
-            foliageSphere.Center = Scene.Camera.Position;
 
-            var newVisible = GetFoliageNodes((IntersectionVolumeFrustum)Scene.Camera.Frustum, foliageSphere);
+        /// <summary>
+        /// Updates the visible nodes, and frees the buffers of the not visible nodes
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Sphere</param>
+        /// <returns>Returns whether the visibility has changed or not</returns>
+        private bool UpdateNodeVisibility(BoundingFrustum frustum, BoundingSphere sph)
+        {
+            var newVisible = GetFoliageNodes(frustum, sph);
 
             bool allNewNodesIn = EnumerableContains(visibleNodes, newVisible, out var remNodes);
             bool nodesOut = remNodes.Any();
@@ -313,27 +376,29 @@ namespace Engine
                 FreeBuffers(remNodes);
             }
 
-            if (allNewNodesIn && !nodesOut)
+            if (allNewNodesIn)
             {
-                //No changes
+                //No new nodes
                 return false;
             }
 
             return true;
         }
         /// <summary>
-        /// Gets the node list suitable for foliage planting
+        /// Gets the visible node list from the quad-tree
         /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="sph">Foliage bounding sphere</param>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Sphere</param>
         /// <returns>Returns a node list</returns>
-        private QuadTreeNode[] GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
+        private QuadTreeNode[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
             var nodes = foliageQuadtree.GetNodesInVolume(ref sph);
-            if (nodes?.Any() != true)
+            if (!nodes.Any())
             {
                 return [];
             }
+
+            var volume = (IntersectionVolumeFrustum)frustum;
 
             return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint).ToArray();
         }
@@ -343,6 +408,7 @@ namespace Engine
         /// <typeparam name="T">Element type</typeparam>
         /// <param name="enum1">First enumerable list</param>
         /// <param name="enum2">Second enumerable list</param>
+        /// <param name="outNodes">Returns the nodes from enum1, not in enum 2</param>
         /// <returns>Returns true if the first enumerable contains all the elements of the second enumerable</returns>
         private static bool EnumerableContains(IEnumerable<QuadTreeNode> enum1, IEnumerable<QuadTreeNode> enum2, out IEnumerable<QuadTreeNode> outNodes)
         {
@@ -359,64 +425,67 @@ namespace Engine
 
             return allInNodes.Count == 0;
         }
+
         /// <summary>
-        /// Frees the buffers of the specified node list
+        /// Frees the buffers associated to the specified node list
         /// </summary>
         /// <param name="nodes">Node list</param>
         private void FreeBuffers(IEnumerable<QuadTreeNode> nodes)
         {
             foreach (var node in nodes)
             {
-                if (!foliagePatches.TryGetValue(node, out var patches))
+                if (!foliagePatches.TryGetValue(node, out var nodeData))
                 {
                     continue;
                 }
 
-                foreach (var patch in patches)
+                foreach (var d in nodeData)
                 {
-                    if (!assignedPatches.TryGetValue(patch, out var buffer))
-                    {
-                        continue;
-                    }
-
-                    buffer.Free();
-
-                    assignedPatches.Remove(patch);
+                    //Frees the buffer, but maintain the patch data
+                    d.FreeBuffer(false);
                 }
             }
         }
+
         /// <summary>
         /// Updates patches state
         /// </summary>
-        private void UpdatePatches()
+        /// <param name="eyePosition">Eye position</param>
+        private void UpdatePatches(Vector3 eyePosition)
         {
-            List<FoliagePatch> toAssign = [];
+            List<FoliageNode> toAssign = [];
 
             var gbbox = foliageQuadtree.BoundingBox;
-
             int channelCount = foliageMapChannels.Count;
-            for (int i = 0; i < visibleNodes.Length; i++)
+
+            //Iterate over the visible nodes, and get the current patch configuration of each
+            foreach (var node in visibleNodes)
             {
-                var node = visibleNodes[i];
                 var nbbox = node.BoundingBox;
 
-                bool init = GetNodePatches(node, channelCount, out var fPatchList);
-                if (!init)
+                //Get the node data
+                bool initialized = GetNodePatches(node, channelCount, out var nodeData);
+                if (!initialized)
                 {
-                    toAssign.AddRange(DoPlant(fPatchList, gbbox, nbbox));
+                    //Initialice the node data
+                    DoPlant(nodeData, gbbox, nbbox);
                 }
+
+                //Collect the node data to assign a buffer
+                toAssign.AddRange(nodeData.Where(n => n.IsReadyToAssign()));
             }
 
-            foreach (var patch in toAssign)
+            //Iterate over the node data
+            foreach (var n in toAssign)
             {
-                var freeBuffer = GetNextFreeBuffer();
-
-                if (assignedPatches.TryAdd(patch, freeBuffer))
+                if (n.Buffer != null)
                 {
+                    //Already has a buffer
                     continue;
                 }
 
-                assignedPatches[patch] = freeBuffer;
+                //Assign a new free buffer to the node data
+                n.SetBuffer(GetNextFreeBuffer(eyePosition));
             }
         }
         /// <summary>
@@ -424,31 +493,27 @@ namespace Engine
         /// </summary>
         /// <param name="node">Node</param>
         /// <param name="channelCount">Channel count</param>
-        /// <param name="patches">Patch list</param>
+        /// <param name="nodeData">Node data</param>
         /// <returns>Returns true if the node is initialized</returns>
-        private bool GetNodePatches(QuadTreeNode node, int channelCount, out List<FoliagePatch> patches)
+        private bool GetNodePatches(QuadTreeNode node, int channelCount, out FoliageNode[] nodeData)
         {
-            if (foliagePatches.TryGetValue(node, out patches))
+            if (foliagePatches.TryGetValue(node, out nodeData))
             {
                 return true;
             }
 
-            patches = [];
-            for (int i = 0; i < channelCount; i++)
-            {
-                patches.Add(new());
-            }
-            foliagePatches.Add(node, patches);
+            nodeData = Helper.CreateArray<FoliageNode>(channelCount, () => new());
+
+            foliagePatches.Add(node, nodeData);
 
             return false;
         }
         /// <summary>
         /// Updates the patch list state and finds a list of patches with assigned data
         /// </summary>
-        /// <param name="patches">Patch list</param>
+        /// <param name="nodeData">Node data</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
-        /// <returns>Returns a list of patches</returns>
         /// <remarks>
         /// For each high LOD visible node, look for planted foliagePatches.
         /// - If planted, see if they were assigned to a foliageBuffer
@@ -456,35 +521,29 @@ namespace Engine
         ///   - If not, add to toAssign list
         /// - If not planted, launch planting task y do nothing more. The node will be processed next time
         /// </remarks>
-        private IEnumerable<FoliagePatch> DoPlant(List<FoliagePatch> patches, BoundingBox gbbox, BoundingBox nbbox)
+        private void DoPlant(FoliageNode[] nodeData, BoundingBox gbbox, BoundingBox nbbox)
         {
-            for (int i = 0; i < patches.Count; i++)
-            {
-                var patch = patches[i];
-                if (!patch.Planted)
-                {
-                    //Do the planting task
-                    Task.Run(async () => await patch.PlantAsync(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox))
-                        .ConfigureAwait(false)
-                        .GetAwaiter()
-                        .GetResult();
-                }
-                else if (!patch.HasData || assignedPatches.ContainsKey(patch))
-                {
-                    continue;
-                }
+            //Select all patches without calculated data
+            var toPlant = nodeData
+                .Where(n => !n.Patch.Planted)
+                .Select(n => n.Patch)
+                .ToArray();
 
-                yield return patch;
-            }
+            var res = Parallel.For(0, toPlant.Length, (i) =>
+            {
+                toPlant[i].Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox);
+            });
         }
         /// <summary>
         /// Gets the next free buffer
         /// </summary>
-        private FoliageBuffer GetNextFreeBuffer()
+        /// <param name="eyePosition">Eye position</param>
+        private FoliageBuffer GetNextFreeBuffer(Vector3 eyePosition)
         {
+            //Try to find unused first
             foreach (var buffer in foliageBuffers)
             {
-                if (assignedPatches.Any(pb => pb.Value == buffer))
+                if (foliagePatches.Values.Any(n => n.Any(pb => pb.Buffer == buffer)))
                 {
                     continue;
                 }
@@ -492,13 +551,48 @@ namespace Engine
                 return buffer;
             }
 
-            var free = assignedPatches.Select(pb => pb.Value).FirstOrDefault(b => b != null && !b.Attached);
-            if (free != null)
+            //All buffer already used. Try to find not visible & fartest from position
+            var notVisibleNodes = foliagePatches.Keys.Except(visibleNodes).OrderByDescending(n => Vector3.DistanceSquared(n.Center, eyePosition));
+            foreach (var node in notVisibleNodes)
             {
-                return free;
+                foreach (var nd in foliagePatches[node])
+                {
+                    var buffer = nd.Buffer;
+
+                    if (buffer == null || buffer.Attached)
+                    {
+                        continue;
+                    }
+
+                    return buffer;
+                }
             }
 
+            //No buffer
             return null;
+        }
+
+        /// <summary>
+        /// Writes patches data into graphic buffers
+        /// </summary>
+        private void WritePatches()
+        {
+            var dc = Scene.Game.Graphics.ImmediateContext;
+            var eyePosition = Scene.Camera.Position;
+            bool transparent = IsTransparent();
+
+            foreach (var node in visibleNodes)
+            {
+                if (!foliagePatches.TryGetValue(node, out var nodeData))
+                {
+                    continue;
+                }
+
+                foreach (var d in nodeData)
+                {
+                    d.WriteData(dc, BufferManager, eyePosition, transparent);
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -526,41 +620,8 @@ namespace Engine
             }
 
             var dc = context.DeviceContext;
-            var eyePosition = context.Camera.Position;
-            bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
-            WritePatches(dc, eyePosition, transparent);
 
             return DrawPatches(dc);
-        }
-        /// <summary>
-        /// Attaches patches data into graphic buffers
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="eyePosition">Eye position</param>
-        /// <param name="transparent">Transparent</param>
-        /// <remarks>
-        /// For each node to assign
-        /// - Look for a free buffer. It's free if unassigned or assigned to not visible node
-        ///   - If free buffer found, assign
-        ///   - If not, look for a buffer to free, farthest from camera first
-        /// </remarks>
-        private void WritePatches(IEngineDeviceContext dc, Vector3 eyePosition, bool transparent)
-        {
-            foreach (var (patch, buffer) in assignedPatches)
-            {
-                if (buffer == null)
-                {
-                    continue;
-                }
-
-                if (buffer.Attached)
-                {
-                    continue;
-                }
-
-                var data = patch.GetData(eyePosition, transparent);
-                buffer.WriteData(dc, BufferManager, data);
-            }
         }
         /// <summary>
         /// Draws the visible patch list
@@ -571,11 +632,19 @@ namespace Engine
             bool drawn = false;
             foreach (var node in visibleNodes)
             {
-                var patches = foliagePatches[node];
-                var patchBuffers = patches.Where(assignedPatches.ContainsKey).Select(p => new { Patch = p, Buffer = assignedPatches[p] });
-                foreach (var pb in patchBuffers)
+                if (!foliagePatches.TryGetValue(node, out var nodeData))
                 {
-                    var channelData = foliageMapChannels[pb.Patch.Channel];
+                    continue;
+                }
+
+                foreach (var d in nodeData)
+                {
+                    if (!d.IsReadyToDraw())
+                    {
+                        continue;
+                    }
+
+                    var channelData = foliageMapChannels[d.Patch.Channel];
 
                     var state = new BuiltInFoliageState
                     {
@@ -600,7 +669,7 @@ namespace Engine
 
                     foliageDrawer.UpdateFoliage(dc, state);
 
-                    drawn = pb.Buffer.DrawFoliage(dc, foliageDrawer) || drawn;
+                    drawn = d.Buffer.DrawFoliage(dc, foliageDrawer) || drawn;
                 }
             }
 

@@ -872,7 +872,7 @@ namespace Engine.Common
                 return false;
             }
 
-            dc.IASetVertexBuffers(0, vertexBufferBindings);
+            dc.IASetVertexBuffers(0, [.. vertexBufferBindings]);
 
             return true;
         }
@@ -945,12 +945,12 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<uint> data)
+        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
+        public bool WriteIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor, uint[] data, bool discard = true)
         {
-            return WriteBuffer(
-                dc, descriptor, data,
-                indexBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray(),
-                indexBuffers);
+            var descriptors = indexBufferDescriptors.OfType<IEngineBufferDescriptor>();
+
+            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. indexBuffers], discard);
         }
         /// <summary>
         /// Writes vertex data into buffer
@@ -959,13 +959,13 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteVertexBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
+        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
+        public bool WriteVertexBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
             where T : struct
         {
-            return WriteBuffer(
-                dc, descriptor, data,
-                vertexBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray(),
-                vertexBuffers);
+            var descriptors = vertexBufferDescriptors.OfType<IEngineBufferDescriptor>();
+
+            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. vertexBuffers], discard);
         }
         /// <summary>
         /// Writes instancing data
@@ -973,13 +973,13 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Instancig data</param>
-        public bool WriteInstancingData<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
+        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
+        public bool WriteInstancingData<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
             where T : struct
         {
-            return WriteBuffer(
-                dc, descriptor, data,
-                instancingBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray(),
-                vertexBuffers);
+            var descriptors = instancingBufferDescriptors.OfType<IEngineBufferDescriptor>();
+
+            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. vertexBuffers], discard);
         }
         /// <summary>
         /// Writes data in buffer
@@ -990,9 +990,44 @@ namespace Engine.Common
         /// <param name="data">Data to write</param>
         /// <param name="bufferDescriptors">Buffer descriptors</param>
         /// <param name="buffers">Buffer list</param>
-        private bool WriteBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data, IEnumerable<IEngineBufferDescriptor> bufferDescriptors, IEnumerable<EngineBuffer> buffers)
+        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
+        private bool WriteDiscardBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
             where T : struct
         {
+            if (!ValidateWriteBuffer(dc, descriptor, data, bufferDescriptors, buffers, out var buffer))
+            {
+                return false;
+            }
+
+            if (discard)
+            {
+                return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
+            }
+
+            if (!dc.IsImmediateContext)
+            {
+                Logger.WriteWarning(this, $"Invalid WriteNoOverwriteBuffer action into deferred dc: {dc}. WriteDiscardBuffer action performed instead.");
+
+                return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
+            }
+
+            return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+        }
+        /// <summary>
+        /// Validates write data parameters
+        /// </summary>
+        /// <typeparam name="T">Type of data</typeparam>
+        /// <param name="dc">Device context</param>
+        /// <param name="descriptor">Buffer descriptor</param>
+        /// <param name="data">Data to write</param>
+        /// <param name="bufferDescriptors">Buffer descriptors</param>
+        /// <param name="buffers">Buffer list</param>
+        /// <param name="buffer">Returns the buffer to update</param>
+        private bool ValidateWriteBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
+            where T : struct
+        {
+            buffer = null;
+
             if (dc == null)
             {
                 return false;
@@ -1003,7 +1038,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return true;
             }
@@ -1014,16 +1049,16 @@ namespace Engine.Common
                 return false;
             }
 
-            var bufferDescriptor = bufferDescriptors.ElementAt(descriptor.BufferDescriptionIndex);
+            var bufferDescriptor = bufferDescriptors[descriptor.BufferDescriptionIndex];
             if (bufferDescriptor.Dirty)
             {
                 Logger.WriteWarning(this, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
-            var buffer = buffers.ElementAt(bufferDescriptor.BufferIndex);
+            buffer = buffers[bufferDescriptor.BufferIndex];
 
-            return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
+            return true;
         }
 
         /// <summary>
@@ -1031,7 +1066,7 @@ namespace Engine.Common
         /// </summary>
         public void CreateBuffers()
         {
-            Task.Run(async () => await CreateBuffersAsync(string.Empty, null));
+            Task.Run(() => CreateBuffersAsync(string.Empty, null)).ConfigureAwait(false);
         }
     }
 }

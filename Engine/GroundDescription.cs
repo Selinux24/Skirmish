@@ -84,6 +84,7 @@ namespace Engine
         public GroundDescription()
             : base()
         {
+            BlendMode = BlendModes.Opaque;
             CastShadow = ShadowCastingAlgorihtms.All;
         }
 
@@ -95,7 +96,7 @@ namespace Engine
             // Read model content
             if (Heightmap != null)
             {
-                return new[] { await Heightmap.ReadContentData() };
+                return [await Heightmap.ReadContentData()];
             }
             else if (Content != null)
             {

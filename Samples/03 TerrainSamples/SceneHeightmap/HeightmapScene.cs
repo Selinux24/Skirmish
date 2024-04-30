@@ -34,7 +34,6 @@ namespace TerrainSamples.SceneHeightmap
 
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
-        private bool lanternFixed = false;
 
         private readonly Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
@@ -55,15 +54,17 @@ namespace TerrainSamples.SceneHeightmap
         private bool showTerrainDEBUG = false;
         private bool terrainInitializedDEBUG = false;
 
-        private GroundGardener gardener = null;
-        private GroundGardener gardener2 = null;
+        private GroundGardener gardenerGrass = null;
+        private GroundGardener gardenerFlowers = null;
         private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
         private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private PrimitiveListDrawer<Line3D> linesDrawer = null;
         private const float gardenerAreaSize = 512;
         private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(0, gardenerAreaSize, gardenerAreaSize));
         private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
         private bool showGardenerDEBUG = false;
+
+        private BoundingFrustum cameraFrustum;
+        private bool showCameraFrustumDEBUG = false;
 
         private ModelInstanced torchs = null;
         private SceneLightSpot spotLight1 = null;
@@ -486,11 +487,6 @@ namespace TerrainSamples.SceneHeightmap
                 "DEBUG++ bounding boxes faces",
                 new() { Count = 1000, DepthEnabled = true, StartsVisible = false, }, LayerUI - 1);
 
-            linesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "DEBUG++ Lines drawer",
-                "DEBUG++ Lines drawer",
-                new() { Count = 1000, StartsVisible = false, }, LayerEffects + 1);
-
             lightsDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DEBUG++ Lights",
                 "DEBUG++ Lights",
@@ -537,14 +533,14 @@ namespace TerrainSamples.SceneHeightmap
         {
             LoadResources(
                 [
-                    InitializeGardener,
-                    InitializeGardener2,
+                    InitializeGardenerGrass,
+                    InitializeGardenerFlowers,
                     SetAnimationDictionaries,
                     SetPositionOverTerrain,
                 ],
                 LoadingTaskTerrainObjectsCompleted);
         }
-        private async Task InitializeGardener()
+        private async Task InitializeGardenerGrass()
         {
             var vDesc = new GroundGardenerDescription()
             {
@@ -591,9 +587,9 @@ namespace TerrainSamples.SceneHeightmap
                     Instances = GroundGardenerPatchInstances.Default,
                 },
             };
-            gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
+            gardenerGrass = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
         }
-        private async Task InitializeGardener2()
+        private async Task InitializeGardenerFlowers()
         {
             var vDesc2 = new GroundGardenerDescription()
             {
@@ -633,10 +629,8 @@ namespace TerrainSamples.SceneHeightmap
                     Seed = 3,
                     WindEffect = 1f,
                 },
-                StartsActive = false,
-                StartsVisible = false,
             };
-            gardener2 = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Flowers", "Flowers", vDesc2);
+            gardenerFlowers = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Flowers", "Flowers", vDesc2);
         }
         private async Task SetAnimationDictionaries()
         {
@@ -1164,6 +1158,16 @@ namespace TerrainSamples.SceneHeightmap
                 Camera.MoveBackward(gameTime, !Game.Input.ShiftPressed);
             }
 
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(gameTime, !Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, !Game.Input.ShiftPressed);
+            }
+
             return Camera.Position;
         }
         private Vector3 UpdateWalkingCamera(IGameTime gameTime)
@@ -1240,7 +1244,6 @@ namespace TerrainSamples.SceneHeightmap
             if (Game.Input.KeyJustReleased(Keys.L))
             {
                 lantern.Enabled = !lantern.Enabled;
-                lanternFixed = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.O))
@@ -1324,6 +1327,16 @@ namespace TerrainSamples.SceneHeightmap
                 bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
                 bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
             }
+
+            if (Game.Input.KeyJustReleased(Keys.M))
+            {
+                cameraFrustum = Camera.Frustum;
+
+                showCameraFrustumDEBUG = !showCameraFrustumDEBUG;
+
+                bboxesDrawer.Visible = bboxesDrawer.Active = showCameraFrustumDEBUG;
+                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showCameraFrustumDEBUG;
+            }
         }
         private void UpdateInputNavigation()
         {
@@ -1362,13 +1375,6 @@ namespace TerrainSamples.SceneHeightmap
             if (Game.Input.KeyJustReleased(Keys.G))
             {
                 Lights.KeyLight.CastShadow = !Lights.KeyLight.CastShadow;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.Space))
-            {
-                lanternFixed = true;
-                linesDrawer.SetPrimitives(Color.LightPink, lantern.GetVolume(10));
-                linesDrawer.Visible = true;
             }
         }
         private void UpdateInputFog()
@@ -1461,7 +1467,7 @@ namespace TerrainSamples.SceneHeightmap
             spotLight1.Enabled = false;
             spotLight2.Enabled = false;
 
-            if (lantern.Enabled && !lanternFixed)
+            if (lantern.Enabled)
             {
                 lantern.Position = Camera.Position + (Camera.Left * 2);
                 lantern.Direction = Camera.Direction;
@@ -1490,8 +1496,8 @@ namespace TerrainSamples.SceneHeightmap
                 if (windNextStrength < windStrength) windStrength = windNextStrength;
             }
 
-            gardener?.SetWind(windDirection, windStrength);
-            gardener2?.SetWind(windDirection, windStrength);
+            gardenerGrass?.SetWind(windDirection, windStrength);
+            gardenerFlowers?.SetWind(windDirection, windStrength);
         }
         private void UpdateDust(IGameTime gameTime)
         {
@@ -1540,15 +1546,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateDrawers()
         {
-            if (showTerrainDEBUG)
-            {
-                UpdateDebugTerrain();
-            }
-
-            if (showGardenerDEBUG)
-            {
-                UpdateDebugGardeners();
-            }
+            UpdateDebugDrawers();
 
             if (showSoldierDEBUG)
             {
@@ -1565,37 +1563,64 @@ namespace TerrainSamples.SceneHeightmap
                 UpdateDebugLightCullingVolumes();
             }
         }
-        private void UpdateDebugTerrain()
+        private void UpdateDebugDrawers()
+        {
+            Color4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
+
+            Color4 frustumLColor = new(Color.LightPink.ToColor3(), 0.75f);
+            Color4 frustumTColor = new(Color.LightPink.ToColor3(), 0.25f);
+
+            lightsVolumeDrawer.Clear();
+            lightsVolumeDrawer.Clear();
+
+            if (showTerrainDEBUG)
+            {
+                UpdateDebugTerrain(terrainColor);
+            }
+
+            if (showGardenerDEBUG)
+            {
+                UpdateDebugGardeners();
+            }
+
+            if (showCameraFrustumDEBUG)
+            {
+                UpdateCameraFrustum(frustumLColor, frustumTColor);
+            }
+        }
+        private void UpdateDebugTerrain(Color4 color)
         {
             if (terrainInitializedDEBUG)
             {
                 return;
             }
 
-            bboxesDrawer.Clear();
-            bboxesTriDrawer.Clear();
-
             var terrainBoxes = terrain.GetBoundingBoxes(5);
             var listBoxes = Line3D.CreateBoxes(terrainBoxes);
-            bboxesDrawer.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
+            bboxesDrawer.SetPrimitives(color, listBoxes);
 
             terrainInitializedDEBUG = true;
+        }
+        private void UpdateCameraFrustum(Color4 lColor, Color4 tColor)
+        {
+            var lines = Line3D.CreateFrustum(cameraFrustum);
+            var tris = GeometryUtil.CreateFrustum(Topology.TriangleList, cameraFrustum);
+
+            bboxesDrawer.SetPrimitives(lColor, lines);
+            bboxesTriDrawer.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
         private void UpdateDebugGardeners()
         {
             terrainInitializedDEBUG = false;
 
-            bboxesDrawer.Clear();
-            bboxesTriDrawer.Clear();
-
-            if (gardener.Visible)
+            if (gardenerGrass.Visible)
             {
-                UpdateDebugGardener(gardener);
+                UpdateDebugGardener(gardenerGrass);
             }
 
-            if (gardener2.Visible)
+            if (gardenerFlowers.Visible)
             {
-                UpdateDebugGardener(gardener2);
+                UpdateDebugGardener(gardenerFlowers);
             }
         }
         private void UpdateDebugGardener(GroundGardener g)

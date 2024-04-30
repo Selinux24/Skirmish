@@ -65,20 +65,20 @@ namespace Engine.Common
             {
                 VertexBuffer = graphics.CreateStreamOutBuffer(name, data);
 
-                StreamOutBinding = new[]
-                {
+                StreamOutBinding =
+                [
                     new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
-                };
+                ];
             }
             else
             {
                 VertexBuffer = graphics.CreateVertexBuffer(name, data, false);
             }
 
-            VertexBufferBinding = new[]
-            {
+            VertexBufferBinding =
+            [
                 new EngineVertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
-            };
+            ];
         }
         /// <summary>
         /// Constructor
@@ -104,20 +104,20 @@ namespace Engine.Common
             {
                 VertexBuffer = graphics.CreateStreamOutBuffer(name, sizeInBytes);
 
-                StreamOutBinding = new[]
-                {
+                StreamOutBinding =
+                [
                     new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
-                };
+                ];
             }
             else
             {
                 VertexBuffer = graphics.CreateVertexBuffer(name, sizeInBytes, false);
             }
 
-            VertexBufferBinding = new[]
-            {
+            VertexBufferBinding =
+            [
                 new EngineVertexBufferBinding (VertexBuffer, default(T).GetStride(), 0),
-            };
+            ];
         }
         /// <summary>
         /// Destructor
@@ -154,7 +154,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="data">Data to write</param>
-        public void Write(IEngineDeviceContext dc, IEnumerable<T> data)
+        public void Write(IEngineDeviceContext dc, T[] data)
         {
             dc.WriteDiscardBuffer(VertexBuffer, data);
         }

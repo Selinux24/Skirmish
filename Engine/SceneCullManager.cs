@@ -78,7 +78,7 @@ namespace Engine
         /// <param name="item">Object</param>
         private void SetCullValue(CullData value, int index, ICullable item, bool force)
         {
-            var values = Objects.AddOrUpdate(item, new List<CullData>(), (k, v) => v);
+            var values = Objects.AddOrUpdate(item, [], (k, v) => v);
 
             int count = values.Count;
             if (count <= index)

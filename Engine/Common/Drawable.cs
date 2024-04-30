@@ -6,7 +6,13 @@ namespace Engine.Common
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable<T> : BaseSceneObject<T>, IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class Drawable<T>(Scene scene, string id, string name) : BaseSceneObject<T>(scene, id, name), IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
     {
         /// <summary>
         /// Buffer manager
@@ -26,17 +32,6 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual int InstanceCount { get; protected set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected Drawable(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>

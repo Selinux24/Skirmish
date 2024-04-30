@@ -293,7 +293,7 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            immediateContext = new EngineDeviceContext("Immediate", -1, device.ImmediateContext3);
+            immediateContext = new EngineDeviceContext("Immediate", true, -1, device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -557,7 +557,7 @@ namespace Engine
         /// <param name="passIndex">Pass index</param>
         public IEngineDeviceContext CreateDeferredContext(string name, int passIndex)
         {
-            return new EngineDeviceContext(name, passIndex, new DeviceContext3(device));
+            return new EngineDeviceContext(name, false, passIndex, new DeviceContext3(device));
         }
 
         /// <summary>
@@ -702,7 +702,7 @@ namespace Engine
         /// <param name="arraySize">Render target list size</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a render target and its textures</returns>
-        public (EngineRenderTargetView RenderTarget, IEnumerable<EngineShaderResourceView> ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
+        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView[] ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
         {
             try
             {

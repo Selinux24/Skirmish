@@ -48,11 +48,11 @@ namespace Engine
         /// <summary>
         /// Lights geometry vertices
         /// </summary>
-        private readonly List<VertexPosition> lightGeometryVertices = new();
+        private readonly List<VertexPosition> lightGeometryVertices = [];
         /// <summary>
         /// Light geometry indices
         /// </summary>
-        private readonly List<uint> lightGeometryIndices = new();
+        private readonly List<uint> lightGeometryIndices = [];
         /// <summary>
         /// Update light geometry buffers flag
         /// </summary>
@@ -281,7 +281,7 @@ namespace Engine
             }
             else
             {
-                dc.WriteDiscardBuffer(lightGeometryVertexBuffer, lightGeometryVertices);
+                dc.WriteDiscardBuffer(lightGeometryVertexBuffer, [.. lightGeometryVertices]);
             }
 
             if (lightGeometryIndexBuffer == null)
@@ -290,7 +290,7 @@ namespace Engine
             }
             else
             {
-                dc.WriteDiscardBuffer(lightGeometryIndexBuffer, lightGeometryIndices);
+                dc.WriteDiscardBuffer(lightGeometryIndexBuffer, [.. lightGeometryIndices]);
             }
 
             updateLightBuffers = true;

@@ -302,7 +302,7 @@ namespace Engine
         {
             UpdateBufferData();
 
-            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, bufferData))
+            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, [.. bufferData]))
             {
                 return;
             }

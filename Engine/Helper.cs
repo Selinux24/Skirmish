@@ -326,7 +326,7 @@ namespace Engine
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
-        public static T[] CreateArray<T>(int length, T defaultValue) where T : struct
+        public static T[] CreateArray<T>(int length, T defaultValue = default) where T : struct
         {
             T[] array = new T[length];
 

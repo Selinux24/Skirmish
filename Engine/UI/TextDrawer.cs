@@ -12,7 +12,13 @@ namespace Engine.UI
     /// <summary>
     /// Text drawer
     /// </summary>
-    class TextDrawer : Drawable<TextDrawerDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    class TextDrawer(Scene scene, string id, string name) : Drawable<TextDrawerDescription>(scene, id, name)
     {
         /// <summary>
         /// Maximum text length
@@ -84,7 +90,7 @@ namespace Engine.UI
         /// <summary>
         /// Font drawer
         /// </summary>
-        private readonly BuiltInFonts fontDrawer;
+        private readonly BuiltInFonts fontDrawer = BuiltInShaders.GetDrawer<BuiltInFonts>();
 
         /// <summary>
         /// Manipulator
@@ -253,17 +259,6 @@ namespace Engine.UI
         /// </summary>
         public IUIControl Parent { get; set; } = null;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public TextDrawer(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-            fontDrawer = BuiltInShaders.GetDrawer<BuiltInFonts>();
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -489,8 +484,8 @@ namespace Engine.UI
         /// <param name="dc">Device context</param>
         private void WriteBuffers(IEngineDeviceContext dc)
         {
-            bool vertsWrited = BufferManager.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount));
-            bool idxWrited = BufferManager.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount));
+            bool vertsWrited = BufferManager.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount).ToArray());
+            bool idxWrited = BufferManager.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount).ToArray());
             if (!vertsWrited || !idxWrited)
             {
                 return;

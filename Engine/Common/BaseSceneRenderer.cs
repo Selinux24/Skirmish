@@ -1296,7 +1296,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="target">Target type</param>
         /// <returns>Returns the target texture list</returns>
-        private IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
+        private EngineShaderResourceView[] GetTargetTextures(Targets target)
         {
             return target switch
             {
@@ -1793,7 +1793,7 @@ namespace Engine.Common
             if (ExecuteParallel(actions))
             {
                 //Execute command list
-                var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
+                var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command).ToArray();
                 ic.ExecuteCommandLists(commands);
             }
         }

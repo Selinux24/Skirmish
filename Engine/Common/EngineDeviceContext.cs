@@ -144,7 +144,7 @@ namespace Engine.Common
         /// <summary>
         /// Current viewport
         /// </summary>
-        private IEnumerable<RawViewportF> currentViewports;
+        private RawViewportF[] currentViewports;
 
         /// <summary>
         /// Current depth-stencil state
@@ -299,6 +299,8 @@ namespace Engine.Common
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
+        public bool IsImmediateContext { get; private set; }
+        /// <inheritdoc/>
         public int PassIndex { get; private set; }
         /// <inheritdoc/>
         public Topology IAPrimitiveTopology
@@ -341,12 +343,15 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="name">Name</param>
+        /// <param name="immediate">Is the immediate context</param>
         /// <param name="passIndex">Pass index</param>
         /// <param name="deviceContext">Device context</param>
-        internal EngineDeviceContext(string name, int passIndex, DeviceContext3 deviceContext)
+        internal EngineDeviceContext(string name, bool immediate, int passIndex, DeviceContext3 deviceContext)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A device context name must be specified.");
             this.deviceContext = deviceContext ?? throw new ArgumentNullException(nameof(deviceContext), "A device context must be specified.");
+
+            IsImmediateContext = immediate;
 
             PassIndex = passIndex;
             this.deviceContext.DebugName = name;
@@ -446,12 +451,12 @@ namespace Engine.Common
             SetViewPorts([(RawViewportF)viewport]);
         }
         /// <inheritdoc/>
-        public void SetViewports(IEnumerable<Viewport> viewports)
+        public void SetViewports(Viewport[] viewports)
         {
             SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
         }
         /// <inheritdoc/>
-        public void SetViewports(IEnumerable<ViewportF> viewports)
+        public void SetViewports(ViewportF[] viewports)
         {
             SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
         }
@@ -459,14 +464,14 @@ namespace Engine.Common
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        private void SetViewPorts(IEnumerable<RawViewportF> viewports)
+        private void SetViewPorts(RawViewportF[] viewports)
         {
             if (Helper.CompareEnumerables(currentViewports, viewports))
             {
                 return;
             }
 
-            deviceContext.Rasterizer.SetViewports(viewports.ToArray());
+            deviceContext.Rasterizer.SetViewports(viewports);
             frameCounters.ViewportsSets++;
 
             currentViewports = viewports;
@@ -589,7 +594,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void IASetVertexBuffers(int firstSlot, IEnumerable<EngineVertexBufferBinding> vertexBufferBindings)
+        public void IASetVertexBuffers(int firstSlot, EngineVertexBufferBinding[] vertexBufferBindings)
         {
             if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
             {
@@ -674,7 +679,7 @@ namespace Engine.Common
             currentVertexShaderConstantBufferState.SetConstantBuffer(deviceContext.VertexShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetVertexShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentVertexShaderConstantBufferState.SetConstantBuffers(deviceContext.VertexShader, startSlot, bufferList);
         }
@@ -684,7 +689,7 @@ namespace Engine.Common
             currentVertexShaderResourceViewState.SetShaderResource(deviceContext.VertexShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetVertexShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentVertexShaderResourceViewState.SetShaderResources(deviceContext.VertexShader, startSlot, resourceViews);
         }
@@ -694,7 +699,7 @@ namespace Engine.Common
             currentVertexShaderSamplerState.SetSampler(deviceContext.VertexShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetVertexShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentVertexShaderSamplerState.SetSamplers(deviceContext.VertexShader, startSlot, samplerStates);
         }
@@ -723,7 +728,7 @@ namespace Engine.Common
             currentHullShaderConstantBufferState.SetConstantBuffer(deviceContext.HullShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetHullShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetHullShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentHullShaderConstantBufferState.SetConstantBuffers(deviceContext.HullShader, startSlot, bufferList);
         }
@@ -733,7 +738,7 @@ namespace Engine.Common
             currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetHullShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
         }
@@ -743,7 +748,7 @@ namespace Engine.Common
             currentHullShaderSamplerState.SetSampler(deviceContext.HullShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetHullShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetHullShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentHullShaderSamplerState.SetSamplers(deviceContext.HullShader, startSlot, samplerStates);
         }
@@ -772,7 +777,7 @@ namespace Engine.Common
             currentDomainShaderConstantBufferState.SetConstantBuffer(deviceContext.DomainShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetDomainShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentDomainShaderConstantBufferState.SetConstantBuffers(deviceContext.DomainShader, startSlot, bufferList);
         }
@@ -782,7 +787,7 @@ namespace Engine.Common
             currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetDomainShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
         }
@@ -792,7 +797,7 @@ namespace Engine.Common
             currentDomainShaderSamplerState.SetSampler(deviceContext.DomainShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetDomainShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentDomainShaderSamplerState.SetSamplers(deviceContext.DomainShader, startSlot, samplerStates);
         }
@@ -821,7 +826,7 @@ namespace Engine.Common
             currentGeometryShaderConstantBufferState.SetConstantBuffer(deviceContext.GeometryShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetGeometryShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentGeometryShaderConstantBufferState.SetConstantBuffers(deviceContext.GeometryShader, startSlot, bufferList);
         }
@@ -831,7 +836,7 @@ namespace Engine.Common
             currentGeometryShaderResourceViewState.SetShaderResource(deviceContext.GeometryShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetGeometryShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentGeometryShaderResourceViewState.SetShaderResources(deviceContext.GeometryShader, startSlot, resourceViews);
         }
@@ -841,12 +846,12 @@ namespace Engine.Common
             currentGeometryShaderSamplerState.SetSampler(deviceContext.GeometryShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetGeometryShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentGeometryShaderSamplerState.SetSamplers(deviceContext.GeometryShader, startSlot, samplerStates);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderStreamOutputTargets(IEnumerable<EngineStreamOutputBufferBinding> streamOutBinding)
+        public void SetGeometryShaderStreamOutputTargets(EngineStreamOutputBufferBinding[] streamOutBinding)
         {
             if (Helper.CompareEnumerables(currentStreamOutputBindings, streamOutBinding))
             {
@@ -885,7 +890,7 @@ namespace Engine.Common
             currentPixelShaderConstantBufferState.SetConstantBuffer(deviceContext.PixelShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetPixelShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentPixelShaderConstantBufferState.SetConstantBuffers(deviceContext.PixelShader, startSlot, bufferList);
         }
@@ -895,7 +900,7 @@ namespace Engine.Common
             currentPixelShaderResourceViewState.SetShaderResource(deviceContext.PixelShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetPixelShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentPixelShaderResourceViewState.SetShaderResources(deviceContext.PixelShader, startSlot, resourceViews);
         }
@@ -905,7 +910,7 @@ namespace Engine.Common
             currentPixelShaderSamplerState.SetSampler(deviceContext.PixelShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetPixelShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentPixelShaderSamplerState.SetSamplers(deviceContext.PixelShader, startSlot, samplerStates);
         }
@@ -934,7 +939,7 @@ namespace Engine.Common
             currentComputeShaderConstantBufferState.SetConstantBuffer(deviceContext.ComputeShader, slot, buffer);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        public void SetComputeShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
         {
             currentComputeShaderConstantBufferState.SetConstantBuffers(deviceContext.ComputeShader, startSlot, bufferList);
         }
@@ -944,7 +949,7 @@ namespace Engine.Common
             currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        public void SetComputeShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
         {
             currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
         }
@@ -954,7 +959,7 @@ namespace Engine.Common
             currentComputeShaderSamplerState.SetSampler(deviceContext.ComputeShader, slot, samplerState);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        public void SetComputeShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
         {
             currentComputeShaderSamplerState.SetSamplers(deviceContext.ComputeShader, startSlot, samplerStates);
         }
@@ -993,7 +998,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        public void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : struct
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1001,7 +1006,7 @@ namespace Engine.Common
                 return;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return;
             }
@@ -1009,7 +1014,7 @@ namespace Engine.Common
             UpdateResource(t.Resource.QueryInterface<Texture1D>(), data);
         }
         /// <inheritdoc/>
-        public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        public void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : struct
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1017,7 +1022,7 @@ namespace Engine.Common
                 return;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return;
             }
@@ -1025,7 +1030,7 @@ namespace Engine.Common
             UpdateResource(t.Resource.QueryInterface<Texture2D1>(), data);
         }
         /// <inheritdoc/>
-        public void UpdateTexture3D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        public void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : struct
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1033,7 +1038,7 @@ namespace Engine.Common
                 return;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return;
             }
@@ -1046,7 +1051,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type of data</typeparam>
         /// <param name="resource">Resource to update</param>
         /// <param name="data">Data</param>
-        private void UpdateResource<T>(Resource resource, IEnumerable<T> data) where T : struct
+        private void UpdateResource<T>(Resource resource, T[] data) where T : struct
         {
             using (resource)
             {
@@ -1073,13 +1078,13 @@ namespace Engine.Common
             return WriteDiscardBuffer(buffer, 0, new[] { data });
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data)
             where T : struct
         {
             return WriteDiscardBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data)
             where T : struct
         {
             var b = buffer?.GetBuffer();
@@ -1088,7 +1093,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return true;
             }
@@ -1111,13 +1116,13 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data)
             where T : struct
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data)
             where T : struct
         {
             var b = buffer?.GetBuffer();
@@ -1126,7 +1131,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() != true)
+            if (data.Length <= 0)
             {
                 return true;
             }
@@ -1149,13 +1154,13 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, int length)
+        public T[] ReadBuffer<T>(EngineBuffer buffer, int length)
             where T : struct
         {
             return ReadBuffer<T>(buffer, 0, length);
         }
         /// <inheritdoc/>
-        public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
+        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
             where T : struct
         {
             var b = buffer?.GetBuffer();
@@ -1318,9 +1323,9 @@ namespace Engine.Common
             commandList.Dispose();
         }
         /// <inheritdoc/>
-        public void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false)
+        public void ExecuteCommandLists(IEngineCommandList[] commandLists, bool restoreState = false)
         {
-            if (!commandLists.Any())
+            if (commandLists.Length <= 0)
             {
                 return;
             }

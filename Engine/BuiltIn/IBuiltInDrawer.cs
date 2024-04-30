@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.BuiltIn
 {
     using Engine.Common;
@@ -36,7 +35,7 @@ namespace Engine.BuiltIn
         /// <param name="meshes">Mesh list</param>
         /// <param name="instances">Number of instances</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0);
+        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>

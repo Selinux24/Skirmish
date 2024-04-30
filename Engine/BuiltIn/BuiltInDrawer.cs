@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
+﻿
 namespace Engine.BuiltIn
 {
     using Engine.Common;
@@ -298,14 +296,14 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0)
         {
             if (bufferManager == null)
             {
                 return false;
             }
 
-            if (meshes?.Any() != true)
+            if (meshes.Length <= 0)
             {
                 return false;
             }

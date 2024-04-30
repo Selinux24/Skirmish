@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.BuiltIn.Deferred
 {
     using Engine.Common;
@@ -33,7 +32,7 @@ namespace Engine.BuiltIn.Deferred
         /// Updates the geometry map
         /// </summary>
         /// <param name="geometryMap">Geometry map</param>
-        public void UpdateGeometryMap(IEnumerable<EngineShaderResourceView> geometryMap, EngineShaderResourceView lightMap)
+        public void UpdateGeometryMap(EngineShaderResourceView[] geometryMap, EngineShaderResourceView lightMap)
         {
             pixelShader.SetDeferredBuffer(geometryMap);
             pixelShader.SetLightMap(lightMap);

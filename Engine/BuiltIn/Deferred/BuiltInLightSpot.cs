@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Deferred
@@ -77,7 +76,7 @@ namespace Engine.BuiltIn.Deferred
         /// Updates the geometry map
         /// </summary>
         /// <param name="geometryMap">Geometry map</param>
-        public void UpdateGeometryMap(IEnumerable<EngineShaderResourceView> geometryMap)
+        public void UpdateGeometryMap(EngineShaderResourceView[] geometryMap)
         {
             pixelShader.SetDeferredBuffer(geometryMap);
             pixelShader.SetPointSampler(pointSampler);

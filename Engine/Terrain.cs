@@ -847,6 +847,12 @@ namespace Engine
                 return false;
             }
 
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return false;
+            }
+
             var terrainDrawer = GetDrawer(context);
             if (terrainDrawer == null)
             {

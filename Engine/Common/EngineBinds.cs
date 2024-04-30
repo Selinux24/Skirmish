@@ -5,7 +5,7 @@ namespace Engine.Common
     using SharpDX.Direct3D11;
 
     [Flags]
-    public enum EngineBindFlags
+    public enum EngineBinds
     {
         /// <summary>
         /// Bind a buffer as a vertex buffer to the input-assembler stage.

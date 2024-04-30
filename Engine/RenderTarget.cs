@@ -1,6 +1,5 @@
 ﻿using SharpDX.DXGI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -36,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Buffer textures
         /// </summary>
-        public IEnumerable<EngineShaderResourceView> Textures { get; protected set; }
+        public EngineShaderResourceView[] Textures { get; protected set; }
         /// <summary>
         /// Buffer texture
         /// </summary>
@@ -126,9 +125,9 @@ namespace Engine
             Targets?.Dispose();
             Targets = null;
 
-            if (Textures?.Any() == true)
+            if (Textures.Length > 0)
             {
-                for (int i = 0; i < Textures.Count(); i++)
+                for (int i = 0; i < Textures.Length; i++)
                 {
                     Textures.ElementAt(i)?.Dispose();
                 }

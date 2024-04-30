@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
 using System;
-using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -14,6 +13,10 @@ namespace Engine.Common
         /// Gets de device context name
         /// </summary>
         string Name { get; }
+        /// <summary>
+        /// Gets whether the context is the immediate context or not
+        /// </summary>
+        bool IsImmediateContext { get; }
         /// <summary>
         /// Gets de pass index
         /// </summary>
@@ -46,12 +49,12 @@ namespace Engine.Common
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        void SetViewports(IEnumerable<Viewport> viewports);
+        void SetViewports(Viewport[] viewports);
         /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        void SetViewports(IEnumerable<ViewportF> viewports);
+        void SetViewports(ViewportF[] viewports);
 
         /// <summary>
         /// Set render target
@@ -118,7 +121,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="firstSlot">The first input slot for binding</param>
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
-        void IASetVertexBuffers(int firstSlot, IEnumerable<EngineVertexBufferBinding> vertexBufferBindings);
+        void IASetVertexBuffers(int firstSlot, EngineVertexBufferBinding[] vertexBufferBindings);
         /// <summary>
         /// Bind an index buffer to the input-assembler stage.
         /// </summary>
@@ -154,7 +157,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetVertexShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetVertexShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current vertex shader
         /// </summary>
@@ -166,7 +169,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource view list</param>
-        void SetVertexShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetVertexShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current vertex shader
         /// </summary>
@@ -178,7 +181,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetVertexShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
 
 
         /// <summary>
@@ -203,7 +206,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetHullShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetHullShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current hull shader
         /// </summary>
@@ -215,7 +218,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetHullShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current hull shader
         /// </summary>
@@ -227,7 +230,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetHullShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetHullShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
 
 
         /// <summary>
@@ -252,7 +255,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetDomainShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetDomainShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current domain shader
         /// </summary>
@@ -264,7 +267,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetDomainShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current domain shader
         /// </summary>
@@ -276,7 +279,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetDomainShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetDomainShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Sets the geometry shader in the current device context
@@ -300,7 +303,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetGeometryShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetGeometryShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current geometry shader
         /// </summary>
@@ -312,7 +315,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetGeometryShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current geometry shader
         /// </summary>
@@ -324,12 +327,12 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetGeometryShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetGeometryShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
         /// <summary>
         /// Sets targets for stream output
         /// </summary>
         /// <param name="streamOutBinding">Stream output binding</param>
-        void SetGeometryShaderStreamOutputTargets(IEnumerable<EngineStreamOutputBufferBinding> streamOutBinding);
+        void SetGeometryShaderStreamOutputTargets(EngineStreamOutputBufferBinding[] streamOutBinding);
 
         /// <summary>
         /// Sets the pixel shader in the current device context
@@ -353,7 +356,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetPixelShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetPixelShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current pixel shader
         /// </summary>
@@ -365,7 +368,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetPixelShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetPixelShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current pixel shader
         /// </summary>
@@ -377,7 +380,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetPixelShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Sets the compute shader in the current device context
@@ -401,7 +404,7 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetComputeShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList);
+        void SetComputeShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current compute shader
         /// </summary>
@@ -413,7 +416,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews);
+        void SetComputeShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current compute shader
         /// </summary>
@@ -425,7 +428,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetComputeShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates);
+        void SetComputeShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Apply effect pass
@@ -455,21 +458,21 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct;
+        void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>    
+        void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
         /// <summary>
         /// Updates a texture
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct;
-        /// <summary>
-        /// Updates a texture
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="texture">Texture to update</param>
-        /// <param name="data">Data to write</param>
-        void UpdateTexture3D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct;
+        void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
 
         /// <summary>
         /// Reads an array of values from the specified buffer
@@ -478,7 +481,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, int length) where T : struct;
+        T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : struct;
         /// <summary>
         /// Reads an array of values from the specified buffer
         /// </summary>
@@ -487,7 +490,7 @@ namespace Engine.Common
         /// <param name="offset">Offset to read</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : struct;
+        T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : struct;
 
         /// <summary>
         /// Writes data into buffer
@@ -502,7 +505,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        bool WriteDiscardBuffer<T>(EngineBuffer buffer, IEnumerable<T> data) where T : struct;
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data) where T : struct;
         /// <summary>
         /// Writes data into buffer
         /// </summary>
@@ -510,7 +513,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data) where T : struct;
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : struct;
 
         /// <summary>
         /// Writes data into buffer
@@ -518,7 +521,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, IEnumerable<T> data) where T : struct;
+        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : struct;
         /// <summary>
         /// Writes data into buffer
         /// </summary>
@@ -526,7 +529,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data) where T : struct;
+        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : struct;
 
         /// <summary>
         /// Draw
@@ -607,6 +610,6 @@ namespace Engine.Common
         /// </summary>
         /// <param name="commandLists">Command list</param>
         /// <param name="restoreState">Resore state</param>
-        void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false);
+        void ExecuteCommandLists(IEngineCommandList[] commandLists, bool restoreState = false);
     }
 }

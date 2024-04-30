@@ -5,7 +5,7 @@ namespace Engine.Common
     using SharpDX.Direct3D11;
 
     [Flags]
-    public enum EngineCpuAccessFlags
+    public enum EngineCpuAccess
     {
         /// <summary>
         /// The resource is to be mappable so that the CPU can change its contents.

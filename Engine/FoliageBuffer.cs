@@ -1,8 +1,6 @@
 ﻿using Engine.BuiltIn;
 using Engine.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -25,27 +23,26 @@ namespace Engine
         }
 
         /// <summary>
+        /// Buffer name
+        /// </summary>
+        private readonly string name;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        private readonly BufferManager bufferManager = null;
+        /// <summary>
+        /// Vertex buffer descriptor
+        /// </summary>
+        private readonly BufferDescriptor vertexBuffer = null;
+        /// <summary>
         /// Vertex count
         /// </summary>
         private int vertexDrawCount = 0;
 
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        protected BufferManager BufferManager = null;
-
-        /// <summary>
-        /// Buffer id
-        /// </summary>
-        public readonly int Id = 0;
-        /// <summary>
         /// Foliage attached to buffer flag
         /// </summary>
-        public bool Attached { get; protected set; }
-        /// <summary>
-        /// Vertex buffer descriptor
-        /// </summary>
-        public BufferDescriptor VertexBuffer = null;
+        public bool Attached { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -54,10 +51,14 @@ namespace Engine
         /// <param name="name">Name</param>
         public FoliageBuffer(BufferManager bufferManager, string name)
         {
-            BufferManager = bufferManager;
-            Id = GetID();
+            ArgumentNullException.ThrowIfNull(bufferManager);
+            this.bufferManager = bufferManager;
+
+            int id = GetID();
+            this.name = $"{name ?? nameof(FoliageBuffer)}.{id}";
+
             Attached = false;
-            VertexBuffer = bufferManager.AddVertexData(string.Format("{1}.{0}", Id, name), true, new VertexBillboard[FoliagePatch.MAX]);
+            vertexBuffer = this.bufferManager.AddVertexData(this.name, true, new VertexBillboard[FoliagePatch.MAX]);
         }
         /// <summary>
         /// Destructor
@@ -84,7 +85,7 @@ namespace Engine
             }
 
             //Remove data from buffer manager
-            BufferManager?.RemoveVertexData(VertexBuffer);
+            bufferManager?.RemoveVertexData(vertexBuffer);
         }
 
         /// <summary>
@@ -93,24 +94,24 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="data">Vertex data</param>
-        public void WriteData(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<VertexBillboard> data)
+        public void WriteData(IEngineDeviceContext dc, BufferManager bufferManager, VertexBillboard[] data)
         {
             vertexDrawCount = 0;
             Attached = false;
 
             //Get the data
-            if (!data.Any())
+            if (data.Length <= 0)
             {
                 return;
             }
 
             //Attach data to buffer
-            if (!bufferManager.WriteVertexBuffer(dc, VertexBuffer, data))
+            if (!bufferManager.WriteVertexBuffer(dc, vertexBuffer, data, false))
             {
                 return;
             }
 
-            vertexDrawCount = data.Count();
+            vertexDrawCount = data.Length;
             Attached = true;
         }
         /// <summary>
@@ -133,9 +134,9 @@ namespace Engine
                 return false;
             }
 
-            return drawer.Draw(dc, BufferManager, new DrawOptions
+            return drawer.Draw(dc, bufferManager, new()
             {
-                VertexBuffer = VertexBuffer,
+                VertexBuffer = vertexBuffer,
                 VertexDrawCount = vertexDrawCount,
                 Topology = Topology.PointList,
             });
@@ -144,7 +145,7 @@ namespace Engine
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id} => Attached: {Attached}; {VertexBuffer}";
+            return $"{name} => Attached: {Attached}; {vertexBuffer}";
         }
     }
 }

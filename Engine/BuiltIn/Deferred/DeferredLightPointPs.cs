@@ -1,6 +1,4 @@
 ﻿using Engine.Shaders.Properties;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.BuiltIn.Deferred
 {
@@ -18,7 +16,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Deferred buffer
         /// </summary>
-        private IEnumerable<EngineShaderResourceView> deferredBuffer;
+        private EngineShaderResourceView[] deferredBuffer;
         /// <summary>
         /// Point sampler
         /// </summary>
@@ -47,7 +45,7 @@ namespace Engine.BuiltIn.Deferred
         /// Sets the deferred buffer
         /// </summary>
         /// <param name="deferredBuffer">Deferred buffer</param>
-        public void SetDeferredBuffer(IEnumerable<EngineShaderResourceView> deferredBuffer)
+        public void SetDeferredBuffer(EngineShaderResourceView[] deferredBuffer)
         {
             this.deferredBuffer = deferredBuffer;
         }
@@ -63,7 +61,7 @@ namespace Engine.BuiltIn.Deferred
         /// <inheritdoc/>
         public void SetShaderResources(IEngineDeviceContext dc)
         {
-            if (deferredBuffer?.Any() != true)
+            if (deferredBuffer.Length <= 0)
             {
                 return;
             }
@@ -77,7 +75,7 @@ namespace Engine.BuiltIn.Deferred
             dc.SetPixelShaderConstantBuffers(0, cb);
 
             dc.SetPixelShaderResourceViews(0, deferredBuffer);
-            dc.SetPixelShaderResourceView(deferredBuffer.Count(), BuiltInShaders.GetShadowMapPointResourceView());
+            dc.SetPixelShaderResourceView(deferredBuffer.Length, BuiltInShaders.GetShadowMapPointResourceView());
 
             dc.SetPixelShaderSampler(0, samplerPoint);
 

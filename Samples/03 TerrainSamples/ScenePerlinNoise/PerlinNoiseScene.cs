@@ -235,7 +235,9 @@ namespace TerrainSamples.ScenePerlinNoise
                 noiseMapDirty = true;
             }
 
-            texture.Update(Game.Graphics.ImmediateContext, noiseMap?.MapImage.Flatten());
+            var nmaps = noiseMap?.MapImage.Flatten() ?? [];
+
+            texture.Update(Game.Graphics.ImmediateContext, [.. nmaps]);
 
             if (noiseMapDirty)
             {
