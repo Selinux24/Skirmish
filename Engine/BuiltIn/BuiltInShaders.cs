@@ -153,18 +153,7 @@ namespace Engine.BuiltIn
         /// <exception cref="EngineException">Throws an exception when the shader cannot be added to the shader cache</exception>
         private static T CompileShader<T>(string name, Func<T> compiler) where T : class, IEngineShader
         {
-            if (shaders.TryGetValue(name, out var sh))
-            {
-                return sh as T;
-            }
-
-            sh = compiler.Invoke();
-            if (shaders.TryAdd(name, sh))
-            {
-                return sh as T;
-            }
-
-            throw new EngineException($"Error adding shader to collection in {nameof(CompileShader)}");
+            return shaders.GetOrAdd(name, (key) => compiler.Invoke()) as T;
         }
         /// <summary>
         /// Compiles a shader or retrieves it from the shader cache

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -130,22 +130,14 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="vertices">Vertex list</param>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
+        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
         {
             int offset;
 
-            Monitor.Enter(data);
-            try
-            {
-                //Store current data index as descriptor offset
-                offset = data.Count;
-                //Add items to data list
-                data.AddRange(vertices);
-            }
-            finally
-            {
-                Monitor.Exit(data);
-            }
+            //Store current data index as descriptor offset
+            offset = data.Count;
+            //Add items to data list
+            data.AddRange(vertices);
 
             //Add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -153,60 +145,40 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = vertices.Count();
 
-            Monitor.Enter(vertexDescriptors);
-            try
-            {
-                vertexDescriptors.Add(descriptor);
-            }
-            finally
-            {
-                Monitor.Exit(vertexDescriptors);
-            }
+            vertexDescriptors.Add(descriptor);
+
+            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
-        public void RemoveDescriptor(BufferDescriptor descriptor)
+        public async Task RemoveDescriptor(BufferDescriptor descriptor)
         {
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                Monitor.Enter(data);
-                try
-                {
-                    data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                }
-                finally
-                {
-                    Monitor.Exit(data);
-                }
+                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
             }
 
-            Monitor.Enter(vertexDescriptors);
-            try
+            //Remove descriptor
+            vertexDescriptors.Remove(descriptor);
+
+            if (vertexDescriptors.Count == 0)
             {
-                //Remove descriptor
-                vertexDescriptors.Remove(descriptor);
-
-                if (vertexDescriptors.Count == 0)
-                {
-                    return;
-                }
-
-                //Reallocate descriptor offsets
-                vertexDescriptors[0].BufferOffset = 0;
-                for (int i = 1; i < vertexDescriptors.Count; i++)
-                {
-                    var prev = vertexDescriptors[i - 1];
-
-                    vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-                }
+                return;
             }
-            finally
+
+            //Reallocate descriptor offsets
+            vertexDescriptors[0].BufferOffset = 0;
+            for (int i = 1; i < vertexDescriptors.Count; i++)
             {
-                Monitor.Exit(vertexDescriptors);
+                var prev = vertexDescriptors[i - 1];
+
+                vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
             }
+
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -70,7 +69,7 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description</param>
         /// <param name="instances">Number of instances</param>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
+        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
         {
             //Store current data index as descriptor offset
             int offset = Instances;
@@ -84,47 +83,35 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = instances;
 
-            Monitor.Enter(instancingDescriptors);
-            try
-            {
-                instancingDescriptors.Add(descriptor);
-            }
-            finally
-            {
-                Monitor.Exit(instancingDescriptors);
-            }
+            instancingDescriptors.Add(descriptor);
+
+            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
         /// <param name="instances">Number of instances</param>
-        public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
+        public async Task RemoveDescriptor(BufferDescriptor descriptor, int instances)
         {
-            Monitor.Enter(instancingDescriptors);
-            try
-            {
-                //Remove descriptor
-                instancingDescriptors.Remove(descriptor);
+            //Remove descriptor
+            instancingDescriptors.Remove(descriptor);
 
-                if (instancingDescriptors.Count != 0)
+            if (instancingDescriptors.Count != 0)
+            {
+                //Reallocate descriptor offsets
+                instancingDescriptors[0].BufferOffset = 0;
+                for (int i = 1; i < instancingDescriptors.Count; i++)
                 {
-                    //Reallocate descriptor offsets
-                    instancingDescriptors[0].BufferOffset = 0;
-                    for (int i = 1; i < instancingDescriptors.Count; i++)
-                    {
-                        var prev = instancingDescriptors[i - 1];
+                    var prev = instancingDescriptors[i - 1];
 
-                        instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-                    }
+                    instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
-            }
-            finally
-            {
-                Monitor.Exit(instancingDescriptors);
             }
 
             Instances -= instances;
+
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

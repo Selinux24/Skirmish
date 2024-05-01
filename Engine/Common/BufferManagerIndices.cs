@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -60,22 +60,15 @@ namespace Engine.Common
         /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="indices">Index list</param>
         /// <returns>Returns the new registerd descriptor</returns>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
+        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
             int offset;
 
-            Monitor.Enter(data);
-            try
-            {
-                //Store current data index as descriptor offset
-                offset = data.Count;
-                //Add items to data list
-                data.AddRange(indices);
-            }
-            finally
-            {
-                Monitor.Exit(data);
-            }
+            //Store current data index as descriptor offset
+            offset = data.Count;
+
+            //Add items to data list
+            data.AddRange(indices);
 
             //Create and add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -83,21 +76,15 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = indices.Count();
 
-            Monitor.Enter(descriptors);
-            try
-            {
-                descriptors.Add(descriptor);
-            }
-            finally
-            {
-                Monitor.Exit(descriptors);
-            }
+            descriptors.Add(descriptor);
+
+            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
-        public void RemoveDescriptor(BufferDescriptor descriptor)
+        public async Task RemoveDescriptor(BufferDescriptor descriptor)
         {
             //Find descriptor
             var index = descriptors.IndexOf(descriptor);
@@ -108,42 +95,28 @@ namespace Engine.Common
 
             if (descriptor.Count > 0)
             {
-                Monitor.Enter(data);
-                try
-                {
-                    //If descriptor has items, remove from buffer descriptors
-                    data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                }
-                finally
-                {
-                    Monitor.Exit(data);
-                }
+                //If descriptor has items, remove from buffer descriptors
+                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
             }
 
-            Monitor.Enter(descriptors);
-            try
+            //Remove from descriptors list
+            descriptors.RemoveAt(index);
+
+            if (descriptors.Count == 0)
             {
-                //Remove from descriptors list
-                descriptors.RemoveAt(index);
-
-                if (descriptors.Count == 0)
-                {
-                    return;
-                }
-
-                //Reallocate descriptor offsets
-                descriptors[0].BufferOffset = 0;
-                for (int i = 1; i < descriptors.Count; i++)
-                {
-                    var prev = descriptors[i - 1];
-
-                    descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-                }
+                return;
             }
-            finally
+
+            //Reallocate descriptor offsets
+            descriptors[0].BufferOffset = 0;
+            for (int i = 1; i < descriptors.Count; i++)
             {
-                Monitor.Exit(descriptors);
+                var prev = descriptors[i - 1];
+
+                descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
             }
+     
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

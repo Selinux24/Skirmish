@@ -24,38 +24,33 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        public BufferDescriptor VertexDescriptor { get; set; } = new BufferDescriptor();
+        public BufferDescriptor VertexDescriptor { get; set; } = new();
         /// <summary>
         /// Instancing buffer descriptor
         /// </summary>
         public BufferDescriptor InstancingDescriptor { get; set; } = null;
 
         /// <inheritdoc/>
-        public void Process(BufferManager bufferManager)
+        public async Task ProcessAsync(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
 
             if (Action == BufferDescriptorRequestActions.Add)
             {
-                Add(bufferManager);
+                await Add(bufferManager);
             }
             else if (Action == BufferDescriptorRequestActions.Remove)
             {
-                Remove(bufferManager);
+                await Remove(bufferManager);
             }
 
             Processed = ProcessedStages.Processed;
-        }
-        /// <inheritdoc/>
-        public async Task ProcessAsync(BufferManager bufferManager)
-        {
-            await Task.Run(() => Process(bufferManager));
         }
         /// <summary>
         /// Adds the descriptor to the buffer manager
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        private void Add(BufferManager bufferManager)
+        private async Task Add(BufferManager bufferManager)
         {
             if (Data?.Any() != true)
             {
@@ -88,13 +83,13 @@ namespace Engine.Common
                 descriptor.InstancingDescriptor = InstancingDescriptor;
             }
 
-            descriptor.AddDescriptor(VertexDescriptor, Id, slot, Data);
+            await descriptor.AddDescriptor(VertexDescriptor, Id, slot, Data);
         }
         /// <summary>
         /// Removes the descriptor from de internal buffers of the buffer manager
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        private void Remove(BufferManager bufferManager)
+        private async Task Remove(BufferManager bufferManager)
         {
             if (VertexDescriptor?.Ready == true)
             {
@@ -102,9 +97,15 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{VertexDescriptor.Id}]");
 
-                descriptor.RemoveDescriptor(VertexDescriptor);
+                await descriptor.RemoveDescriptor(VertexDescriptor);
                 descriptor.ReallocationNeeded = true;
             }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Id} => {Action} {Processed}; {VertexDescriptor}";
         }
     }
 }

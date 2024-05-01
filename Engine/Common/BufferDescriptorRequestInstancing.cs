@@ -25,31 +25,26 @@ namespace Engine.Common
         public BufferDescriptor Descriptor { get; set; } = new BufferDescriptor();
 
         /// <inheritdoc/>
-        public void Process(BufferManager bufferManager)
+        public async Task ProcessAsync(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
 
             if (Action == BufferDescriptorRequestActions.Add)
             {
-                Add(bufferManager);
+                await Add(bufferManager);
             }
             else if (Action == BufferDescriptorRequestActions.Remove)
             {
-                Remove(bufferManager);
+                await Remove(bufferManager);
             }
 
             Processed = ProcessedStages.Processed;
-        }
-        /// <inheritdoc/>
-        public async Task ProcessAsync(BufferManager bufferManager)
-        {
-            await Task.Run(() => Process(bufferManager));
         }
         /// <summary>
         /// Assign the descriptor to the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private void Add(BufferManager bufferManager)
+        private async Task Add(BufferManager bufferManager)
         {
             BufferManagerInstances<VertexInstancingData> descriptor;
 
@@ -67,13 +62,13 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = true;
             }
 
-            descriptor.AddDescriptor(Descriptor, Id, slot, Instances);
+            await descriptor.AddDescriptor(Descriptor, Id, slot, Instances);
         }
         /// <summary>
         /// Remove the descriptor from de internal buffers of the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private void Remove(BufferManager bufferManager)
+        private async Task Remove(BufferManager bufferManager)
         {
             if (Descriptor?.Ready == true)
             {
@@ -81,9 +76,15 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Descriptor.Id}]");
 
-                descriptor.RemoveDescriptor(Descriptor, Instances);
+                await descriptor.RemoveDescriptor(Descriptor, Instances);
                 descriptor.ReallocationNeeded = true;
             }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Id} => {Action} {Processed}; {Descriptor}";
         }
     }
 }

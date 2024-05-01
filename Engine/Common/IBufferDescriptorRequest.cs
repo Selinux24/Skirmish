@@ -28,11 +28,6 @@ namespace Engine.Common
         /// Updates the buffer descriptor
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        void Process(BufferManager bufferManager);
-        /// <summary>
-        /// Updates the buffer descriptor
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
         Task ProcessAsync(BufferManager bufferManager);
     }
 }
