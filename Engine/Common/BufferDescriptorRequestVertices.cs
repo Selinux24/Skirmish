@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -31,17 +30,17 @@ namespace Engine.Common
         public BufferDescriptor InstancingDescriptor { get; set; } = null;
 
         /// <inheritdoc/>
-        public async Task ProcessAsync(BufferManager bufferManager)
+        public void Process(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
 
             if (Action == BufferDescriptorRequestActions.Add)
             {
-                await Add(bufferManager);
+                Add(bufferManager);
             }
             else if (Action == BufferDescriptorRequestActions.Remove)
             {
-                await Remove(bufferManager);
+                Remove(bufferManager);
             }
 
             Processed = ProcessedStages.Processed;
@@ -50,7 +49,7 @@ namespace Engine.Common
         /// Adds the descriptor to the buffer manager
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        private async Task Add(BufferManager bufferManager)
+        private void Add(BufferManager bufferManager)
         {
             if (Data?.Any() != true)
             {
@@ -83,13 +82,13 @@ namespace Engine.Common
                 descriptor.InstancingDescriptor = InstancingDescriptor;
             }
 
-            await descriptor.AddDescriptor(VertexDescriptor, Id, slot, Data);
+            descriptor.AddDescriptor(VertexDescriptor, Id, slot, Data);
         }
         /// <summary>
         /// Removes the descriptor from de internal buffers of the buffer manager
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        private async Task Remove(BufferManager bufferManager)
+        private void Remove(BufferManager bufferManager)
         {
             if (VertexDescriptor?.Ready == true)
             {
@@ -97,7 +96,7 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{VertexDescriptor.Id}]");
 
-                await descriptor.RemoveDescriptor(VertexDescriptor);
+                descriptor.RemoveDescriptor(VertexDescriptor);
                 descriptor.ReallocationNeeded = true;
             }
         }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -130,7 +129,7 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="vertices">Vertex list</param>
-        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
         {
             int offset;
 
@@ -146,14 +145,12 @@ namespace Engine.Common
             descriptor.Count = vertices.Count();
 
             vertexDescriptors.Add(descriptor);
-
-            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
-        public async Task RemoveDescriptor(BufferDescriptor descriptor)
+        public void RemoveDescriptor(BufferDescriptor descriptor)
         {
             if (descriptor.Count > 0)
             {
@@ -177,8 +174,6 @@ namespace Engine.Common
 
                 vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
             }
-
-            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

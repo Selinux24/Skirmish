@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -69,7 +68,7 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description</param>
         /// <param name="instances">Number of instances</param>
-        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
         {
             //Store current data index as descriptor offset
             int offset = Instances;
@@ -84,15 +83,13 @@ namespace Engine.Common
             descriptor.Count = instances;
 
             instancingDescriptors.Add(descriptor);
-
-            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
         /// <param name="instances">Number of instances</param>
-        public async Task RemoveDescriptor(BufferDescriptor descriptor, int instances)
+        public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
         {
             //Remove descriptor
             instancingDescriptors.Remove(descriptor);
@@ -110,8 +107,6 @@ namespace Engine.Common
             }
 
             Instances -= instances;
-
-            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

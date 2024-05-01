@@ -282,7 +282,7 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processing descriptor requests: {requestTotal}");
 
-                float requestCurrent = await DoProcessRequest(id, progress, 0, requestTotal, toAssign);
+                float requestCurrent = DoProcessRequest(id, progress, 0, requestTotal, toAssign);
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Descriptor requests processed: {requestCurrent}");
 
@@ -365,13 +365,13 @@ namespace Engine.Common
         /// <param name="current">Current progress value</param>
         /// <param name="total">Total progress value</param>
         /// <param name="toAssign">To assign buffer list</param>
-        private async Task<float> DoProcessRequest(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
+        private float DoProcessRequest(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
         {
             foreach (var request in toAssign)
             {
                 Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processing {request}");
 
-                await request.ProcessAsync(this);
+                request.Process(this);
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => Processed {request}");
 

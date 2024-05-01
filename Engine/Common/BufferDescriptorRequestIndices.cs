@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -27,17 +26,17 @@ namespace Engine.Common
         public BufferDescriptor Descriptor { get; set; } = new BufferDescriptor();
 
         /// <inheritdoc/>
-        public async Task ProcessAsync(BufferManager bufferManager)
+        public void Process(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
 
             if (Action == BufferDescriptorRequestActions.Add)
             {
-                await Add(bufferManager);
+                Add(bufferManager);
             }
             else if (Action == BufferDescriptorRequestActions.Remove)
             {
-                await Remove(bufferManager);
+                Remove(bufferManager);
             }
 
             Processed = ProcessedStages.Processed;
@@ -46,7 +45,7 @@ namespace Engine.Common
         /// Assign the descriptor to the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private async Task Add(BufferManager bufferManager)
+        private void Add(BufferManager bufferManager)
         {
             if (Data?.Any() != true)
             {
@@ -69,13 +68,13 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = true;
             }
 
-            await descriptor.AddDescriptor(Descriptor, Id, slot, Data);
+            descriptor.AddDescriptor(Descriptor, Id, slot, Data);
         }
         /// <summary>
         /// Remove the descriptor from de internal buffers of the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private async Task Remove(BufferManager bufferManager)
+        private void Remove(BufferManager bufferManager)
         {
             if (Descriptor?.Ready == true)
             {
@@ -83,7 +82,7 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{Descriptor.Id}]");
 
-                await descriptor.RemoveDescriptor(Descriptor);
+                descriptor.RemoveDescriptor(Descriptor);
                 descriptor.ReallocationNeeded = true;
             }
         }

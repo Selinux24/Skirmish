@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 namespace Engine.Common
 {
     /// <summary>
@@ -25,17 +24,17 @@ namespace Engine.Common
         public BufferDescriptor Descriptor { get; set; } = new BufferDescriptor();
 
         /// <inheritdoc/>
-        public async Task ProcessAsync(BufferManager bufferManager)
+        public void Process(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
 
             if (Action == BufferDescriptorRequestActions.Add)
             {
-                await Add(bufferManager);
+                Add(bufferManager);
             }
             else if (Action == BufferDescriptorRequestActions.Remove)
             {
-                await Remove(bufferManager);
+                Remove(bufferManager);
             }
 
             Processed = ProcessedStages.Processed;
@@ -44,7 +43,7 @@ namespace Engine.Common
         /// Assign the descriptor to the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private async Task Add(BufferManager bufferManager)
+        private void Add(BufferManager bufferManager)
         {
             BufferManagerInstances<VertexInstancingData> descriptor;
 
@@ -62,13 +61,13 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = true;
             }
 
-            await descriptor.AddDescriptor(Descriptor, Id, slot, Instances);
+            descriptor.AddDescriptor(Descriptor, Id, slot, Instances);
         }
         /// <summary>
         /// Remove the descriptor from de internal buffers of the buffer manager
         /// </summary>
         /// <param name="request">Buffer request</param>
-        private async Task Remove(BufferManager bufferManager)
+        private void Remove(BufferManager bufferManager)
         {
             if (Descriptor?.Ready == true)
             {
@@ -76,7 +75,7 @@ namespace Engine.Common
 
                 Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Descriptor.Id}]");
 
-                await descriptor.RemoveDescriptor(Descriptor, Instances);
+                descriptor.RemoveDescriptor(Descriptor, Instances);
                 descriptor.ReallocationNeeded = true;
             }
         }

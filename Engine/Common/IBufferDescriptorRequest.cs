@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 namespace Engine.Common
 {
     /// <summary>
@@ -28,6 +27,6 @@ namespace Engine.Common
         /// Updates the buffer descriptor
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        Task ProcessAsync(BufferManager bufferManager);
+        void Process(BufferManager bufferManager);
     }
 }

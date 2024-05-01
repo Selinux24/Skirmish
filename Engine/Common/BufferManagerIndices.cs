@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -60,7 +59,7 @@ namespace Engine.Common
         /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="indices">Index list</param>
         /// <returns>Returns the new registerd descriptor</returns>
-        public async Task AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
             int offset;
 
@@ -77,14 +76,12 @@ namespace Engine.Common
             descriptor.Count = indices.Count();
 
             descriptors.Add(descriptor);
-
-            await Task.CompletedTask;
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
-        public async Task RemoveDescriptor(BufferDescriptor descriptor)
+        public void RemoveDescriptor(BufferDescriptor descriptor)
         {
             //Find descriptor
             var index = descriptors.IndexOf(descriptor);
@@ -115,8 +112,6 @@ namespace Engine.Common
 
                 descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
             }
-     
-            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>
