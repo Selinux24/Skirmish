@@ -142,6 +142,7 @@ namespace IntermediateSamples.SceneMixamo
                 "TestModel",
                 new ModelDescription()
                 {
+                    BlendMode = BlendModes.OpaqueTransparent,
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Content = ContentDescription.FromFile("SceneMixamo/resources/TestModel", "TestModel.json"),
                 });

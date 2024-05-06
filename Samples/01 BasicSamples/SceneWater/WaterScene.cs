@@ -104,6 +104,7 @@ namespace BasicSamples.SceneWater
         private async Task InitializeWater()
         {
             var desc = WaterDescription.CreateOcean(terrainSize, 0f);
+            desc.BlendMode = BlendModes.Alpha;
 
             await AddComponentEffect<Water, WaterDescription>("Water", "Water", desc);
         }

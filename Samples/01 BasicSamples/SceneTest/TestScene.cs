@@ -705,6 +705,7 @@ namespace BasicSamples.SceneTest
             {
                 Primitives = cubeTris.ToArray(),
                 Color = Color.Red,
+                BlendMode = BlendModes.Alpha,
             };
 
             await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
@@ -767,6 +768,7 @@ namespace BasicSamples.SceneTest
             {
                 Primitives = [.. markers],
                 Color = new(Color.Yellow.ToColor3(), 0.3333f),
+                BlendMode = BlendModes.Alpha,
             };
             await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DebugPM",

@@ -11,7 +11,7 @@ namespace Engine
         /// </summary>
         public static ParticleManagerDescription Default()
         {
-            return new ParticleManagerDescription();
+            return new();
         }
 
         /// <summary>
@@ -20,6 +20,7 @@ namespace Engine
         public ParticleManagerDescription()
             : base()
         {
+            BlendMode = BlendModes.OpaqueAlpha;
             DeferredEnabled = false;
         }
     }

@@ -186,7 +186,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DebugItemTris",
                 "DebugItemTris",
-                new PrimitiveListDrawerDescription<Triangle>() { Count = 100000, Color = itemTrisColor });
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 100000, Color = itemTrisColor, BlendMode = BlendModes.Alpha });
 
             itemTris.Visible = false;
         }

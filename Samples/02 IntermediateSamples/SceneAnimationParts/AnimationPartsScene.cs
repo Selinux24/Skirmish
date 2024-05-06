@@ -153,13 +153,13 @@ namespace IntermediateSamples.SceneAnimationParts
             itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "DebugItemTris",
                 "DebugItemTris",
-                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, BlendMode = BlendModes.Alpha });
             itemTris.Visible = false;
 
             itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DebugItemLines",
                 "DebugItemLines",
-                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
             itemLines.Visible = false;
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
