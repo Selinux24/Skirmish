@@ -216,7 +216,7 @@ namespace BasicSamples.SceneCascadedShadows
             {
                 CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile("Common/trees", "Tree.json"),
             };
 

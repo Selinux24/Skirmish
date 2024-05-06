@@ -6,9 +6,9 @@ namespace Engine
     using Engine.BuiltIn.Foliage;
 
     /// <summary>
-    /// Ground gardener description
+    /// Foliage description
     /// </summary>
-    public class GroundGardenerDescription : SceneObjectDescription
+    public class FoliageDescription : SceneObjectDescription
     {
         /// <summary>
         /// Vegetation channel
@@ -138,7 +138,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public GroundGardenerDescription()
+        public FoliageDescription()
             : base()
         {
             CastShadow = ShadowCastingAlgorihtms.Directional;

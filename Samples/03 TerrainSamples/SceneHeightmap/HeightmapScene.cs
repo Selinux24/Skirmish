@@ -48,20 +48,23 @@ namespace TerrainSamples.SceneHeightmap
         private UITextArea help = null;
         private UITextArea help2 = null;
 
+        private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
+        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
+        private PrimitiveListDrawer<Line3D> lightsDrawer = null;
+        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+
         private SkyScattering skydom = null;
 
         private Terrain terrain = null;
         private bool showTerrainDEBUG = false;
         private bool terrainInitializedDEBUG = false;
 
-        private GroundGardener gardenerGrass = null;
-        private GroundGardener gardenerFlowers = null;
-        private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
-        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private const float gardenerAreaSize = 512;
-        private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(0, gardenerAreaSize, gardenerAreaSize));
-        private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
-        private bool showGardenerDEBUG = false;
+        private Foliage fGrass = null;
+        private Foliage fFlowers = null;
+        private const float areaSize = 512;
+        private readonly BoundingBox? fGrassArea = new BoundingBox(new Vector3(-areaSize * 2, -areaSize, -areaSize), new Vector3(0, areaSize, areaSize));
+        private readonly BoundingBox? fFlowersArea = new BoundingBox(new Vector3(0, -areaSize, -areaSize), new Vector3(areaSize * 2, areaSize, areaSize));
+        private bool showFoliageDEBUG = false;
 
         private BoundingFrustum cameraFrustum;
         private bool showCameraFrustumDEBUG = false;
@@ -96,9 +99,7 @@ namespace TerrainSamples.SceneHeightmap
         private Model watchTower = null;
         private ModelInstanced containers = null;
 
-        private PrimitiveListDrawer<Line3D> lightsDrawer = null;
         private bool drawLightsDEBUG = false;
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawLightsVolumesDEBUG = false;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
@@ -277,7 +278,7 @@ namespace TerrainSamples.SceneHeightmap
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees", @"tree.json"),
                 StartsVisible = false,
             };
@@ -290,7 +291,7 @@ namespace TerrainSamples.SceneHeightmap
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees2", @"tree.json"),
                 StartsVisible = false,
             };
@@ -348,6 +349,7 @@ namespace TerrainSamples.SceneHeightmap
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Default,
+                BlendMode = BlendModes.OpaqueAlpha,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/buildings", @"Affgan1.json"),
                 StartsVisible = false,
@@ -533,25 +535,33 @@ namespace TerrainSamples.SceneHeightmap
         {
             LoadResources(
                 [
-                    InitializeGardenerGrass,
-                    InitializeGardenerFlowers,
+                    InitializeGrass,
+                    InitializeFlowers,
                     SetAnimationDictionaries,
                     SetPositionOverTerrain,
                 ],
                 LoadingTaskTerrainObjectsCompleted);
         }
-        private async Task InitializeGardenerGrass()
+        private async Task InitializeGrass()
         {
-            var vDesc = new GroundGardenerDescription()
+            var vDesc = new FoliageDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
-                PlantingArea = gardenerArea,
+                PlantingArea = fGrassArea,
+
+                BlendMode = BlendModes.Opaque,
+
+                ColliderType = ColliderTypes.None,
+                PathFindingHull = PickingHullTypes.None,
+                PickingHull = PickingHullTypes.None,
+                CullingVolumeType = CullingVolumeTypes.None,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                ChannelRed = new GroundGardenerDescription.Channel()
+
+                ChannelRed = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["grass_v.dds"],
-                    Density = 1f,
+                    Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
                     MinSize = new Vector2(0.5f, 0.5f),
@@ -560,7 +570,7 @@ namespace TerrainSamples.SceneHeightmap
                     WindEffect = 1f,
                     Instances = GroundGardenerPatchInstances.Four,
                 },
-                ChannelGreen = new GroundGardenerDescription.Channel()
+                ChannelGreen = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["grass_d.dds"],
                     VegetationNormalMaps = ["grass_n.dds"],
@@ -573,7 +583,7 @@ namespace TerrainSamples.SceneHeightmap
                     WindEffect = 1f,
                     Instances = GroundGardenerPatchInstances.Two,
                 },
-                ChannelBlue = new GroundGardenerDescription.Channel()
+                ChannelBlue = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["grass1.png"],
                     Density = 0.1f,
@@ -587,50 +597,59 @@ namespace TerrainSamples.SceneHeightmap
                     Instances = GroundGardenerPatchInstances.Default,
                 },
             };
-            gardenerGrass = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);
+            fGrass = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", vDesc);
         }
-        private async Task InitializeGardenerFlowers()
+        private async Task InitializeFlowers()
         {
-            var vDesc2 = new GroundGardenerDescription()
+            var vDesc2 = new FoliageDescription()
             {
                 ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map_flowers.png",
-                PlantingArea = gardenerArea2,
-                ChannelRed = new GroundGardenerDescription.Channel()
+                PlantingArea = fFlowersArea,
+
+                BlendMode = BlendModes.Opaque,
+
+                ColliderType = ColliderTypes.None,
+                PathFindingHull = PickingHullTypes.None,
+                PickingHull = PickingHullTypes.None,
+                CullingVolumeType = CullingVolumeTypes.None,
+                CastShadow = ShadowCastingAlgorihtms.All,
+
+                ChannelRed = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["flower0.dds"],
-                    Density = 1f,
+                    Density = 0.5f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f) * 0.15f,
-                    MaxSize = new Vector2(1.5f, 1.5f) * 0.25f,
+                    MinSize = new Vector2(1f, 1f) * 0.3f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 1,
                     WindEffect = 1f,
                 },
-                ChannelGreen = new GroundGardenerDescription.Channel()
+                ChannelGreen = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["flower1.dds"],
-                    Density = 0.1f,
+                    Density = 0.5f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f) * 0.15f,
-                    MaxSize = new Vector2(1.5f, 1.5f) * 0.25f,
+                    MinSize = new Vector2(1f, 1f) * 0.3f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 2,
                     WindEffect = 1f,
                 },
-                ChannelBlue = new GroundGardenerDescription.Channel()
+                ChannelBlue = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["flower2.dds"],
                     Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
-                    MinSize = new Vector2(1f, 1f) * 0.15f,
-                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
+                    MinSize = new Vector2(1f, 1f) * 0.3f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 1f,
                     Seed = 3,
                     WindEffect = 1f,
                 },
             };
-            gardenerFlowers = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Flowers", "Flowers", vDesc2);
+            fFlowers = await AddComponentEffect<Foliage, FoliageDescription>("Flowers", "Flowers", vDesc2);
         }
         private async Task SetAnimationDictionaries()
         {
@@ -1292,8 +1311,8 @@ namespace TerrainSamples.SceneHeightmap
             {
                 showTerrainDEBUG = !showTerrainDEBUG;
 
-                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
-                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
+                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showFoliageDEBUG;
+                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showFoliageDEBUG;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
@@ -1322,10 +1341,10 @@ namespace TerrainSamples.SceneHeightmap
 
             if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                showGardenerDEBUG = !showGardenerDEBUG;
+                showFoliageDEBUG = !showFoliageDEBUG;
 
-                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
-                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showGardenerDEBUG;
+                bboxesDrawer.Visible = bboxesDrawer.Active = showTerrainDEBUG || showFoliageDEBUG;
+                bboxesTriDrawer.Visible = bboxesTriDrawer.Active = showTerrainDEBUG || showFoliageDEBUG;
             }
 
             if (Game.Input.KeyJustReleased(Keys.M))
@@ -1496,8 +1515,8 @@ namespace TerrainSamples.SceneHeightmap
                 if (windNextStrength < windStrength) windStrength = windNextStrength;
             }
 
-            gardenerGrass?.SetWind(windDirection, windStrength);
-            gardenerFlowers?.SetWind(windDirection, windStrength);
+            fGrass?.SetWind(windDirection, windStrength);
+            fFlowers?.SetWind(windDirection, windStrength);
         }
         private void UpdateDust(IGameTime gameTime)
         {
@@ -1578,7 +1597,7 @@ namespace TerrainSamples.SceneHeightmap
                 UpdateDebugTerrain(terrainColor);
             }
 
-            if (showGardenerDEBUG)
+            if (showFoliageDEBUG)
             {
                 UpdateDebugGardeners();
             }
@@ -1613,17 +1632,17 @@ namespace TerrainSamples.SceneHeightmap
         {
             terrainInitializedDEBUG = false;
 
-            if (gardenerGrass.Visible)
+            if (fGrass.Visible)
             {
-                UpdateDebugGardener(gardenerGrass);
+                UpdateDebugGardener(fGrass);
             }
 
-            if (gardenerFlowers.Visible)
+            if (fFlowers.Visible)
             {
-                UpdateDebugGardener(gardenerFlowers);
+                UpdateDebugGardener(fFlowers);
             }
         }
-        private void UpdateDebugGardener(GroundGardener g)
+        private void UpdateDebugGardener(Foliage g)
         {
             float minY = float.MaxValue;
 

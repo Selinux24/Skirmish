@@ -121,7 +121,7 @@ namespace BasicSamples.SceneLights
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile("Common/trees", "Tree.json"),
             };
 

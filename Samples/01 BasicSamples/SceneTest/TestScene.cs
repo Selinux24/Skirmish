@@ -307,7 +307,7 @@ namespace BasicSamples.SceneTest
                 CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
             };
             tree = await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
@@ -317,7 +317,7 @@ namespace BasicSamples.SceneTest
                 CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 50,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
             };

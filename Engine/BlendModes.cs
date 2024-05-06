@@ -33,12 +33,12 @@ namespace Engine
         /// </summary>
         PostProcess = 16,
         /// <summary>
-        /// Default blend mode
+        /// Opaque + Alpha blend mode
         /// </summary>
-        Default = Opaque | Alpha,
+        OpaqueAlpha = Opaque | Alpha,
         /// <summary>
-        /// Default transparent
+        /// Opaque + Transparent blend mode
         /// </summary>
-        DefaultTransparent = Opaque | Transparent,
+        OpaqueTransparent = Opaque | Transparent,
     }
 }

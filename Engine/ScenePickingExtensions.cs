@@ -1,6 +1,8 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -65,7 +67,7 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(IEnumerable<ISceneObject> collection, PickingRay ray, out ScenePickingResult<T> result) where T : IRayIntersectable
+        private static bool PickFirst<T>(IEnumerable<ISceneObject> collection, PickingRay ray, out ScenePickingResult<T> result) where T : IRayIntersectable
         {
             result = new ScenePickingResult<T>();
 
@@ -197,7 +199,7 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(IEnumerable<ISceneObject> collection, PickingRay ray, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
+        private static bool PickAll<T>(IEnumerable<ISceneObject> collection, PickingRay ray, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
         {
             if (!collection.Any())
             {
@@ -293,16 +295,16 @@ namespace Engine
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickNearest<T>(this Scene scene, PickingRay ray, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
         {
-            if (!PickAll(scene, ray, usage, out IEnumerable<ScenePickingResultMultiple<T>> results))
+            if (!PickAll<T>(scene, ray, usage, out var results))
             {
-                result = new ScenePickingResult<T>();
+                result = default;
 
                 return false;
             }
 
             var first = results.First();
 
-            result = new ScenePickingResult<T>
+            result = new()
             {
                 PickingResult = first.PickingResults.First(),
                 SceneObject = first.SceneObject,
@@ -310,14 +312,13 @@ namespace Engine
 
             return true;
         }
-
         /// <summary>
         /// Performs coarse ray picking over the specified scene object collection
         /// </summary>
         /// <param name="collection">Collection to test</param>
         /// <param name="ray">Ray</param>
         /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        public static IEnumerable<CoarsePickingResult> TestCoarse(IEnumerable<ISceneObject> collection, PickingRay ray)
+        private static IEnumerable<CoarsePickingResult> TestCoarse(IEnumerable<ISceneObject> collection, PickingRay ray)
         {
             if (!collection.Any())
             {
@@ -403,86 +404,84 @@ namespace Engine
 
             return false;
         }
-    }
-
-    /// <summary>
-    /// Scene pinking results
-    /// </summary>
-    /// <typeparam name="T"><see cref="IRayIntersectable"/> item type</typeparam>
-    public struct ScenePickingResult<T> where T : IRayIntersectable
-    {
-        /// <summary>
-        /// Scene object
-        /// </summary>
-        public ISceneObject SceneObject { get; set; }
-        /// <summary>
-        /// Picking results
-        /// </summary>
-        public PickingResult<T> PickingResult { get; set; }
-    }
-
-    /// <summary>
-    /// Scene pinking results
-    /// </summary>
-    /// <typeparam name="T"><see cref="IRayIntersectable"/> item type</typeparam>
-    public struct ScenePickingResultMultiple<T> where T : IRayIntersectable
-    {
-        /// <summary>
-        /// Scene object
-        /// </summary>
-        public ISceneObject SceneObject { get; set; }
-        /// <summary>
-        /// Picking results
-        /// </summary>
-        public IEnumerable<PickingResult<T>> PickingResults { get; set; }
 
         /// <summary>
-        /// Gets the first result
+        /// Gets the unordered first picking position of the given ray list
         /// </summary>
-        public readonly PickingResult<T> First()
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="rayList">Picking ray list</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="callback">Result callback</param>
+        public static void PickFirstAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
         {
-            return PickingResults.FirstOrDefault();
-        }
-        /// <summary>
-        /// Gets the las result
-        /// </summary>
-        /// <returns></returns>
-        public readonly PickingResult<T> Last()
-        {
-            return PickingResults.LastOrDefault();
-        }
-        /// <summary>
-        /// Gets the nearest result to the picking origin
-        /// </summary>
-        public readonly PickingResult<T> Nearest()
-        {
-            return PickingResults
-                .OrderBy(p => p.Distance)
-                .FirstOrDefault();
-        }
-        /// <summary>
-        /// Gets the fartest result to the picking origin
-        /// </summary>
-        public readonly PickingResult<T> Fartest()
-        {
-            return PickingResults
-                .OrderByDescending(p => p.Distance)
-                .FirstOrDefault();
-        }
+            Task.Run(() =>
+            {
+                var query = rayList
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .Select(ray =>
+                    {
+                        bool found = PickFirst<T>(scene, ray, usage, out var result);
 
-        /// <summary>
-        /// Gets the minimum distance valur to the picking origin
-        /// </summary>
-        public readonly float GetMinimumDistance()
-        {
-            return PickingResults.Min(p => p.Distance);
+                        return (found, result);
+                    });
+
+                callback(query.ToArray());
+
+            }).ConfigureAwait(false);
         }
         /// <summary>
-        /// Gets the maximum distance valur to the picking origin
+        /// Gets all picking positions of the given ray list
         /// </summary>
-        public readonly float GetMaximumDistance()
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="rayList">Picking ray list</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="callback">Result callback</param>
+        public static void PickAllAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, IEnumerable<ScenePickingResultMultiple<T>>)>> callback) where T : IRayIntersectable
         {
-            return PickingResults.Max(p => p.Distance);
+            Task.Run(() =>
+            {
+                var query = rayList
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .Select(ray =>
+                    {
+                        bool found = PickAll<T>(scene, ray, usage, out var result);
+
+                        return (found, result);
+                    });
+
+                callback(query.ToArray());
+
+            }).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// Gets nearest picking position of the given ray list
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="rayList">Picking ray list</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="callback">Result callback</param>
+        public static void PickNearestAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
+        {
+            Task.Run(() =>
+            {
+                var query = rayList
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .Select(ray =>
+                    {
+                        bool found = PickNearest<T>(scene, ray, usage, out var result);
+
+                        return (found, result);
+                    });
+
+                callback(query.ToArray());
+
+            }).ConfigureAwait(false);
         }
     }
 }

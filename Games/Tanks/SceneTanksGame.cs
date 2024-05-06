@@ -310,6 +310,7 @@ namespace Tanks
         private async Task InitializeUIModalDialog()
         {
             var descPan = UIPanelDescription.Default(Color.DarkGreen);
+            descPan.BlendMode = BlendModes.OpaqueTransparent;
             dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
@@ -642,6 +643,7 @@ namespace Tanks
         private async Task InitializeDecalDrawer()
         {
             var desc = DecalDrawerDescription.DefaultRotate(@"Resources/Crater.png", 100);
+            desc.BlendMode = BlendModes.OpaqueAlpha;
 
             decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
             decalDrawer.TintColor = new Color(90, 77, 72, 170);

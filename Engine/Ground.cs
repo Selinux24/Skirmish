@@ -11,7 +11,13 @@ namespace Engine
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground<T> : Drawable<T>, IGround, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class Ground<T>(Scene scene, string id, string name) : Drawable<T>(scene, id, name), IGround, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
     {
         /// <inheritdoc/>
         public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.Hull;
@@ -22,18 +28,6 @@ namespace Engine
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> GroundPickingQuadtree = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected Ground(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
@@ -105,12 +99,12 @@ namespace Engine
                 return GetGeometry(refresh);
             }
 
-            return Enumerable.Empty<Triangle>();
+            return [];
         }
         /// <inheritdoc/>
         public virtual IEnumerable<Triangle> GetGeometry(bool refresh = false)
         {
-            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? Enumerable.Empty<Triangle>();
+            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? [];
         }
         /// <inheritdoc/>
         public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
@@ -196,7 +190,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
         {
-            return GroundPickingQuadtree?.GetBoundingBoxes(level) ?? Enumerable.Empty<BoundingBox>();
+            return GroundPickingQuadtree?.GetBoundingBoxes(level) ?? [];
         }
     }
 }

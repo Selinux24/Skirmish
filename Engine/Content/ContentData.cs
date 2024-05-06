@@ -1109,123 +1109,105 @@ namespace Engine.Content
         /// </summary>
         public void Optimize()
         {
-            if (materialContent.Count < 1)
+            if (materialContent.Count <= 1)
             {
+                //One material only
                 return;
             }
 
-            var skins = GetControllerSkins();
-            if (skins.Length != 0)
+            if (geometryContent.Count <= 1)
             {
-                //Skinned
-                foreach (string skin in skins)
-                {
-                    foreach (string material in materialContent.Keys)
-                    {
-                        OptimizeSkinnedMesh(skin, material);
-                    }
-                }
+                //One geometry group only
+                return;
             }
 
-            foreach (string material in materialContent.Keys)
+            if (!materialContent.Keys.Any(m => geometryContent.Values.Count(g => g.Keys.Any(k => k == m)) > 1))
             {
-                OptimizeStaticMesh(material);
+                //No materials with more than one geometry group
+                return;
             }
+
+            OptimizeGeometry();
         }
         /// <summary>
-        /// Optimizes the skinned mesh
+        /// Optimizes the geometry dictionary, grouping existing sub-meshes below the same material.
         /// </summary>
-        /// <param name="skin">Skin name</param>
-        /// <param name="material">Material name</param>
-        private void OptimizeSkinnedMesh(string skin, string material)
+        private void OptimizeGeometry()
         {
-            var skinnedM = ComputeSubmeshContent(skin, skin, material);
-            if (skinnedM != null)
+            //Group by material name
+            var group = GroupByMaterial(out var skinned);
+
+            //Clear current geometry
+            geometryContent.Clear();
+
+            //Add skinning
+            foreach (var (mesh, meshDict) in skinned)
             {
-                OptimizeSubmeshContent(skin, material, [skinnedM]);
+                geometryContent.Add(mesh, meshDict);
             }
-        }
-        /// <summary>
-        /// Optimizes the static mesh
-        /// </summary>
-        /// <param name="material">Material name</param>
-        private void OptimizeStaticMesh(string material)
-        {
-            var staticM = new List<SubMeshContent>();
 
-            var meshNames = geometryContent.Keys.ToArray();
-
-            foreach (string meshName in meshNames)
+            //Add grouped submeshes
+            foreach (var (mat, meshes) in group)
             {
-                var skins = GetControllerSkins();
-                if (Array.Exists(skins, s => s == meshName))
+                if (meshes.Count == 0)
                 {
                     continue;
                 }
 
-                var submesh = ComputeSubmeshContent(meshName, StaticMesh, material);
-                if (submesh != null)
-                {
-                    staticM.Add(submesh);
-                }
-            }
+                string firstMesh = null;
+                List<SubMeshContent> subMeshList = [];
 
-            if (staticM.Count > 0)
-            {
-                OptimizeSubmeshContent(StaticMesh, material, staticM);
+                foreach (var (meshName, subMesh) in meshes)
+                {
+                    //Group using the first mesh name
+                    firstMesh ??= meshName;
+                    subMeshList.Add(subMesh);
+                }
+
+                var gmesh = subMeshList[0];
+                if (subMeshList.Count > 1)
+                {
+                    SubMeshContent.OptimizeMeshes(subMeshList, out gmesh);
+                }
+
+                geometryContent.Add(firstMesh, new([new(mat, gmesh)]));
             }
         }
         /// <summary>
-        /// Computes the specified source mesh
+        /// Groups the sub-mesh list by material name, excluding the skinned parts
         /// </summary>
-        /// <param name="sourceMesh">Source mesh name</param>
-        /// <param name="targetMesh">Target mesh name</param>
-        /// <param name="material">Material name</param>
-        /// <returns>Returns a submesh content if source mesh isn't a hull</returns>
-        private SubMeshContent ComputeSubmeshContent(string sourceMesh, string targetMesh, string material)
+        /// <param name="skinned">Excluded skinned parts</param>
+        private Dictionary<string, List<(string, SubMeshContent)>> GroupByMaterial(out Dictionary<string, Dictionary<string, SubMeshContent>> skinned)
         {
-            if (!geometryContent.TryGetValue(sourceMesh, out var dict))
+            skinned = [];
+
+            Dictionary<string, List<(string, SubMeshContent)>> group = [];
+
+            var skins = GetControllerSkins();
+
+            //Group by material name
+            foreach (var (mesh, subMeshDict) in geometryContent)
             {
-                return null;
+                if (Array.Exists(skins, s => mesh == s))
+                {
+                    skinned.Add(mesh, subMeshDict);
+
+                    continue;
+                }
+
+                foreach (var (mat, subMesh) in subMeshDict)
+                {
+                    if (!group.TryGetValue(mat, out var meshes))
+                    {
+                        meshes = [];
+                        group.Add(mat, meshes);
+                    }
+
+                    meshes.Add((mesh, subMesh));
+                }
             }
 
-            if (dict.TryGetValue(material, out var mat))
-            {
-                if (mat.IsHull)
-                {
-                    //Group into new dictionary
-                    ImportMaterial(targetMesh, material, mat);
-                }
-                else
-                {
-                    //Return the submesh content
-                    return mat;
-                }
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Optimizes the submesh content list
-        /// </summary>
-        /// <param name="mesh">Mesh name</param>
-        /// <param name="material">Material name</param>
-        /// <param name="meshList">Mesh list to optimize</param>
-        private void OptimizeSubmeshContent(string mesh, string material, IEnumerable<SubMeshContent> meshList)
-        {
-            if (SubMeshContent.OptimizeMeshes(meshList, out var gmesh))
-            {
-                //Mesh grouped
-                ImportMaterial(mesh, material, gmesh);
-            }
-            else
-            {
-                //Cannot group
-                foreach (var m in meshList)
-                {
-                    ImportMaterial(mesh, material, m);
-                }
-            }
+            return group;
         }
 
         /// <summary>

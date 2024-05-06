@@ -185,7 +185,7 @@ namespace IntermediateSamples.SceneInstancing
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = instances,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(@"SceneInstancing/Resources/Trees", @"tree.json"),
             };

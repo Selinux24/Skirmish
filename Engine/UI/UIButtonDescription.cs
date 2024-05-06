@@ -20,7 +20,7 @@ namespace Engine.UI
         /// <param name="color">Button color</param>
         public static UIButtonDescription Default(Color4 color)
         {
-            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+            var blendMode = color.Alpha >= 1f ? BlendModes.Opaque : BlendModes.OpaqueTransparent;
 
             return new UIButtonDescription()
             {
@@ -74,7 +74,7 @@ namespace Engine.UI
         /// <param name="color">Button color</param>
         public static UIButtonDescription Default(TextDrawerDescription font, Color4 color)
         {
-            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+            var blendMode = color.Alpha >= 1f ? BlendModes.Opaque : BlendModes.OpaqueTransparent;
 
             return new UIButtonDescription()
             {
@@ -133,7 +133,7 @@ namespace Engine.UI
         /// <param name="pressedColor">Pressed button color</param>
         public static UIButtonDescription DefaultTwoStateButton(Color4 releasedColor, Color4 pressedColor)
         {
-            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Opaque : BlendModes.OpaqueTransparent;
 
             return new UIButtonDescription()
             {
@@ -207,7 +207,7 @@ namespace Engine.UI
         /// <param name="pressedColor">Pressed button color</param>
         public static UIButtonDescription DefaultTwoStateButton(TextDrawerDescription font, Color4 releasedColor, Color4 pressedColor)
         {
-            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Opaque : BlendModes.OpaqueTransparent;
 
             return new UIButtonDescription()
             {

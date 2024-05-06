@@ -28,7 +28,7 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static SpriteDescription Default(Color4 baseColor, float width = 0, float height = 0)
         {
-            var blendMode = baseColor.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+            var blendMode = baseColor.Alpha >= 1f ? BlendModes.Opaque : BlendModes.OpaqueTransparent;
 
             return new SpriteDescription
             {
@@ -48,7 +48,7 @@ namespace Engine.UI
         {
             return new SpriteDescription
             {
-                Textures = new[] { fileName },
+                Textures = [fileName],
                 BaseColor = Color4.White,
                 Width = width,
                 Height = height,

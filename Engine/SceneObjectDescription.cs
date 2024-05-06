@@ -30,7 +30,7 @@ namespace Engine
         /// <summary>
         /// Blend mode
         /// </summary>
-        public BlendModes BlendMode { get; set; } = BlendModes.Default;
+        public BlendModes BlendMode { get; set; } = BlendModes.Opaque;
         /// <summary>
         /// Culling volume by default
         /// </summary>

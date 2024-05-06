@@ -1,9 +1,9 @@
 ﻿using Engine.Common;
 using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -15,7 +15,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of elements in patch
         /// </summary>
-        public const int MAX = 1024 * 8;
+        public const int MAX = 1024 * 4;
 
         /// <summary>
         /// Foliage patch id static counter
@@ -38,6 +38,10 @@ namespace Engine
         /// Foliage data count
         /// </summary>
         private int foliageCount = 0;
+        /// <summary>
+        /// Temporal planting data
+        /// </summary>
+        private readonly ConcurrentBag<VertexBillboard> tmpData = [];
 
         /// <summary>
         /// Patch id
@@ -67,113 +71,105 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="map">Foliage map</param>
-        /// <param name="description">Vegetation task</param>
+        /// <param name="description">Foliage descripton</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
         /// <returns>Returns generated vertex data</returns>
-        private static VertexBillboard[] CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
+        private void CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
         {
-            List<VertexBillboard> vertexData = new(MAX);
+            Planted = false;
+
+            tmpData.Clear();
 
             Random rnd = new(description.Seed);
-            int count = (int)MathF.Min(MAX, MAX * description.Density);
 
-            Parallel.For(0, count, (index) =>
+            var rayList = CalculatePickingRays(scene, map, description, gbbox, nbbox, rnd);
+
+            scene.PickFirstAsync<Triangle>(rayList, SceneObjectUsages.Ground, (res) =>
             {
-                if (CalculatePoint(scene, map, description, gbbox, nbbox, rnd, out var v))
-                {
-                    vertexData.Add(v);
-                }
-            });
-
-            return [.. vertexData];
-        }
-        /// <summary>
-        /// Calculates a point
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="map">Foliage map</param>
-        /// <param name="description">Vegetation task</param>
-        /// <param name="gbbox">Relative bounding box to plant</param>
-        /// <param name="nbbox">Node box</param>
-        /// <param name="rnd">Randomizer</param>
-        /// <param name="res">Returns the planting point if any</param>
-        /// <returns>Returns true if found</returns>
-        private static bool CalculatePoint(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd, out VertexBillboard res)
-        {
-            Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
-            Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
-
-            //Attempts
-            for (int i = 0; i < 3; i++)
-            {
-                Vector3 pos = new(
-                    rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
-                    nbbox.Maximum.Y + 1f,
-                    rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
-
-                bool plant = false;
-                if (map != null)
-                {
-                    var c = map.GetRelative(pos, min, max);
-
-                    if (c[description.Index] > 0)
-                    {
-                        plant = rnd.NextFloat(0, 1) < c[description.Index];
-                    }
-                }
-                else
-                {
-                    plant = true;
-                }
-
-                if (plant)
+                foreach (var (found, r) in res)
                 {
                     Vector2 size = new(
                         rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
                         rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
 
-                    var planted = FindGroundPosition(scene, pos, size, out var v);
-                    if (planted)
+                    if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
                     {
-                        res = v;
-
-                        return true;
+                        tmpData.Add(new()
+                        {
+                            Position = r.PickingResult.Position,
+                            Size = size,
+                        });
                     }
                 }
-            }
 
-            res = default;
+                var array = tmpData.ToArray();
+                Array.Copy(array, foliageData, array.Length);
+                foliageCount = array.Length;
 
-            return false;
+                Planted = true;
+            });
         }
         /// <summary>
-        /// Finds the ground position of the specified point in the scene
+        /// Calculates a picking ray list to test over terrain
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="pos">Position</param>
-        /// <param name="size">Size</param>
-        /// <param name="res">Resulting item</param>
-        /// <returns>Returns true if found</returns>
-        private static bool FindGroundPosition(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
+        /// <param name="map">Foliage map</param>
+        /// <param name="description">Foliage descripton</param>
+        /// <param name="gbbox">Global bounding box</param>
+        /// <param name="nbbox">Node bounding box</param>
+        /// <param name="rnd">Randomizer</param>
+        private static IEnumerable<PickingRay> CalculatePickingRays(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd)
         {
-            var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
+            int count = (int)MathF.Min(MAX, MAX * description.Density);
 
-            bool found = scene.PickFirst<Triangle>(ray, SceneObjectUsages.Ground, out var r);
-            if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
+            for (int i = 0; i < count; i++)
             {
-                res = new()
+                if (!CalculatePoint(map, description, gbbox, nbbox, rnd, out var pos))
                 {
-                    Position = r.PickingResult.Position,
-                    Size = size,
-                };
+                    continue;
+                }
 
-                return true;
+                var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
+
+                yield return ray;
+            }
+        }
+        /// <summary>
+        /// Calculates a point
+        /// </summary>
+        /// <param name="map">Foliage map</param>
+        /// <param name="description">Foliage descripton</param>
+        /// <param name="gbbox">Relative bounding box to plant</param>
+        /// <param name="nbbox">Node box</param>
+        /// <param name="rnd">Randomizer</param>
+        /// <param name="pos">Resulting point</param>
+        private static bool CalculatePoint(FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd, out Vector3 pos)
+        {
+            Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
+            Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
+
+            pos = new(
+                rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
+                nbbox.Maximum.Y + 1f,
+                rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
+
+            bool plant = false;
+            if (map != null)
+            {
+                var c = map.GetRelative(pos, min, max);
+
+                if (c[description.Index] > 0)
+                {
+                    plant = rnd.NextFloat(0, 1) < c[description.Index];
+                }
+            }
+            else
+            {
+                plant = true;
             }
 
-            res = default;
-
-            return false;
+            return plant;
         }
 
         /// <summary>
@@ -196,12 +192,7 @@ namespace Engine
         {
             Channel = description.Index;
 
-            var data = CalculatePoints(scene, map, description, gbbox, nbbox);
-
-            foliageCount = data.Length;
-            Array.Copy(data, foliageData, foliageCount);
-
-            Planted = true;
+            CalculatePoints(scene, map, description, gbbox, nbbox);
         }
         /// <summary>
         /// Get foliage data

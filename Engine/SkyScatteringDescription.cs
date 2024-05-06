@@ -50,7 +50,7 @@ namespace Engine
         /// <param name="resolution">Resolution</param>
         public static SkyScatteringDescription Default(SkyScatteringResolutions resolution = SkyScatteringResolutions.Low)
         {
-            return new SkyScatteringDescription()
+            return new()
             {
                 Resolution = resolution,
             };

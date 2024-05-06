@@ -13,7 +13,7 @@ namespace Engine
     using Engine.Content;
 
     /// <summary>
-    /// Ground garden planter
+    /// Foliage class helper
     /// </summary>
     /// <remarks>
     /// Constructor
@@ -21,7 +21,7 @@ namespace Engine
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    public sealed class GroundGardener(Scene scene, string id, string name) : Drawable<GroundGardenerDescription>(scene, id, name), IUseMaterials
+    public sealed class Foliage(Scene scene, string id, string name) : Drawable<FoliageDescription>(scene, id, name), IUseMaterials
     {
         /// <summary>
         /// Maximum number of active buffer for foliage drawing
@@ -111,7 +111,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~GroundGardener()
+        ~Foliage()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -151,7 +151,7 @@ namespace Engine
         private bool IsTransparent() => BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 
         /// <inheritdoc/>
-        public override async Task ReadAssets(GroundGardenerDescription description)
+        public override async Task ReadAssets(FoliageDescription description)
         {
             await base.ReadAssets(description);
 
@@ -203,7 +203,7 @@ namespace Engine
         /// <param name="index">Channel index</param>
         /// <param name="contentPath">Resources content path</param>
         /// <returns>Returns the new map channel</returns>
-        private async Task<FoliageMapChannel> CreateChannel(GroundGardenerDescription.Channel channel, int index, string contentPath)
+        private async Task<FoliageMapChannel> CreateChannel(FoliageDescription.Channel channel, int index, string contentPath)
         {
             EngineShaderResourceView foliageTextures = null;
             EngineShaderResourceView foliageNormalMaps = null;
@@ -731,7 +731,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the bounds of the ground gardener
+        /// Gets the bounds of the foliage area
         /// </summary>
         public BoundingBox GetPlantingBounds()
         {

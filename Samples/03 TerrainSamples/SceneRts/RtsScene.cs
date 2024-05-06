@@ -73,7 +73,7 @@ namespace TerrainSamples.SceneRts
         private Vector3 tankRightCat = Vector3.Zero;
 
         private Scenery terrain = null;
-        private GroundGardener gardener = null;
+        private Foliage gardener = null;
         private readonly Vector3 windDirection = Vector3.UnitX;
         private readonly float windStrength = 1f;
         private readonly List<Line3D> oks = [];
@@ -682,7 +682,7 @@ namespace TerrainSamples.SceneRts
             var t1Desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 100,
                 Content = ContentDescription.FromFile("SceneRts/resources/Trees", "birch_a.json"),
                 StartsVisible = false,
@@ -691,7 +691,7 @@ namespace TerrainSamples.SceneRts
             var t2Desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 100,
                 Content = ContentDescription.FromFile("SceneRts/resources/Trees", "birch_b.json"),
                 StartsVisible = false,
@@ -769,10 +769,10 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var grDesc = new GroundGardenerDescription()
+            var grDesc = new FoliageDescription()
             {
                 ContentPath = "SceneRts/resources/Terrain/Foliage/Billboard",
-                ChannelRed = new GroundGardenerDescription.Channel()
+                ChannelRed = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["grass_v.dds"],
                     Density = 10f,
@@ -786,7 +786,7 @@ namespace TerrainSamples.SceneRts
                     Instances = GroundGardenerPatchInstances.Four,
                 }
             };
-            gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", grDesc);
+            gardener = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", grDesc);
 
             sw.Stop();
             return new TaskResult()

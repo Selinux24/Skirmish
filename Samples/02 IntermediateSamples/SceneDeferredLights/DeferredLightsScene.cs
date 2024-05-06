@@ -190,7 +190,7 @@ namespace IntermediateSamples.SceneDeferredLights
             var desc1 = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_a.json"),
                 StartsVisible = false,
             };
@@ -199,7 +199,7 @@ namespace IntermediateSamples.SceneDeferredLights
             var desc2 = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 12,
                 Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_b.json"),
                 StartsVisible = false,
@@ -208,10 +208,10 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private async Task InitializeGardener()
         {
-            var desc = new GroundGardenerDescription()
+            var desc = new FoliageDescription()
             {
                 ContentPath = "SceneDeferredLights/Resources/Vegetation",
-                ChannelRed = new GroundGardenerDescription.Channel()
+                ChannelRed = new FoliageDescription.Channel()
                 {
                     VegetationTextures = ["grass.png"],
                     Density = 20f,
@@ -222,7 +222,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 },
                 StartsVisible = false,
             };
-            await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Vegetation", "Vegetation", desc);
+            await AddComponentEffect<Foliage, FoliageDescription>("Vegetation", "Vegetation", desc);
         }
         private async Task InitializeDebug()
         {

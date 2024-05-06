@@ -182,7 +182,7 @@ namespace TerrainSamples.SceneCrowds
             var desc1 = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 PathFindingHull = PickingHullTypes.Hull,
                 Content = ContentDescription.FromFile("SceneCrowds/resources/trees", "birch_a.json"),
             };
@@ -191,7 +191,7 @@ namespace TerrainSamples.SceneCrowds
             var desc2 = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 10,
                 PathFindingHull = PickingHullTypes.Hull,
                 Content = ContentDescription.FromFile("SceneCrowds/resources/trees", "birch_b.json"),

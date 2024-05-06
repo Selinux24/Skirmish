@@ -491,7 +491,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 UseAnisotropic = true,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                BlendMode = BlendModes.DefaultTransparent,
+                BlendMode = BlendModes.OpaqueTransparent,
                 ContentList = content,
                 AssetsConfiguration = assetsMap,
                 Levels = levelsMap,
