@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -179,7 +178,7 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static async Task<FontMap> FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
+        public static FontMap FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
         {
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
@@ -199,7 +198,7 @@ namespace Engine.UI
 
             var fontDesc = Game.Fonts.FromFile(generator, FontMapProcessParameters.Default, fileName, size, style);
             fMap = new FontMap(fontDesc);
-            await fMap.Initialize(game);
+            fMap.Initialize(game);
 
             //Add map to the font cache
             FontMapCache.Add(fMap);
@@ -213,7 +212,7 @@ namespace Engine.UI
         /// <param name="contentPath">Content path</param>
         /// <param name="fontMapping">Font mapping</param>
         /// <returns>Returns the created font map</returns>
-        public static async Task<FontMap> FromMap(Game game, string contentPath, FontMapping fontMapping)
+        public static FontMap FromMap(Game game, string contentPath, FontMapping fontMapping)
         {
             string fontName = Path.Combine(contentPath, fontMapping.ImageFile);
 
@@ -226,7 +225,7 @@ namespace Engine.UI
             fMap = new FontMap
             {
                 FontName = fontName,
-                Texture = await game.ResourceManager.RequestResource(fontName, false)
+                Texture = game.ResourceManager.RequestResource(fontName, false)
             };
 
             string fontMapName = Path.Combine(contentPath, fontMapping.MapFile);
@@ -279,7 +278,7 @@ namespace Engine.UI
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
         /// <remarks>The font family must exists in the FontFamily.Families collection</remarks>
-        public static async Task<FontMap> FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamilies, float size, FontMapStyles style)
+        public static FontMap FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamilies, float size, FontMapStyles style)
         {
             var fontFamily = Game.Fonts.FindFonts(fontFamilies);
             if (string.IsNullOrEmpty(fontFamily))
@@ -297,7 +296,7 @@ namespace Engine.UI
 
             var fontDesc = Game.Fonts.FromFamilyName(generator, FontMapProcessParameters.Default, fontFamily, size, style);
             fMap = new FontMap(fontDesc);
-            await fMap.Initialize(game);
+            fMap.Initialize(game);
 
             //Add map to the font cache
             FontMapCache.Add(fMap);
@@ -434,9 +433,9 @@ namespace Engine.UI
         /// Initializes the font resources
         /// </summary>
         /// <param name="game">Game</param>
-        public async Task Initialize(Game game)
+        public void Initialize(Game game)
         {
-            Texture = await game.ResourceManager.RequestResource(bitmapStream, false);
+            Texture = game.ResourceManager.RequestResource(bitmapStream, false);
         }
 
         /// <summary>

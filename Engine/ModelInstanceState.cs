@@ -6,9 +6,7 @@ namespace Engine
     /// </summary>
     public class ModelInstanceState : ISceneObjectState
     {
-        /// <summary>
-        /// Object id
-        /// </summary>
+        /// <inheritdoc/>
         public string Id { get; set; }
         /// <summary>
         /// Instance id

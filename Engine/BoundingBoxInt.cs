@@ -6,17 +6,22 @@ namespace Engine
     /// <summary>
     /// A bounding box for vertices in a <see cref="PolyMesh"/>.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="BoundingBoxInt"/> struct.
+    /// </remarks>
+    /// <param name="min">The lower bound of the bounding box.</param>
+    /// <param name="max">The upper bound of the bounding box.</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct BoundingBoxInt : IEquatable<BoundingBoxInt>
+    public struct BoundingBoxInt(Vector3Int min, Vector3Int max) : IEquatable<BoundingBoxInt>
     {
         /// <summary>
         /// The lower bound of the bounding box.
         /// </summary>
-        public Vector3Int Min { get; set; }
+        public Vector3Int Min { get; set; } = min;
         /// <summary>
         /// The upper bound of the bounding box.
         /// </summary>
-        public Vector3Int Max { get; set; }
+        public Vector3Int Max { get; set; } = max;
 
         /// <summary>
         /// Checks whether two boudning boxes are intersecting.
@@ -29,17 +34,6 @@ namespace Engine
             return !(a.Min.X > b.Max.X || a.Max.X < b.Min.X
                 || a.Min.Y > b.Max.Y || a.Max.Y < b.Min.Y
                 || a.Min.Z > b.Max.Z || a.Max.Z < b.Min.Z);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BoundingBoxInt"/> struct.
-        /// </summary>
-        /// <param name="min">The lower bound of the bounding box.</param>
-        /// <param name="max">The upper bound of the bounding box.</param>
-        public BoundingBoxInt(Vector3Int min, Vector3Int max)
-        {
-            Min = min;
-            Max = max;
         }
 
         /// <inheritdoc/>

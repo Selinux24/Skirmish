@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -607,7 +606,7 @@ namespace Engine
 
             var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
 
-            return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode, so, Array.Empty<int>(), 0), cmpResult.Bytecode);
+            return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode, so, [], 0), cmpResult.Bytecode);
         }
         /// <summary>
         /// Loads a geometry shader from pre-compiled file
@@ -624,7 +623,7 @@ namespace Engine
             using var code = ShaderBytecode.FromStream(ms);
             var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
 
-            return new EngineGeometryShader(name, new GeometryShader(device, code.Data, so, Array.Empty<int>(), 0), code);
+            return new EngineGeometryShader(name, new GeometryShader(device, code.Data, so, [], 0), code);
         }
 
         /// <summary>

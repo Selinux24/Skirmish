@@ -474,10 +474,7 @@ namespace Engine
             Point2 = ray.Position + ray.Direction;
         }
 
-        /// <summary>
-        /// Gets vertex position list
-        /// </summary>
-        /// <returns>Returns the vertex position list</returns>
+        /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
             return
@@ -486,18 +483,12 @@ namespace Engine
                 Point2,
             ];
         }
-        /// <summary>
-        /// Gets the vertex list stride
-        /// </summary>
-        /// <returns>Returns the list stride</returns>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
             return 2;
         }
-        /// <summary>
-        /// Gets the vertex list topology
-        /// </summary>
-        /// <returns>Returns the list topology</returns>
+        /// <inheritdoc/>
         public readonly Topology GetTopology()
         {
             return Topology.LineList;

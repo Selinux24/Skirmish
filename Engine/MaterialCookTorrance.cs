@@ -29,7 +29,7 @@ namespace Engine
         {
             get
             {
-                return new MaterialCookTorrance()
+                return new()
                 {
                     DiffuseColor = MaterialConstants.DiffuseColor,
                     EmissiveColor = MaterialConstants.EmissiveColor,
@@ -50,7 +50,7 @@ namespace Engine
         {
             MaterialCookTorranceContent content = builtInMaterial;
 
-            return new MaterialCookTorrance()
+            return new()
             {
                 DiffuseColor = content.DiffuseColor,
                 EmissiveColor = content.EmissiveColor,
@@ -86,15 +86,13 @@ namespace Engine
         /// Roughness
         /// </summary>
         public float Roughness { get; set; }
-        /// <summary>
-        /// Use transparency
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsTransparent { get; set; }
 
         /// <inheritdoc/>
         public BufferMaterials Convert()
         {
-            return new BufferMaterials
+            return new()
             {
                 Algorithm = (uint)SpecularAlgorithms.CookTorrance,
                 Block11 = 0,

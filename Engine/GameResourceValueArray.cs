@@ -7,12 +7,15 @@ namespace Engine
     /// <summary>
     /// Value array resource request
     /// </summary>
-    public class GameResourceValueArray<T> : IGameResourceRequest where T : struct
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class GameResourceValueArray<T>(string name) : IGameResourceRequest where T : struct
     {
         /// <inheritdoc/>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = name;
         /// <inheritdoc/>
-        public EngineShaderResourceView ResourceView { get; private set; }
+        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView(name);
         /// <summary>
         /// Size
         /// </summary>
@@ -25,15 +28,6 @@ namespace Engine
         /// Dynamic resource
         /// </summary>
         public bool Dynamic { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public GameResourceValueArray(string name)
-        {
-            Name = name;
-            ResourceView = new EngineShaderResourceView(name);
-        }
 
         /// <inheritdoc/>
         public void Create(Game game)

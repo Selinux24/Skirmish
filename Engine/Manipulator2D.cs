@@ -7,12 +7,16 @@ namespace Engine
     /// <summary>
     /// 2D manipulator
     /// </summary>
-    public class Manipulator2D
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    public class Manipulator2D(Game game)
     {
         /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game;
+        private readonly Game game = game;
         /// <summary>
         /// Update internals flag
         /// </summary>
@@ -53,15 +57,6 @@ namespace Engine
         /// Linear velocity modifier
         /// </summary>
         public float LinearVelocity { get; set; } = 1f;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        public Manipulator2D(Game game)
-        {
-            this.game = game;
-        }
 
         /// <summary>
         /// Updates the internal state
@@ -218,10 +213,7 @@ namespace Engine
             updateInternals = true;
         }
 
-        /// <summary>
-        /// Gets manipulator text representation
-        /// </summary>
-        /// <returns>Returns manipulator text description</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Size: {SizeTransform.GetDescription()}; Sprite: {SpriteTransform.GetDescription()}";

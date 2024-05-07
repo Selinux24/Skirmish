@@ -309,7 +309,7 @@ namespace Engine.Modular
                 //Lights
                 for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    await InitializeObjectLights(objList[i], model[i]);
+                    InitializeObjectLights(objList[i], model[i]);
 
                     InitializeObjectAnimations(objList[i], model[i]);
                 }
@@ -324,7 +324,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="obj">Object</param>
         /// <param name="instance">Model instance</param>
-        private async Task InitializeObjectLights(ObjectReference obj, ModelInstance instance)
+        private void InitializeObjectLights(ObjectReference obj, ModelInstance instance)
         {
             if (!obj.LoadLights)
             {
@@ -370,7 +370,7 @@ namespace Engine.Modular
                     Instance = instance,
                 };
 
-                await particleManager.AddParticleSystem(
+                particleManager.AddParticleSystem(
                     ParticleSystemTypes.CPU,
                     particleDescriptors[obj.ParticleLight.Name],
                     emitter);

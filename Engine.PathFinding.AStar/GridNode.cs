@@ -30,7 +30,7 @@ namespace Engine.PathFinding.AStar
         protected List<GridNode> ConnectedNodes = [];
 
         /// <inheritdoc/>
-        public int Id { get; private set; }
+        public int Id { get; }
         /// <inheritdoc/>
         public Vector3 Center { get; private set; } = center;
         /// <inheritdoc/>

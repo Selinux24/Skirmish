@@ -1,4 +1,5 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
     /// <summary>
     /// Sky plane modes

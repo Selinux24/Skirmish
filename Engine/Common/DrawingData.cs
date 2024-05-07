@@ -228,7 +228,7 @@ namespace Engine.Common
             var resourceManager = Game.ResourceManager;
             foreach (var texture in textures.GetValues())
             {
-                await texture.RequestResource(resourceManager);
+                texture.RequestResource(resourceManager);
             }
 
             //Initialize mesh materials

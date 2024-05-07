@@ -134,7 +134,7 @@ namespace Engine.UI
 
             if (Textured)
             {
-                await InitializeTexture(Description.ContentPath, Description.Textures);
+                InitializeTexture(Description.ContentPath, Description.Textures);
             }
         }
         /// <summary>
@@ -174,10 +174,10 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private async Task InitializeTexture(string contentPath, string[] textures)
+        private void InitializeTexture(string contentPath, string[] textures)
         {
             var image = new FileArrayImageContent(contentPath, textures);
-            spriteTexture = await Game.ResourceManager.RequestResource(image);
+            spriteTexture = Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>

@@ -18,9 +18,7 @@ namespace Engine
         /// </summary>
         private readonly Vector3[] normals = null;
 
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
@@ -28,9 +26,7 @@ namespace Engine
                 return checkPoints[0];
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
@@ -38,13 +34,9 @@ namespace Engine
                 return checkPoints[^1];
             }
         }
-        /// <summary>
-        /// Gets the total length of the path
-        /// </summary>
+        /// <inheritdoc/>
         public float Length { get; private set; }
-        /// <summary>
-        /// Gets the total checkpoint number of the path
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount
         {
             get
@@ -52,9 +44,7 @@ namespace Engine
                 return checkPoints?.Length ?? 0;
             }
         }
-        /// <summary>
-        /// Number of normals in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -83,11 +73,7 @@ namespace Engine
             Length = length;
         }
 
-        /// <summary>
-        /// Gets the path position at specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the position at time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
             if (PositionCount <= 0)
@@ -124,11 +110,7 @@ namespace Engine
 
             return res;
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             if (NormalCount <= 0)
@@ -165,11 +147,7 @@ namespace Engine
 
             return res;
         }
-        /// <summary>
-        /// Gets the next control point at specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the next control path at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
             if (PositionCount <= 0)
@@ -206,11 +184,7 @@ namespace Engine
 
             return res;
         }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
             List<Vector3> returnPath = [];

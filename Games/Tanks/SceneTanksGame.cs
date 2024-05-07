@@ -1753,7 +1753,7 @@ You will lost all the game progress.",
 
             PlayEffectShooting(Shooter);
 
-            _ = AddShotSystem(barrelPosition, shotDirection);
+            AddShotSystem(barrelPosition, shotDirection);
         }
         private async Task IntegrateShot(IGameTime gameTime)
         {
@@ -1811,7 +1811,7 @@ You will lost all the game progress.",
                 if (impactPosition.HasValue)
                 {
                     //Add damage effects to tank
-                    await AddExplosionSystem(impactPosition.Value);
+                    AddExplosionSystem(impactPosition.Value);
                     PlayEffectDamage(Target);
                     PlayEffectImpact(Target);
                 }
@@ -1825,23 +1825,23 @@ You will lost all the game progress.",
                         Vector3 min = Vector3.One * -5f;
                         Vector3 max = Vector3.One * +5f;
 
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
 
                         await Task.Delay(500);
 
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(500);
 
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(3000);
 
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
                     });
                 }
@@ -1851,7 +1851,7 @@ You will lost all the game progress.",
                 //Ground impact
                 if (impactPosition.HasValue)
                 {
-                    await AddSmokePlumeSystem(impactPosition.Value);
+                    AddSmokePlumeSystem(impactPosition.Value);
                     AddCrater(impactPosition.Value, impactNormal.Value);
                     PlayEffectDestroyed(impactPosition.Value);
                 }
@@ -1960,7 +1960,7 @@ You will lost all the game progress.",
             }
         }
 
-        private async Task AddExplosionSystem(Vector3 position)
+        private void AddExplosionSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
             float duration = explosionDurationSeconds;
@@ -1987,10 +1987,10 @@ You will lost all the game progress.",
                 MaximumDistance = 1000f,
             };
 
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
         }
-        private async Task AddShotSystem(Vector3 position, Vector3 direction)
+        private void AddShotSystem(Vector3 position, Vector3 direction)
         {
             float duration = shotDurationSeconds;
             float rate = 0.005f;
@@ -2016,10 +2016,10 @@ You will lost all the game progress.",
                 MaximumDistance = 1000f,
             };
 
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotExplosion"], emitter1);
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotSmoke"], emitter2);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotExplosion"], emitter1);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotSmoke"], emitter2);
         }
-        private async Task AddSmokePlumeSystem(Vector3 position)
+        private void AddSmokePlumeSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextFloat(10, 30);
@@ -2047,8 +2047,8 @@ You will lost all the game progress.",
                 MaximumDistance = 5000f,
             };
 
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
-            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
         }
         private void AddCrater(Vector3 position, Vector3 normal)
         {

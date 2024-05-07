@@ -82,7 +82,7 @@ namespace Engine
         /// <inheritdoc/>
         public async Task Process(IProgress<LoadResourceProgress> progress)
         {
-            List<TaskResult> loadResult = [];
+            List<LoadTaskResult> loadResult = [];
 
             List<Task> taskList = new(tasks.Select(fnc => fnc.Invoke()));
 
@@ -194,7 +194,7 @@ namespace Engine
         /// <inheritdoc/>
         public async Task Process(IProgress<LoadResourceProgress> progress)
         {
-            List<TaskResult<T>> loadResult = [];
+            List<LoadTaskResult<T>> loadResult = [];
 
             List<Task<T>> taskList = new(tasks.Select(fnc => fnc.Invoke()));
 

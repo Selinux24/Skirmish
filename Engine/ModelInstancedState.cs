@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -17,6 +16,6 @@ namespace Engine
         /// <summary>
         /// Instance list
         /// </summary>
-        public IEnumerable<IGameState> Instances { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> Instances { get; set; } = [];
     }
 }

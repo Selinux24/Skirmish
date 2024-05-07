@@ -143,7 +143,7 @@ namespace Engine
                 if (useAlphaMap && useSlopes) { terrainMode = BuiltInTerrainModes.Full; }
                 if (useSlopes) { terrainMode = BuiltInTerrainModes.Slopes; }
 
-                await ReadHeightmapTextures(Description.Heightmap.ContentPath, Description.Heightmap.Textures);
+                ReadHeightmapTextures(Description.Heightmap.ContentPath, Description.Heightmap.Textures);
             }
 
             // Read material
@@ -285,20 +285,20 @@ namespace Engine
         /// </summary>
         /// <param name="baseContentPath">Base content path</param>
         /// <param name="description">Textures description</param>
-        private async Task ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
+        private void ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
         {
             string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
 
             var normalMapTextures = new FileArrayImageContent(tContentPath, description.NormalMaps);
-            terrainNormalMaps = await Game.ResourceManager.RequestResource(normalMapTextures);
+            terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
 
             if (description.UseSlopes)
             {
                 var texturesLR = new FileArrayImageContent(tContentPath, description.TexturesLR);
                 var texturesHR = new FileArrayImageContent(tContentPath, description.TexturesHR);
 
-                terrainTexturesLR = await Game.ResourceManager.RequestResource(texturesLR);
-                terrainTexturesHR = await Game.ResourceManager.RequestResource(texturesHR);
+                terrainTexturesLR = Game.ResourceManager.RequestResource(texturesLR);
+                terrainTexturesHR = Game.ResourceManager.RequestResource(texturesHR);
             }
 
             if (description.UseAlphaMapping)
@@ -306,8 +306,8 @@ namespace Engine
                 var colors = new FileArrayImageContent(tContentPath, description.ColorTextures);
                 var aMap = new FileArrayImageContent(tContentPath, description.AlphaMap);
 
-                colorTextures = await Game.ResourceManager.RequestResource(colors);
-                alphaMap = await Game.ResourceManager.RequestResource(aMap);
+                colorTextures = Game.ResourceManager.RequestResource(colors);
+                alphaMap = Game.ResourceManager.RequestResource(aMap);
             }
         }
 

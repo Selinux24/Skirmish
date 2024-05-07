@@ -163,6 +163,7 @@ namespace TerrainSamples.SceneCrowds
             };
 
             var tankAgent = new GameAgent<GraphAgentType, SteerManipulatorController>(
+                this,
                 $"tankAgent.{tank.Id}",
                 $"tankAgent",
                 tankAgentType,

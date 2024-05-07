@@ -15,7 +15,7 @@ namespace Engine
         /// <returns>Returns a water description</returns>
         public static WaterDescription CreateDefault(float planeSize, float planeHeight)
         {
-            return new WaterDescription()
+            return new()
             {
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
@@ -29,7 +29,7 @@ namespace Engine
         /// <returns>Returns a water description</returns>
         public static WaterDescription CreateCalm(float planeSize, float planeHeight)
         {
-            return new WaterDescription()
+            return new()
             {
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
@@ -47,7 +47,7 @@ namespace Engine
         /// <returns>Returns a water description</returns>
         public static WaterDescription CreateOcean(float planeSize, float planeHeight)
         {
-            return new WaterDescription()
+            return new()
             {
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,

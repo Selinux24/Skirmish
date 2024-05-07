@@ -81,9 +81,7 @@ namespace Engine
                 return [.. points];
             }
         }
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
@@ -91,9 +89,7 @@ namespace Engine
                 return Points[0];
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
@@ -101,13 +97,9 @@ namespace Engine
                 return Points[^1];
             }
         }
-        /// <summary>
-        /// Number of segments in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount { get; private set; }
-        /// <summary>
-        /// Number of normals in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -115,9 +107,7 @@ namespace Engine
                 return 0;
             }
         }
-        /// <summary>
-        /// Total length of path
-        /// </summary>
+        /// <inheritdoc/>
         public float Length { get; private set; }
 
         /// <summary>
@@ -356,31 +346,19 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Gets curve position in specified time
-        /// </summary>
-        /// <param name="time">Global time value</param>
-        /// <returns>Returns curve position in specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
             FindCurve(time, out int segment, out float segmentTime);
 
             return CalculateBezierPoint(segment, segmentTime);
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             return Vector3.Up;
         }
-        /// <summary>
-        /// Gets the next control point in the specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the next control point in time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
             FindCurve(time, out int segment, out _);
@@ -429,11 +407,7 @@ namespace Engine
 
             return p;
         }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
             List<Vector3> returnPath = [];

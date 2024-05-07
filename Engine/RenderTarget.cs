@@ -72,9 +72,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -129,7 +127,7 @@ namespace Engine
             {
                 for (int i = 0; i < Textures.Length; i++)
                 {
-                    Textures.ElementAt(i)?.Dispose();
+                    Textures[i]?.Dispose();
                 }
             }
             Textures = null;

@@ -31,10 +31,6 @@ namespace Engine.Common
         private LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
-        /// Gets the texture count for texture index
-        /// </summary>
-        public int TextureCount { get; private set; }
-        /// <summary>
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropicFiltering { get; private set; }
@@ -120,8 +116,6 @@ namespace Engine.Common
                 LoadAnimation = description.LoadAnimation,
                 LoadNormalMaps = description.LoadNormalMaps,
                 DynamicBuffers = description.Dynamic,
-
-                TextureCount = TextureCount,
             };
 
             if (geo.Count() == 1)

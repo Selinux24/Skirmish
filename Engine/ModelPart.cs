@@ -5,10 +5,14 @@ namespace Engine
     /// <summary>
     /// Model part
     /// </summary>
-    public class ModelPart : IModelPart
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Name</param>
+    public class ModelPart(string name) : IModelPart
     {
         /// <inheritdoc/>
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         /// <inheritdoc/>
         public Matrix InitialWorldTransform { get; private set; } = Matrix.Identity;
         /// <inheritdoc/>
@@ -27,15 +31,6 @@ namespace Engine
         public IModelPart Parent { get; private set; }
         /// <inheritdoc/>
         public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name</param>
-        public ModelPart(string name)
-        {
-            Name = name;
-        }
 
         /// <inheritdoc/>
         public void SetParent(IModelPart parent)

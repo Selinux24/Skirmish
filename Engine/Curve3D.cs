@@ -52,9 +52,7 @@ namespace Engine
                 cZ.PreLoop = value;
             }
         }
-        /// <summary>
-        /// Gets the key count
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount
         {
             get
@@ -62,9 +60,7 @@ namespace Engine
                 return cX.Keys.Count;
             }
         }
-        /// <summary>
-        /// Number of normals in the curve
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -72,9 +68,7 @@ namespace Engine
                 return 0;
             }
         }
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
@@ -82,9 +76,7 @@ namespace Engine
                 return Start.Value;
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
@@ -130,9 +122,7 @@ namespace Engine
                 return GetKey(PositionCount - 1);
             }
         }
-        /// <summary>
-        /// Gets the curve total length
-        /// </summary>
+        /// <inheritdoc/>
         public float Length
         {
             get
@@ -223,11 +213,7 @@ namespace Engine
                 new Vector3(keyX.TangentOut, keyY.TangentOut, keyZ.TangentOut),
                 keyX.Continuity);
         }
-        /// <summary>
-        /// Gets the curve position at specified time
-        /// </summary>
-        /// <param name="time">Curve time</param>
-        /// <returns>Returns the curve position at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
             return new Vector3(
@@ -235,20 +221,12 @@ namespace Engine
                 cY.Evaluate(time),
                 cZ.Evaluate(time));
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             return Vector3.Up;
         }
-        /// <summary>
-        /// Gets the next control point at specified time
-        /// </summary>
-        /// <param name="time">Curve time</param>
-        /// <returns>Returns the next control point at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
             return new Vector3(
@@ -294,11 +272,7 @@ namespace Engine
             }
 
         }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
             var returnPath = new List<Vector3>();

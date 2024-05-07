@@ -21,7 +21,7 @@ namespace Engine
         /// <param name="textures">Texture description</param>
         public static HeightmapDescription FromMap(NoiseMap heightmap, float cellsize, float maximumHeight, Curve heightCurve, HeightmapTexturesDescription textures)
         {
-            return new HeightmapDescription
+            return new()
             {
                 Heightmap = heightmap.Map,
                 CellSize = cellsize,

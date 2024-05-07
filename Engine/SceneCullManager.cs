@@ -9,39 +9,9 @@ namespace Engine
     public class SceneCullManager
     {
         /// <summary>
-        /// Cull data
-        /// </summary>
-        public struct CullData
-        {
-            /// <summary>
-            /// Empty cull data
-            /// </summary>
-            public static CullData Empty
-            {
-                get
-                {
-                    return new CullData()
-                    {
-                        Culled = false,
-                        Distance = float.MaxValue,
-                    };
-                }
-            }
-
-            /// <summary>
-            /// Cull flag. If true, the item is culled
-            /// </summary>
-            public bool Culled { get; set; }
-            /// <summary>
-            /// Distance from point of view when the item is'nt culled
-            /// </summary>
-            public float Distance { get; set; }
-        }
-
-        /// <summary>
         /// Culled objects dictionary
         /// </summary>
-        protected ConcurrentDictionary<ICullable, List<CullData>> Objects = new();
+        protected ConcurrentDictionary<ICullable, List<SceneCullData>> Objects = new();
 
         /// <summary>
         /// Performs cull test in the object list against the culling volume
@@ -57,7 +27,7 @@ namespace Engine
             foreach (var item in objects)
             {
                 var cull = item.Cull(cullIndex, volume, out float distance);
-                var cullData = new CullData
+                var cullData = new SceneCullData
                 {
                     Culled = cull,
                     Distance = distance,
@@ -76,7 +46,7 @@ namespace Engine
         /// <param name="value">Value</param>
         /// <param name="index">Results index</param>
         /// <param name="item">Object</param>
-        private void SetCullValue(CullData value, int index, ICullable item, bool force)
+        private void SetCullValue(SceneCullData value, int index, ICullable item, bool force)
         {
             var values = Objects.AddOrUpdate(item, [], (k, v) => v);
 
@@ -84,7 +54,7 @@ namespace Engine
             if (count <= index)
             {
                 int length = index - count + 1;
-                var cullData = new CullData[length];
+                var cullData = new SceneCullData[length];
                 values.AddRange(cullData);
             }
 
@@ -107,14 +77,14 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="item">Object</param>
         /// <returns>Returns the cull data item for the specified object and index. If not exists, returns the Empty cull data object</returns>
-        public CullData GetCullValue(int index, ICullable item)
+        public SceneCullData GetCullValue(int index, ICullable item)
         {
             if (Objects.TryGetValue(item, out var values) && index < values.Count)
             {
                 return values[index];
             }
 
-            return CullData.Empty;
+            return SceneCullData.Empty;
         }
     }
 }

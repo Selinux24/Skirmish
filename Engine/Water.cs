@@ -9,7 +9,13 @@ namespace Engine
     /// <summary>
     /// Water drawer
     /// </summary>
-    public sealed class Water : Drawable<WaterDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class Water(Scene scene, string id, string name) : Drawable<WaterDescription>(scene, id, name)
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -54,17 +60,6 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public Water(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>

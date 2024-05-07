@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -65,26 +64,18 @@ namespace Engine
         /// Active particle count
         /// </summary>
         public int ActiveParticles { get; private set; }
-        /// <summary>
-        /// Gets the maximum number of concurrent particles
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxConcurrentParticles { get; private set; }
         /// <summary>
         /// Time to end
         /// </summary>
         public float TimeToEnd { get; private set; }
 
-        /// <summary>
-        /// Particle system Name
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; set; }
-        /// <summary>
-        /// Particle emitter
-        /// </summary>
+        /// <inheritdoc/>
         public ParticleEmitter Emitter { get; private set; }
-        /// <summary>
-        /// Gets if the current particle system is active
-        /// </summary>
+        /// <inheritdoc/>
         public bool Active
         {
             get
@@ -100,12 +91,12 @@ namespace Engine
         /// <param name="name">System name</param>
         /// <param name="description">System description</param>
         /// <param name="emitter">Emitter</param>
-        public static async Task<ParticleSystemCpu> Create(Scene scene, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        public static ParticleSystemCpu Create(Scene scene, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             var pParameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
-            var texture = await scene.Game.ResourceManager.RequestResource(imgContent);
+            var texture = scene.Game.ResourceManager.RequestResource(imgContent);
             var textureCount = (uint)imgContent.Count;
 
             emitter.UpdateBounds(pParameters);
@@ -155,9 +146,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -176,10 +165,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Update internal state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public void Update(UpdateContext context)
         {
             Emitter.Update(context.GameTime, Scene.Camera.Position);
@@ -220,7 +206,7 @@ namespace Engine
             }
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
-            dc.SetBlendState(graphics.GetBlendState(parameters.BlendMode));
+            dc.SetBlendState(graphics.GetBlendState(context.DrawerMode, parameters.BlendMode));
 
             var useRotation = parameters.RotateSpeed != Vector2.Zero;
             var state = new BuiltInParticlesState
@@ -243,18 +229,12 @@ namespace Engine
             return particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
         }
 
-        /// <summary>
-        /// Gets current particle system parameters
-        /// </summary>
-        /// <returns>Returns the particle system parameters configuration</returns>
+        /// <inheritdoc/>
         public ParticleSystemParams GetParameters()
         {
             return parameters;
         }
-        /// <summary>
-        /// Sets the particle system parameters
-        /// </summary>
-        /// <param name="particleParameters">Particle system parameters</param>
+        /// <inheritdoc/>
         public void SetParameters(ParticleSystemParams particleParameters)
         {
             parameters = particleParameters;

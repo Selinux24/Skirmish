@@ -5,24 +5,27 @@ namespace Engine
     /// <summary>
     /// Picking ray
     /// </summary>
-    public struct PickingRay
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public struct PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams, float length)
     {
         /// <summary>
         /// Position
         /// </summary>
-        public Vector3 Position { get; set; }
+        public Vector3 Position { get; set; } = position;
         /// <summary>
         /// Direction
         /// </summary>
-        public Vector3 Direction { get; set; }
+        public Vector3 Direction { get; set; } = direction;
         /// <summary>
         /// Ray length
         /// </summary>
-        public float RayLength { get; set; }
+        public float RayLength { get; set; } = length;
         /// <summary>
         /// Picking parameters
         /// </summary>
-        public PickingHullTypes RayPickingParams { get; set; }
+        public PickingHullTypes RayPickingParams { get; set; } = rayPickingParams;
         /// <summary>
         /// Detect facing only primitive normals
         /// </summary>
@@ -78,16 +81,6 @@ namespace Engine
         public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams) : this(position, direction, rayPickingParams, float.MaxValue)
         {
 
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams, float length)
-        {
-            Position = position;
-            Direction = direction;
-            RayLength = length;
-            RayPickingParams = rayPickingParams;
         }
 
         /// <summary>

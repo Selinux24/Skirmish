@@ -81,7 +81,7 @@ namespace Engine.UI
             vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(Name, false, indices);
 
-            Texture = await InitializeTexture(Description.ContentPath, Description.Textures);
+            Texture = InitializeTexture(Description.ContentPath, Description.Textures);
             TextureIndex = Description.TextureIndex;
             Channel = Description.Channel;
         }
@@ -90,7 +90,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private async Task<EngineShaderResourceView> InitializeTexture(string contentPath, string[] textures)
+        private EngineShaderResourceView InitializeTexture(string contentPath, string[] textures)
         {
             if ((textures?.Length ?? 0) == 0)
             {
@@ -98,7 +98,7 @@ namespace Engine.UI
             }
 
             var image = new FileArrayImageContent(contentPath, textures);
-            return await Game.ResourceManager.RequestResource(image);
+            return Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>

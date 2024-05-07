@@ -1,6 +1,5 @@
 ﻿using Engine.Common;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Tween
@@ -31,7 +30,13 @@ namespace Engine.Tween
         /// <inheritdoc/>
         public int Layer { get; set; }
         /// <inheritdoc/>
-        public bool HasOwner { get; private set; }
+        public bool HasOwner
+        {
+            get
+            {
+                return Owner != null;
+            }
+        }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
 

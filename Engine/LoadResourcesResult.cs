@@ -13,7 +13,7 @@ namespace Engine
         /// <summary>
         /// Task result list
         /// </summary>
-        public virtual IEnumerable<TaskResult> Results { get; set; }
+        public virtual IEnumerable<LoadTaskResult> Results { get; set; }
         /// <summary>
         /// Gets whether all tasks completed correctly or not
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine
                 .Select(r => r.Exception)
                 .ToArray();
 
-            return exList ?? Array.Empty<Exception>();
+            return exList ?? [];
         }
         /// <summary>
         /// Gets a string with the listed exceptions
@@ -94,6 +94,6 @@ namespace Engine
         /// <summary>
         /// Task result list
         /// </summary>
-        public new IEnumerable<TaskResult<T>> Results { get; set; }
+        public new IEnumerable<LoadTaskResult<T>> Results { get; set; }
     }
 }

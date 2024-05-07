@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -188,9 +187,9 @@ namespace Engine
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
         /// <returns>Returns the new particle system</returns>
-        public async Task<IParticleSystem> AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        public IParticleSystem AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            return await AddParticleSystem($"{Name}.{type}.{description.Name}", type, description, emitter);
+            return AddParticleSystem($"{Name}.{type}.{description.Name}", type, description, emitter);
         }
         /// <summary>
         /// Adds a new particle system to the collection
@@ -200,17 +199,17 @@ namespace Engine
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
         /// <returns>Returns the new particle system</returns>
-        public async Task<IParticleSystem> AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        public IParticleSystem AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             IParticleSystem pSystem;
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = await ParticleSystemCpu.Create(Scene, name, description, emitter);
+                pSystem = ParticleSystemCpu.Create(Scene, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = await ParticleSystemGpu.Create(Scene, name, description, emitter);
+                pSystem = ParticleSystemGpu.Create(Scene, name, description, emitter);
             }
             else
             {

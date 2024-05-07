@@ -517,7 +517,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 messages.Text = res.GetErrorMessage();
                 messages.Visible = true;
 
-                res.ThrowExceptions();
+                return;
             }
 
             InitializeEnvironment();

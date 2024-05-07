@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -142,9 +141,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -402,9 +399,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            var (key, resource) = await TryGetResource(imageContent);
+            var (key, resource) = TryGetResource(imageContent);
             if (resource != null)
             {
                 return resource;
@@ -431,9 +428,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
-            return await RequestResource(new FileImageContent(path), mipAutogen, dynamic);
+            return RequestResource(new FileImageContent(path), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -442,9 +439,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            return await RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
+            return RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -455,9 +452,9 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            var (key, resource) = await TryGetResource(identifier);
+            var (key, resource) = TryGetResource(identifier);
             if (resource != null)
             {
                 return resource;
@@ -492,9 +489,9 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            var (key, resource) = await TryGetResource(identifier);
+            var (key, resource) = TryGetResource(identifier);
             if (resource != null)
             {
                 return resource;
@@ -528,40 +525,40 @@ namespace Engine
         /// <param name="imageContent">Image content</param>
         /// <param name="key">Resource key</param>
         /// <returns>Returns the resource if exists</returns>
-        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(IImageContent imageContent)
+        private (string Key, EngineShaderResourceView Resource) TryGetResource(IImageContent imageContent)
         {
             string key = imageContent?.GetResourceKey();
             if (key == null)
             {
-                return await Task.FromResult((key, (EngineShaderResourceView)null));
+                return (key, null);
             }
 
             if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, (EngineShaderResourceView)null));
+                return (key, null);
             }
 
-            return await Task.FromResult((key, resource));
+            return (key, resource);
         }
         /// <summary>
         /// Trys to get a resource by identifier
         /// </summary>
         /// <param name="identifier">Identifier</param>
         /// <returns>Returns the resource if exists</returns>
-        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(Guid identifier)
+        private (string Key, EngineShaderResourceView Resource) TryGetResource(Guid identifier)
         {
             string key = identifier.ToByteArray().GetMd5Sum();
             if (key == null)
             {
-                return await Task.FromResult((key, (EngineShaderResourceView)null));
+                return (key, null);
             }
 
             if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, (EngineShaderResourceView)null));
+                return (key, null);
             }
 
-            return await Task.FromResult((key, resource));
+            return (key, resource);
         }
     }
 }

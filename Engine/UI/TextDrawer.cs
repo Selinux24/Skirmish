@@ -294,15 +294,15 @@ namespace Engine.UI
 
             if (!string.IsNullOrWhiteSpace(Description.FontFileName) && !string.IsNullOrWhiteSpace(Description.ContentPath))
             {
-                fontMap = await FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
+                fontMap = FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
             }
             else if (Description.FontMapping != null)
             {
-                fontMap = await FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
+                fontMap = FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
             }
             else if (!string.IsNullOrWhiteSpace(Description.FontFamily))
             {
-                fontMap = await FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
+                fontMap = FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
             }
 
             VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];

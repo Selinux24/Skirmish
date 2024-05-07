@@ -205,7 +205,7 @@ namespace TerrainSamples.ScenePerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = await Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
+            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
 
             perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;

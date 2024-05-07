@@ -3,10 +3,21 @@ using System.Collections.Generic;
 
 namespace Engine
 {
+    /// <summary>
+    /// Engine service factory
+    /// </summary>
     public static class EngineServiceFactory
     {
-        private static readonly Dictionary<Type, IGameServiceFactory> serviceFactories = new();
+        /// <summary>
+        /// Services
+        /// </summary>
+        private static readonly Dictionary<Type, IGameServiceFactory> serviceFactories = [];
 
+        /// <summary>
+        /// Register a service in the factory
+        /// </summary>
+        /// <typeparam name="I">Interface type</typeparam>
+        /// <typeparam name="T">Service type</typeparam>
         public static void Register<I, T>()
             where T : class, IGameServiceFactory<I>
         {
@@ -22,7 +33,11 @@ namespace Engine
                 serviceFactories.Add(type, factory);
             }
         }
-
+        /// <summary>
+        /// Instances a service
+        /// </summary>
+        /// <typeparam name="I">Interface type</typeparam>
+        /// <returns>Returns the registered service</returns>
         public static I Instance<I>()
         {
             if (!serviceFactories.TryGetValue(typeof(I), out var factory))

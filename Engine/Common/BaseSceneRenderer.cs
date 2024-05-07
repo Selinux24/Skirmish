@@ -922,7 +922,7 @@ namespace Engine.Common
         /// <param name="blendMode">Blend mode</param>
         protected virtual void SetBlendState(IEngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
         {
-            dc.SetBlendState(Scene.Game.Graphics.GetBlendState(blendMode));
+            dc.SetBlendState(Scene.Game.Graphics.GetBlendState(drawerMode, blendMode));
         }
         /// <summary>
         /// Sets the depth-stencil buffer state

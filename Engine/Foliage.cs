@@ -160,7 +160,7 @@ namespace Engine
                 throw new EngineException("A gardener description should be specified.");
             }
 
-            textureRandom = await Game.ResourceManager.RequestResource(Guid.NewGuid(), 1024, -1, 1, 24);
+            textureRandom = Game.ResourceManager.RequestResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
             foliageSphere = new BoundingSphere(Vector3.Zero, Description.VisibleRadius);
 
@@ -181,7 +181,7 @@ namespace Engine
                 var channelDesc = Description.Channels[i];
                 if (channelDesc?.Enabled == true)
                 {
-                    var newChannel = await CreateChannel(channelDesc, i, contentPath);
+                    var newChannel = CreateChannel(channelDesc, i, contentPath);
 
                     foliageMapChannels.Add(newChannel);
                 }
@@ -203,7 +203,7 @@ namespace Engine
         /// <param name="index">Channel index</param>
         /// <param name="contentPath">Resources content path</param>
         /// <returns>Returns the new map channel</returns>
-        private async Task<FoliageMapChannel> CreateChannel(FoliageDescription.Channel channel, int index, string contentPath)
+        private FoliageMapChannel CreateChannel(FoliageDescription.Channel channel, int index, string contentPath)
         {
             EngineShaderResourceView foliageTextures = null;
             EngineShaderResourceView foliageNormalMaps = null;
@@ -218,13 +218,13 @@ namespace Engine
             if (textureCount > 0)
             {
                 var image = new FileArrayImageContent(contentPath, channel.VegetationTextures);
-                foliageTextures = await Game.ResourceManager.RequestResource(image);
+                foliageTextures = Game.ResourceManager.RequestResource(image);
             }
 
             if (normalMapCount > 0)
             {
                 var image = new FileArrayImageContent(contentPath, channel.VegetationNormalMaps);
-                foliageNormalMaps = await Game.ResourceManager.RequestResource(image);
+                foliageNormalMaps = Game.ResourceManager.RequestResource(image);
             }
 
             return new FoliageMapChannel()
@@ -464,8 +464,8 @@ namespace Engine
                 var nbbox = node.BoundingBox;
 
                 //Get the node data
-                bool initialized = GetNodePatches(node, channelCount, out var nodeData);
-                if (!initialized)
+                bool pathInitialized = GetNodePatches(node, channelCount, out var nodeData);
+                if (!pathInitialized)
                 {
                     //Initialice the node data
                     DoPlant(nodeData, gbbox, nbbox);
@@ -529,7 +529,7 @@ namespace Engine
                 .Select(n => n.Patch)
                 .ToArray();
 
-            var res = Parallel.For(0, toPlant.Length, (i) =>
+            Parallel.For(0, toPlant.Length, (i) =>
             {
                 toPlant[i].Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox);
             });
@@ -543,7 +543,7 @@ namespace Engine
             //Try to find unused first
             foreach (var buffer in foliageBuffers)
             {
-                if (foliagePatches.Values.Any(n => n.Any(pb => pb.Buffer == buffer)))
+                if (foliagePatches.Values.Any(n => Array.Exists(n, pb => pb.Buffer == buffer)))
                 {
                     continue;
                 }
@@ -552,18 +552,18 @@ namespace Engine
             }
 
             //All buffer already used. Try to find not visible & fartest from position
-            var notVisibleNodes = foliagePatches.Keys.Except(visibleNodes).OrderByDescending(n => Vector3.DistanceSquared(n.Center, eyePosition));
+            var notVisibleNodes = foliagePatches.Keys
+                .Except(visibleNodes)
+                .OrderByDescending(n => Vector3.DistanceSquared(n.Center, eyePosition));
+
             foreach (var node in notVisibleNodes)
             {
-                foreach (var nd in foliagePatches[node])
+                var buffer = foliagePatches[node]
+                    .Select(nd => nd.Buffer)
+                    .FirstOrDefault(b => b != null && !b.Attached);
+
+                if (buffer != null)
                 {
-                    var buffer = nd.Buffer;
-
-                    if (buffer == null || buffer.Attached)
-                    {
-                        continue;
-                    }
-
                     return buffer;
                 }
             }

@@ -313,7 +313,7 @@ namespace TerrainSamples.SceneSkybox
                 MaximumDistance = GameEnvironment.LODDistanceLow,
             };
 
-            await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
         }
         private async Task InitializeDecalEmitter()
         {

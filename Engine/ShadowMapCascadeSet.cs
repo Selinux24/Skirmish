@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Cascade shadow map matrix set
     /// </summary>
-    public class ShadowMapCascadeSet
+    class ShadowMapCascadeSet
     {
         /// <summary>
         /// Total cascades

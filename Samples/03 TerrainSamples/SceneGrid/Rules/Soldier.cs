@@ -112,7 +112,7 @@ namespace TerrainSamples.SceneGrid.Rules
                 return BaseInitiative - GetModifiersInitiative();
             }
         }
-        public MoraleStates CurrentMorale { get; private set; }
+        public MoraleStates CurrentMorale { get; set; }
         public int CurrentFirstAidHability
         {
             get

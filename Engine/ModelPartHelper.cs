@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Model parts
         /// </summary>
-        private readonly List<IModelPart> modelParts = new();
+        private readonly List<IModelPart> modelParts = [];
 
         /// <summary>
         /// Model part count

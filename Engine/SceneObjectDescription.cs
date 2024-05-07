@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine
 {
     /// <summary>
@@ -47,83 +46,5 @@ namespace Engine
         /// Path finding hull
         /// </summary>
         public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.None;
-    }
-
-    /// <summary>
-    /// Shadow casting algorihtms
-    /// </summary>
-    [Flags]
-    public enum ShadowCastingAlgorihtms : uint
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Directional shadow casting
-        /// </summary>
-        Directional = 1,
-        /// <summary>
-        /// Spot shadow casting
-        /// </summary>
-        Spot = 2,
-        /// <summary>
-        /// Point shadow casting
-        /// </summary>
-        Point = 4,
-        /// <summary>
-        /// All shadow types
-        /// </summary>
-        All = Directional | Spot | Point,
-    }
-
-    /// <summary>
-    /// Culling volume types
-    /// </summary>
-    public enum CullingVolumeTypes : uint
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Box volume
-        /// </summary>
-        BoxVolume = 1,
-        /// <summary>
-        /// Spheric volume
-        /// </summary>
-        SphericVolume = 2,
-    }
-
-    /// <summary>
-    /// Collider types
-    /// </summary>
-    public enum ColliderTypes
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Sphere
-        /// </summary>
-        Spheric = 1,
-        /// <summary>
-        /// Oriented box
-        /// </summary>
-        Box = 2,
-        /// <summary>
-        /// Cylinder
-        /// </summary>
-        Cylinder = 3,
-        /// <summary>
-        /// Capsule
-        /// </summary>
-        Capsule = 4,
-        /// <summary>
-        /// Mesh
-        /// </summary>
-        Mesh = 5,
     }
 }

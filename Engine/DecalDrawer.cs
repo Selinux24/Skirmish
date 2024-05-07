@@ -106,7 +106,7 @@ namespace Engine
             RotateDecals = Description.RotateDecals;
 
             var imgContent = new FileArrayImageContent(Description.TextureName);
-            Texture = await Scene.Game.ResourceManager.RequestResource(imgContent);
+            Texture = Scene.Game.ResourceManager.RequestResource(imgContent);
             TextureCount = (uint)imgContent.Count;
 
             decals = new VertexDecal[MaxDecalCount];
@@ -167,7 +167,7 @@ namespace Engine
             }
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
-            dc.SetBlendState(graphics.GetBlendState(BlendMode));
+            dc.SetBlendState(graphics.GetBlendState(context.DrawerMode, BlendMode));
 
             decalDrawer.Update(
                 dc,

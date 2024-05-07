@@ -13,7 +13,7 @@ namespace Engine
         /// <param name="maxCount">Max decal count</param>
         public static DecalDrawerDescription Default(string textureFileName, int maxCount)
         {
-            return new DecalDrawerDescription
+            return new()
             {
                 TextureName = textureFileName,
                 MaxDecalCount = maxCount,
@@ -26,7 +26,7 @@ namespace Engine
         /// <param name="maxCount">Max decal count</param>
         public static DecalDrawerDescription DefaultRotate(string textureFileName, int maxCount)
         {
-            return new DecalDrawerDescription
+            return new()
             {
                 TextureName = textureFileName,
                 MaxDecalCount = maxCount,

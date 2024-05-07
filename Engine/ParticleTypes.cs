@@ -1,6 +1,9 @@
 ﻿
 namespace Engine
 {
+    /// <summary>
+    /// Particle types
+    /// </summary>
     public enum ParticleTypes
     {
         /// <summary>

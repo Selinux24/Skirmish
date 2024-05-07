@@ -1,4 +1,5 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
     using Engine.Common;
 
@@ -276,25 +277,31 @@
         /// <summary>
         /// Gets blend state
         /// </summary>
+        /// <param name="drawerMode">Drawer mode</param>
         /// <param name="blendMode">Blend mode</param>
-        public EngineBlendState GetBlendState(BlendModes blendMode)
+        public EngineBlendState GetBlendState(DrawerModes drawerMode, BlendModes blendMode)
         {
             if (blendMode.HasFlag(BlendModes.Additive))
             {
                 return GetBlendAdditive();
             }
-            else if (blendMode.HasFlag(BlendModes.Transparent))
-            {
-                return GetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
-            }
-            else if (blendMode.HasFlag(BlendModes.Alpha))
-            {
-                return GetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
-            }
-            else
+
+            if (drawerMode.HasFlag(DrawerModes.OpaqueOnly))
             {
                 return GetBlendDefault();
             }
+
+            if (blendMode.HasFlag(BlendModes.Transparent))
+            {
+                return GetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
+            }
+
+            if (blendMode.HasFlag(BlendModes.Alpha))
+            {
+                return GetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
+            }
+
+            return GetBlendDefault();
         }
 
         /// <summary>

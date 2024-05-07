@@ -27,7 +27,7 @@ namespace Engine
         /// <param name="otherStatus">Game status dictionary</param>
         private GameStatus(GameStatus otherStatus) : this()
         {
-            status = new Dictionary<string, double>(otherStatus.status);
+            status = new(otherStatus.status);
         }
 
         /// <summary>

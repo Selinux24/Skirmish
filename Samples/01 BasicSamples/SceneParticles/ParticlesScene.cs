@@ -288,7 +288,7 @@ namespace BasicSamples.SceneParticles
             }
             if (Game.Input.KeyJustPressed(Keys.D7))
             {
-                _ = AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
+                AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
             }
 
             if (Game.Input.KeyJustPressed(Keys.P))
@@ -460,7 +460,7 @@ namespace BasicSamples.SceneParticles
             _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter21);
             _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions[particlePlumeString], emitter22);
         }
-        private async Task AddSmokePlumeSystemWithWind(Vector3 wind, float force)
+        private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
             var emitter = new ParticleEmitter()
             {
@@ -471,7 +471,7 @@ namespace BasicSamples.SceneParticles
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter);
+            var pSystem = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions[particlePlumeString], emitter);
 
             var parameters = pSystem.GetParameters();
 

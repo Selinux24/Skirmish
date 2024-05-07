@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
@@ -8,25 +7,6 @@ namespace Engine
     /// </summary>
     public class CubemapDescription : SceneObjectDescription
     {
-        /// <summary>
-        /// Cube map geometry enumeration
-        /// </summary>
-        public enum CubeMapGeometry
-        {
-            /// <summary>
-            /// Box
-            /// </summary>
-            Box,
-            /// <summary>
-            /// Sphere
-            /// </summary>
-            Sphere,
-            /// <summary>
-            /// Hemispheric
-            /// </summary>
-            Hemispheric,
-        }
-
         /// <summary>
         /// Gets the default cube map description
         /// </summary>
@@ -123,15 +103,15 @@ namespace Engine
         /// <param name="faceSize">Face size</param>
         public static Rectangle[] ComputeCubemapFaces(int faceSize)
         {
-            return new[]
-            {
-                new Rectangle(faceSize * 2, faceSize * 1, faceSize, faceSize), //Right
-                new Rectangle(faceSize * 0, faceSize * 1, faceSize, faceSize), //Left
-                new Rectangle(faceSize * 1, faceSize * 0, faceSize, faceSize), //Top
-                new Rectangle(faceSize * 1, faceSize * 2, faceSize, faceSize), //Bottom
-                new Rectangle(faceSize * 1, faceSize * 1, faceSize, faceSize), //Front
-                new Rectangle(faceSize * 3, faceSize * 1, faceSize, faceSize), //Back
-            };
+            return
+            [
+                new (faceSize * 2, faceSize * 1, faceSize, faceSize), //Right
+                new (faceSize * 0, faceSize * 1, faceSize, faceSize), //Left
+                new (faceSize * 1, faceSize * 0, faceSize, faceSize), //Top
+                new (faceSize * 1, faceSize * 2, faceSize, faceSize), //Bottom
+                new (faceSize * 1, faceSize * 1, faceSize, faceSize), //Front
+                new (faceSize * 3, faceSize * 1, faceSize, faceSize), //Back
+            ];
         }
 
         /// <summary>
@@ -154,7 +134,7 @@ namespace Engine
         /// Index 4: Front face
         /// Index 5: Back face
         /// </remarks>
-        public Rectangle[] Faces { get; set; } = Array.Empty<Rectangle>();
+        public Rectangle[] Faces { get; set; } = [];
 
         /// <summary>
         /// Plain texture list

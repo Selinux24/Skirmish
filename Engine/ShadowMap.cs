@@ -12,23 +12,30 @@ namespace Engine
     /// <summary>
     /// Shadow map
     /// </summary>
-    public abstract class ShadowMap : IShadowMap
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="width">Width</param>
+    /// <param name="height">Height</param>
+    /// <param name="arraySize">Array size</param>
+    public abstract class ShadowMap(Scene scene, string name, int width, int height, int arraySize) : IShadowMap
     {
         /// <summary>
         /// Scene
         /// </summary>
-        protected Scene Scene { get; private set; }
+        protected Scene Scene { get; private set; } = scene;
         /// <summary>
         /// Viewport
         /// </summary>
-        protected Viewport[] Viewports { get; set; }
+        protected Viewport[] Viewports { get; set; } = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
         /// <summary>
         /// Depth map
         /// </summary>
         protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
 
         /// <inheritdoc/>
-        public string Name { get; protected set; }
+        public string Name { get; protected set; } = name;
         /// <inheritdoc/>
         public ISceneLight LightSource { get; set; }
         /// <inheritdoc/>
@@ -38,20 +45,6 @@ namespace Engine
         /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="arraySize">Array size</param>
-        protected ShadowMap(Scene scene, string name, int width, int height, int arraySize)
-        {
-            Scene = scene;
-            Name = name;
-
-            Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
-        }
         /// <summary>
         /// Destructor
         /// </summary>

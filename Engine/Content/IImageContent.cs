@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 namespace Engine.Content
 {
     using Engine.Common;
@@ -9,6 +8,8 @@ namespace Engine.Content
     /// </summary>
     public interface IImageContent
     {
+        const int retryCount = 10;
+
         /// <summary>
         /// Name
         /// </summary>
@@ -22,19 +23,22 @@ namespace Engine.Content
         /// Creates a mesh image
         /// </summary>
         /// <param name="resourceManager">Resource manager</param>
-        public async Task<IMeshImage> CreateMeshImage(GameResourceManager resourceManager)
+        public IMeshImage CreateMeshImage(GameResourceManager resourceManager)
         {
-            var view = await resourceManager.RequestResource(this);
-            if (view == null)
+            for (int i = 0; i < retryCount; i++)
             {
-                string errorMessage = $"Texture cannot be requested: {this}";
-
-                Logger.WriteError(nameof(DrawingData), errorMessage);
-
-                throw new EngineException(errorMessage);
+                var view = resourceManager.RequestResource(this);
+                if (view != null)
+                {
+                    return new MeshImage() { Resource = view };
+                }
             }
 
-            return new MeshImage() { Resource = view };
+            string errorMessage = $"Texture cannot be requested: {this}";
+
+            Logger.WriteError(nameof(DrawingData), errorMessage);
+
+            throw new EngineException(errorMessage);
         }
         /// <summary>
         /// Generates the resource view

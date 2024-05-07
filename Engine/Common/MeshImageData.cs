@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 namespace Engine.Common
 {
     using Engine.Content;
@@ -34,9 +33,9 @@ namespace Engine.Common
         /// Requests the image resource
         /// </summary>
         /// <param name="resourceManager">Resource manager</param>
-        public async Task RequestResource(GameResourceManager resourceManager)
+        public void RequestResource(GameResourceManager resourceManager)
         {
-            Texture = await Content.CreateMeshImage(resourceManager);
+            Texture = Content.CreateMeshImage(resourceManager);
         }
     }
 }

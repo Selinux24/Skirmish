@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Task result
     /// </summary>
-    public class TaskResult
+    public class LoadTaskResult
     {
         /// <summary>
         /// Gets whether the task completed correctly or not
@@ -27,7 +27,7 @@ namespace Engine
     /// Task result
     /// </summary>
     /// <typeparam name="T">Result type</typeparam>
-    public class TaskResult<T> : TaskResult
+    public class LoadTaskResult<T> : LoadTaskResult
     {
         /// <summary>
         /// Result

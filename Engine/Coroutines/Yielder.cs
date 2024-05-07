@@ -28,7 +28,13 @@ namespace Engine.Coroutines
         /// <inheritdoc/>
         public int Layer { get; set; } = 1;
         /// <inheritdoc/>
-        public bool HasOwner { get; private set; }
+        public bool HasOwner
+        {
+            get
+            {
+                return Owner != null;
+            }
+        }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
 

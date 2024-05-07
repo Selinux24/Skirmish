@@ -1,5 +1,4 @@
-﻿
-using Engine.Content;
+﻿using Engine.Content;
 
 namespace Engine
 {

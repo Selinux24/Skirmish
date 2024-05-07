@@ -444,18 +444,18 @@ namespace TerrainSamples.SceneHeightmap
                 GlowTexture = GlowString,
                 Flares =
                 [
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
 
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
 
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -893,8 +893,8 @@ namespace TerrainSamples.SceneHeightmap
 
                 Lights.Add(torchLights[i - 1]);
 
-                await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
-                await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             await Task.CompletedTask;

@@ -13,12 +13,13 @@ namespace TerrainSamples.SceneCrowds
     /// <remarks>
     /// Constructor
     /// </remarks>
+    /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
     /// <param name="agentType">Agent type</param>
     /// <param name="model">Model</param>
     /// <param name="controller">Controller</param>
-    public class GameAgent<TAgent, TController>(string id, string name, TAgent agentType, TController controller, ModelInstance model) : IAgent<TAgent>, IUpdatable, IControllable, ITransformable3D
+    public class GameAgent<TAgent, TController>(Scene scene, string id, string name, TAgent agentType, TController controller, ModelInstance model) : IAgent<TAgent>, IUpdatable, IControllable, ITransformable3D
         where TAgent : GraphAgentType
         where TController : ManipulatorController
     {
@@ -36,7 +37,7 @@ namespace TerrainSamples.SceneCrowds
         /// <inheritdoc/>
         public string Name { get; set; } = name;
         /// <inheritdoc/>
-        public Scene Scene { get; private set; }
+        public Scene Scene { get; private set; } = scene;
         /// <inheritdoc/>
         public SceneObjectUsages Usage { get; set; } = SceneObjectUsages.Agent;
         /// <inheritdoc/>

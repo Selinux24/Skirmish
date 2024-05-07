@@ -148,10 +148,10 @@ namespace Engine
             await base.ReadAssets(description);
 
             var img1 = new FileArrayImageContent(Description.ContentPath, Description.Texture1Name);
-            skyTexture1 = await Game.ResourceManager.RequestResource(img1);
+            skyTexture1 = Game.ResourceManager.RequestResource(img1);
 
             var img2 = new FileArrayImageContent(Description.ContentPath, Description.Texture2Name);
-            skyTexture2 = await Game.ResourceManager.RequestResource(img2);
+            skyTexture2 = Game.ResourceManager.RequestResource(img2);
 
             skyMode = Description.SkyMode;
 

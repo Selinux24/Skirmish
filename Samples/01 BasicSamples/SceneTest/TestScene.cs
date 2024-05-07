@@ -229,28 +229,26 @@ namespace BasicSamples.SceneTest
 
             LoadResources(
                 taskList,
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
+                 (res) =>
+                 {
+                     if (!res.Completed)
+                     {
+                         res.ThrowExceptions();
+                     }
 
-                    PlantTrees();
+                     PlantTrees();
 
-                    GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
+                     GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
-                    Vector3 translation = new(-20, 10, -40);
-                    Camera.Goto(baseDelta + translation);
-                    Camera.LookTo(baseDelta);
+                     Vector3 translation = new(-20, 10, -40);
+                     Camera.Goto(baseDelta + translation);
+                     Camera.LookTo(baseDelta);
 
-                    uiTweener.Hide(blackPan, 4000);
-                    uiTweener.Hide(progressBar, 2000);
+                     uiTweener.Hide(blackPan, 4000);
+                     uiTweener.Hide(progressBar, 2000);
 
-                    await Task.Delay(1000);
-
-                    gameReady = true;
-                });
+                     gameReady = true;
+                 });
         }
         private async Task InitializeSkyEffects()
         {
@@ -285,7 +283,7 @@ namespace BasicSamples.SceneTest
                 SkyMode = SkyPlaneModes.Perturbed,
             };
 
-            skyPlane = await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", cloudsDesc);
+            skyPlane = await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", cloudsDesc, 2);
         }
         private async Task InitializeScenery()
         {
@@ -750,7 +748,7 @@ namespace BasicSamples.SceneTest
             List<Triangle> markers = [];
             for (int i = 0; i < positions.Length; i++)
             {
-                particlePlumes[i] = await pManager.AddParticleSystem(
+                particlePlumes[i] = pManager.AddParticleSystem(
                     ParticleSystemTypes.CPU,
                     pPlume,
                     new ParticleEmitter()
