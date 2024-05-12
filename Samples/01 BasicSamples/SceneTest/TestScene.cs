@@ -46,7 +46,6 @@ namespace BasicSamples.SceneTest
         private UITextArea runtime = null;
         private UIPanel blackPan = null;
         private UIProgressBar progressBar = null;
-        private float progressValue = 0;
 
         private Scenery scenery = null;
 
@@ -103,12 +102,14 @@ namespace BasicSamples.SceneTest
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeUI,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -227,28 +228,42 @@ namespace BasicSamples.SceneTest
             progressBar.ProgressValue = 0;
             uiTweener.Show(progressBar, 1000);
 
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 taskList,
-                 (res) =>
-                 {
-                     if (!res.Completed)
-                     {
-                         res.ThrowExceptions();
-                     }
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-                     PlantTrees();
+                    PlantTrees();
 
-                     GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
+                    GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
-                     Vector3 translation = new(-20, 10, -40);
-                     Camera.Goto(baseDelta + translation);
-                     Camera.LookTo(baseDelta);
+                    Vector3 translation = new(-20, 10, -40);
+                    Camera.Goto(baseDelta + translation);
+                    Camera.LookTo(baseDelta);
 
-                     uiTweener.Hide(blackPan, 4000);
-                     uiTweener.Hide(progressBar, 2000);
+                    uiTweener.Hide(blackPan, 4000);
+                    uiTweener.Hide(progressBar, 2000);
 
-                     gameReady = true;
-                 });
+                    gameReady = true;
+                },
+                (value) =>
+                {
+                    if (progressBar == null)
+                    {
+                        return;
+                    }
+
+                    float progressValue = progressBar.ProgressValue;
+                    progressValue = MathF.Max(progressValue, value.Progress);
+                    progressBar.ProgressValue = progressValue;
+                    progressBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
+                });
+
+            LoadResources(group);
         }
         private async Task InitializeSkyEffects()
         {
@@ -808,17 +823,6 @@ namespace BasicSamples.SceneTest
                 t.SetPosition(treeIPos.Position + delta);
                 t.SetRotation(r, y, y);
                 t.SetScaling(s);
-            }
-        }
-
-        public override void OnReportProgress(LoadResourceProgress value)
-        {
-            progressValue = MathF.Max(progressValue, value.Progress);
-
-            if (progressBar != null)
-            {
-                progressBar.ProgressValue = progressValue;
-                progressBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
             }
         }
 

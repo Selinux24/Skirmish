@@ -293,7 +293,7 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            immediateContext = new EngineDeviceContext("Immediate", true, -1, device.ImmediateContext3);
+            immediateContext = new EngineDeviceContext("Immediate Context", true, -1, device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -533,21 +533,21 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the device error state
+        /// Gets the removed device reason
         /// </summary>
-        public string GetDeviceErrors()
+        public bool GetRemovedDeviceStatus(out string removedReason)
         {
             var res = device.DeviceRemovedReason;
             if (res.Failure)
             {
-                return ResultDescriptor.Find(res)?.Description;
+                removedReason = ResultDescriptor.Find(res)?.Description;
+
+                return true;
             }
 
-#if DEBUG
-            return GetDebugInfo();
-#else
-            return null;
-#endif
+            removedReason = null;
+
+            return false;
         }
 
         /// <summary>
@@ -557,7 +557,7 @@ namespace Engine
         /// <param name="passIndex">Pass index</param>
         public IEngineDeviceContext CreateDeferredContext(string name, int passIndex)
         {
-            return new EngineDeviceContext(name, false, passIndex, new DeviceContext3(device));
+            return new EngineDeviceContext(name, false, passIndex, new(device) { DebugName = name });
         }
 
         /// <summary>
@@ -568,7 +568,7 @@ namespace Engine
         /// <returns>Returns a new depth stencil state</returns>
         public EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description)
         {
-            return new EngineDepthStencilState(name, new DepthStencilState(device, (DepthStencilStateDescription)description));
+            return new(name, new(device, (DepthStencilStateDescription)description));
         }
 
         /// <summary>
@@ -581,7 +581,7 @@ namespace Engine
         /// <returns>Returns a new blend state</returns>
         public EngineBlendState CreateBlendState(string name, EngineBlendStateDescription description, Color4? blendFactor, int sampleMask)
         {
-            return new EngineBlendState(name, new BlendState1(device, (BlendStateDescription1)description), blendFactor, sampleMask);
+            return new(name, new(device, (BlendStateDescription1)description), blendFactor, sampleMask);
         }
 
         /// <summary>
@@ -591,7 +591,7 @@ namespace Engine
         /// <returns>Returns a new rasterizer state</returns>
         public EngineRasterizerState CreateRasterizerState(string name, EngineRasterizerStateDescription description)
         {
-            return new EngineRasterizerState(name, new RasterizerState2(device, (RasterizerStateDescription2)description));
+            return new(name, new(device, (RasterizerStateDescription2)description));
         }
 
         /// <summary>
@@ -602,7 +602,7 @@ namespace Engine
         /// <returns>Returns the new sampler state</returns>
         public EngineSamplerState CreateSamplerState(string name, EngineSamplerStateDescription description)
         {
-            return new EngineSamplerState(name, new SamplerState(device, (SamplerStateDescription)description));
+            return new(name, new(device, (SamplerStateDescription)description));
         }
 
         /// <summary>
@@ -626,7 +626,7 @@ namespace Engine
 
             using var texture = new Texture2D1(
                 device,
-                new Texture2DDescription1()
+                new()
                 {
                     Width = width,
                     Height = height,
@@ -644,17 +644,11 @@ namespace Engine
             {
                 Format = format,
                 Dimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
-                Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                {
-
-                },
-                Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
-                {
-
-                },
+                Texture2D = new(),
+                Texture2DMS = new(),
             };
 
-            return new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, texture, description));
+            return new($"{name}.DSV", new(device, texture, description));
         }
 
         /// <summary>
@@ -668,84 +662,10 @@ namespace Engine
         /// <returns>Returns a render target and its texture</returns>
         public (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool useSamples)
         {
-            try
-            {
-                FrameCounters.Textures++;
+            FrameCounters.Textures++;
 
-                bool multiSampled = false;
-                var sampleDescription = new SampleDescription(1, 0);
-                if (useSamples)
-                {
-                    multiSampled = MultiSampled;
-                    sampleDescription = CurrentSampleDescription;
-                }
+            bool multiSampled = useSamples && MultiSampled;
 
-                var rt = CreateRenderTargetTexture(name, format, width, height, multiSampled, sampleDescription);
-
-                var rtv = new EngineRenderTargetView($"{name}.RTV", rt.RenderTarget);
-                var srv = new EngineShaderResourceView($"{name}.SRV", rt.ShaderResource);
-
-                return (rtv, srv);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Creates a new multiple render target and his textures
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="arraySize">Render target list size</param>
-        /// <param name="useSamples">Use samples if available</param>
-        /// <returns>Returns a render target and its textures</returns>
-        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView[] ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
-        {
-            try
-            {
-                FrameCounters.Textures++;
-
-                bool multiSampled = false;
-                var sampleDescription = new SampleDescription(1, 0);
-                if (useSamples)
-                {
-                    multiSampled = MultiSampled;
-                    sampleDescription = CurrentSampleDescription;
-                }
-
-                var rtv = new EngineRenderTargetView($"{name}.RTV_array_{arraySize}");
-                var srv = new EngineShaderResourceView[arraySize];
-
-                for (int i = 0; i < arraySize; i++)
-                {
-                    var rt = CreateRenderTargetTexture(name, format, width, height, multiSampled, sampleDescription);
-
-                    rtv.Add(rt.RenderTarget);
-                    srv[i] = new EngineShaderResourceView($"{name}.SRV[{i}]", rt.ShaderResource);
-                }
-
-                return (rtv, srv);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Creates a render target texture and a shader resource view for the texture
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="multiSampled">Create a multisampled texture</param>
-        /// <param name="sampleDescription">Sample description</param>
-        /// <returns>Returns a render target and its texture</returns>
-        private (RenderTargetView1 RenderTarget, ShaderResourceView1 ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription)
-        {
             var desc = new Texture2DDescription1()
             {
                 Width = width,
@@ -753,7 +673,7 @@ namespace Engine
                 MipLevels = 1,
                 ArraySize = 1,
                 Format = format,
-                SampleDescription = sampleDescription,
+                SampleDescription = useSamples ? CurrentSampleDescription : new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
@@ -761,7 +681,7 @@ namespace Engine
             };
             var texture = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX"
             };
             using (texture)
             {
@@ -777,31 +697,109 @@ namespace Engine
                 if (multiSampled)
                 {
                     rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
-                    rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
+                    rtvDesc.Texture2DMS = new();
 
                     srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
-                    srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
+                    srvDesc.Texture2DMS = new();
                 }
                 else
                 {
                     rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
-                    rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
+                    rtvDesc.Texture2D = new();
 
                     srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
-                    srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
+                    srvDesc.Texture2D = new() { MipLevels = 1 };
                 }
 
-                var rtv = new RenderTargetView1(device, texture, rtvDesc)
+                var rtv = new EngineRenderTargetView($"{name}.RTV", new(device, texture, rtvDesc)
                 {
-                    DebugName = $"{name}.RTVTexture",
-                };
-                var srv = new ShaderResourceView1(device, texture, srvDesc)
+                    DebugName = $"{name}.RTV"
+                });
+
+                var srv = new EngineShaderResourceView($"{name}.SRV", new(device, texture, srvDesc)
                 {
-                    DebugName = $"{name}.SRVTexture",
-                };
+                    DebugName = $"{name}.SRV"
+                });
 
                 return (rtv, srv);
             }
+        }
+        /// <summary>
+        /// Creates a new multiple render target and his textures
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="arraySize">Render target list size</param>
+        /// <param name="useSamples">Use samples if available</param>
+        /// <returns>Returns a render target and its textures</returns>
+        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView[] ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
+        {
+            FrameCounters.Textures++;
+
+            var rtv = new EngineRenderTargetView($"{name}.RTV_array({arraySize})");
+            var srv = new EngineShaderResourceView[arraySize];
+
+            bool multiSampled = useSamples && MultiSampled;
+
+            var desc = new Texture2DDescription1()
+            {
+                Width = width,
+                Height = height,
+                MipLevels = 1,
+                ArraySize = 1,
+                Format = format,
+                SampleDescription = useSamples ? CurrentSampleDescription : new(1, 0),
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None
+            };
+
+            for (int i = 0; i < arraySize; i++)
+            {
+                var texture = new Texture2D1(device, desc)
+                {
+                    DebugName = $"{name}.TEX_array({arraySize})[{i}]"
+                };
+                using (texture)
+                {
+                    var rtvDesc = new RenderTargetViewDescription1()
+                    {
+                        Format = format,
+                    };
+                    var srvDesc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                    };
+
+                    if (multiSampled)
+                    {
+                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                        rtvDesc.Texture2DMS = new();
+
+                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                        srvDesc.Texture2DMS = new();
+                    }
+                    else
+                    {
+                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                        rtvDesc.Texture2D = new();
+
+                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                        srvDesc.Texture2D = new() { MipLevels = 1 };
+                    }
+
+                    string rtvName = $"{name}.RTV_array({arraySize})[{i}]";
+                    string srvName = $"{name}.SRV_array({arraySize})[{i}]";
+
+                    rtv.Add(new(device, texture, rtvDesc) { DebugName = rtvName });
+                    srv[i] = new(srvName, new(device, texture, srvDesc) { DebugName = srvName });
+                }
+            }
+
+            return (rtv, srv);
         }
 
         /// <summary>
@@ -820,7 +818,7 @@ namespace Engine
                 MipLevels = 1,
                 ArraySize = 1,
                 Format = Format.R24G8_Typeless,
-                SampleDescription = new SampleDescription(1, 0),
+                SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
@@ -829,7 +827,7 @@ namespace Engine
 
             var depthMap = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX"
             };
             using (depthMap)
             {
@@ -838,24 +836,24 @@ namespace Engine
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
                     Dimension = DepthStencilViewDimension.Texture2D,
-                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                    Texture2D = new()
                     {
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV", new(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = ShaderResourceViewDimension.Texture2D,
-                    Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
+                    Texture2D = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -877,7 +875,7 @@ namespace Engine
                 MipLevels = 1,
                 ArraySize = mapCount,
                 Format = Format.R24G8_Typeless,
-                SampleDescription = new SampleDescription(1, 0),
+                SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
@@ -886,7 +884,7 @@ namespace Engine
 
             var depthMap = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX_array({mapCount})"
             };
             using (depthMap)
             {
@@ -895,26 +893,26 @@ namespace Engine
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
                     Dimension = DepthStencilViewDimension.Texture2DArray,
-                    Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                    Texture2DArray = new()
                     {
                         ArraySize = mapCount,
                         FirstArraySlice = 0,
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV_array({mapCount})", new(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = ShaderResourceViewDimension.Texture2D,
-                    Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
+                    Texture2D = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_array({mapCount})", new(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -937,16 +935,17 @@ namespace Engine
                 MipLevels = 1,
                 ArraySize = arraySize * mapCount,
                 Format = Format.R24G8_Typeless,
-                SampleDescription = new SampleDescription(1, 0),
+                SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                OptionFlags = ResourceOptionFlags.None,
+                TextureLayout = TextureLayout.Undefined,
             };
 
             var depthMap = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX_array({arraySize},{mapCount})"
             };
             using (depthMap)
             {
@@ -958,21 +957,21 @@ namespace Engine
                         Flags = DepthStencilViewFlags.None,
                         Format = Format.D24_UNorm_S8_UInt,
                         Dimension = DepthStencilViewDimension.Texture2DArray,
-                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                        Texture2DArray = new()
                         {
                             ArraySize = mapCount,
                             FirstArraySlice = i,
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView($"{name}_{i}.DSV", new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new($"{name}.DSV_array({arraySize},{mapCount})[{i}]", new(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = ShaderResourceViewDimension.Texture2DArray,
-                    Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
+                    Texture2DArray = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
@@ -981,7 +980,7 @@ namespace Engine
                         PlaneSlice = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_array({arraySize},{mapCount})", new(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -1012,7 +1011,7 @@ namespace Engine
 
             var depthMap = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX_cube"
             };
             using (depthMap)
             {
@@ -1021,26 +1020,26 @@ namespace Engine
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
                     Dimension = DepthStencilViewDimension.Texture2DArray,
-                    Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                    Texture2DArray = new()
                     {
                         ArraySize = 6,
                         FirstArraySlice = 0,
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV_cube", new(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = ShaderResourceViewDimension.TextureCube,
-                    TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
+                    TextureCube = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_cube", new(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -1059,20 +1058,20 @@ namespace Engine
             {
                 Width = width,
                 Height = height,
-                ArraySize = 6 * arraySize,
-                BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = Format.R24G8_Typeless,
                 MipLevels = 1,
+                ArraySize = arraySize * 6,
+                Format = Format.R24G8_Typeless,
+                SampleDescription = new(1, 0),
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.TextureCube,
-                SampleDescription = new SampleDescription(1, 0),
                 TextureLayout = TextureLayout.Undefined,
             };
 
             var depthMap = new Texture2D1(device, desc)
             {
-                DebugName = name
+                DebugName = $"{name}.TEX_cube_array({arraySize})"
             };
             using (depthMap)
             {
@@ -1084,21 +1083,21 @@ namespace Engine
                         Flags = DepthStencilViewFlags.None,
                         Format = Format.D24_UNorm_S8_UInt,
                         Dimension = DepthStencilViewDimension.Texture2DArray,
-                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                        Texture2DArray = new()
                         {
                             ArraySize = 6,
                             FirstArraySlice = i * 6,
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView($"{name}_{i}.DSV", new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new($"{name}.DSV_cube_array({arraySize})[{i}]", new(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = ShaderResourceViewDimension.TextureCubeArray,
-                    TextureCubeArray = new ShaderResourceViewDescription.TextureCubeArrayResource()
+                    TextureCubeArray = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
@@ -1106,7 +1105,7 @@ namespace Engine
                         First2DArrayFace = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_cube_array({arraySize})", new(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }

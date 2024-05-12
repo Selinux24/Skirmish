@@ -29,7 +29,7 @@ namespace Engine.BuiltIn.Deferred
             SetVertexShader<DeferredLightOrthoVs>(false);
             pixelShader = SetPixelShader<DeferredLightDirectionalPs>(false);
 
-            cbDirectional = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightDirectional>(false);
+            cbDirectional = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightDirectional>(nameof(BuiltInLightDirectional), false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }

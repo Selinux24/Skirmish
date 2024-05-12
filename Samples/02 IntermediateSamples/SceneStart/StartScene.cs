@@ -43,7 +43,7 @@ namespace IntermediateSamples.SceneStart
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeCursor,

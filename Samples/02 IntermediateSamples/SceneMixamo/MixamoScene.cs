@@ -44,9 +44,11 @@ namespace IntermediateSamples.SceneMixamo
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 InitializeUITitle,
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUITitle()
         {
@@ -85,12 +87,14 @@ namespace IntermediateSamples.SceneMixamo
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloor,
                     InitializeModel,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeFloor()
         {

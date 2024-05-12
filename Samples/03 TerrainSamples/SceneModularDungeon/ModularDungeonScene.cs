@@ -156,7 +156,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             LoadUI();
         }
-        public override void OnReportProgress(LoadResourceProgress value)
+        public void OnReportProgress(LoadResourceProgress value)
         {
             if (value.Id == "LoadAssets")
             {
@@ -304,13 +304,16 @@ namespace TerrainSamples.SceneModularDungeon
 
         private void LoadUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeUI,
                     InitializeMapTexture,
                 ],
-                LoadUICompleted);
+                LoadUICompleted,
+                OnReportProgress);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -401,7 +404,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             pbLevels.Visible = true;
 
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeDebug,
                     InitializeDungeon,
@@ -410,7 +413,10 @@ namespace TerrainSamples.SceneModularDungeon
                     InitializeAudio,
                 ],
                 LoadAssetsCompleted,
+                OnReportProgress,
                 "LoadAssets");
+
+            LoadResources(group);
         }
         private async Task InitializeDebug()
         {
@@ -1435,10 +1441,13 @@ namespace TerrainSamples.SceneModularDungeon
 
             SetSelectedItem(null);
 
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 () => ChangeToLevelAsync(name),
                 ChangeToLevelResults,
+                OnReportProgress,
                 "LoadAssets");
+
+            LoadResources(group);
         }
         private async Task ChangeToLevelAsync(string name)
         {

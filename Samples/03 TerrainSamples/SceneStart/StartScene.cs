@@ -64,7 +64,7 @@ namespace TerrainSamples.SceneStart
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeCursor,
@@ -72,6 +72,8 @@ namespace TerrainSamples.SceneStart
                     InitializeAssets,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {

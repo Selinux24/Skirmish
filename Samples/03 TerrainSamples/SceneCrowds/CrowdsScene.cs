@@ -62,12 +62,14 @@ namespace TerrainSamples.SceneCrowds
 
         private void InitializeUIComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeCursor,
                     InitializeUI,
                 ],
                 InitializeUIComponentsComplete);
+
+            LoadResources(group);
         }
         private async Task InitializeCursor()
         {
@@ -109,7 +111,7 @@ namespace TerrainSamples.SceneCrowds
 
         private void InitializeSceneComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeSkydom,
                     InitializeTanks,
@@ -118,6 +120,8 @@ namespace TerrainSamples.SceneCrowds
                     InitializeDebug,
                 ],
                 InitializeSceneComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeSkydom()
         {

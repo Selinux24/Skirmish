@@ -65,7 +65,9 @@ namespace BasicSamples.SceneParticles
 
         private void InitializeUIObjects()
         {
-            LoadResources(InitializeUI, InitializeUIObjectsCompleted);
+            var group = LoadResourceGroup.FromTasks(InitializeUI, InitializeUIObjectsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUI()
         {
@@ -107,13 +109,15 @@ namespace BasicSamples.SceneParticles
 
         private void InitializeSceneObjects()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloor,
                     InitializeModels,
                     InitializeParticleVolumeDrawer,
                 ],
                 InitializeSceneObjectsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeFloor()
         {

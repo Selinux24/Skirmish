@@ -82,12 +82,14 @@ namespace IntermediateSamples.SceneDeferredLights
 
         private void LoadingTaskUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeCursor,
                     InitializeUIComponents
                 ],
                 LoadingTaskUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeCursor()
         {
@@ -138,7 +140,7 @@ namespace IntermediateSamples.SceneDeferredLights
 
         private void LoadingTaskObjects()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     ()=>InitializeAndTrace(InitializeSkydom),
                     ()=>InitializeAndTrace(InitializeHelicopters),
@@ -148,6 +150,8 @@ namespace IntermediateSamples.SceneDeferredLights
                     InitializeDebug,
                 ],
                 LoadingTaskObjectsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeSkydom()
         {

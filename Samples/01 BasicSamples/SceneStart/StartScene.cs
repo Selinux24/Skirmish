@@ -52,19 +52,18 @@ namespace BasicSamples.SceneStart
 
         private void InitializeComponents()
         {
-            Func<Task>[] tasks =
-            [
-                InitializeTweener,
-                InitializeCursor,
-                InitializeBackground,
-                InitializeTitle,
-                InitializeButtonPanel,
-                InitializeMusic,
-            ];
-
-            LoadResources(
-                tasks,
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeTweener,
+                    InitializeCursor,
+                    InitializeBackground,
+                    InitializeTitle,
+                    InitializeButtonPanel,
+                    InitializeMusic,
+                ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {

@@ -57,7 +57,7 @@ namespace BasicSamples.SceneLights
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloorAsphalt,
                     InitializeBuildingObelisk,
@@ -69,6 +69,8 @@ namespace BasicSamples.SceneLights
                     InitializeBufferDrawer
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeFloorAsphalt()
         {

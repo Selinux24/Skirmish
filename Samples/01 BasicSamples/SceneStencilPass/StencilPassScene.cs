@@ -48,7 +48,7 @@ namespace BasicSamples.SceneStencilPass
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloorAsphalt,
                     InitializeBuildingObelisk,
@@ -62,6 +62,8 @@ namespace BasicSamples.SceneStencilPass
 
                     gameReady = true;
                 });
+
+            LoadResources(group);
         }
         private async Task InitializeFloorAsphalt()
         {

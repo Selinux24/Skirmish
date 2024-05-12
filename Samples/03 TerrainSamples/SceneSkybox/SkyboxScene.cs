@@ -134,7 +134,7 @@ namespace TerrainSamples.SceneSkybox
 
         private void InitializeResources()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeUI,
                     InitializeSkydom,
@@ -150,6 +150,8 @@ namespace TerrainSamples.SceneSkybox
                     InitializeDebug,
                 ],
                 InitializeResourcesCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUI()
         {

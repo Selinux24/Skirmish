@@ -110,18 +110,26 @@ namespace TerrainSamples.ScenePerlinNoise
         {
             base.Initialize();
 
-            LoadResources(InitializeUI, (res) =>
-            {
-                res.ThrowExceptions();
-                ResizeUI();
-            });
+            var group = LoadResourceGroup.FromTasks(
+                InitializeUI,
+                (res) =>
+                {
+                    res.ThrowExceptions();
+                    ResizeUI();
+                });
 
-            LoadResources(InitializeTextureRenderer, (res) =>
-            {
-                res.ThrowExceptions();
-                ResizeTextureRenderer();
-                gameReady = true;
-            });
+            LoadResources(group);
+
+            var textureGroup = LoadResourceGroup.FromTasks(
+                InitializeTextureRenderer,
+                (res) =>
+                {
+                    res.ThrowExceptions();
+                    ResizeTextureRenderer();
+                    gameReady = true;
+                });
+
+            LoadResources(textureGroup);
         }
         public async Task InitializeUI()
         {

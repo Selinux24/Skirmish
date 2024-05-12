@@ -25,7 +25,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; set; } = 0;
+        public int AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public int ToAllocateSize
         {
@@ -37,7 +37,9 @@ namespace Engine.Common
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
-        public bool Allocated { get; set; } = false;
+        public bool Allocated { get; private set; } = false;
+        /// <inheritdoc/>
+        public int Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -115,9 +117,20 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
+        public void Allocate()
+        {
+            AllocatedSize = Data.Count();
+            Allocated = true;
+            Allocations++;
+            ReallocationNeeded = false;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"[{Dynamic}] AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            string strDynamic = Dynamic ? "[Dynamic]" : "";
+
+            return $"[{typeof(uint)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
         }
     }
 }

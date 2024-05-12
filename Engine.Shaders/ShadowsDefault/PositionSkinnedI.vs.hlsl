@@ -15,7 +15,7 @@ struct VSVertex
     uint4 boneIndices : BONEINDICES;
     row_major float4x4 localTransform : LOCALTRANSFORM;
     uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
     uint animationOffset : ANIMATIONOFFSET;
     uint animationOffsetB : ANIMATIONOFFSETB;
     float animationInterpolation : ANIMATIONINTERPOLATION;

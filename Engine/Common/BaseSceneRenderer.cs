@@ -75,7 +75,7 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing target state data
         /// </summary>
-        struct PostProcessinStateData
+        struct PostProcessingStateData
         {
             /// <summary>
             /// Render pass
@@ -178,7 +178,7 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing effects list
         /// </summary>
-        private readonly List<PostProcessinStateData> postProcessingEffects = [];
+        private readonly List<PostProcessingStateData> postProcessingEffects = [];
 
         /// <summary>
         /// Deferred context list
@@ -566,7 +566,7 @@ namespace Engine.Common
         /// <param name="drawMode">Draw mode</param>
         protected DrawContext GetImmediateDrawContext(DrawerModes drawMode)
         {
-            return new DrawContext
+            return new()
             {
                 Name = $"{drawMode} immediate context.",
 
@@ -585,7 +585,7 @@ namespace Engine.Common
                 ShadowMapSpot = ShadowMapperSpot,
 
                 //Pass context
-                PassContext = new PassContext
+                PassContext = new()
                 {
                     Name = "Immediate",
                     PassIndex = -1,
@@ -808,7 +808,7 @@ namespace Engine.Common
             }
 
             var dc = GetDeferredContext($"Deferred Context({name}.{passIndex})", passIndex);
-            passLists.Add(new PassContext
+            passLists.Add(new()
             {
                 PassIndex = passIndex,
                 Name = name,
@@ -1349,7 +1349,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="renderTarget">Render target</param>
         /// <param name="renderPass">Render pass</param>
-        private void DrawPostProcessing(IEngineDeviceContext dc, RenderTargetParameters renderTarget, PostProcessinStateData state)
+        private void DrawPostProcessing(IEngineDeviceContext dc, RenderTargetParameters renderTarget, PostProcessingStateData state)
         {
             if (state.Effects?.Any() != true)
             {
@@ -1644,7 +1644,7 @@ namespace Engine.Common
             {
                 var effects = PostProcessingObjectsEffects.GetEffects();
 
-                postProcessingEffects.Add(new PostProcessinStateData
+                postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingObjectsEffects,
                     RenderPass = RenderPass.Objects,
@@ -1656,7 +1656,7 @@ namespace Engine.Common
             {
                 var effects = PostProcessingUIEffects.GetEffects();
 
-                postProcessingEffects.Add(new PostProcessinStateData
+                postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingUIEffects,
                     RenderPass = RenderPass.UI,
@@ -1668,7 +1668,7 @@ namespace Engine.Common
             {
                 var effects = PostProcessingFinalEffects.GetEffects();
 
-                postProcessingEffects.Add(new PostProcessinStateData
+                postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingFinalEffects,
                     RenderPass = RenderPass.Final,

@@ -183,9 +183,11 @@ namespace TerrainSamples.SceneRts
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup<TaskResult>.FromTasks(
                 InitializeUITitle,
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task<TaskResult> InitializeUITitle()
         {
@@ -269,29 +271,28 @@ namespace TerrainSamples.SceneRts
 
         private void InitializeModels()
         {
-            Func<Task>[] loadTasks =
-            [
-                InitializeWalker,
-                InitializeDebug,
-                InitializeParticles,
-                InitializeLensFlare,
-                InitializeHelicopter,
-                InitializeTanks,
-                InitializeHeliport,
-                InitializeGarage,
-                InitializeBuildings,
-                InitializeObelisk,
-                InitializeRocks,
-                InitializeTrees,
-                InitializeSkydom,
-                InitializeClouds,
-                InitializeTerrain,
-                InitializeGardener,
-            ];
-
-            LoadResources(
-                loadTasks,
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeWalker,
+                    InitializeDebug,
+                    InitializeParticles,
+                    InitializeLensFlare,
+                    InitializeHelicopter,
+                    InitializeTanks,
+                    InitializeHeliport,
+                    InitializeGarage,
+                    InitializeBuildings,
+                    InitializeObelisk,
+                    InitializeRocks,
+                    InitializeTrees,
+                    InitializeSkydom,
+                    InitializeClouds,
+                    InitializeTerrain,
+                    InitializeGardener,
+                ],
                 InitializeModelsCompleted);
+
+            LoadResources(group);
         }
         private async Task<TaskResult> InitializeWalker()
         {

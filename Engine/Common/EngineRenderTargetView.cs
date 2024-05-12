@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Render target list
         /// </summary>
-        private List<RenderTargetView1> rtvList = new();
+        private List<RenderTargetView1> rtvList = [];
 
         /// <summary>
         /// Name
@@ -114,7 +114,7 @@ namespace Engine.Common
         /// <returns>Returns the internal render target list</returns>
         internal IEnumerable<RenderTargetView1> GetRenderTargets()
         {
-            return rtvList.ToArray();
+            return [.. rtvList];
         }
     }
 }

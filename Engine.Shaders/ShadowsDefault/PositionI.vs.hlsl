@@ -3,7 +3,7 @@ struct VSVertex
 {
     float3 positionLocal : POSITION;
     row_major float4x4 localTransform : LOCALTRANSFORM;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
     uint instanceId : SV_INSTANCEID;
 };
 

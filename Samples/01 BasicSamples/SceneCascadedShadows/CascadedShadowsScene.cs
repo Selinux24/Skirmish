@@ -73,7 +73,7 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeUITitle,
                     InitializeUILevelsControl,
@@ -85,6 +85,8 @@ namespace BasicSamples.SceneCascadedShadows
                     InitializeLights,
                 ],
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUITitle()
         {

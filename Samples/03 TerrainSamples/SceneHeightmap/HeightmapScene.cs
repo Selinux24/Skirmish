@@ -161,12 +161,14 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeUIAssets,
                 ],
                 LoadingTaskUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -237,7 +239,7 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskGameAssets()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeRocks,
                     InitializeTrees,
@@ -258,6 +260,8 @@ namespace TerrainSamples.SceneHeightmap
                     InitializeDebugAssets,
                 ],
                 LoadingTaskGameAssetsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeRocks()
         {
@@ -533,7 +537,7 @@ namespace TerrainSamples.SceneHeightmap
 
         private void LoadingTaskTerrainObjects()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeGrass,
                     InitializeFlowers,
@@ -541,6 +545,8 @@ namespace TerrainSamples.SceneHeightmap
                     SetPositionOverTerrain,
                 ],
                 LoadingTaskTerrainObjectsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeGrass()
         {

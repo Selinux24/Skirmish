@@ -133,9 +133,11 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 InitializeUITitle,
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUITitle()
         {
@@ -176,7 +178,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeLadder,
                     InitializeLadder2,
@@ -188,6 +190,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
                     InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeFloor()
         {

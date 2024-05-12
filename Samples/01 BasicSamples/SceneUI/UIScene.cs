@@ -60,14 +60,17 @@ namespace BasicSamples.SceneUI
 
         private void LoadUserInterface()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeConsole,
                     InitializeBackground,
                     InitializeProgressbar,
                 ],
-                LoadUserInterfaceCompleted);
+                LoadUserInterfaceCompleted,
+                OnReportProgress);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -122,7 +125,7 @@ namespace BasicSamples.SceneUI
 
         private void LoadControls()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeSmiley,
                     InitializeStaticPan,
@@ -130,7 +133,10 @@ namespace BasicSamples.SceneUI
                     InitializeButtonTest,
                     InitializeScroll,
                 ],
-                LoadControlsCompleted);
+                LoadControlsCompleted,
+                OnReportProgress);
+
+            LoadResources(group);
         }
         private async Task InitializeSmiley()
         {
@@ -323,7 +329,7 @@ namespace BasicSamples.SceneUI
             gameReady = true;
         }
 
-        public override void OnReportProgress(LoadResourceProgress value)
+        public void OnReportProgress(LoadResourceProgress value)
         {
             progressValue = MathF.Max(progressValue, value.Progress);
 

@@ -152,13 +152,15 @@ namespace TerrainSamples.SceneGrid
         }
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeHUD,
                     InitializeText,
                     InitializeMinimap,
                 ],
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeHUD()
         {
@@ -330,12 +332,14 @@ namespace TerrainSamples.SceneGrid
 
         private void InitializeResources()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeModels,
                     InitializeDebug,
                 ],
                 InitializeResourcesCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeModels()
         {

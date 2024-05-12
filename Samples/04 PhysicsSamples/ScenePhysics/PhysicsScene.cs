@@ -53,7 +53,7 @@ namespace PhysicsSamples.ScenePhysics
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTexts,
                     InitializeLineDrawer,
@@ -67,6 +67,8 @@ namespace PhysicsSamples.ScenePhysics
                     InitializeRod,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTexts()
         {

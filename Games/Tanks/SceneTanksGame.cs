@@ -34,7 +34,6 @@ namespace Tanks
 
         private UITextArea loadingText;
         private UIProgressBar loadingBar;
-        private float progressValue = 0;
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
@@ -177,23 +176,6 @@ namespace Tanks
             GameEnvironment.LODDistanceLow = 1000f;
         }
 
-        public override void OnReportProgress(LoadResourceProgress value)
-        {
-            if (loadingBar == null)
-            {
-                return;
-            }
-
-            if (value.Id == loadGroupSceneObjects)
-            {
-                progressValue = MathF.Max(progressValue, value.Progress);
-
-                loadingBar.ProgressValue = progressValue;
-                loadingBar.Caption.Text = $"{loadGroupSceneObjects} {(int)(progressValue * 100f)}%";
-                loadingBar.Visible = true;
-            }
-        }
-
         public override void Initialize()
         {
             base.Initialize();
@@ -203,12 +185,14 @@ namespace Tanks
 
         private void LoadLoadingUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeLoadingUI,
                 ],
                 LoadLoadingUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -257,14 +241,14 @@ namespace Tanks
 
             await Task.Delay(2000);
 
-            LoadUI();
+            LoadAssets();
         }
 
-        private void LoadUI()
+        private void LoadAssets()
         {
             InitializePlayers();
 
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeUIGameMessages,
                     InitializeUIModalDialog,
@@ -285,8 +269,22 @@ namespace Tanks
                     InitializeLights,
                     InitializeDebugDrawer,
                 ],
-                LoadUICompleted,
+                LoadAssetsCompleted,
+                (value) =>
+                {
+                    if (loadingBar == null)
+                    {
+                        return;
+                    }
+
+                    float progressValue = MathF.Max(loadingBar.ProgressValue, value.Progress);
+                    loadingBar.ProgressValue = progressValue;
+                    loadingBar.Caption.Text = $"{value.Id} {(int)(progressValue * 100f)}%";
+                    loadingBar.Visible = true;
+                },
                 loadGroupSceneObjects);
+
+            LoadResources(group);
         }
 
         private async Task InitializeUIGameMessages()
@@ -842,7 +840,7 @@ namespace Tanks
             boundsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
         }
 
-        private async Task LoadUICompleted(LoadResourcesResult res)
+        private async Task LoadAssetsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -862,7 +860,7 @@ namespace Tanks
             PrepareLighting();
             UpdateCamera(true);
 
-            await StartGame();
+            PlantTrees(StartGame);
         }
         private void UpdateLayout()
         {
@@ -1010,21 +1008,37 @@ namespace Tanks
             loadingBar.Width = Game.Form.RenderWidth * 0.8f;
             loadingBar.Height = 35;
         }
-        private void PlantTrees()
+        private void PlantTrees(Func<Task> startGame)
         {
+            loadingBar.ProgressValue = 0;
+            loadingBar.Caption.Text = "Planting trees...";
+            uiTweener.ClearTween(loadingBar);
+            uiTweener.Show(loadingBar, 500);
+
             var bbox = terrain.GetBoundingBox();
             var min = bbox.Minimum.XZ();
             var max = bbox.Maximum.XZ();
             var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
 
             int totalTrees = treeModels.Sum(t => t.InstanceCount);
-            int progressCount = 0;
-            foreach (var treeModel in treeModels)
+
+            Task.Run(() =>
             {
-                progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees);
-            }
+                int progressCount = 0;
+                foreach (var treeModel in treeModels)
+                {
+                    progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees, (float progress) =>
+                    {
+                        loadingBar.ProgressValue = MathF.Max(loadingBar.ProgressValue, progress);
+                        loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
+                        loadingBar.Visible = true;
+                    });
+                }
+
+                return startGame();
+            }).ConfigureAwait(false);
         }
-        private int PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, int trees, int total)
+        private int PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, int trees, int total, Action<float> callback)
         {
             int count = trees;
 
@@ -1048,10 +1062,7 @@ namespace Tanks
 
                 treeCount--;
 
-                float progress = count++ / (float)total;
-                loadingBar.ProgressValue = progress;
-                loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
-                loadingBar.Visible = true;
+                callback.Invoke(count++ / (float)total);
 
                 tree[treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
             }
@@ -1115,30 +1126,27 @@ namespace Tanks
                 Components.RemoveComponent(terrain);
                 decalDrawer.Clear();
 
-                LoadResources(
+                loadingBar.ProgressValue = 0;
+
+                var group = LoadResourceGroup.FromTasks(
                     InitializeModelsTerrain,
                     LoadNewGameCompleted);
+
+                LoadResources(group);
             });
         }
-        private async Task LoadNewGameCompleted(LoadResourcesResult res)
+        private void LoadNewGameCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
                 res.ThrowExceptions();
             }
 
-            await StartGame();
+            PlantTrees(StartGame);
         }
 
         private async Task StartGame()
         {
-            loadingBar.ProgressValue = 0;
-            loadingBar.Caption.Text = "Planting trees...";
-            uiTweener.ClearTween(loadingBar);
-            uiTweener.Show(loadingBar, 500);
-            await Task.Delay(1000);
-
-            PlantTrees();
             PrepareModels();
 
             uiTweener.ClearTween(loadingBar);

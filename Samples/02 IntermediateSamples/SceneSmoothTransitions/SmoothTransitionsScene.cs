@@ -57,9 +57,11 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 InitializeUITitle,
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUITitle()
         {
@@ -98,13 +100,15 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloor,
                     InitializeSoldier,
                     InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeFloor()
         {

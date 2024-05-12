@@ -53,7 +53,7 @@ namespace BasicSamples.SceneWater
         }
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
             [
                 InitializeLensFlare,
                 InitializeSky,
@@ -66,6 +66,8 @@ namespace BasicSamples.SceneWater
 
                 gameReady = true;
             });
+
+            LoadResources(group);
         }
         private async Task InitializeLensFlare()
         {

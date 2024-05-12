@@ -536,7 +536,9 @@ namespace Engine
             // Fire and forget
             Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
 
-            Scene.LoadResources(taskList, LoadPatchesCompleted, $"{loadTaskName}");
+            var loadGroup = LoadResourceGroup<SceneryPatchTask>.FromTasks(taskList, LoadPatchesCompleted, null, $"{loadTaskName}");
+
+            Scene.LoadResources(loadGroup);
 
             Logger.WriteTrace(this, $"{loadTaskName} End.");
         }

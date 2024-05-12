@@ -130,13 +130,15 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeText,
                     InitializeUI,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
@@ -372,12 +374,14 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void InitializeMapData()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeNavmesh,
                     InitializeDebug,
                 ],
                 InitializeMapDataCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeNavmesh()
         {
@@ -1364,7 +1368,9 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             Components.RemoveComponent(debugGeometry);
 
-            LoadResources(() => LoadDebugModel(agent, debugType));
+            var group = LoadResourceGroup.FromTasks(() => LoadDebugModel(agent, debugType));
+
+            LoadResources(group);
         }
         private void DrawGraphObstaclesAreasAndConnections()
         {

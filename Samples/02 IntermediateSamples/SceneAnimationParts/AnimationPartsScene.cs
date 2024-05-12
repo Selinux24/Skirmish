@@ -49,9 +49,11 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private void InitializeUI()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 InitializeUITitle,
                 InitializeUICompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeUITitle()
         {
@@ -83,13 +85,15 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTank,
                     InitializeFloor,
                     InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTank()
         {

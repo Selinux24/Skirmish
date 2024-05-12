@@ -22,7 +22,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; set; } = 0;
+        public int AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public int ToAllocateSize
         {
@@ -34,7 +34,9 @@ namespace Engine.Common
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
-        public bool Allocated { get; set; } = false;
+        public bool Allocated { get; private set; } = false;
+        /// <inheritdoc/>
+        public int Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -56,7 +58,7 @@ namespace Engine.Common
         /// Gets the buffer format stride
         /// </summary>
         /// <returns>Returns the buffer format stride in bytes</returns>
-        public static int GetStride()
+        public int GetStride()
         {
             return default(T).GetStride();
         }
@@ -110,9 +112,21 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
+        public void Allocate()
+        {
+            AllocatedSize = Instances;
+            Allocated = true;
+            Allocations++;
+            ReallocationNeeded = false;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"[{typeof(T)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            string strDynamic = Dynamic ? "[Dynamic]" : "";
+            string strInstances = Instances > 0 ? $" Instances: {Instances}" : "";
+
+            return $"[{typeof(T)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}{strInstances}";
         }
     }
 }

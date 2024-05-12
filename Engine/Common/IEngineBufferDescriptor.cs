@@ -35,5 +35,14 @@ namespace Engine.Common
         /// Gets whether the internal buffer is currently allocated in the graphic device
         /// </summary>
         bool Allocated { get; }
+        /// <summary>
+        /// Number of allocations
+        /// </summary>
+        int Allocations { get; }
+
+        /// <summary>
+        /// Updates the allocated buffer size
+        /// </summary>
+        void Allocate();
     }
 }

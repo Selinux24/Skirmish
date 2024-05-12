@@ -66,8 +66,8 @@ namespace Engine.BuiltIn.Deferred
             vertexShader = SetVertexShader<DeferredLightVs>(false);
             pixelShader = SetPixelShader<DeferredLightSpotPs>(false);
 
-            cbLight = BuiltInShaders.GetConstantBuffer<PerLight>(false);
-            cbSpot = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightSpot>(false);
+            cbLight = BuiltInShaders.GetConstantBuffer<PerLight>(nameof(BuiltInLightSpot), false);
+            cbSpot = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightSpot>(nameof(BuiltInLightSpot), false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }

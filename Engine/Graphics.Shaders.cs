@@ -22,7 +22,7 @@ namespace Engine
         /// <returns>Returns a new Input Layout</returns>
         private EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
         {
-            return new EngineInputLayout(name, new InputLayout(device, bytes, elements));
+            return new(name, new(device, bytes, elements));
         }
         /// <summary>
         /// Creates a new Input Layout for a vertext data type

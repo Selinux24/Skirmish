@@ -187,14 +187,6 @@ namespace Engine
         /// </summary>
         public bool CollectGameStatus { get; set; }
         /// <summary>
-        /// Progress reporter
-        /// </summary>
-        public readonly IProgress<LoadResourceProgress> Progress;
-        /// <summary>
-        /// Buffer progress reporter
-        /// </summary>
-        public readonly IProgress<LoadResourceProgress> ProgressBuffers;
-        /// <summary>
         /// Game status
         /// </summary>
         public readonly GameStatus GameStatus = new();
@@ -311,9 +303,6 @@ namespace Engine
             Name = name;
 
             GameTime = new GameTime();
-
-            Progress = new Progress<LoadResourceProgress>(ReportProgress);
-            ProgressBuffers = new Progress<LoadResourceProgress>(ReportProgressBuffers);
 
             BufferManager = new BufferManager(this);
 
@@ -460,7 +449,38 @@ namespace Engine
             Logger.WriteInformation(this, "** Game started                                                         **");
             Logger.WriteInformation(this, LogLineString);
 
+#if DEBUG
+            Form.Render(() =>
+            {
+                try
+                {
+                    Frame();
+                }
+                catch (System.Runtime.InteropServices.SEHException ex)
+                {
+                    Logger.WriteError(this, ex);
+
+                    if (Graphics.GetRemovedDeviceStatus(out string removedReason))
+                    {
+                        Logger.WriteError(this, $"{nameof(Frame)}: Device Removed: {removedReason}", ex);
+                    }
+
+                    string deviceErrors = Graphics.GetDebugInfo();
+                    if (!string.IsNullOrWhiteSpace(deviceErrors))
+                    {
+                        Logger.WriteError(this, $"{nameof(Frame)}: {deviceErrors}", ex);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, ex);
+
+                    throw;
+                }
+            });
+#else
             Form.Render(Frame);
+#endif
         }
 
         /// <summary>
@@ -596,23 +616,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Report progress callback
-        /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public void ReportProgress(LoadResourceProgress value)
-        {
-            GetActiveScene()?.OnReportProgress(value);
-        }
-        /// <summary>
-        /// Report buffer progress callback
-        /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public void ReportProgressBuffers(LoadResourceProgress value)
-        {
-            GetActiveScene()?.OnReportProgressBuffers(value);
-        }
-
-        /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="taskGroup">Resource load tasks</param>
@@ -645,9 +648,7 @@ namespace Engine
 
             integratingResources = true;
 
-            var progress = Progress;
-
-            var groups = Task.Run(async () => await IntegrateResourcesAsync(progress)).ConfigureAwait(false).GetAwaiter().GetResult();
+            var groups = Task.Run(IntegrateResourcesAsync).ConfigureAwait(false).GetAwaiter().GetResult();
             foreach (var gr in groups)
             {
                 gr.End();
@@ -656,9 +657,8 @@ namespace Engine
         /// <summary>
         /// Integrates the resource groups in the resource queue
         /// </summary>
-        /// <param name="progress">Progress</param>
         /// <returns>Returns the integrated resource groups</returns>
-        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync(IProgress<LoadResourceProgress> progress)
+        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
         {
             List<ILoadResourceGroup> res = [];
 
@@ -668,14 +668,14 @@ namespace Engine
                 {
                     string logText = $"{nameof(Game)}.{nameof(IntegrateResources)}.{loadResourceGroup.Id ?? NoIdString}";
 
-                    await loadResourceGroup.Process(progress);
+                    await loadResourceGroup.Process();
 
                     Logger.WriteInformation(this, $"{logText} => BufferManager: Recreating buffers");
-                    await BufferManager.CreateBuffersAsync(loadResourceGroup.Id, ProgressBuffers);
+                    BufferManager.CreateBuffers(loadResourceGroup.Id);
                     Logger.WriteInformation(this, $"{logText} => BufferManager: Buffers recreated");
 
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: Creating new resources");
-                    ResourceManager.CreateResources(loadResourceGroup.Id, ProgressBuffers);
+                    ResourceManager.CreateResources(loadResourceGroup.Id, null);
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
 
                     res.Add(loadResourceGroup);
@@ -763,7 +763,7 @@ namespace Engine
             LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
             Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
 
-            IntegrateResources();
+            Task.Run(IntegrateResources).ConfigureAwait(false);
 
             FrameCounters.FramesPerSecond++;
             FrameCounters.FrameTime += GameTime.ElapsedSeconds;
@@ -787,23 +787,10 @@ namespace Engine
         /// </summary>
         private void FrameInput()
         {
-            try
-            {
-                var iSW = Stopwatch.StartNew();
-                Input.Update(GameTime);
-                iSW.Stop();
-                GameStatus.Add(nameof(FrameInput), iSW);
-            }
-            catch (System.Runtime.InteropServices.SEHException ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameInput)}: {Graphics.GetDeviceErrors()}", ex);
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameInput)}: {ex.Message}", ex);
-            }
+            var iSW = Stopwatch.StartNew();
+            Input.Update(GameTime);
+            iSW.Stop();
+            GameStatus.Add(nameof(FrameInput), iSW);
         }
         /// <summary>
         /// Update scene state
@@ -811,23 +798,10 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            try
-            {
-                var uSW = Stopwatch.StartNew();
-                scene.Update(GameTime);
-                uSW.Stop();
-                GameStatus.Add(nameof(FrameSceneUpdate), uSW);
-            }
-            catch (System.Runtime.InteropServices.SEHException ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: {Graphics.GetDeviceErrors()}", ex);
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: {ex.Message}", ex);
-            }
+            var uSW = Stopwatch.StartNew();
+            scene.Update(GameTime);
+            uSW.Stop();
+            GameStatus.Add(nameof(FrameSceneUpdate), uSW);
         }
         /// <summary>
         /// Draw scene
@@ -835,97 +809,64 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            try
-            {
-                var dSW = Stopwatch.StartNew();
-                scene.Draw(GameTime);
-                dSW.Stop();
-                GameStatus.Add(nameof(FrameSceneDraw), dSW);
-            }
-            catch (System.Runtime.InteropServices.SEHException ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: {Graphics.GetDeviceErrors()}", ex);
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: {ex.Message}", ex);
-            }
+            var dSW = Stopwatch.StartNew();
+            scene.Draw(GameTime);
+            dSW.Stop();
+            GameStatus.Add(nameof(FrameSceneDraw), dSW);
         }
         /// <summary>
         /// Present frame
         /// </summary>
         private void FramePresent()
         {
-            try
-            {
-                var pSW = Stopwatch.StartNew();
-                Graphics.Present();
-                pSW.Stop();
-                GameStatus.Add(nameof(FramePresent), pSW);
-            }
-            catch (System.Runtime.InteropServices.SEHException ex)
-            {
-                Logger.WriteError(this, $"{nameof(FramePresent)}: {Graphics.GetDeviceErrors()}", ex);
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"{nameof(FramePresent)}: {ex.Message}", ex);
-            }
+            var pSW = Stopwatch.StartNew();
+            Graphics.Present();
+            pSW.Stop();
+            GameStatus.Add(nameof(FramePresent), pSW);
         }
         /// <summary>
         /// Refreshes frame counters
         /// </summary>
         private void FrameRefreshCounters()
         {
-            try
-            {
-                var counters = FrameCounters.GetFrameCounters(-1);
+            RuntimeText = GetRuntimeText();
 
-                RuntimeText = string.Format(
-                    "{0} - {1} - Frame {2} FPS: {3:000} Updates: {4:00} {5} F. Time: {6:0.0000} (secs) T. Time: {7:0000} (secs)",
-                    Graphics.DeviceDescription,
-                    GetActiveScene()?.GetRenderMode() ?? SceneModes.Unknown,
-                    FrameCounters.FrameCount,
-                    FrameCounters.FramesPerSecond,
-                    FrameCounters.PickCounters.TransformUpdatesPerFrame,
-                    counters,
-                    GameTime.ElapsedSeconds,
-                    GameTime.TotalSeconds);
 #if DEBUG
-                Form.Text = RuntimeText;
+            Form.Text = RuntimeText;
 #endif
-                FrameCounters.FramesPerSecond = 0;
-                FrameCounters.FrameTime = 0f;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Refresh Counters error: {ex.Message}", ex);
-            }
+            FrameCounters.FramesPerSecond = 0;
+            FrameCounters.FrameTime = 0f;
         }
         /// <summary>
         /// Collects frame status
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            try
+            GameStatusCollected?.Invoke(this, new()
             {
-                GameStatusCollectedEventArgs e = new()
-                {
-                    Trace = GameStatus.Copy(),
-                };
+                Trace = GameStatus.Copy(),
+            });
 
-                GameStatusCollected?.Invoke(this, e);
+            CollectGameStatus = false;
+        }
 
-                CollectGameStatus = false;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Collect Game Status error: {ex.Message}", ex);
-            }
+        /// <summary>
+        /// Gets the runtime text with frame counters data
+        /// </summary>
+        public string GetRuntimeText()
+        {
+            var counters = FrameCounters.GetFrameCounters(-1);
+
+            return string.Format(
+                "{0} - {1} - Frame {2} FPS: {3:000} Updates: {4:00} {5} F. Time: {6:0.0000} (secs) T. Time: {7:0000} (secs)",
+                Graphics.DeviceDescription,
+                GetActiveScene()?.GetRenderMode() ?? SceneModes.Unknown,
+                FrameCounters.FrameCount,
+                FrameCounters.FramesPerSecond,
+                FrameCounters.PickCounters.TransformUpdatesPerFrame,
+                counters,
+                GameTime.ElapsedSeconds,
+                GameTime.TotalSeconds);
         }
     }
 }

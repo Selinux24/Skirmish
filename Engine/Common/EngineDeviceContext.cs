@@ -354,7 +354,6 @@ namespace Engine.Common
             IsImmediateContext = immediate;
 
             PassIndex = passIndex;
-            this.deviceContext.DebugName = name;
 
             frameCounters = FrameCounters.CreatePassCounters(name, passIndex);
 
@@ -1342,6 +1341,14 @@ namespace Engine.Common
         public static implicit operator DeviceContext3(EngineDeviceContext value)
         {
             return value.deviceContext;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            string deviceType = IsImmediateContext ? "Immediate" : "Deferred";
+
+            return $"{deviceType} => {Name}";
         }
     }
 }

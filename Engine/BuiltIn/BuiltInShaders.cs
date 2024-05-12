@@ -253,9 +253,9 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static EngineConstantBuffer<T> GetConstantBuffer<T>(bool singleton = true) where T : struct, IBufferData
+        public static EngineConstantBuffer<T> GetConstantBuffer<T>(string id = null, bool singleton = true) where T : struct, IBufferData
         {
-            string name = nameof(BuiltInShaders) + "." + typeof(T).FullName;
+            string name = id ?? nameof(BuiltInShaders) + "." + typeof(T).FullName;
 
             if (!singleton)
             {

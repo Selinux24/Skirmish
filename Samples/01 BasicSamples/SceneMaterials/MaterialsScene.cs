@@ -71,7 +71,7 @@ namespace BasicSamples.SceneMaterials
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTextBoxes,
                     InitializeSkyEffects,
@@ -82,6 +82,8 @@ namespace BasicSamples.SceneMaterials
                     InitializeMetallicList,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTextBoxes()
         {
@@ -541,11 +543,11 @@ namespace BasicSamples.SceneMaterials
             currentAlgorithm++;
             currentAlgorithm %= algorithmCount;
 
-            var t = InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}");
-
-            LoadResources(
-                () => t,
+            var group = LoadResourceGroup.FromTasks(
+                () => InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
                 (res) => { res.ThrowExceptions(); });
+
+            LoadResources(group);
         }
 
         public override void GameGraphicsResized()

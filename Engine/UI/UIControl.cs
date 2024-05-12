@@ -160,7 +160,11 @@ namespace Engine.UI
             {
                 base.Active = value;
 
-                children.ForEach(c => c.Active = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Active = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -174,7 +178,11 @@ namespace Engine.UI
             {
                 base.Visible = value;
 
-                children.ForEach(c => c.Visible = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Visible = value;
+                }
             }
         }
 
@@ -486,7 +494,11 @@ namespace Engine.UI
                     baseColor = value;
                 }
 
-                children.ForEach(c => c.BaseColor = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.BaseColor = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -503,7 +515,11 @@ namespace Engine.UI
                     tintColor = value;
                 }
 
-                children.ForEach(c => c.TintColor = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.TintColor = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -520,7 +536,11 @@ namespace Engine.UI
                     alpha = value;
                 }
 
-                children.ForEach(c => c.Alpha = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Alpha = value;
+                }
             }
         }
 
@@ -532,10 +552,12 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                children
-                    .OfType<IDisposable>()
-                    .ToList()
-                    .ForEach(c => c.Dispose());
+                var childrenArray = children.OfType<IDisposable>().ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Dispose();
+                }
+
                 children.Clear();
             }
 
@@ -594,10 +616,11 @@ namespace Engine.UI
                 UpdateInternals = false;
             }
 
-            children
-                .OfType<IUpdatable>()
-                .ToList()
-                .ForEach(c => c.Update(context));
+            var childrenArray = children.OfType<IUpdatable>().ToArray();
+            foreach (var c in childrenArray)
+            {
+                c.Update(context);
+            }
         }
         /// <summary>
         /// Updates the internal transform
@@ -624,7 +647,11 @@ namespace Engine.UI
                 Manipulator.Update2D(parentPos);
             }
 
-            children.ForEach(c => c.Invalidate());
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray)
+            {
+                c.Invalidate();
+            }
         }
         /// <summary>
         /// Updates the control position, based on the specified anchor value
@@ -711,9 +738,10 @@ namespace Engine.UI
 
             bool drawn = false;
 
-            foreach (var item in children.OfType<IDrawable>())
+            var childrenArray = children.OfType<IDrawable>().ToArray();
+            foreach (var c in childrenArray)
             {
-                drawn = item.Draw(context) || drawn;
+                drawn = c.Draw(context) || drawn;
             }
 
             return drawn;
@@ -866,7 +894,11 @@ namespace Engine.UI
         {
             UpdateInternals = true;
 
-            children.ForEach(c => c.Resize());
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray)
+            {
+                c.Resize();
+            }
         }
 
         /// <summary>

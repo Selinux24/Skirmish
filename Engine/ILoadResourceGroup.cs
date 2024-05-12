@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -16,8 +15,7 @@ namespace Engine
         /// <summary>
         /// Process the load resource group
         /// </summary>
-        /// <param name="progress">Progress</param>
-        Task Process(IProgress<LoadResourceProgress> progress);
+        Task Process();
         /// <summary>
         /// Ends the load resource group
         /// </summary>

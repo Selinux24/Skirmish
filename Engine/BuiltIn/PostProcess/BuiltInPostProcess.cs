@@ -33,8 +33,8 @@ namespace Engine.BuiltIn.PostProcess
             SetVertexShader<PostProcessVs>(false);
             pixelShader = SetPixelShader<PostProcessPs>(false);
 
-            cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>(false);
-            cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>(false);
+            cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>(nameof(BuiltInPostProcess), false);
+            cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>(nameof(BuiltInPostProcess), false);
 
             sSampler = BuiltInShaders.GetSamplerLinear();
         }

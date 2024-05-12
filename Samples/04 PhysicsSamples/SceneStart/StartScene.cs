@@ -48,7 +48,7 @@ namespace PhysicsSamples.SceneStart
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeCursor,
@@ -56,6 +56,8 @@ namespace PhysicsSamples.SceneStart
                     InitializeAssets,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {

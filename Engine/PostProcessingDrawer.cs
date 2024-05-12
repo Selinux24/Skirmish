@@ -55,7 +55,7 @@ namespace Engine
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
 
-            bufferManager.CreateBuffers();
+            bufferManager.CreateBuffers(nameof(PostProcessingDrawer));
         }
 
         /// <inheritdoc/>

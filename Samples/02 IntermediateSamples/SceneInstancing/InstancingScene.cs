@@ -56,7 +56,7 @@ namespace IntermediateSamples.SceneInstancing
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
                     InitializeTexts,
@@ -67,6 +67,8 @@ namespace IntermediateSamples.SceneInstancing
                     InitializeWall,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {

@@ -43,13 +43,15 @@ namespace BasicSamples.SceneNormalMap
 
         private void InitializeComponents()
         {
-            LoadResources(
+            var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeText,
                     InitializeDungeon,
                     InitializeEmitter,
                 ],
                 InitializeComponentsCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeText()
         {
