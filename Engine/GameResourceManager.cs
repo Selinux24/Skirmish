@@ -174,7 +174,7 @@ namespace Engine
         /// </summary>
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
-        public void CreateResources(string id, IProgress<LoadResourceProgress> progress)
+        public void CreateResources(string id, IProgress<LoadResourceProgress> progress = null)
         {
             if (allocating)
             {
@@ -193,7 +193,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Length}");
 
-                ProcessPendingRequests(id, progress, pendingRequests);
+                ProcessPendingRequests(id, pendingRequests, progress);
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Length}");
             }
@@ -214,7 +214,7 @@ namespace Engine
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="pendingRequests">Pending request list</param>
-        private void ProcessPendingRequests(string id, IProgress<LoadResourceProgress> progress, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests)
+        private void ProcessPendingRequests(string id, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests, IProgress<LoadResourceProgress> progress = null)
         {
             // Get pending requests
             float total = pendingRequests.Count() + 1;

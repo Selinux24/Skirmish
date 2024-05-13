@@ -407,14 +407,14 @@ namespace Engine
                     DebugName = name,
                 };
 
-                DeviceContext3 dc = immediateContext;
-               
+                DeviceContext3 ic = immediateContext;
+
                 int i = 0;
                 foreach (var currentDesc in descriptions)
                 {
                     var index = textureArray.CalculateSubResourceIndex(0, i++, out _);
 
-                    dc.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                    ic.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                 }
 
                 return textureArray;
@@ -527,14 +527,14 @@ namespace Engine
                     DebugName = name,
                 };
 
-                DeviceContext3 dc = immediateContext;
+                DeviceContext3 ic = immediateContext;
 
                 int i = 0;
                 foreach (var currentDesc in descriptions)
                 {
                     var index = textureArray.CalculateSubResourceIndex(0, i++, out _);
 
-                    dc.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                    ic.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                 }
 
                 return textureArray;

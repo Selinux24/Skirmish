@@ -1147,6 +1147,7 @@ namespace Engine.Content
             }
 
             //Add grouped submeshes
+            int idx = 0;
             foreach (var (mat, meshes) in group)
             {
                 if (meshes.Count == 0)
@@ -1160,7 +1161,7 @@ namespace Engine.Content
                 foreach (var (meshName, subMesh) in meshes)
                 {
                     //Group using the first mesh name
-                    firstMesh ??= meshName;
+                    firstMesh ??= $"opt_{idx++}.{meshName}";
                     subMeshList.Add(subMesh);
                 }
 

@@ -389,9 +389,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -984,6 +982,7 @@ namespace Engine.Common
             {
                 return false;
             }
+
             var dataStream = constantBuffer.DataStream.GetDataStream();
             var buffer = constantBuffer.Buffer.GetBuffer();
 

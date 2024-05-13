@@ -675,17 +675,10 @@ namespace Engine
                     Logger.WriteInformation(this, $"{logText} => BufferManager: Buffers recreated");
 
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: Creating new resources");
-                    ResourceManager.CreateResources(loadResourceGroup.Id, null);
+                    ResourceManager.CreateResources(loadResourceGroup.Id);
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
 
                     res.Add(loadResourceGroup);
-                }
-
-                if (ResourceManager.HasRequests)
-                {
-                    Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                    ResourceManager.CreateResources($"ResourceManager.Frame{FrameCounters.FrameCount}", null);
-                    Logger.WriteInformation(this, "ResourceManager: New resources created");
                 }
             }
             finally
@@ -764,6 +757,13 @@ namespace Engine
             Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
 
             Task.Run(IntegrateResources).ConfigureAwait(false);
+
+            if (ResourceManager.HasRequests)
+            {
+                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
+                ResourceManager.CreateResources($"ResourceManager.Frame({FrameCounters.FrameCount})");
+                Logger.WriteInformation(this, "ResourceManager: New resources created");
+            }
 
             FrameCounters.FramesPerSecond++;
             FrameCounters.FrameTime += GameTime.ElapsedSeconds;

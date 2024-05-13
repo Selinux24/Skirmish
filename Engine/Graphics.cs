@@ -293,7 +293,9 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            immediateContext = new EngineDeviceContext("Immediate Context", true, -1, device.ImmediateContext3);
+            const string icName = "Immediate Context";
+            device.ImmediateContext3.DebugName = icName;
+            immediateContext = new(icName, true, -1, device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 

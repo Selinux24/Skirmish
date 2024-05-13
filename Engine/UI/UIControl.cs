@@ -552,8 +552,8 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                var childrenArray = children.OfType<IDisposable>().ToArray();
-                foreach (var c in childrenArray)
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray.OfType<IDisposable>())
                 {
                     c.Dispose();
                 }
@@ -616,8 +616,8 @@ namespace Engine.UI
                 UpdateInternals = false;
             }
 
-            var childrenArray = children.OfType<IUpdatable>().ToArray();
-            foreach (var c in childrenArray)
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray.OfType<IUpdatable>())
             {
                 c.Update(context);
             }
@@ -738,8 +738,8 @@ namespace Engine.UI
 
             bool drawn = false;
 
-            var childrenArray = children.OfType<IDrawable>().ToArray();
-            foreach (var c in childrenArray)
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray.OfType<IDrawable>())
             {
                 drawn = c.Draw(context) || drawn;
             }
