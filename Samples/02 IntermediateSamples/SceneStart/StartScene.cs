@@ -53,6 +53,8 @@ namespace IntermediateSamples.SceneStart
                     InitializeMusic,
                 ],
                 PrepareAssets);
+
+            LoadResources(group);
         }
         private async Task InitializeTweener()
         {
