@@ -388,7 +388,7 @@ namespace TerrainSamples.SceneGrid
             };
             PathFinderDescription = new(settings, input, []);
 
-            EnqueueNavigationGraphUpdate();
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
 
         public override void Update(IGameTime gameTime)
@@ -717,7 +717,7 @@ namespace TerrainSamples.SceneGrid
             minimapArea = new(initialMinimapArea.X * wRatio, initialMinimapArea.Y * hRatio, initialMinimapArea.Width * wRatio, initialMinimapArea.Height * hRatio);
         }
 
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
             Camera.FarPlaneDistance = 1000f;
             Camera.Mode = CameraModes.FreeIsometric;
@@ -730,6 +730,11 @@ namespace TerrainSamples.SceneGrid
             terrain.Visible = true;
 
             GoToSoldier(skirmishGame.CurrentSoldier);
+
+            if (!loaded)
+            {
+                return;
+            }
 
             gameReady = true;
         }

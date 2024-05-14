@@ -170,7 +170,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
-        public override void NavigationGraphLoading()
+        public void NavigationGraphLoading()
         {
             if (scenery?.CurrentLevel == null)
             {
@@ -181,8 +181,13 @@ namespace TerrainSamples.SceneModularDungeon
 
             LoadNavigationGraphFromFile(fileName);
         }
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
+            if (!loaded)
+            {
+                return;
+            }
+
             if (!gameAssetsInitialized)
             {
                 return;
@@ -197,7 +202,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             ChangeToLevelCompleted();
         }
-        public override void NavigationGraphUpdated()
+        public void NavigationGraphUpdated()
         {
             //Update active paths with the new graph configuration
             if (ratController.HasPath)
@@ -1385,7 +1390,9 @@ namespace TerrainSamples.SceneModularDungeon
                 File.Delete(fileName);
             }
 
-            EnqueueNavigationGraphUpdate();
+            NavigationGraphLoading();
+
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
         private void SaveGraphToFile()
         {

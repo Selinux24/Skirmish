@@ -414,7 +414,9 @@ namespace TerrainSamples.SceneSkybox
             //Generate the path finder description
             PathFinderDescription = new(nvSettings, nvInput, [walker]);
 
-            EnqueueNavigationGraphUpdate((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
+            EnqueueNavigationGraphUpdate(
+                NavigationGraphLoaded,
+                (progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }
 
         public override void Update(IGameTime gameTime)
@@ -704,8 +706,13 @@ namespace TerrainSamples.SceneSkybox
             panel.Height = 120;
         }
 
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
+            if (!loaded)
+            {
+                return;
+            }
+
             StartScene();
 
             StartSounds();

@@ -1090,7 +1090,7 @@ namespace TerrainSamples.SceneRts
 
             sw.Stop();
 
-            EnqueueNavigationGraphUpdate();
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
         private void StartRocks(Random posRnd)
         {
@@ -1248,8 +1248,13 @@ namespace TerrainSamples.SceneRts
             panel.Height = counters2.Top + counters2.Height + 3;
         }
 
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
+            if (loaded)
+            {
+                return;
+            }
+
             if (started)
             {
                 return;

@@ -84,47 +84,56 @@ namespace Engine.PathFinding
         /// Creates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        bool CreateAt(Vector3 position);
+        /// <param name="callback">Updating callback</param>
+        void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Creates the graph at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        bool CreateAt(BoundingBox bbox);
+        /// <param name="callback">Updating callback</param>
+        void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Creates the graph at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        bool CreateAt(IEnumerable<Vector3> positions);
+        /// <param name="callback">Updating callback</param>
+        void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        bool UpdateAt(Vector3 position);
+        /// <param name="callback">Updating callback</param>
+        void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Updates the graph at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        bool UpdateAt(BoundingBox bbox);
+        /// <param name="callback">Updating callback</param>
+        void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Updates the graph at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        bool UpdateAt(IEnumerable<Vector3> positions);
+        /// <param name="callback">Updating callback</param>
+        void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Removes the graph node at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        bool RemoveAt(Vector3 position);
+        /// <param name="callback">Updating callback</param>
+        void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Removes the graph node at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        bool RemoveAt(BoundingBox bbox);
+        /// <param name="callback">Updating callback</param>
+        void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null);
         /// <summary>
         /// Removes the graph node at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        bool RemoveAt(IEnumerable<Vector3> positions);
+        /// <param name="callback">Updating callback</param>
+        void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null);
 
         /// <summary>
         /// Adds a cylinder obstacle
@@ -161,15 +170,7 @@ namespace Engine.PathFinding
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(IGameTime gameTime);
-
-        /// <summary>
-        /// On graph updating event
-        /// </summary>
-        event EventHandler Updating;
-        /// <summary>
-        /// On graph updated event
-        /// </summary>
-        event EventHandler Updated;
+        /// <param name="callback">Updating callback</param>
+        void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null);
     }
 }

@@ -17,14 +17,6 @@ namespace Engine.PathFinding
     public class WalkableScene(Game game) : Scene(game)
     {
         /// <summary>
-        /// Navigation graph update requested
-        /// </summary>
-        private bool navigationGraphUpdateRequested = false;
-        /// <summary>
-        /// Navigation graph update callback
-        /// </summary>
-        private Action<float> navigationGraphUpdateCallback = null;
-        /// <summary>
         /// Navigation graph updating
         /// </summary>
         private bool navigationGraphUpdating = false;
@@ -120,8 +112,6 @@ namespace Engine.PathFinding
         {
             NavigationGraph?.Update(gameTime);
 
-            FireUpdateNavigationGraph();
-
             base.Update(gameTime);
         }
 
@@ -129,39 +119,53 @@ namespace Engine.PathFinding
         /// Loads a navigation graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
-        public void LoadNavigationGraphFromFile(string fileName)
+        /// <param name="callback">Finalization callback</param>
+        public void LoadNavigationGraphFromFile(string fileName, Action<bool> callback = null)
         {
             if (!File.Exists(fileName))
             {
+                callback?.Invoke(false);
+
                 return;
             }
 
             string hash = PathFinderDescription.GetHash();
 
             var graph = PathFinderDescription.Load(fileName, hash);
-            if (graph != null)
+            if (graph == null)
             {
-                SetNavigationGraph(graph);
+                callback?.Invoke(false);
+
+                return;
             }
+
+            SetNavigationGraph(graph, callback);
         }
         /// <summary>
         /// Loads a navigation graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
-        public async Task LoadNavigationGraphFromFileAsync(string fileName)
+        /// <param name="callback">Finalization callback</param>
+        public async Task LoadNavigationGraphFromFileAsync(string fileName, Action<bool> callback = null)
         {
             if (!File.Exists(fileName))
             {
+                callback?.Invoke(false);
+
                 return;
             }
 
             string hash = await PathFinderDescription.GetHashAsync();
 
             var graph = await PathFinderDescription.LoadAsync(fileName, hash);
-            if (graph != null)
+            if (graph == null)
             {
-                SetNavigationGraph(graph);
+                callback?.Invoke(false);
+
+                return;
             }
+
+            SetNavigationGraph(graph, callback);
         }
         /// <summary>
         /// Saves a navigation graph to a file
@@ -188,30 +192,24 @@ namespace Engine.PathFinding
         /// Enqueues a navigation graph update
         /// </summary>
         /// <param name="progressCallback">Progres callback</param>
-        public void EnqueueNavigationGraphUpdate(Action<float> progressCallback = null)
+        public void EnqueueNavigationGraphUpdate(Action<bool> callback = null, Action<float> progressCallback = null)
         {
-            if (navigationGraphUpdateRequested) return;
-
-            navigationGraphUpdateRequested = true;
-            navigationGraphUpdateCallback = progressCallback;
+            Task.Run(() =>
+            {
+                FireUpdateNavigationGraph(callback, progressCallback);
+            }).ConfigureAwait(false);
         }
         /// <summary>
         /// Fires a navigation graph update
         /// </summary>
-        private void FireUpdateNavigationGraph()
+        /// <param name="callback">Finalization callback</param>
+        private void FireUpdateNavigationGraph(Action<bool> callback, Action<float> progressCallback)
         {
             if (navigationGraphUpdating) return;
 
-            if (!navigationGraphUpdateRequested) return;
-
-            var progressCallback = navigationGraphUpdateCallback;
-
-            navigationGraphUpdateRequested = false;
-            navigationGraphUpdateCallback = null;
-
             Task.Run(() =>
             {
-                UpdateNavigationGraph(progressCallback);
+                UpdateNavigationGraph(callback, progressCallback);
 
                 navigationGraphUpdating = false;
             });
@@ -219,136 +217,59 @@ namespace Engine.PathFinding
         /// <summary>
         /// Updates the navigation graph
         /// </summary>
+        /// <param name="callback">Finalization callback</param>
         /// <param name="progressCallback">Optional progress callback</param>
-        public async Task UpdateNavigationGraphAsync(Action<float> progressCallback = null)
+        public async Task UpdateNavigationGraphAsync(Action<bool> callback = null, Action<float> progressCallback = null)
         {
             if (PathFinderDescription == null)
             {
-                SetNavigationGraph(null);
+                SetNavigationGraph(null, callback);
 
                 return;
             }
 
             var graph = await PathFinderDescription.BuildAsync(progressCallback);
 
-            SetNavigationGraph(graph);
+            SetNavigationGraph(graph, callback);
         }
         /// <summary>
         /// Updates the navigation graph
         /// </summary>
         /// <param name="progressCallback">Optional progress callback</param>
-        public void UpdateNavigationGraph(Action<float> progressCallback = null)
+        /// <param name="callback">Finalization callback</param>
+        public void UpdateNavigationGraph(Action<bool> callback = null, Action<float> progressCallback = null)
         {
             if (PathFinderDescription == null)
             {
-                SetNavigationGraph(null);
+                SetNavigationGraph(null, callback);
 
                 return;
             }
 
             var graph = PathFinderDescription.Build(progressCallback);
 
-            SetNavigationGraph(graph);
+            SetNavigationGraph(graph, callback);
         }
         /// <summary>
         /// Sets a navigation graph
         /// </summary>
         /// <param name="graph">Navigation graph</param>
-        private void SetNavigationGraph(IGraph graph)
+        /// <param name="callback">Finalization callback</param>
+        private void SetNavigationGraph(IGraph graph, Action<bool> callback)
         {
-            if (NavigationGraph != null)
-            {
-                NavigationGraphRemoving();
-
-                NavigationGraph.Updating -= GraphUpdating;
-                NavigationGraph.Updated -= GraphUpdated;
-
-                NavigationGraph.Dispose();
-                NavigationGraph = null;
-
-                NavigationGraphRemoved();
-            }
+            NavigationGraph?.Dispose();
+            NavigationGraph = null;
 
             if (graph == null)
             {
+                callback?.Invoke(false);
+
                 return;
             }
 
-            NavigationGraphLoading();
-
             NavigationGraph = graph;
-            NavigationGraph.Updating += GraphUpdating;
-            NavigationGraph.Updated += GraphUpdated;
 
-            NavigationGraphLoaded();
-        }
-        /// <summary>
-        /// Fires when graph is removing
-        /// </summary>
-        public virtual void NavigationGraphRemoving()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is removed
-        /// </summary>
-        public virtual void NavigationGraphRemoved()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is loading
-        /// </summary>
-        public virtual void NavigationGraphLoading()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is loaded
-        /// </summary>
-        public virtual void NavigationGraphLoaded()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is updating
-        /// </summary>
-        public virtual void NavigationGraphUpdating()
-        {
-
-        }
-        /// <summary>
-        /// Fires when graph is updated
-        /// </summary>
-        public virtual void NavigationGraphUpdated()
-        {
-
-        }
-        /// <summary>
-        /// Graph updating event
-        /// </summary>
-        /// <param name="sender">Sender graph</param>
-        /// <param name="e">Event args</param>
-        private void GraphUpdating(object sender, EventArgs e)
-        {
-            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - Triggered by {sender}");
-
-            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - {nameof(NavigationGraphUpdating)} Call");
-            NavigationGraphUpdating();
-            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - {nameof(NavigationGraphUpdating)} End");
-        }
-        /// <summary>
-        /// Graph updated event
-        /// </summary>
-        /// <param name="sender">Sender graph</param>
-        /// <param name="e">Event args</param>
-        private void GraphUpdated(object sender, EventArgs e)
-        {
-            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - Triggered by {sender}");
-
-            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} Call");
-            NavigationGraphUpdated();
-            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} End");
+            callback?.Invoke(true);
         }
 
         /// <summary>
@@ -641,7 +562,8 @@ namespace Engine.PathFinding
         /// Updates the graph at position
         /// </summary>
         /// <param name="position">Position</param>
-        public async Task UpdateGraphAsync(Vector3 position)
+        /// <param name="callback">Updating callback</param>
+        public async Task UpdateGraphAsync(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             if (PathFinderDescription == null)
             {
@@ -652,13 +574,14 @@ namespace Engine.PathFinding
             await PathFinderDescription.RefreshAsync();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(position);
+            NavigationGraph?.UpdateAt(position, callback);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
         /// </summary>
         /// <param name="positions">Positions list</param>
-        public async Task UpdateGraphAsync(IEnumerable<Vector3> positions)
+        /// <param name="callback">Updating callback</param>
+        public async Task UpdateGraphAsync(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             if (positions?.Any() != true)
             {
@@ -674,25 +597,27 @@ namespace Engine.PathFinding
             await PathFinderDescription.RefreshAsync();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(positions);
+            NavigationGraph?.UpdateAt(positions, callback);
         }
         /// <summary>
         /// Updates the graph at position
         /// </summary>
         /// <param name="position">Position</param>
-        public void UpdateGraph(Vector3 position)
+        /// <param name="callback">Updating callback</param>
+        public void UpdateGraph(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             // Refresh source geometry
             PathFinderDescription?.Refresh();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(position);
+            NavigationGraph?.UpdateAt(position, callback);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
         /// </summary>
         /// <param name="positions">Positions list</param>
-        public void UpdateGraph(IEnumerable<Vector3> positions)
+        /// <param name="callback">Updating callback</param>
+        public void UpdateGraph(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             if (positions?.Any() != true)
             {
@@ -703,7 +628,7 @@ namespace Engine.PathFinding
             PathFinderDescription?.Refresh();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(positions);
+            NavigationGraph?.UpdateAt(positions, callback);
         }
 
         /// <summary>

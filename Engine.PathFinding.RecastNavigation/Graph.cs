@@ -4,6 +4,7 @@ using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,10 +15,6 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class Graph : IGraph
     {
-        /// <inheritdoc/>
-        public event EventHandler Updating;
-        /// <inheritdoc/>
-        public event EventHandler Updated;
         /// <summary>
         /// Updated flag
         /// </summary>
@@ -362,108 +359,112 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public bool CreateAt(Vector3 position)
+        public void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
-            return CreateAt(LookupTiles([position]));
+            CreateAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public bool CreateAt(BoundingBox bbox)
+        public void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            return CreateAt(LookupTiles(bbox));
+            CreateAt(LookupTiles(bbox), callback);
         }
         /// <inheritdoc/>
-        public bool CreateAt(IEnumerable<Vector3> positions)
+        public void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
-            return CreateAt(LookupTiles(positions));
+            CreateAt(LookupTiles(positions), callback);
         }
         /// <summary>
         /// Creates the tile list
         /// </summary>
         /// <param name="tiles">Tile list</param>
-        private bool CreateAt(List<(int x, int y)> tiles)
+        private void CreateAt(List<(int x, int y)> tiles, Action<GraphUpdateStates> callback)
         {
             if (tiles.Count == 0)
             {
-                return true;
+                return;
             }
 
-            Updating?.Invoke(this, new EventArgs());
+            Task.Run(() =>
+            {
+                callback?.Invoke(GraphUpdateStates.Updating);
 
-            BuildTiles(tiles, false);
+                BuildTiles(tiles, false);
 
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+                callback?.Invoke(GraphUpdateStates.Updated);
+            }).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public bool UpdateAt(Vector3 position)
+        public void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
-            return UpdateAt(LookupTiles([position]));
+            UpdateAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public bool UpdateAt(BoundingBox bbox)
+        public void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            return UpdateAt(LookupTiles(bbox));
+            UpdateAt(LookupTiles(bbox), callback);
         }
         /// <inheritdoc/>
-        public bool UpdateAt(IEnumerable<Vector3> positions)
+        public void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
-            return UpdateAt(LookupTiles(positions));
+            UpdateAt(LookupTiles(positions), callback);
         }
         /// <summary>
         /// Updates the tile list
         /// </summary>
         /// <param name="tiles">Tile list</param>
-        private bool UpdateAt(List<(int x, int y)> tiles)
+        private void UpdateAt(List<(int x, int y)> tiles, Action<GraphUpdateStates> callback)
         {
             if (tiles.Count == 0)
             {
-                return true;
+                return;
             }
 
-            Updating?.Invoke(this, new EventArgs());
+            Task.Run(() =>
+            {
+                callback?.Invoke(GraphUpdateStates.Updating);
 
-            BuildTiles(tiles, true);
+                BuildTiles(tiles, true);
 
-            Updated?.Invoke(this, new EventArgs());
+                callback?.Invoke(GraphUpdateStates.Updated);
 
-            return true;
+            }).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public bool RemoveAt(Vector3 position)
+        public void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
-            return RemoveAt(LookupTiles([position]));
+            RemoveAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public bool RemoveAt(BoundingBox bbox)
+        public void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            return RemoveAt(LookupTiles(bbox));
+            RemoveAt(LookupTiles(bbox), callback);
         }
         /// <inheritdoc/>
-        public bool RemoveAt(IEnumerable<Vector3> positions)
+        public void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
-            return RemoveAt(LookupTiles(positions));
+            RemoveAt(LookupTiles(positions), callback);
         }
         /// <summary>
         /// Removes the tile list
         /// </summary>
         /// <param name="tiles">Tile list</param>
-        private bool RemoveAt(List<(int x, int y)> tiles)
+        private void RemoveAt(List<(int x, int y)> tiles, Action<GraphUpdateStates> callback)
         {
             if (tiles.Count == 0)
             {
-                return true;
+                return;
             }
 
-            Updating?.Invoke(this, new EventArgs());
+            Task.Run(() =>
+            {
+                callback?.Invoke(GraphUpdateStates.Updating);
 
-            RemoveTiles(tiles);
+                RemoveTiles(tiles);
 
-            Updated?.Invoke(this, new EventArgs());
-
-            return true;
+                callback?.Invoke(GraphUpdateStates.Updated);
+            }).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -541,7 +542,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public void Update(IGameTime gameTime)
+        public void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null)
         {
             var tcs = agentQuerieFactories
                 .Where(a => a.NavMesh?.TileCache != null)
@@ -551,7 +552,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 if (tc.Updating())
                 {
-                    Updating?.Invoke(this, EventArgs.Empty);
+                    callback?.Invoke(GraphUpdateStates.Updating);
                 }
 
                 var status = tc.Update(agent, out bool upToDate, out bool cacheUpdated);
@@ -564,7 +565,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (cacheUpdated)
                 {
-                    Updated?.Invoke(this, EventArgs.Empty);
+                    callback?.Invoke(GraphUpdateStates.Updated);
                 }
             }
 

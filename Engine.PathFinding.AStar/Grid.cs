@@ -280,47 +280,47 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public bool CreateAt(Vector3 position)
+        public void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool CreateAt(BoundingBox bbox)
+        public void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool CreateAt(IEnumerable<Vector3> positions)
+        public void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(Vector3 position)
+        public void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(BoundingBox bbox)
+        public void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(IEnumerable<Vector3> positions)
+        public void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(Vector3 position)
+        public void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(BoundingBox bbox)
+        public void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(IEnumerable<Vector3> positions)
+        public void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
@@ -353,7 +353,7 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public void Update(IGameTime gameTime)
+        public void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null)
         {
             //Updates the internal state
         }

@@ -257,10 +257,17 @@ namespace TerrainSamples.SceneCrowds
 
             PathFinderDescription = new(nmsettings, nmInput, [tankAgentType]);
 
-            EnqueueNavigationGraphUpdate((progress) =>
-            {
-                help.Text = $"Loading navigation mesh {progress:0.0%}...";
-            });
+            EnqueueNavigationGraphUpdate(
+                (loaded) =>
+                {
+                    if (!loaded) return;
+
+                    NavigationGraphLoaded();
+                },
+                (progress) =>
+                {
+                    help.Text = $"Loading navigation mesh {progress:0.0%}...";
+                });
         }
         private void StartNodes()
         {
@@ -519,7 +526,7 @@ namespace TerrainSamples.SceneCrowds
             upperPanel.Height = help.Top + help.Height + 3;
         }
 
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded()
         {
             help.Text = "Point & click over terrain to move the crowd. Press F1 to show the Navigation mesh.";
 

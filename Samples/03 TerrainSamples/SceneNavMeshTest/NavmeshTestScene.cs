@@ -484,8 +484,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
             EnqueueGraph();
         }
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
+            if (!loaded)
+            {
+                return;
+            }
+
             var mapTime = DateTime.Now.TimeOfDay;
             loadState = null;
 
@@ -499,8 +504,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
             gameReady = true;
         }
-        public override void NavigationGraphUpdated()
+        public void NavigationGraphUpdated(bool loaded)
         {
+            if (!loaded)
+            {
+                return;
+            }
+
             DrawGraphNodes(agent);
         }
 
@@ -1506,7 +1516,7 @@ namespace TerrainSamples.SceneNavMeshTest
             loadState = "Updating navigation graph.";
 
             enqueueTime = DateTime.Now.TimeOfDay;
-            EnqueueNavigationGraphUpdate();
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
         private void ShowMessage(string text, long duration = 5000)
         {

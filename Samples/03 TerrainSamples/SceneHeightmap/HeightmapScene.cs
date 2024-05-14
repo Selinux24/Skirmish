@@ -118,7 +118,7 @@ namespace TerrainSamples.SceneHeightmap
         private bool uiReady = false;
         private bool gameReady = false;
 
-        private bool udaptingGraph = false;
+        private bool updatingGraph = false;
 
         public HeightmapScene(Game game)
             : base(game)
@@ -1073,7 +1073,7 @@ namespace TerrainSamples.SceneHeightmap
 
             PathFinderDescription = new(nmsettings, nminput, [agent]);
 
-            EnqueueNavigationGraphUpdate();
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
 
         public override void Update(IGameTime gameTime)
@@ -1133,18 +1133,22 @@ namespace TerrainSamples.SceneHeightmap
                 return;
             }
 
-            if (!udaptingGraph)
+            if (updatingGraph)
             {
-                udaptingGraph = true;
-
-                Task.Run(() =>
-                {
-                    Vector3 extent = Vector3.One * 20f;
-                    NavigationGraph.UpdateAt(new BoundingBox(position - extent, position + extent));
-
-                    udaptingGraph = false;
-                });
+                return;
             }
+
+            updatingGraph = true;
+
+            Vector3 extent = Vector3.One * 20f;
+            var bbox = new BoundingBox(position - extent, position + extent);
+            NavigationGraph.UpdateAt(bbox, (updateState) =>
+            {
+                if (updateState == GraphUpdateStates.Updated)
+                {
+                    updatingGraph = false;
+                }
+            });
         }
         private Vector3 UpdateFlyingCamera(IGameTime gameTime)
         {
@@ -1771,14 +1775,17 @@ namespace TerrainSamples.SceneHeightmap
             }
         }
 
-        public override void NavigationGraphLoaded()
+        public void NavigationGraphLoaded(bool loaded)
         {
             gameReady = true;
 
             uiTweener.ClearTween(fadePanel);
             uiTweener.TweenAlpha(fadePanel, fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
 
-            UpdateGraphNodes(agent);
+            if (loaded)
+            {
+                UpdateGraphNodes(agent);
+            }
         }
         private void UpdateGraphNodes(AgentType agent)
         {
