@@ -94,8 +94,8 @@ namespace Engine.Content.FmtCollada
 
             foreach (var model in modelList)
             {
-                model.Flush();
-                model.Dispose();
+                await model.FlushAsync();
+                await model.DisposeAsync();
             }
 
             return [.. res];

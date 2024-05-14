@@ -141,7 +141,7 @@ namespace Engine
         /// <param name="primitives">Primitives list</param>
         public void SetPrimitives(Color4 color, IEnumerable<T> primitives)
         {
-            if (primitives?.Count() > 0)
+            if (primitives?.Any() ?? false)
             {
                 if (!dictionary.TryGetValue(color, out var values))
                 {
@@ -156,15 +156,15 @@ namespace Engine
                 values.AddRange(primitives);
 
                 dictionaryChanged = true;
-            }
-            else
-            {
-                if (dictionary.ContainsKey(color))
-                {
-                    dictionary.TryRemove(color, out _);
 
-                    dictionaryChanged = true;
-                }
+                return;
+            }
+
+            if (dictionary.ContainsKey(color))
+            {
+                dictionary.TryRemove(color, out _);
+
+                dictionaryChanged = true;
             }
         }
         /// <summary>
