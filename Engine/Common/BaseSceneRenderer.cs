@@ -706,7 +706,7 @@ namespace Engine.Common
                 }
 
                 // Nearest first
-                res = -d1.CompareTo(d2);
+                res = d1.CompareTo(d2);
             }
 
             if (res == 0)
@@ -774,7 +774,7 @@ namespace Engine.Common
                 }
 
                 // Far objects first
-                res = d1.CompareTo(d2);
+                res = -d1.CompareTo(d2);
             }
 
             if (res == 0)
