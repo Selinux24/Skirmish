@@ -62,7 +62,11 @@ namespace Tanks
                 return;
             }
 
-            trees.ForEach(controller => controller.UpdateController(gameTime));
+            var activeTrees = trees.Where(controller => controller.Active).ToArray();
+            foreach (var tree in activeTrees)
+            {
+                tree.UpdateController(gameTime);
+            }
         }
 
         /// <summary>

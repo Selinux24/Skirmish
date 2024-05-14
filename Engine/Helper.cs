@@ -752,7 +752,7 @@ namespace Engine
         {
             float dot = Vector3.Dot(one, two);
 
-            return MathF.Acos(MathF.Min(dot, 1f));
+            return MathF.Acos(MathUtil.Clamp(dot, -1f, 1f));
         }
         /// <summary>
         /// Gets the angle between two vectors in the same plane
