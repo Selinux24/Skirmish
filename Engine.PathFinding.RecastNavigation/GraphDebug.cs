@@ -122,20 +122,22 @@ namespace Engine.PathFinding.RecastNavigation
         {
             string nameTris = $"{GraphDebugTypes.Nodes}_Tris";
 
+            Vector3 deltaY = new(0f, 0.01f, 0f);
+
             if (separateNodes)
             {
                 var tris = nodes
                     .GroupBy(n => Helper.IntToCol(n.Id, 128))
                     .ToDictionary(
                         keySelector => keySelector.Key,
-                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable());
+                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY));
 
                 yield return new(nameTris, Topology.TriangleList, tris);
             }
             else
             {
                 Color4 colorTris = new Color(0, 192, 255, 128);
-                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).AsEnumerable())]);
+                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY))]);
 
                 yield return new(nameTris, Topology.TriangleList, tris);
             }

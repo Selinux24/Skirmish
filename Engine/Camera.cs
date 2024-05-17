@@ -791,10 +791,32 @@ namespace Engine
         /// <summary>
         /// Sets the camera position
         /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        public void SetPosition(float x, float y, float z)
+        {
+            nextPosition = new(x, y, z);
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera position
+        /// </summary>
         /// <param name="position">Position</param>
         public void SetPosition(Vector3 position)
         {
             nextPosition = position;
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera point of interest
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        public void SetInterest(float x, float y, float z)
+        {
+            nextInterest = new(x, y, z);
             updateNeeded = true;
         }
         /// <summary>
@@ -882,6 +904,18 @@ namespace Engine
             updateNeeded = true;
 
             return nextVelocity;
+        }
+        /// <summary>
+        /// Movement
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 Move(IGameTime gameTime, float x, float y, float z, bool slow)
+        {
+            return Move(gameTime, new(x, y, z), slow);
         }
 
         /// <summary>
@@ -1186,9 +1220,9 @@ namespace Engine
         /// <summary>
         /// Move camera to position
         /// </summary>
-        /// <param name="x">X position component</param>
-        /// <param name="y">Y position component</param>
-        /// <param name="z">Z position component</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
         /// <param name="translation">Translation mode</param>
         public void Goto(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {
@@ -1219,9 +1253,9 @@ namespace Engine
         /// <summary>
         /// Center camera in new interest
         /// </summary>
-        /// <param name="x">X position component</param>
-        /// <param name="y">Y position component</param>
-        /// <param name="z">Z position component</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
         /// <param name="translation">Translation mode</param>
         public void LookTo(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {

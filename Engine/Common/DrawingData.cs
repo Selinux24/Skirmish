@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace Engine.Common
         /// <summary>
         /// Meshes
         /// </summary>
-        private readonly Dictionary<string, MeshByMaterialCollection> meshes = [];
+        private readonly ConcurrentDictionary<string, MeshByMaterialCollection> meshes = [];
         /// <summary>
         /// Materials dictionary
         /// </summary>
@@ -191,7 +192,7 @@ namespace Engine.Common
             var geometry = await modelContent.CreateGeometry(Description.LoadAnimation, Description.LoadNormalMaps, Description.Constraint);
             foreach (var mesh in geometry)
             {
-                meshes.Add(mesh.Key, mesh.Value);
+                meshes.AddOrUpdate(mesh.Key, mesh.Value, (k, v) => v);
             }
 
             //Get hull geometry
@@ -214,7 +215,7 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         public async Task Initialize(string name, BufferDescriptor instancingBuffer = null)
         {
-            if (meshes.Count == 0)
+            if (meshes.IsEmpty)
             {
                 return;
             }

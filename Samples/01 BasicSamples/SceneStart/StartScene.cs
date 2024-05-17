@@ -214,7 +214,7 @@ namespace BasicSamples.SceneStart
             position.X = +((xmouse * d) + (0.2f * MathF.Cos(vx * Game.GameTime.TotalSeconds)));
             position.Y = -((ymouse * d) + (0.1f * MathF.Sin(vy * Game.GameTime.TotalSeconds)));
 
-            Camera.SetPosition(new Vector3(0, 0, -5f));
+            Camera.SetPosition(0, 0, -5f);
             Camera.LookTo(position);
         }
         private void UpdateInput()

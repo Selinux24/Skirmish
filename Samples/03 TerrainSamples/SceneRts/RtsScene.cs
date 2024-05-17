@@ -301,12 +301,13 @@ namespace TerrainSamples.SceneRts
 
             await Task.Run(() =>
             {
-                walkerAgentType = new GraphAgentType()
+                walkerAgentType = new()
                 {
                     Name = "Walker type",
                     Height = 1f,
                     Radius = 0.2f,
                     MaxClimb = 0.9f,
+                    MaxSlope = 60,
                 };
             });
 
@@ -547,9 +548,10 @@ namespace TerrainSamples.SceneRts
             tankAgentType = new GraphAgentType()
             {
                 Name = "Tank type",
-                Height = tankbbox.Height,
-                Radius = tankbbox.Width * 0.5f,
-                MaxClimb = tankbbox.Height * 0.1f,
+                Height = MathF.Round(tankbbox.Height, 1),
+                Radius = MathF.Round(tankbbox.Width * 0.5f, 1),
+                MaxClimb = MathF.Round(tankbbox.Height * 0.1f, 1),
+                MaxSlope = 40,
             };
 
             PrepareLights(tankP1.Lights);
@@ -1250,7 +1252,7 @@ namespace TerrainSamples.SceneRts
 
         public void NavigationGraphLoaded(bool loaded)
         {
-            if (loaded)
+            if (!loaded)
             {
                 return;
             }

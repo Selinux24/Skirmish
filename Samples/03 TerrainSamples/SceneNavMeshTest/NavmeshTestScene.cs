@@ -12,6 +12,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TerrainSamples.Mapping;
@@ -108,6 +109,11 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color connectionColor = Color.LightPink;
         private readonly Color connectionColorStart = Color.Pink;
         private readonly Color connectionColorEnd = Color.DeepPink;
+
+        private bool mapSelected = false;
+        private string mapResourcesFolder;
+        private string mapFileName;
+        private Stopwatch swUpdateGraph = Stopwatch.StartNew();
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -301,7 +307,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             uiReady = true;
 
-            InitializeMapData();
+            mapSelected = false;
         }
         private void InitializeInputMapping()
         {
@@ -372,6 +378,28 @@ namespace TerrainSamples.SceneNavMeshTest
             Lights.FillLight.Enabled = true;
         }
 
+        private void SelectMap()
+        {
+            mapSelected = false;
+
+            System.Windows.Forms.OpenFileDialog dlg = new()
+            {
+                Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+
+            mapResourcesFolder = Path.GetDirectoryName(dlg.FileName);
+            mapFileName = Path.GetFileName(dlg.FileName);
+            mapSelected = true;
+
+            InitializeMapData();
+        }
         private void InitializeMapData()
         {
             var group = LoadResourceGroup.FromTasks(
@@ -385,14 +413,18 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavmesh()
         {
-            var contentDesc = ContentDescription.FromFile(resourcesFolder, "testSimpleMap04.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = contentDesc,
+                Content = new()
+                {
+                    ContentFolder = mapResourcesFolder,
+                    ContentFilename = mapFileName,
+                },
                 PathFindingHull = PickingHullTypes.Perfect,
+                StartsVisible = false,
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
@@ -405,30 +437,30 @@ namespace TerrainSamples.SceneNavMeshTest
             agent = new()
             {
                 Name = "Player",
-                Height = 0.2f,
-                Radius = 0.1f,
-                MaxClimb = 0.5f,
-                MaxSlope = 50f,
+                Height = 2.4f,
+                Radius = 1.3f,
+                MaxClimb = 0.2f,
+                MaxSlope = 40f,
                 Velocity = 3f,
                 VelocitySlow = 1f,
                 PathFilter = pathFilter,
             };
 
             //Rasterization
-            nmsettings.CellSize = 0.1f;
-            nmsettings.CellHeight = 0.1f;
+            nmsettings.CellSize = 0.3f;
+            nmsettings.CellHeight = 0.2f;
 
             //Region
             nmsettings.RegionMinSize = 8;
             nmsettings.RegionMergeSize = 20;
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypes.Monotone;
+            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Filtering
-            nmsettings.FilterLedgeSpans = false;
-            nmsettings.FilterLowHangingObstacles = false;
-            nmsettings.FilterWalkableLowHeightSpans = false;
+            nmsettings.FilterLedgeSpans = true;
+            nmsettings.FilterLowHangingObstacles = true;
+            nmsettings.FilterWalkableLowHeightSpans = true;
 
             //Polygonization
             nmsettings.EdgeMaxLength = 12f;
@@ -442,6 +474,7 @@ namespace TerrainSamples.SceneNavMeshTest
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 32;
+            nmsettings.BuildAllTiles = false;
 
             //Debugging
             nmsettings.EnableDebugInfo = true;
@@ -481,6 +514,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1f, 1.2f, 1f) * maxD * 0.8f);
+            Camera.FarPlaneDistance = maxD * 3f;
+
+            inputGeometry.Visible = true;
 
             EnqueueGraph();
         }
@@ -504,12 +540,16 @@ namespace TerrainSamples.SceneNavMeshTest
 
             gameReady = true;
         }
-        public void NavigationGraphUpdated(bool loaded)
+        public void NavigationGraphUpdated(GraphUpdateStates state)
         {
-            if (!loaded)
+            if (state != GraphUpdateStates.Updated)
             {
                 return;
             }
+
+            swUpdateGraph.Stop();
+            lastElapsedSeconds = swUpdateGraph.ElapsedMilliseconds / 1000.0f;
+            loadState = null;
 
             DrawGraphNodes(agent);
         }
@@ -531,6 +571,11 @@ namespace TerrainSamples.SceneNavMeshTest
             UpdateCameraInput();
 
             UpdateLoadingText();
+
+            if (!mapSelected)
+            {
+                SelectMap();
+            }
 
             if (!gameReady)
             {
@@ -708,35 +753,31 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void ToggleTile(Vector3 tilePosition)
         {
-            lastElapsedSeconds = null;
-            loadState = $"Updating tile at {tilePosition}.";
+            if (NavigationGraph == null)
+            {
+                return;
+            }
 
             bool remove = Game.Input.ShiftPressed;
             bool create = Game.Input.ControlPressed;
 
-            var sw = Stopwatch.StartNew();
-            try
-            {
-                if (create)
-                {
-                    NavigationGraph.CreateAt(tilePosition);
-                    return;
-                }
+            lastElapsedSeconds = null;
+            loadState = $"Updating tile at {tilePosition}.";
+            swUpdateGraph = Stopwatch.StartNew();
 
-                if (remove)
-                {
-                    NavigationGraph.RemoveAt(tilePosition);
-                    return;
-                }
-
-                NavigationGraph.UpdateAt(tilePosition);
-            }
-            finally
+            if (create)
             {
-                sw.Stop();
-                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
-                loadState = null;
+                NavigationGraph.CreateAt(tilePosition, NavigationGraphUpdated);
+                return;
             }
+
+            if (remove)
+            {
+                NavigationGraph.RemoveAt(tilePosition, NavigationGraphUpdated);
+                return;
+            }
+
+            NavigationGraph.UpdateAt(tilePosition, NavigationGraphUpdated);
         }
         private void UpdateGameStateAddObstacle()
         {
@@ -1376,9 +1417,32 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void DrawGraphNodes(AgentType agent)
         {
-            Components.RemoveComponent(debugGeometry);
+            var tmp = debugGeometry;
 
-            var group = LoadResourceGroup.FromTasks(() => LoadDebugModel(agent, debugType));
+            var group = LoadResourceGroup.FromTasks(
+                () => LoadDebugModel(agent, debugType),
+                (LoadResourcesResult res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        return;
+                    }
+
+                    if (debugGeometry == null)
+                    {
+                        return;
+                    }
+
+                    debugGeometry.Visible = true;
+
+                    if (tmp == null)
+                    {
+                        return;
+                    }
+
+                    tmp.Visible = false;
+                    Components.RemoveComponent(tmp);
+                });
 
             LoadResources(group);
         }
@@ -1409,6 +1473,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task LoadDebugModel(AgentType agent, GraphDebugTypes debug)
         {
+            await Task.Delay(100);
+
             var debugInfoList = GetDebugInfo(agent)?.GetInfo((int)debug, lastPosition)?.GetValues() ?? [];
             if (!debugInfoList.Any())
             {
@@ -1422,7 +1488,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 AmbientColor = Color3.White,
                 SpecularColor = MaterialConstants.SpecularColor,
                 Shininess = MaterialConstants.Shininess,
-                IsTransparent = false,
+                IsTransparent = true,
             };
 
             ContentData content = new();
@@ -1443,19 +1509,24 @@ namespace TerrainSamples.SceneNavMeshTest
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(content),
+
                 CastShadow = ShadowCastingAlgorihtms.None,
                 PathFindingHull = PickingHullTypes.None,
                 CullingVolumeType = CullingVolumeTypes.None,
                 ColliderType = ColliderTypes.None,
                 PickingHull = PickingHullTypes.None,
+
+                BlendMode = BlendModes.Transparent,
                 TextureIndex = 0,
                 UseAnisotropicFiltering = false,
                 Optimize = false,
                 DepthEnabled = true,
-                StartsVisible = true,
+
+                StartsVisible = false,
             };
 
-            debugGeometry = await AddComponentEffect<Model, ModelDescription>("debugGeometry", "debugGeometry", desc);
+            string id = $"debugGeometry_{DateTime.Now.Ticks}";
+            debugGeometry = await AddComponentEffect<Model, ModelDescription>(id, "debugGeometry", desc);
         }
         private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Color4, IEnumerable<Vector3>> data)
         {

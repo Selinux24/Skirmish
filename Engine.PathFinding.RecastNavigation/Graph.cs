@@ -196,11 +196,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// Builds the tiles in the list
         /// </summary>
         /// <param name="tiles">Tile list</param>
-        private void BuildTiles(List<(int x, int y)> tiles, bool update)
+        /// <param name="create">If true, creates the tile if not exists. If false, updates the tile if exists</param>
+        private void BuildTiles(List<(int x, int y)> tiles, bool create)
         {
             foreach (var agentQ in agentQuerieFactories)
             {
-                BuildTiles(agentQ, tiles, update);
+                BuildTiles(agentQ, tiles, create);
             }
         }
         /// <summary>
@@ -208,16 +209,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agentQ">Agent query</param>
         /// <param name="updateTiles">Tile list</param>
-        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<(int x, int y)> updateTiles, bool update)
+        /// <param name="create">If true, creates the tile if not exists. If false, updates the tile if exists</param>
+        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<(int x, int y)> updateTiles, bool create)
         {
             foreach (var (x, y) in updateTiles)
             {
-                if (update && agentQ.NavMesh.HasTilesAt(x, y))
-                {
-                    continue;
-                }
+                bool tileExist = agentQ.NavMesh.HasTilesAt(x, y);
 
-                agentQ.NavMesh.BuildTileAt(x, y, Settings, Input, agentQ.Agent);
+                if (create && !tileExist || !create && tileExist)
+                {
+                    agentQ.NavMesh.BuildTileAt(x, y, Settings, Input, agentQ.Agent);
+                }
             }
         }
         /// <summary>
@@ -388,9 +390,10 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 callback?.Invoke(GraphUpdateStates.Updating);
 
-                BuildTiles(tiles, false);
+                BuildTiles(tiles, true);
 
                 callback?.Invoke(GraphUpdateStates.Updated);
+
             }).ConfigureAwait(false);
         }
 
@@ -424,7 +427,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 callback?.Invoke(GraphUpdateStates.Updating);
 
-                BuildTiles(tiles, true);
+                BuildTiles(tiles, false);
 
                 callback?.Invoke(GraphUpdateStates.Updated);
 

@@ -218,8 +218,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private static ContourVertex[] CreateInitialPoints(ContourVertex[] points)
         {
-            var ll = points[0];
-            var ur = points[0];
+            var first = points[0];
+            first.Flag = 0;
+
+            var ll = first;
+            var ur = first;
             for (int i = 1; i < points.Length; i++)
             {
                 var p = points[i];

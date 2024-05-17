@@ -153,8 +153,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             base.Initialize();
 
-            Camera.SetPosition(new Vector3(10000, 10000, 10000));
-            Camera.SetInterest(new Vector3(10001, 10000, 10000));
+            Camera.SetPosition(10000, 10000, 10000);
+            Camera.SetInterest(10001, 10000, 10000);
 
             LoadingTaskUI();
         }
@@ -527,8 +527,8 @@ namespace TerrainSamples.SceneHeightmap
 
             Camera.NearPlaneDistance = near;
             Camera.FarPlaneDistance = far;
-            Camera.SetPosition(new Vector3(24, 12, 14));
-            Camera.SetInterest(new Vector3(0, 10, 0));
+            Camera.SetPosition(24, 12, 14);
+            Camera.SetInterest(0, 10, 0);
             Camera.MovementDelta = 45f;
             Camera.SlowMovementDelta = 20f;
 

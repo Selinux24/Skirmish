@@ -129,8 +129,8 @@ namespace BasicSamples.SceneNormalMap
             Camera.NearPlaneDistance = 0.5f;
             Camera.FarPlaneDistance = 500;
             Camera.Mode = CameraModes.Free;
-            Camera.SetPosition(new Vector3(-5, 3, -5));
-            Camera.SetInterest(new Vector3(0, 0, 0));
+            Camera.SetPosition(-5, 3, -5);
+            Camera.SetInterest(0, 0, 0);
         }
         private void InitializeEnvironment()
         {

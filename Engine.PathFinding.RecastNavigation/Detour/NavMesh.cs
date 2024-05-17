@@ -3,7 +3,6 @@ using Engine.PathFinding.RecastNavigation.Recast;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -924,7 +923,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int h = Utils.ComputeTileHash(x, y, m_tileLutMask);
             var tile = m_posLookup[h];
 
-            return tile != null;
+            return tile != null && tile.Header.X == x && tile.Header.Y == y;
         }
         /// <summary>
         /// Gets the tile at specified coordinates
@@ -964,7 +963,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Find tile based on hash.
             int h = Utils.ComputeTileHash(x, y, m_tileLutMask);
             var tile = m_posLookup[h];
-
             while (tile != null)
             {
                 if (tile.Header.X == x && tile.Header.Y == y && tiles.Count < maxTiles)
