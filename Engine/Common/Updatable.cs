@@ -4,20 +4,14 @@ namespace Engine.Common
     /// <summary>
     /// Updatable object
     /// </summary>
-    public abstract class Updatable<T> : BaseSceneObject<T>, IUpdatable where T : SceneObjectDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class Updatable<T>(Scene scene, string id, string name) : BaseSceneObject<T>(scene, id, name), IUpdatable where T : SceneObjectDescription
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected Updatable(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public virtual void EarlyUpdate(UpdateContext context)
         {

@@ -1,6 +1,4 @@
 ﻿using Engine;
-using Engine.Audio;
-using Engine.Audio.Tween;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -14,9 +12,7 @@ namespace BasicSamples.SceneStart
 {
     class StartScene : Scene
     {
-        private const string MusicResourceString = "Music";
-
-        private AudioEffectTweener audioTweener;
+        private SoundEffectsManager soundEffectsManager;
         private UIControlTweener uiTweener;
 
         private Model backGround = null;
@@ -30,8 +26,6 @@ namespace BasicSamples.SceneStart
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
-
-        private IGameAudioEffect currentMusic = null;
 
         private bool sceneReady = false;
 
@@ -69,7 +63,6 @@ namespace BasicSamples.SceneStart
         {
             await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
 
-            audioTweener = this.AddAudioEffectTweener();
             uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeCursor()
@@ -154,20 +147,8 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            AudioManager.LoadSound(MusicResourceString, "SceneStart", "anttisinstrumentals+icemanandangelinstrumental.mp3");
-            AudioManager.AddEffectParams(
-                MusicResourceString,
-                new GameAudioEffectParameters
-                {
-                    DestroyWhenFinished = false,
-                    SoundName = MusicResourceString,
-                    IsLooped = true,
-                    UseAudio3D = true,
-                });
-
-            currentMusic = AudioManager.CreateEffectInstance(MusicResourceString);
-
-            await Task.CompletedTask;
+            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            soundEffectsManager.InitializeAudio("SceneStart");
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -178,11 +159,8 @@ namespace BasicSamples.SceneStart
 
             Lights.KeyLight.Direction = Vector3.ForwardLH;
 
-            AudioManager.MasterVolume = 1f;
-            AudioManager.Start();
-
-            currentMusic?.Play();
-            audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
+            soundEffectsManager.Start(1f);
+            soundEffectsManager.Play();
 
             backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.Audio;
     using Engine.Common;
 
     /// <summary>
@@ -47,10 +46,6 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModes sceneMode = SceneModes.Unknown;
-        /// <summary>
-        /// Audio manager
-        /// </summary>
-        private GameAudioManager audioManager = null;
 
         /// <summary>
         /// Scene bounding box
@@ -60,16 +55,6 @@ namespace Engine
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
-        /// <summary>
-        /// Audio manager
-        /// </summary>
-        protected GameAudioManager AudioManager
-        {
-            get
-            {
-                return audioManager ??= new();
-            }
-        }
 
         /// <summary>
         /// Game class
@@ -170,9 +155,6 @@ namespace Engine
             Renderer?.Dispose();
             Renderer = null;
 
-            audioManager?.Dispose();
-            audioManager = null;
-
             Camera?.Dispose();
             Camera = null;
 
@@ -208,8 +190,6 @@ namespace Engine
 
                 // Camera!
                 Camera?.Update(gameTime);
-
-                AudioManager?.Update(gameTime);
 
                 // Action!
                 Renderer?.Update(gameTime);
@@ -393,6 +373,7 @@ namespace Engine
 
             return component;
         }
+
         /// <summary>
         /// Adds an agent component to the scene
         /// </summary>
@@ -505,6 +486,20 @@ namespace Engine
             where TDescription : SceneObjectDescription
         {
             return await AddComponentInternal<TObj, TDescription>(id, name, description, usage, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponent<TObj>(string id, string name, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+            where TObj : BaseSceneObject<SceneObjectDescription>
+        {
+            return await AddComponentInternal<TObj, SceneObjectDescription>(id, name, new(), usage, layer);
         }
         /// <summary>
         /// Adds a component to the scene

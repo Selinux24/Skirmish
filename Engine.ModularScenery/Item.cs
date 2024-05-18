@@ -6,39 +6,31 @@ namespace Engine.Modular
     /// <summary>
     /// Modular scenery item
     /// </summary>
-    public class Item
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="obj">Object</param>
+    /// <param name="instance">Scene object</param>
+    /// <param name="emitters">Particle emitters list</param>
+    /// <param name="state">Initial state</param>
+    public class Item(ObjectReference obj, ModelInstance instance, ParticleEmitter[] emitters, string state)
     {
         /// <summary>
         /// Object
         /// </summary>
-        public ObjectReference Object { get; private set; }
+        public ObjectReference Object { get; private set; } = obj;
         /// <summary>
         /// Instance
         /// </summary>
-        public ModelInstance Instance { get; private set; }
+        public ModelInstance Instance { get; private set; } = instance;
         /// <summary>
         /// Particle emitters
         /// </summary>
-        public ParticleEmitter[] Emitters { get; private set; }
+        public ParticleEmitter[] Emitters { get; private set; } = emitters;
         /// <summary>
         /// Current state
         /// </summary>
-        public string CurrentState { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="obj">Object</param>
-        /// <param name="instance">Scene object</param>
-        /// <param name="emitters">Particle emitters list</param>
-        /// <param name="state">Initial state</param>
-        public Item(ObjectReference obj, ModelInstance instance, ParticleEmitter[] emitters, string state)
-        {
-            Object = obj;
-            Instance = instance;
-            Emitters = emitters;
-            CurrentState = state;
-        }
+        public string CurrentState { get; set; } = state;
 
         /// <inheritdoc/>
         public override string ToString()

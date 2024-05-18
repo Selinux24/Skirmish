@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Audio;
 using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
@@ -61,6 +60,8 @@ namespace TerrainSamples.SceneSkybox
             MaxSlope = 45,
         };
 
+        private SoundEffectsManager soundEffectsManager;
+
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea help = null;
@@ -93,8 +94,6 @@ namespace TerrainSamples.SceneSkybox
         private DecalDrawer decalEmitter = null;
 
         private int directionalLightCount = 0;
-
-        private IGameAudioEffect fireAudioEffect;
 
         private bool loadingReady = false;
         private bool gameReady = false;
@@ -137,6 +136,7 @@ namespace TerrainSamples.SceneSkybox
             var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeUI,
+                    InitializeAudio,
                     InitializeSkydom,
                     InitializeLakeBottom,
                     InitializeTorchs,
@@ -185,6 +185,11 @@ namespace TerrainSamples.SceneSkybox
             #endregion
 
             UpdateLayout();
+        }
+        private async Task InitializeAudio()
+        {
+            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            soundEffectsManager.InitializeAudio(resourceAudioString);
         }
         private async Task InitializeSkydom()
         {
@@ -631,7 +636,7 @@ namespace TerrainSamples.SceneSkybox
         }
         private void UpdateTexts()
         {
-            var m = fireAudioEffect.GetOutputMatrix();
+            var m = soundEffectsManager.GetOutputMatrix();
             var ep = movingFire.Manipulator.Position.GetDescription();
             var ev = movingFire.Manipulator.Velocity.GetDescription();
             var lp = Camera.Position.GetDescription();
@@ -762,29 +767,8 @@ namespace TerrainSamples.SceneSkybox
         }
         private void StartSounds()
         {
-            const string sphereSound = "target_balls_single_loop";
-            const string sphereEffect = "Sphere";
-
-            AudioManager.LoadSound(sphereSound, resourceAudioString, "target_balls_single_loop.wav");
-
-            AudioManager.AddEffectParams(
-                sphereEffect,
-                new GameAudioEffectParameters
-                {
-                    SoundName = sphereSound,
-                    IsLooped = true,
-                    UseAudio3D = true,
-                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                    Volume = 0.25f,
-                    EmitterRadius = 6,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            fireAudioEffect = AudioManager.CreateEffectInstance(sphereEffect, movingFire, Camera);
-            fireAudioEffect.Play();
-
-            AudioManager.MasterVolume = 0.5f;
-            AudioManager.Start();
+            soundEffectsManager.Start(0.5f);
+            soundEffectsManager.PlaySphereEffect(movingFire);
         }
     }
 }

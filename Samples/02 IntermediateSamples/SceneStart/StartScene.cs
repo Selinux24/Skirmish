@@ -13,9 +13,8 @@ namespace IntermediateSamples.SceneStart
     class StartScene : Scene
     {
         private const string EmtpyNameString = "Empty";
-        private const string MusicString = "Music";
 
-        private AudioEffectTweener audioTweener;
+        private SoundEffectsManager soundEffectsManager;
 
         private Model backGround = null;
         private UITextArea title = null;
@@ -23,8 +22,6 @@ namespace IntermediateSamples.SceneStart
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-
-        private IGameAudioEffect currentMusic = null;
 
         public StartScene(Game game) : base(game)
         {
@@ -59,8 +56,6 @@ namespace IntermediateSamples.SceneStart
         private async Task InitializeTweener()
         {
             await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
-
-            audioTweener = this.AddAudioEffectTweener();
         }
         private async Task InitializeCursor()
         {
@@ -192,20 +187,8 @@ namespace IntermediateSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            AudioManager.LoadSound(MusicString, "scenestart/resources", "anttisinstrumentals+keepshiningoninstrumental.mp3");
-            AudioManager.AddEffectParams(
-                MusicString,
-                new GameAudioEffectParameters
-                {
-                    DestroyWhenFinished = false,
-                    SoundName = MusicString,
-                    IsLooped = true,
-                    UseAudio3D = true,
-                });
-
-            currentMusic = AudioManager.CreateEffectInstance(MusicString);
-
-            await Task.CompletedTask;
+            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            soundEffectsManager.InitializeAudio("scenestart/resources");
         }
         private void PrepareAssets(LoadResourcesResult res)
         {
@@ -214,11 +197,8 @@ namespace IntermediateSamples.SceneStart
                 res.ThrowExceptions();
             }
 
-            AudioManager.MasterVolume = 1f;
-            AudioManager.Start();
-
-            currentMusic?.Play();
-            audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
+            soundEffectsManager.Start(1f);
+            soundEffectsManager.Play();
 
             backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 

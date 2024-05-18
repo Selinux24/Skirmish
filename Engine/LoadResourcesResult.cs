@@ -30,15 +30,28 @@ namespace Engine
         /// </summary>
         public virtual void ThrowExceptions()
         {
-            var exList = GetExceptions();
-            if (!exList.Any())
+            var aggregate = Flatten();
+            if (aggregate == null)
             {
                 return;
             }
 
+            throw aggregate;
+        }
+        /// <summary>
+        /// Gets the aggregate exception, if any
+        /// </summary>
+        public virtual AggregateException Flatten()
+        {
+            var exList = GetExceptions();
+            if (!exList.Any())
+            {
+                return null;
+            }
+
             var aggregate = new AggregateException($"A load resource task list results in error.", exList);
 
-            throw aggregate.Flatten();
+            return aggregate.Flatten();
         }
         /// <summary>
         /// Gets a list of exception results, if any

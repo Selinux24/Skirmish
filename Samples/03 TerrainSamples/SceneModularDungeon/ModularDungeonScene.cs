@@ -9,7 +9,6 @@ namespace TerrainSamples.SceneModularDungeon
 {
     using Engine;
     using Engine.Animation;
-    using Engine.Audio;
     using Engine.BuiltIn.PostProcess;
     using Engine.Common;
     using Engine.Content;
@@ -36,6 +35,8 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly string dungeonCnfFile;
 
         private UIControlTweener uiTweener;
+        private SoundEffectsManager soundEffectsManager;
+        private DebugDrawers debugDrawers;
 
         private Sprite dungeonMap = null;
         private UIProgressBar pbLevels = null;
@@ -70,33 +71,14 @@ namespace TerrainSamples.SceneModularDungeon
 
         private ModelInstanced human = null;
 
-        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private PrimitiveListDrawer<Line3D> ratDrawer = null;
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
-        private PrimitiveListDrawer<Triangle> obstacleDrawer = null;
-        private PrimitiveListDrawer<Line3D> connectionDrawer = null;
-        private int currentGraph = 0;
-
         private readonly string nmFile = "nm.graph";
         private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
         private readonly List<ObstacleInfo> obstacles = [];
-        private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
 
-        private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
-
-        private string soundDoor = null;
-        private string soundLadder = null;
-        private string soundTorch = null;
-
-        private string[] soundWinds = null;
         private Vector3 windPosition = new(60, 0, -20);
         private bool windCreated = false;
-
-        private string ratSoundMove = null;
-        private string ratSoundTalk = null;
-        private IGameAudioEffect ratSoundInstance = null;
 
         private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
@@ -112,14 +94,6 @@ namespace TerrainSamples.SceneModularDungeon
         private bool levelInitialized = false;
         private bool gameReady = false;
         private GameStates gameState = GameStates.None;
-
-        private AgentType CurrentAgent
-        {
-            get
-            {
-                return currentGraph == 0 ? playerAgentType : ratAgentType;
-            }
-        }
 
         public ModularDungeonScene(Game game, bool isOnePageDungeon, string dungeonDefFile, string dungeonMapFile, string dungeonCnfFile)
             : base(game)
@@ -213,7 +187,9 @@ namespace TerrainSamples.SceneModularDungeon
                 CalcPath(ratAgentType, from, to);
             }
 
-            UpdateGraphDebug(CurrentAgent);
+            debugDrawers.DrawGraph();
+
+            UpdateDebugInfo();
         }
 
         public override void Update(IGameTime gameTime)
@@ -425,44 +401,8 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private async Task InitializeDebug()
         {
-            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = 50000,
-            };
-            graphDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
-            graphDrawer.Visible = false;
-
-            var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
-                Count = 10000,
-            };
-            bboxesDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
-            bboxesDrawer.Visible = false;
-
-            var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
-                Count = 10000,
-            };
-            ratDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
-            ratDrawer.Visible = false;
-
-            var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                DepthEnabled = false,
-                Count = 10000,
-            };
-            obstacleDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
-            obstacleDrawer.Visible = false;
-
-            var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Color = connectionColor,
-                Count = 10000,
-            };
-            connectionDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db5", "DEBUG++ Connections", connectionDrawerDesc);
-            connectionDrawer.Visible = false;
+            debugDrawers = await AddComponent<DebugDrawers>("debugDrawers", "debugDrawers");
+            await debugDrawers.Initialize([playerAgentType, ratAgentType]);
         }
         private async Task InitializeDungeon()
         {
@@ -606,105 +546,8 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private async Task InitializeAudio()
         {
-            AudioManager.MasterVolume = 1;
-            AudioManager.UseMasteringLimiter = true;
-            AudioManager.SetMasteringLimit(15, 1500);
-
-            //Sounds
-            soundDoor = "door";
-            soundLadder = "ladder";
-            AudioManager.LoadSound(soundDoor, Path.Combine(resourcesFolder, resourceAudio), "door.wav");
-            AudioManager.LoadSound(soundLadder, Path.Combine(resourcesFolder, resourceAudio), "ladder.wav");
-
-            string soundWind1 = "wind1";
-            string soundWind2 = "wind2";
-            string soundWind3 = "wind3";
-            AudioManager.LoadSound(soundWind1, Path.Combine(resourcesFolder, resourceAudio), "Wind1_S.wav");
-            AudioManager.LoadSound(soundWind2, Path.Combine(resourcesFolder, resourceAudio), "Wind2_S.wav");
-            AudioManager.LoadSound(soundWind3, Path.Combine(resourcesFolder, resourceAudio), "Wind3_S.wav");
-            soundWinds = [soundWind1, soundWind2, soundWind3];
-
-            ratSoundMove = "mouseMove";
-            ratSoundTalk = "mouseTalk";
-            AudioManager.LoadSound(ratSoundMove, Path.Combine(resourcesFolder, resourceAudio), "mouse1.wav");
-            AudioManager.LoadSound(ratSoundTalk, Path.Combine(resourcesFolder, resourceAudio), "mouse2.wav");
-
-            soundTorch = "torch";
-            AudioManager.LoadSound(soundTorch, Path.Combine(resourcesFolder, resourceAudio), "loop_torch.wav");
-
-            //Effects
-            AudioManager.AddEffectParams(
-                soundDoor,
-                new GameAudioEffectParameters
-                {
-                    SoundName = soundDoor,
-                    DestroyWhenFinished = true,
-                    Volume = 1f,
-                    UseAudio3D = true,
-                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                    EmitterRadius = 3,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            AudioManager.AddEffectParams(
-                soundLadder,
-                new GameAudioEffectParameters
-                {
-                    SoundName = soundLadder,
-                    DestroyWhenFinished = true,
-                    Volume = 1f,
-                    UseAudio3D = true,
-                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                    EmitterRadius = 3,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            for (int i = 0; i < soundWinds.Length; i++)
-            {
-                AudioManager.AddEffectParams(
-                    soundWinds[i],
-                    new GameAudioEffectParameters
-                    {
-                        DestroyWhenFinished = true,
-                        IsLooped = false,
-                        SoundName = soundWinds[i],
-                        Volume = 1f,
-                        UseAudio3D = true,
-                        ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                        EmitterRadius = 15,
-                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                    });
-            }
-
-            AudioManager.AddEffectParams(
-                ratSoundMove,
-                new GameAudioEffectParameters
-                {
-                    SoundName = ratSoundMove,
-                    DestroyWhenFinished = false,
-                    Volume = 1f,
-                    IsLooped = true,
-                    UseAudio3D = true,
-                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                    EmitterRadius = 3,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            AudioManager.AddEffectParams(
-                ratSoundTalk,
-                new GameAudioEffectParameters
-                {
-                    SoundName = ratSoundTalk,
-                    DestroyWhenFinished = true,
-                    Volume = 1f,
-                    IsLooped = false,
-                    UseAudio3D = true,
-                    ReverbPreset = GameAudioReverbPresets.StoneRoom,
-                    EmitterRadius = 3,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-
-            await Task.CompletedTask;
+            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            soundEffectsManager.InitializeAudio(Path.Combine(resourcesFolder, resourceAudio));
         }
         private void LoadAssetsCompleted(LoadResourcesResult res)
         {
@@ -722,7 +565,7 @@ namespace TerrainSamples.SceneModularDungeon
 
                 StartCamera();
 
-                AudioManager.Start();
+                soundEffectsManager.Start(0.5f);
 
                 ChangeToLevel(null);
             }
@@ -796,25 +639,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void UpdateDebugInfo()
         {
-            //Graph
-            bboxesDrawer.Clear();
-
-            //Objects
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance), Color.PaleVioletRed);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance), Color.ForestGreen);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance), Color.Cyan);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance), Color.LightYellow);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance), Color.MediumPurple);
-        }
-        private void UpdateBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
-        {
-            if (!items.Any())
-            {
-                return;
-            }
-
-            var boxes = items.Select(i => i.GetBoundingBox());
-            bboxesDrawer.SetPrimitives(color, Line3D.CreateBoxes(boxes));
+            debugDrawers.DrawScenery(scenery);
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {
@@ -839,7 +664,7 @@ namespace TerrainSamples.SceneModularDungeon
                 o.Obstacle = obb;
             });
 
-            PaintObstacles();
+            debugDrawers.DrawObstacles(obstacles);
         }
 
         private void UpdatePlayerInput()
@@ -905,31 +730,27 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                graphDrawer.Visible = !graphDrawer.Visible;
-                connectionDrawer.Visible = graphDrawer.Visible;
+                debugDrawers.ToggleConnections();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                bboxesDrawer.Visible = !bboxesDrawer.Visible;
+                debugDrawers.ToggleBoundingBoxes();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                obstacleDrawer.Visible = !obstacleDrawer.Visible;
+                debugDrawers.ToggleObstacles();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F4))
             {
-                ratDrawer.Visible = !ratDrawer.Visible;
+                debugDrawers.ToggleRat();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F))
             {
-                //Frustum
-                var frustum = Line3D.CreateFrustum(Camera.Frustum);
-
-                bboxesDrawer.SetPrimitives(Color.White, frustum);
+                debugDrawers.DrawCamera(Camera);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Oem5))
@@ -963,10 +784,10 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Game.Input.KeyJustReleased(Keys.G))
             {
-                currentGraph++;
-                currentGraph %= 2;
+                debugDrawers.SetNextAgentIndex();
+                debugDrawers.DrawGraph();
 
-                UpdateGraphDebug(CurrentAgent);
+                UpdateDebugInfo();
             }
         }
         private void UpdateRatInput()
@@ -1006,7 +827,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (!windCreated)
             {
-                CreateWind(0);
+                CreateWind();
 
                 windCreated = true;
             }
@@ -1054,8 +875,8 @@ namespace TerrainSamples.SceneModularDungeon
                     rat.Visible = false;
                     ratController.Clear();
 
-                    ratSoundInstance?.Pause();
-                    RatTalkPlay();
+                    soundEffectsManager.StopRatMove();
+                    soundEffectsManager.PlayRatTalk(rat);
                 }
             }
 
@@ -1074,44 +895,38 @@ namespace TerrainSamples.SceneModularDungeon
                 {
                     ratController.UpdateManipulator(gameTime, rat.Manipulator);
 
-                    ratSoundInstance?.Play();
-                    RatTalkPlay();
+                    soundEffectsManager.PlayRatMove();
+                    soundEffectsManager.PlayRatTalk(rat);
                 }
             }
 
-            if (rat.Visible && ratDrawer.Visible)
+            if (rat.Visible)
             {
-                var bbox = rat.GetBoundingBox();
-
-                ratDrawer.SetPrimitives(Color.White, Line3D.CreateBox(bbox));
+                debugDrawers.DrawModel(rat);
             }
         }
         private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)
         {
             var path = FindPath(agent, from, to);
-            if (path?.Count > 0)
+            if (!(path?.Count > 0))
             {
-                path.InsertControlPoint(0, from, Vector3.Up);
-                path.AddControlPoint(to, Vector3.Up);
-
-                ratDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.Positions));
-
-                ratController.Follow(new NormalPath(path.Positions, path.Normals));
-                ratController.MaximumSpeed = ratAgentType.Velocity;
-                rat.Visible = true;
-                rat.AnimationController.Start(0);
-
-                ratActive = true;
-                ratTime = nextRatTime;
-
-                return true;
+                return false;
             }
 
-            return false;
-        }
-        private void RatTalkPlay()
-        {
-            AudioManager.CreateEffectInstance(ratSoundTalk, rat, Camera)?.Play();
+            path.InsertControlPoint(0, from, Vector3.Up);
+            path.AddControlPoint(to, Vector3.Up);
+
+            ratController.Follow(new NormalPath(path.Positions, path.Normals));
+            ratController.MaximumSpeed = ratAgentType.Velocity;
+            rat.Visible = true;
+            rat.AnimationController.Start(0);
+
+            ratActive = true;
+            ratTime = nextRatTime;
+
+            debugDrawers.DrawPath(path);
+
+            return true;
         }
         private void UpdateEntities()
         {
@@ -1271,13 +1086,8 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 Task.Run(async () =>
                 {
-                    var effect = AudioManager.CreateEffectInstance(soundDoor, item.Instance, Camera);
-                    if (effect != null)
-                    {
-                        effect.Play();
-
-                        await Task.Delay(effect.Duration);
-                    }
+                    var duration = soundEffectsManager.PlayDoor(item.Instance);
+                    await Task.Delay(duration);
 
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
@@ -1288,7 +1098,7 @@ namespace TerrainSamples.SceneModularDungeon
                     {
                         Game.SetScene<SceneStart.StartScene>();
                     }
-                });
+                }).ConfigureAwait(false);
             }
         }
         private void UpdateEntityTrigger(Item item)
@@ -1303,7 +1113,7 @@ namespace TerrainSamples.SceneModularDungeon
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
-                    AudioManager.CreateEffectInstance(soundLadder)?.Play();
+                    soundEffectsManager.PlayLadder(item.Instance);
                     scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }
@@ -1440,11 +1250,11 @@ namespace TerrainSamples.SceneModularDungeon
             Lights.ClearPointLights();
             Lights.ClearSpotLights();
 
-            AudioManager.Stop();
-            AudioManager.ClearEffects();
+            soundEffectsManager.Stop();
 
             ClearNPCs();
-            ClearDebugDrawers();
+
+            debugDrawers.Clear();
 
             SetSelectedItem(null);
 
@@ -1469,19 +1279,14 @@ namespace TerrainSamples.SceneModularDungeon
 
             ConfigureNavigationGraph();
 
-            EnqueueNavigationGraphUpdate();
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
         private void ChangeToLevelResults(LoadResourcesResult res)
         {
-            try
+            if (!res.Completed)
             {
-                if (!res.Completed)
-                {
-                    res.ThrowExceptions();
-                }
-            }
-            catch (Exception ex)
-            {
+                var ex = res.Flatten();
+
                 Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
@@ -1501,7 +1306,7 @@ namespace TerrainSamples.SceneModularDungeon
 
                 Lights.Add(torch);
 
-                AudioManager.Start();
+                soundEffectsManager.Start(0.5f);
 
                 InitializePostProcessing();
 
@@ -1544,7 +1349,8 @@ namespace TerrainSamples.SceneModularDungeon
                     AgentActionTypes.All);
             }
 
-            PaintConnections();
+            var conns = PathFinderDescription.GetConnections();
+            debugDrawers.DrawConnections(conns);
         }
         private void StartEntities()
         {
@@ -1589,7 +1395,7 @@ namespace TerrainSamples.SceneModularDungeon
         private void StartEntitiesAudio()
         {
             //Rat sound
-            ratSoundInstance = AudioManager.CreateEffectInstance(ratSoundMove, rat, Camera);
+            soundEffectsManager.CreateRatSounds(rat);
 
             //Torchs
             StartEntitiesAudioTorchs();
@@ -1603,26 +1409,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .GetObjectsByName("Dn_Torch")
                 .Select(o => o.Instance);
 
-            int index = 0;
-            foreach (var item in torchs)
-            {
-                string effectName = $"torch{index++}";
-
-                AudioManager.AddEffectParams(
-                    effectName,
-                    new GameAudioEffectParameters
-                    {
-                        SoundName = soundTorch,
-                        DestroyWhenFinished = false,
-                        Volume = 0.05f,
-                        IsLooped = true,
-                        UseAudio3D = true,
-                        EmitterRadius = 2,
-                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                    });
-
-                AudioManager.CreateEffectInstance(effectName, item, Camera)?.Play();
-            }
+            soundEffectsManager.CreateTorchEmitters(torchs);
         }
         private void StartEntitiesAudioBigFires()
         {
@@ -1632,26 +1419,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .. scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Instance),
             ];
 
-            int index = 0;
-            foreach (var item in fires)
-            {
-                string effectName = $"bigFire{index++}";
-
-                AudioManager.AddEffectParams(
-                    effectName,
-                    new GameAudioEffectParameters
-                    {
-                        SoundName = soundTorch,
-                        DestroyWhenFinished = false,
-                        Volume = 1,
-                        IsLooped = true,
-                        UseAudio3D = true,
-                        EmitterRadius = 5,
-                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                    });
-
-                AudioManager.CreateEffectInstance(effectName, item, Camera)?.Play();
-            }
+            soundEffectsManager.CreateBigFireEmitters(fires);
         }
         private void StartEntitiesObstacles()
         {
@@ -1688,7 +1456,7 @@ namespace TerrainSamples.SceneModularDungeon
                 }
             }
 
-            PaintObstacles();
+            debugDrawers.DrawObstacles(obstacles);
         }
 
         private void ClearNPCs()
@@ -1699,131 +1467,23 @@ namespace TerrainSamples.SceneModularDungeon
 
             human.Visible = false;
         }
-        private void ClearDebugDrawers()
+
+        private void CreateWind()
         {
-            bboxesDrawer.Clear();
-            ratDrawer.Clear();
-            graphDrawer.Clear();
-            obstacleDrawer.Clear();
-            connectionDrawer.Clear();
-        }
-
-        private void PaintObstacles()
-        {
-            obstacleDrawer.Clear(obstacleColor);
-
-            foreach (var obstacle in obstacles.Select(o => o.Obstacle))
-            {
-                IEnumerable<Triangle> obstacleTris = null;
-
-                if (obstacle is BoundingCylinder bc)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(bc, 32);
-                }
-                else if (obstacle is BoundingBox bbox)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(bbox);
-                }
-                else if (obstacle is OrientedBoundingBox obb)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(obb);
-                }
-
-                if (obstacleTris?.Any() == true)
-                {
-                    obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
-                }
-            }
-        }
-        private void PaintConnections()
-        {
-            connectionDrawer.Clear(connectionColor);
-
-            var conns = PathFinderDescription.GetConnections();
-
-            foreach (var conn in conns)
-            {
-                var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
-                connectionDrawer.AddPrimitives(connectionColor, arclines);
-
-                var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
-                connectionDrawer.AddPrimitives(connectionColor, cirlinesF);
-
-                if (conn.BiDirectional)
-                {
-                    var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
-                    connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
-                }
-            }
-        }
-
-        private void UpdateGraphDebug(AgentType agent)
-        {
-            var nodes = BuildGraphNodeDebugAreas(agent);
-
-            graphDrawer.Clear();
-            graphDrawer.SetPrimitives(nodes);
-
-            UpdateDebugInfo();
-        }
-        private Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(AgentType agent)
-        {
-            var nodes = GetNodes(agent).OfType<GraphNode>();
-            if (!nodes.Any())
-            {
-                return [];
-            }
-
-            Dictionary<Color4, IEnumerable<Triangle>> res = [];
-
-            foreach (var node in nodes)
-            {
-                var color = Helper.IntToCol(node.Id, 128);
-                var tris = node.Triangles;
-
-                if (!res.TryGetValue(color, out var value))
-                {
-                    value = new List<Triangle>(tris);
-                    res.Add(color, value);
-                }
-                else
-                {
-                    ((List<Triangle>)value).AddRange(tris);
-                }
-            }
-
-            return res;
-        }
-
-        private void CreateWind(int index)
-        {
-            int duration = 100;
-
             Manipulator3D man = new();
             man.SetPosition(windPosition);
 
-            var soundEffect = soundWinds[index];
+            var windEffectDuration = soundEffectsManager.PlayWind(man);
 
-            var windInstance = AudioManager.CreateEffectInstance(soundEffect, man, Camera);
-            if (windInstance != null)
-            {
-                windInstance.Play();
-
-                float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
-                duration = (int)(windInstance.Duration.TotalMilliseconds * durationVariation);
-            }
-
-            index = Helper.RandomGenerator.Next(0, soundWinds.Length + 1);
-            index %= soundWinds.Length;
+            float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
+            int duration = (int)(windEffectDuration.TotalMilliseconds * durationVariation);
 
             Task.Run(async () =>
             {
-                await Task.Delay(duration);
+                await Task.Delay(Math.Max(100, duration));
 
-                if (AudioManager != null)
-                {
-                    CreateWind(index);
-                }
+                CreateWind();
+
             }).ConfigureAwait(false);
         }
 
