@@ -537,8 +537,8 @@ namespace BasicSamples.SceneMaterials
             spheres1.Active = false;
             spheres2.Active = false;
 
-            Components.RemoveComponent(spheres1);
-            Components.RemoveComponent(spheres2);
+            RemoveComponent(spheres1);
+            RemoveComponent(spheres2);
 
             currentAlgorithm++;
             currentAlgorithm %= algorithmCount;

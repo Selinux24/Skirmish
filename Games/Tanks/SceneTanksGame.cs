@@ -956,7 +956,7 @@ namespace Tanks
 
                 InitializePlayers();
 
-                Components.RemoveComponent(terrain);
+                RemoveComponent(terrain);
                 decalDrawer.Clear();
 
                 loadingBar.ProgressValue = 0;

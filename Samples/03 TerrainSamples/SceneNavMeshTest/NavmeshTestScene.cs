@@ -1441,7 +1441,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     }
 
                     tmp.Visible = false;
-                    Components.RemoveComponent(tmp);
+                    RemoveComponent(tmp);
                 });
 
             LoadResources(group);

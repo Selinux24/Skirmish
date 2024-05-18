@@ -111,18 +111,16 @@ namespace IntermediateSamples.SceneStart
             var panTransforms = await AddButtonPanel<SceneTransforms.TransformsScene>(buttonDesc, "Transforms");
             var panExit = await AddButtonExit(exitDesc, "Exit");
 
-            int index = 0;
-
             mainPanel.AddChild(panSimpleAnimation);
             mainPanel.AddChild(panTransforms);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>($"Empty{++index}", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", EmtpyNameString, emptyDesc));
             mainPanel.AddChild(panMixamo);
             mainPanel.AddChild(panDeferredLights);
 
             mainPanel.AddChild(panSmoothTransitions);
             mainPanel.AddChild(panAnimationParts);
             mainPanel.AddChild(panInstancing);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>($"Empty{++index}", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty2", EmtpyNameString, emptyDesc));
             mainPanel.AddChild(panExit);
         }
         private async Task<UIPanel> AddButtonPanel<T>(UIButtonDescription desc, string text) where T : Scene

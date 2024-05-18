@@ -121,8 +121,6 @@ namespace Engine
                     form.RenderHeight);
             }
 
-            Components.Updated += ComponentsUpdated;
-
             Lights = SceneLights.CreateDefault(this);
         }
         /// <summary>
@@ -158,12 +156,8 @@ namespace Engine
             Camera?.Dispose();
             Camera = null;
 
-            if (Components != null)
-            {
-                Components.Updated -= ComponentsUpdated;
-                Components.Dispose();
-                Components = null;
-            }
+            Components?.Dispose();
+            Components = null;
         }
 
         /// <summary>
@@ -369,7 +363,7 @@ namespace Engine
         {
             var component = await CreateComponent<TObj, TDescription>(id, name, description);
 
-            Components.AddComponent(component, usage, layer);
+            Components.AddComponent(component, usage, layer, ComponentsUpdated);
 
             return component;
         }
@@ -517,15 +511,34 @@ namespace Engine
                 throw new ArgumentNullException(nameof(component));
             }
 
-            Components.AddComponent(component, usage, layer);
+            Components.AddComponent(component, usage, layer, ComponentsUpdated);
 
             return await Task.FromResult(component);
         }
 
         /// <summary>
+        /// Removes the specified component
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="component">Component instance</param>
+        public void RemoveComponent<TObj>(TObj component) where TObj : ISceneObject
+        {
+            Components.RemoveComponent(component, ComponentsUpdated);
+        }
+        /// <summary>
+        /// Removes the specified component list
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="components">Component instance list</param>
+        public void RemoveComponents<TObj>(IEnumerable<TObj> components) where TObj : ISceneObject
+        {
+            Components.RemoveComponents(components.OfType<ISceneObject>(), ComponentsUpdated);
+        }
+
+        /// <summary>
         /// Components updated event
         /// </summary>
-        private void ComponentsUpdated(object sender, EventArgs e)
+        private void ComponentsUpdated(IEnumerable<ISceneObject> components)
         {
             Renderer?.UpdateGlobals();
         }

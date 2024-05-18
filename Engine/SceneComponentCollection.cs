@@ -11,11 +11,6 @@ namespace Engine
     public class SceneComponentCollection : IDisposable
     {
         /// <summary>
-        /// Collection updated event
-        /// </summary>
-        public event SceneComponentCollectionUpdatedEventHandler Updated;
-
-        /// <summary>
         /// Components sorting
         /// </summary>
         /// <param name="p1">First component</param>
@@ -116,8 +111,9 @@ namespace Engine
         /// <param name="component">Component</param>
         /// <param name="usage">Usage</param>
         /// <param name="layer">Processing layer</param>
+        /// <param name="callback">Callback</param>
         /// <returns>Returns the added component</returns>
-        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int layer)
+        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int layer, Action<IEnumerable<ISceneObject>> callback = null)
         {
             if (component == null)
             {
@@ -151,14 +147,14 @@ namespace Engine
             }
             finally
             {
-                FireUpdated(true, [component]);
+                callback?.Invoke([component]);
             }
         }
         /// <summary>
         /// Removes and disposes the specified component
         /// </summary>
         /// <param name="component">Component</param>
-        public void RemoveComponent(ISceneObject component)
+        public void RemoveComponent(ISceneObject component, Action<IEnumerable<ISceneObject>> callback = null)
         {
             if (component == null)
             {
@@ -178,7 +174,7 @@ namespace Engine
             }
             finally
             {
-                FireUpdated(false, [component]);
+                callback?.Invoke([component]);
             }
 
             if (component is IDisposable disposable)
@@ -190,7 +186,7 @@ namespace Engine
         /// Removes and disposes the specified component list
         /// </summary>
         /// <param name="components">List of components</param>
-        public void RemoveComponents(IEnumerable<ISceneObject> components)
+        public void RemoveComponents(IEnumerable<ISceneObject> components, Action<IEnumerable<ISceneObject>> callback = null)
         {
             if (components?.Any() != true)
             {
@@ -206,28 +202,12 @@ namespace Engine
             }
             finally
             {
-                FireUpdated(false, components);
+                callback?.Invoke(components);
             }
 
             foreach (var disposable in components.OfType<IDisposable>())
             {
                 disposable.Dispose();
-            }
-        }
-        /// <summary>
-        /// Fires the updated collection event
-        /// </summary>
-        /// <param name="added">Added or removed</param>
-        /// <param name="components">Component list</param>
-        private void FireUpdated(bool added, IEnumerable<ISceneObject> components)
-        {
-            if (added)
-            {
-                Updated?.Invoke(this, new SceneComponentCollectionUpdatedEventArgs() { Added = components });
-            }
-            else
-            {
-                Updated?.Invoke(this, new SceneComponentCollectionUpdatedEventArgs() { Removed = components });
             }
         }
 
@@ -552,34 +532,6 @@ namespace Engine
             return internalComponents
                 .Where(c => c.Owner == owner)
                 .AsEnumerable();
-        }
-    }
-
-    /// <summary>
-    /// Updated event handler
-    /// </summary>
-    public delegate void SceneComponentCollectionUpdatedEventHandler(object sender, SceneComponentCollectionUpdatedEventArgs e);
-
-    /// <summary>
-    /// Updated event arguments
-    /// </summary>
-    public class SceneComponentCollectionUpdatedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Added components
-        /// </summary>
-        public IEnumerable<ISceneObject> Added { get; set; }
-        /// <summary>
-        /// Removed components
-        /// </summary>
-        public IEnumerable<ISceneObject> Removed { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public SceneComponentCollectionUpdatedEventArgs() : base()
-        {
-
         }
     }
 }

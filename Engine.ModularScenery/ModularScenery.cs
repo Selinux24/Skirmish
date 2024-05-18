@@ -192,8 +192,8 @@ namespace Engine.Modular
             ClearCache();
 
             //Removes previous level components from scene
-            Scene.Components.RemoveComponents(assets.Select(a => a.Value));
-            Scene.Components.RemoveComponents(objects.Select(o => o.Value));
+            Scene.RemoveComponents(assets.Select(a => a.Value));
+            Scene.RemoveComponents(objects.Select(o => o.Value));
 
             //Clear internal lists and data
             assets.Clear();
