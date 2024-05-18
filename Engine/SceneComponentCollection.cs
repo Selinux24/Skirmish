@@ -279,7 +279,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage)
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
                 .AsEnumerable();
         }
         /// <summary>
@@ -298,7 +298,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage && (predicate?.Invoke(c) ?? true))
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c) ?? true))
                 .AsEnumerable();
         }
         /// <summary>
@@ -317,7 +317,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where((c, i) => c.Usage == usage && (predicate?.Invoke(c, i) ?? true))
+                .Where((c, i) => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c, i) ?? true))
                 .AsEnumerable();
         }
 
@@ -361,7 +361,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage)
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
                 .OfType<T>()
                 .ToArray();
         }
@@ -382,7 +382,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage)
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
                 .OfType<T>()
                 .Where(predicate)
                 .ToArray();
@@ -421,7 +421,7 @@ namespace Engine
             }
 
             return internalComponents
-                .FirstOrDefault(c => c.Usage == usage);
+                .FirstOrDefault(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage));
         }
         /// <summary>
         /// Gets the first component in the collection which has the specified usage flag, and validates de predicate
@@ -439,7 +439,7 @@ namespace Engine
             }
 
             return internalComponents
-                .FirstOrDefault(c => c.Usage == usage && (predicate?.Invoke(c) ?? true));
+                .FirstOrDefault(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c) ?? true));
         }
 
         /// <summary>
@@ -481,7 +481,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage)
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
                 .OfType<T>()
                 .FirstOrDefault();
         }
@@ -502,7 +502,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Where(c => c.Usage == usage)
+                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
                 .OfType<T>()
                 .FirstOrDefault(predicate);
         }

@@ -55,15 +55,15 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 var background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
 
                 textArea = await CreateText();
-                background.AddChild(textArea);
+                background.AddChild(textArea, true);
             }
             else
             {
                 textArea = await CreateText();
-                AddChild(textArea);
+                AddChild(textArea, true);
             }
         }
         private async Task<Sprite> CreateBackground()

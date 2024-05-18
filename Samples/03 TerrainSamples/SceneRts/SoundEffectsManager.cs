@@ -302,7 +302,7 @@ namespace TerrainSamples.SceneRts
 
         public void PlayForest()
         {
-            if (heliEffectInstance == null)
+            if (forestEffectInstance == null)
             {
                 forestEffectInstance = audioManager.CreateEffectInstance(forestEffect);
                 forestEffectInstance.Play();
@@ -317,13 +317,13 @@ namespace TerrainSamples.SceneRts
                 heliEffectInstance.Play();
             }
         }
-        public void PlayHelicopterDestroyed(ITransform emitter)
-        {
-            audioManager.CreateEffectInstance(heliDestroyedEffect, emitter, Scene.Camera)?.Play();
-        }
         public void StopHelicopterMoving()
         {
             heliEffectInstance?.Stop();
+        }
+        public void PlayHelicopterDestroyed(ITransform emitter)
+        {
+            audioManager.CreateEffectInstance(heliDestroyedEffect, emitter, Scene.Camera)?.Play();
         }
 
         public void PlayTank1Moving(ITransformable3D tankP1)

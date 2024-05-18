@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface sprite cursor
     /// </summary>
-    public sealed class UICursor : UIControl<UICursorDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UICursor(Scene scene, string id, string name) : UIControl<UICursorDescription>(scene, id, name)
     {
         /// <summary>
         /// Sprite
@@ -28,18 +34,6 @@ namespace Engine.UI
         /// </summary>
         public Vector2 Delta { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UICursor(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task ReadAssets(UICursorDescription description)
         {
@@ -50,7 +44,7 @@ namespace Engine.UI
             EventsEnabled = false;
 
             cursorSprite = await CreateSprite();
-            AddChild(cursorSprite, false);
+            AddChild(cursorSprite);
         }
         private async Task<Sprite> CreateSprite()
         {

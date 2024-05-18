@@ -63,16 +63,16 @@ namespace Engine.UI
             TwoStateButton = Description.TwoStateButton;
 
             buttonReleased = await CreateButtonReleased();
-            AddChild(buttonReleased);
+            AddChild(buttonReleased, true);
 
             if (Description.TwoStateButton)
             {
                 buttonPressed = await CreateButtonPressed();
-                AddChild(buttonPressed);
+                AddChild(buttonPressed, true);
             }
 
             Caption = await CreateCaption();
-            AddChild(Caption);
+            AddChild(Caption, true);
         }
         private async Task<Sprite> CreateButtonReleased()
         {

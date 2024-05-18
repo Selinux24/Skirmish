@@ -220,7 +220,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             foreach (var b in mainBtns)
             {
-                mainPanel.AddChild(b, false);
+                mainPanel.AddChild(b);
             }
 
             var enumValues = Enum.GetValues<GraphDebugTypes>();
@@ -252,7 +252,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     stateManager.StartState(States.Default);
 
                 });
-                debugPanel.AddChild(btn, false);
+                debugPanel.AddChild(btn);
             }
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Action clickAction = null)

@@ -6,7 +6,13 @@ namespace Engine.UI
     /// <summary>
     /// UI dialog
     /// </summary>
-    public sealed class UIDialog : UIControl<UIDialogDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIDialog(Scene scene, string id, string name) : UIControl<UIDialogDescription>(scene, id, name)
     {
         /// <summary>
         /// Close button
@@ -43,33 +49,21 @@ namespace Engine.UI
         /// </summary>
         public event EventHandler OnCloseHandler;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIDialog(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task ReadAssets(UIDialogDescription description)
         {
             await base.ReadAssets(description);
 
             var backPanel = await CreateBackpanel();
-            AddChild(backPanel);
+            AddChild(backPanel, true);
 
             dialogText = await CreateDialogText();
-            backPanel.AddChild(dialogText);
+            backPanel.AddChild(dialogText, true);
 
             if (Description.DialogButtons.HasFlag(UIDialogButtons.Accept))
             {
                 butAccept = await CreateAcceptButton();
-                backPanel.AddChild(butAccept, false);
+                backPanel.AddChild(butAccept);
 
                 buttonAreaHeight = butAccept.Height + 10;
             }
@@ -79,12 +73,12 @@ namespace Engine.UI
                 if (Description.DialogButtons.HasFlag(UIDialogButtons.Cancel))
                 {
                     butClose = await CreateCancelButton();
-                    backPanel.AddChild(butClose, false);
+                    backPanel.AddChild(butClose);
                 }
                 else
                 {
                     butClose = await CreateCloseButton();
-                    backPanel.AddChild(butClose, false);
+                    backPanel.AddChild(butClose);
                 }
 
                 buttonAreaHeight = butClose.Height + 10;

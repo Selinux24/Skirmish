@@ -122,7 +122,7 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
             }
 
             SetGridLayout(Description.GridLayout);

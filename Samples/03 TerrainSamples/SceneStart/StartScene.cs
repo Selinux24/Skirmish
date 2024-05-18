@@ -254,7 +254,7 @@ namespace TerrainSamples.SceneStart
                     }
                 };
 
-                modularDungeonTabs.TabPanels[i].AddChild(button);
+                modularDungeonTabs.TabPanels[i].AddChild(button, true);
             }
 
             var buttonBasicDesc = UIButtonDescription.Default(largeFont, "basicdungeon/basicdungeon.png");
@@ -271,7 +271,7 @@ namespace TerrainSamples.SceneStart
                     Game.SetScene(new SceneModularDungeon.ModularDungeonScene(Game, false, "basicdungeon", null, null), SceneModes.DeferredLightning);
                 }
             };
-            modularDungeonTabs.TabPanels[basicIndex].AddChild(buttonBasic);
+            modularDungeonTabs.TabPanels[basicIndex].AddChild(buttonBasic, true);
 
             var backButton = modularDungeonTabs.TabButtons[backIndex];
             backButton.MouseClick += (s, o) =>

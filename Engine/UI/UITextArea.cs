@@ -327,13 +327,13 @@ namespace Engine.UI
             if (Scroll.HasFlag(ScrollModes.Vertical))
             {
                 sbVertical = await CreateScrollBar(ScrollModes.Vertical);
-                AddChild(sbVertical, false);
+                AddChild(sbVertical);
             }
 
             if (Scroll.HasFlag(ScrollModes.Horizontal))
             {
                 sbHorizontal = await CreateScrollBar(ScrollModes.Horizontal);
-                AddChild(sbHorizontal, false);
+                AddChild(sbHorizontal);
             }
 
             GrowControl();

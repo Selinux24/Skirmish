@@ -1,6 +1,4 @@
 ﻿using Engine;
-using Engine.Audio;
-using Engine.Audio.Tween;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -104,86 +102,69 @@ namespace IntermediateSamples.SceneStart
 
             var emptyDesc = SpriteDescription.Default("scenestart/resources/empty.png");
 
-            var panSimpleAnimation = await AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
+            var panSimpleAnimation = await AddButtonPanel<SceneSimpleAnimation.SimpleAnimationScene>(buttonDesc, "Simple Animation");
+            var panAnimationParts = await AddButtonPanel<SceneAnimationParts.AnimationPartsScene>(buttonDesc, "Animation Parts");
+            var panSmoothTransitions = await AddButtonPanel<SceneSmoothTransitions.SmoothTransitionsScene>(buttonDesc, "Smooth Transitions");
+            var panMixamo = await AddButtonPanel<SceneMixamo.MixamoScene>(buttonDesc, "Mixamo Models");
+            var panDeferredLights = await AddButtonPanel<SceneDeferredLights.DeferredLightsScene>(buttonDesc, "Deferred Lighting");
+            var panInstancing = await AddButtonPanel<SceneInstancing.InstancingScene>(buttonDesc, "Instancing");
+            var panTransforms = await AddButtonPanel<SceneTransforms.TransformsScene>(buttonDesc, "Transforms");
+            var panExit = await AddButtonExit(exitDesc, "Exit");
 
-                Game.SetScene<SceneSimpleAnimation.SimpleAnimationScene>();
-            });
-            var panAnimationParts = await AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
+            int index = 0;
 
-                Game.SetScene<SceneAnimationParts.AnimationPartsScene>();
-            });
-            var panSmoothTransitions = await AddButtonPanel(buttonDesc, "Smooth Transitions", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
+            mainPanel.AddChild(panSimpleAnimation);
+            mainPanel.AddChild(panTransforms);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>($"Empty{++index}", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panMixamo);
+            mainPanel.AddChild(panDeferredLights);
 
-                Game.SetScene<SceneSmoothTransitions.SmoothTransitionsScene>();
-            });
-            var panMixamo = await AddButtonPanel(buttonDesc, "Mixamo Models", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
-
-                Game.SetScene<SceneMixamo.MixamoScene>();
-            });
-            var panDeferredLights = await AddButtonPanel(buttonDesc, "Deferred Lighting", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
-
-                Game.SetScene<SceneDeferredLights.DeferredLightsScene>(SceneModes.DeferredLightning);
-            });
-            var panInstancing = await AddButtonPanel(buttonDesc, "Instancing", (sender, args) =>
-            {
-                if (!args.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
-
-                Game.SetScene<SceneInstancing.InstancingScene>();
-            });
-            var panExit = await AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
-
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", EmtpyNameString, emptyDesc), false);
-            mainPanel.AddChild(panSimpleAnimation, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", EmtpyNameString, emptyDesc), false);
-            mainPanel.AddChild(panMixamo, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", EmtpyNameString, emptyDesc), false);
-            mainPanel.AddChild(panDeferredLights, false);
-
-            mainPanel.AddChild(panSmoothTransitions, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", EmtpyNameString, emptyDesc), false);
-            mainPanel.AddChild(panAnimationParts, false);
-            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty6", EmtpyNameString, emptyDesc), false);
-            mainPanel.AddChild(panInstancing, false);
-            mainPanel.AddChild(panExit, false);
+            mainPanel.AddChild(panSmoothTransitions);
+            mainPanel.AddChild(panAnimationParts);
+            mainPanel.AddChild(panInstancing);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>($"Empty{++index}", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panExit);
         }
-        private async Task<UIPanel> AddButtonPanel(UIButtonDescription desc, string text, MouseEventHandler buttonJustReleased)
+        private async Task<UIPanel> AddButtonPanel<T>(UIButtonDescription desc, string text) where T : Scene
         {
-            var panel = await CreateComponent<UIPanel, UIPanelDescription>($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
+            var button = await CreateButton(desc, text, (sender, args) =>
+            {
+                if (!args.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
 
-            var button = await CreateComponent<UIButton, UIButtonDescription>($"MainPanel.Button.{text}", $"MainPanel.Button.{text}", desc);
-            button.Caption.Text = text;
-            button.MouseClick += buttonJustReleased;
-            panel.AddChild(button);
+                Game.SetScene<T>();
+            });
+
+            var panel = await CreatePanel(text);
+            panel.AddChild(button, true);
 
             return panel;
+        }
+        private async Task<UIPanel> AddButtonExit(UIButtonDescription desc, string text)
+        {
+            var button = await CreateButton(desc, text, (sender, args) =>
+            {
+                Game.Exit();
+            });
+
+            var panel = await CreatePanel(text);
+            panel.AddChild(button, true);
+
+            return panel;
+        }
+        private async Task<UIPanel> CreatePanel(string text)
+        {
+            return await CreateComponent<UIPanel, UIPanelDescription>($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
+        }
+        private async Task<UIButton> CreateButton(UIButtonDescription desc, string text, MouseEventHandler mouseClickHandler)
+        {
+            var button = await CreateComponent<UIButton, UIButtonDescription>($"MainPanel.Button.{text}", $"MainPanel.Button.{text}", desc);
+            button.Caption.Text = text;
+            button.MouseClick += mouseClickHandler;
+
+            return button;
         }
         private async Task InitializeMusic()
         {

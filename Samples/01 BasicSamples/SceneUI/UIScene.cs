@@ -192,7 +192,7 @@ namespace BasicSamples.SceneUI
             };
             textArea = await CreateComponent<UITextArea, UITextAreaDescription>("StaticPanel.Text", "StaticPanel.Text", descText);
 
-            staticPan.AddChild(textArea);
+            staticPan.AddChild(textArea, true);
         }
         private async Task InitializeDynamicPan()
         {
@@ -261,8 +261,8 @@ namespace BasicSamples.SceneUI
 
             var textMapped = await CreateComponent<UITextArea, UITextAreaDescription>("DynamicPanel.MaraText", "DynamicPanel.MaraText", descText);
 
-            dynamicPan.AddChild(textMapped);
-            dynamicPan.AddChild(butClose, false);
+            dynamicPan.AddChild(textMapped, true);
+            dynamicPan.AddChild(butClose);
         }
         private async Task InitializeButtonTest()
         {
@@ -310,7 +310,7 @@ namespace BasicSamples.SceneUI
             scrollTextArea = await CreateComponent<UITextArea, UITextAreaDescription>("scrollText", "scrollText", areaDesc);
             scrollTextArea.Text = Properties.Resources.Lorem;
 
-            panel.AddChild(scrollTextArea);
+            panel.AddChild(scrollTextArea, true);
         }
         private async Task LoadControlsCompleted(LoadResourcesResult res)
         {

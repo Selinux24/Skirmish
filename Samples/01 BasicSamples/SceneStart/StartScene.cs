@@ -130,7 +130,7 @@ namespace BasicSamples.SceneStart
             exitButtonDesc.StartsVisible = false;
 
             await CreateButton("ButtonExit", exitButtonDesc, "Exit", 'E', ExitButtonClick);
-            buttonPanel.AddChildren(sceneButtons, false);
+            buttonPanel.AddChildren(sceneButtons);
         }
         private async Task<UIButton> CreateButton(string name, UIButtonDescription desc, string title, char keyChar, MouseEventHandler onClick)
         {

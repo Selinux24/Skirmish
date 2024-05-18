@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine
 {
     /// <summary>
     /// Scene object usages enumeration
     /// </summary>
+    [Flags]
     public enum SceneObjectUsages
     {
         /// <summary>
@@ -21,10 +23,10 @@ namespace Engine
         /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 3,
+        Agent = 4,
         /// <summary>
         /// User interface
         /// </summary>
-        UI = 4,
+        UI = 8,
     }
 }

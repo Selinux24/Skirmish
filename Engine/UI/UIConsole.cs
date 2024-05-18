@@ -9,7 +9,13 @@ namespace Engine.UI
     /// <summary>
     /// Console
     /// </summary>
-    public sealed class UIConsole : UIControl<UIConsoleDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIConsole(Scene scene, string id, string name) : UIControl<UIConsoleDescription>(scene, id, name)
     {
         /// <summary>
         /// Log lines
@@ -64,18 +70,6 @@ namespace Engine.UI
         /// </summary>
         public TimeSpan UpdateInterval { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIConsole(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
         public override async Task ReadAssets(UIConsoleDescription description)
         {
@@ -92,15 +86,15 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 var background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
 
                 textArea = await CreateText();
-                background.AddChild(textArea);
+                background.AddChild(textArea, true);
             }
             else
             {
                 textArea = await CreateText();
-                AddChild(textArea);
+                AddChild(textArea, true);
             }
         }
         private async Task<Sprite> CreateBackground()

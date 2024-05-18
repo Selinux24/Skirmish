@@ -323,9 +323,9 @@ namespace Tanks
 
             dialogText = await CreateComponent<UITextArea, UITextAreaDescription>("DialogText", "DialogText", descText);
 
-            dialog.AddChild(dialogText);
-            dialog.AddChild(dialogCancel, false);
-            dialog.AddChild(dialogAccept, false);
+            dialog.AddChild(dialogText, true);
+            dialog.AddChild(dialogCancel);
+            dialog.AddChild(dialogAccept);
             dialog.Visible = false;
             dialog.EventsEnabled = true;
         }
@@ -1740,7 +1740,7 @@ You will lost all the game progress.",
                             if (Shooter.Intersects(IntersectDetectionMode.Mesh, tree, IntersectDetectionMode.Mesh))
                             {
                                 //Find collision vector
-                                var collisionVector = Shooter.Manipulator.Position - tree.Manipulator.Position;
+                                var collisionVector = tree.Manipulator.Position - Shooter.Manipulator.Position;
                                 collisionVector.Y = 0;
                                 collisionVector.Normalize();
 

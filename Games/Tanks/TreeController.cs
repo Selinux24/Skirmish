@@ -119,9 +119,9 @@ namespace Tanks
                     return;
                 }
 
-                Tree.Manipulator.SetNormal(-CollisionVector, 0.1f);
+                Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-                if (MathUtil.NearEqual(1f, Vector3.Dot(-CollisionVector, Tree.Manipulator.Up)))
+                if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
                 {
                     Active = false;
 

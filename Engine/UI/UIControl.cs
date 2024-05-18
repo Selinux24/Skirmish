@@ -1025,7 +1025,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public bool AddChild(IUIControl ctrl, bool fitToParent = true)
+        public bool AddChild(IUIControl ctrl, bool fitToParent = false)
         {
             if (!ValidateAddChild(ctrl))
             {
@@ -1039,7 +1039,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true)
+        public bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = false)
         {
             if (!ValidateAddChildren(controls))
             {
@@ -1087,7 +1087,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool InsertChild(int index, IUIControl ctrl, bool fitToParent = true)
+        public bool InsertChild(int index, IUIControl ctrl, bool fitToParent = false)
         {
             if (index < 0 || index >= children.Count)
             {
@@ -1106,7 +1106,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = true)
+        public bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = false)
         {
             if (index < 0 || index >= children.Count)
             {

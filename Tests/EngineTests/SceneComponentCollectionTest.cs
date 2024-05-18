@@ -290,7 +290,7 @@ namespace Engine.Tests
             Assert.AreEqual(obj2.Object, components[1]);
             Assert.AreEqual(obj3.Object, components[2]);
 
-            coll.RemoveComponents(new[] { obj1.Object, obj1b.Object });
+            coll.RemoveComponents([obj1.Object, obj1b.Object]);
             Assert.AreEqual(2, coll.Count);
 
             components = coll.Get()?.ToArray();
@@ -298,7 +298,7 @@ namespace Engine.Tests
             Assert.AreEqual(obj2.Object, components[0]);
             Assert.AreEqual(obj3.Object, components[1]);
 
-            coll.RemoveComponents(new[] { obj2.Object, obj3.Object });
+            coll.RemoveComponents([obj2.Object, obj3.Object]);
             Assert.AreEqual(0, coll.Count);
         }
 

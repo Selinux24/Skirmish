@@ -318,7 +318,7 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 Background = await CreateBackground();
-                AddChild(Background);
+                AddChild(Background, true);
             }
 
             if (Description.Tabs > 0)
@@ -334,8 +334,8 @@ namespace Engine.UI
                     var panel = await CreatePanel(panelDesc, i);
                     tabPanels.Add(panel);
 
-                    AddChild(button, false);
-                    AddChild(panel, false);
+                    AddChild(button);
+                    AddChild(panel);
                 }
 
                 SetSelectedTab(0);
@@ -468,7 +468,7 @@ namespace Engine.UI
             tabButtons[index] = button;
 
             RemoveChild(oldButton, true);
-            AddChild(button, false);
+            AddChild(button);
 
             updateLayout = true;
         }
@@ -488,7 +488,7 @@ namespace Engine.UI
             tabPanels[index] = panel;
 
             RemoveChild(oldPanel, true);
-            AddChild(panel, false);
+            AddChild(panel);
 
             updateLayout = true;
         }
