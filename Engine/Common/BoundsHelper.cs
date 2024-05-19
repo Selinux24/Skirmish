@@ -5,16 +5,20 @@ namespace Engine.Common
     /// <summary>
     /// Collider helper class
     /// </summary>
-    class BoundsHelper
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="bounds">Initial bounds state</param>
+    class BoundsHelper(BoundsHelperInitialState bounds)
     {
         /// <summary>
         /// Bounds
         /// </summary>
-        private readonly BoundsHelperInitialState bounds;
+        private readonly BoundsHelperInitialState bounds = bounds;
         /// <summary>
         /// Bounds salt value
         /// </summary>
-        private int boundsSalt = 0;
+        private int boundsSalt = bounds.Salt;
 
         /// <summary>
         /// Transformed bounding sphere
@@ -42,17 +46,6 @@ namespace Engine.Common
         /// Update bounding box flag
         /// </summary>
         private bool updateOrientedBox = true;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="bounds">Initial bounds state</param>
-        public BoundsHelper(BoundsHelperInitialState bounds)
-        {
-            this.bounds = bounds;
-
-            boundsSalt = bounds.Salt;
-        }
 
         /// <summary>
         /// Invalidates the internal state

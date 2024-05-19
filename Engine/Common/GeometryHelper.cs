@@ -22,11 +22,11 @@ namespace Engine.Common
         /// <summary>
         /// Points cache
         /// </summary>
-        private IEnumerable<Vector3> positionCache = Enumerable.Empty<Vector3>();
+        private IEnumerable<Vector3> positionCache = [];
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private IEnumerable<Triangle> triangleCache = Enumerable.Empty<Triangle>();
+        private IEnumerable<Triangle> triangleCache = [];
 
         /// <summary>
         /// Invalidates internal state
@@ -57,7 +57,7 @@ namespace Engine.Common
 
             if (drawingData == null)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             if (controller != null && drawingData.SkinningData != null)
@@ -99,7 +99,7 @@ namespace Engine.Common
 
             if (drawingData == null)
             {
-                return Enumerable.Empty<Triangle>();
+                return [];
             }
 
             if (controller != null && drawingData.SkinningData != null)

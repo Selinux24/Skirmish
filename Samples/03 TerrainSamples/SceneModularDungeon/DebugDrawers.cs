@@ -89,20 +89,19 @@ namespace TerrainSamples.SceneModularDungeon
             bboxesDrawer.Clear();
 
             //Objects
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance), Color.PaleVioletRed);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance), Color.ForestGreen);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance), Color.Cyan);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance), Color.LightYellow);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance), Color.MediumPurple);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance.GetBoundingBox()), Color.PaleVioletRed);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance.GetBoundingBox()), Color.ForestGreen);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance.GetBoundingBox()), Color.Cyan);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple);
         }
-        private void DrawBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
+        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color color)
         {
-            if (!items.Any())
+            if (!boxes.Any())
             {
                 return;
             }
 
-            var boxes = items.Select(i => i.GetBoundingBox());
             bboxesDrawer.SetPrimitives(color, Line3D.CreateBoxes(boxes));
         }
 
@@ -118,7 +117,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             foreach (var obstacle in obstacles.Select(o => o.Obstacle))
             {
-                IEnumerable<Triangle> obstacleTris = null;
+                IEnumerable<Triangle> obstacleTris;
 
                 if (obstacle is BoundingCylinder bc)
                 {
@@ -132,11 +131,12 @@ namespace TerrainSamples.SceneModularDungeon
                 {
                     obstacleTris = Triangle.ComputeTriangleList(obb);
                 }
-
-                if (obstacleTris?.Any() == true)
+                else
                 {
-                    obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
+                    continue;
                 }
+
+                obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
             }
         }
         public void DrawConnections(IEnumerable<IGraphConnection> conns)

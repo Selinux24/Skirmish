@@ -10,6 +10,17 @@ namespace Engine.Common
     public sealed class BoundsHelperInitialState
     {
         /// <summary>
+        /// Creates an initial state from a point list
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public static BoundsHelperInitialState FromPoints(IEnumerable<Vector3> points)
+        {
+            BoundsHelperInitialState initialState = new();
+            initialState.SetPoints(points);
+            return initialState;
+        }
+
+        /// <summary>
         /// Initial bounding sphere
         /// </summary>
         public BoundingSphere BoundingSphere { get; private set; }

@@ -163,8 +163,9 @@ namespace Engine
         /// <param name="description">Description</param>
         public ModelInstance(BaseModel<ModelInstancedDescription> model, ModelInstancedDescription description)
         {
-            Id = GetNextInstanceId();
             this.model = model;
+
+            Id = GetNextInstanceId();
 
             var drawData = model.GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
@@ -183,7 +184,8 @@ namespace Engine
             AnimationController = new(model);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            boundsHelper = new(model.BoundsHelperInitialState);
+            var initialState = BoundsHelperInitialState.FromPoints(GetPoints());
+            boundsHelper = new(initialState);
         }
 
         /// <summary>

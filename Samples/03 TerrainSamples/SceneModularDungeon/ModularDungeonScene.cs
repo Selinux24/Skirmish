@@ -188,8 +188,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
 
             debugDrawers.DrawGraph();
-
-            UpdateDebugInfo();
+            debugDrawers.DrawScenery(scenery);
         }
 
         public override void Update(IGameTime gameTime)
@@ -389,7 +388,6 @@ namespace TerrainSamples.SceneModularDungeon
                 [
                     InitializeDebug,
                     InitializeDungeon,
-                    InitializePlayer,
                     InitializeNPCs,
                     InitializeAudio,
                 ],
@@ -402,6 +400,29 @@ namespace TerrainSamples.SceneModularDungeon
         private async Task InitializeDebug()
         {
             debugDrawers = await AddComponent<DebugDrawers>("debugDrawers", "debugDrawers");
+
+            playerAgentType = new Player()
+            {
+                Name = "Player",
+                Height = 1.5f,
+                Radius = 0.2f,
+                MaxClimb = 0.8f,
+                MaxSlope = 50f,
+                Velocity = 4f,
+                VelocitySlow = 1f,
+            };
+
+            ratAgentType = new Player()
+            {
+                Name = "Rat",
+                Height = 0.2f,
+                Radius = 0.1f,
+                MaxClimb = 0.5f,
+                MaxSlope = 50f,
+                Velocity = 3f,
+                VelocitySlow = 1f,
+            };
+
             await debugDrawers.Initialize([playerAgentType, ratAgentType]);
         }
         private async Task InitializeDungeon()
@@ -470,21 +491,6 @@ namespace TerrainSamples.SceneModularDungeon
 
             return contentData.SelectMany(c => c);
         }
-        private async Task InitializePlayer()
-        {
-            playerAgentType = new Player()
-            {
-                Name = "Player",
-                Height = 1.5f,
-                Radius = 0.2f,
-                MaxClimb = 0.8f,
-                MaxSlope = 50f,
-                Velocity = 4f,
-                VelocitySlow = 1f,
-            };
-
-            await Task.CompletedTask;
-        }
         private async Task InitializeNPCs()
         {
             await Task.WhenAll(
@@ -503,17 +509,6 @@ namespace TerrainSamples.SceneModularDungeon
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.json"),
                 });
-
-            ratAgentType = new Player()
-            {
-                Name = "Rat",
-                Height = 0.2f,
-                Radius = 0.1f,
-                MaxClimb = 0.5f,
-                MaxSlope = 50f,
-                Velocity = 3f,
-                VelocitySlow = 1f,
-            };
 
             rat.Manipulator.SetScaling(0.5f);
             rat.Manipulator.SetPosition(0, 0, 0);
@@ -637,10 +632,6 @@ namespace TerrainSamples.SceneModularDungeon
             Camera.SetPosition(cameraInitialPosition);
             Camera.SetInterest(cameraInitialInterest);
         }
-        private void UpdateDebugInfo()
-        {
-            debugDrawers.DrawScenery(scenery);
-        }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {
             if (!e.Items.Any())
@@ -648,21 +639,27 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            var obs = obstacles.Where(o => e.Items.Select(i => i.Instance).Contains(o.Item));
-            if (!obs.Any())
+            foreach (var item in e.Items)
             {
-                return;
+                var obs = obstacles.FindAll(o => o.Item == item.Instance);
+                if (obs.Count <= 0)
+                {
+                    continue;
+                }
+
+                //Refresh affected obstacles (if any)
+                foreach (var o in obs)
+                {
+                    RemoveObstacle(o.Index);
+
+                    if (item.CurrentState == "close")
+                    {
+                        var obb = o.Item.GetOrientedBoundingBox();
+                        o.Index = AddObstacle(obb);
+                        o.Obstacle = obb;
+                    }
+                }
             }
-
-            //Refresh affected obstacles (if any)
-            obs.ToList().ForEach(o =>
-            {
-                var obb = o.Item.GetOrientedBoundingBox();
-
-                RemoveObstacle(o.Index);
-                o.Index = AddObstacle(obb);
-                o.Obstacle = obb;
-            });
 
             debugDrawers.DrawObstacles(obstacles);
         }
@@ -782,12 +779,10 @@ namespace TerrainSamples.SceneModularDungeon
                 SaveGraphToFile();
             }
 
-            if (Game.Input.KeyJustReleased(Keys.G))
+            if (Game.Input.KeyJustReleased(Keys.F9))
             {
                 debugDrawers.SetNextAgentIndex();
                 debugDrawers.DrawGraph();
-
-                UpdateDebugInfo();
             }
         }
         private void UpdateRatInput()
@@ -1108,14 +1103,16 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(t => t.Actions.Any())
                 .ToArray();
 
-            if (triggers.Length != 0)
+            if (triggers.Length == 0)
             {
-                int keyIndex = ReadKeyIndex();
-                if (keyIndex > 0 && keyIndex <= triggers.Length)
-                {
-                    soundEffectsManager.PlayLadder(item.Instance);
-                    scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
-                }
+                return;
+            }
+
+            int keyIndex = ReadKeyIndex();
+            if (keyIndex > 0 && keyIndex <= triggers.Length)
+            {
+                soundEffectsManager.PlayLadder(item.Instance);
+                scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
             }
         }
         private void UpdateEntityLight(Item item)
@@ -1368,6 +1365,11 @@ namespace TerrainSamples.SceneModularDungeon
 
             //Sounds
             StartEntitiesAudio();
+
+            //Debug info
+            debugDrawers.DrawGraph();
+            debugDrawers.DrawScenery(scenery);
+            debugDrawers.DrawObstacles(obstacles);
         }
         private void StartNPCs()
         {
@@ -1455,8 +1457,6 @@ namespace TerrainSamples.SceneModularDungeon
                     obstacles.Add(new ObstacleInfo { Index = index, Item = human[i], Obstacle = bc });
                 }
             }
-
-            debugDrawers.DrawObstacles(obstacles);
         }
 
         private void ClearNPCs()
