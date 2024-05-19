@@ -29,17 +29,6 @@ float4 main(PSVertexPositionTexture input) : SV_TARGET
 	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 	color *= input.tintColor;
 
-    if (gPerFrame.FogRange > 0)
-	{
-        float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
-        float fog = CalcFogFactor(distToEye, gPerFrame.FogStart, gPerFrame.FogRange);
-        if (fog >= 1)
-        {
-            return gPerFrame.FogColor;
-        }
-        color = ApplyFog(color, gPerFrame.FogColor, fog);
-    }
-
 	color = GetChannel(color, gChannel);
 
 	return color;
