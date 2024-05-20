@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Provides local steering behaviors for a group of agents. 
     /// </summary>
-    public class Crowd
+    public class Crowd : ICrowd<GraphAgentType, CrowdAgent, CrowdAgentParameters>
     {
         /// The maximum number of crowd avoidance configurations supported by the
         /// crowd manager.
@@ -96,7 +96,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="nav">The navigation mesh to use for planning.</param>
         /// <param name="settings">Settings</param>
-        public Crowd(NavMesh nav, CrowdParameters settings)
+        public Crowd(NavMesh nav, ICrowdParameters<GraphAgentType> settings)
         {
             m_maxPathResult = settings.MaxPathResult;
             m_sampleVelocityAdaptative = settings.SampleVelocityAdaptative;
@@ -170,12 +170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
 
-        /// <summary>
-        /// Adds a new agent to the crowd.
-        /// </summary>
-        /// <param name="pos">The requested position of the agent.</param>
-        /// <param name="param">The configutation of the agent.</param>
-        /// <returns>The new agent.</returns>
+        /// <inheritdoc/>
         public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParameters param)
         {
             // Find nearest position on navmesh and place the agent there.
@@ -223,10 +218,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return ag;
         }
-        /// <summary>
-        /// Removes the agent from the crowd.
-        /// </summary>
-        /// <param name="ag">Agent to remove</param>
+        /// <inheritdoc/>
         public void RemoveAgent(CrowdAgent ag)
         {
             if (ag == null)
@@ -236,30 +228,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_agents.Remove(ag);
         }
-        /// <summary>
-        /// Gets the agents int the agent pool.
-        /// </summary>
-        /// <returns>The collection of agents.</returns>
+        /// <inheritdoc/>
         public CrowdAgent[] GetAgents()
         {
             return [.. m_agents];
         }
-        /// <summary>
-        /// Gets the active agents int the agent pool.
-        /// </summary>
-        /// <returns>The collection of active agents.</returns>
+        /// <inheritdoc/>
         public CrowdAgent[] GetActiveAgents()
         {
             return m_agents.Where(a => a.Active).ToArray();
         }
 
-        /// <summary>
-        /// Updates the steering and positions of all agents.
-        /// </summary>
-        /// <param name="dt">The time, in seconds, to update the simulation. [Limit: > 0]</param>
-        /// <param name="debug">A debug object to load with debug information. [Opt]</param>
-        public void Update(float dt, IEnumerable<CrowdAgentDebugInfo> debug)
+        /// <inheritdoc/>
+        public void Update(IGameTime gameTime)
         {
+            float dt = gameTime.ElapsedSeconds;
+
             m_velocitySampleCount = 0;
 
             var activeAgents = GetActiveAgents();
@@ -288,7 +272,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             FindColliders(walkingAgents);
 
             // Find next corner to steer to.
-            FindNextCorner(walkingAgents, debug);
+            FindNextCorner(walkingAgents, []);
 
             // Trigger off-mesh connections (depends on corners).
             TriggerOffMeshConnections(walkingAgents);
@@ -297,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             CalculateSteering(walkingAgents);
 
             // Velocity planning.	
-            VelocityPlanning(walkingAgents, debug);
+            VelocityPlanning(walkingAgents, []);
 
             // Integrate.
             IntegrateAgents(walkingAgents, dt);

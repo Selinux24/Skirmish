@@ -1,5 +1,4 @@
 ﻿using Engine.PathFinding.RecastNavigation.Detour;
-using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using SharpDX;
 using System;
@@ -16,26 +15,13 @@ namespace Engine.PathFinding.RecastNavigation
     public class Graph : IGraph
     {
         /// <summary>
-        /// Updated flag
-        /// </summary>
-        private bool updated = true;
-
-        /// <summary>
         /// Item indices
         /// </summary>
         private readonly List<GraphItem> itemIndices = [];
         /// <summary>
-        /// Debug info
-        /// </summary>
-        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = [];
-        /// <summary>
         /// Agent query list
         /// </summary>
         private readonly List<GraphAgentQueryFactory> agentQuerieFactories = [];
-        /// <summary>
-        /// Crowd list
-        /// </summary>
-        private readonly List<Crowd> crowds = [];
 
         /// <inheritdoc/>
         public bool Initialized { get; internal set; }
@@ -473,8 +459,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public int AddObstacle(IObstacle obstacle)
         {
-            updated = false;
-
             var obstacles = new List<Tuple<GraphAgentType, int>>();
 
             foreach (var agentQ in agentQuerieFactories)
@@ -520,8 +504,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public void RemoveObstacle(int obstacleId)
         {
-            updated = false;
-
             var instance = itemIndices.Find(o => o.Id == obstacleId);
             if (instance == null)
             {
@@ -537,144 +519,30 @@ namespace Engine.PathFinding.RecastNavigation
 
             itemIndices.Remove(instance);
         }
+        /// <inheritdoc/>
+        public void UpdateObstacles(Action<GraphUpdateStates> callback = null)
+        {
+            var tcs = agentQuerieFactories
+                .Where(a => a.NavMesh?.TileCache.Updating() == true)
+                .Select(a => (a.Agent, a.NavMesh.TileCache));
+
+            if (tcs.Any())
+            {
+                callback?.Invoke(GraphUpdateStates.Updating);
+
+                foreach (var (agent, tc) in tcs)
+                {
+                    tc.Update(agent, out _);
+                }
+
+                callback?.Invoke(GraphUpdateStates.Updated);
+            }
+        }
 
         /// <inheritdoc/>
         public IGraphDebug GetDebugInfo(AgentType agent)
         {
             return new GraphDebug(this, agent);
-        }
-
-        /// <inheritdoc/>
-        public void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null)
-        {
-            var tcs = agentQuerieFactories
-                .Where(a => a.NavMesh?.TileCache != null)
-                .Select(a => (a.Agent, a.NavMesh.TileCache));
-
-            foreach (var (agent, tc) in tcs)
-            {
-                if (tc.Updating())
-                {
-                    callback?.Invoke(GraphUpdateStates.Updating);
-                }
-
-                var status = tc.Update(agent, out bool upToDate, out bool cacheUpdated);
-                if (updated == upToDate || !status.HasFlag(Status.DT_SUCCESS))
-                {
-                    continue;
-                }
-
-                updated = upToDate;
-
-                if (cacheUpdated)
-                {
-                    callback?.Invoke(GraphUpdateStates.Updated);
-                }
-            }
-
-            foreach (var crowd in crowds)
-            {
-                debugInfo.TryGetValue(crowd, out var debug);
-
-                crowd.Update(gameTime.ElapsedSeconds, debug);
-            }
-        }
-
-        /// <summary>
-        /// Adds a new crowd
-        /// </summary>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new crowd</returns>
-        public Crowd AddCrowd(CrowdParameters settings)
-        {
-            var navMesh = (GetAgentQueryFactory(settings.Agent)?.NavMesh) ?? throw new ArgumentException($"No navigation mesh found for the specified {nameof(settings.Agent)}.", nameof(settings));
-
-            var cr = new Crowd(navMesh, settings);
-            crowds.Add(cr);
-            return cr;
-        }
-        /// <summary>
-        /// Request move all agents in the crowd
-        /// </summary>
-        /// <param name="crowd">Crowd</param>
-        /// <param name="agent">Agent type</param>
-        /// <param name="p">Destination position</param>
-        public void RequestMoveCrowd(Crowd crowd, AgentType agent, Vector3 p)
-        {
-            //Find agent query
-            var query = CreateAgentQuery(agent);
-            if (query == null)
-            {
-                return;
-            }
-
-            Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
-            if (status == Status.DT_FAILURE)
-            {
-                return;
-            }
-
-            foreach (var ag in crowd.GetAgents())
-            {
-                ag.RequestMoveTarget(poly, nP);
-            }
-        }
-        /// <summary>
-        /// Request move a single crowd agent
-        /// </summary>
-        /// <param name="crowd">Crowd</param>
-        /// <param name="crowdAgent">Agent</param>
-        /// <param name="agent">Agent type</param>
-        /// <param name="p">Destination position</param>
-        public void RequestMoveAgent(Crowd crowd, CrowdAgent crowdAgent, AgentType agent, Vector3 p)
-        {
-            //Find agent query
-            var query = CreateAgentQuery(agent);
-            if (query == null)
-            {
-                return;
-            }
-
-            Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
-            if (status == Status.DT_FAILURE)
-            {
-                return;
-            }
-
-            crowdAgent.RequestMoveTarget(poly, nP);
-        }
-
-        /// <summary>
-        /// Enables debug info for crowd and agent
-        /// </summary>
-        /// <param name="crowd">Crowd</param>
-        /// <param name="crowdAgent">Agent</param>
-        public void EnableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
-        {
-            if (!debugInfo.TryGetValue(crowd, out var debugData))
-            {
-                debugData = [];
-                debugInfo.Add(crowd, debugData);
-            }
-
-            if (!debugData.Exists(l => l.Agent == crowdAgent))
-            {
-                debugData.Add(new() { Agent = crowdAgent });
-            }
-        }
-        /// <summary>
-        /// Disables debug info for crowd and agent
-        /// </summary>
-        /// <param name="crowd">Crowd</param>
-        /// <param name="crowdAgent">Agent</param>
-        public void DisableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
-        {
-            if (!debugInfo.TryGetValue(crowd, out var debugData))
-            {
-                return;
-            }
-
-            debugData.RemoveAll(l => l.Agent == crowdAgent);
         }
     }
 }

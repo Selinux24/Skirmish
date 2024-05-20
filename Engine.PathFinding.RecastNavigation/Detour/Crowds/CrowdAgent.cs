@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Represents an agent managed by a Crowd object.
     /// </summary>
-    public class CrowdAgent
+    public class CrowdAgent : ICrowdAgent
     {
         /// The maximum number of corners a crowd agent will look ahead in the path.
         /// This value is used for sizing the crowd agent corner buffers.

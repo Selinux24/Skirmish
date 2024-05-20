@@ -21,11 +21,6 @@ namespace Engine.PathFinding.AStar
         private readonly List<GridNode> nodes = [];
 
         /// <inheritdoc/>
-        public event EventHandler Updating;
-        /// <inheritdoc/>
-        public event EventHandler Updated;
-
-        /// <inheritdoc/>
         public bool Initialized { get; set; }
         /// <inheritdoc/>
         public bool EnableDebug { get; set; }
@@ -345,31 +340,16 @@ namespace Engine.PathFinding.AStar
         {
             throw new NotImplementedException();
         }
+        /// <inheritdoc/>
+        public void UpdateObstacles(Action<GraphUpdateStates> callback = null)
+        {
+            //Updates the internal state
+        }
 
         /// <inheritdoc/>
         public IGraphDebug GetDebugInfo(AgentType agent)
         {
             throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        public void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null)
-        {
-            //Updates the internal state
-        }
-        /// <summary>
-        /// Fires the updated event
-        /// </summary>
-        protected void FireUpdated()
-        {
-            Updated?.Invoke(this, new EventArgs());
-        }
-        /// <summary>
-        /// Fires the updating event
-        /// </summary>
-        protected void FireUpdating()
-        {
-            Updating?.Invoke(this, new EventArgs());
         }
 
         /// <inheritdoc/>

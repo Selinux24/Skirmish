@@ -159,18 +159,16 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="obstacleId">Obstacle id</param>
         void RemoveObstacle(int obstacleId);
+        /// <summary>
+        /// Updates obstacles state
+        /// </summary>
+        /// <param name="callback">Updating callback</param>
+        void UpdateObstacles(Action<GraphUpdateStates> callback = null);
 
         /// <summary>
         /// Gets the debug information helper
         /// </summary>
         /// <param name="agent">Agent</param>
         IGraphDebug GetDebugInfo(AgentType agent);
-
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="callback">Updating callback</param>
-        void Update(IGameTime gameTime, Action<GraphUpdateStates> callback = null);
     }
 }

@@ -537,9 +537,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Updates the tile-cache
         /// </summary>
         /// <param name="agent">Agent</param>
-        /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
+        /// <param name="callback">Updating callback</param>
         /// <param name="cacheUpdated">Returns true if the instance tile cahche is up to date (No requests to perform)</param>
-        public Status Update(GraphAgentType agent, out bool upToDate, out bool cacheUpdated)
+        public Status Update(GraphAgentType agent, out bool cacheUpdated)
         {
             bool updating = Updating();
 
@@ -551,7 +551,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             Status status = ProcessUpdates(agent);
 
-            upToDate = m_update.Count == 0 && m_reqs.Count == 0;
             cacheUpdated = updating != Updating();
 
             return status;

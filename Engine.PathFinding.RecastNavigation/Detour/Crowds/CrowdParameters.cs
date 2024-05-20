@@ -4,47 +4,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Crowd settings
     /// </summary>
-    public class CrowdParameters
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    /// <param name="maxAgents">Max agents</param>
+    public class CrowdParameters(GraphAgentType agent, int maxAgents) : ICrowdParameters<GraphAgentType>
     {
-        /// <summary>
-        /// Agent type
-        /// </summary>
-        public GraphAgentType Agent { get; private set; }
-        /// <summary>
-        /// The maximum number of agents the crowd can manage.
-        /// </summary>
-        public int MaxAgents { get; set; }
-        /// <summary>
-        /// The maximum radius of any agent that will be added to the crowd.
-        /// </summary>
-        public float MaxAgentRadius { get; set; }
-        /// <summary>
-        /// Maximum path result
-        /// </summary>
+        /// <inheritdoc/>
+        public GraphAgentType Agent { get; private set; } = agent;
+        /// <inheritdoc/>
+        public int MaxAgents { get; set; } = maxAgents;
+        /// <inheritdoc/>
+        public float MaxAgentRadius { get; set; } = agent.Radius;
+        /// <inheritdoc/>
         public int MaxPathResult { get; set; } = 256;
-        /// <summary>
-        /// Sample velocity adaptative
-        /// </summary>
+        /// <inheritdoc/>
         public bool SampleVelocityAdaptative { get; set; } = true;
-        /// <summary>
-        /// Collistion resolve iterations
-        /// </summary>
+        /// <inheritdoc/>
         public int CollisionResolveIterations { get; set; } = 4;
-        /// <summary>
-        /// Collision resolve factor
-        /// </summary>
+        /// <inheritdoc/>
         public float CollisionResolveFactor { get; set; } = 0.7f;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="maxAgents">Max agents</param>
-        public CrowdParameters(GraphAgentType agent, int maxAgents)
-        {
-            Agent = agent;
-            MaxAgentRadius = agent.Radius;
-            MaxAgents = maxAgents;
-        }
     }
 }

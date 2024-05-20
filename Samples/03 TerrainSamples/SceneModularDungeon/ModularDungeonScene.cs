@@ -222,6 +222,15 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
+            NavigationGraph?.UpdateObstacles((state) =>
+            {
+                if(state == GraphUpdateStates.Updated)
+                {
+                    debugDrawers.DrawGraph();
+                    debugDrawers.DrawObstacles(obstacles);
+                }
+            });
+
             if (gameState == GameStates.Player)
             {
                 UpdateStatePlayer(gameTime);
@@ -660,8 +669,6 @@ namespace TerrainSamples.SceneModularDungeon
                     }
                 }
             }
-
-            debugDrawers.DrawObstacles(obstacles);
         }
 
         private void UpdatePlayerInput()

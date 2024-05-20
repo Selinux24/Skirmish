@@ -48,10 +48,6 @@ namespace Engine.Common
         public PickingHullTypes PickingHull { get; set; }
         /// <inheritdoc/>
         public PickingHullTypes PathFindingHull { get; set; }
-        /// <summary>
-        /// Volumen helper initial state
-        /// </summary>
-        public BoundsHelperInitialState BoundsHelperInitialState { get; private set; } = new();
 
         /// <summary>
         /// Destructor

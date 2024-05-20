@@ -20,6 +20,10 @@ namespace Engine
         /// </summary>
         private LevelOfDetail levelOfDetail = LevelOfDetail.None;
         /// <summary>
+        /// Volumen helper initial state
+        /// </summary>
+        private readonly BoundsHelperInitialState boundsHelperInitialState = new();
+        /// <summary>
         /// Volume helper
         /// </summary>
         private readonly BoundsHelper boundsHelper;
@@ -113,7 +117,7 @@ namespace Engine
         public Model(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            boundsHelper = new(BoundsHelperInitialState);
+            boundsHelper = new(boundsHelperInitialState);
         }
 
         /// <inheritdoc/>
@@ -142,7 +146,7 @@ namespace Engine
             AnimationController = new(this);
             AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            BoundsHelperInitialState.SetPoints(GetPoints());
+            boundsHelperInitialState.SetPoints(GetPoints());
         }
         /// <inheritdoc/>
         public override async Task InitializeAssets()

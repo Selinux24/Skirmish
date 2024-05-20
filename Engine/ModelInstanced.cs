@@ -178,9 +178,6 @@ namespace Engine
             MaximumCount = -1;
 
             hasIndependentTransforms = Description.TransformDependences.Length != 0;
-
-            var points = GetDrawingData(GetLODMinimum()).GetPoints(Matrix.Identity);
-            BoundsHelperInitialState.SetPoints(points);
         }
         /// <inheritdoc/>
         public override async Task InitializeAssets()
