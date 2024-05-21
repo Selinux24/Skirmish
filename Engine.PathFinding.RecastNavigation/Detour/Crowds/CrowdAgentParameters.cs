@@ -4,25 +4,42 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Configuration parameters for a crowd agent.
     /// </summary>
-    public class CrowdAgentParameters : ICrowdAgentParameters
+    public class CrowdAgentParameters
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// Agent radius.
+        /// </summary>
         public float Radius { get; set; }
-        /// <inheritdoc/>
-        public float SlowDownRadiusFactor { get; set; } = 2;
-        /// <inheritdoc/>
+        /// <summary>
+        /// Slow down agent radius factor
+        /// </summary>
+        /// <remarks>Multiplied by Readius</remarks>
+        public float SlowDownRadiusFactor { get; set; }
+        /// <summary>
+        /// Agent height.
+        /// </summary>
         public float Height { get; set; }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Maximum allowed acceleration.
+        /// </summary>
         public float MaxAcceleration { get; set; }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Maximum allowed speed.
+        /// </summary>
         public float MaxSpeed { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Defines how close a collision element must be before it is considered for steering behaviors.
+        /// </summary>
         public float CollisionQueryRange { get; set; }
-        /// <inheritdoc/>
+        /// <summary>
+        /// The path visibility optimization range.
+        /// </summary>
         public float PathOptimizationRange { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// How aggresive the agent manager should be at avoiding collisions with this agent.
+        /// </summary>
         public float SeparationWeight { get; set; }
 
         /// <summary>
@@ -30,13 +47,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public UpdateFlagTypes UpdateFlags { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// The index of the avoidance configuration to use for the agent. 
+        /// </summary>
         public int ObstacleAvoidanceType { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// The index of the query filter used by this agent.
+        /// </summary>
         public int QueryFilterTypeIndex { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// User defined data attached to the agent.
+        /// </summary>
         public object UserData { get; set; }
     }
 }

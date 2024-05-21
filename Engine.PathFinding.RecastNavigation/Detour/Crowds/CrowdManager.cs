@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
@@ -8,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// Crowd manager
     /// </summary>
     /// <param name="graph">Internal graph</param>
-    public class CrowdManager(Graph graph) : ICrowdManager<Crowd, GraphAgentType, CrowdAgent, CrowdAgentParameters>
+    public class CrowdManager(Graph graph) : ICrowdManager<GraphAgentType, CrowdAgent>
     {
         /// <summary>
         /// Parent graph
@@ -17,23 +16,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Crowd list
         /// </summary>
-        private readonly List<Crowd> crowds = [];
+        private readonly List<ICrowd<GraphAgentType, CrowdAgent>> crowds = [];
 
         /// <inheritdoc/>
-        public Crowd AddCrowd<TSettings>(TSettings settings)
-            where TSettings : ICrowdParameters<GraphAgentType>
+        public void AddCrowd<TCrowd>(TCrowd crowd) where TCrowd : ICrowd<GraphAgentType, CrowdAgent>
         {
-            var navMesh = (graph.CreateAgentQuery(settings.Agent)?.GetAttachedNavMesh()) ?? throw new ArgumentException($"No navigation mesh found for the specified {nameof(settings.Agent)}.", nameof(settings));
+            crowd.Initialize(graph);
 
-            var cr = new Crowd(navMesh, settings);
-            crowds.Add(cr);
-            return cr;
+            crowds.Add(crowd);
         }
         /// <inheritdoc/>
-        public void RequestMoveCrowd(Crowd crowd, GraphAgentType agent, Vector3 p)
+        public void RequestMoveCrowd<TCrowd>(TCrowd crowd, Vector3 p) where TCrowd : ICrowd<GraphAgentType, CrowdAgent>
         {
             //Find agent query
-            var query = graph.CreateAgentQuery(agent);
+            var query = graph.CreateAgentQuery(crowd.Agent);
             if (query == null)
             {
                 return;
@@ -51,10 +47,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
         /// <inheritdoc/>
-        public void RequestMoveAgent(Crowd crowd, CrowdAgent crowdAgent, GraphAgentType agent, Vector3 p)
+        public void RequestMoveAgent<TCrowd>(TCrowd crowd, CrowdAgent crowdAgent, Vector3 p) where TCrowd : ICrowd<GraphAgentType, CrowdAgent>
         {
             //Find agent query
-            var query = graph.CreateAgentQuery(agent);
+            var query = graph.CreateAgentQuery(crowd.Agent);
             if (query == null)
             {
                 return;

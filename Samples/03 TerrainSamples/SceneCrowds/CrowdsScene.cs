@@ -30,7 +30,6 @@ namespace TerrainSamples.SceneCrowds
         private GraphAgentType tankAgentType = null;
         private readonly List<GameAgent<GraphAgentType, SteerManipulatorController>> tankAgents = [];
 
-        private Graph graph = null;
         private CrowdManager crowdManager = null;
         private Crowd crowd = null;
 
@@ -436,11 +435,11 @@ namespace TerrainSamples.SceneCrowds
 
             if (Game.Input.ShiftPressed)
             {
-                crowdManager.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.PickingResult.Position);
+                crowdManager.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, r.PickingResult.Position);
             }
             else
             {
-                crowdManager.RequestMoveCrowd(crowd, tankAgentType, r.PickingResult.Position);
+                crowdManager.RequestMoveCrowd(crowd, r.PickingResult.Position);
             }
         }
         private void UpdateInputDebug()
@@ -540,12 +539,13 @@ namespace TerrainSamples.SceneCrowds
                 return;
             }
 
-            graph = nGraph;
-            crowdManager = new(graph);
+            crowdManager = new(nGraph);
 
             var settings = new CrowdParameters(tankAgentType, tankAgents.Count);
 
-            crowd = crowdManager.AddCrowd(settings);
+            crowd = new Crowd(settings);
+
+            crowdManager.AddCrowd(crowd);
 
             var par = new CrowdAgentParameters()
             {
@@ -565,7 +565,11 @@ namespace TerrainSamples.SceneCrowds
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                tankAgents[i].CrowdAgent = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
+                var ag = new CrowdAgent(par);
+
+                crowd.AddAgent(ag, tankAgents[i].Manipulator.Position);
+
+                tankAgents[i].CrowdAgent = ag;
             }
 
             gameReady = true;

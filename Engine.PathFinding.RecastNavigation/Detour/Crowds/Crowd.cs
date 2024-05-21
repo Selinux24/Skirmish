@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Provides local steering behaviors for a group of agents. 
     /// </summary>
-    public class Crowd : ICrowd<GraphAgentType, CrowdAgent, CrowdAgentParameters>
+    public class Crowd : ICrowd<GraphAgentType, CrowdAgent>
     {
         /// The maximum number of crowd avoidance configurations supported by the
         /// crowd manager.
@@ -35,10 +35,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         const int MAX_COMMON_NODES = 512;
 
         /// <summary>
-        /// Navigation query
-        /// </summary>
-        private readonly NavMeshQuery m_navquery = null;
-        /// <summary>
         /// Agent list
         /// </summary>
         private readonly List<CrowdAgent> m_agents = [];
@@ -54,10 +50,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Obstacle query list
         /// </summary>
         private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = [];
-        /// <summary>
-        /// Path queue
-        /// </summary>
-        private readonly PathQueue m_pathq = null;
         /// <summary>
         /// Obstacle avoidance query
         /// </summary>
@@ -92,11 +84,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private int m_velocitySampleCount = 0;
 
         /// <summary>
+        /// Navigation query
+        /// </summary>
+        private NavMeshQuery m_navquery = null;
+        /// <summary>
+        /// Path queue
+        /// </summary>
+        private PathQueue m_pathq = null;
+
+        /// <inheritdoc/>
+        public GraphAgentType Agent { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="nav">The navigation mesh to use for planning.</param>
         /// <param name="settings">Settings</param>
-        public Crowd(NavMesh nav, ICrowdParameters<GraphAgentType> settings)
+        public Crowd(CrowdParameters settings)
         {
             m_maxPathResult = settings.MaxPathResult;
             m_sampleVelocityAdaptative = settings.SampleVelocityAdaptative;
@@ -133,12 +137,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     AdaptiveDepth = 5
                 });
             }
-
-            // Allocate temp buffer for merging paths.
-            m_pathq = new(nav, m_maxPathResult, MAX_PATHQUEUE_NODES);
-
-            // The navquery is mostly used for local searches, no need for large node pool.
-            m_navquery = new(nav, MAX_COMMON_NODES);
         }
 
         /// <summary>
@@ -171,11 +169,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
 
         /// <inheritdoc/>
-        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParameters param)
+        public void Initialize(IGraph graph)
+        {
+            if (graph is not Graph gr)
+            {
+                return;
+            }
+
+            var navMesh = (gr.CreateAgentQuery(Agent)?.GetAttachedNavMesh()) ?? throw new ArgumentException($"No navigation mesh found for the specified {nameof(Agent)}.");
+
+            // Allocate temp buffer for merging paths.
+            m_pathq = new(navMesh, m_maxPathResult, MAX_PATHQUEUE_NODES);
+
+            // The navquery is mostly used for local searches, no need for large node pool.
+            m_navquery = new(navMesh, MAX_COMMON_NODES);
+        }
+        /// <inheritdoc/>
+        public void AddAgent(CrowdAgent ag, Vector3 pos)
         {
             // Find nearest position on navmesh and place the agent there.
             Status status = m_navquery.FindNearestPoly(
-                pos, m_agentPlacementHalfExtents, m_filters[param.QueryFilterTypeIndex],
+                pos,
+                m_agentPlacementHalfExtents,
+                m_filters[ag.Params.QueryFilterTypeIndex],
                 out int r, out Vector3 nearest);
             if (status != Status.DT_SUCCESS)
             {
@@ -193,30 +209,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 state = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
             }
 
-            var ag = new CrowdAgent()
-            {
-                Params = param,
-                Partial = false,
-                TopologyOptTime = 0,
-                TargetReplanTime = 0,
-                DVel = Vector3.Zero,
-                NVel = Vector3.Zero,
-                Vel = Vector3.Zero,
-                NPos = nearest,
-                DesiredSpeed = 0,
-                State = state,
-                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE,
-                Active = true,
-            };
-
+            ag.Partial = false;
+            ag.TopologyOptTime = 0;
+            ag.TargetReplanTime = 0;
+            ag.DVel = Vector3.Zero;
+            ag.NVel = Vector3.Zero;
+            ag.Vel = Vector3.Zero;
+            ag.NPos = nearest;
+            ag.DesiredSpeed = 0;
+            ag.State = state;
+            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
             ag.Corridor.Init(m_maxPathResult);
             ag.Corridor.Reset(r, nearest);
             ag.Boundary.Reset();
             ag.ClearNeighbours();
+            ag.Active = true;
 
             m_agents.Add(ag);
-
-            return ag;
         }
         /// <inheritdoc/>
         public void RemoveAgent(CrowdAgent ag)
@@ -237,6 +246,87 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public CrowdAgent[] GetActiveAgents()
         {
             return m_agents.Where(a => a.Active).ToArray();
+        }
+        /// <inheritdoc/>
+        public IGraphQueryFilter GetFilter(int i)
+        {
+            return (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE) ? m_filters[i] : null;
+        }
+        /// <inheritdoc/>
+        public void SetFilter(int i, IGraphQueryFilter filter)
+        {
+            if (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE)
+            {
+                m_filters[i] = filter;
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 GetQueryHalfExtents()
+        {
+            return m_agentPlacementHalfExtents;
+        }
+        /// <inheritdoc/>
+        public Vector3 GetQueryExtents()
+        {
+            return m_agentPlacementHalfExtents;
+        }
+        /// <summary>
+        /// Gets the shared avoidance configuration for the specified index.
+        /// </summary>
+        /// <param name="i">The index of the configuration to retreive. [Limits:  0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
+        /// <returns>The requested configuration.</returns>
+        public ObstacleAvoidanceParams GetObstacleAvoidanceParams(int i)
+        {
+            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
+            {
+                return m_obstacleQueryParams[i];
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Sets the shared avoidance configuration for the specified index.
+        /// </summary>
+        /// <param name="i">The index. [Limits: 0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
+        /// <param name="param">The new configuration.</param>
+        public void SetObstacleAvoidanceParams(int i, ObstacleAvoidanceParams param)
+        {
+            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
+            {
+                m_obstacleQueryParams[i] = param;
+            }
+        }
+        /// <summary>
+        /// Gets the velocity sample count.
+        /// </summary>
+        /// <returns>The velocity sample count.</returns>
+        public int GetVelocitySampleCount()
+        {
+            return m_velocitySampleCount;
+        }
+        /// <summary>
+        /// Gets the crowd's proximity grid.
+        /// </summary>
+        /// <returns>The crowd's proximity grid.</returns>
+        public ProximityGrid<CrowdAgent> GetGrid()
+        {
+            return m_grid;
+        }
+        /// <summary>
+        /// Gets the crowd's path request queue.
+        /// </summary>
+        /// <returns>The crowd's path request queue.</returns>
+        public PathQueue GetPathQueue()
+        {
+            return m_pathq;
+        }
+        /// <summary>
+        /// Gets the query object used by the crowd.
+        /// </summary>
+        /// <returns></returns>
+        public NavMeshQuery GetNavMeshQuery()
+        {
+            return m_navquery;
         }
 
         /// <inheritdoc/>
@@ -966,102 +1056,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 ag.Vel = Vector3.Zero;
                 ag.DVel = Vector3.Zero;
             }
-        }
-
-        /// <summary>
-        /// Gets the filter used by the crowd.
-        /// </summary>
-        /// <param name="i">Filter index</param>
-        /// <returns>The filter used by the crowd.</returns>
-        public IGraphQueryFilter GetFilter(int i)
-        {
-            return (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE) ? m_filters[i] : null;
-        }
-        /// <summary>
-        /// Sets the filter for the specified index.
-        /// </summary>
-        /// <param name="i">The index</param>
-        /// <param name="filter">The new filter</param>
-        public void SetFilter(int i, IGraphQueryFilter filter)
-        {
-            if (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE)
-            {
-                m_filters[i] = filter;
-            }
-        }
-        /// <summary>
-        /// Gets the shared avoidance configuration for the specified index.
-        /// </summary>
-        /// <param name="i">The index of the configuration to retreive. [Limits:  0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
-        /// <returns>The requested configuration.</returns>
-        public ObstacleAvoidanceParams GetObstacleAvoidanceParams(int i)
-        {
-            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
-            {
-                return m_obstacleQueryParams[i];
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Sets the shared avoidance configuration for the specified index.
-        /// </summary>
-        /// <param name="i">The index. [Limits: 0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
-        /// <param name="param">The new configuration.</param>
-        public void SetObstacleAvoidanceParams(int i, ObstacleAvoidanceParams param)
-        {
-            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
-            {
-                m_obstacleQueryParams[i] = param;
-            }
-        }
-        /// <summary>
-        /// Gets the search halfExtents [(x, y, z)] used by the crowd for query operations. 
-        /// </summary>
-        /// <returns>The search halfExtents used by the crowd. [(x, y, z)]</returns>
-        public Vector3 GetQueryHalfExtents()
-        {
-            return m_agentPlacementHalfExtents;
-        }
-        /// <summary>
-        /// Same as getQueryHalfExtents. Left to maintain backwards compatibility.
-        /// </summary>
-        /// <returns>The search halfExtents used by the crowd. [(x, y, z)]</returns>
-        public Vector3 GetQueryExtents()
-        {
-            return m_agentPlacementHalfExtents;
-        }
-        /// <summary>
-        /// Gets the velocity sample count.
-        /// </summary>
-        /// <returns>The velocity sample count.</returns>
-        public int GetVelocitySampleCount()
-        {
-            return m_velocitySampleCount;
-        }
-        /// <summary>
-        /// Gets the crowd's proximity grid.
-        /// </summary>
-        /// <returns>The crowd's proximity grid.</returns>
-        public ProximityGrid<CrowdAgent> GetGrid()
-        {
-            return m_grid;
-        }
-        /// <summary>
-        /// Gets the crowd's path request queue.
-        /// </summary>
-        /// <returns>The crowd's path request queue.</returns>
-        public PathQueue GetPathQueue()
-        {
-            return m_pathq;
-        }
-        /// <summary>
-        /// Gets the query object used by the crowd.
-        /// </summary>
-        /// <returns></returns>
-        public NavMeshQuery GetNavMeshQuery()
-        {
-            return m_navquery;
         }
     }
 }

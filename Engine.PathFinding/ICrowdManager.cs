@@ -9,25 +9,22 @@ namespace Engine.PathFinding
     /// <typeparam name="TAgent">Agent type</typeparam>
     /// <typeparam name="TCrowdAgent">Crowd agent type</typeparam>
     /// <typeparam name="TCrowdAgentParams">Crowd agent parameters</typeparam>
-    public interface ICrowdManager<TCrowd, TAgent, TCrowdAgent, TCrowdAgentParams>
-        where TCrowd : ICrowd<TAgent, TCrowdAgent, TCrowdAgentParams>
+    public interface ICrowdManager<TAgent, TCrowdAgent>
         where TAgent : AgentType
         where TCrowdAgent : ICrowdAgent
-        where TCrowdAgentParams : ICrowdAgentParameters
     {
         /// <summary>
         /// Adds a new crowd
         /// </summary>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new crowd</returns>
-        TCrowd AddCrowd<TSettings>(TSettings settings) where TSettings : ICrowdParameters<TAgent>;
+        /// <param name="crowd">Crowd</param>
+        void AddCrowd<TCrowd>(TCrowd crowd) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>
         /// Request move all agents in the crowd
         /// </summary>
         /// <param name="crowd">Crowd</param>
         /// <param name="agent">Agent type</param>
         /// <param name="p">Destination position</param>
-        void RequestMoveCrowd(TCrowd crowd, TAgent agent, Vector3 p);
+        void RequestMoveCrowd<TCrowd>(TCrowd crowd, Vector3 p) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>
         /// Request move a single crowd agent
         /// </summary>
@@ -35,7 +32,7 @@ namespace Engine.PathFinding
         /// <param name="crowdAgent">Agent</param>
         /// <param name="agent">Agent type</param>
         /// <param name="p">Destination position</param>
-        void RequestMoveAgent(TCrowd crowd, TCrowdAgent crowdAgent, TAgent agent, Vector3 p);
+        void RequestMoveAgent<TCrowd>(TCrowd crowd, TCrowdAgent crowdAgent, Vector3 p) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>
         /// Updates crowd state
         /// </summary>

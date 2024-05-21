@@ -22,9 +22,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         private readonly List<CrowdNeighbour> neighbours = [];
 
-        /// <summary>
-        /// True if the agent is active, false if the agent is in an unused slot in the agent pool.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Active { get; set; } = false;
         /// <summary>
         /// The type of mesh polygon the agent is traversing.
@@ -51,9 +49,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public float DesiredSpeed { get; set; }
 
-        /// <summary>
-        /// The current agent position. [(x, y, z)]
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 NPos { get; set; }
         /// <summary>
         /// A temporary value used to accumulate agent displacement during iterative collision resolution. [(x, y, z)]
@@ -110,8 +106,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Constructor
         /// </summary>
-        public CrowdAgent()
+        /// <param name="parameters">Crowd agent parameters</param>
+        public CrowdAgent(CrowdAgentParameters parameters)
         {
+            Params = parameters;
             Corridor.Init(256);
         }
 
@@ -148,12 +146,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             neighbours.Clear();
         }
 
-        /// <summary>
-        /// Submits a new move request for the specified agent.
-        /// </summary>
-        /// <param name="r">The position's polygon reference.</param>
-        /// <param name="pos">The position within the polygon.</param>
-        /// <returns>True if the request was successfully submitted.</returns>
+        /// <inheritdoc/>
         public bool RequestMoveTarget(int r, Vector3 pos)
         {
             if (r == 0)
@@ -177,11 +170,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// <summary>
-        /// Submits a new move request for the specified agent.
-        /// </summary>
-        /// <param name="vel">The movement velocity. [(x, y, z)]</param>
-        /// <returns>True if the request was successfully submitted.</returns>
+        /// <inheritdoc/>
         public bool RequestMoveVelocity(Vector3 vel)
         {
             // Initialize request.
@@ -193,10 +182,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// <summary>
-        /// Resets any request for the specified agent.
-        /// </summary>
-        /// <returns>True if the request was successfully reseted.</returns>
+        /// <inheritdoc/>
         public bool ResetMoveTarget()
         {
             // Initialize request.
@@ -263,7 +249,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Returns the distance to goal
         /// </summary>
         /// <param name="range">Range to goal</param>
-        public float GetDistanceToGoal(float range)
+        private float GetDistanceToGoal(float range)
         {
             if (Corners.Count <= 0)
             {
@@ -282,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Calculates the smooth steer direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        public void CalcSmoothSteerDirection(out Vector3 dir)
+        private void CalcSmoothSteerDirection(out Vector3 dir)
         {
             dir = Vector3.Zero;
 
@@ -318,7 +304,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Calculates the straigh steer direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        public void CalcStraightSteerDirection(out Vector3 dir)
+        private void CalcStraightSteerDirection(out Vector3 dir)
         {
             dir = Vector3.Zero;
 

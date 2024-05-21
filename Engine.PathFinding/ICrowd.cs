@@ -1,9 +1,4 @@
 ﻿using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
@@ -13,18 +8,28 @@ namespace Engine.PathFinding
     /// <typeparam name="TAgent">Agent type</typeparam>
     /// <typeparam name="TCrowdAgent">Crowd agent type</typeparam>
     /// <typeparam name="TCrowdAgentParams">Crowd agent parameters</typeparam>
-    public interface ICrowd<TAgent, TCrowdAgent, TCrowdAgentParams>
+    public interface ICrowd<TAgent, TCrowdAgent>
         where TAgent : AgentType
         where TCrowdAgent : ICrowdAgent
-        where TCrowdAgentParams : ICrowdAgentParameters
     {
+        /// <summary>
+        /// Agent type
+        /// </summary>
+        public TAgent Agent { get; }
+
+        /// <summary>
+        /// Initializes the crowd graph
+        /// </summary>
+        /// <param name="graph">Graph</param>
+        void Initialize(IGraph graph);
+
         /// <summary>
         /// Adds a new agent to the crowd.
         /// </summary>
         /// <param name="pos">The requested position of the agent.</param>
         /// <param name="param">The configutation of the agent.</param>
         /// <returns>The new agent.</returns>
-        TCrowdAgent AddAgent(Vector3 pos, TCrowdAgentParams param);
+        void AddAgent(TCrowdAgent ag, Vector3 pos);
         /// <summary>
         /// Removes the agent from the crowd.
         /// </summary>
@@ -40,6 +45,29 @@ namespace Engine.PathFinding
         /// </summary>
         /// <returns>The collection of active agents.</returns>
         TCrowdAgent[] GetActiveAgents();
+
+        /// <summary>
+        /// Gets the filter used by the crowd.
+        /// </summary>
+        /// <param name="i">Filter index</param>
+        /// <returns>The filter used by the crowd.</returns>
+        IGraphQueryFilter GetFilter(int i);
+        /// <summary>
+        /// Sets the filter for the specified index.
+        /// </summary>
+        /// <param name="i">The index</param>
+        /// <param name="filter">The new filter</param>
+        void SetFilter(int i, IGraphQueryFilter filter);
+        /// <summary>
+        /// Gets the search halfExtents [(x, y, z)] used by the crowd for query operations. 
+        /// </summary>
+        /// <returns>The search halfExtents used by the crowd. [(x, y, z)]</returns>
+        Vector3 GetQueryHalfExtents();
+        /// <summary>
+        /// Same as getQueryHalfExtents. Left to maintain backwards compatibility.
+        /// </summary>
+        /// <returns>The search halfExtents used by the crowd. [(x, y, z)]</returns>
+        Vector3 GetQueryExtents();
 
         /// <summary>
         /// Updates the steering and positions of all agents.
