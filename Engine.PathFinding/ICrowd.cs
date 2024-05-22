@@ -7,8 +7,7 @@ namespace Engine.PathFinding
     /// </summary>
     /// <typeparam name="TAgent">Agent type</typeparam>
     /// <typeparam name="TCrowdAgent">Crowd agent type</typeparam>
-    /// <typeparam name="TCrowdAgentParams">Crowd agent parameters</typeparam>
-    public interface ICrowd<TAgent, TCrowdAgent>
+    public interface ICrowd<out TAgent, TCrowdAgent>
         where TAgent : AgentType
         where TCrowdAgent : ICrowdAgent
     {
@@ -26,9 +25,8 @@ namespace Engine.PathFinding
         /// <summary>
         /// Adds a new agent to the crowd.
         /// </summary>
-        /// <param name="pos">The requested position of the agent.</param>
-        /// <param name="param">The configutation of the agent.</param>
-        /// <returns>The new agent.</returns>
+        /// <param name="ag">Crowd agent</param>
+        /// <param name="pos">Agent position</param>
         void AddAgent(TCrowdAgent ag, Vector3 pos);
         /// <summary>
         /// Removes the agent from the crowd.

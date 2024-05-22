@@ -137,6 +137,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     AdaptiveDepth = 5
                 });
             }
+
+            Agent = settings.Agent;
         }
 
         /// <summary>

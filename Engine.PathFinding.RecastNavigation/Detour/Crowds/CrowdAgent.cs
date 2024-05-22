@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The agent's configuration parameters.
         /// </summary>
-        public CrowdAgentParameters Params { get; set; } = new();
+        public CrowdAgentParameters Params { get; private set; }
 
         /// <summary>
         /// The local path corridor corners for the agent.
@@ -111,39 +111,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             Params = parameters;
             Corridor.Init(256);
-        }
-
-        /// <summary>
-        /// The known neighbors of the agent.
-        /// </summary>
-        public IEnumerable<CrowdNeighbour> GetNeighbours()
-        {
-            return [.. neighbours];
-        }
-        /// <summary>
-        /// Adds new neighbour to list, based on distance (nearest first)
-        /// </summary>
-        /// <param name="ag">Agent</param>
-        /// <param name="dist">Distance</param>
-        public void AddNeighbour(CrowdAgent ag, float dist)
-        {
-            neighbours.Add(new CrowdNeighbour()
-            {
-                Agent = ag,
-                Dist = dist,
-            });
-
-            if (neighbours.Count > 1)
-            {
-                neighbours.Sort((n1, n2) => n1.Dist.CompareTo(n2.Dist));
-            }
-        }
-        /// <summary>
-        /// Clears the neighbour list
-        /// </summary>
-        public void ClearNeighbours()
-        {
-            neighbours.Clear();
         }
 
         /// <inheritdoc/>
@@ -194,6 +161,39 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
 
             return true;
+        }
+
+        /// <summary>
+        /// The known neighbors of the agent.
+        /// </summary>
+        public IEnumerable<CrowdNeighbour> GetNeighbours()
+        {
+            return [.. neighbours];
+        }
+        /// <summary>
+        /// Adds new neighbour to list, based on distance (nearest first)
+        /// </summary>
+        /// <param name="ag">Agent</param>
+        /// <param name="dist">Distance</param>
+        public void AddNeighbour(CrowdAgent ag, float dist)
+        {
+            neighbours.Add(new()
+            {
+                Agent = ag,
+                Dist = dist,
+            });
+
+            if (neighbours.Count > 1)
+            {
+                neighbours.Sort((n1, n2) => n1.Dist.CompareTo(n2.Dist));
+            }
+        }
+        /// <summary>
+        /// Clears the neighbour list
+        /// </summary>
+        public void ClearNeighbours()
+        {
+            neighbours.Clear();
         }
 
         /// <summary>

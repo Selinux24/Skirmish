@@ -5,10 +5,8 @@ namespace Engine.PathFinding
     /// <summary>
     /// Crowd manager interface
     /// </summary>
-    /// <typeparam name="TCrowd">Crowd type</typeparam>
     /// <typeparam name="TAgent">Agent type</typeparam>
     /// <typeparam name="TCrowdAgent">Crowd agent type</typeparam>
-    /// <typeparam name="TCrowdAgentParams">Crowd agent parameters</typeparam>
     public interface ICrowdManager<TAgent, TCrowdAgent>
         where TAgent : AgentType
         where TCrowdAgent : ICrowdAgent
@@ -22,7 +20,6 @@ namespace Engine.PathFinding
         /// Request move all agents in the crowd
         /// </summary>
         /// <param name="crowd">Crowd</param>
-        /// <param name="agent">Agent type</param>
         /// <param name="p">Destination position</param>
         void RequestMoveCrowd<TCrowd>(TCrowd crowd, Vector3 p) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>
@@ -30,7 +27,6 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="crowd">Crowd</param>
         /// <param name="crowdAgent">Agent</param>
-        /// <param name="agent">Agent type</param>
         /// <param name="p">Destination position</param>
         void RequestMoveAgent<TCrowd>(TCrowd crowd, TCrowdAgent crowdAgent, Vector3 p) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>

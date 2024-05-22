@@ -4,7 +4,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Configuration parameters for a crowd agent.
     /// </summary>
-    public class CrowdAgentParameters
+    public struct CrowdAgentParameters
     {
         /// <summary>
         /// Agent radius.
@@ -56,10 +56,5 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// The index of the query filter used by this agent.
         /// </summary>
         public int QueryFilterTypeIndex { get; set; }
-
-        /// <summary>
-        /// User defined data attached to the agent.
-        /// </summary>
-        public object UserData { get; set; }
     }
 }
