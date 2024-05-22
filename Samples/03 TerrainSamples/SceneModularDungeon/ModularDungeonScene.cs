@@ -52,6 +52,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly Vector3 cameraInitialInterest = new(1001, 1000, 1000);
 
         private SceneLightPoint torch = null;
+        private readonly List<LightController> lightControllers = [];
 
         private ModularScenery scenery = null;
 
@@ -224,7 +225,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             NavigationGraph?.UpdateObstacles((state) =>
             {
-                if(state == GraphUpdateStates.Updated)
+                if (state == GraphUpdateStates.Updated)
                 {
                     debugDrawers.DrawGraph();
                     debugDrawers.DrawObstacles(obstacles);
@@ -245,6 +246,8 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 UpdateStateMap();
             }
+
+            lightControllers.ForEach(l => l.Update(gameTime));
         }
         private void UpdateStatePlayer(IGameTime gameTime)
         {
@@ -715,14 +718,6 @@ namespace TerrainSamples.SceneModularDungeon
             else
             {
                 Camera.Goto(Camera.Position);
-            }
-
-            if (torch.Enabled)
-            {
-                torch.Position =
-                    Camera.Position +
-                    (Camera.Direction * 0.5f) +
-                    (Camera.Left * 0.2f);
             }
 
             if (Game.Input.KeyJustReleased(Keys.L))
@@ -1251,8 +1246,7 @@ namespace TerrainSamples.SceneModularDungeon
             Camera.SetPosition(cameraInitialPosition);
             Camera.SetInterest(cameraInitialInterest);
 
-            Lights.ClearPointLights();
-            Lights.ClearSpotLights();
+            ClearLevelLights();
 
             soundEffectsManager.Stop();
 
@@ -1308,7 +1302,7 @@ namespace TerrainSamples.SceneModularDungeon
                 Camera.SetPosition(pos);
                 Camera.SetInterest(pos + dir);
 
-                Lights.Add(torch);
+                InitializeLevelLights();
 
                 soundEffectsManager.Start(0.5f);
 
@@ -1464,6 +1458,47 @@ namespace TerrainSamples.SceneModularDungeon
                     obstacles.Add(new ObstacleInfo { Index = index, Item = human[i], Obstacle = bc });
                 }
             }
+        }
+
+        private void ClearLevelLights()
+        {
+            Lights.ClearPointLights();
+            Lights.ClearSpotLights();
+            lightControllers.Clear();
+        }
+        private void InitializeLevelLights()
+        {
+            var controllers = Lights.PointLights
+                .Where(l => l.Name.Contains("Dn_Torch") || l.Name.Contains("Dn_Temple"))
+                .Select(l =>
+                {
+                    Vector3 orig = l.Position;
+
+                    return new LightController()
+                    {
+                        Light = l,
+                        PositionFnc = () =>
+                        {
+                            return orig;
+                        },
+                    };
+                });
+
+            lightControllers.AddRange(controllers);
+
+            Lights.Add(torch);
+
+            lightControllers.Add(new()
+            {
+                Light = torch,
+                PositionFnc = () =>
+                {
+                    return
+                        Camera.Position +
+                        (Camera.Direction * 0.5f) +
+                        (Camera.Left * 0.2f);
+                },
+            });
         }
 
         private void ClearNPCs()
