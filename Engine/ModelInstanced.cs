@@ -526,23 +526,25 @@ namespace Engine
         /// <param name="positions">New positions</param>
         public void SetPositions(IEnumerable<Vector3> positions)
         {
-            if (positions?.Any() == true && instancesAll?.Length > 0)
+            if ((positions?.Any()) != true || !(instancesAll?.Length > 0))
             {
-                for (int i = 0; i < instancesAll.Length; i++)
-                {
-                    var instance = instancesAll[i];
+                return;
+            }
 
-                    if (i < positions.Count())
-                    {
-                        instance.Manipulator.SetPosition(positions.ElementAt(i));
-                        instance.Active = true;
-                        instance.Visible = true;
-                    }
-                    else
-                    {
-                        instance.Active = false;
-                        instance.Visible = false;
-                    }
+            for (int i = 0; i < instancesAll.Length; i++)
+            {
+                var instance = instancesAll[i];
+
+                if (i < positions.Count())
+                {
+                    instance.Manipulator.SetPosition(positions.ElementAt(i));
+                    instance.Active = true;
+                    instance.Visible = true;
+                }
+                else
+                {
+                    instance.Active = false;
+                    instance.Visible = false;
                 }
             }
         }
@@ -552,23 +554,25 @@ namespace Engine
         /// <param name="transforms">Transform matrix list</param>
         public void SetTransforms(IEnumerable<Matrix> transforms)
         {
-            if (transforms?.Any() == true && instancesAll?.Length > 0)
+            if ((transforms?.Any()) != true || !(instancesAll?.Length > 0))
             {
-                for (int i = 0; i < instancesAll.Length; i++)
-                {
-                    var instance = instancesAll[i];
+                return;
+            }
 
-                    if (i < transforms.Count())
-                    {
-                        instance.Manipulator.SetTransform(transforms.ElementAt(i));
-                        instance.Active = true;
-                        instance.Visible = true;
-                    }
-                    else
-                    {
-                        instance.Active = false;
-                        instance.Visible = false;
-                    }
+            for (int i = 0; i < instancesAll.Length; i++)
+            {
+                var instance = instancesAll[i];
+
+                if (i < transforms.Count())
+                {
+                    instance.Manipulator.SetTransform(transforms.ElementAt(i));
+                    instance.Active = true;
+                    instance.Visible = true;
+                }
+                else
+                {
+                    instance.Active = false;
+                    instance.Visible = false;
                 }
             }
         }

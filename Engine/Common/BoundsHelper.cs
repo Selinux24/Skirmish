@@ -50,16 +50,21 @@ namespace Engine.Common
         /// <summary>
         /// Invalidates the internal state
         /// </summary>
-        public void Invalidate()
+        /// <param name="manipulator">Manipulator</param>
+        public void Invalidate(ITransform manipulator)
         {
-            updateBoundingBox = true;
             updateBoundingSphere = true;
+            updateBoundingBox = true;
             updateOrientedBox = true;
+
+            GetBoundingSphere(manipulator);
+            GetBoundingBox(manipulator);
         }
         /// <summary>
         /// Checks de initial bounds state value
         /// </summary>
-        private void CheckBoundsState()
+        /// <param name="manipulator">Manipulator</param>
+        private void CheckBoundsState(ITransform manipulator)
         {
             if (boundsSalt == bounds.Salt)
             {
@@ -69,7 +74,7 @@ namespace Engine.Common
             //State changed, update internal state
             boundsSalt = bounds.Salt;
 
-            Invalidate();
+            Invalidate(manipulator);
         }
 
         /// <summary>
@@ -80,7 +85,7 @@ namespace Engine.Common
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(ITransform manipulator, bool refresh = false)
         {
-            CheckBoundsState();
+            CheckBoundsState(manipulator);
 
             if (updateBoundingSphere || refresh)
             {
@@ -99,7 +104,7 @@ namespace Engine.Common
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(ITransform manipulator, bool refresh = false)
         {
-            CheckBoundsState();
+            CheckBoundsState(manipulator);
 
             if (updateBoundingBox || refresh)
             {
@@ -118,7 +123,7 @@ namespace Engine.Common
         /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
         public OrientedBoundingBox GetOrientedBoundingBox(ITransform manipulator, bool refresh = false)
         {
-            CheckBoundsState();
+            CheckBoundsState(manipulator);
 
             if (updateOrientedBox || refresh)
             {

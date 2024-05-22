@@ -402,8 +402,8 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
-            boundsHelper.Invalidate();
             geometryHelper.Invalidate();
+            boundsHelper.Invalidate(Manipulator);
         }
 
         /// <inheritdoc/>
