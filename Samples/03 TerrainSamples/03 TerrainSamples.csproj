@@ -787,7 +787,7 @@
     <Content Include="SceneModularDungeon\Resources\MDP\Window.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\OnePageDungeons\basicDungeon.config">
+    <Content Include="SceneModularDungeon\Resources\AssetCollections\basicDungeon.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.json">
@@ -814,7 +814,7 @@
     <Content Include="SceneModularDungeon\Resources\OnePageDungeons\maze_of_the_purple_god.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\OnePageDungeons\MDP.config">
+    <Content Include="SceneModularDungeon\Resources\AssetCollections\MDP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\OnePageDungeons\ragerock_fortress.json">
@@ -823,7 +823,7 @@
     <Content Include="SceneModularDungeon\Resources\OnePageDungeons\ragerock_fortress.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\OnePageDungeons\UMRP.config">
+    <Content Include="SceneModularDungeon\Resources\AssetCollections\UMRP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\UMRP\Arch_Gothic.mtl">

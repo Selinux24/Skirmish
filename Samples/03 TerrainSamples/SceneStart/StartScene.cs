@@ -235,9 +235,9 @@ namespace TerrainSamples.SceneStart
             {
                 string mapFile = mapFiles[i];
                 string mapTexture = Path.ChangeExtension(mapFile, ".png");
-                //string mapCnf = "OnePageDungeons/basicDungeon.config"
-                //string mapCnf = "OnePageDungeons/UMRP.config"
-                string mapCnf = "OnePageDungeons/MDP.config";
+                //string mapCnf = "AssetCollections/basicDungeon.json"
+                //string mapCnf = "AssetCollections/UMRP.json"
+                string mapCnf = "AssetCollections/MDP.json";
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.ContentPath = resourcesFolder;

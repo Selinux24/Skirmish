@@ -641,6 +641,8 @@ namespace TerrainSamples.SceneModularDungeon
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = maxDistance;
             Camera.Mode = CameraModes.Free;
+            Camera.SetPosition(cameraInitialPosition);
+            Camera.SetInterest(cameraInitialInterest);
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {

@@ -121,7 +121,7 @@ namespace TerrainSamples.SceneModularDungeon
                 transform.Rotate(gameTime, velX, -velY, 0);
             }
 #else
-            Transform.Rotate(gameTime, velX, -velY, 0);
+            transform.Rotate(gameTime, velX, -velY, 0);
 #endif
 
             transform.Update(gameTime);
