@@ -7,9 +7,15 @@ namespace TerrainSamples.SceneModularDungeon
     /// <summary>
     /// Light basic controller
     /// </summary>
-    class LightController
+    internal class LightController
     {
+        /// <summary>
+        /// Random generator
+        /// </summary>
         private readonly Random rnd = Helper.NewGenerator();
+        /// <summary>
+        /// Initial controller time
+        /// </summary>
         private readonly float initialTime = Helper.RandomGenerator.NextFloat(0, 100);
 
         /// <summary>

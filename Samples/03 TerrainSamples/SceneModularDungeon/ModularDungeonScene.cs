@@ -47,9 +47,9 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly Color ambientDown = new(72, 72, 255, 255);
 
         private Player playerAgentType = null;
-        private readonly Color3 agentTorchLight = new Color(255, 249, 224).RGB();
+        private readonly Color3 agentTorchLight = new Color(255, 201, 14).RGB();
         private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
-        private readonly Vector3 cameraInitialInterest = new(1001, 1000, 1000);
+        private readonly Vector3 cameraInitialInterest = new(-1001, 1000, 1000);
 
         private SceneLightPoint torch = null;
         private readonly List<LightController> lightControllers = [];
@@ -261,7 +261,7 @@ namespace TerrainSamples.SceneModularDungeon
             UpdateDebugInput(gameTime);
             UpdateGraphInput();
             UpdateRatInput();
-            UpdatePlayerInput();
+            UpdatePlayerInput(gameTime);
             UpdateEntitiesInput();
         }
         private void UpdateStateMap()
@@ -413,7 +413,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             debugDrawers = await AddComponent<DebugDrawers>("debugDrawers", "debugDrawers");
 
-            playerAgentType = new Player()
+            playerAgentType = new()
             {
                 Name = "Player",
                 Height = 1.5f,
@@ -424,7 +424,7 @@ namespace TerrainSamples.SceneModularDungeon
                 VelocitySlow = 1f,
             };
 
-            ratAgentType = new Player()
+            ratAgentType = new()
             {
                 Name = "Rat",
                 Height = 0.2f,
@@ -574,6 +574,8 @@ namespace TerrainSamples.SceneModularDungeon
 
                 soundEffectsManager.Start(0.5f);
 
+                playerController = new(this, playerAgentType);
+
                 ChangeToLevel(null);
             }
             catch (AggregateException ex)
@@ -625,7 +627,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 0.5f);
 
-            torch = new SceneLightPoint("player_torch", true, agentTorchLight, agentTorchLight, true, desc);
+            torch = new("player_torch", true, agentTorchLight, agentTorchLight, true, desc);
             Lights.Add(torch);
         }
         private void InitializePostProcessing()
@@ -638,11 +640,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = maxDistance;
-            Camera.MovementDelta = playerAgentType.Velocity;
-            Camera.SlowMovementDelta = playerAgentType.VelocitySlow;
             Camera.Mode = CameraModes.Free;
-            Camera.SetPosition(cameraInitialPosition);
-            Camera.SetInterest(cameraInitialInterest);
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {
@@ -668,57 +666,17 @@ namespace TerrainSamples.SceneModularDungeon
                     {
                         var obb = o.Item.GetOrientedBoundingBox();
                         o.Index = AddObstacle(obb);
-                        o.Obstacle = obb;
+                        o.Bounds = obb;
                     }
                 }
             }
         }
 
-        private void UpdatePlayerInput()
+        private PlayerController playerController = null;
+
+        private void UpdatePlayerInput(IGameTime gameTime)
         {
-            if (Game.Input.KeyPressed(Keys.A))
-            {
-                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
-            }
-
-            if (Game.Input.KeyPressed(Keys.D))
-            {
-                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
-            }
-
-            if (Game.Input.KeyPressed(Keys.W))
-            {
-                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
-            }
-
-            if (Game.Input.KeyPressed(Keys.S))
-            {
-                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
-            }
-
-#if DEBUG
-            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
-            {
-                Camera.RotateMouse(
-                    Game.GameTime,
-                    Game.Input.MouseXDelta,
-                    Game.Input.MouseYDelta);
-            }
-#else
-            Camera.RotateMouse(
-                Game.GameTime,
-                Game.Input.MouseXDelta,
-                Game.Input.MouseYDelta);
-#endif
-
-            if (Walk(playerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
-            {
-                Camera.Goto(walkerPos);
-            }
-            else
-            {
-                Camera.Goto(Camera.Position);
-            }
+            playerController.Update(gameTime);
 
             if (Game.Input.KeyJustReleased(Keys.L))
             {
@@ -927,7 +885,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void UpdateEntities()
         {
-            var sphere = new BoundingSphere(Camera.Position, doorDistance);
+            var sphere = new BoundingSphere(playerController.Position, doorDistance);
 
             var objTypes =
                 ObjectTypes.Entrance |
@@ -1243,8 +1201,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             gameReady = false;
 
-            Camera.SetPosition(cameraInitialPosition);
-            Camera.SetInterest(cameraInitialInterest);
+            playerController.Initialize(cameraInitialPosition, cameraInitialInterest);
 
             ClearLevelLights();
 
@@ -1299,8 +1256,7 @@ namespace TerrainSamples.SceneModularDungeon
                 Vector3 pos = scenery.CurrentLevel.StartPosition;
                 Vector3 dir = scenery.CurrentLevel.LookingVector;
                 pos.Y += playerAgentType.Height;
-                Camera.SetPosition(pos);
-                Camera.SetInterest(pos + dir);
+                playerController.Initialize(pos, pos + dir);
 
                 InitializeLevelLights();
 
@@ -1440,7 +1396,7 @@ namespace TerrainSamples.SceneModularDungeon
                 int index = AddObstacle(obb);
                 if (index >= 0)
                 {
-                    obstacles.Add(new ObstacleInfo { Index = index, Item = item, Obstacle = obb });
+                    obstacles.Add(new ObstacleInfo { Index = index, Item = item, Bounds = obb });
                 }
             }
 
@@ -1455,7 +1411,7 @@ namespace TerrainSamples.SceneModularDungeon
                 int index = AddObstacle(bc);
                 if (index >= 0)
                 {
-                    obstacles.Add(new ObstacleInfo { Index = index, Item = human[i], Obstacle = bc });
+                    obstacles.Add(new ObstacleInfo { Index = index, Item = human[i], Bounds = bc });
                 }
             }
         }
@@ -1494,9 +1450,9 @@ namespace TerrainSamples.SceneModularDungeon
                 PositionFnc = () =>
                 {
                     return
-                        Camera.Position +
-                        (Camera.Direction * 0.5f) +
-                        (Camera.Left * 0.2f);
+                        playerController.Position +
+                        (playerController.Direction * 0.5f) +
+                        (playerController.Left * 0.2f);
                 },
             });
         }

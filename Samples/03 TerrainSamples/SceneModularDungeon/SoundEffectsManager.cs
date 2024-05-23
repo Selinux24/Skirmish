@@ -3,7 +3,6 @@ using Engine.Audio;
 using Engine.Common;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace TerrainSamples.SceneModularDungeon
 {
@@ -258,7 +257,6 @@ namespace TerrainSamples.SceneModularDungeon
             effect.Volume = volume;
             effect.Play();
         }
-
 
         public TimeSpan PlayWind(IManipulator3D man)
         {

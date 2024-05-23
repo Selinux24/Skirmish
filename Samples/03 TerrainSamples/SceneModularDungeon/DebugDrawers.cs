@@ -115,7 +115,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             obstacleDrawer.Clear(obstacleColor);
 
-            foreach (var obstacle in obstacles.Select(o => o.Obstacle))
+            foreach (var obstacle in obstacles.Select(o => o.Bounds))
             {
                 IEnumerable<Triangle> obstacleTris;
 
