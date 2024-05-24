@@ -109,7 +109,7 @@ namespace Engine
         /// <param name="planeHeight">Plane height</param>
         private void InitializeBuffers(string name, float planeSize, float planeHeight)
         {
-            var plane = GeometryUtil.CreateXZPlane(planeSize, planeHeight);
+            var plane = GeometryUtil.CreateXZPlane(planeSize, planeSize, planeHeight);
 
             var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
             var indices = plane.Indices;

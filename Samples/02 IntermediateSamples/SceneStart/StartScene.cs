@@ -86,7 +86,7 @@ namespace IntermediateSamples.SceneStart
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", UIPanelDescription.Default(Color.Transparent));
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
-            mainPanel.SetGridLayout(GridLayout.FixedRows(2));
+            mainPanel.SetGridLayout(GridLayout.FixedRows(3));
 
             var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 24, true);
 
@@ -109,18 +109,28 @@ namespace IntermediateSamples.SceneStart
             var panDeferredLights = await AddButtonPanel<SceneDeferredLights.DeferredLightsScene>(buttonDesc, "Deferred Lighting");
             var panInstancing = await AddButtonPanel<SceneInstancing.InstancingScene>(buttonDesc, "Instancing");
             var panTransforms = await AddButtonPanel<SceneTransforms.TransformsScene>(buttonDesc, "Transforms");
+            var panGardener = await AddButtonPanel<SceneGardener.GardenerScene>(buttonDesc, "Gardener");
             var panExit = await AddButtonExit(exitDesc, "Exit");
 
             mainPanel.AddChild(panSimpleAnimation);
-            mainPanel.AddChild(panTransforms);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", EmtpyNameString, emptyDesc));
-            mainPanel.AddChild(panMixamo);
-            mainPanel.AddChild(panDeferredLights);
-
-            mainPanel.AddChild(panSmoothTransitions);
-            mainPanel.AddChild(panAnimationParts);
-            mainPanel.AddChild(panInstancing);
+            mainPanel.AddChild(panTransforms);
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty2", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panGardener);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", EmtpyNameString, emptyDesc));
+
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panMixamo);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty5", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panDeferredLights);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty6", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panSmoothTransitions);
+
+            mainPanel.AddChild(panAnimationParts);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty7", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(panInstancing);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty8", EmtpyNameString, emptyDesc));
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty9", EmtpyNameString, emptyDesc));
             mainPanel.AddChild(panExit);
         }
         private async Task<UIPanel> AddButtonPanel<T>(UIButtonDescription desc, string text) where T : Scene

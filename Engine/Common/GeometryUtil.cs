@@ -2639,17 +2639,18 @@ namespace Engine.Common
         /// <summary>
         /// Creates a XZ plane
         /// </summary>
-        /// <param name="size">Plane size</param>
+        /// <param name="sizeX">Plane X size</param>
+        /// <param name="sizeZ">Plane Z size</param>
         /// <param name="height">Plane height</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateXZPlane(float size, float height)
+        public static GeometryDescriptor CreateXZPlane(float sizeX, float sizeZ, float height)
         {
             Vector3[] vertices =
             [
-                new (-size*0.5f, +height, -size*0.5f),
-                new (-size*0.5f, +height, +size*0.5f),
-                new (+size*0.5f, +height, -size*0.5f),
-                new (+size*0.5f, +height, +size*0.5f),
+                new (-sizeX*0.5f, +height, -sizeZ*0.5f),
+                new (-sizeX*0.5f, +height, +sizeZ*0.5f),
+                new (+sizeX*0.5f, +height, -sizeZ*0.5f),
+                new (+sizeX*0.5f, +height, +sizeZ*0.5f),
             ];
 
             Vector3[] normals =
@@ -2662,10 +2663,10 @@ namespace Engine.Common
 
             Vector2[] uvs =
             [
-                new (0.0f, 0.0f),
-                new (0.0f, size),
-                new (size, 0.0f),
-                new (size, size),
+                new (0f, 0f),
+                new (1f, 0f),
+                new (0f, 1f),
+                new (1f, 1f),
             ];
 
             uint[] indices =
@@ -2691,7 +2692,19 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreatePlane(float size, float height, Vector3 normal)
         {
-            var geometry = CreateXZPlane(size, height);
+            return CreatePlane(size, size, height, normal);
+        }
+        /// <summary>
+        /// Creates a plane with the specified normal
+        /// </summary>
+        /// <param name="sizeX">Plane X size</param>
+        /// <param name="sizeZ">Plane Z size</param>
+        /// <param name="height">Plane height</param>
+        /// <param name="normal">Plane normal</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePlane(float sizeX, float sizeZ, float height, Vector3 normal)
+        {
+            var geometry = CreateXZPlane(sizeX, sizeZ, height);
 
             var rotNormal = Vector3.Normalize(normal);
             if (rotNormal == Vector3.Up)

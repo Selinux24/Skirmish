@@ -11,6 +11,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SceneGardener\Resources\dirt002.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_d0.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_d1.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_d2.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_n0.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_n1.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_n2.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_p0.png" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_p1.png" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_p2.png" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_v0.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_v1.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\grass_v2.dds" />
+    <None Remove="SceneGardener\Resources\Foliage\map.png" />
+    <None Remove="SceneGardener\Resources\Foliage\mapTest.png" />
+    <None Remove="SceneGardener\Resources\normal001.dds" />
     <None Remove="SceneTransforms\Resources\terrain.png" />
     <None Remove="SceneTransforms\Resources\terrain_nmap.png" />
     <None Remove="SceneTransforms\Resources\Tree1.dae" />
@@ -104,6 +120,54 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneDeferredLights\Resources\Vegetation\grass.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\dirt002.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_p0.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_p1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_p2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_d0.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_d1.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_d2.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_n0.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_n1.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_n2.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_v0.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_v1.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\grass_v2.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\mapTest.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\Foliage\map.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneGardener\Resources\normal001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneInstancing\Resources\Ground\gravel_01_diffuse.jpg">

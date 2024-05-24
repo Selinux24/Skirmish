@@ -65,7 +65,7 @@ namespace IntermediateSamples.SceneTransforms
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
-            title.Text = "Mixamo Model";
+            title.Text = "Transforms";
             runtime.Text = "";
             messages.Text = "";
 
