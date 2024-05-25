@@ -43,15 +43,15 @@ namespace Engine.PathFinding.Tests
             agentDefault = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f };
             agentInclined = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
 
-            var pZero = GeometryUtil.CreateXZPlane(10, hZero);
+            var pZero = GeometryUtil.CreateXZPlane(10, 10, hZero);
             zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
             pointZero = Vector3.Up * hZero;
 
-            var pOne = GeometryUtil.CreateXZPlane(10, hOne);
+            var pOne = GeometryUtil.CreateXZPlane(10, 10, hOne);
             hOnePlaneTris = Triangle.ComputeTriangleList(pOne.Vertices, pOne.Indices);
             pointOne = Vector3.Up * hOne;
 
-            var pTwo = GeometryUtil.CreateXZPlane(10, hTwo);
+            var pTwo = GeometryUtil.CreateXZPlane(10, 10, hTwo);
             hTwoPlaneTris = Triangle.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
             pointTwo = Vector3.Up * hTwo;
 
