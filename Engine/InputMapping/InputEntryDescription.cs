@@ -1,6 +1,5 @@
-﻿using Engine;
-
-namespace TerrainSamples.Mapping
+﻿
+namespace Engine.InputMapping
 {
     /// <summary>
     /// Input entry description

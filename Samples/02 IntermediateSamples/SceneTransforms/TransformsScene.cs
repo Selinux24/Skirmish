@@ -15,6 +15,13 @@ namespace IntermediateSamples.SceneTransforms
         private const float l = 5f * s;
         private const float h = 0f;
 
+        private const string resourcesTerrainFolder = "Common/Terrain/";
+        private const string resourcesTerrainDiffuseTexture = resourcesTerrainFolder + "terrain.png";
+        private const string resourcesTerrainNormalMapTexture = resourcesTerrainFolder + "terrain_nmap.png";
+
+        private const string resourcesTreeFolder = "Common/Trees/";
+        private const string resourcesTreeFile = "STree1.json";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea messages = null;
@@ -104,29 +111,17 @@ namespace IntermediateSamples.SceneTransforms
         }
         private async Task InitializeFloor()
         {
-            VertexData[] vertices =
-            [
-                new (){ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new (){ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new (){ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new (){ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneTransforms/resources/terrain.png";
-            mat.NormalMapTexture = "SceneTransforms/resources/terrain_nmap.png";
+            mat.DiffuseTexture = resourcesTerrainDiffuseTexture;
+            mat.NormalMapTexture = resourcesTerrainNormalMapTexture;
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
                 Instances = 9,
             };
 
@@ -143,13 +138,11 @@ namespace IntermediateSamples.SceneTransforms
         }
         private async Task InitializeTree()
         {
-            const string resourcesFolder = "SceneTransforms/Resources";
             const string modelName = "Tree1";
-            const string modelFileName = "Tree1.json";
 
             var tDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile(resourcesFolder, modelFileName),
+                Content = ContentDescription.FromFile(resourcesTreeFolder, resourcesTreeFile),
                 Optimize = true,
                 PickingHull = PickingHullTypes.Hull,
                 CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot,

@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
-namespace TerrainSamples.Mapping
+namespace Engine.InputMapping
 {
     /// <summary>
     /// Input mapper description

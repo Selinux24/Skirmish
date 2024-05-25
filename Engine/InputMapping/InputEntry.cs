@@ -1,7 +1,6 @@
-﻿using Engine;
-using System;
+﻿using System;
 
-namespace TerrainSamples.Mapping
+namespace Engine.InputMapping
 {
     /// <summary>
     /// Input entry
@@ -100,7 +99,7 @@ namespace TerrainSamples.Mapping
         /// <inheritdoc/>
         public override string ToString()
         {
-            if(entry is MouseButtons)
+            if (entry is MouseButtons)
             {
                 return $"Mouse {entry}";
             }

@@ -14,6 +14,37 @@ namespace IntermediateSamples.SceneInstancing
 {
     class InstancingScene : Scene
     {
+        private const string resourceFolder = "Common/";
+
+        private const string resourceSkyboxesFolder = resourceFolder + "skyboxes/";
+        private readonly string[] resourceSkyboxesFiles =
+        [
+            resourceSkyboxesFolder + "Sky_horiz_1_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_3_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_4_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_5_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_7_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_9_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_10_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_14_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_15_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_18_4096.jpg",
+            resourceSkyboxesFolder + "Sky_horiz_22_4096.jpg",
+        ];
+
+        private const string resourceGroundFolder = resourceFolder + "gravel/";
+        private const string resourceGroundDiffuseTexture = resourceGroundFolder + "gravel_01_diffuse.jpg";
+        private const string resourceGroundNormalMapTexture = resourceGroundFolder + "gravel_01_normal.jpg";
+
+        private const string resourceTreesFolder = resourceFolder + "Trees/";
+        private const string resourceTreeFile = "tree.json";
+
+        private const string resourceSoldierFolder = resourceFolder + "Soldier/";
+        private const string resourceSoldierFile = "soldier_anim2.json";
+
+        private const string resourceWallFolder = resourceFolder + "Wall/";
+        private const string resourceWallFile = "wall.json";
+
         private BuiltInPostProcessStateTweener postProcessingTweener;
 
         private Sprite panel = null;
@@ -106,24 +137,9 @@ namespace IntermediateSamples.SceneInstancing
         }
         private async Task InitializeSky()
         {
-            string[] paths =
-            [
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_1_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_3_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_4_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_5_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_7_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_9_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_10_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_14_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_15_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_18_4096.jpg",
-                @"SceneInstancing/resources/skyboxes/Sky_horiz_22_4096.jpg",
-            ];
+            skyboxesCount = (uint)resourceSkyboxesFiles.Length;
 
-            skyboxesCount = (uint)paths.Length;
-
-            var desc = SkydomDescription.Hemispheric(paths, Camera.FarPlaneDistance);
+            var desc = SkydomDescription.Hemispheric(resourceSkyboxesFiles, Camera.FarPlaneDistance);
 
             skydom = await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
@@ -133,30 +149,18 @@ namespace IntermediateSamples.SceneInstancing
             float h = 0f;
             int side = 5;
 
-            VertexData[] vertices =
-            [
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneInstancing/resources/ground/gravel_01_diffuse.jpg";
-            mat.NormalMapTexture = "SceneInstancing/resources/ground/gravel_01_normal.jpg";
+            mat.DiffuseTexture = resourceGroundDiffuseTexture;
+            mat.NormalMapTexture = resourceGroundNormalMapTexture;
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             var floor = await AddComponent<ModelInstanced, ModelInstancedDescription>("Floor", "Floor", desc);
@@ -189,7 +193,7 @@ namespace IntermediateSamples.SceneInstancing
                 Instances = instances,
                 BlendMode = BlendModes.OpaqueTransparent,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"SceneInstancing/Resources/Trees", @"tree.json"),
+                Content = ContentDescription.FromFile(resourceTreesFolder, resourceTreeFile),
             };
             var trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
 
@@ -233,7 +237,7 @@ namespace IntermediateSamples.SceneInstancing
                 Instances = 100,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"SceneInstancing/Resources/Soldier", @"soldier_anim2.json"),
+                Content = ContentDescription.FromFile(resourceSoldierFolder, resourceSoldierFile),
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
             troops.MaximumCount = -1;
@@ -290,7 +294,7 @@ namespace IntermediateSamples.SceneInstancing
                     Instances = 40,
                     CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneInstancing/Resources/Wall", "wall.json"),
+                    Content = ContentDescription.FromFile(resourceWallFolder, resourceWallFile),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();

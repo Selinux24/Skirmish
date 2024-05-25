@@ -11,6 +11,14 @@ namespace IntermediateSamples.SceneMixamo
 {
     public class MixamoScene : Scene
     {
+        private const string resourcesAsphaltFolder = "Common/Asphalt/";
+        private const string resourcesAsphaltDiffuseFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_diffuse.dds";
+        private const string resourcesAsphaltNormalFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_normal.dds";
+        private const string resourcesAsphaltSpecularFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_specular.dds";
+
+        private const string resourceModelFolder = "SceneMixamo/resources/";
+        private const string resourceModelFile = "TestModel.json";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea messages = null;
@@ -98,33 +106,21 @@ namespace IntermediateSamples.SceneMixamo
         }
         private async Task InitializeFloor()
         {
-            float l = 50f;
+            float l = 100f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new (){ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new (){ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new (){ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneMixamo/resources/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneMixamo/resources/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneMixamo/resources/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
+            mat.NormalMapTexture = resourcesAsphaltNormalFile;
+            mat.SpecularTexture = resourcesAsphaltSpecularFile;
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
                 Instances = 9,
             };
 
@@ -135,7 +131,7 @@ namespace IntermediateSamples.SceneMixamo
             {
                 for (int z = -1; z < 2; z++)
                 {
-                    floor[i++].Manipulator.SetPosition(x * l * 2f, h, z * l * 2f);
+                    floor[i++].Manipulator.SetPosition(x * l, h, z * l);
                 }
             }
         }
@@ -148,7 +144,7 @@ namespace IntermediateSamples.SceneMixamo
                 {
                     BlendMode = BlendModes.OpaqueTransparent,
                     CastShadow = ShadowCastingAlgorihtms.All,
-                    Content = ContentDescription.FromFile("SceneMixamo/resources/TestModel", "TestModel.json"),
+                    Content = ContentDescription.FromFile(resourceModelFolder, resourceModelFile),
                 });
 
             model.Manipulator.SetTransform(modelInitPosition, 0, MathUtil.DegreesToRadians(-90), 0, 0.1f);

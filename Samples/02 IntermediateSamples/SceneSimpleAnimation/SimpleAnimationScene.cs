@@ -13,10 +13,16 @@ namespace IntermediateSamples.SceneSimpleAnimation
 {
     public class SimpleAnimationScene : Scene
     {
-        private const string SceneResourceDoors = "SceneSimpleAnimation/Resources/Doors";
-        private const string SceneResourceLadder = "SceneSimpleAnimation/Resources/Ladder";
-        private const string SceneResourceSoldier = "SceneSimpleAnimation/Resources/Soldier";
-        private const string SceneResourceRat = "SceneSimpleAnimation/Resources/Rat";
+        private const string resourcesAsphaltFolder = "Common/Asphalt/";
+        private const string resourcesAsphaltDiffuseFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_diffuse.dds";
+        private const string resourcesAsphaltNormalFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_normal.dds";
+        private const string resourcesAsphaltSpecularFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_specular.dds";
+
+        private const string SceneResource = "Common/";
+        private const string SceneResourceDoors = SceneResource + "Doors/";
+        private const string SceneResourceLadder = SceneResource + "Ladder/";
+        private const string SceneResourceSoldier = SceneResource + "Soldier/";
+        private const string SceneResourceRat = SceneResource + "Rat/";
 
         private const string DefaultString = "default";
         private const string OpenString = "open";
@@ -30,22 +36,22 @@ namespace IntermediateSamples.SceneSimpleAnimation
         private const string WalkString = "walk";
         private const string RunString = "run";
 
+        private const string laddersAString = "LadderA";
+        private const string laddersBString = "LadderB";
+        private const string laddersCString = "LadderC";
+        private const string soldiersString = "Soldiers";
+        private const string ratsString = "Rats";
+        private const string doorsString = "Doors";
+        private const string doorWallsString = "DoorWalls";
+        private const string jailsString = "Jails";
+        private const string jailWallsString = "JailWalls";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea animText = null;
         private UITextArea messages = null;
         private Sprite backPanel = null;
         private UIConsole console = null;
-
-        const string laddersAString = "LadderA";
-        const string laddersBString = "LadderB";
-        const string laddersCString = "LadderC";
-        const string soldiersString = "Soldiers";
-        const string ratsString = "Rats";
-        const string doorsString = "Doors";
-        const string doorWallsString = "DoorWalls";
-        const string jailsString = "Jails";
-        const string jailWallsString = "JailWalls";
 
         private ModelInstanced laddersA;
         private ModelInstanced laddersB;
@@ -200,30 +206,18 @@ namespace IntermediateSamples.SceneSimpleAnimation
             float l = 15f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
-                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
-                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneSimpleAnimation/resources/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneSimpleAnimation/resources/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneSimpleAnimation/resources/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
+            mat.NormalMapTexture = resourcesAsphaltNormalFile;
+            mat.SpecularTexture = resourcesAsphaltSpecularFile;
 
             var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);

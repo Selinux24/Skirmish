@@ -9,6 +9,14 @@ namespace IntermediateSamples.SceneAnimationParts
 {
     class AnimationPartsScene : Scene
     {
+        private const string resourcesLeopardFolder = "Common/Leopard/";
+        private const string resourcesLeopardFile = "Leopard.json";
+
+        private const string resourcesAsphaltFolder = "Common/Asphalt/";
+        private const string resourcesAsphaltDiffuseFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_diffuse.dds";
+        private const string resourcesAsphaltNormalFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_normal.dds";
+        private const string resourcesAsphaltSpecularFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_specular.dds";
+
         private UITextArea title = null;
         private UIPanel backPanel = null;
         private UIConsole console = null;
@@ -91,7 +99,17 @@ namespace IntermediateSamples.SceneAnimationParts
                     InitializeFloor,
                     InitializeDebug,
                 ],
-                InitializeComponentsCompleted);
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
+                    StartEnvironment();
+
+                    gameReady = true;
+                });
 
             LoadResources(group);
         }
@@ -101,7 +119,7 @@ namespace IntermediateSamples.SceneAnimationParts
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
-                Content = ContentDescription.FromFile("SceneAnimationParts/Resources/Leopard", "Leopard.json"),
+                Content = ContentDescription.FromFile(resourcesLeopardFolder, resourcesLeopardFile),
                 TransformNames =
                 [
                     "Hull-mesh",
@@ -121,33 +139,21 @@ namespace IntermediateSamples.SceneAnimationParts
         }
         private async Task InitializeFloor()
         {
-            float l = 50f;
+            float l = 100f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new() { Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new() { Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
-                new() { Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
-                new() { Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneAnimationParts/Resources/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneAnimationParts/Resources/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneAnimationParts/Resources/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
+            mat.NormalMapTexture = resourcesAsphaltNormalFile;
+            mat.SpecularTexture = resourcesAsphaltSpecularFile;
 
             var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
@@ -166,18 +172,7 @@ namespace IntermediateSamples.SceneAnimationParts
                 new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
             itemLines.Visible = false;
         }
-        private void InitializeComponentsCompleted(LoadResourcesResult res)
-        {
-            if (!res.Completed)
-            {
-                res.ThrowExceptions();
-            }
-
-            InitializeEnvironment();
-
-            gameReady = true;
-        }
-        private void InitializeEnvironment()
+        private void StartEnvironment()
         {
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));

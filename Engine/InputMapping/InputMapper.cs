@@ -1,7 +1,6 @@
-﻿using Engine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace TerrainSamples.Mapping
+namespace Engine.InputMapping
 {
     /// <summary>
     /// Input mapper

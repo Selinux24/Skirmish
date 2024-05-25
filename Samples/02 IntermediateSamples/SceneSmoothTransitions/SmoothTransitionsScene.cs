@@ -14,6 +14,14 @@ namespace IntermediateSamples.SceneSmoothTransitions
 {
     public class SmoothTransitionsScene : Scene
     {
+        private const string resourcesAsphaltFolder = "Common/Asphalt/";
+        private const string resourcesAsphaltDiffuseFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_diffuse.dds";
+        private const string resourcesAsphaltNormalFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_normal.dds";
+        private const string resourcesAsphaltSpecularFile = resourcesAsphaltFolder + "d_road_asphalt_stripes_specular.dds";
+
+        private const string resourcesSoldierFolder = "Common/Soldier/";
+        private const string resourcesSoldierFile = "soldier_anim2.json";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea messages = null;
@@ -115,30 +123,18 @@ namespace IntermediateSamples.SceneSmoothTransitions
             float l = 15f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
-                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
-                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
-            ];
-
-            uint[] indices =
-            [
-                    0, 1, 2,
-                    1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneSmoothTransitions/resources/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneSmoothTransitions/resources/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneSmoothTransitions/resources/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
+            mat.NormalMapTexture = resourcesAsphaltNormalFile;
+            mat.SpecularTexture = resourcesAsphaltSpecularFile;
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
                 Instances = 9,
             };
 
@@ -162,7 +158,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneSmoothTransitions/Resources/Soldier", "soldier_anim2.json"),
+                    Content = ContentDescription.FromFile(resourcesSoldierFolder, resourcesSoldierFile),
                     TextureIndex = 1,
                 });
 

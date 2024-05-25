@@ -13,9 +13,29 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
 {
+    /// <summary>
+    /// Deferred lights scene test
+    /// </summary>
     public class DeferredLightsScene : Scene
     {
-        private readonly string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
+        private const string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
+
+        private const string resourcesLocalFolder = "SceneDeferredLights/Resources/";
+        private const string resourcesCursor = resourcesLocalFolder + "target.png";
+        private const string resourcesSkydom = resourcesLocalFolder + "sunset.dds";
+
+        private const string resourcesM24Folder = "Common/M24/";
+        private const string resourcesM24File = "m24.json";
+
+        private const string resourcesTerrainFolder = "Common/Terrain/";
+        private const string resourcesTerrainFile = "terrain.json";
+
+        private const string resourcesTreeFolder = "Common/trees/";
+        private const string resourcesBirchAFile = "birch_a.json";
+        private const string resourcesBirchBFile = "birch_b.json";
+
+        private const string resourcesVegetationFolder = resourcesLocalFolder + "Vegetation/";
+        private const string resourcesGrassFile = "grass.png";
 
         private const float near = 0.1f;
         private const float far = 1000f;
@@ -93,8 +113,9 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = UICursorDescription.Default("SceneDeferredLights/Resources/target.png", 15, 15, true);
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
+            var desc = UICursorDescription.Default(resourcesCursor, 15, 15, true);
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
         }
         private async Task InitializeUIComponents()
         {
@@ -155,7 +176,7 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private async Task InitializeSkydom()
         {
-            var desc = SkydomDescription.Sphere(@"SceneDeferredLights/Resources/sunset.dds", far);
+            var desc = SkydomDescription.Sphere(resourcesSkydom, far);
 
             await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
@@ -165,7 +186,7 @@ namespace IntermediateSamples.SceneDeferredLights
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 TextureIndex = 2,
-                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
+                Content = ContentDescription.FromFile(resourcesM24Folder, resourcesM24File),
                 StartsVisible = false,
             };
             helicopter = await AddComponent<Model, ModelDescription>("Helicopter", "Helicopter", desc1);
@@ -175,7 +196,7 @@ namespace IntermediateSamples.SceneDeferredLights
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 2,
-                Content = ContentDescription.FromFile("SceneDeferredLights/Resources", "m24.json"),
+                Content = ContentDescription.FromFile(resourcesM24Folder, resourcesM24File),
                 StartsVisible = false,
             };
             helicopters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of Helicopters", "Bunch of Helicopters", desc2);
@@ -186,8 +207,9 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private async Task InitializeTerrain()
         {
-            var terrainDesc = GroundDescription.FromFile("SceneDeferredLights/Resources", "terrain.json", 2);
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDesc);
+            var desc = GroundDescription.FromFile(resourcesTerrainFolder, resourcesTerrainFile, 2);
+
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeTrees()
         {
@@ -195,7 +217,7 @@ namespace IntermediateSamples.SceneDeferredLights
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_a.json"),
+                Content = ContentDescription.FromFile(resourcesTreeFolder, resourcesBirchAFile),
                 StartsVisible = false,
             };
             tree = await AddComponentGround<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
@@ -205,7 +227,7 @@ namespace IntermediateSamples.SceneDeferredLights
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 12,
-                Content = ContentDescription.FromFile("SceneDeferredLights/resources/trees", "birch_b.json"),
+                Content = ContentDescription.FromFile(resourcesTreeFolder, resourcesBirchBFile),
                 StartsVisible = false,
             };
             trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
@@ -214,10 +236,10 @@ namespace IntermediateSamples.SceneDeferredLights
         {
             var desc = new FoliageDescription()
             {
-                ContentPath = "SceneDeferredLights/Resources/Vegetation",
-                ChannelRed = new FoliageDescription.Channel()
+                ContentPath = resourcesVegetationFolder,
+                ChannelRed = new()
                 {
-                    VegetationTextures = ["grass.png"],
+                    VegetationTextures = [resourcesGrassFile],
                     Density = 20f,
                     StartRadius = 0f,
                     EndRadius = 50f,

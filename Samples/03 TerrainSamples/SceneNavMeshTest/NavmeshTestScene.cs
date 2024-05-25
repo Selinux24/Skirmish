@@ -2,6 +2,7 @@
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
+using Engine.InputMapping;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour;
@@ -15,7 +16,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TerrainSamples.Mapping;
 using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneNavMeshTest
