@@ -3,21 +3,27 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneCascadedShadows
 {
     /// <summary>
-    /// Lights scene test
+    /// Cascade shadows scene test
     /// </summary>
     public class CascadedShadowsScene : Scene
     {
         private const float spaceSize = 80;
-        private const string GlowString = "lfGlow.png";
-        private const string Flare1String = "lfFlare1.png";
-        private const string Flare2String = "lfFlare2.png";
-        private const string Flare3String = "lfFlare3.png";
-        private const string Flare4String = "lfFlare4.png";
+        private const string resourceFlare = "Common/lensFlare/";
+        private const string resourceGlowString = "lfGlow.png";
+        private const string resourceFlare1String = "lfFlare1.png";
+        private const string resourceFlare2String = "lfFlare2.png";
+        private const string resourceFlare3String = "lfFlare3.png";
+        private const string resourceFlare4String = "lfFlare4.png";
+        private const string resourceFloorDiffuse = "Common/floors/dirt/dirt002.dds";
+        private const string resourceFloorNormal = "Common/floors/dirt/normal001.dds";
+        private const string resourceObelisk = "Common/buildings/obelisk/";
+        private const string resourceTrees = "Common/trees/";
 
         private bool gameReady = false;
 
@@ -78,7 +84,7 @@ namespace BasicSamples.SceneCascadedShadows
                     InitializeUITitle,
                     InitializeUILevelsControl,
                     InitializeUIDrawers,
-                    InitializeFloorAsphalt,
+                    InitializeFloor,
                     InitializeBuildingObelisk,
                     InitializeTree,
                     InitializeSkyEffects,
@@ -167,35 +173,23 @@ namespace BasicSamples.SceneCascadedShadows
             gameReady = true;
         }
 
-        private async Task InitializeFloorAsphalt()
+        private async Task InitializeFloor()
         {
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new (){ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new (){ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new (){ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
-
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "Common/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "Common/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.DiffuseTexture = resourceFloorDiffuse;
+            mat.NormalMapTexture = resourceFloorNormal;
 
             var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
@@ -207,7 +201,7 @@ namespace BasicSamples.SceneCascadedShadows
                 Instances = 4,
                 CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("Common/buildings/obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
 
             buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
@@ -219,7 +213,7 @@ namespace BasicSamples.SceneCascadedShadows
                 CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile("Common/trees", "Tree.json"),
+                Content = ContentDescription.FromFile(resourceTrees, "Tree.json"),
             };
 
             await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
@@ -228,20 +222,20 @@ namespace BasicSamples.SceneCascadedShadows
         {
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flare", "Flare", new LensFlareDescription()
             {
-                ContentPath = @"Common/lensFlare",
-                GlowTexture = GlowString,
+                ContentPath = resourceFlare,
+                GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new ( 0.0f, 5.6f, new Color( 25,  25,  25), Flare4String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
+                    new ( 0.0f, 5.6f, new Color( 25,  25,  25), resourceFlare4String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -324,6 +318,16 @@ namespace BasicSamples.SceneCascadedShadows
             if (Game.Input.KeyPressed(Keys.S))
             {
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, Game.Input.ShiftPressed);
             }
         }
         private void UpdateDebug()

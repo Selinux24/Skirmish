@@ -10,20 +10,24 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneMaterials
 {
+    /// <summary>
+    /// Materials scene test
+    /// </summary>
     public class MaterialsScene : Scene
     {
-        private readonly float spaceSize = 40;
-        private readonly float radius = 1;
-        private readonly int stacks = 40;
-        private const string GlowString = "lfGlow.png";
-        private const string Flare1String = "lfFlare1.png";
-        private const string Flare2String = "lfFlare2.png";
-        private const string Flare3String = "lfFlare3.png";
-        private const string SceneMaterialsDefaultDiffuse = "SceneMaterials/white.png";
-        private const string SceneMaterialsDefaultNormal1 = "SceneMaterials/nmap1.jpg";
-        private const string SceneMaterialsDefaultNormal2 = "SceneMaterials/nmap2.png";
-        private const string SceneMaterialsCorrugatedDiffuse = "SceneMaterials/corrugated_d.jpg";
-        private const string SceneMaterialsCorrugatedNormal = "SceneMaterials/corrugated_n.jpg";
+        private const float spaceSize = 40;
+        private const float radius = 1;
+        private const int stacks = 40;
+        private const string resourceFlare = "Common/lensFlare/";
+        private const string resourceGlowString = "lfGlow.png";
+        private const string resourceFlare1String = "lfFlare1.png";
+        private const string resourceFlare2String = "lfFlare2.png";
+        private const string resourceFlare3String = "lfFlare3.png";
+        private const string resourceCorrugatedDiffuse = "Common/floors/corrugated/corrugated_d.jpg";
+        private const string resourceCorrugatedNormal = "Common/floors/corrugated/corrugated_n.jpg";
+        private const string resourceDefaultDiffuse = "SceneMaterials/white.png";
+        private const string resourceDefaultNormal1 = "SceneMaterials/nmap1.jpg";
+        private const string resourceDefaultNormal2 = "SceneMaterials/nmap2.png";
 
         private Sprite backpanel = null;
         private UITextArea title = null;
@@ -106,63 +110,52 @@ namespace BasicSamples.SceneMaterials
         {
             await AddComponentEffect<LensFlare, LensFlareDescription>("LensFlare", "LensFlare", new LensFlareDescription()
             {
-                ContentPath = @"Common/lensFlare",
-                GlowTexture = GlowString,
+                ContentPath = resourceFlare,
+                GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
         private async Task InitializeFloor()
         {
-            float l = spaceSize;
-            float t = spaceSize / 5f;
+            float l = spaceSize * 2;
+            float t = 8f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new (-l, -h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new (){ Position = new (-l, -h, +l), Normal = Vector3.Up, Texture = new (0.0f, t) },
-                new (){ Position = new (+l, -h, -l), Normal = Vector3.Up, Texture = new (t, 0.0f) },
-                new (){ Position = new (+l, -h, +l), Normal = Vector3.Up, Texture = new (t, t) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * t);
 
             var mat = MaterialCookTorranceContent.Default;
             mat.Metallic = 0.9f;
             mat.Roughness = 0.1f;
-            mat.DiffuseTexture = SceneMaterialsCorrugatedDiffuse;
-            mat.NormalMapTexture = SceneMaterialsCorrugatedNormal;
+            mat.DiffuseTexture = resourceCorrugatedDiffuse;
+            mat.NormalMapTexture = resourceCorrugatedNormal;
 
             var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeEmitters()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.25f, 32, 32);
@@ -259,8 +252,8 @@ namespace BasicSamples.SceneMaterials
                 mat.SpecularColor = (Color.Gold * 1.25f).RGB();
                 mat.Metallic = 0.9f;
                 mat.Roughness = roughness * (i + 1);
-                mat.DiffuseTexture = SceneMaterialsDefaultDiffuse;
-                mat.NormalMapTexture = SceneMaterialsDefaultNormal2;
+                mat.DiffuseTexture = resourceDefaultDiffuse;
+                mat.NormalMapTexture = resourceDefaultNormal2;
 
                 materials.Add(mat);
             }
@@ -273,8 +266,8 @@ namespace BasicSamples.SceneMaterials
                 mat.SpecularColor = (Color.Gold * 1.25f).RGB();
                 mat.Metallic = metalness * (i + 1);
                 mat.Roughness = 0.1f;
-                mat.DiffuseTexture = SceneMaterialsDefaultDiffuse;
-                mat.NormalMapTexture = SceneMaterialsDefaultNormal2;
+                mat.DiffuseTexture = resourceDefaultDiffuse;
+                mat.NormalMapTexture = resourceDefaultNormal2;
 
                 materials.Add(mat);
             }
@@ -318,8 +311,8 @@ namespace BasicSamples.SceneMaterials
             {
                 MaterialPhongContent mat = MaterialPhongContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
-                mat.DiffuseTexture = SceneMaterialsDefaultDiffuse;
-                mat.NormalMapTexture = nmap ? SceneMaterialsDefaultNormal1 : SceneMaterialsDefaultNormal2;
+                mat.DiffuseTexture = resourceDefaultDiffuse;
+                mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
                 mat.Shininess = matParams.Shininess;
                 return mat;
@@ -328,8 +321,8 @@ namespace BasicSamples.SceneMaterials
             {
                 MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
-                mat.DiffuseTexture = SceneMaterialsDefaultDiffuse;
-                mat.NormalMapTexture = nmap ? SceneMaterialsDefaultNormal1 : SceneMaterialsDefaultNormal2;
+                mat.DiffuseTexture = resourceDefaultDiffuse;
+                mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
                 mat.Shininess = matParams.Shininess;
                 return mat;
@@ -338,8 +331,8 @@ namespace BasicSamples.SceneMaterials
             {
                 MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
-                mat.DiffuseTexture = SceneMaterialsDefaultDiffuse;
-                mat.NormalMapTexture = nmap ? SceneMaterialsDefaultNormal1 : SceneMaterialsDefaultNormal2;
+                mat.DiffuseTexture = resourceDefaultDiffuse;
+                mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
                 mat.Metallic = matParams.Metallic;
                 mat.Roughness = matParams.Roughness;
@@ -564,13 +557,5 @@ namespace BasicSamples.SceneMaterials
             backpanel.Width = Game.Form.RenderWidth;
             backpanel.Height = runtime.Top + runtime.Height + 3;
         }
-    }
-
-    struct MaterialParams
-    {
-        public SpecularAlgorithms Algorithm;
-        public float Shininess;
-        public float Metallic;
-        public float Roughness;
     }
 }

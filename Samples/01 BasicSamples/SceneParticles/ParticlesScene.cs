@@ -5,10 +5,14 @@ using Engine.Content;
 using Engine.UI;
 using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneParticles
 {
+    /// <summary>
+    /// Particles scene test
+    /// </summary>
     public class ParticlesScene : Scene
     {
         private const string resourcesFolder = "SceneParticles";
@@ -20,6 +24,7 @@ namespace BasicSamples.SceneParticles
         private const string particleProjectileString = "Projectile";
         private const string particleExplosionString = "Explosion";
         private const string particleSmokeExplosionString = "SmokeExplosion";
+        private const string resourcesFloor = "Common/floors/floor.png";
 
         private UITextArea text = null;
         private UITextArea statistics = null;
@@ -121,30 +126,21 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeFloor()
         {
-            float l = 10f;
+            float l = 20f;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new (-l, -h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new (){ Position = new (-l, -h, +l), Normal = Vector3.Up, Texture = new (0.0f, l) },
-                new (){ Position = new (+l, -h, -l), Normal = Vector3.Up, Texture = new (l, 0.0f) },
-                new (){ Position = new (+l, -h, +l), Normal = Vector3.Up, Texture = new (l, l) },
-            ];
-
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
+            geo.Transform(Matrix.RotationY(MathUtil.PiOverTwo));
 
             var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseTexture = resourcesFolder + "/floor.png";
+            material.DiffuseTexture = resourcesFloor;
+            material.DiffuseColor = Color.White;
 
             var desc = new ModelDescription()
             {
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, material),
+                Content = ContentDescription.FromContentData(geo, material),
             };
 
             await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);

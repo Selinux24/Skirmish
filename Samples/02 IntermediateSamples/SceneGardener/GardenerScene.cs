@@ -121,6 +121,7 @@ namespace IntermediateSamples.SceneGardener
             {
                 Content = ContentDescription.FromContentData(geo, mat),
                 CastShadow = ShadowCastingAlgorihtms.All,
+                StartsVisible = false,
             };
 
             pov = await AddComponentAgent<Model, ModelDescription>("Sphere", "Sphere", desc);
@@ -301,6 +302,11 @@ namespace IntermediateSamples.SceneGardener
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
                 map.Visible = !map.Visible;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F2))
+            {
+                pov.Visible = !pov.Visible;
             }
 
             UpdateInputCamera(gameTime);

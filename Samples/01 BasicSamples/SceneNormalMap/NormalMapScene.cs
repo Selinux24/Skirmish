@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
 {
+    /// <summary>
+    /// Normal map test scene
+    /// </summary>
     public class NormalMapScene : Scene
     {
         private readonly string resourcesFolder = "SceneNormalMap/resources";
@@ -60,13 +63,13 @@ namespace BasicSamples.SceneNormalMap
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new() { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Tiled Wall Test Scene";
 
-            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new() { Font = defaultFont12, TextForeColor = Color.Yellow });
             fps.Text = null;
 
-            picks = await AddComponentUI<UITextArea, UITextAreaDescription>("Picks", "Picks", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            picks = await AddComponentUI<UITextArea, UITextAreaDescription>("Picks", "Picks", new() { Font = defaultFont12, TextForeColor = Color.Yellow });
             picks.Text = null;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
@@ -103,12 +106,10 @@ namespace BasicSamples.SceneNormalMap
             mat.EmissiveColor = Color.White.RGB();
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 16, 5);
-            var vertices = VertexData.FromDescriptor(sphere);
-            var indices = sphere.Indices;
 
             var desc = new ModelDescription()
             {
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(sphere, mat),
             };
 
             lightEmitter = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", desc);
@@ -119,12 +120,15 @@ namespace BasicSamples.SceneNormalMap
             {
                 res.ThrowExceptions();
             }
+
             UpdateLayout();
-            InitializeCamera();
-            InitializeEnvironment();
+
+            StartCamera();
+            StartEnvironment();
+
             gameReady = true;
         }
-        private void InitializeCamera()
+        private void StartCamera()
         {
             Camera.NearPlaneDistance = 0.5f;
             Camera.FarPlaneDistance = 500;
@@ -132,7 +136,7 @@ namespace BasicSamples.SceneNormalMap
             Camera.SetPosition(-5, 3, -5);
             Camera.SetInterest(0, 0, 0);
         }
-        private void InitializeEnvironment()
+        private void StartEnvironment()
         {
             GameEnvironment.Background = Color.Black;
 

@@ -15,6 +15,10 @@ namespace BasicSamples.SceneLights
     public class LightsScene : Scene
     {
         private const float spaceSize = 20;
+        private const string resourceFloorDiffuse = "Common/floors/dirt/dirt002.dds";
+        private const string resourceFloorNormal = "Common/floors/dirt/normal001.dds";
+        private const string resourceObelisk = "Common/buildings/obelisk/";
+        private const string resourceTrees = "Common/trees/";
 
         private bool gameReady = false;
 
@@ -59,7 +63,7 @@ namespace BasicSamples.SceneLights
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    InitializeFloorAsphalt,
+                    InitializeFloor,
                     InitializeBuildingObelisk,
                     InitializeTree,
                     InitializeEmitter,
@@ -72,35 +76,23 @@ namespace BasicSamples.SceneLights
 
             LoadResources(group);
         }
-        private async Task InitializeFloorAsphalt()
+        private async Task InitializeFloor()
         {
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
-
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "Common/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "Common/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.DiffuseTexture = resourceFloorDiffuse;
+            mat.NormalMapTexture = resourceFloorNormal;
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.All,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
@@ -110,9 +102,9 @@ namespace BasicSamples.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = ShadowCastingAlgorihtms.All,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("Common/buildings/obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
 
             buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
@@ -121,27 +113,25 @@ namespace BasicSamples.SceneLights
         {
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.All,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile("Common/trees", "Tree.json"),
+                Content = ContentDescription.FromFile(resourceTrees, "Tree.json"),
             };
 
             await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
         }
         private async Task InitializeEmitter()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var s = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
-            var vertices = VertexData.FromDescriptor(s);
-            var indices = s.Indices;
+            var geo = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
 
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             lightEmitters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Emitter", "Emitter", desc);
@@ -150,20 +140,18 @@ namespace BasicSamples.SceneLights
         {
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
 
-            var cone = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
+            var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
-            Matrix m = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f);
-            cone.Transform(m);
+            geo.Transform(Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f));
 
-            var vertices = VertexData.FromDescriptor(cone);
-            vertices = vertices.Select(v =>
+            var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {
                 v.Color = Color.Gray;
                 return v;
             });
 
-            var indices = cone.Indices;
+            var indices = geo.Indices;
 
             var desc = new ModelInstancedDescription()
             {

@@ -3,13 +3,20 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStencilPass
 {
+    /// <summary>
+    /// Stencil pass scene test
+    /// </summary>
     public class StencilPassScene : Scene
     {
-        private readonly float spaceSize = 10;
+        private readonly float spaceSize = 20;
+        private const string resourceFloorDiffuse = "Common/floors/dirt/dirt002.dds";
+        private const string resourceFloorNormal = "Common/floors/dirt/normal001.dds";
+        private const string resourceObelisk = "Common/buildings/obelisk/";
 
         private bool gameReady = false;
 
@@ -50,7 +57,7 @@ namespace BasicSamples.SceneStencilPass
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    InitializeFloorAsphalt,
+                    InitializeFloor,
                     InitializeBuildingObelisk,
                     InitializeEmitter,
                     InitializeLights,
@@ -65,54 +72,42 @@ namespace BasicSamples.SceneStencilPass
 
             LoadResources(group);
         }
-        private async Task InitializeFloorAsphalt()
+        private async Task InitializeFloor()
         {
             float l = spaceSize;
             float h = 0f;
 
-            VertexData[] vertices =
-            [
-                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
-
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "Common/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "Common/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.DiffuseTexture = resourceFloorDiffuse;
+            mat.NormalMapTexture = resourceFloorNormal;
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.All,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.All,
+                Instances = 4,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("Common/buildings/obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
 
-            var buildingObelisk = await AddComponent<Model, ModelDescription>("Obelisk", "Obelisk", desc);
-            buildingObelisk.Manipulator.SetPosition(0, 0, 0);
+            await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeEmitter()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);

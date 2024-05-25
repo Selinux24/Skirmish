@@ -14,17 +14,36 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneTest
 {
+    /// <summary>
+    /// Components test scene
+    /// </summary>
     public class TestScene : Scene
     {
-        private const string GlowString = "lfGlow.png";
-        private const string Flare1String = "lfFlare1.png";
-        private const string Flare2String = "lfFlare2.png";
-        private const string Flare3String = "lfFlare3.png";
         private const string DefaultString = "default";
-        private const string SceneLampsString = "SceneTest/lamps";
-        private const string SceneParticlesString = "SceneTest/particles";
-        const string particleSmokeFileName = "smoke.png";
-        const string particleFireFileName = "fire.png";
+
+        private const string resourceFlare = "Common/lensFlare/";
+        private const string resourceGlowString = "lfGlow.png";
+        private const string resourceFlare1String = "lfFlare1.png";
+        private const string resourceFlare2String = "lfFlare2.png";
+        private const string resourceFlare3String = "lfFlare3.png";
+
+        private const string resourceSky = "SceneTest/sky/";
+        private const string resourceTexture1Name = "perturb001.dds";
+        private const string resourceTexture2Name = "cloud001.dds";
+
+        private const string resourceScenery = "SceneTest/scenery/";
+        private const string resourceTrees = "SceneTest/Trees/";
+        private const string resourceFloor = "Common/floors/asphalt/";
+        private const string resourceObelisk = "SceneTest/buildings/obelisk/";
+        private const string resourceSoldier = "SceneTest/character/soldier/";
+        private const string resourceChallenger = "SceneTest/vehicles/Challenger/";
+        private const string resourceLeopard = "SceneTest/vehicles/leopard/";
+        private const string resourceLamps = "SceneTest/lamps/";
+        private const string resourceContainers = "SceneTest/container/";
+
+        private const string resourceParticles = "SceneTest/particles";
+        private const string resourceSmokeFileName = "smoke.png";
+        private const string resourceFireFileName = "fire.png";
 
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
@@ -269,22 +288,22 @@ namespace BasicSamples.SceneTest
         {
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", new LensFlareDescription()
             {
-                ContentPath = @"Common/lensFlare",
-                GlowTexture = GlowString,
+                ContentPath = resourceFlare,
+                GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
                 ]
             });
 
@@ -292,9 +311,9 @@ namespace BasicSamples.SceneTest
 
             var cloudsDesc = new SkyPlaneDescription()
             {
-                ContentPath = "SceneTest/sky",
-                Texture1Name = "perturb001.dds",
-                Texture2Name = "cloud001.dds",
+                ContentPath = resourceSky,
+                Texture1Name = resourceTexture1Name,
+                Texture2Name = resourceTexture2Name,
                 SkyMode = SkyPlaneModes.Perturbed,
             };
 
@@ -302,7 +321,7 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeScenery()
         {
-            var sDesc = GroundDescription.FromFile("SceneTest/scenery", "Clif.json");
+            var sDesc = GroundDescription.FromFile(resourceScenery, "Clif.json");
 
             scenery = await AddComponentGround<Scenery, GroundDescription>("Scenery", "Scenery", sDesc);
             var bbox = scenery.GetBoundingBox();
@@ -321,7 +340,7 @@ namespace BasicSamples.SceneTest
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
+                Content = ContentDescription.FromFile(resourceTrees, "Tree.json"),
             };
             tree = await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
 
@@ -332,33 +351,21 @@ namespace BasicSamples.SceneTest
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 50,
-                Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
+                Content = ContentDescription.FromFile(resourceTrees, "Tree.json"),
             };
             treesI = await AddComponent<ModelInstanced, ModelInstancedDescription>("TreeI", "TreeI", descI);
         }
         private async Task InitializeFloorAsphalt()
         {
-            float l = spaceSize;
+            float l = spaceSize * 2;
             float h = baseHeight;
 
-            VertexData[] vertices =
-            [
-                new (){ Position = new (-l, h, -l), Normal = Vector3.Up, Texture = new (0.0f, 0.0f) },
-                new (){ Position = new (-l, h, +l), Normal = Vector3.Up, Texture = new (0.0f, 1.0f) },
-                new (){ Position = new (+l, h, -l), Normal = Vector3.Up, Texture = new (1.0f, 0.0f) },
-                new (){ Position = new (+l, h, +l), Normal = Vector3.Up, Texture = new (1.0f, 1.0f) },
-            ];
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
 
-            uint[] indices =
-            [
-                0, 1, 2,
-                1, 3, 2,
-            ];
-
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.DiffuseTexture = resourceFloor + "d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = resourceFloor + "d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = resourceFloor + "d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
@@ -366,7 +373,7 @@ namespace BasicSamples.SceneTest
                 BlendMode = BlendModes.Opaque,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             var descI = new ModelInstancedDescription()
@@ -376,7 +383,7 @@ namespace BasicSamples.SceneTest
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 Instances = 8,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Content = ContentDescription.FromContentData(geo, mat),
             };
 
             var floorAsphalt = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
@@ -385,39 +392,39 @@ namespace BasicSamples.SceneTest
 
             var floorAsphaltI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("FloorI", "FloorI", descI);
 
-            floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
-            floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
-            floorAsphaltI[2].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
-            floorAsphaltI[3].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
+            floorAsphaltI[0].Manipulator.SetPosition(-l + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
+            floorAsphaltI[1].Manipulator.SetPosition(+l + baseDelta.X, baseDelta.Y, 0 + baseDelta.Z);
+            floorAsphaltI[2].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, -l + baseDelta.Z);
+            floorAsphaltI[3].Manipulator.SetPosition(0 + baseDelta.X, baseDelta.Y, +l + baseDelta.Z);
 
-            floorAsphaltI[4].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
-            floorAsphaltI[5].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, (-l * 2) + baseDelta.Z);
-            floorAsphaltI[6].Manipulator.SetPosition((-l * 2) + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
-            floorAsphaltI[7].Manipulator.SetPosition((+l * 2) + baseDelta.X, baseDelta.Y, (+l * 2) + baseDelta.Z);
+            floorAsphaltI[4].Manipulator.SetPosition(-l + baseDelta.X, baseDelta.Y, -l + baseDelta.Z);
+            floorAsphaltI[5].Manipulator.SetPosition(+l + baseDelta.X, baseDelta.Y, -l + baseDelta.Z);
+            floorAsphaltI[6].Manipulator.SetPosition(-l + baseDelta.X, baseDelta.Y, +l + baseDelta.Z);
+            floorAsphaltI[7].Manipulator.SetPosition(+l + baseDelta.X, baseDelta.Y, +l + baseDelta.Z);
         }
         private async Task InitializeBuildingObelisk()
         {
             var buildingObelisk = await AddComponent<Model, ModelDescription>(
                 "Obelisk",
                 "Obelisk",
-                new ModelDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
+                    Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
                 });
 
             var buildingObeliskI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "ObeliskI",
                 "ObeliskI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
                     Instances = 4,
-                    Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
+                    Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
                 });
 
             buildingObelisk.Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
@@ -444,21 +451,21 @@ namespace BasicSamples.SceneTest
             var characterSoldier = await AddComponentAgent<Model, ModelDescription>(
                 "Soldier",
                 "Soldier",
-                new ModelDescription()
+                new()
                 {
                     TextureIndex = 1,
                     CastShadow = ShadowCastingAlgorihtms.All,
-                    Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
+                    Content = ContentDescription.FromFile(resourceSoldier, "soldier_anim2.json"),
                 });
 
             var characterSoldierI = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
                 "SoldierI",
                 "SoldierI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 4,
-                    Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
+                    Content = ContentDescription.FromFile(resourceSoldier, "soldier_anim2.json"),
                 });
 
             float s = spaceSize / 2f;
@@ -491,22 +498,22 @@ namespace BasicSamples.SceneTest
             var vehicle = await AddComponentAgent<Model, ModelDescription>(
                 "Challenger",
                 "Challenger",
-                new ModelDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.json"),
+                    Content = ContentDescription.FromFile(resourceChallenger, "Challenger.json"),
                 });
 
             var vehicleI = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
                 "LeopardI",
                 "LeopardI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
-                    Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.json"),
+                    Content = ContentDescription.FromFile(resourceLeopard, "Leopard.json"),
                 });
 
             float s = -spaceSize / 2f;
@@ -538,22 +545,22 @@ namespace BasicSamples.SceneTest
             var lamp = await AddComponent<Model, ModelDescription>(
                 "Lamp",
                 "Lamp",
-                new ModelDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile(SceneLampsString, "lamp.json"),
+                    Content = ContentDescription.FromFile(resourceLamps, "lamp.json"),
                 });
 
             var lampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "LampI",
                 "LampI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
-                    Content = ContentDescription.FromFile(SceneLampsString, "lamp.json"),
+                    Content = ContentDescription.FromFile(resourceLamps, "lamp.json"),
                 });
 
             float dist = 0.23f;
@@ -586,22 +593,22 @@ namespace BasicSamples.SceneTest
             var streetlamp = await AddComponent<Model, ModelDescription>(
                 "StreetLamp",
                 "Street Lamp",
-                new ModelDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile(SceneLampsString, "streetlamp.json"),
+                    Content = ContentDescription.FromFile(resourceLamps, "streetlamp.json"),
                 });
 
             var streetlampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "StreetLampI",
                 "Street LampI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 9,
-                    Content = ContentDescription.FromFile(SceneLampsString, "streetlamp.json"),
+                    Content = ContentDescription.FromFile(resourceLamps, "streetlamp.json"),
                 });
 
             streetlamp.Manipulator.SetPosition(-spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * -2f + baseDelta.Z);
@@ -649,11 +656,11 @@ namespace BasicSamples.SceneTest
             var container = await AddComponentGround<Model, ModelDescription>(
                 "Container",
                 "Container",
-                new ModelDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
-                    Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
+                    Content = ContentDescription.FromFile(resourceContainers, "Container.json"),
                 });
 
             float s = -spaceSize / 2f;
@@ -672,12 +679,12 @@ namespace BasicSamples.SceneTest
             var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
                 "ContainerI",
                 "ContainerI",
-                new ModelInstancedDescription()
+                new()
                 {
                     CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = instances,
-                    Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
+                    Content = ContentDescription.FromFile(resourceContainers, "Container.json"),
                 });
 
             var prnd = Helper.NewGenerator(1000);
@@ -728,12 +735,12 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeParticles()
         {
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume(SceneParticlesString, particleSmokeFileName, 10f);
-            var pFire = ParticleSystemDescription.InitializeFire(SceneParticlesString, particleFireFileName, 10f);
-            var pDust = ParticleSystemDescription.InitializeDust(SceneParticlesString, particleSmokeFileName, 10f);
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(SceneParticlesString, particleSmokeFileName, 10f);
-            var pExplosion = ParticleSystemDescription.InitializeExplosion(SceneParticlesString, particleFireFileName, 10f);
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(SceneParticlesString, particleSmokeFileName, 10f);
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticles, resourceSmokeFileName, 10f);
+            var pFire = ParticleSystemDescription.InitializeFire(resourceParticles, resourceFireFileName, 10f);
+            var pDust = ParticleSystemDescription.InitializeDust(resourceParticles, resourceSmokeFileName, 10f);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourceParticles, resourceSmokeFileName, 10f);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticles, resourceFireFileName, 10f);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticles, resourceSmokeFileName, 10f);
 
             pDescriptions.Add("Plume", pPlume);
             pDescriptions.Add("Fire", pFire);
@@ -1156,51 +1163,6 @@ namespace BasicSamples.SceneTest
                 var file = $"frame.{Game.GameTime.Ticks}.txt";
 
                 File.WriteAllLines(file, lines);
-            }
-        }
-    }
-
-    struct GridParams
-    {
-        public int RowSize;
-        public float AreaSize;
-        public float Sx;
-        public float Sy;
-        public float Sz;
-        public int XCount;
-        public int ZCount;
-        public int XRowCount;
-        public int ZRowCount;
-        public int BasementRows;
-
-        public readonly (Vector3 position, float angle) GetP(Random prnd, int i, float baseHeight, Vector3 delta)
-        {
-            float height = (i / RowSize * Sy) + baseHeight + delta.Y - (Sy * BasementRows);
-
-            if ((i % RowSize) < ZRowCount)
-            {
-                float rx = (i % ZRowCount < ZCount ? -AreaSize - (Sx / 2f) : AreaSize + (Sx / 2f)) + prnd.NextFloat(-1f, 1f);
-                float dz = i % ZRowCount < ZCount ? -(Sz / 2f) : (Sz / 2f);
-
-                float x = rx + delta.X;
-                float y = height;
-                float z = (i % ZCount * Sz) - AreaSize + delta.Z + dz;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
-
-                return (new(x, y, z), angle);
-            }
-            else
-            {
-                int ci = i - ZRowCount;
-                float rz = (ci % XRowCount < XCount ? -AreaSize - (Sz / 2f) : AreaSize + (Sz / 2f)) + prnd.NextFloat(-1f, 1f);
-                float dx = ci % XRowCount < XCount ? (Sx / 2f) : -(Sx / 2f);
-
-                float x = (ci % XCount * Sx) - AreaSize + delta.X + dx;
-                float y = height;
-                float z = rz + delta.Z;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
-
-                return (new(x, y, z), angle);
             }
         }
     }
