@@ -14,6 +14,13 @@ namespace TerrainSamples.SceneStart
 {
     class StartScene : Scene
     {
+        private const string resourceCursor = "Common/UI/Cursor/pointer.png";
+        private const string resourceUIFolder = "Common/UI/";
+        private const string resourceBackgroundFile = "SkyPlane.json";
+        private const string resourceFontsFolder = "Common/UI/Fonts/";
+        private const string resourceControlsFolder = "Common/UI/Controls/";
+        private const string resourceControlsFile = "buttons.png";
+
         private const int layerHUD = 50;
         private const int layerCursor = 100;
 
@@ -35,7 +42,6 @@ namespace TerrainSamples.SceneStart
         private UITabPanel modularDungeonTabs = null;
         private readonly string modularDungeonTabsPath = "scenemodulardungeon/resources";
 
-        private readonly string resourcesFolder = "SceneStart";
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
@@ -83,28 +89,29 @@ namespace TerrainSamples.SceneStart
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = UICursorDescription.Default("pointer.png", 48, 48, false, new Vector2(-14f, -7f));
-            cursorDesc.ContentPath = resourcesFolder;
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc, layerCursor);
+            var desc = UICursorDescription.Default(resourceCursor, 48, 48, false, new Vector2(-14f, -7f));
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc, layerCursor);
         }
         private async Task InitializeBackground()
         {
-            var backGroundDesc = new ModelDescription()
+            var desc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.json"),
+                Content = ContentDescription.FromFile(resourceUIFolder, resourceBackgroundFile),
             };
-            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
+
+            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", desc);
         }
         private async Task InitializeAssets()
         {
             #region Title text
 
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
-            titleFont.ContentPath = resourcesFolder;
+            titleFont.ContentPath = resourceFontsFolder;
             titleFont.CustomKeycodes = ['✌'];
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
-            titleDesc.ContentPath = resourcesFolder;
+            titleDesc.ContentPath = resourceFontsFolder;
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
@@ -121,10 +128,10 @@ namespace TerrainSamples.SceneStart
             #region Scene buttons
 
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
-            buttonsFont.ContentPath = resourcesFolder;
+            buttonsFont.ContentPath = resourceFontsFolder;
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
-            startButtonDesc.ContentPath = resourcesFolder;
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, resourceControlsFile, new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            startButtonDesc.ContentPath = resourceControlsFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
@@ -147,8 +154,8 @@ namespace TerrainSamples.SceneStart
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
-            exitButtonDesc.ContentPath = resourcesFolder;
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, resourceControlsFile, new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            exitButtonDesc.ContentPath = resourceControlsFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
@@ -209,14 +216,13 @@ namespace TerrainSamples.SceneStart
             tabButtons.Add("Back");
 
             var largeFont = TextDrawerDescription.FromFile(largeControlsFont, 72);
-            largeFont.ContentPath = resourcesFolder;
+            largeFont.ContentPath = resourceFontsFolder;
             var mediumFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
-            mediumFont.ContentPath = resourcesFolder;
+            mediumFont.ContentPath = resourceFontsFolder;
             var mediumClickFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
-            mediumClickFont.ContentPath = resourcesFolder;
+            mediumClickFont.ContentPath = resourceFontsFolder;
 
             var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
-            desc.ContentPath = resourcesFolder;
             desc.ButtonDescription.Font = mediumFont;
             desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;
             desc.ButtonDescription.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -240,7 +246,6 @@ namespace TerrainSamples.SceneStart
                 string mapCnf = "AssetCollections/MDP.json";
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
-                buttonDesc.ContentPath = resourcesFolder;
                 buttonDesc.Text = "Click image to load...";
                 buttonDesc.TextForeColor = Color.DarkGray;
                 buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Right;

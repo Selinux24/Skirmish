@@ -18,6 +18,16 @@ namespace TerrainSamples.SceneCrowds
 {
     public class CrowdsScene : WalkableScene
     {
+        private const string resourceCursor = "Common/UI/Cursor/target.png";
+        private const string resourceSkybox = "Common/Skyboxes/sunset.dds";
+        private const string resourceTankFolder = "Common/Agents/Leopard/";
+        private const string resourceTankFile = "leopard.json";
+        private const string resourceTerrainFolder = "Common/Terrain/Basic/";
+        private const string resourceTerrainFile = "terrain.json";
+        private const string resourceTreesFolder = "Common/Trees/Birch/";
+        private const string resourceTreeBirchAFile = "birch_a.json";
+        private const string resourceTreeBirchBFile = "birch_b.json";
+
         private const int MaxGridDrawer = 10000;
 
         private const float near = 0.1f;
@@ -73,9 +83,9 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = UICursorDescription.Default(@"SceneCrowds/Resources/target.png", 15, 15, true);
+            var desc = UICursorDescription.Default(resourceCursor, 15, 15, true);
 
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
         }
         private async Task InitializeUI()
         {
@@ -125,7 +135,7 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeSkydom()
         {
-            var desc = SkydomDescription.Sphere(@"SceneCrowds/Resources/sunset.dds", far);
+            var desc = SkydomDescription.Sphere(resourceSkybox, far);
 
             await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
@@ -134,7 +144,7 @@ namespace TerrainSamples.SceneCrowds
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneCrowds/Resources", "leopard.json"),
+                Content = ContentDescription.FromFile(resourceTankFolder, resourceTankFile),
                 Instances = 5,
             };
             var tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
@@ -180,7 +190,9 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeTerrain()
         {
-            await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", GroundDescription.FromFile("SceneCrowds/Resources", "terrain.json", 2));
+            var desc = GroundDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 2);
+
+            await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeTrees()
         {
@@ -189,7 +201,7 @@ namespace TerrainSamples.SceneCrowds
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.OpaqueTransparent,
                 PathFindingHull = PickingHullTypes.Hull,
-                Content = ContentDescription.FromFile("SceneCrowds/resources/trees", "birch_a.json"),
+                Content = ContentDescription.FromFile(resourceTreesFolder, resourceTreeBirchAFile),
             };
             tree = await AddComponentGround<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
 
@@ -199,7 +211,7 @@ namespace TerrainSamples.SceneCrowds
                 BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 10,
                 PathFindingHull = PickingHullTypes.Hull,
-                Content = ContentDescription.FromFile("SceneCrowds/resources/trees", "birch_b.json"),
+                Content = ContentDescription.FromFile(resourceTreesFolder, resourceTreeBirchBFile),
             };
             trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
         }

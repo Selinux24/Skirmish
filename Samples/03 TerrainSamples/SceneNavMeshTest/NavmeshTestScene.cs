@@ -25,7 +25,8 @@ namespace TerrainSamples.SceneNavMeshTest
     /// </summary>
     class NavmeshTestScene : WalkableScene
     {
-        private readonly string resourcesFolder = "SceneNavmeshTest/resources";
+        private const string resourcesUIFolder = "Common/UI/Fonts/";
+        private const string resourcesUIControls = "Common/UI/Controls/";
 
         private readonly InputMapper inputMapper;
 
@@ -179,10 +180,10 @@ namespace TerrainSamples.SceneNavMeshTest
         private async Task InitializeUI()
         {
             var btnFont = TextDrawerDescription.FromFamily(buttonFonts, 10, FontMapStyles.Bold, true);
-            btnFont.ContentPath = resourcesFolder;
+            btnFont.ContentPath = resourcesUIFolder;
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
-            btnDesc.ContentPath = resourcesFolder;
+            btnDesc.ContentPath = resourcesUIControls;
             btnDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             btnDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
             btnDesc.TextForeColor = Color.Gold;

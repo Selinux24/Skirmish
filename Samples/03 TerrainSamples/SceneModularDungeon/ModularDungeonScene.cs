@@ -26,8 +26,12 @@ namespace TerrainSamples.SceneModularDungeon
     {
         private const float maxDistance = 35;
 
-        private const string resourcesFolder = "SceneModularDungeon/resources";
-        private const string resourceAudio = "audio/effects";
+        private const string resourcesLocalFolder = "SceneModularDungeon/resources/";
+        private const string resourceAudioFolder = "Common/Audio/Effects/";
+        private const string resourceRatFolder = "Common/Agents/Rat/";
+        private const string resourceRatFile = "rat.json";
+        private const string resourceHumanFolder = "Common/Agents/Human2/";
+        private const string resourceHumanFile = "Human2.json";
 
         private readonly bool isOnePageDungeon;
         private readonly string dungeonDefFile;
@@ -82,13 +86,6 @@ namespace TerrainSamples.SceneModularDungeon
         private bool windCreated = false;
 
         private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
-
-        enum GameStates
-        {
-            None,
-            Player,
-            Map,
-        }
 
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
@@ -364,7 +361,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
+            string onePageResourcesFolder = Path.Combine(resourcesLocalFolder, "onepagedungeons");
 
             dungeonMap = await AddComponentUI<Sprite, SpriteDescription>("map1", "DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), LayerUI + 2);
             dungeonMap.Visible = false;
@@ -442,13 +439,13 @@ namespace TerrainSamples.SceneModularDungeon
             ModularSceneryDescription desc;
             if (isOnePageDungeon)
             {
-                string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
+                string onePageResourcesFolder = Path.Combine(resourcesLocalFolder, "onepagedungeons");
 
                 desc = await LoadOnePageDungeon(Path.Combine(onePageResourcesFolder, dungeonDefFile), dungeonCnfFile);
             }
             else
             {
-                string contentFolder = Path.Combine(resourcesFolder, dungeonDefFile);
+                string contentFolder = Path.Combine(resourcesLocalFolder, dungeonDefFile);
                 const string contentFile = "assets.json";
                 const string assetMapFile = "assetsmap.json";
                 const string levelMapFile = "levels.json";
@@ -461,7 +458,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private static async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {
-            var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
+            var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesLocalFolder, dungeonConfigFile));
 
             List<ContentData> contentData = [.. await ReadAssetFiles(config.AssetFiles), .. await ReadAssets(config.Assets)];
 
@@ -488,7 +485,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return [];
             }
 
-            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
+            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesLocalFolder, a)));
 
             return contentData.SelectMany(c => c);
         }
@@ -499,7 +496,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return [];
             }
 
-            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
+            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesLocalFolder, a)));
 
             return contentData.SelectMany(c => c);
         }
@@ -514,12 +511,12 @@ namespace TerrainSamples.SceneModularDungeon
             rat = await AddComponent<Model, ModelDescription>(
                 "char1",
                 "Rat",
-                new ModelDescription()
+                new()
                 {
                     TextureIndex = 0,
                     CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.json"),
+                    Content = ContentDescription.FromFile(resourceRatFolder, resourceRatFile),
                 });
 
             rat.Manipulator.SetScaling(0.5f);
@@ -546,7 +543,7 @@ namespace TerrainSamples.SceneModularDungeon
                     CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.json"),
+                    Content = ContentDescription.FromFile(resourceHumanFolder, resourceHumanFile),
                 });
 
             human.Visible = false;
@@ -554,7 +551,7 @@ namespace TerrainSamples.SceneModularDungeon
         private async Task InitializeAudio()
         {
             soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
-            soundEffectsManager.InitializeAudio(Path.Combine(resourcesFolder, resourceAudio));
+            soundEffectsManager.InitializeAudio(resourceAudioFolder);
         }
         private void LoadAssetsCompleted(LoadResourcesResult res)
         {

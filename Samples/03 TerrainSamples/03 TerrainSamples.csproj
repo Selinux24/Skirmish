@@ -11,92 +11,133 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Common\Agents\Leopard\Leopard_0.bmp" />
+    <None Remove="Common\Agents\Leopard\Leopard_1.bmp" />
+    <None Remove="Common\Agents\Leopard\Leopard_2.bmp" />
+    <None Remove="Common\Buildings\Obelisk2\obelisk.json" />
+    <None Remove="Common\Buildings\Obelisk2\obelisk.mtl" />
+    <None Remove="Common\Buildings\Obelisk2\obelisk.obj" />
+    <None Remove="Common\Buildings\Obelisk2\obelisk_d.jpg" />
+    <None Remove="Common\Buildings\Obelisk2\obelisk_n.jpg" />
+    <None Remove="Common\Effects\Particles\explosion.png" />
+    <None Remove="Common\Effects\Particles\fire.dds" />
+    <None Remove="Common\Effects\Particles\fire.png" />
+    <None Remove="Common\Effects\Particles\floor.png" />
+    <None Remove="Common\Effects\Particles\smoke.png" />
+    <None Remove="Common\Props\Rocks\boulder.json" />
+    <None Remove="Common\Props\Rocks\boulder_1.dae" />
+    <None Remove="Common\Props\Rocks\boulder_2.dae" />
+    <None Remove="Common\Props\Rocks\boulder_3.dae" />
+    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_diffuse.dds" />
+    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_normal.dds" />
+    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_specular.dds" />
+  </ItemGroup>
+
+  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="SceneCrowds\Resources\Leopard.bmp">
+    <Content Include="Common\Agents\Leopard\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Leopard.dae">
+    <Content Include="Common\Agents\Leopard\Leopard.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Leopard.json">
+    <Content Include="Common\Agents\Leopard\Leopard_0.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\sunset.dds">
+    <Content Include="Common\Agents\Leopard\Leopard_1.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\target.png">
+    <Content Include="Common\Agents\Leopard\Leopard_2.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\terrain.dae">
+    <Content Include="Common\Buildings\Obelisk2\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\terrain.json">
+    <Content Include="Common\Buildings\Obelisk2\obelisk.mtl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\terrain.png">
+    <Content Include="Common\Buildings\Obelisk2\obelisk.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\terrain_nmap.png">
+    <Content Include="Common\Buildings\Obelisk2\obelisk_d.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_01_bark_diffuse.dds">
+    <Content Include="Common\Buildings\Obelisk2\obelisk_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_01_bark_normal.dds">
+    <Content Include="Common\Effects\Particles\explosion.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_01_leaves_diffuse.dds">
+    <Content Include="Common\Effects\Particles\fire.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_01_leaves_normal.dds">
+    <Content Include="Common\Effects\Particles\floor.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_a.dae">
+    <Content Include="Common\Skyboxes\sunset.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_a.json">
+    <Content Include="Common\UI\Cursor\target.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_b.dae">
+    <Content Include="Common\Terrain\Basic\terrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCrowds\Resources\Trees\birch_b.json">
+    <Content Include="Common\Terrain\Basic\terrain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\cursor.dae">
+    <Content Include="Common\Terrain\Basic\terrain.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\cursor.json">
+    <Content Include="Common\Terrain\Basic\terrain_nmap.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\soldier0.jpg">
+    <Content Include="Common\Trees\Birch\birch_01_bark_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\Soldier1.jpg">
+    <Content Include="Common\Trees\Birch\birch_01_bark_normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\soldier_anim2.dae">
+    <Content Include="Common\Trees\Birch\birch_01_leaves_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\soldier_anim2.json">
+    <Content Include="Common\Trees\Birch\birch_01_leaves_normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\terrain.dae">
+    <Content Include="Common\Trees\Birch\birch_a.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\terrain.json">
+    <Content Include="Common\Trees\Birch\birch_a.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\terrain.png">
+    <Content Include="Common\Trees\Birch\birch_b.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources3D\terrain_nmap.png">
+    <Content Include="Common\Trees\Birch\birch_b.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources\ARMY RUST.ttf">
+    <Content Include="Common\UI\Cursor3D\cursor.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\UI\Cursor3D\cursor.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Agents\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Agents\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Agents\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Agents\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\UI\Fonts\ARMY RUST.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneGrid\Resources\button_off.png">
@@ -108,293 +149,275 @@
     <Content Include="SceneGrid\Resources\HUD.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneGrid\Resources\JOYSTIX.TTF">
+    <Content Include="Common\UI\Fonts\JOYSTIX.TTF">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Bradley\Bradley.dae">
+    <Content Include="Common\Agents\Bradley\Bradley.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Bradley\Bradley.jpg">
+    <Content Include="Common\Agents\Bradley\Bradley.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Bradley\Bradley.json">
+    <Content Include="Common\Agents\Bradley\Bradley.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Buildings\Affgan1.dae">
+    <Content Include="Common\Buildings\Affgan\Affgan1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Buildings\Affgan1.json">
+    <Content Include="Common\Buildings\Affgan\Affgan1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Buildings\afghan_building.jpg">
+    <Content Include="Common\Buildings\Affgan\afghan_building.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\container.dae">
+    <Content Include="Common\Props\Container\container.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\container.json">
+    <Content Include="Common\Props\Container\container.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\ikube azul-1.png">
+    <Content Include="Common\Props\Container\ikube azul-1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\ikube azul-2.png">
+    <Content Include="Common\Props\Container\ikube azul-2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\ikube azul-3.png">
+    <Content Include="Common\Props\Container\ikube azul-3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\ikube azul-4.png">
+    <Content Include="Common\Props\Container\ikube azul-4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Container\ikube azul-5.png">
+    <Content Include="Common\Props\Container\ikube azul-5.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\M24\m24.dae">
+    <Content Include="Common\Agents\M24\m24.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\M24\m24.dds">
+    <Content Include="Common\Agents\M24\m24.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\M24\m24.json">
+    <Content Include="Common\Effects\Particles\dust.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Particles\dust.png">
+    <Content Include="Common\Effects\Particles\fire.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Particles\fire.png">
+    <Content Include="Common\Effects\Particles\smoke.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Particles\smoke.png">
+    <Content Include="Common\Props\Rocks\boulder.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_1.dae">
+    <Content Include="Common\Props\Rocks\boulder_1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_2.dae">
+    <Content Include="Common\Props\Rocks\boulder_2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_3.dae">
+    <Content Include="Common\Props\Rocks\boulder_3.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
+    <Content Include="Common\Props\Rocks\boulder_granite_grey_01_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_granite_grey_01_normal.dds">
+    <Content Include="Common\Props\Rocks\boulder_granite_grey_01_normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Rocks\boulder_granite_grey_01_specular.dds">
+    <Content Include="Common\Props\Rocks\boulder_granite_grey_01_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Flare\lfFlare1.png">
+    <Content Include="Common\Effects\Flare\lfFlare1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Flare\lfFlare2.png">
+    <Content Include="Common\Effects\Flare\lfFlare2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Flare\lfFlare3.png">
+    <Content Include="Common\Effects\Flare\lfFlare3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Flare\lfGlow.png">
+    <Content Include="Common\Effects\Flare\lfGlow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\flower0.dds">
+    <Content Include="Common\Foliage\flower0.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\flower1.dds">
+    <Content Include="Common\Foliage\flower1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\flower2.dds">
+    <Content Include="Common\Foliage\flower2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass0.png">
+    <Content Include="Common\Foliage\grass0.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass1.png">
+    <Content Include="Common\Foliage\grass1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass2.png">
+    <Content Include="Common\Foliage\grass2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_d0.dds">
+    <Content Include="Common\Foliage\grass_d0.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_d1.dds">
+    <Content Include="Common\Foliage\grass_d1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_d2.dds">
+    <Content Include="Common\Foliage\grass_d2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_n0.dds">
+    <Content Include="Common\Foliage\grass_n0.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_n1.dds">
+    <Content Include="Common\Foliage\grass_n1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_n2.dds">
+    <Content Include="Common\Foliage\grass_n2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_v0.dds">
+    <Content Include="Common\Foliage\grass_v0.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_v1.dds">
+    <Content Include="Common\Foliage\grass_v1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\grass_v2.dds">
+    <Content Include="Common\Foliage\grass_v2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\map.png">
+    <Content Include="Common\Foliage\map.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Foliage\Billboard\map_flowers.png">
+    <Content Include="Common\Foliage\map_flowers.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\desert0cm.bmp">
+    <Content Include="SceneHeightmap\Resources\desert0cm.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\desert0hm.bmp">
+    <Content Include="SceneHeightmap\Resources\desert0hm.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\alpha001.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\alpha001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt001.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt002.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt002.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt004.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt004.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt0hr.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt0hr.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt0lr.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt0lr.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt1lr.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt1lr.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\dirt2lr.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\dirt2lr.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\normal001.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\normal001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\normal002.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\normal002.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\specular001.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\specular001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\specular002.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\specular002.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Heightmap\Textures\stone001.dds">
+    <Content Include="SceneHeightmap\Resources\Textures\stone001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Objects\torch.dae">
+    <Content Include="Common\Props\Torch\torch.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Scenery\Objects\torch.json">
+    <Content Include="Common\Props\Torch\torch.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Sky\cloud001.dds">
+    <Content Include="Common\Sky\cloud001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Sky\perturb001.dds">
+    <Content Include="Common\Sky\perturb001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Soldier\soldier0.jpg">
+    <Content Include="Common\Trees\TreeB\Bark_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Soldier\Soldier1.jpg">
+    <Content Include="Common\Trees\TreeB\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Soldier\soldier_anim2.dae">
+    <Content Include="Common\Trees\TreeB\TreeB.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Soldier\soldier_anim2.json">
+    <Content Include="Common\Trees\TreeB\treeB_1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\target.png">
+    <Content Include="Common\Trees\TreeB\treeB_2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\Bark_d.png">
+    <Content Include="Common\Trees\TreeB\treeB_3.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\Leafs_d.png">
+    <Content Include="Common\Trees\TreeA\Bark_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\Tree.json">
+    <Content Include="Common\Trees\TreeA\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\tree_1.dae">
+    <Content Include="Common\Trees\TreeA\TreeA.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\tree_2.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Trees2\tree_3.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\Bark_d.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\Leafs_d.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\Tree.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\tree_1.dae">
+    <Content Include="Common\Trees\TreeA\treeA_1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\tree_2.dae">
+    <Content Include="Common\Trees\TreeA\treeA_2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Trees\tree_3.dae">
+    <Content Include="Common\Trees\TreeA\treeA_3.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Watch Tower\Watch Tower.dae">
+    <Content Include="Common\Buildings\Watch Tower\Watch Tower.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Watch Tower\Watch Tower.json">
+    <Content Include="Common\Buildings\Watch Tower\Watch Tower.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneHeightmap\Resources\Watch Tower\Wood.jpg">
+    <Content Include="Common\Buildings\Watch Tower\Wood.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\door.wav">
+    <Content Include="Common\Audio\Effects\door.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\ladder.wav">
+    <Content Include="Common\Audio\Effects\ladder.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\loop_torch.wav">
+    <Content Include="Common\Audio\Effects\loop_torch.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\mouse1.wav">
+    <Content Include="Common\Audio\Effects\mouse1.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\mouse2.wav">
+    <Content Include="Common\Audio\Effects\mouse2.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\Wind1_S.wav">
+    <Content Include="Common\Audio\Effects\Wind1_S.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\Wind2_S.wav">
+    <Content Include="Common\Audio\Effects\Wind2_S.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Audio\Effects\Wind3_S.wav">
+    <Content Include="Common\Audio\Effects\Wind3_S.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\BasicDungeon\Assets.dae">
@@ -532,19 +555,19 @@
     <Content Include="SceneModularDungeon\Resources\BasicDungeon\wrack1_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Characters\Human2\Human2.dae">
+    <Content Include="Common\Agents\Human2\Human2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Characters\Human2\Human2.json">
+    <Content Include="Common\Agents\Human2\Human2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Characters\Rat\Rat.dae">
+    <Content Include="Common\Agents\Rat\Rat.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Characters\Rat\Rat.json">
+    <Content Include="Common\Agents\Rat\Rat.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneModularDungeon\Resources\Characters\Rat\Rat_d.png">
+    <Content Include="Common\Agents\Rat\Rat_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneModularDungeon\Resources\MDP\Barrel.mtl">
@@ -1384,22 +1407,10 @@
     <Content Include="SceneModularDungeon\Resources\UMRP\Window_Open_Double.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneNavMeshTest\Resources\buttons.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneNavMeshTest\Resources\dungeon.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneNavMeshTest\Resources\dungeon.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneNavMeshTest\Resources\modular_dungeon.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneNavMeshTest\Resources\modular_dungeon.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.mtl">
@@ -1408,19 +1419,10 @@
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap01.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.mtl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap02.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneNavMeshTest\Resources\testSimpleMap04.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap03.mtl">
@@ -1435,352 +1437,184 @@
     <Content Include="SceneNavMeshTest\Resources\testSimpleMap04.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Buildings\Building_1.json">
+    <Content Include="Common\Buildings\Building\Building_1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\explosion_helicopter_close_01.wav">
+    <Content Include="Common\Audio\Effects\explosion_helicopter_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\explosion_helicopter_distant_01.wav">
+    <Content Include="Common\Audio\Effects\explosion_helicopter_distant_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\explosion_vehicle_small_close_01.wav">
+    <Content Include="Common\Audio\Effects\explosion_vehicle_small_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\explosion_vehicle_small_distant_01.wav">
+    <Content Include="Common\Audio\Effects\explosion_vehicle_small_distant_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\fire_vehicle_close_loop.wav">
+    <Content Include="Common\Audio\Effects\fire_vehicle_close_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\fire_vehicle_distant_loop.wav">
+    <Content Include="Common\Audio\Effects\fire_vehicle_distant_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\heli.wav">
+    <Content Include="Common\Audio\Effects\heli.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\machinegun-shooting.wav">
+    <Content Include="Common\Audio\Effects\machinegun-shooting.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_grate_large_01.wav">
+    <Content Include="Common\Audio\Effects\metal_grate_large_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_grate_large_02.wav">
+    <Content Include="Common\Audio\Effects\metal_grate_large_02.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_grate_large_03.wav">
+    <Content Include="Common\Audio\Effects\metal_grate_large_03.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_grate_large_04.wav">
+    <Content Include="Common\Audio\Effects\metal_grate_large_04.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_pipe_large_01.wav">
+    <Content Include="Common\Audio\Effects\metal_pipe_large_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_pipe_large_02.wav">
+    <Content Include="Common\Audio\Effects\metal_pipe_large_02.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_pipe_large_03.wav">
+    <Content Include="Common\Audio\Effects\metal_pipe_large_03.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\metal_pipe_large_04.wav">
+    <Content Include="Common\Audio\Effects\metal_pipe_large_04.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\tank_engine.wav">
+    <Content Include="Common\Audio\Effects\tank_engine.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Audio\Effects\wind_birds_forest_01.wav">
+    <Content Include="Common\Audio\Effects\wind_birds_forest_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Buildings\Building_1.dae">
+    <Content Include="Common\Buildings\Building\Building_1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Clouds\cloud001.dds">
+    <Content Include="Common\Buildings\Garage\concrete.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Clouds\perturb001.dds">
+    <Content Include="Common\Buildings\Garage\garage.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Cursor\cursor.dae">
+    <Content Include="Common\Buildings\Garage\garage.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Cursor\cursor.json">
+    <Content Include="Common\Agents\M24\m24 - 1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Cursor\target.png">
+    <Content Include="Common\Agents\M24\m24 - 2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Flare\lfFlare1.png">
+    <Content Include="Common\Agents\M24\m24 - 3.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Flare\lfFlare2.png">
+    <Content Include="Common\Buildings\Heliport\concrete.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Flare\lfFlare3.png">
+    <Content Include="Common\Buildings\Heliport\heliport.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Flare\lfGlow.png">
+    <Content Include="Common\Buildings\Heliport\heliport.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Garage\concrete.jpg">
+    <Content Include="Common\Buildings\Heliport\heliport.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Garage\garage.dae">
+    <Content Include="Common\Buildings\Obelisk\diffus.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Garage\garage.json">
+    <Content Include="Common\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Helicopter\m24 - 1.dds">
+    <Content Include="Common\Buildings\Obelisk\obelisk.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Helicopter\m24 - 2.dds">
+    <Content Include="Common\Buildings\Obelisk\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Helicopter\m24 - 3.dds">
+    <Content Include="Common\Buildings\Obelisk\specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Helicopter\m24.dae">
+    <Content Include="Common\Terrain\TwoLevels\terrain.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Helicopter\m24.json">
+    <Content Include="Common\Terrain\TwoLevels\terrain_nmap.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Heliport\concrete.jpg">
+    <Content Include="Common\Terrain\TwoLevels\two_levels.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Heliport\heliport.dae">
+    <Content Include="Common\Terrain\TwoLevels\two_levels.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Heliport\heliport.json">
+    <Content Include="Common\UvDebug\uvtest.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Heliport\heliport.png">
+    <Content Include="Common\Audio\Effects\target_balls_single_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Leopard\Leopard.dae">
+    <Content Include="Common\Effects\Bullets\bullet-hole_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Leopard\Leopard.json">
+    <Content Include="Common\Effects\Bullets\bullet-hole_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Leopard\Leopard_0.bmp">
+    <Content Include="Common\Effects\Bullets\bullet-hole_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Leopard\Leopard_1.bmp">
+    <Content Include="Common\Skyboxes\Daylight Box UV.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Leopard\Leopard_2.bmp">
+    <Content Include="Common\Buildings\Fountain\1_9be8dc.mtl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Obelisk\diffus.dds">
+    <Content Include="Common\Buildings\Fountain\1_9be8dc.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Obelisk\normal.dds">
+    <Content Include="Common\Buildings\Fountain\Fountain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Obelisk\obelisk.dae">
+    <Content Include="Common\Buildings\Fountain\tLbZ9Jo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Obelisk\obelisk.json">
+    <Content Include="Common\Surfaces\Dirt\Diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Obelisk\specular.dds">
+    <Content Include="Common\Surfaces\Dirt\Normal.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Particles\explosion.png">
+    <Content Include="Common\Buildings\Ruins\ruins.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Particles\fire.dds">
+    <Content Include="Common\Buildings\Ruins\ruins.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Particles\fire.png">
+    <Content Include="Common\UI\backGround.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Particles\floor.png">
+    <Content Include="Common\UI\Controls\buttons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Particles\smoke.png">
+    <Content Include="Common\UI\Fonts\HelveticaNeue Medium.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder.json">
+    <Content Include="Common\UI\Fonts\HelveticaNeueHv.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_1.dae">
+    <Content Include="Common\UI\Cursor\pointer.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_2.dae">
+    <Content Include="Common\UI\SkyPlane.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_3.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_granite_grey_01_normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Rocks\boulder_granite_grey_01_specular.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Skydom\sunset.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\Foliage\Billboard\grass_v0.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\Foliage\Billboard\grass_v1.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\Foliage\Billboard\grass_v2.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\terrain.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\terrain_nmap.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\two_levels.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Terrain\two_levels.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_01_bark_diffuse.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_01_bark_normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_01_leaves_diffuse.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_01_leaves_normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_a.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_a.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_b.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\Trees\birch_b.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneRts\Resources\uvtest.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Audio\Effects\target_balls_single_loop.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Bullets\bullet-hole_1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Bullets\bullet-hole_2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Bullets\bullet-hole_3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Daylight Box UV.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\fire.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\flare0.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\flare1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\flare2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\flare3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Fountain\1_9be8dc.mtl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Fountain\1_9be8dc.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Fountain\Fountain.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Fountain\tLbZ9Jo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\LakeBottom\Diffuse.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\LakeBottom\Normal.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Obelisk\obelisk.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Obelisk\obelisk.mtl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Obelisk\obelisk.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Obelisk\obelisk_d.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\Obelisk\obelisk_n.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\raindrop.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\ruins.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\ruins.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\smoke.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\sunset.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\target.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\torch.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneSkybox\Resources\torch.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\backGround.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\buttons.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\HelveticaNeue Medium.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\HelveticaNeueHv.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\pointer.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\SkyPlane.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\SkyPlane.json">
+    <Content Include="Common\UI\SkyPlane.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

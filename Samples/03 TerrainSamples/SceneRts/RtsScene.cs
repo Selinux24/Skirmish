@@ -23,17 +23,57 @@ namespace TerrainSamples.SceneRts
 
     public class RtsScene : WalkableScene
     {
-        private const string resourceParticlesString = "SceneRts/resources/particles";
-        private const string resourceParticleSmokeString = "smoke.png";
-        private const string resourceParticleFireString = "fire.png";
-        private const string GlowString = "lfGlow.png";
-        private const string Flare1String = "lfFlare1.png";
-        private const string Flare2String = "lfFlare2.png";
-        private const string Flare3String = "lfFlare3.png";
-        private const string helicopterString = "Helicopter";
-        private const string tank1String = "Tank1";
-        private const string tank2String = "Tank2";
-        private const string resourceEffectsString = "SceneRts/resources/Audio/Effects";
+        private const string resourceTarjetFile = "Common/UI/Cursor/target.png";
+
+        private const string resourceCursorFolder = "Common/UI/Cursor3D/";
+        private const string resourceCursorFile = "cursor.json";
+
+        private const string resourceUVFile = "Common/UvDebug/uvtest.png";
+
+        private const string resourceSkyboxFile = "Common/Skyboxes/sunset.dds";
+        private const string resourceCloudsFolder = "Common/Sky/";
+        private const string resourceCloudsPerturbFile = "perturb001.dds";
+        private const string resourceCloudsCloudFile = "cloud001.dds";
+
+        private const string resourceParticlesFolder = "Common/Effects/Particles/";
+        private const string resourceParticleSmokeFile = "smoke.png";
+        private const string resourceParticleFireFile = "fire.png";
+        private const string resourceFlareFolder = "Common/Effects/Flare/";
+        private const string resourceFlareGlowFile = "lfGlow.png";
+        private const string resourceFlareFlare1File = "lfFlare1.png";
+        private const string resourceFlareFlare2File = "lfFlare2.png";
+        private const string resourceFlareFlare3File = "lfFlare3.png";
+
+        private const string resourceTerrainFolder = "Common/Terrain/TwoLevels/";
+        private const string resourceTerrainFile = "two_levels.json";
+
+        private const string resourceFoliageFolder = "Common/Foliage/";
+        private const string resourceFoliageGrassFile = "grass_v.dds";
+
+        private const string resourceHelicopterFolder = "Common/Agents/M24/";
+        private const string resourceHelicopterFile = "m24.json";
+        private const string resourceHelicopterName = "Helicopter";
+        private const string resourceTankFolder = "Common/Agents/Leopard/";
+        private const string resourceTankFile = "Leopard.json";
+        private const string resourceTank1Name = "Tank1";
+        private const string resourceTank2Name = "Tank2";
+
+        private const string resourceEffectsFolder = "Common/Audio/Effects/";
+
+        private const string resourceHeliportFolder = "Common/Buildings/Heliport/";
+        private const string resourceHeliportFile = "Heliport.json";
+        private const string resourceGarageFolder = "Common/Buildings/Garage/";
+        private const string resourceGarageFile = "Garage.json";
+        private const string resourceBuildingFolder = "Common/Buildings/Building/";
+        private const string resourceBuildingFile = "Building_1.json";
+        private const string resourceObeliskFolder = "Common/Buildings/Obelisk/";
+        private const string resourceObeliskFile = "Obelisk.json";
+
+        private const string resourceRocksFolder = "Common/Props/Rocks/";
+        private const string resourceRocksFile = "boulder.json";
+        private const string resourceTreesFolder = "Common/Trees/Birch/";
+        private const string resourceTreeAFile = "birch_a.json";
+        private const string resourceTreeBFile = "birch_b.json";
 
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;
@@ -226,11 +266,11 @@ namespace TerrainSamples.SceneRts
             {
                 DeferredEnabled = false,
                 DepthEnabled = false,
-                Content = ContentDescription.FromFile("SceneRts/resources/cursor", "cursor.json"),
+                Content = ContentDescription.FromFile(resourceCursorFolder, resourceCursorFile),
             };
             cursor3D = await AddComponentCursor<Model, ModelDescription>("Cursor3D", "Cursor3D", c3DDesc);
 
-            var c2DDesc = UICursorDescription.Default("SceneRts/resources/Cursor/target.png", 16, 16, true, Color.Red);
+            var c2DDesc = UICursorDescription.Default(resourceTarjetFile, 16, 16, true, Color.Red);
             cursor2D = await AddComponentCursor<UICursor, UICursorDescription>("Cursor2D", "Cursor2D", c2DDesc);
             cursor2D.BaseColor = Color.Red;
             cursor2D.Visible = false;
@@ -324,7 +364,7 @@ namespace TerrainSamples.SceneRts
             shadowMapDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("++DEBUG++ Shadow Map", "++DEBUG++ Shadow Map", smDesc);
             shadowMapDrawer.Channel = ColorChannels.Red;
 
-            debugTex = Game.ResourceManager.RequestResource(@"SceneRts/resources/uvtest.png");
+            debugTex = Game.ResourceManager.RequestResource(resourceUVFile);
 
             #endregion
 
@@ -431,12 +471,12 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesString, resourceParticleSmokeString);
-            pFire = ParticleSystemDescription.InitializeFire(resourceParticlesString, resourceParticleFireString);
-            pDust = ParticleSystemDescription.InitializeDust(resourceParticlesString, resourceParticleSmokeString);
-            pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourceParticlesString, resourceParticleSmokeString);
-            pExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesString, resourceParticleFireString);
-            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesString, resourceParticleSmokeString);
+            pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesFolder, resourceParticleSmokeFile);
+            pFire = ParticleSystemDescription.InitializeFire(resourceParticlesFolder, resourceParticleFireFile);
+            pDust = ParticleSystemDescription.InitializeDust(resourceParticlesFolder, resourceParticleSmokeFile);
+            pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourceParticlesFolder, resourceParticleSmokeFile);
+            pExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, resourceParticleFireFile);
+            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, resourceParticleSmokeFile);
 
             pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
@@ -454,22 +494,22 @@ namespace TerrainSamples.SceneRts
 
             var lfDesc = new LensFlareDescription()
             {
-                ContentPath = "SceneRts/resources/Flare",
-                GlowTexture = GlowString,
+                ContentPath = resourceFlareFolder,
+                GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlareFlare1File),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlareFlare2File),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -490,11 +530,11 @@ namespace TerrainSamples.SceneRts
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 TextureIndex = 0,
-                Content = ContentDescription.FromFile("SceneRts/resources/Helicopter", "M24.json"),
+                Content = ContentDescription.FromFile(resourceHelicopterFolder, resourceHelicopterFile),
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 StartsVisible = false,
             };
-            helicopter = await AddComponentAgent<Model, ModelDescription>(nameof(helicopter), helicopterString, hDesc);
+            helicopter = await AddComponentAgent<Model, ModelDescription>(nameof(helicopter), resourceHelicopterName, hDesc);
             helicopter.Manipulator.SetScaling(0.15f);
 
             PrepareLights(helicopter.Lights);
@@ -502,7 +542,7 @@ namespace TerrainSamples.SceneRts
             sw.Stop();
             return new TaskResult()
             {
-                Text = helicopterString,
+                Text = resourceHelicopterName,
                 Duration = sw.Elapsed,
             };
         }
@@ -515,13 +555,13 @@ namespace TerrainSamples.SceneRts
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
-                Content = ContentDescription.FromFile("SceneRts/resources/Leopard", "Leopard.json"),
+                Content = ContentDescription.FromFile(resourceTankFolder, resourceTankFile),
                 TransformNames = ["Barrel-mesh", "Turret-mesh", "Hull-mesh"],
                 TransformDependences = [1, 2, -1],
                 StartsVisible = false,
             };
-            tankP1 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP1), tank1String, tDesc);
-            tankP2 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP2), tank2String, tDesc);
+            tankP1 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP1), resourceTank1Name, tDesc);
+            tankP2 = await AddComponentAgent<Model, ModelDescription>(nameof(tankP2), resourceTank2Name, tDesc);
 
             tankP1.Manipulator.SetScaling(0.2f);
             tankP2.Manipulator.SetScaling(0.2f);
@@ -560,7 +600,7 @@ namespace TerrainSamples.SceneRts
             var hpDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneRts/resources/Heliport", "Heliport.json"),
+                Content = ContentDescription.FromFile(resourceHeliportFolder, resourceHeliportFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -583,7 +623,7 @@ namespace TerrainSamples.SceneRts
             var gDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneRts/resources/Garage", "Garage.json"),
+                Content = ContentDescription.FromFile(resourceGarageFolder, resourceGarageFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -606,7 +646,7 @@ namespace TerrainSamples.SceneRts
             var gDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile("SceneRts/resources/Buildings", "Building_1.json"),
+                Content = ContentDescription.FromFile(resourceBuildingFolder, resourceBuildingFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -630,7 +670,7 @@ namespace TerrainSamples.SceneRts
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 4,
-                Content = ContentDescription.FromFile("SceneRts/resources/Obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObeliskFolder, resourceObeliskFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -652,7 +692,7 @@ namespace TerrainSamples.SceneRts
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 250,
-                Content = ContentDescription.FromFile("SceneRts/resources/Rocks", "boulder.json"),
+                Content = ContentDescription.FromFile(resourceRocksFolder, resourceRocksFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -675,7 +715,7 @@ namespace TerrainSamples.SceneRts
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 100,
-                Content = ContentDescription.FromFile("SceneRts/resources/Trees", "birch_a.json"),
+                Content = ContentDescription.FromFile(resourceTreesFolder, resourceTreeAFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -684,7 +724,7 @@ namespace TerrainSamples.SceneRts
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.OpaqueTransparent,
                 Instances = 100,
-                Content = ContentDescription.FromFile("SceneRts/resources/Trees", "birch_b.json"),
+                Content = ContentDescription.FromFile(resourceTreesFolder, resourceTreeBFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Hull,
             };
@@ -703,7 +743,7 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            string fileName = @"SceneRts/resources/Skydom/sunset.dds";
+            string fileName = resourceSkyboxFile;
 
             var skydomDesc = SkydomDescription.Sphere(fileName, Camera.FarPlaneDistance);
             await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
@@ -722,9 +762,9 @@ namespace TerrainSamples.SceneRts
 
             await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", new SkyPlaneDescription()
             {
-                ContentPath = "SceneRts/resources/clouds",
-                Texture1Name = "perturb001.dds",
-                Texture2Name = "cloud001.dds",
+                ContentPath = resourceCloudsFolder,
+                Texture1Name = resourceCloudsPerturbFile,
+                Texture2Name = resourceCloudsCloudFile,
                 SkyMode = SkyPlaneModes.Perturbed,
                 MaxBrightness = 0.8f,
                 MinBrightness = 0.1f,
@@ -745,7 +785,7 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var terrainDescription = GroundDescription.FromFile("SceneRts/resources/Terrain", "two_levels.json", 1);
+            var terrainDescription = GroundDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 1);
             terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDescription);
 
             sw.Stop();
@@ -762,10 +802,10 @@ namespace TerrainSamples.SceneRts
 
             var grDesc = new FoliageDescription()
             {
-                ContentPath = "SceneRts/resources/Terrain/Foliage/Billboard",
-                ChannelRed = new FoliageDescription.Channel()
+                ContentPath = resourceFoliageFolder,
+                ChannelRed = new()
                 {
-                    VegetationTextures = ["grass_v.dds"],
+                    VegetationTextures = [resourceFoliageGrassFile],
                     Density = 10f,
                     StartRadius = 0f,
                     EndRadius = 50f,
@@ -792,7 +832,7 @@ namespace TerrainSamples.SceneRts
             sw.Restart();
 
             soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
-            soundEffectsManager.InitializeAudio(resourceEffectsString, helicopterString, tank1String, tank2String);
+            soundEffectsManager.InitializeAudio(resourceEffectsFolder, resourceHelicopterName, resourceTank1Name, resourceTank2Name);
 
             sw.Stop();
             return new TaskResult()
@@ -1150,8 +1190,8 @@ namespace TerrainSamples.SceneRts
             tankP1Agent = new TankAIAgent(agentManager, tankAgentType, tankP1, tStats);
             tankP2Agent = new TankAIAgent(agentManager, tankAgentType, tankP2, tStats);
 
-            tankP1Agent.SceneObject.Name = tank1String;
-            tankP2Agent.SceneObject.Name = tank2String;
+            tankP1Agent.SceneObject.Name = resourceTank1Name;
+            tankP2Agent.SceneObject.Name = resourceTank2Name;
 
             // Register events
             tankP1Agent.Moving += Agent_Moving;

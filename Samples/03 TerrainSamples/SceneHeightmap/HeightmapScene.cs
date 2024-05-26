@@ -18,10 +18,59 @@ namespace TerrainSamples.SceneHeightmap
 {
     public class HeightmapScene : WalkableScene
     {
-        private const string GlowString = "lfGlow.png";
-        private const string Flare1String = "lfFlare1.png";
-        private const string Flare2String = "lfFlare2.png";
-        private const string Flare3String = "lfFlare3.png";
+        private const string resourceCursor = "Common/UI/Cursor/target.png";
+        private const string resourceRocksFolder = "Common/Props/Rocks/";
+        private const string resourceRocksFile = "boulder.json";
+        private const string resourceATreesFolder = "Common/Trees/TreeA/";
+        private const string resourceATreesFile = "treeA.json";
+        private const string resourceBTreesFolder = "Common/Trees/TreeB/";
+        private const string resourceBTreesFile = "treeB.json";
+        private const string resourceSoldierFolder = "Common/Agents/Soldier/";
+        private const string resourceSoldierFile = "soldier_anim2.json";
+        private const string resourceHelicopterFolder = "Common/Agents/M24/";
+        private const string resourceHelicopterFile = "m24.json";
+        private const string resourceTankFolder = "Common/Agents/Bradley/";
+        private const string resourceTankFile = "Bradley.json";
+        private const string resourceBuildingFolder = "Common/Buildings/Affgan/";
+        private const string resourceBuildingFile = "Affgan1.json";
+        private const string resourceTowerFolder = "Common/Buildings/Watch Tower/";
+        private const string resourceTowerFile = "Watch Tower.json";
+        private const string resourceContainerFolder = "Common/Props/Container/";
+        private const string resourceContainerFile = "container.json";
+        private const string resourceTorchFolder = "Common/Props/Torch/";
+        private const string resourceTorchFile = "torch.json";
+        private const string resourceParticlesFolder = "Common/Effects/Particles/";
+        private const string resourceFireFile = "fire.png";
+        private const string resourceSmokeFile = "smoke.png";
+        private const string resourceDustFile = "dust.png";
+        private const string resourceFlare = "Common/Effects/Flare/";
+        private const string resourceFlareGlowFile = "lfGlow.png";
+        private const string resourceFlareFlare1File = "lfFlare1.png";
+        private const string resourceFlareFlare2File = "lfFlare2.png";
+        private const string resourceFlareFlare3File = "lfFlare3.png";
+        private const string resourceClouds = "Common/Sky/";
+        private const string resourceCloudsPerturbFile = "perturb001.dds";
+        private const string resourceCloudsCloudFile = "cloud001.dds";
+        private const string resourceFoliageGrass = "Common/Foliage/";
+        private const string resourceFoliageGrassMapFile = "map.png";
+        private const string resourceFoliageGrass1File = "grass_v.dds";
+        private const string resourceFoliageGrass2File = "grass_d.dds";
+        private const string resourceFoliageGrass2NFile = "grass_n.dds";
+        private const string resourceFoliageGrass3File = "grass1.png";
+        private const string resourceFoliageFlower = "Common/Foliage/";
+        private const string resourceFoliageFlowerMapFile = "map_flowers.png";
+        private const string resourceFoliageFlower1File = "flower0.dds";
+        private const string resourceFoliageFlower2File = "flower1.dds";
+        private const string resourceFoliageFlower3File = "flower2.dds";
+        private const string resourceLocalTerrain = "SceneHeightmap/Resources/";
+        private const string resourceLocalHeightmapFile = "desert0hm.bmp";
+        private const string resourceLocalColormapFile = "desert0cm.bmp";
+        private const string resourceLocalTextures = "Textures";
+        private readonly string[] resourceLocalNormalMapFiles = ["normal001.dds", "normal002.dds"];
+        private const string resourceLocalAlphaMapFile = "alpha001.dds";
+        private readonly string[] resourceLocalColorFiles = ["dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds"];
+        private readonly string[] resourceLocalLRFiles = ["dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds"];
+        private readonly string[] resourceLocalHRFiles = ["dirt0hr.dds"];
 
         private const float near = 0.5f;
         private const float far = 3000f;
@@ -164,7 +213,10 @@ namespace TerrainSamples.SceneHeightmap
             var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
+                    InitializeUICursor,
+                    InitializeUIFadePanel,
                     InitializeUIAssets,
+                    InitializeDebug,
                 ],
                 LoadingTaskUICompleted);
 
@@ -175,24 +227,21 @@ namespace TerrainSamples.SceneHeightmap
             await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
             uiTweener = this.AddUIControlTweener();
         }
+        private async Task InitializeUICursor()
+        {
+            var desc = UICursorDescription.Default(resourceCursor, 20, 20, true, Color.Red);
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
+        }
+        private async Task InitializeUIFadePanel()
+        {
+            var desc = UIPanelDescription.Screen(this, Color4.Black * 0.3333f);
+            desc.StartsVisible = false;
+
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", desc, LayerUIEffects);
+        }
         private async Task InitializeUIAssets()
         {
-            #region Cursor
-
-            var cursorDesc = UICursorDescription.Default("SceneHeightmap/Resources/target.png", 20, 20, true, Color.Red);
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
-
-            #endregion
-
-            #region Fade panel
-
-            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
-            fadePanel.Visible = false;
-
-            #endregion
-
-            #region Texts
-
             var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
             var defaultFont11 = TextDrawerDescription.FromFamily("Tahoma", 11);
             defaultFont18.LineAdjust = true;
@@ -208,17 +257,16 @@ namespace TerrainSamples.SceneHeightmap
             help.Text = "";
             help2.Text = "";
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", spDesc, LayerUI - 1);
+            var desc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
 
-            #endregion
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, LayerUI - 1);
+        }
+        private async Task InitializeDebug()
+        {
+            var desc = UITextureRendererDescription.Default();
+            desc.StartsVisible = false;
 
-            #region Debug
-
-            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default());
-            bufferDrawer.Visible = false;
-
-            #endregion
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", desc);
         }
         private void LoadingTaskUICompleted(LoadResourcesResult res)
         {
@@ -265,111 +313,120 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeRocks()
         {
-            var rDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Hull,
                 Instances = 250,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Rocks", @"boulder.json"),
+                Content = ContentDescription.FromFile(resourceRocksFolder, resourceRocksFile),
                 StartsVisible = false,
             };
-            rocks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
+
+            rocks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", desc);
         }
         private async Task InitializeTrees()
         {
-            var treeDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees", @"tree.json"),
+                Content = ContentDescription.FromFile(resourceATreesFolder, resourceATreesFile),
                 StartsVisible = false,
             };
-            trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
+
+            trees = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", desc);
         }
         private async Task InitializeTrees2()
         {
-            var tree2Desc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Hull,
                 Instances = 200,
                 BlendMode = BlendModes.OpaqueTransparent,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Trees2", @"tree.json"),
+                Content = ContentDescription.FromFile(resourceBTreesFolder, resourceBTreesFile),
                 StartsVisible = false,
             };
-            trees2 = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees2", "Trees2", tree2Desc);
+
+            trees2 = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Trees2", "Trees2", desc);
         }
         private async Task InitializeSoldier()
         {
-            var sDesc = new ModelDescription()
+            var desc = new ModelDescription()
             {
                 TextureIndex = 0,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Soldier", @"soldier_anim2.json"),
+                Content = ContentDescription.FromFile(resourceSoldierFolder, resourceSoldierFile),
                 StartsVisible = false,
             };
-            soldier = await AddComponentAgent<Model, ModelDescription>("Soldier", "Soldier", sDesc);
+
+            soldier = await AddComponentAgent<Model, ModelDescription>("Soldier", "Soldier", desc);
         }
         private async Task InitializeTroops()
         {
-            var tDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Soldier", @"soldier_anim2.json"),
+                Content = ContentDescription.FromFile(resourceSoldierFolder, resourceSoldierFile),
                 StartsVisible = false,
             };
-            troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
+
+            troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", desc);
         }
         private async Task InitializeM24()
         {
-            var mDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Fast,
                 Instances = 3,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/m24", @"m24.json"),
+                Content = ContentDescription.FromFile(resourceHelicopterFolder, resourceHelicopterFile),
                 StartsVisible = false,
             };
-            helicopterI = await AddComponent<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
+
+            helicopterI = await AddComponent<ModelInstanced, ModelInstancedDescription>("M24", "M24", desc);
         }
         private async Task InitializeBradley()
         {
-            var mDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Fast,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Bradley", @"Bradley.json"),
+                Content = ContentDescription.FromFile(resourceTankFolder, resourceTankFile),
                 StartsVisible = false,
             };
-            bradleyI = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
+
+            bradleyI = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", desc);
         }
         private async Task InitializeBuildings()
         {
-            var mDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Default,
                 BlendMode = BlendModes.OpaqueAlpha,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/buildings", @"Affgan1.json"),
+                Content = ContentDescription.FromFile(resourceBuildingFolder, resourceBuildingFile),
                 StartsVisible = false,
             };
-            buildings = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Affgan buildings", "Affgan buildings", mDesc);
+
+            buildings = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Affgan buildings", "Affgan buildings", desc);
         }
         private async Task InitializeWatchTower()
         {
-            var mDesc = new ModelDescription()
+            var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 PathFindingHull = PickingHullTypes.Default,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Watch Tower", @"Watch Tower.json"),
+                Content = ContentDescription.FromFile(resourceTowerFolder, resourceTowerFile),
                 StartsVisible = false,
             };
-            watchTower = await AddComponentGround<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
+
+            watchTower = await AddComponentGround<Model, ModelDescription>("Watch Tower", "Watch Tower", desc);
         }
         private async Task InitializeContainers()
         {
@@ -379,28 +436,30 @@ namespace TerrainSamples.SceneHeightmap
                 PathFindingHull = PickingHullTypes.Fast,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/container", "Container.json"),
+                Content = ContentDescription.FromFile(resourceContainerFolder, resourceContainerFile),
                 StartsVisible = false,
             };
+
             containers = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Container", "Container", desc);
         }
         private async Task InitializeTorchs()
         {
-            var tcDesc = new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
             {
                 Instances = 50,
-                Content = ContentDescription.FromFile(@"SceneHeightmap/Resources/Scenery/Objects", @"torch.json"),
+                Content = ContentDescription.FromFile(resourceTorchFolder, resourceTorchFile),
                 StartsVisible = false,
             };
-            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
+
+            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", desc);
         }
         private async Task InitializeParticles()
         {
             pManager = await AddComponent<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
-            pFire = ParticleSystemDescription.InitializeFire("SceneHeightmap/Resources/particles", "fire.png", 0.5f);
-            pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneHeightmap/Resources/particles", "smoke.png", 0.5f);
-            pDust = ParticleSystemDescription.InitializeDust("SceneHeightmap/Resources/particles", "dust.png", 2f);
+            pFire = ParticleSystemDescription.InitializeFire(resourceParticlesFolder, resourceFireFile, 0.5f);
+            pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesFolder, resourceSmokeFile, 0.5f);
+            pDust = ParticleSystemDescription.InitializeDust(resourceParticlesFolder, resourceDustFile, 2f);
             pDust.MinHorizontalVelocity = 10f;
             pDust.MaxHorizontalVelocity = 15f;
             pDust.MinVerticalVelocity = 0f;
@@ -414,72 +473,77 @@ namespace TerrainSamples.SceneHeightmap
         {
             var hDesc = new HeightmapDescription()
             {
-                ContentPath = "SceneHeightmap/Resources/Scenery/Heightmap",
-                HeightmapFileName = "desert0hm.bmp",
-                ColormapFileName = "desert0cm.bmp",
+                ContentPath = resourceLocalTerrain,
+                HeightmapFileName = resourceLocalHeightmapFile,
+                ColormapFileName = resourceLocalColormapFile,
                 CellSize = 15,
                 MaximumHeight = 150,
                 Textures = new HeightmapTexturesDescription()
                 {
-                    ContentPath = "Textures",
-                    NormalMaps = ["normal001.dds", "normal002.dds"],
+                    ContentPath = resourceLocalTextures,
+                    NormalMaps = resourceLocalNormalMapFiles,
 
                     UseAlphaMapping = true,
-                    AlphaMap = "alpha001.dds",
-                    ColorTextures = ["dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds"],
+                    AlphaMap = resourceLocalAlphaMapFile,
+                    ColorTextures = resourceLocalColorFiles,
 
                     UseSlopes = false,
                     SlopeRanges = new Vector2(0.005f, 0.25f),
-                    TexturesLR = ["dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds"],
-                    TexturesHR = ["dirt0hr.dds"],
+                    TexturesLR = resourceLocalLRFiles,
+                    TexturesHR = resourceLocalHRFiles,
 
                     Proportion = 0.25f,
                     Resolution = 100f,
                 },
             };
-            var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
-            terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", gDesc);
+
+            var desc = GroundDescription.FromHeightmapDescription(hDesc, 5);
+
+            terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeLensFlare()
         {
-            var lfDesc = new LensFlareDescription()
+            var desc = new LensFlareDescription()
             {
-                ContentPath = @"SceneHeightmap/Resources/Scenery/Flare",
-                GlowTexture = GlowString,
+                ContentPath = resourceFlare,
+                GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), Flare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), Flare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), Flare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), Flare1String),
+                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlareFlare1File),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), Flare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), Flare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), Flare2String),
+                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlareFlare2File),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), Flare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), Flare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), Flare3String),
+                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
-            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
+
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", desc);
         }
         private async Task InitializeSkydom()
         {
-            var skDesc = new SkyScatteringDescription();
-            skydom = await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", skDesc);
+            var desc = new SkyScatteringDescription();
+
+            skydom = await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeClouds()
         {
-            var scDesc = new SkyPlaneDescription()
+            var desc = new SkyPlaneDescription()
             {
-                ContentPath = "SceneHeightmap/Resources/sky",
-                Texture1Name = "perturb001.dds",
-                Texture2Name = "cloud001.dds",
+                ContentPath = resourceClouds,
+                Texture1Name = resourceCloudsPerturbFile,
+                Texture2Name = resourceCloudsCloudFile,
                 SkyMode = SkyPlaneModes.Perturbed,
                 Direction = new Vector2(1, 1),
             };
-            await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", scDesc);
+
+            await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", desc);
         }
         private async Task InitializeDebugAssets()
         {
@@ -550,10 +614,10 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeGrass()
         {
-            var vDesc = new FoliageDescription()
+            var desc = new FoliageDescription()
             {
-                ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
-                VegetationMap = "map.png",
+                ContentPath = resourceFoliageGrass,
+                VegetationMap = resourceFoliageGrassMapFile,
                 PlantingArea = fGrassArea,
 
                 BlendMode = BlendModes.Opaque,
@@ -566,7 +630,7 @@ namespace TerrainSamples.SceneHeightmap
 
                 ChannelRed = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["grass_v.dds"],
+                    VegetationTextures = [resourceFoliageGrass1File],
                     Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
@@ -578,8 +642,8 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelGreen = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["grass_d.dds"],
-                    VegetationNormalMaps = ["grass_n.dds"],
+                    VegetationTextures = [resourceFoliageGrass2File],
+                    VegetationNormalMaps = [resourceFoliageGrass2NFile],
                     Density = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
@@ -591,7 +655,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelBlue = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["grass1.png"],
+                    VegetationTextures = [resourceFoliageGrass3File],
                     Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -603,14 +667,15 @@ namespace TerrainSamples.SceneHeightmap
                     Instances = GroundGardenerPatchInstances.Default,
                 },
             };
-            fGrass = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", vDesc);
+
+            fGrass = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", desc);
         }
         private async Task InitializeFlowers()
         {
-            var vDesc2 = new FoliageDescription()
+            var desc = new FoliageDescription()
             {
-                ContentPath = "SceneHeightmap/Resources/Scenery/Foliage/Billboard",
-                VegetationMap = "map_flowers.png",
+                ContentPath = resourceFoliageFlower,
+                VegetationMap = resourceFoliageFlowerMapFile,
                 PlantingArea = fFlowersArea,
 
                 BlendMode = BlendModes.Opaque,
@@ -623,7 +688,7 @@ namespace TerrainSamples.SceneHeightmap
 
                 ChannelRed = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["flower0.dds"],
+                    VegetationTextures = [resourceFoliageFlower1File],
                     Density = 0.5f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -634,7 +699,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelGreen = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["flower1.dds"],
+                    VegetationTextures = [resourceFoliageFlower2File],
                     Density = 0.5f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -645,7 +710,7 @@ namespace TerrainSamples.SceneHeightmap
                 },
                 ChannelBlue = new FoliageDescription.Channel()
                 {
-                    VegetationTextures = ["flower2.dds"],
+                    VegetationTextures = [resourceFoliageFlower3File],
                     Density = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
@@ -655,32 +720,32 @@ namespace TerrainSamples.SceneHeightmap
                     WindEffect = 1f,
                 },
             };
-            fFlowers = await AddComponentEffect<Foliage, FoliageDescription>("Flowers", "Flowers", vDesc2);
+
+            fFlowers = await AddComponentEffect<Foliage, FoliageDescription>("Flowers", "Flowers", desc);
         }
         private async Task SetAnimationDictionaries()
         {
-            await Task.Run(() =>
-            {
-                var hp = new AnimationPath();
-                hp.AddLoop("roll");
-                animations.Add("heli_default", new AnimationPlan(hp));
+            var hp = new AnimationPath();
+            hp.AddLoop("roll");
+            animations.Add("heli_default", new AnimationPlan(hp));
 
-                var sp = new AnimationPath();
-                sp.AddLoop("stand");
-                animations.Add("soldier_stand", new AnimationPlan(sp));
+            var sp = new AnimationPath();
+            sp.AddLoop("stand");
+            animations.Add("soldier_stand", new AnimationPlan(sp));
 
-                var sp1 = new AnimationPath();
-                sp1.AddLoop("idle1");
-                animations.Add("soldier_idle", new AnimationPlan(sp1));
+            var sp1 = new AnimationPath();
+            sp1.AddLoop("idle1");
+            animations.Add("soldier_idle", new AnimationPlan(sp1));
 
-                var m24_1 = new AnimationPath();
-                m24_1.AddLoop("roll");
-                animations.Add("m24_idle", new AnimationPlan(m24_1));
+            var m24_1 = new AnimationPath();
+            m24_1.AddLoop("roll");
+            animations.Add("m24_idle", new AnimationPlan(m24_1));
 
-                var m24_2 = new AnimationPath();
-                m24_2.AddLoop("roll", 5);
-                animations.Add("m24_roll", new AnimationPlan(m24_2));
-            });
+            var m24_2 = new AnimationPath();
+            m24_2.AddLoop("roll", 5);
+            animations.Add("m24_roll", new AnimationPlan(m24_2));
+
+            await Task.CompletedTask;
         }
         private async Task SetPositionOverTerrain()
         {

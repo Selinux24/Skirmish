@@ -18,10 +18,13 @@ namespace TerrainSamples.SceneGrid
 
     public class GridScene : WalkableScene
     {
-        private const string resources = "SceneGrid/Resources";
+        private const string resourcesLocalUI = "SceneGrid/Resources";
         private const string buttonOnString = "button_on.png";
         private const string buttonOffString = "button_off.png";
-        private const string resources3D = "SceneGrid/Resources3D";
+        private const string resourcesFonts = "Common/UI/Fonts/";
+        private const string resourcesCursors = "Common/UI/Cursor3D/";
+        private const string resourcesSoldier = "Common/Agents/Soldier/";
+        private const string resourcesTerrain = "Common/Terrain/Basic/";
 
         private UITextArea txtTitle = null;
         private UITextArea txtGame = null;
@@ -165,7 +168,7 @@ namespace TerrainSamples.SceneGrid
         private async Task InitializeHUD()
         {
             var bgDesc = SpriteDescription.Background("HUD.png");
-            bgDesc.ContentPath = resources;
+            bgDesc.ContentPath = resourcesLocalUI;
             bgDesc.EventsEnabled = true;
 
             await AddComponentUI<Sprite, SpriteDescription>("HUD", "HUD", bgDesc, LayerUI - 1);
@@ -177,13 +180,13 @@ namespace TerrainSamples.SceneGrid
         private async Task InitializeText()
         {
             var titleFont = TextDrawerDescription.FromFile(titleFontFileName, fontSize * 3, true);
-            titleFont.ContentPath = resources;
+            titleFont.ContentPath = resourcesFonts;
             var gameFont = TextDrawerDescription.FromFile(fontFileName, (int)(fontSize * 1.25f));
-            gameFont.ContentPath = resources;
+            gameFont.ContentPath = resourcesFonts;
             var textFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
-            textFont.ContentPath = resources;
+            textFont.ContentPath = resourcesFonts;
             var buttonsFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
-            buttonsFont.ContentPath = resources;
+            buttonsFont.ContentPath = resourcesFonts;
 
             txtTitle = await AddComponentUI<UITextArea, UITextAreaDescription>("txtTitle", "txtTitle", UITextAreaDescription.Default(titleFont), LayerUI + 1);
             txtTitle.TextForeColor = Color.White;
@@ -206,7 +209,7 @@ namespace TerrainSamples.SceneGrid
             txtAction.TextForeColor = Color.Yellow;
 
             var butCloseDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, buttonOnString, buttonOffString);
-            butCloseDesc.ContentPath = resources;
+            butCloseDesc.ContentPath = resourcesLocalUI;
             butCloseDesc.Width = 60;
             butCloseDesc.Height = 20;
             butCloseDesc.TextForeColor = Color.Yellow;
@@ -218,7 +221,7 @@ namespace TerrainSamples.SceneGrid
 
             var butNextDesc = new UIButtonDescription()
             {
-                ContentPath = resources,
+                ContentPath = resourcesLocalUI,
                 TwoStateButton = true,
                 TextureReleased = buttonOnString,
                 TexturePressed = buttonOffString,
@@ -232,7 +235,7 @@ namespace TerrainSamples.SceneGrid
 
             var butPrevSoldierDesc = new UIButtonDescription()
             {
-                ContentPath = resources,
+                ContentPath = resourcesLocalUI,
                 TwoStateButton = true,
                 TextureReleased = buttonOnString,
                 TexturePressed = buttonOffString,
@@ -246,7 +249,7 @@ namespace TerrainSamples.SceneGrid
 
             var butNextSoldierDesc = new UIButtonDescription()
             {
-                ContentPath = resources,
+                ContentPath = resourcesLocalUI,
                 TwoStateButton = true,
                 TextureReleased = buttonOnString,
                 TexturePressed = buttonOffString,
@@ -260,7 +263,7 @@ namespace TerrainSamples.SceneGrid
 
             var butPrevActionDesc = new UIButtonDescription()
             {
-                ContentPath = resources,
+                ContentPath = resourcesLocalUI,
                 TwoStateButton = true,
                 TextureReleased = buttonOnString,
                 TexturePressed = buttonOffString,
@@ -274,7 +277,7 @@ namespace TerrainSamples.SceneGrid
 
             var butNextActionDesc = new UIButtonDescription()
             {
-                ContentPath = resources,
+                ContentPath = resourcesLocalUI,
                 TwoStateButton = true,
                 TextureReleased = buttonOnString,
                 TexturePressed = buttonOffString,
@@ -327,7 +330,7 @@ namespace TerrainSamples.SceneGrid
 
             UpdateLayout();
 
-            _ = Task.Run(InitializeResources);
+            InitializeResources();
         }
 
         private void InitializeResources()
@@ -346,7 +349,7 @@ namespace TerrainSamples.SceneGrid
             var cursor3DDesc = new ModelDescription()
             {
                 DepthEnabled = false,
-                Content = ContentDescription.FromFile(resources3D, "cursor.json"),
+                Content = ContentDescription.FromFile(resourcesCursors, "cursor.json"),
                 StartsVisible = false,
             };
             cursor3D = await AddComponentEffect<Model, ModelDescription>("Cursor3D", "Cursor3D", cursor3DDesc, LayerEffects);
@@ -355,12 +358,12 @@ namespace TerrainSamples.SceneGrid
             {
                 Instances = skirmishGame.AllSoldiers.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(resources3D, "soldier_anim2.json"),
+                Content = ContentDescription.FromFile(resourcesSoldier, "soldier_anim2.json"),
                 StartsVisible = false,
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", troopsDesc);
 
-            var terrainDesc = GroundDescription.FromFile(resources3D, "terrain.json");
+            var terrainDesc = GroundDescription.FromFile(resourcesTerrain, "terrain.json");
             terrainDesc.StartsVisible = false;
             terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDesc);
         }

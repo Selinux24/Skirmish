@@ -15,11 +15,28 @@ namespace TerrainSamples.SceneSkybox
 {
     public class SkyboxScene : WalkableScene
     {
-        private const string resourceSkyboxString = "SceneSkybox/resources";
-        private const string resourceLakeBottomString = "SceneSkybox/resources/lakebottom";
-        private const string resourceFountainString = "SceneSkybox/resources/Fountain";
-        private const string resourceObeliskString = "SceneSkybox/resources/obelisk";
-        private const string resourceAudioString = "SceneSkybox/resources/Audio/Effects";
+        private const string resourceAudioFolder = "Common/Audio/Effects/";
+        private const string resourceCursorFile = "Common/UI/Cursor/target.png";
+
+        private const string resourceParticlesFolder = "Common/Effects/Particles/";
+        private const string resourceParticlesFireFile = "fire.png";
+        private const string resourceParticlesSmokeFile = "smoke.png";
+
+        private const string resourceSkyboxFile = "Common/Skyboxes/Daylight Box UV.png";
+        private const string resourceBulletFile = "Common/Effects/Bullets/bullet-hole.png";
+
+        private const string resourceLakeBottomFolder = "Common/Surfaces/Dirt/";
+        private const string resourceLakeBottomDiffuseFile = "Diffuse.jpg";
+        private const string resourceLakeBottomNormalFile = "Normal.jpg";
+
+        private const string resourceRuinsFolder = "Common/Buildings/Ruins/";
+        private const string resourceRuinsFile = "ruins.json";
+        private const string resourceFountainFolder = "Common/Buildings/Fountain/";
+        private const string resourceFountainFile = "Fountain.json";
+        private const string resourceObeliskFolder = "Common/Buildings/Obelisk2/";
+        private const string resourceObeliskFile = "obelisk.json";
+        private const string resourceTorchFolder = "Common/Props/Torch/";
+        private const string resourceTorchFile = "torch.json";
 
         private const float alpha = 0.25f;
 
@@ -87,9 +104,9 @@ namespace TerrainSamples.SceneSkybox
         private SceneLightPoint movingFireLight = null;
 
         private ParticleManager pManager = null;
-        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire(resourceSkyboxString, "fire.png", 0.5f);
-        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire(resourceSkyboxString, "fire.png", 0.1f);
-        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceSkyboxString, "smoke.png", 0.1f);
+        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire(resourceParticlesFolder, resourceParticlesFireFile, 0.5f);
+        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire(resourceParticlesFolder, resourceParticlesFireFile, 0.1f);
+        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume(resourceParticlesFolder, resourceParticlesSmokeFile, 0.1f);
 
         private DecalDrawer decalEmitter = null;
 
@@ -116,56 +133,30 @@ namespace TerrainSamples.SceneSkybox
         {
             base.Initialize();
 
-            InitializeCamera();
-
-            InitializeResources();
+            InitializeUI();
         }
 
-        private void InitializeCamera()
-        {
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 5000.0f;
-            Camera.Goto(new Vector3(-6, walker.Height, 5));
-            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            Camera.MovementDelta = 4f;
-            Camera.SlowMovementDelta = 2f;
-        }
-
-        private void InitializeResources()
+        private void InitializeUI()
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    InitializeUI,
-                    InitializeAudio,
-                    InitializeSkydom,
-                    InitializeLakeBottom,
-                    InitializeTorchs,
-                    InitializeObelisks,
-                    InitializeFountain,
-                    InitializeRuins,
-                    InitializeWater,
-                    InitializeParticles,
-                    InitializeEmitter,
-                    InitializeDecalEmitter,
+                    InitializeCursor,
+                    InitializeTextComponents,
                     InitializeDebug,
                 ],
-                InitializeResourcesCompleted);
+                InitializeUICompleted);
 
             LoadResources(group);
         }
-        private async Task InitializeUI()
+        private async Task InitializeCursor()
         {
-            #region Cursor
-
-            var cursorDesc = UICursorDescription.Default("SceneSkybox/resources/target.png", 16, 16, true, Color.Purple);
+            var cursorDesc = UICursorDescription.Default(resourceCursorFile, 16, 16, true, Color.Purple);
             cursorDesc.StartsVisible = false;
 
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
-
-            #endregion
-
-            #region Text
-
+        }
+        private async Task InitializeTextComponents()
+        {
             var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
             var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
@@ -181,19 +172,66 @@ namespace TerrainSamples.SceneSkybox
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
+        }
+        private async Task InitializeDebug()
+        {
+            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer.Visible = false;
 
-            #endregion
+            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer.Visible = false;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
             UpdateLayout();
+
+            StartCamera();
+
+            InitializeResources();
+        }
+        private void StartCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000.0f;
+            Camera.Goto(new Vector3(-6, walker.Height, 5));
+            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            Camera.MovementDelta = 4f;
+            Camera.SlowMovementDelta = 2f;
+        }
+
+        private void InitializeResources()
+        {
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeAudio,
+                    InitializeSkydom,
+                    InitializeLakeBottom,
+                    InitializeTorchs,
+                    InitializeObelisks,
+                    InitializeFountain,
+                    InitializeRuins,
+                    InitializeWater,
+                    InitializeParticles,
+                    InitializeEmitter,
+                    InitializeDecalEmitter,
+                ],
+                InitializeResourcesCompleted);
+
+            LoadResources(group);
         }
         private async Task InitializeAudio()
         {
             soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
-            soundEffectsManager.InitializeAudio(resourceAudioString);
+            soundEffectsManager.InitializeAudio(resourceAudioFolder);
         }
         private async Task InitializeSkydom()
         {
-            string fileName = "SceneSkybox/resources/Daylight Box UV.png";
+            string fileName = resourceSkyboxFile;
             int faceSize = 512;
             var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
             skydomDesc.StartsVisible = false;
@@ -225,12 +263,12 @@ namespace TerrainSamples.SceneSkybox
 
             var textures = new HeightmapTexturesDescription
             {
-                ContentPath = resourceLakeBottomString,
-                TexturesLR = ["Diffuse.jpg"],
-                NormalMaps = ["Normal.jpg"],
+                ContentPath = resourceLakeBottomFolder,
+                TexturesLR = [resourceLakeBottomDiffuseFile],
+                NormalMaps = [resourceLakeBottomNormalFile],
                 Scale = 0.0333f,
             };
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
@@ -243,7 +281,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(resourceSkyboxString, "torch.json"),
+                Content = ContentDescription.FromFile(resourceTorchFolder, resourceTorchFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Default,
             };
@@ -256,7 +294,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(resourceObeliskString, "obelisk.json"),
+                Content = ContentDescription.FromFile(resourceObeliskFolder, resourceObeliskFile),
                 StartsVisible = false,
             };
 
@@ -267,7 +305,7 @@ namespace TerrainSamples.SceneSkybox
             var fountainDesc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(resourceFountainString, "Fountain.json"),
+                Content = ContentDescription.FromFile(resourceFountainFolder, resourceFountainFile),
                 StartsVisible = false,
                 PathFindingHull = PickingHullTypes.Perfect,
             };
@@ -276,7 +314,7 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeRuins()
         {
-            var ruinsDesc = GroundDescription.FromFile(resourceSkyboxString, "ruins.json");
+            var ruinsDesc = GroundDescription.FromFile(resourceRuinsFolder, resourceRuinsFile);
             ruinsDesc.Quadtree.MaximumDepth = 1;
             ruinsDesc.StartsVisible = false;
 
@@ -326,19 +364,11 @@ namespace TerrainSamples.SceneSkybox
         {
             var desc = new DecalDrawerDescription
             {
-                TextureName = "SceneSkybox/resources/bullets/bullet-hole.png",
+                TextureName = resourceBulletFile,
                 MaxDecalCount = 1000,
                 RotateDecals = true,
             };
             decalEmitter = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
-        }
-        private async Task InitializeDebug()
-        {
-            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
-            volumesDrawer.Visible = false;
-
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
-            graphDrawer.Visible = false;
         }
         private void InitializeResourcesCompleted(LoadResourcesResult res)
         {
@@ -585,7 +615,7 @@ namespace TerrainSamples.SceneSkybox
         {
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                InitializeCamera();
+                StartCamera();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F1))
