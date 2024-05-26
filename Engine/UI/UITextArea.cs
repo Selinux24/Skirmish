@@ -356,10 +356,7 @@ namespace Engine.UI
         }
         private async Task<UIScrollBar> CreateScrollBar(ScrollModes scrollMode)
         {
-            var desc = UIScrollBarDescription.Default(scrollMode);
-            desc.BaseColor = Description.ScrollbarBaseColor;
-            desc.MarkerColor = Description.ScrollbarMarkerColor;
-            desc.MarkerSize = Description.ScrollbarMarkerSize;
+            var desc = UIScrollBarDescription.Default(Description.ScrollbarBaseColor, Description.ScrollbarMarkerColor, Description.ScrollbarMarkerSize, scrollMode);
             desc.EventsEnabled = true;
 
             var sb = await Scene.CreateComponent<UIScrollBar, UIScrollBarDescription>(

@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// Sprite scroll bar
     /// </summary>
-    public sealed class UIScrollBar : UIControl<UIScrollBarDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIScrollBar(Scene scene, string id, string name) : UIControl<UIScrollBarDescription>(scene, id, name)
     {
         /// <summary>
         /// Bar sprite
@@ -59,18 +65,6 @@ namespace Engine.UI
                 spriteBar.Color1 = baseColor;
                 spriteBar.Color3 = baseColor;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIScrollBar(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
         }
 
         /// <inheritdoc/>

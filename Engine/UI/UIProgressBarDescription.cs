@@ -12,7 +12,7 @@ namespace Engine.UI
         /// </summary>
         public static UIProgressBarDescription Default()
         {
-            return new UIProgressBarDescription();
+            return new();
         }
         /// <summary>
         /// Gets the default progress bar description
@@ -21,7 +21,7 @@ namespace Engine.UI
         /// <param name="progressColor">Progress color</param>
         public static UIProgressBarDescription Default(Color4 baseColor, Color4 progressColor)
         {
-            return new UIProgressBarDescription()
+            return new()
             {
                 BaseColor = baseColor,
                 ProgressColor = progressColor,
@@ -33,7 +33,7 @@ namespace Engine.UI
         /// <param name="font">Font description</param>
         public static UIProgressBarDescription Default(TextDrawerDescription font)
         {
-            return new UIProgressBarDescription()
+            return new()
             {
                 Font = font,
             };
@@ -46,27 +46,14 @@ namespace Engine.UI
         /// <param name="progressColor">Progress color</param>
         public static UIProgressBarDescription Default(TextDrawerDescription font, Color4 baseColor, Color4 progressColor)
         {
-            return new UIProgressBarDescription()
+            return new()
             {
                 Font = font,
                 BaseColor = baseColor,
                 ProgressColor = progressColor,
             };
         }
-      
-        /// <summary>
-        /// Gets the default progress bar description from a font family name
-        /// </summary>
-        /// <param name="fontFamilyName">Font family name</param>
-        /// <param name="size">Font size</param>
-        /// <param name="fineSampling">Fine sampling</param>
-        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
-        {
-            return new UIProgressBarDescription()
-            {
-                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
-            };
-        }
+
         /// <summary>
         /// Gets the default progress bar description from a font family name
         /// </summary>
@@ -74,27 +61,14 @@ namespace Engine.UI
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="fineSampling">Fine sampling</param>
-        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
+        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool fineSampling = false)
         {
-            return new UIProgressBarDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
-        
-        /// <summary>
-        /// Gets the default progress bar description from a font file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <param name="size">Size</param>
-        /// <param name="lineAdjust">Line adjust</param>
-        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
-        {
-            return new UIProgressBarDescription()
-            {
-                Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
-            };
-        }
+
         /// <summary>
         /// Gets the default progress bar description from a font file
         /// </summary>
@@ -102,14 +76,14 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
+        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool lineAdjust = false)
         {
-            return new UIProgressBarDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
-        
+
         /// <summary>
         /// Gets the default progress bar description from a font map 
         /// </summary>
@@ -117,7 +91,7 @@ namespace Engine.UI
         /// <param name="fontMapFileName">Font map file name</param>
         public static UIProgressBarDescription DefaultFromMap(string fontImageFileName, string fontMapFileName)
         {
-            return new UIProgressBarDescription
+            return new()
             {
                 Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };

@@ -148,7 +148,8 @@ namespace TerrainSamples.ScenePerlinNoise
 
             var defaultButton = UIButtonDescription.DefaultTwoStateButton(defaultFont16, bColor1, bColor2);
 
-            backGround = await AddComponentUI<UIPanel, UIPanelDescription>("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
+            var bgDesc = UIPanelDescription.Screen(this, pBackground);
+            backGround = await AddComponentUI<UIPanel, UIPanelDescription>("backGround", "backGround", bgDesc);
             btnExit = await AddComponentUI<UIButton, UIButtonDescription>("btnExit", "Exit", defaultButton);
 
             txtScale = await AddComponentUI<UITextArea, UITextAreaDescription>("txtScale", "Scale", defaultText16);

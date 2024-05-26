@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.UI
 {
@@ -180,7 +179,7 @@ namespace Engine.UI
         /// <summary>
         /// Custom key codes to add to the default key code collection
         /// </summary>
-        public IEnumerable<char> CustomKeycodes { get; set; } = Enumerable.Empty<char>();
+        public IEnumerable<char> CustomKeycodes { get; set; } = [];
 
         /// <summary>
         /// Constructor

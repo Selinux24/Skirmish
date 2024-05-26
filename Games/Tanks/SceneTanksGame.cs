@@ -197,7 +197,7 @@ namespace Tanks
             fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
-            loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
+            loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
             loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -205,7 +205,7 @@ namespace Tanks
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
-            loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
+            loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true), LayerUIEffects + 1);
             loadingBar.ProgressColor = Color.CornflowerBlue;
             loadingBar.BaseColor = Color.Yellow;
             loadingBar.Caption.TextForeColor = Color.Black;
@@ -331,42 +331,42 @@ namespace Tanks
         }
         private async Task InitializeUIPlayers()
         {
-            player1Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player1Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
             player1Name.TextHorizontalAlign = TextHorizontalAlign.Left;
             player1Name.Visible = false;
 
-            player1Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player1Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
             player1Points.TextHorizontalAlign = TextHorizontalAlign.Center;
             player1Points.Visible = false;
 
-            player1Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player1Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
             player1Life.ProgressColor = Color.DarkRed;
             player1Life.BaseColor = player1Status.Color;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
-            player2Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player2Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
             player2Name.TextHorizontalAlign = TextHorizontalAlign.Right;
             player2Name.Visible = false;
 
-            player2Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player2Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
             player2Points.TextHorizontalAlign = TextHorizontalAlign.Center;
             player2Points.Visible = false;
 
-            player2Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player2Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
             player2Life.ProgressColor = Color.DarkRed;
             player2Life.BaseColor = player2Status.Color;
             player2Life.Caption.TextForeColor = Color.White;
@@ -375,7 +375,7 @@ namespace Tanks
         }
         private async Task InitializeUITurn()
         {
-            turnText = await AddComponentUI<UITextArea, UITextAreaDescription>("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
+            turnText = await AddComponentUI<UITextArea, UITextAreaDescription>("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = TextHorizontalAlign.Center;
