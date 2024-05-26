@@ -295,7 +295,7 @@ namespace Engine
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private ConcurrentDictionary<int, SceneryPatch> patchDictionary = new();
+        private readonly ConcurrentDictionary<int, SceneryPatch> patchDictionary = new();
         /// <summary>
         /// Visible Nodes
         /// </summary>
@@ -327,16 +327,17 @@ namespace Engine
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing)
             {
-                foreach (var item in patchDictionary?.Values)
-                {
-                    item?.Dispose();
-                }
-
-                patchDictionary?.Clear();
-                patchDictionary = null;
+                return;
             }
+
+            foreach (var item in patchDictionary.Values)
+            {
+                item?.Dispose();
+            }
+
+            patchDictionary.Clear();
         }
 
         /// <inheritdoc/>

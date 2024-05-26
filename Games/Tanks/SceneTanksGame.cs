@@ -1103,7 +1103,7 @@ namespace Tanks
 
             if (shooting && shot != null)
             {
-                _ = IntegrateShot(gameTime);
+                IntegrateShot(gameTime);
 
                 return;
             }
@@ -1383,7 +1383,7 @@ You will lost all the game progress.",
 
             PaintShot(true);
 
-            _ = IntegrateCollision();
+            IntegrateTankCollision();
         }
         private void UpdateCamera(bool firstUpdate)
         {
@@ -1596,7 +1596,7 @@ You will lost all the game progress.",
 
             AddShotSystem(barrelPosition, shotDirection);
         }
-        private async Task IntegrateShot(IGameTime gameTime)
+        private void IntegrateShot(IGameTime gameTime)
         {
             // Get barrel position
             var (barrelPosition, _) = GetTankBarrel(Shooter);
@@ -1612,7 +1612,7 @@ You will lost all the game progress.",
             // Test collision with target
             if (Target.Intersects(projVolume, out var targetImpact))
             {
-                await ResolveShot(true, targetImpact.Position, targetImpact.Primitive.Normal);
+                ResolveShot(true, targetImpact.Position, targetImpact.Primitive.Normal);
 
                 return;
             }
@@ -1621,7 +1621,7 @@ You will lost all the game progress.",
             var terrainBox = terrain.GetBoundingBox();
             if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
-                await ResolveShot(false, null, null);
+                ResolveShot(false, null, null);
 
                 return;
             }
@@ -1629,10 +1629,11 @@ You will lost all the game progress.",
             // Test full collision with terrain mesh
             if (terrain.Intersects(projVolume, out var terrainImpact))
             {
-                await ResolveShot(false, terrainImpact.Position, terrainImpact.Primitive.Normal);
+                ResolveShot(false, terrainImpact.Position, terrainImpact.Primitive.Normal);
             }
         }
-        private async Task ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
+
+        private void ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
         {
             shot = null;
             shooting = false;
@@ -1641,70 +1642,94 @@ You will lost all the game progress.",
             projectile.Manipulator.SetPosition(outPosition);
             projectile.Visible = false;
 
+            //Target damaged
+            int impactDamage = Helper.RandomGenerator.Next(10, 50);
+
             if (impact)
             {
-                //Target damaged
-                int res = Helper.RandomGenerator.Next(10, 50);
-
-                ShooterStatus.Points += res * 100;
-                TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - res, 0, TargetStatus.MaxLife);
+                ShooterStatus.Points += impactDamage * 100;
+                TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - impactDamage, 0, TargetStatus.MaxLife);
 
                 if (impactPosition.HasValue)
                 {
                     //Add damage effects to tank
-                    AddExplosionSystem(impactPosition.Value);
-                    soundEffectsManager.PlayEffectDamage(Target);
-                    soundEffectsManager.PlayEffectImpact(Target);
+                    TankImpact(impactNormal.Value, Target);
+
+                    IntegrateImpactCollision(impactPosition.Value, impactDamage * 0.5f);
                 }
 
                 if (TargetStatus.CurrentLife == 0)
                 {
                     //Tank destroyed
-
-                    await Task.Run(async () =>
-                    {
-                        Vector3 min = Vector3.One * -5f;
-                        Vector3 max = Vector3.One * +5f;
-
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        soundEffectsManager.PlayEffectDestroyed(Target);
-
-                        await Task.Delay(500);
-
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-
-                        await Task.Delay(500);
-
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-
-                        await Task.Delay(3000);
-
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        soundEffectsManager.PlayEffectDestroyed(Target);
-                    });
+                    TankDestroyed();
                 }
             }
-            else
+            else if (impactPosition.HasValue)
             {
                 //Ground impact
-                if (impactPosition.HasValue)
-                {
-                    AddSmokePlumeSystem(impactPosition.Value);
-                    AddCrater(impactPosition.Value, impactNormal.Value);
-                    soundEffectsManager.PlayEffectDestroyed(impactPosition.Value);
-                }
+                GroundImpact(impactPosition.Value, impactNormal.Value);
+
+                IntegrateImpactCollision(impactPosition.Value, impactDamage * 0.5f);
             }
 
-            await Task.Run(async () =>
+            ShowImpactResultDialog(impact);
+        }
+        private void TankDestroyed()
+        {
+            Task.Run(async () =>
+            {
+                Vector3 min = Vector3.One * -5f;
+                Vector3 max = Vector3.One * +5f;
+
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                soundEffectsManager.PlayEffectDestroyed(Target);
+
+                await Task.Delay(500);
+
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+
+                await Task.Delay(500);
+
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+
+                await Task.Delay(3000);
+
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                soundEffectsManager.PlayEffectDestroyed(Target);
+            }).ConfigureAwait(false);
+        }
+        private void TankImpact(Vector3 impactPosition, ITransformable3D emitter)
+        {
+            Task.Run(() =>
+            {
+                AddExplosionSystem(impactPosition);
+                soundEffectsManager.PlayEffectDamage(emitter);
+                soundEffectsManager.PlayEffectImpact(emitter);
+            }).ConfigureAwait(false);
+        }
+        private void GroundImpact(Vector3 impactPosition, Vector3 impactNormal)
+        {
+            Task.Run(() =>
+            {
+
+
+                AddSmokePlumeSystem(impactPosition);
+                AddCrater(impactPosition, impactNormal);
+                soundEffectsManager.PlayEffectDestroyed(impactPosition);
+            }).ConfigureAwait(false);
+        }
+        private void ShowImpactResultDialog(bool impact)
+        {
+            Task.Run(async () =>
             {
                 dialogActive = true;
 
                 await ShowMessage(impact ? "Impact!" : "You miss!", 2000);
 
-                await EvaluateTurn(ShooterStatus, TargetStatus);
+                EvaluateTurn(ShooterStatus, TargetStatus);
 
                 if (!gameEnding)
                 {
@@ -1712,12 +1737,12 @@ You will lost all the game progress.",
                 }
 
                 dialogActive = false;
-            });
+            }).ConfigureAwait(false);
         }
 
-        private async Task IntegrateCollision()
+        private void IntegrateTankCollision()
         {
-            await Task.Run(() =>
+            Task.Run(() =>
             {
                 treeModels.ForEach(treeModel =>
                 {
@@ -1749,10 +1774,45 @@ You will lost all the game progress.",
                             }
                         });
                 });
-            });
+            }).ConfigureAwait(false);
+        }
+        private void IntegrateImpactCollision(Vector3 impactPosition, float radius)
+        {
+            BoundingSphere impactBbox = new(impactPosition, radius);
+
+            Task.Run(() =>
+            {
+                treeModels.ForEach(treeModel =>
+                {
+                    treeModel
+                        .GetInstances()
+                        .AsParallel()
+                        .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                        .ForAll((tree) =>
+                        {
+                            if (TreeController.IsBroken(tree))
+                            {
+                                return;
+                            }
+
+                            if (!impactBbox.Intersects(tree.GetBoundingSphere()))
+                            {
+                                return;
+                            }
+
+                            //Find collision vector
+                            var collisionVector = tree.Manipulator.Position - impactPosition;
+                            collisionVector.Y = 0;
+                            collisionVector.Normalize();
+
+                            //Store a tree controller
+                            TreeController.AddFallingTree(tree, collisionVector);
+                        });
+                });
+            }).ConfigureAwait(false);
         }
 
-        private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
+        private void EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
         {
             pbFire.ProgressValue = 0;
             pbFire.ProgressColor = pbFireProgressColor;
@@ -1768,8 +1828,6 @@ You will lost all the game progress.",
                 uiTweener.TweenScale(gameMessage, 0, 1, 1000, ScaleFuncs.CubicEaseIn);
 
                 uiTweener.Show(fadePanel, 3000);
-
-                await Task.Delay(3000);
 
                 uiTweener.Show(gameKeyHelp, 1000);
                 uiTweener.TweenScaleBounce(gameKeyHelp, 1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
