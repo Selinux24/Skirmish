@@ -90,7 +90,7 @@ namespace BasicSamples.SceneLights
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(geo, mat),
             };
@@ -102,7 +102,7 @@ namespace BasicSamples.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = ShadowCastingAlgorihtms.Directional,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
@@ -113,7 +113,7 @@ namespace BasicSamples.SceneLights
         {
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.OpaqueTransparent,
                 Content = ContentDescription.FromFile(resourceTrees, "Tree.json"),
@@ -131,6 +131,7 @@ namespace BasicSamples.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
+                CastShadow = ShadowCastingAlgorihtms.None,
                 Content = ContentDescription.FromContentData(geo, mat),
             };
 
@@ -156,6 +157,7 @@ namespace BasicSamples.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 3,
+                CastShadow = ShadowCastingAlgorihtms.None,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
@@ -166,6 +168,7 @@ namespace BasicSamples.SceneLights
             Lights.KeyLight.Enabled = false;
             Lights.KeyLight.CastShadow = false;
             Lights.BackLight.Enabled = false;
+            Lights.BackLight.CastShadow = false;
             Lights.FillLight.Enabled = true;
             Lights.FillLight.CastShadow = false;
 
