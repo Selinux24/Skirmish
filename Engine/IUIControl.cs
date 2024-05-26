@@ -11,6 +11,10 @@ namespace Engine
     public interface IUIControl : IUIEventsEvaluable
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; set; }
+        /// <summary>
         /// Active
         /// </summary>
         bool Active { get; set; }

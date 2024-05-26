@@ -450,12 +450,10 @@ namespace TerrainSamples.SceneStart
         }
         private void ShowButton(IUIControl ctrl, long milliseconds)
         {
-            uiTweener.ClearTween(ctrl);
             uiTweener.Show(ctrl, milliseconds);
         }
         private void HideButton(IUIControl ctrl, long milliseconds)
         {
-            uiTweener.ClearTween(ctrl);
             uiTweener.Hide(ctrl, milliseconds);
         }
     }
