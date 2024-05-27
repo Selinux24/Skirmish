@@ -52,10 +52,9 @@ namespace Engine
         public FoliageBuffer(BufferManager bufferManager, string name)
         {
             ArgumentNullException.ThrowIfNull(bufferManager);
-            this.bufferManager = bufferManager;
 
-            int id = GetID();
-            this.name = $"{name ?? nameof(FoliageBuffer)}.{id}";
+            this.bufferManager = bufferManager;
+            this.name = $"{name ?? nameof(FoliageBuffer)}.{GetID()}";
 
             Attached = false;
             vertexBuffer = this.bufferManager.AddVertexData(this.name, true, new VertexBillboard[FoliagePatch.MAX]);

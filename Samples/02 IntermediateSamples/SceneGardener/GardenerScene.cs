@@ -45,14 +45,18 @@ namespace IntermediateSamples.SceneGardener
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color grassTrisColor = new(Color.Blue.ToColor3(), 0.15f);
-        private readonly Color grassLinesColor = new(Color.Blue.ToColor3(), 0.5f);
+        private readonly Color gbLinesColor = new(Color.Cyan.ToColor3(), 0.5f);
+        private readonly Color grTrisColor = new(Color.Blue.ToColor3(), 0.15f);
+        private readonly Color grLinesColor = new(Color.Blue.ToColor3(), 0.5f);
+        private readonly Color fTrisColor = new(Color.Green.ToColor3(), 0.15f);
+        private readonly Color eTrisColor = new(Color.Orange.ToColor3(), 0.15f);
+        private readonly Color rTrisColor = new(Color.Red.ToColor3(), 0.15f);
         private readonly Color frTrisColor = new(Color.White.ToColor3(), 0.15f);
         private readonly Color frLinesColor = new(Color.White.ToColor3(), 0.5f);
-        private readonly Color crStartTrisColor = new(Color.Red.ToColor3(), 0.15f);
-        private readonly Color crStartLinesColor = new(Color.Red.ToColor3(), 1f);
-        private readonly Color crEndTrisColor = new(Color.Green.ToColor3(), 0.15f);
-        private readonly Color crEndLinesColor = new(Color.Green.ToColor3(), 1f);
+        private readonly Color crStartTrisColor = new(Color.IndianRed.ToColor3(), 0.15f);
+        private readonly Color crStartLinesColor = new(Color.IndianRed.ToColor3(), 1f);
+        private readonly Color crEndTrisColor = new(Color.WhiteSmoke.ToColor3(), 0.15f);
+        private readonly Color crEndLinesColor = new(Color.WhiteSmoke.ToColor3(), 1f);
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -192,7 +196,7 @@ namespace IntermediateSamples.SceneGardener
             };
 
             map = await AddComponentEffect<Model, ModelDescription>("Map", "Map", desc);
-            map.TintColor = new Color4(1f, 1f, 1f, 0.5f);
+            map.TintColor = new Color4(1f, 1f, 1f, 0.1f);
         }
         private async Task InitializeGrass()
         {
@@ -343,8 +347,9 @@ namespace IntermediateSamples.SceneGardener
             }
 
             UpdateInputCamera(gameTime);
-
             UpdateInputPOV();
+
+            UpdatePOV();
 
             runtime.Text = Game.RuntimeText;
         }
@@ -394,24 +399,28 @@ namespace IntermediateSamples.SceneGardener
         }
         private void UpdateInputPOV()
         {
-            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left) && !Game.Input.ShiftPressed)
+            if (!Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(PickingHullTypes.Perfect);
-                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
-                {
-                    pov.Manipulator.SetPosition(r.PickingResult.Position + (povHeight * 0.5f));
-                }
+                return;
             }
 
-            if (Game.Input.MouseButtonPressed(MouseButtons.Left) && Game.Input.ShiftPressed)
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
             {
-                var pRay = GetPickingRay(PickingHullTypes.Perfect);
-                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
-                {
-                    pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
-                }
+                return;
             }
 
+            if (Game.Input.ShiftPressed)
+            {
+                pov.Manipulator.SetPosition(r.PickingResult.Position + (povHeight * 0.5f));
+            }
+            else
+            {
+                pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
+            }
+        }
+        private void UpdatePOV()
+        {
             var position = pov.Manipulator.Position;
             var interest = position - pov.Manipulator.Forward;
 
@@ -422,7 +431,8 @@ namespace IntermediateSamples.SceneGardener
             grass.PointOfView = position;
             grass.PointOfViewFrustum = frustum;
 
-            DrawGardenerNodes(grassLinesColor, grassTrisColor);
+            DrawGardenerNodes(grLinesColor, grTrisColor, fTrisColor, eTrisColor, rTrisColor);
+            DrawGardenerBounds(gbLinesColor);
             DrawFrustum(frustum, frLinesColor, frTrisColor);
             DrawCircle(position, grassStartRadius, crStartLinesColor, crStartTrisColor);
             DrawCircle(position, grassEndRadius, crEndLinesColor, crEndTrisColor);
@@ -446,29 +456,69 @@ namespace IntermediateSamples.SceneGardener
                 itemTris.Clear(tColor);
             }
 
+            position.Y = h;
             var lines = Line3D.CreateCircle(position, r, 32);
             var tris = GeometryUtil.CreateCircle(Topology.TriangleList, position, r, 32);
 
             itemLines.SetPrimitives(lColor, lines);
             itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
-        private void DrawGardenerNodes(Color4 lColor, Color4 tColor)
+        private void DrawGardenerNodes(Color4 lColor, Color4 tColor, Color4 fColor, Color4 eColor, Color4 rColor)
         {
             itemLines.Clear(lColor);
             itemTris.Clear(tColor);
+            itemTris.Clear(fColor);
+            itemTris.Clear(eColor);
+            itemTris.Clear(rColor);
 
-            var nodes = grass.GetVisibleNodes();
-            foreach (var node in nodes)
+            var visibleNodes = grass.GetVisibleNodes();
+            var filledNodes = grass.GetFilledNodes();
+            var allNodes = grass.GetAllNodes();
+
+            foreach (var node in allNodes)
             {
                 var corners = node.BoundingBox.GetCorners();
                 var topQuad = Flatten([corners[1], corners[0], corners[4], corners[5]]);
 
                 var lines = Line3D.CreatePolygon(topQuad);
-                var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
-
                 itemLines.AddPrimitives(lColor, lines);
-                itemTris.AddPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+
+                bool isVisible = Array.Exists(visibleNodes, n => n == node);
+
+                var nn = Array.FindIndex(filledNodes, n => n.Item1 == node);
+                if (nn >= 0)
+                {
+                    var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+
+                    var filled = filledNodes[nn].Item2;
+                    if(isVisible && filled)
+                    {
+                        itemTris.AddPrimitives(fColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    }
+                    else if(isVisible && !filled)
+                    {
+                        itemTris.AddPrimitives(rColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    }
+                    else if (filled)
+                    {
+                        itemTris.AddPrimitives(eColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    }
+                }
+                else if (isVisible)
+                {
+                    var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+
+                    itemTris.AddPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                }
             }
+        }
+        private void DrawGardenerBounds(Color4 lColor)
+        {
+            var bbox = grass.GetPlantingBounds();
+            bbox.Minimum = new Vector3(bbox.Minimum.X, h, bbox.Minimum.Z);
+
+            var lines = Line3D.CreateBox(bbox);
+            itemLines.SetPrimitives(lColor, lines);
         }
         private static Vector3[] Flatten(Vector3[] points)
         {

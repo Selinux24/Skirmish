@@ -56,6 +56,10 @@ namespace Engine
         /// </summary>
         public bool Planted { get; protected set; } = false;
         /// <summary>
+        /// Foliage populating flag
+        /// </summary>
+        public bool Planting { get; protected set; } = false;
+        /// <summary>
         /// Returns true if the path has foliage data
         /// </summary>
         public bool HasData
@@ -75,9 +79,9 @@ namespace Engine
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
         /// <returns>Returns generated vertex data</returns>
-        private void CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
+        private void CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
-            Planted = false;
+            Planting = true;
 
             tmpData.Clear();
 
@@ -93,7 +97,7 @@ namespace Engine
                         rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
                         rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
 
-                    if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
+                    if (found)
                     {
                         tmpData.Add(new()
                         {
@@ -107,7 +111,10 @@ namespace Engine
                 Array.Copy(array, foliageData, array.Length);
                 foliageCount = array.Length;
 
+                Planting = false;
                 Planted = true;
+
+                callback?.Invoke();
             });
         }
         /// <summary>
@@ -188,11 +195,11 @@ namespace Engine
         /// <param name="description">Terrain vegetation description</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
-        public void Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox)
+        public void Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
             Channel = description.Index;
 
-            CalculatePoints(scene, map, description, gbbox, nbbox);
+            CalculatePoints(scene, map, description, gbbox, nbbox, callback);
         }
         /// <summary>
         /// Get foliage data

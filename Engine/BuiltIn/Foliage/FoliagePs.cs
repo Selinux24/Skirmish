@@ -14,6 +14,10 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         private IEngineConstantBuffer cbPerMaterial;
         /// <summary>
+        /// Per patch constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerPatch;
+        /// <summary>
         /// Texture array resource view
         /// </summary>
         private EngineShaderResourceView textureArray;
@@ -47,6 +51,13 @@ namespace Engine.BuiltIn.Foliage
             cbPerMaterial = constantBuffer;
         }
         /// <summary>
+        /// Sets per patch constant buffer
+        /// </summary>
+        public void SetPerPatchConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerPatch = constantBuffer;
+        }
+        /// <summary>
         /// Sets the texture array
         /// </summary>
         /// <param name="textureArray">Texture array</param>
@@ -74,6 +85,7 @@ namespace Engine.BuiltIn.Foliage
                 BuiltInShaders.GetSpotsConstantBuffer(),
                 BuiltInShaders.GetPointsConstantBuffer(),
                 cbPerMaterial,
+                cbPerPatch,
             };
 
             dc.SetPixelShaderConstantBuffers(0, cb);

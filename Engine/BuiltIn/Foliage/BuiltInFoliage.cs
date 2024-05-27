@@ -49,6 +49,7 @@ namespace Engine.BuiltIn.Foliage
 
             var pixelShader = GetPixelShader<FoliagePs>();
             pixelShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
+            pixelShader?.SetPerPatchConstantBuffer(cbPerPatch);
             pixelShader?.SetTextureArray(state.Texture);
             pixelShader?.SetNormalMapArray(state.NormalMaps);
         }

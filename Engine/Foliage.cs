@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -94,6 +95,10 @@ namespace Engine
         /// Foliage drawer
         /// </summary>
         private BuiltInFoliage foliageDrawer = null;
+        /// <summary>
+        /// Concurrent node queue
+        /// </summary>
+        private readonly ConcurrentQueue<FoliageNode> nodeQueue = [];
 
         /// <summary>
         /// Time between node sorting
@@ -313,10 +318,7 @@ namespace Engine
                     SortVisibleNodes(time, eyePosition);
 
                     //Update node visibility
-                    if (!UpdateNodeVisibility(frustum, sph))
-                    {
-                        return;
-                    }
+                    UpdateNodeVisibility(frustum, sph);
 
                     //Update visible patches data
                     UpdatePatches(eyePosition);
@@ -333,7 +335,7 @@ namespace Engine
             if (updatePending)
             {
                 //Writes data into graphics device
-                WritePatches();
+                WritePatches(eyePosition);
 
                 updatePending = false;
             }
@@ -471,8 +473,6 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         private void UpdatePatches(Vector3 eyePosition)
         {
-            List<FoliageNode> toAssign = [];
-
             var gbbox = foliageQuadtree.BoundingBox;
             int channelCount = foliageMapChannels.Count;
 
@@ -482,24 +482,29 @@ namespace Engine
                 var nbbox = node.BoundingBox;
 
                 //Get the node data
-                bool pathInitialized = GetNodePatches(node, channelCount, out var nodeData);
-                if (!pathInitialized)
+                GetNodePatches(node, channelCount, out var nodeData);
+                if (!Array.Exists(nodeData, n => !n.Patch.Planted && !n.Patch.Planting))
                 {
-                    //Initialice the node data
-                    DoPlant(nodeData, gbbox, nbbox);
+                    continue;
                 }
 
-                //Collect the node data to assign a buffer
-                toAssign.AddRange(nodeData.Where(n => n.IsReadyToAssign()));
+                //Initialice the node data
+                DoPlant(nodeData, gbbox, nbbox, nodeQueue.Enqueue);
             }
 
-            //Iterate over the node data
-            foreach (var n in toAssign)
+            while (nodeQueue.TryDequeue(out var n))
             {
                 if (n.Buffer != null)
                 {
                     //Already has a buffer
-                    continue;
+                    return;
+                }
+
+                if (n.Patch.Planted && !n.Patch.HasData)
+                {
+                    //No data
+                    n.FreeBuffer(true);
+                    return;
                 }
 
                 //Assign a new free buffer to the node data
@@ -512,19 +517,16 @@ namespace Engine
         /// <param name="node">Node</param>
         /// <param name="channelCount">Channel count</param>
         /// <param name="nodeData">Node data</param>
-        /// <returns>Returns true if the node is initialized</returns>
-        private bool GetNodePatches(QuadTreeNode node, int channelCount, out FoliageNode[] nodeData)
+        private void GetNodePatches(QuadTreeNode node, int channelCount, out FoliageNode[] nodeData)
         {
             if (foliagePatches.TryGetValue(node, out nodeData))
             {
-                return true;
+                return;
             }
 
             nodeData = Helper.CreateArray<FoliageNode>(channelCount, () => new());
 
             foliagePatches.Add(node, nodeData);
-
-            return false;
         }
         /// <summary>
         /// Updates the patch list state and finds a list of patches with assigned data
@@ -539,17 +541,19 @@ namespace Engine
         ///   - If not, add to toAssign list
         /// - If not planted, launch planting task y do nothing more. The node will be processed next time
         /// </remarks>
-        private void DoPlant(FoliageNode[] nodeData, BoundingBox gbbox, BoundingBox nbbox)
+        private void DoPlant(FoliageNode[] nodeData, BoundingBox gbbox, BoundingBox nbbox, Action<FoliageNode> callback)
         {
             //Select all patches without calculated data
             var toPlant = nodeData
                 .Where(n => !n.Patch.Planted)
-                .Select(n => n.Patch)
                 .ToArray();
 
             Parallel.For(0, toPlant.Length, (i) =>
             {
-                toPlant[i].Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox);
+                toPlant[i].Patch.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
+                {
+                    callback?.Invoke(toPlant[i]);
+                });
             });
         }
         /// <summary>
@@ -572,7 +576,8 @@ namespace Engine
             //All buffer already used. Try to find not visible & fartest from position
             var notVisibleNodes = foliagePatches.Keys
                 .Except(visibleNodes)
-                .OrderByDescending(n => Vector3.DistanceSquared(n.Center, eyePosition));
+                .OrderByDescending(n => Vector3.DistanceSquared(n.Center, eyePosition))
+                .ToArray();
 
             foreach (var node in notVisibleNodes)
             {
@@ -593,10 +598,9 @@ namespace Engine
         /// <summary>
         /// Writes patches data into graphic buffers
         /// </summary>
-        private void WritePatches()
+        private void WritePatches(Vector3 eyePosition)
         {
             var dc = Scene.Game.Graphics.ImmediateContext;
-            var eyePosition = Scene.Camera.Position;
             bool transparent = IsTransparent();
 
             foreach (var node in visibleNodes)
@@ -763,6 +767,36 @@ namespace Engine
         public QuadTreeNode[] GetVisibleNodes()
         {
             return [.. visibleNodes];
+        }
+        /// <summary>
+        /// Gets the quadtree node list
+        /// </summary>
+        public QuadTreeNode[] GetAllNodes()
+        {
+            var allNodes = foliageQuadtree.GetLeafNodes();
+
+            return [.. allNodes];
+        }
+        /// <summary>
+        /// Gets the ready to draw quadtree node list
+        /// </summary>
+        public (QuadTreeNode, bool)[] GetFilledNodes()
+        {
+            List<(QuadTreeNode, bool)> nodes = [];
+
+            foreach (var (node, patches) in foliagePatches.ToDictionary())
+            {
+                if (patches.Length == 0)
+                {
+                    continue;
+                }
+
+                bool ready = Array.FindAll(patches, p => p.Patch.Planted || p.IsReadyToDraw()).Length == patches.Length;
+
+                nodes.Add((node, ready));
+            }
+
+            return [.. nodes];
         }
     }
 }

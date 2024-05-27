@@ -53,14 +53,14 @@ inline void createPatches(uint primID, float3 position, float2 size)
 {
     position.y += (size.y * (0.5f + gDelta.y));
 
-    float3 look = gPointOfView - position;
-    float len = length(look);
+    float len = length(gPointOfView - position);
     if ((gStartRadius > 0 && len < gStartRadius) || (gEndRadius > 0 && len > gEndRadius))
     {
         return;
     }
     
 	//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
+    float3 look = gPerFrame.EyePosition - position;
     look.y = 0.0f; // y-axis aligned, so project to xz-plane
     look = normalize(look);
     float3 right = cross(up, look);
