@@ -21,6 +21,10 @@ namespace IntermediateSamples.SceneGardener
         private const string resourceDirtDiffuseString = "dirt002.dds";
         private const string resourceDirtNormalString = "normal001.dds";
         private const string resourceFoliageString = "SceneGardener/Resources/Foliage/";
+        private const string resourceFoliageDiffuse1File = "grass_v.dds";
+        private const string resourceFoliageDiffuse2File = "grass_d.dds";
+        private const string resourceFoliageNormal2File = "grass_n.dds";
+        private const string resourceFoliageDiffuse3File = "grass_p.png";
         private const string resourceFoliageMap = "mapTest.png";
 
         private UITextArea title = null;
@@ -29,21 +33,34 @@ namespace IntermediateSamples.SceneGardener
         private Sprite backPanel = null;
         private UIConsole console = null;
 
+        private const float povRadius = 1.5f;
+        private const float povHeight = 6f;
         private Model pov = null;
+
+        private const float grassStartRadius = 5f;
+        private const float grassEndRadius = 50f;
+        private Foliage grass = null;
+
         private Model map = null;
+
+        private PrimitiveListDrawer<Triangle> itemTris = null;
+        private PrimitiveListDrawer<Line3D> itemLines = null;
+        private readonly Color grassTrisColor = new(Color.Blue.ToColor3(), 0.15f);
+        private readonly Color grassLinesColor = new(Color.Blue.ToColor3(), 0.5f);
+        private readonly Color frTrisColor = new(Color.White.ToColor3(), 0.15f);
+        private readonly Color frLinesColor = new(Color.White.ToColor3(), 0.5f);
+        private readonly Color crStartTrisColor = new(Color.Red.ToColor3(), 0.15f);
+        private readonly Color crStartLinesColor = new(Color.Red.ToColor3(), 1f);
+        private readonly Color crEndTrisColor = new(Color.Green.ToColor3(), 0.15f);
+        private readonly Color crEndLinesColor = new(Color.Green.ToColor3(), 1f);
 
         private bool uiReady = false;
         private bool gameReady = false;
 
         public GardenerScene(Game game) : base(game)
         {
-#if DEBUG
-            Game.VisibleMouse = false;
+            Game.VisibleMouse = true;
             Game.LockMouse = false;
-#else
-            Game.VisibleMouse = false;
-            Game.LockMouse = true;
-#endif
 
             GameEnvironment.Background = Color.CornflowerBlue;
         }
@@ -106,6 +123,7 @@ namespace IntermediateSamples.SceneGardener
                     InitializeDirt,
                     InitializeFoliageMap,
                     InitializeGrass,
+                    InitializeDebug,
                 ],
                 InitializeComponentsCompleted);
 
@@ -113,7 +131,7 @@ namespace IntermediateSamples.SceneGardener
         }
         private async Task InitializePointOfView()
         {
-            var geo = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, 32, 15);
+            var geo = GeometryUtil.CreateCapsule(Topology.TriangleList, povRadius, povHeight, 32, 15);
 
             var mat = MaterialBlinnPhongContent.Default;
 
@@ -121,11 +139,10 @@ namespace IntermediateSamples.SceneGardener
             {
                 Content = ContentDescription.FromContentData(geo, mat),
                 CastShadow = ShadowCastingAlgorihtms.All,
-                StartsVisible = false,
             };
 
-            pov = await AddComponentAgent<Model, ModelDescription>("Sphere", "Sphere", desc);
-            pov.Manipulator.SetPosition(0, h, 0);
+            pov = await AddComponentAgent<Model, ModelDescription>("Capsule", "Capsule", desc);
+            pov.Manipulator.SetPosition(0, h + (povHeight * 0.5f), 0);
         }
         private async Task InitializeDirt()
         {
@@ -181,8 +198,6 @@ namespace IntermediateSamples.SceneGardener
         {
             float areaSize = l * dirtInstances * 0.5f;
 
-            float startRadius = 0f;
-            float endRadius = 500f;
             float windEffect = 0f;
             Vector2 minSize = new(3f, 3f);
             Vector2 maxSize = new(5f, 5f);
@@ -198,50 +213,67 @@ namespace IntermediateSamples.SceneGardener
                 PickingHull = PickingHullTypes.None,
                 CullingVolumeType = CullingVolumeTypes.None,
                 CastShadow = ShadowCastingAlgorihtms.None,
+                NodeSize = 24,
 
                 ChannelRed = new FoliageDescription.Channel()
                 {
                     Seed = 1,
                     Instances = GroundGardenerPatchInstances.Default,
-                    StartRadius = startRadius,
-                    EndRadius = endRadius,
+                    StartRadius = grassStartRadius,
+                    EndRadius = grassEndRadius,
                     WindEffect = windEffect,
                     MinSize = minSize,
                     MaxSize = maxSize,
                     Density = 1f,
-                    VegetationTextures = ["grass_v.dds"],
+                    VegetationTextures = [resourceFoliageDiffuse1File],
                     Enabled = true,
                 },
                 ChannelGreen = new FoliageDescription.Channel()
                 {
                     Seed = 2,
                     Instances = GroundGardenerPatchInstances.Default,
-                    StartRadius = startRadius,
-                    EndRadius = endRadius,
+                    StartRadius = grassStartRadius,
+                    EndRadius = grassEndRadius,
                     WindEffect = windEffect,
                     MinSize = minSize,
                     MaxSize = maxSize,
                     Density = 1f,
-                    VegetationTextures = ["grass_d.dds"],
-                    VegetationNormalMaps = ["grass_n.dds"],
+                    VegetationTextures = [resourceFoliageDiffuse2File],
+                    VegetationNormalMaps = [resourceFoliageNormal2File],
                     Enabled = true,
                 },
                 ChannelBlue = new FoliageDescription.Channel()
                 {
                     Seed = 3,
                     Instances = GroundGardenerPatchInstances.Default,
-                    StartRadius = startRadius,
-                    EndRadius = endRadius,
+                    StartRadius = grassStartRadius,
+                    EndRadius = grassEndRadius,
                     WindEffect = windEffect,
                     MinSize = minSize,
                     MaxSize = maxSize,
                     Density = 1f,
-                    VegetationTextures = ["grass_p.png"],
+                    VegetationTextures = [resourceFoliageDiffuse3File],
                     Enabled = true,
                 },
             };
-            var grass = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", vDesc);
+            grass = await AddComponentEffect<Foliage, FoliageDescription>("Grass", "Grass", vDesc);
+            grass.UseCameraAsPointOfView = false;
             grass.Visible = true;
+        }
+        private async Task InitializeDebug()
+        {
+            const string itemTrisName = nameof(itemTris);
+            const string itemLinesName = nameof(itemLines);
+
+            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                itemTrisName,
+                itemTrisName,
+                new() { Count = 5000, BlendMode = BlendModes.Alpha, StartsVisible = false });
+
+            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                itemLinesName,
+                itemLinesName,
+                new() { Count = 1000, BlendMode = BlendModes.Alpha, StartsVisible = false });
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -306,10 +338,13 @@ namespace IntermediateSamples.SceneGardener
 
             if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                pov.Visible = !pov.Visible;
+                itemLines.Visible = !itemLines.Visible;
+                itemTris.Visible = itemLines.Visible;
             }
 
             UpdateInputCamera(gameTime);
+
+            UpdateInputPOV();
 
             runtime.Text = Game.RuntimeText;
         }
@@ -356,6 +391,96 @@ namespace IntermediateSamples.SceneGardener
             {
                 camera.MoveDown(gameTime, slow);
             }
+        }
+        private void UpdateInputPOV()
+        {
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left) && !Game.Input.ShiftPressed)
+            {
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
+                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
+                {
+                    pov.Manipulator.SetPosition(r.PickingResult.Position + (povHeight * 0.5f));
+                }
+            }
+
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left) && Game.Input.ShiftPressed)
+            {
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
+                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
+                {
+                    pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
+                }
+            }
+
+            var position = pov.Manipulator.Position;
+            var interest = position - pov.Manipulator.Forward;
+
+            var proj = Matrix.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
+            var view = Matrix.LookAtLH(position, interest, Vector3.Up);
+            var frustum = new BoundingFrustum(view * proj);
+
+            grass.PointOfView = position;
+            grass.PointOfViewFrustum = frustum;
+
+            DrawGardenerNodes(grassLinesColor, grassTrisColor);
+            DrawFrustum(frustum, frLinesColor, frTrisColor);
+            DrawCircle(position, grassStartRadius, crStartLinesColor, crStartTrisColor);
+            DrawCircle(position, grassEndRadius, crEndLinesColor, crEndTrisColor);
+        }
+        private void DrawFrustum(BoundingFrustum frustum, Color4 lColor, Color4 tColor)
+        {
+            var corners = frustum.GetCorners();
+            var topQuad = Flatten([corners[2], corners[1], corners[5], corners[6]]);
+
+            var lines = Line3D.CreatePolygon(topQuad);
+            var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+
+            itemLines.SetPrimitives(lColor, lines);
+            itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+        }
+        private void DrawCircle(Vector3 position, float r, Color4 lColor, Color4 tColor)
+        {
+            if (r <= 0)
+            {
+                itemLines.Clear(lColor);
+                itemTris.Clear(tColor);
+            }
+
+            var lines = Line3D.CreateCircle(position, r, 32);
+            var tris = GeometryUtil.CreateCircle(Topology.TriangleList, position, r, 32);
+
+            itemLines.SetPrimitives(lColor, lines);
+            itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+        }
+        private void DrawGardenerNodes(Color4 lColor, Color4 tColor)
+        {
+            itemLines.Clear(lColor);
+            itemTris.Clear(tColor);
+
+            var nodes = grass.GetVisibleNodes();
+            foreach (var node in nodes)
+            {
+                var corners = node.BoundingBox.GetCorners();
+                var topQuad = Flatten([corners[1], corners[0], corners[4], corners[5]]);
+
+                var lines = Line3D.CreatePolygon(topQuad);
+                var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+
+                itemLines.AddPrimitives(lColor, lines);
+                itemTris.AddPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+            }
+        }
+        private static Vector3[] Flatten(Vector3[] points)
+        {
+            Vector3[] res = new Vector3[points.Length];
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                res[i] = points[i];
+                res[i].Y = h;
+            }
+
+            return res;
         }
 
         public override void GameGraphicsResized()

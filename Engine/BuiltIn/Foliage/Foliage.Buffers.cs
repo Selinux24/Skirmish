@@ -60,6 +60,8 @@ namespace Engine.BuiltIn.Foliage
         {
             return new PerPatch
             {
+                PointOfView = state.PointOfView,
+
                 WindDirection = state.WindDirection,
                 WindStrength = state.WindStrength,
 
@@ -73,41 +75,47 @@ namespace Engine.BuiltIn.Foliage
         }
 
         /// <summary>
-        /// Wind direction
+        /// Point of view
         /// </summary>
         [FieldOffset(0)]
+        public Vector3 PointOfView;
+
+        /// <summary>
+        /// Wind direction
+        /// </summary>
+        [FieldOffset(16)]
         public Vector3 WindDirection;
         /// <summary>
         /// Wind strength
         /// </summary>
-        [FieldOffset(12)]
+        [FieldOffset(28)]
         public float WindStrength;
 
         /// <summary>
         /// Rotation
         /// </summary>
-        [FieldOffset(16)]
+        [FieldOffset(32)]
         public float StartRadius;
         /// <summary>
         /// Texture count
         /// </summary>
-        [FieldOffset(20)]
+        [FieldOffset(36)]
         public float EndRadius;
         /// <summary>
         /// Instance count
         /// </summary>
-        [FieldOffset(24)]
+        [FieldOffset(40)]
         public uint Instances;
 
         /// <summary>
         /// Position delta for additional instances
         /// </summary>
-        [FieldOffset(32)]
+        [FieldOffset(48)]
         public Vector3 Delta;
         /// <summary>
         /// Wind effect
         /// </summary>
-        [FieldOffset(44)]
+        [FieldOffset(60)]
         public float WindEffect;
 
         /// <inheritdoc/>

@@ -8,13 +8,16 @@ cbuffer cbPerFrame : register(b0)
 
 cbuffer cbPerPatch : register(b1)
 {
+    float3 gPointOfView;
+    float PAD12;
+        
     float3 gWindDirection;
     float gWindStrength;
 
     float gStartRadius;
     float gEndRadius;
     uint gInstances;
-    float PAD12;
+    float PAD13;
     
     float3 gDelta;
     float gWindEffect;
@@ -50,7 +53,7 @@ inline void createPatches(uint primID, float3 position, float2 size)
 {
     position.y += (size.y * (0.5f + gDelta.y));
 
-    float3 look = gPerFrame.EyePosition - position;
+    float3 look = gPointOfView - position;
     float len = length(look);
     if ((gStartRadius > 0 && len < gStartRadius) || (gEndRadius > 0 && len > gEndRadius))
     {

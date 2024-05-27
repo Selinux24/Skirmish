@@ -100,6 +100,18 @@ namespace Engine
         /// </summary>
         public float NodeSortingSeconds { get; set; } = 5f;
         /// <summary>
+        /// Point of view
+        /// </summary>
+        public Vector3 PointOfView { get; set; }
+        /// <summary>
+        /// Point of view frustum
+        /// </summary>
+        public BoundingFrustum PointOfViewFrustum { get; set; }
+        /// <summary>
+        /// Uses the camera as point of view
+        /// </summary>
+        public bool UseCameraAsPointOfView { get; set; } = true;
+        /// <summary>
         /// Wind direction
         /// </summary>
         public Vector3 WindDirection { get; set; }
@@ -272,6 +284,12 @@ namespace Engine
                 return;
             }
 
+            if (UseCameraAsPointOfView)
+            {
+                PointOfView = Scene.Camera.Position;
+                PointOfViewFrustum = Scene.Camera.Frustum;
+            }
+
             if (updatingNodes)
             {
                 //Node update task runing
@@ -282,9 +300,9 @@ namespace Engine
 
             //Copy variables for the async task
             float time = context.GameTime.ElapsedSeconds;
-            var eyePosition = Scene.Camera.Position;
+            var frustum = PointOfViewFrustum;
+            var eyePosition = PointOfView;
             foliageSphere.Center = eyePosition;
-            var frustum = Scene.Camera.Frustum;
             var sph = foliageSphere;
 
             Task.Run(() =>
@@ -662,6 +680,8 @@ namespace Engine
 
                         MaterialIndex = foliageMaterial.ResourceIndex,
                         RandomTexture = textureRandom,
+
+                        PointOfView = PointOfView,
 
                         WindDirection = WindDirection,
                         WindStrength = WindStrength * channelData.WindEffect,

@@ -46,6 +46,10 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         public EngineShaderResourceView NormalMaps { get; set; }
         /// <summary>
+        /// Point of view
+        /// </summary>
+        public Vector3 PointOfView { get; set; }
+        /// <summary>
         /// Wind direction
         /// </summary>
         public Vector3 WindDirection { get; set; }
