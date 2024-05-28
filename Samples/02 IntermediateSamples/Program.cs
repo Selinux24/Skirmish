@@ -25,7 +25,7 @@ namespace IntermediateSamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Intermediate Samples", WindowsEngineForm.ScreenSize * 0.8f);
+                using Game cl = new("Intermediate Samples", WindowsEngineForm.ScreenSize * 0.33f);
 #else
                 using Game cl = new("Intermediate Samples");
 #endif

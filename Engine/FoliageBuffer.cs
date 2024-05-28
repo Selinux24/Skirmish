@@ -40,9 +40,15 @@ namespace Engine
         private int vertexDrawCount = 0;
 
         /// <summary>
-        /// Foliage attached to buffer flag
+        /// Buffer ready
         /// </summary>
-        public bool Attached { get; private set; }
+        public bool Ready
+        {
+            get
+            {
+                return vertexDrawCount > 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -56,7 +62,6 @@ namespace Engine
             this.bufferManager = bufferManager;
             this.name = $"{name ?? nameof(FoliageBuffer)}.{GetID()}";
 
-            Attached = false;
             vertexBuffer = this.bufferManager.AddVertexData(this.name, true, new VertexBillboard[FoliagePatch.MAX]);
         }
         /// <summary>
@@ -84,22 +89,17 @@ namespace Engine
             }
 
             //Remove data from buffer manager
-            bufferManager?.RemoveVertexData(vertexBuffer);
+            bufferManager.RemoveVertexData(vertexBuffer);
         }
 
         /// <summary>
         /// Attaches the specified patch to buffer
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="data">Vertex data</param>
-        public void WriteData(IEngineDeviceContext dc, BufferManager bufferManager, VertexBillboard[] data)
+        /// <param name="data">Data</param>
+        public void WriteData(IEngineDeviceContext dc, VertexBillboard[] data)
         {
-            vertexDrawCount = 0;
-            Attached = false;
-
-            //Get the data
-            if (data.Length <= 0)
+            if (data.Length == 0)
             {
                 return;
             }
@@ -111,16 +111,15 @@ namespace Engine
             }
 
             vertexDrawCount = data.Length;
-            Attached = true;
         }
         /// <summary>
-        /// Frees the buffer
+        /// Clears the buffer
         /// </summary>
-        public void Free()
+        public void Clear()
         {
             vertexDrawCount = 0;
-            Attached = false;
         }
+
         /// <summary>
         /// Draws the foliage data
         /// </summary>
@@ -128,7 +127,7 @@ namespace Engine
         /// <param name="drawer">Drawer</param>
         public bool DrawFoliage(IEngineDeviceContext dc, BuiltInDrawer drawer)
         {
-            if (vertexDrawCount <= 0)
+            if (vertexDrawCount == 0)
             {
                 return false;
             }
@@ -144,7 +143,7 @@ namespace Engine
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{name} => Attached: {Attached}; {vertexBuffer}";
+            return $"{name} => Ready: {Ready}; {vertexBuffer}";
         }
     }
 }

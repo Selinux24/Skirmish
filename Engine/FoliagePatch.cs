@@ -1,4 +1,5 @@
-﻿using Engine.Common;
+﻿using Engine.Collections;
+using Engine.Common;
 using SharpDX;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +11,10 @@ namespace Engine
     /// <summary>
     /// Foliage patch
     /// </summary>
-    class FoliagePatch
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    class FoliagePatch(QuadTreeNode node)
     {
         /// <summary>
         /// Maximum number of elements in patch
@@ -48,6 +52,10 @@ namespace Engine
         /// </summary>
         public readonly int Id = GetID();
         /// <summary>
+        /// Parent node
+        /// </summary>
+        public QuadTreeNode Node { get; private set; } = node ?? throw new ArgumentNullException(nameof(node));
+        /// <summary>
         /// Foliage map channel
         /// </summary>
         public int Channel { get; protected set; } = -1;
@@ -69,6 +77,20 @@ namespace Engine
                 return foliageCount > 0;
             }
         }
+        /// <summary>
+        /// Assigned buffer
+        /// </summary>
+        public FoliageBuffer Buffer { get; protected set; }
+        /// <summary>
+        /// Gets whether the patch is ready for drawing
+        /// </summary>
+        public bool ReadyForDrawing
+        {
+            get
+            {
+                return Planted && HasData && Buffer?.Ready == true;
+            }
+        }
 
         /// <summary>
         /// Calculates a list of points in the specified bounds
@@ -78,6 +100,7 @@ namespace Engine
         /// <param name="description">Foliage descripton</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
+        /// <param name="callback">Planted callback</param>
         /// <returns>Returns generated vertex data</returns>
         private void CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
@@ -180,14 +203,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public FoliagePatch()
-        {
-
-        }
-
-        /// <summary>
         /// Launches foliage population
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -195,6 +210,7 @@ namespace Engine
         /// <param name="description">Terrain vegetation description</param>
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
+        /// <param name="callback">Planted callback</param>
         public void Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
             Channel = description.Index;
@@ -202,18 +218,12 @@ namespace Engine
             CalculatePoints(scene, map, description, gbbox, nbbox, callback);
         }
         /// <summary>
-        /// Get foliage data
+        /// Sorts the internal data by distance to eye position. Far first if transparency specified, near first otherwise
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <param name="transparent">Use transparency</param>
-        /// <returns>Returns the foliage data ordered by distance to eye position. Far first if transparency specified, near first otherwise</returns>
-        public VertexBillboard[] GetData(Vector3 eyePosition, bool transparent)
+        public void SortData(Vector3 eyePosition, bool transparent)
         {
-            if (foliageCount <= 0)
-            {
-                return [];
-            }
-
             //Sort data
             Array.Sort(foliageData, (obj1, obj2) =>
             {
@@ -224,14 +234,53 @@ namespace Engine
 
                 return d1.CompareTo(d2);
             });
+        }
+        /// <summary>
+        /// Get foliage data
+        /// </summary>
+        public VertexBillboard[] GetData()
+        {
+            if (foliageCount <= 0)
+            {
+                return [];
+            }
 
             return foliageData.Take(foliageCount).ToArray();
+        }
+
+        /// <summary>
+        /// Associates the buffer to the current patch
+        /// </summary>
+        /// <param name="buffer">Buffer</param>
+        public void SetBuffer(FoliageBuffer buffer)
+        {
+            Buffer = buffer;
+            Buffer?.Clear();
+        }
+        /// <summary>
+        /// Attaches the specified patch to buffer
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        public void WriteData(IEngineDeviceContext dc)
+        {
+            if (Buffer == null)
+            {
+                return;
+            }
+
+            var data = GetData();
+            if (data.Length <= 0)
+            {
+                return;
+            }
+
+            Buffer.WriteData(dc, data);
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Id}.Channel_{Channel} => Planted: {Planted}; HasData: {HasData}; Instances: {foliageCount}";
+            return $"{Id}.Channel_{Channel} => Planted: {Planted}; HasData: {HasData}; {Buffer}";
         }
     }
 }
