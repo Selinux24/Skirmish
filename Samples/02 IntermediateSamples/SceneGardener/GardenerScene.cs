@@ -27,8 +27,18 @@ namespace IntermediateSamples.SceneGardener
         private const string resourceFoliageDiffuse3File = "grass_p.png";
         private const string resourceFoliageMap = "mapTest.png";
 
+        private const string noHelpText = "Press F1 for help.";
+        private const string helpText = @"
+F1  - Hide this help.
+F2  - Show foliage map
+F3  - Show foliage areas
+TAB - Change control between Camera and Agent
+   + Camera: WASD-Space-C to move. Left mouse click to rotate. Left mouse click + shift to change agent position.
+   + Agent : WASD to move. Mouse to rotate.";
+
         private UITextArea title = null;
         private UITextArea runtime = null;
+        private UITextArea help = null;
         private UITextArea messages = null;
         private Sprite backPanel = null;
         private UIConsole console = null;
@@ -49,14 +59,17 @@ namespace IntermediateSamples.SceneGardener
         private readonly Color grTrisColor = new(Color.Blue.ToColor3(), 0.15f);
         private readonly Color grLinesColor = new(Color.Blue.ToColor3(), 0.5f);
         private readonly Color fTrisColor = new(Color.Green.ToColor3(), 0.15f);
-        private readonly Color eTrisColor = new(Color.Orange.ToColor3(), 0.15f);
-        private readonly Color rTrisColor = new(Color.Red.ToColor3(), 0.15f);
+        private readonly Color empTrisColor = new(Color.Orange.ToColor3(), 0.15f);
+        private readonly Color errTrisColor = new(Color.Red.ToColor3(), 0.15f);
         private readonly Color frTrisColor = new(Color.White.ToColor3(), 0.15f);
         private readonly Color frLinesColor = new(Color.White.ToColor3(), 0.5f);
         private readonly Color crStartTrisColor = new(Color.IndianRed.ToColor3(), 0.15f);
         private readonly Color crStartLinesColor = new(Color.IndianRed.ToColor3(), 1f);
         private readonly Color crEndTrisColor = new(Color.WhiteSmoke.ToColor3(), 0.15f);
         private readonly Color crEndLinesColor = new(Color.WhiteSmoke.ToColor3(), 1f);
+
+        private bool showHelp = false;
+        private bool freeCamera = true;
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -92,10 +105,12 @@ namespace IntermediateSamples.SceneGardener
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
             title.Text = "Gardener";
             runtime.Text = "";
+            help.Text = "";
             messages.Text = "";
 
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
@@ -202,7 +217,7 @@ namespace IntermediateSamples.SceneGardener
         {
             float areaSize = l * dirtInstances * 0.5f;
 
-            float windEffect = 0f;
+            float windEffect = 0.3333f;
             Vector2 minSize = new(3f, 3f);
             Vector2 maxSize = new(5f, 5f);
 
@@ -337,18 +352,37 @@ namespace IntermediateSamples.SceneGardener
 
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                map.Visible = !map.Visible;
+                showHelp = !showHelp;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
+            {
+                map.Visible = !map.Visible;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F3))
             {
                 itemLines.Visible = !itemLines.Visible;
                 itemTris.Visible = itemLines.Visible;
             }
 
-            UpdateInputCamera(gameTime);
-            UpdateInputPOV();
+            if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                freeCamera = !freeCamera;
+            }
 
+            if (freeCamera)
+            {
+                UpdateInputCamera(gameTime);
+
+                UpdateInputPOV();
+            }
+            else
+            {
+                UpdateInputAgent(gameTime);
+            }
+
+            UpdateHelp();
             UpdatePOV();
 
             runtime.Text = Game.RuntimeText;
@@ -397,6 +431,49 @@ namespace IntermediateSamples.SceneGardener
                 camera.MoveDown(gameTime, slow);
             }
         }
+        private void UpdateInputAgent(IGameTime gameTime)
+        {
+            var transform = pov.Manipulator;
+            var input = Game.Input;
+            float vel = input.ShiftPressed ? 8 : 16;
+            float velX = input.MouseXDelta * 0.1f;
+
+            if (input.MouseButtonPressed(MouseButtons.Right))
+            {
+                transform.Rotate(gameTime, velX, 0, 0);
+            }
+
+            if (input.KeyPressed(Keys.A))
+            {
+                transform.MoveLeft(gameTime, vel);
+            }
+
+            if (input.KeyPressed(Keys.D))
+            {
+                transform.MoveRight(gameTime, vel);
+            }
+
+            if (input.KeyPressed(Keys.W))
+            {
+                transform.MoveForward(gameTime, vel);
+            }
+
+            if (input.KeyPressed(Keys.S))
+            {
+                transform.MoveBackward(gameTime, vel);
+            }
+
+            var position = transform.Position;
+            position.Y = povHeight * 0.5f;
+            transform.SetPosition(position);
+
+            var camPosition = position;
+            camPosition.Y += povHeight;
+            var interest = camPosition - transform.Forward;
+
+            Camera.SetPosition(camPosition);
+            Camera.SetInterest(interest);
+        }
         private void UpdateInputPOV()
         {
             if (!Game.Input.MouseButtonPressed(MouseButtons.Left))
@@ -419,6 +496,19 @@ namespace IntermediateSamples.SceneGardener
                 pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
             }
         }
+        private void UpdateHelp()
+        {
+            if (showHelp)
+            {
+                help.Text = helpText;
+            }
+            else
+            {
+                help.Text = noHelpText;
+            }
+
+            UpdateLayout();
+        }
         private void UpdatePOV()
         {
             var position = pov.Manipulator.Position;
@@ -431,7 +521,7 @@ namespace IntermediateSamples.SceneGardener
             grass.PointOfView = position;
             grass.PointOfViewFrustum = frustum;
 
-            DrawGardenerNodes(grLinesColor, grTrisColor, fTrisColor, eTrisColor, rTrisColor);
+            DrawGardenerNodes(grLinesColor, grTrisColor, fTrisColor, empTrisColor, errTrisColor);
             DrawGardenerBounds(gbLinesColor);
             DrawFrustum(frustum, frLinesColor, frTrisColor);
             DrawCircle(position, grassStartRadius, crStartLinesColor, crStartTrisColor);
@@ -463,17 +553,17 @@ namespace IntermediateSamples.SceneGardener
             itemLines.SetPrimitives(lColor, lines);
             itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
-        private void DrawGardenerNodes(Color4 lColor, Color4 tColor, Color4 fColor, Color4 eColor, Color4 rColor)
+        private void DrawGardenerNodes(Color4 lColor, Color4 tColor, Color4 fColor, Color4 empColor, Color4 errColor)
         {
             itemLines.Clear(lColor);
             itemTris.Clear(tColor);
             itemTris.Clear(fColor);
-            itemTris.Clear(eColor);
-            itemTris.Clear(rColor);
+            itemTris.Clear(empColor);
+            itemTris.Clear(errColor);
 
-            var visibleNodes = grass.GetVisibleNodes();
-            var filledNodes = grass.GetFilledNodes();
             var allNodes = grass.GetAllNodes();
+            var visibleNodes = grass.GetVisibleNodes();
+            var patches = grass.GetPatches();
 
             foreach (var node in allNodes)
             {
@@ -483,31 +573,28 @@ namespace IntermediateSamples.SceneGardener
                 var lines = Line3D.CreatePolygon(topQuad);
                 itemLines.AddPrimitives(lColor, lines);
 
+                var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+
                 bool isVisible = Array.Exists(visibleNodes, n => n == node);
 
-                var nn = Array.FindIndex(filledNodes, n => n.Item1 == node);
-                if (nn >= 0)
-                {
-                    var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
+                var pNodes = Array.FindAll(patches, n => n.Node == node);
+                bool anyError = Array.Exists(pNodes, n => n.WithData && !n.Ready);
+                bool allOk = Array.Exists(pNodes, n => !(n.WithData && n.Ready)) && Array.Exists(pNodes, n => n.WithData && n.Ready);
 
-                    var filled = filledNodes[nn].Item2;
-                    if(isVisible && filled)
-                    {
-                        itemTris.AddPrimitives(fColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
-                    }
-                    else if(isVisible && !filled)
-                    {
-                        itemTris.AddPrimitives(rColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
-                    }
-                    else if (filled)
-                    {
-                        itemTris.AddPrimitives(eColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
-                    }
+                if (isVisible && allOk)
+                {
+                    itemTris.AddPrimitives(fColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                }
+                else if (isVisible && anyError)
+                {
+                    itemTris.AddPrimitives(errColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                }
+                else if (allOk)
+                {
+                    itemTris.AddPrimitives(empColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
                 else if (isVisible)
                 {
-                    var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
-
                     itemTris.AddPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
             }
@@ -548,10 +635,11 @@ namespace IntermediateSamples.SceneGardener
 
             title.SetPosition(Vector2.Zero);
             runtime.SetPosition(new Vector2(5, title.AbsoluteRectangle.Bottom + 3));
-            messages.SetPosition(new Vector2(5, runtime.AbsoluteRectangle.Bottom + 3));
+            help.SetPosition(new Vector2(5, runtime.AbsoluteRectangle.Bottom + 3));
+            messages.SetPosition(new Vector2(5, help.AbsoluteRectangle.Bottom + 3));
 
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = messages.AbsoluteRectangle.Bottom + 3 + ((messages.Height + 3) * 2);
+            backPanel.Height = help.AbsoluteRectangle.Top + 3 + (help.Height + 3);
 
             console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;

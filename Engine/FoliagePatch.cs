@@ -245,7 +245,7 @@ namespace Engine
                 return [];
             }
 
-            return foliageData.Take(foliageCount).ToArray();
+            return [.. foliageData];
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Engine
             }
 
             var data = GetData();
-            if (data.Length <= 0)
+            if (data.Length == 0)
             {
                 return;
             }

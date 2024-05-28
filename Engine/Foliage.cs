@@ -315,14 +315,19 @@ namespace Engine
             var eyePosition = PointOfView;
             foliageSphere.Center = eyePosition;
             var sph = foliageSphere;
+            var ic = Scene.Game.Graphics.ImmediateContext;
+            bool transparent = IsTransparent();
+
+            //Update node visibility
+            UpdateNodeVisibility(ic, eyePosition, transparent, frustum, sph);
+
+            //Writes data into graphics device
+            WritePatches(ic, eyePosition, transparent);
 
             Task.Run(() =>
             {
                 try
                 {
-                    //Update node visibility
-                    visibleNodes = GetVisibleNodes(frustum, sph);
-
                     //Sort nodes
                     SortVisibleNodes(time, eyePosition);
 
@@ -334,11 +339,40 @@ namespace Engine
                     updatingNodes = false;
                 }
             }).ConfigureAwait(false);
-
-            //Writes data into graphics device
-            WritePatches(eyePosition);
         }
 
+        /// <summary>
+        /// Updates the node visibility
+        /// </summary>
+        /// <param name="ic">Device context</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="transparent">Transparent</param>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="sph">Bounding sphere</param>
+        private void UpdateNodeVisibility(IEngineDeviceContext ic, Vector3 eyePosition, bool transparent, BoundingFrustum frustum, BoundingSphere sph)
+        {
+            //Update visible nodes
+            visibleNodes = GetVisibleNodes(frustum, sph);
+
+            foreach (var node in visibleNodes)
+            {
+                //Get the node filled patch list, without buffer
+                var patchList = foliagePatches
+                    .Where(p => p.Node == node && !p.ReadyForDrawing && p.Planted && p.HasData)
+                    .ToArray();
+
+                foreach (var patch in patchList)
+                {
+                    //Assign a buffer
+                    var freeBuffer = FindBuffer(eyePosition);
+
+                    //Assign a new free buffer to the node data
+                    patch.SetBuffer(freeBuffer);
+                    patch.SortData(eyePosition, transparent);
+                    patch.WriteData(ic);
+                }
+            }
+        }
         /// <summary>
         /// Gets the visible node list from the quad-tree
         /// </summary>
@@ -356,6 +390,55 @@ namespace Engine
             var volume = (IntersectionVolumeFrustum)frustum;
 
             return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint).ToArray();
+        }
+
+        /// <summary>
+        /// Finds a buffer
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        private FoliageBuffer FindBuffer(Vector3 eyePosition)
+        {
+            // Find a free buffer
+            var freeBuffer = GetNextFreeBuffer();
+            if (freeBuffer == null)
+            {
+                // Take the buffer from another patch
+                var farestPatch = GetFreeFarestPatch(eyePosition);
+                freeBuffer = farestPatch?.Buffer;
+
+                // Remove the buffer from the farest patch
+                farestPatch?.SetBuffer(null);
+            }
+
+            return freeBuffer;
+        }
+        /// <summary>
+        /// Gets the next free buffer
+        /// </summary>
+        private FoliageBuffer GetNextFreeBuffer()
+        {
+            //Try to find unused first
+            var freeBuffer = foliageBuffers.Find(b => !foliagePatches.Exists(p => p.Buffer == b));
+            if (freeBuffer != null)
+            {
+                return freeBuffer;
+            }
+
+            //All buffers already used.
+            return null;
+        }
+        /// <summary>
+        /// Gets the farest not visible patch
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        private FoliagePatch GetFreeFarestPatch(Vector3 eyePosition)
+        {
+            //Try to find not visible & fartest from position
+            var notVisible = foliagePatches
+                .FindAll(p => p.Buffer != null && !Array.Exists(visibleNodes, n => n == p.Node))
+                .OrderByDescending(p => Vector3.DistanceSquared(p.Node.Center, eyePosition));
+
+            return notVisible.FirstOrDefault();
         }
 
         /// <summary>
@@ -399,7 +482,6 @@ namespace Engine
         private void UpdatePatches()
         {
             var gbbox = foliageQuadtree.BoundingBox;
-            int channelCount = foliageMapChannels.Count;
 
             //Iterate over the visible nodes, and get the current patch configuration of each
             foreach (var node in visibleNodes)
@@ -431,51 +513,30 @@ namespace Engine
         {
             //Select all patches without calculated data
             var toPlant = patches
-                .Where(n => !n.Planting && !n.Planted)
+                .Where(p => !p.ReadyForDrawing && !p.Planting && !p.Planted)
                 .ToArray();
 
             Parallel.For(0, toPlant.Length, (i) =>
             {
-                toPlant[i].Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
+                var p = toPlant[i];
+
+                p.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
                 {
-                    callback?.Invoke(toPlant[i]);
+                    //Enqueue
+                    callback?.Invoke(p);
                 });
             });
-        }
-        /// <summary>
-        /// Gets the next free buffer
-        /// </summary>
-        /// <param name="eyePosition">Eye position</param>
-        private FoliageBuffer GetNextFreeBuffer(Vector3 eyePosition)
-        {
-            //Try to find unused first
-            var freeBuffer = foliageBuffers.Find(b => !foliagePatches.Any(p => p.Buffer == b));
-            if (freeBuffer != null)
-            {
-                return freeBuffer;
-            }
-
-            //All buffers already used.
-
-            //Try to find not visible & fartest from position
-            return foliagePatches
-                .FindAll(p => !Array.Exists(visibleNodes, n => n == p.Node))
-                .OrderByDescending(p => Vector3.DistanceSquared(p.Node.Center, eyePosition))
-                .FirstOrDefault()?.Buffer;
         }
 
         /// <summary>
         /// Writes patches data into graphic buffers
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
-        private void WritePatches(Vector3 eyePosition)
+        private void WritePatches(IEngineDeviceContext ic, Vector3 eyePosition, bool transparent)
         {
-            var dc = Scene.Game.Graphics.ImmediateContext;
-            bool transparent = IsTransparent();
-
             while (toAssignQueue.TryDequeue(out var patch))
             {
-                if (patch.Buffer != null)
+                if (patch.ReadyForDrawing)
                 {
                     //Already has a buffer
                     return;
@@ -488,10 +549,13 @@ namespace Engine
                     return;
                 }
 
+                // Find a free buffer
+                var freeBuffer = FindBuffer(eyePosition);
+
                 //Assign a new free buffer to the node data
-                patch.SetBuffer(GetNextFreeBuffer(eyePosition));
+                patch.SetBuffer(freeBuffer);
                 patch.SortData(eyePosition, transparent);
-                patch.WriteData(dc);
+                patch.WriteData(ic);
             }
         }
 
@@ -531,8 +595,11 @@ namespace Engine
         {
             bool drawn = false;
 
-            var toDrawPatches = foliagePatches
-                .FindAll(p => p.ReadyForDrawing && Array.Exists(visibleNodes, n => n == p.Node));
+            var visiblePatches = foliagePatches
+                .FindAll(p => Array.Exists(visibleNodes, n => n == p.Node));
+
+            var toDrawPatches = visiblePatches
+                .FindAll(p => p.ReadyForDrawing);
 
             foreach (var patch in toDrawPatches)
             {
@@ -647,29 +714,13 @@ namespace Engine
             return [.. allNodes];
         }
         /// <summary>
-        /// Gets the ready to draw quadtree node list
+        /// Gets the patch list state
         /// </summary>
-        public (QuadTreeNode, bool)[] GetFilledNodes()
+        public (QuadTreeNode Node, bool WithData, bool Ready)[] GetPatches()
         {
-            List<(QuadTreeNode, bool)> nodes = [];
-
-            var d = foliagePatches
-                .GroupBy(p => p.Node)
-                .ToDictionary(p => p.Key, p => p.ToArray());
-
-            foreach (var (node, patches) in d)
-            {
-                if (patches.Length == 0)
-                {
-                    continue;
-                }
-
-                bool ready = Array.FindAll(patches, p => p.Planted && p.HasData).Length == patches.Length;
-
-                nodes.Add((node, ready));
-            }
-
-            return [.. nodes];
+            return foliagePatches
+                .Select(patch => (patch.Node, patch.Planted && patch.HasData, patch.ReadyForDrawing))
+                .ToArray();
         }
     }
 }
