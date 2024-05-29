@@ -124,8 +124,7 @@ namespace Engine
             /// Draws the scenery patch shadows
             /// </summary>
             /// <param name="context">Draw context</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            public bool DrawSceneryShadows(DrawContextShadows context, BufferManager bufferManager)
+            public bool DrawSceneryShadows(DrawContextShadows context)
             {
                 if (context.ShadowMap == null)
                 {
@@ -145,7 +144,7 @@ namespace Engine
                         continue;
                     }
 
-                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, meshMaterial))
+                    if (DrawWithDrawer(context.DeviceContext, sceneryDrawer, mesh, meshMaterial))
                     {
                         count += mesh.Count;
                     }
@@ -157,9 +156,8 @@ namespace Engine
             /// Draws the scenery patch
             /// </summary>
             /// <param name="context">Context</param>
-            /// <param name="bufferManager">Buffer manager</param>
             /// <param name="blendMode">Blend mode</param>
-            public bool DrawScenery(DrawContext context, BufferManager bufferManager, BlendModes blendMode)
+            public bool DrawScenery(DrawContext context, BlendModes blendMode)
             {
                 int count = 0;
 
@@ -180,7 +178,7 @@ namespace Engine
                         continue;
                     }
 
-                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, meshMaterial))
+                    if (DrawWithDrawer(context.DeviceContext, sceneryDrawer, mesh, meshMaterial))
                     {
                         count += mesh.Count;
                     }
@@ -192,11 +190,10 @@ namespace Engine
             /// Draws the patch using shaders
             /// </summary>
             /// <param name="dc">Device context</param>
-            /// <param name="bufferManager">Buffer manager</param>
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(IEngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(IEngineDeviceContext dc, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
 
@@ -209,7 +206,7 @@ namespace Engine
                 };
                 sceneryDrawer.UpdateMaterial(dc, materialState);
 
-                return sceneryDrawer.Draw(dc, bufferManager, [mesh]);
+                return sceneryDrawer.Draw(dc, [mesh]);
             }
 
             /// <summary>
@@ -488,7 +485,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
 
-                drawn = (patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager) ?? false) || drawn;
+                drawn = (patchDictionary[nodeId]?.DrawSceneryShadows(context) ?? false) || drawn;
             }
 
             return drawn;
@@ -515,7 +512,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                drawn = (patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode) ?? false) || drawn;
+                drawn = (patchDictionary[nodeId]?.DrawScenery(context, BlendMode) ?? false) || drawn;
             }
 
             return drawn;

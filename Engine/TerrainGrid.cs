@@ -360,17 +360,16 @@ namespace Engine
         /// Draws shadows
         /// </summary>
         /// <param name="context">Draw context</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="drawer">Drawer</param>
-        public bool DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
+        public bool DrawShadows(DrawContextShadows context, IBuiltInDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
             var dc = context.DeviceContext;
-            var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
-            var r1 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMedium);
-            var r2 = DrawNodeList(dc, bufferManager, drawer, visibleNodesLow);
-            var r3 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMinimum);
+            var r0 = DrawNodeList(dc, drawer, visibleNodesHigh);
+            var r1 = DrawNodeList(dc, drawer, visibleNodesMedium);
+            var r2 = DrawNodeList(dc, drawer, visibleNodesLow);
+            var r3 = DrawNodeList(dc, drawer, visibleNodesMinimum);
 
             return r0 || r1 || r2 || r3;
         }
@@ -378,17 +377,16 @@ namespace Engine
         /// Draws
         /// </summary>
         /// <param name="context">Draw context</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="drawer">Drawer</param>
-        public bool Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
+        public bool Draw(DrawContext context, IBuiltInDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
             var dc = context.DeviceContext;
-            var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
-            var r1 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMedium);
-            var r2 = DrawNodeList(dc, bufferManager, drawer, visibleNodesLow);
-            var r3 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMinimum);
+            var r0 = DrawNodeList(dc, drawer, visibleNodesHigh);
+            var r1 = DrawNodeList(dc, drawer, visibleNodesMedium);
+            var r2 = DrawNodeList(dc, drawer, visibleNodesLow);
+            var r3 = DrawNodeList(dc, drawer, visibleNodesMinimum);
 
             return r0 || r1 || r2 || r3;
         }
@@ -396,10 +394,9 @@ namespace Engine
         /// Draws the visible node list
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="drawer">Drawer</param>
         /// <param name="nodeList">Node list</param>
-        private static bool DrawNodeList(IEngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer drawer, TerrainGridNode[] nodeList)
+        private static bool DrawNodeList(IEngineDeviceContext dc, IBuiltInDrawer drawer, TerrainGridNode[] nodeList)
         {
             int instanceCount = 0;
             int primitiveCount = 0;
@@ -418,7 +415,7 @@ namespace Engine
                     VertexBuffer = gNode.VBDesc,
                     Topology = Topology.TriangleList,
                 };
-                if (!drawer.Draw(dc, bufferManager, options))
+                if (!drawer.Draw(dc, options))
                 {
                     continue;
                 }

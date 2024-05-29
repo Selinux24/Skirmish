@@ -166,7 +166,7 @@ namespace Engine
                 IndexBuffer = indexBuffer,
                 Topology = Topology.TriangleList,
             };
-            return waterDrawer.Draw(dc, BufferManager, drawOptions);
+            return waterDrawer.Draw(dc, drawOptions);
         }
     }
 }

@@ -26,6 +26,10 @@ namespace Engine.Common
         /// </summary>
         private readonly List<BufferDescriptor> vertexDescriptors = [];
 
+        /// <summary>
+        /// Vertex type
+        /// </summary>
+        public VertexTypes Type { get; private set; } = type;
         /// <inheritdoc/>
         public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
@@ -54,10 +58,6 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public VertexTypes Type { get; private set; } = type;
         /// <summary>
         /// Vertex data
         /// </summary>
@@ -90,14 +90,21 @@ namespace Engine.Common
         /// <param name="slot">Buffer descriptor slot</param>
         public void AddInputs(int slot)
         {
+            if (data.Count == 0)
+            {
+                return;
+            }
+
+            if (input.Count > 0)
+            {
+                return;
+            }
+
             //Get the input element list from the vertex data
             var inputs = data[0].GetInput(slot);
 
             //Adds the input list
             input.AddRange(inputs);
-
-            //Updates the allocated size
-            AllocatedSize = data.Count;
         }
         /// <summary>
         /// Clears the internal input list
@@ -108,20 +115,16 @@ namespace Engine.Common
             AllocatedSize = 0;
         }
         /// <summary>
-        /// Adds the specified instancing input elements to the internal list
+        /// Sets the specified instancing input elements to the internal list
         /// </summary>
         /// <param name="instancingSlot">Instancing buffer slot</param>
-        public void AddInstancingInputs(int instancingSlot)
-        {
-            var instancingInputs = VertexInstancingData.Input(instancingSlot);
-            input.AddRange(instancingInputs);
-        }
-        /// <summary>
-        /// Crears the instancing inputs from the input elements
-        /// </summary>
-        public void ClearInstancingInputs()
+        public void SetInstancingInputs(int instancingSlot)
         {
             input.RemoveAll(i => i.Classification == InputClassification.PerInstanceData);
+
+            var instancingInputs = VertexInstancingData.Input(instancingSlot);
+
+            input.AddRange(instancingInputs);
         }
 
         /// <summary>
@@ -185,6 +188,26 @@ namespace Engine.Common
             Allocated = true;
             Allocations++;
             ReallocationNeeded = false;
+        }
+        /// <inheritdoc/>
+        public IEngineBufferDescriptor Copy()
+        {
+            var d = new BufferManagerVertices(Type, Dynamic)
+            {
+                BufferIndex = BufferIndex,
+                AllocatedSize = 0,
+                ReallocationNeeded = true,
+                Allocated = false,
+                Allocations = Allocations,
+                BufferBindingIndex = BufferBindingIndex,
+                InstancingDescriptor = InstancingDescriptor,
+            };
+
+            d.data.AddRange(data);
+            d.input.AddRange(input);
+            d.vertexDescriptors.AddRange(vertexDescriptors);
+
+            return d;
         }
 
         /// <inheritdoc/>

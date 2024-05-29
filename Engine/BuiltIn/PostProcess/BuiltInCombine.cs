@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInCombine() : base()
+        public BuiltInCombine(Game game) : base(game)
         {
             SetVertexShader<PostProcessVs>(false);
             pixelShader = SetPixelShader<CombinePs>(false);

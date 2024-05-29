@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInTransparentPositionInstanced() : base()
+        public BuiltInTransparentPositionInstanced(Game game) : base(game)
         {
             SetVertexShader<PositionTextureVsI>();
             SetGeometryShader<ShadowsTransparentGs>();

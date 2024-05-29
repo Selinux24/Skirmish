@@ -244,7 +244,7 @@ namespace Engine
                 instanceIndex++;
             }
 
-            BufferManager.WriteInstancingData(dc, InstancingBuffer, instancingData);
+            Game.WriteInstancingData(dc, InstancingBuffer, instancingData);
         }
         /// <summary>
         /// Gets the limit of instances to draw
@@ -274,7 +274,7 @@ namespace Engine
             }
             var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.ShadowMap.LightSource.Position);
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
-            BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
+            Game.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
             return DrawShadowsInstances(context, cullInstanceList, cullInstanceData);
         }
         /// <summary>
@@ -376,7 +376,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
-                if (drawer.Draw(dc, BufferManager, [mesh], instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }
@@ -404,7 +404,7 @@ namespace Engine
             }
             var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.Camera.Position);
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
-            BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
+            Game.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
             return DrawInstances(context, cullInstanceList, cullInstanceData);
         }
         /// <summary>
@@ -511,7 +511,7 @@ namespace Engine
                 drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                if (drawer.Draw(dc, BufferManager, [mesh], instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }

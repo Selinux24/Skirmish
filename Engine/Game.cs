@@ -380,7 +380,7 @@ namespace Engine
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            BuiltIn.BuiltInShaders.Initialize(Graphics);
+            BuiltIn.BuiltInShaders.Initialize(this);
         }
         /// <summary>
         /// Destructor

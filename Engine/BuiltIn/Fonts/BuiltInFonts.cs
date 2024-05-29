@@ -105,7 +105,7 @@ namespace Engine.BuiltIn.Fonts
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInFonts() : base()
+        public BuiltInFonts(Game game) : base(game)
         {
             SetVertexShader<FontsVs>();
             SetPixelShader<FontsPs>();

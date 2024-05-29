@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInComposer() : base()
+        public BuiltInComposer(Game game) : base(game)
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
             pixelShader = SetPixelShader<DeferredComposerPs>(false);

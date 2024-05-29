@@ -1,13 +1,17 @@
 ﻿
 namespace Engine.BuiltIn
 {
+    using Engine;
     using Engine.Common;
     using Format = SharpDX.DXGI.Format;
 
     /// <summary>
     /// Built-in drawer class
     /// </summary>
-    public abstract class BuiltInDrawer : IBuiltInDrawer
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public abstract class BuiltInDrawer(Game game) : IBuiltInDrawer
     {
         /// <summary>
         /// Vertex shader
@@ -35,12 +39,9 @@ namespace Engine.BuiltIn
         private IBuiltInShader<EngineComputeShader> computeShader = BuiltInShaders.GetComputeShader<Empty<EngineComputeShader>>();
 
         /// <summary>
-        /// Constructor
+        /// Game instance
         /// </summary>
-        protected BuiltInDrawer()
-        {
-
-        }
+        protected readonly Game Game = game;
 
         /// <summary>
         /// Sets a vertex shader of the specified type
@@ -296,13 +297,8 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(IEngineDeviceContext dc, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0)
         {
-            if (bufferManager == null)
-            {
-                return false;
-            }
-
             if (meshes.Length <= 0)
             {
                 return false;
@@ -316,13 +312,13 @@ namespace Engine.BuiltIn
             foreach (var mesh in meshes)
             {
                 // Set the index buffer
-                if (!bufferManager.SetIndexBuffer(dc, mesh.IndexBuffer))
+                if (!Game.SetIndexBuffer(dc, mesh.IndexBuffer))
                 {
                     continue;
                 }
 
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(dc, vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
+                if (!Game.SetInputAssembler(dc, vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
                 {
                     continue;
                 }
@@ -341,24 +337,19 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, DrawOptions options)
+        public virtual bool Draw(IEngineDeviceContext dc, DrawOptions options)
         {
-            if (bufferManager == null)
-            {
-                return false;
-            }
-
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);
 
             // Set the index buffer
-            if (!bufferManager.SetIndexBuffer(dc, options.IndexBuffer))
+            if (!Game.SetIndexBuffer(dc, options.IndexBuffer))
             {
                 return false;
             }
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(dc, vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
+            if (!Game.SetInputAssembler(dc, vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {
                 return false;
             }

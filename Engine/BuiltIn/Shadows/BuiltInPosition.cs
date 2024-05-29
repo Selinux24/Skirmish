@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPosition() : base()
+        public BuiltInPosition(Game game) : base(game)
         {
             SetVertexShader<PositionVs>();
             SetGeometryShader<ShadowsGs>();

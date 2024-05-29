@@ -103,7 +103,7 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInWater() : base()
+        public BuiltInWater(Game game) : base(game)
         {
             SetVertexShader<WaterVs>();
             SetPixelShader<WaterPs>();

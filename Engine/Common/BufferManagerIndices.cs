@@ -124,6 +124,23 @@ namespace Engine.Common
             Allocations++;
             ReallocationNeeded = false;
         }
+        /// <inheritdoc/>
+        public IEngineBufferDescriptor Copy()
+        {
+            var d = new BufferManagerIndices(Dynamic)
+            {
+                BufferIndex = BufferIndex,
+                AllocatedSize = 0,
+                ReallocationNeeded = true,
+                Allocated = false,
+                Allocations = Allocations,
+            };
+
+            d.data.AddRange(data);
+            d.descriptors.AddRange(descriptors);
+
+            return d;
+        }
 
         /// <inheritdoc/>
         public override string ToString()

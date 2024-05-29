@@ -255,12 +255,12 @@ namespace Engine.UI
             if (Textured)
             {
                 spriteTextureDrawer.UpdateSprite(dc, state);
-                drawn = spriteTextureDrawer.Draw(dc, BufferManager, drawOptions);
+                drawn = spriteTextureDrawer.Draw(dc, drawOptions);
             }
             else
             {
                 spriteColorDrawer.UpdateSprite(dc, state);
-                drawn = spriteColorDrawer.Draw(dc, BufferManager, drawOptions);
+                drawn = spriteColorDrawer.Draw(dc, drawOptions);
             }
 
             return drawn;

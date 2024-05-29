@@ -25,7 +25,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionNormalTextureSkinnedInstanced() : base()
+        public BuiltInPositionNormalTextureSkinnedInstanced(Game game) : base(game)
         {
             SetVertexShader<PositionNormalTextureSkinnedVsI>();
             SetPixelShader<PositionNormalTexturePs>();

@@ -28,7 +28,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPostProcess() : base()
+        public BuiltInPostProcess(Game game) : base(game)
         {
             SetVertexShader<PostProcessVs>(false);
             pixelShader = SetPixelShader<PostProcessPs>(false);

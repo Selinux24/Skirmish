@@ -21,7 +21,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionNormalColor() : base()
+        public BuiltInPositionNormalColor(Game game) : base(game)
         {
             SetVertexShader<PositionNormalColorVs>();
             SetPixelShader<PositionNormalColorPs>();

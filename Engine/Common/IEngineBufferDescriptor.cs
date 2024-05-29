@@ -44,5 +44,9 @@ namespace Engine.Common
         /// Updates the allocated buffer size
         /// </summary>
         void Allocate();
+        /// <summary>
+        /// Copies the descriptor
+        /// </summary>
+        IEngineBufferDescriptor Copy();
     }
 }

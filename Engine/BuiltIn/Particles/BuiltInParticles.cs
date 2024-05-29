@@ -130,7 +130,7 @@ namespace Engine.BuiltIn.Particles
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInParticles() : base()
+        public BuiltInParticles(Game game) : base(game)
         {
             SetVertexShader<ParticlesVs>();
             SetGeometryShader<ParticlesGS>();

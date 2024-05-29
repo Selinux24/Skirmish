@@ -62,7 +62,7 @@ namespace Engine.BuiltIn.Decals
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInDecals() : base()
+        public BuiltInDecals(Game game) : base(game)
         {
             SetVertexShader<DecalsVs>();
             SetGeometryShader<DecalsGS>();

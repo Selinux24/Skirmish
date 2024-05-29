@@ -240,7 +240,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            return cloudsDrawer.Draw(dc, BufferManager, drawOptions);
+            return cloudsDrawer.Draw(dc, drawOptions);
         }
     }
 }

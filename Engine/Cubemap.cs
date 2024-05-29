@@ -191,7 +191,7 @@ namespace Engine
 
             drawer.Update(texture);
 
-            return drawer.Draw(dc, BufferManager, new DrawOptions
+            return drawer.Draw(dc, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
@@ -214,7 +214,7 @@ namespace Engine
 
             dc.SetRasterizerState(Game.Graphics.GetRasterizerCullNone());
 
-            return drawer.Draw(dc, BufferManager, new DrawOptions
+            return drawer.Draw(dc, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,

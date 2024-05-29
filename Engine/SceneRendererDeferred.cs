@@ -671,7 +671,7 @@ namespace Engine
             var swGeometryBuffer = Stopwatch.StartNew();
             var swGeometryBufferInit = Stopwatch.StartNew();
 #endif
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (!Scene.Game.SetVertexBuffers(dc))
             {
                 return;
             }
@@ -758,7 +758,7 @@ namespace Engine
 #if DEBUG
             var swDraw = Stopwatch.StartNew();
 #endif
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (!Scene.Game.SetVertexBuffers(dc))
             {
                 return;
             }

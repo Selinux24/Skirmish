@@ -107,7 +107,7 @@ namespace Engine.BuiltIn.SkyScattering
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInSkyScattering() : base()
+        public BuiltInSkyScattering(Game game) : base(game)
         {
             SetVertexShader<SkyScatteringVs>();
             SetPixelShader<SkyScatteringPs>();

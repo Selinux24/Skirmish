@@ -17,7 +17,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionNormalColorInstanced() : base()
+        public BuiltInPositionNormalColorInstanced(Game game) : base(game)
         {
             SetVertexShader<PositionNormalColorVsI>();
             SetPixelShader<PositionNormalColorPs>();

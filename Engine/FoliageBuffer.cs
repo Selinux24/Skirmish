@@ -27,9 +27,9 @@ namespace Engine
         /// </summary>
         private readonly string name;
         /// <summary>
-        /// Buffer manager
+        /// Game instance
         /// </summary>
-        private readonly BufferManager bufferManager = null;
+        private readonly Game game = null;
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -53,16 +53,16 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="game">Game</param>
         /// <param name="name">Name</param>
-        public FoliageBuffer(BufferManager bufferManager, string name)
+        public FoliageBuffer(Game game, string name)
         {
-            ArgumentNullException.ThrowIfNull(bufferManager);
+            ArgumentNullException.ThrowIfNull(game);
 
-            this.bufferManager = bufferManager;
+            this.game = game;
             this.name = $"{name ?? nameof(FoliageBuffer)}.{GetID()}";
 
-            vertexBuffer = this.bufferManager.AddVertexData(this.name, true, new VertexBillboard[FoliagePatch.MAX]);
+            vertexBuffer = this.game.BufferManager.AddVertexData(this.name, true, new VertexBillboard[FoliagePatch.MAX]);
         }
         /// <summary>
         /// Destructor
@@ -89,7 +89,7 @@ namespace Engine
             }
 
             //Remove data from buffer manager
-            bufferManager.RemoveVertexData(vertexBuffer);
+            game.BufferManager.RemoveVertexData(vertexBuffer);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Engine
             }
 
             //Attach data to buffer
-            if (!bufferManager.WriteVertexBuffer(dc, vertexBuffer, data, false))
+            if (!game.WriteVertexBuffer(dc, vertexBuffer, data, false))
             {
                 return;
             }
@@ -132,7 +132,7 @@ namespace Engine
                 return false;
             }
 
-            return drawer.Draw(dc, bufferManager, new()
+            return drawer.Draw(dc, new()
             {
                 VertexBuffer = vertexBuffer,
                 VertexDrawCount = vertexDrawCount,

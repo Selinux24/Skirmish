@@ -93,7 +93,7 @@ namespace Engine.BuiltIn.Clouds
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInClouds() : base()
+        public BuiltInClouds(Game game) : base(game)
         {
             SetVertexShader<CloudsVs>();
             SetPixelShader<CloudsPs>();

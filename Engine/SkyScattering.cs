@@ -362,7 +362,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            return skyDrawer.Draw(dc, BufferManager, drawOptions);
+            return skyDrawer.Draw(dc, drawOptions);
         }
 
         /// <summary>

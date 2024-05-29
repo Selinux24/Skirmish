@@ -61,7 +61,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInLightSpot() : base()
+        public BuiltInLightSpot(Game game) : base(game)
         {
             vertexShader = SetVertexShader<DeferredLightVs>(false);
             pixelShader = SetPixelShader<DeferredLightSpotPs>(false);

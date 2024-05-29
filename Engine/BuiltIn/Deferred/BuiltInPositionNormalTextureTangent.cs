@@ -29,7 +29,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionNormalTextureTangent() : base()
+        public BuiltInPositionNormalTextureTangent(Game game) : base(game)
         {
             SetVertexShader<PositionNormalTextureTangentVs>();
             SetPixelShader<PositionNormalTextureTangentPs>();

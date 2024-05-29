@@ -29,7 +29,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionTextureSkinned() : base()
+        public BuiltInPositionTextureSkinned(Game game) : base(game)
         {
             SetVertexShader<PositionTextureSkinnedVs>();
             SetPixelShader<PositionTexturePs>();

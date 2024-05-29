@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.Particles
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInStreamOut() : base()
+        public BuiltInStreamOut(Game game) : base(game)
         {
             SetVertexShader<StreamOutVs>();
             SetGeometryShader<StreamOutGS>();

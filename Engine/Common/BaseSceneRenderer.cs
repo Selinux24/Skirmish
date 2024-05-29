@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
+    using Engine;
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
 
@@ -1013,7 +1014,7 @@ namespace Engine.Common
             var drawContext = GetPerLightDrawContext(passIndex, passName, shadowMapper);
             var dc = drawContext.DeviceContext;
 
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (!Scene.Game.SetVertexBuffers(dc))
             {
                 return;
             }
@@ -1334,7 +1335,7 @@ namespace Engine.Common
             var dc = pass.DeviceContext;
             dc.ClearState();
 
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (!Scene.Game.SetVertexBuffers(dc))
             {
                 return;
             }
@@ -1688,7 +1689,7 @@ namespace Engine.Common
             var dc = pass.DeviceContext;
             dc.ClearState();
 
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (!Scene.Game.SetVertexBuffers(dc))
             {
                 return;
             }

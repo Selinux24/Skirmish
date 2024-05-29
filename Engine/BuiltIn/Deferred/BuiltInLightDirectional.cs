@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInLightDirectional() : base()
+        public BuiltInLightDirectional(Game game) : base(game)
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
             pixelShader = SetPixelShader<DeferredLightDirectionalPs>(false);

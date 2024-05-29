@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine;
     using Engine.BuiltIn;
     using Engine.BuiltIn.Fonts;
     using Engine.Common;
@@ -430,8 +431,6 @@ namespace Engine.UI
 
             WriteBuffers(dc);
 
-            var bufferManager = BufferManager;
-
             var state = new BuiltInFontState
             {
                 Alpha = Alpha * AlphaMultplier,
@@ -463,7 +462,7 @@ namespace Engine.UI
                     Topology = Topology.TriangleList,
                     VertexBuffer = vertexBuffer,
                 };
-                drawn = fontDrawer.Draw(context.DeviceContext, bufferManager, shOptions);
+                drawn = fontDrawer.Draw(context.DeviceContext, shOptions);
             }
 
             fontDrawer.UpdateText(dc, Manipulator.LocalTransform);
@@ -476,7 +475,7 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            return fontDrawer.Draw(dc, bufferManager, opOptions) || drawn;
+            return fontDrawer.Draw(dc, opOptions) || drawn;
         }
         /// <summary>
         /// Writes text data into buffers
@@ -484,8 +483,8 @@ namespace Engine.UI
         /// <param name="dc">Device context</param>
         private void WriteBuffers(IEngineDeviceContext dc)
         {
-            bool vertsWrited = BufferManager.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount).ToArray());
-            bool idxWrited = BufferManager.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount).ToArray());
+            bool vertsWrited = Game.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount).ToArray());
+            bool idxWrited = Game.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount).ToArray());
             if (!vertsWrited || !idxWrited)
             {
                 return;

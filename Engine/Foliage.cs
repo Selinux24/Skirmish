@@ -202,7 +202,7 @@ namespace Engine
 
             for (int i = 0; i < MaxFoliageBuffers; i++)
             {
-                foliageBuffers.Add(new(BufferManager, Name));
+                foliageBuffers.Add(new(Game, Name));
             }
 
             foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();

@@ -52,7 +52,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInSkymap() : base()
+        public BuiltInSkymap(Game game) : base(game)
         {
             SetVertexShader<SkymapVs>();
             SetPixelShader<SkymapPs>();

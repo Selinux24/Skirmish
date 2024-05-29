@@ -207,7 +207,7 @@ namespace Engine
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 
-            return mapGrid.DrawShadows(context, BufferManager, shadowDrawer);
+            return mapGrid.DrawShadows(context, shadowDrawer);
         }
         /// <inheritdoc/>
         public override bool Draw(DrawContext context)
@@ -234,7 +234,7 @@ namespace Engine
                 return false;
             }
 
-            return mapGrid.Draw(context, BufferManager, terrainDrawer);
+            return mapGrid.Draw(context, terrainDrawer);
         }
         /// <summary>
         /// Gets the terrain drawer, based on the drawing context

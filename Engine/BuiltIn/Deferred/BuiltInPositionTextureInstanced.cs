@@ -25,7 +25,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionTextureInstanced() : base()
+        public BuiltInPositionTextureInstanced(Game game) : base(game)
         {
             SetVertexShader<PositionTextureVsI>();
             SetPixelShader<PositionTexturePs>();

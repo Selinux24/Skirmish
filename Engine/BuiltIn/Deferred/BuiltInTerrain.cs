@@ -25,7 +25,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInTerrain() : base()
+        public BuiltInTerrain(Game game) : base(game)
         {
             SetVertexShader<TerrainVs>();
             SetPixelShader<TerrainPs>();

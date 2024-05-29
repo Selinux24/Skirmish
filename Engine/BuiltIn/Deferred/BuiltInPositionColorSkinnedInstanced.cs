@@ -17,7 +17,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionColorSkinnedInstanced() : base()
+        public BuiltInPositionColorSkinnedInstanced(Game game) : base(game)
         {
             SetVertexShader<PositionColorSkinnedVsI>();
             SetPixelShader<PositionColorPs>();

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -48,7 +49,8 @@ namespace Engine
         /// <param name="item">Object</param>
         private void SetCullValue(SceneCullData value, int index, ICullable item, bool force)
         {
-            var values = Objects.AddOrUpdate(item, [], (k, v) => v);
+            // Copy local list
+            var values = Objects.AddOrUpdate(item, [], (k, v) => v).ToList();
 
             int count = values.Count;
             if (count <= index)

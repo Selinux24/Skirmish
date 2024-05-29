@@ -131,7 +131,7 @@ namespace Engine.UI
                 Channel = Channel,
             });
 
-            bool drawn = spriteDrawer.Draw(dc, BufferManager, new DrawOptions
+            bool drawn = spriteDrawer.Draw(dc, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,

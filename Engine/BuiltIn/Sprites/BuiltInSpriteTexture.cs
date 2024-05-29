@@ -16,7 +16,7 @@ namespace Engine.BuiltIn.Sprites
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInSpriteTexture() : base()
+        public BuiltInSpriteTexture(Game game) : base(game)
         {
             SetVertexShader<SpriteTextureVs>();
             SetPixelShader<SpriteTexturePs>();

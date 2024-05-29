@@ -61,13 +61,11 @@ namespace Engine
         /// <inheritdoc/>
         public void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect, BuiltInPostProcessState state)
         {
-            var bufferManager = game.BufferManager;
-
             builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
             if (state != null) builtInPostProcess.UpdatePass(dc, state);
             builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
 
-            builtInPostProcess.Draw(dc, bufferManager, new DrawOptions
+            builtInPostProcess.Draw(dc, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
@@ -77,12 +75,10 @@ namespace Engine
         /// <inheritdoc/>
         public void Combine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
-            var bufferManager = game.BufferManager;
-
             builtInCombine ??= BuiltInShaders.GetDrawer<BuiltInCombine>(false);
             builtInCombine.Update(texture1, texture2);
 
-            builtInCombine.Draw(dc, bufferManager, new DrawOptions
+            builtInCombine.Draw(dc, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,

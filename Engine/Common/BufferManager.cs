@@ -5,12 +5,15 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using SharpDX.DXGI;
-
     /// <summary>
     /// Buffer manager
     /// </summary>
-    public class BufferManager : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    /// <param name="reservedSlots">Reserved slots</param>
+    public partial class BufferManager(Game game, int reservedSlots = 1) : IDisposable
     {
         private const string NoIdString = "no-id";
         private const string DynamicString = "dynamic";
@@ -32,67 +35,27 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Creates an index buffer
-        /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="name">Buffer name</param>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        /// <param name="indices">Indices</param>
-        /// <returns>Returns new buffer</returns>
-        private static EngineBuffer CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
-        {
-            if (indices?.Any() != true)
-            {
-                return null;
-            }
-
-            return graphics.CreateIndexBuffer(name, indices, dynamic);
-        }
-        /// <summary>
-        /// Creates a vertex buffer from IVertexData
-        /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        /// <param name="name">Buffer name</param>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        /// <param name="vertices">Vertices</param>
-        /// <returns>Returns new buffer</returns>
-        private static EngineBuffer CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
-        {
-            if (vertices?.Any() != true)
-            {
-                return null;
-            }
-
-            return graphics.CreateVertexBuffer(name, vertices, dynamic);
-        }
-        /// <summary>
-        /// Creates an instancing buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="name">Buffer name</param>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        /// <param name="instancingData">Instancing data</param>
-        /// <returns>Returns the new buffer</returns>
-        private static EngineBuffer CreateInstancingBuffer<T>(Graphics graphics, string name, bool dynamic, IEnumerable<T> instancingData)
-            where T : struct, IInstacingData
-        {
-            if (instancingData?.Any() != true)
-            {
-                return null;
-            }
-
-            return graphics.CreateVertexBuffer(name, instancingData, dynamic);
-        }
-
-        /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game = null;
+        private readonly Game game = game;
         /// <summary>
         /// Reserved slots
         /// </summary>
-        private readonly int reservedSlots = 0;
+        private readonly int reservedSlots = reservedSlots;
+
+        /// <summary>
+        /// Index buffer descriptors
+        /// </summary>
+        private readonly List<BufferManagerIndices> indexBufferDescriptors = [];
+        /// <summary>
+        /// Index buffer
+        /// </summary>
+        private readonly List<EngineBuffer> indexBuffers = [];
+
+        /// <summary>
+        /// Vertex buffer descriptors
+        /// </summary>
+        private readonly List<BufferManagerVertices> vertexBufferDescriptors = [];
         /// <summary>
         /// Vertex buffers
         /// </summary>
@@ -101,26 +64,17 @@ namespace Engine.Common
         /// Vertex buffer bindings
         /// </summary>
         private readonly List<EngineVertexBufferBinding> vertexBufferBindings = [];
-        /// <summary>
-        /// Index buffer
-        /// </summary>
-        private readonly List<EngineBuffer> indexBuffers = [];
-        /// <summary>
-        /// Vertex buffer descriptors
-        /// </summary>
-        private readonly List<BufferManagerVertices> vertexBufferDescriptors = [];
+
         /// <summary>
         /// Instancing buffer descriptors
         /// </summary>
         private readonly List<BufferManagerInstances<VertexInstancingData>> instancingBufferDescriptors = [];
-        /// <summary>
-        /// Index buffer descriptors
-        /// </summary>
-        private readonly List<BufferManagerIndices> indexBufferDescriptors = [];
+
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
         private readonly ConcurrentDictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = [];
+
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -161,21 +115,6 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="reservedSlots">Reserved slots</param>
-        public BufferManager(Game game, int reservedSlots = 1)
-        {
-            this.game = game;
-            this.reservedSlots = reservedSlots;
-
-            for (int i = 0; i < reservedSlots; i++)
-            {
-                vertexBufferDescriptors.Add(new BufferManagerVertices(VertexTypes.Unknown, true));
-            }
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -277,6 +216,11 @@ namespace Engine.Common
 
             for (int i = 0; i < reservedSlots; i++)
             {
+                vertexBufferDescriptors.Add(new(VertexTypes.Unknown, true));
+            }
+
+            for (int i = 0; i < reservedSlots; i++)
+            {
                 var descriptor = vertexBufferDescriptors[i];
 
                 int bufferIndex = vertexBuffers.Count;
@@ -328,6 +272,60 @@ namespace Engine.Common
 
             //Replaces the bag
             requestedDescriptors = new(requestedDescriptors.Where(r => r?.Processed != ProcessedStages.Processed));
+        }
+
+        /// <summary>
+        /// Creates an index buffer
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <param name="indices">Indices</param>
+        /// <returns>Returns new buffer</returns>
+        private static EngineBuffer CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
+        {
+            if (indices?.Any() != true)
+            {
+                return null;
+            }
+
+            return graphics.CreateIndexBuffer(name, indices, dynamic);
+        }
+        /// <summary>
+        /// Creates a vertex buffer from IVertexData
+        /// </summary>
+        /// <param name="graphics">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Returns new buffer</returns>
+        private static EngineBuffer CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
+        {
+            if (vertices?.Any() != true)
+            {
+                return null;
+            }
+
+            return graphics.CreateVertexBuffer(name, vertices, dynamic);
+        }
+        /// <summary>
+        /// Creates an instancing buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <param name="instancingData">Instancing data</param>
+        /// <returns>Returns the new buffer</returns>
+        private static EngineBuffer CreateInstancingBuffer<T>(Graphics graphics, string name, bool dynamic, IEnumerable<T> instancingData)
+            where T : struct, IInstacingData
+        {
+            if (instancingData?.Any() != true)
+            {
+                return null;
+            }
+
+            return graphics.CreateVertexBuffer(name, instancingData, dynamic);
         }
 
         /// <summary>
@@ -438,13 +436,11 @@ namespace Engine.Common
                     Logger.WriteTrace(this, $"Loading Group {grId} => Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
-                descriptor.ClearInstancingInputs();
-
                 if (descriptor.InstancingDescriptor != null)
                 {
                     int instancingBufferIndex = instancingBufferDescriptors[descriptor.InstancingDescriptor.BufferDescriptionIndex].BufferIndex;
 
-                    descriptor.AddInstancingInputs(instancingBufferIndex);
+                    descriptor.SetInstancingInputs(instancingBufferIndex);
                 }
 
                 //Updates the allocated buffer size
@@ -501,6 +497,203 @@ namespace Engine.Common
                 //Updates the allocated buffer size
                 descriptor.Allocate();
             }
+        }
+
+        /// <summary>
+        /// Copies the buffer manager to another instance
+        /// </summary>
+        public BufferManager Copy()
+        {
+            BufferManager bm = new(game, reservedSlots)
+            {
+                allocating = false,
+                Initilialized = false,
+            };
+
+            var tmpVBufferList = new EngineBuffer[vertexBuffers.Count];
+            var tmpVBufferBindingsList = new EngineVertexBufferBinding[vertexBufferBindings.Count];
+            var tmpIBufferList = new EngineBuffer[indexBuffers.Count];
+
+            for (int i = 0; i < instancingBufferDescriptors.Count; i++)
+            {
+                var newDescriptor = (BufferManagerInstances<VertexInstancingData>)instancingBufferDescriptors[i].Copy();
+
+                bm.instancingBufferDescriptors.Add(newDescriptor);
+
+                //Create the buffer and binding
+                var data = new VertexInstancingData[newDescriptor.Instances];
+                string name = $"InstancingBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                var buffer = CreateInstancingBuffer(game.Graphics, name, newDescriptor.Dynamic, data);
+
+                tmpVBufferList[newDescriptor.BufferIndex] = buffer;
+                tmpVBufferBindingsList[newDescriptor.BufferBindingIndex] = new(buffer, newDescriptor.GetStride(), 0);
+
+                newDescriptor.Allocate();
+            }
+
+            for (int i = 0; i < vertexBufferDescriptors.Count; i++)
+            {
+                var newDescriptor = (BufferManagerVertices)vertexBufferDescriptors[i].Copy();
+
+                bm.vertexBufferDescriptors.Add(newDescriptor);
+
+                //Create the buffer and binding
+                string name;
+                if (i < reservedSlots)
+                {
+                    name = $"Reserved buffer.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                }
+                else
+                {
+                    name = $"VertexBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                }
+                var buffer = CreateVertexBuffer(game.Graphics, name, newDescriptor.Dynamic, newDescriptor.Data);
+
+                tmpVBufferList[newDescriptor.BufferIndex] = buffer;
+                tmpVBufferBindingsList[newDescriptor.BufferBindingIndex] = new(buffer, newDescriptor.GetStride(), 0);
+
+                newDescriptor.Allocate();
+            }
+
+            for (int i = 0; i < indexBufferDescriptors.Count; i++)
+            {
+                var newDescriptor = (BufferManagerIndices)indexBufferDescriptors[i].Copy();
+
+                bm.indexBufferDescriptors.Add(newDescriptor);
+
+                //Recreate the buffer
+                string name = $"IndexBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                var buffer = CreateIndexBuffer(game.Graphics, name, newDescriptor.Dynamic, newDescriptor.Data);
+
+                tmpIBufferList[newDescriptor.BufferIndex] = buffer;
+
+                newDescriptor.Allocate();
+            }
+
+            bm.vertexBuffers.AddRange(tmpVBufferList);
+            bm.vertexBufferBindings.AddRange(tmpVBufferBindingsList);
+            bm.indexBuffers.AddRange(tmpIBufferList);
+
+            bm.Initilialized = true;
+
+            return bm;
+        }
+
+        /// <summary>
+        /// Gets the vertex buffer binding array
+        /// </summary>
+        public EngineVertexBufferBinding[] GetVertexBufferBindings()
+        {
+            return [.. vertexBufferBindings];
+        }
+
+        /// <summary>
+        /// Gets whether the buffer manager has dirty descriptors
+        /// </summary>
+        public bool HasVertexBufferDescriptorsDirty()
+        {
+            return vertexBufferDescriptors.Exists(d => d.Dirty);
+        }
+        /// <summary>
+        /// Gets the vertex buffer descriptor by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public BufferManagerVertices GetVertexBufferDescriptor(int index)
+        {
+            return vertexBufferDescriptors[index];
+        }
+        /// <summary>
+        /// Gets the vertex buffer by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public EngineBuffer GetVertexBuffer(int index)
+        {
+            return vertexBuffers[index];
+        }
+        /// <summary>
+        /// Gets the vertex buffer list
+        /// </summary>
+        public EngineBuffer[] GetVertexBuffers()
+        {
+            return [.. vertexBuffers];
+        }
+
+        /// <summary>
+        /// Gets the index buffer descriptor by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public BufferManagerIndices GetIndexBufferDescriptor(int index)
+        {
+            return indexBufferDescriptors[index];
+        }
+        /// <summary>
+        /// Gets the index buffer by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        public EngineBuffer GetIndexBuffer(int index)
+        {
+            return indexBuffers[index];
+        }
+        /// <summary>
+        /// Gets the index buffer list
+        /// </summary>
+        public EngineBuffer[] GetIndexBuffers()
+        {
+            return [.. indexBuffers];
+        }
+
+        /// <summary>
+        /// Gets instancing buffer descriptors
+        /// </summary>
+        public IEngineBufferDescriptor[] GetInstancingBufferDescriptors()
+        {
+            return instancingBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray();
+        }
+        /// <summary>
+        /// Gets vertex buffer descriptors
+        /// </summary>
+        public IEngineBufferDescriptor[] GetVertexBufferDescriptors()
+        {
+            return vertexBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray();
+        }
+        /// <summary>
+        /// Gets index buffer descriptors
+        /// </summary>
+        public IEngineBufferDescriptor[] GetIndexBufferDescriptors()
+        {
+            return indexBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray();
+        }
+
+        /// <summary>
+        /// Gets or creates an input layout
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="vertexShader">Vertex shader</param>
+        /// <param name="vertexBufferDescriptor">Buffer description</param>
+        /// <param name="instanced">Instanced flag</param>
+        /// <param name="layout">Returns the input layout</param>
+        public bool GetOrCreateInputLayout(string name, IEngineShader vertexShader, BufferManagerVertices vertexBufferDescriptor, bool instanced, out EngineInputLayout layout)
+        {
+            var key = new InputAssemblerKey
+            {
+                Shader = vertexShader,
+                Vertices = vertexBufferDescriptor,
+            };
+
+            if (!vertexShadersInputLayouts.ContainsKey(key))
+            {
+                // The vertex shader defines the input vertex data type
+                var signature = vertexShader.GetShaderBytecode();
+                var inputLayout = game.Graphics.CreateInputLayout(name, signature, vertexBufferDescriptor, instanced);
+
+                layout = vertexShadersInputLayouts.AddOrUpdate(key, inputLayout, (k, v) => v);
+            }
+            else if (!vertexShadersInputLayouts.TryGetValue(key, out layout))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -680,6 +873,7 @@ namespace Engine.Common
         {
             return instancingBufferDescriptors[index];
         }
+
         /// <summary>
         /// Adds a new vertex buffer description into the buffer manager
         /// </summary>
@@ -714,6 +908,7 @@ namespace Engine.Common
         {
             return vertexBufferDescriptors[index];
         }
+
         /// <summary>
         /// Adds a new index buffer description into the buffer manager
         /// </summary>
@@ -744,259 +939,6 @@ namespace Engine.Common
         public BufferManagerIndices GetIndexBufferDescription(int index)
         {
             return indexBufferDescriptors[index];
-        }
-
-        /// <summary>
-        /// Sets vertex buffers to device context
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        public bool SetVertexBuffers(IEngineDeviceContext dc)
-        {
-            if (dc == null)
-            {
-                return false;
-            }
-
-            if (!Initilialized)
-            {
-                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with no initialized manager");
-                return false;
-            }
-
-            if (vertexBufferDescriptors.Exists(d => d.Dirty))
-            {
-                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with dirty descriptors");
-                return false;
-            }
-
-            dc.IASetVertexBuffers(0, [.. vertexBufferBindings]);
-
-            return true;
-        }
-        /// <summary>
-        /// Sets input layout to device context
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="vertexShader">Vertex shader</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="topology">Topology</param>
-        /// <param name="instanced">Use instancig data</param>
-        public bool SetInputAssembler(IEngineDeviceContext dc, IEngineShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
-        {
-            if (dc == null)
-            {
-                return false;
-            }
-
-            if (descriptor == null)
-            {
-                return true;
-            }
-
-            if (!descriptor.Ready)
-            {
-                return false;
-            }
-
-            if (!Initilialized)
-            {
-                Logger.WriteWarning(this, "Attempt to set technique to Input Assembler with no initialized manager");
-                return false;
-            }
-
-            var vertexBufferDescriptor = vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
-            if (vertexBufferDescriptor.Dirty)
-            {
-                Logger.WriteWarning(this, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
-                return false;
-            }
-
-            var key = new InputAssemblerKey
-            {
-                Shader = vertexShader,
-                Vertices = vertexBufferDescriptor,
-            };
-
-            EngineInputLayout layout;
-            if (!vertexShadersInputLayouts.ContainsKey(key))
-            {
-                // The vertex shader defines the input vertex data type
-                var signature = vertexShader.GetShaderBytecode();
-                var inputLayout = game.Graphics.CreateInputLayout(descriptor.Id, signature, vertexBufferDescriptor, instanced);
-
-                layout = vertexShadersInputLayouts.AddOrUpdate(key, inputLayout, (k, v) => v);
-            }
-            else if (!vertexShadersInputLayouts.TryGetValue(key, out layout))
-            {
-                return false;
-            }
-
-            dc.IAInputLayout = layout;
-            dc.IAPrimitiveTopology = topology;
-            return true;
-        }
-        /// <summary>
-        /// Sets index buffers to device context
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        public bool SetIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor)
-        {
-            if (dc == null)
-            {
-                return false;
-            }
-
-            if (descriptor == null)
-            {
-                dc.IASetIndexBuffer(null, Format.R32_UInt, 0);
-                return true;
-            }
-
-            if (!descriptor.Ready)
-            {
-                return false;
-            }
-
-            if (!Initilialized)
-            {
-                Logger.WriteWarning(this, "Attempt to set index buffers to Input Assembler with no initialized manager");
-                return false;
-            }
-
-            var indexBufferDescriptor = indexBufferDescriptors[descriptor.BufferDescriptionIndex];
-            if (indexBufferDescriptor.Dirty)
-            {
-                Logger.WriteWarning(this, $"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
-                return false;
-            }
-
-            dc.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Writes instancing data
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Instancig data</param>
-        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        public bool WriteInstancingData<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
-            where T : struct
-        {
-            var descriptors = instancingBufferDescriptors.OfType<IEngineBufferDescriptor>();
-
-            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. vertexBuffers], discard);
-        }
-        /// <summary>
-        /// Writes vertex data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Data to write</param>
-        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        public bool WriteVertexBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
-            where T : struct
-        {
-            var descriptors = vertexBufferDescriptors.OfType<IEngineBufferDescriptor>();
-
-            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. vertexBuffers], discard);
-        }
-        /// <summary>
-        /// Writes index data into buffer
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Data to write</param>
-        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        public bool WriteIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor, uint[] data, bool discard = true)
-        {
-            var descriptors = indexBufferDescriptors.OfType<IEngineBufferDescriptor>();
-
-            return WriteDiscardBuffer(dc, descriptor, data, [.. descriptors], [.. indexBuffers], discard);
-        }
-
-        /// <summary>
-        /// Writes data in buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Data to write</param>
-        /// <param name="bufferDescriptors">Buffer descriptors</param>
-        /// <param name="buffers">Buffer list</param>
-        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        private bool WriteDiscardBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
-            where T : struct
-        {
-            if (!ValidateWriteBuffer(dc, descriptor, data, bufferDescriptors, buffers, out var buffer))
-            {
-                return false;
-            }
-
-            if (discard)
-            {
-                return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
-            }
-
-            if (!dc.IsImmediateContext)
-            {
-                Logger.WriteWarning(this, $"Invalid WriteNoOverwriteBuffer action into deferred dc: {dc}. WriteDiscardBuffer action performed instead.");
-
-                return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
-            }
-
-            return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
-        }
-        /// <summary>
-        /// Validates write data parameters
-        /// </summary>
-        /// <typeparam name="T">Type of data</typeparam>
-        /// <param name="dc">Device context</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Data to write</param>
-        /// <param name="bufferDescriptors">Buffer descriptors</param>
-        /// <param name="buffers">Buffer list</param>
-        /// <param name="buffer">Returns the buffer to update</param>
-        private bool ValidateWriteBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
-            where T : struct
-        {
-            buffer = null;
-
-            if (dc == null)
-            {
-                return false;
-            }
-
-            if (descriptor?.Ready != true)
-            {
-                return false;
-            }
-
-            if (data.Length <= 0)
-            {
-                return true;
-            }
-
-            if (!Initilialized)
-            {
-                Logger.WriteWarning(this, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
-                return false;
-            }
-
-            var bufferDescriptor = bufferDescriptors[descriptor.BufferDescriptionIndex];
-            if (bufferDescriptor.Dirty)
-            {
-                Logger.WriteWarning(this, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
-                return false;
-            }
-
-            buffer = buffers[bufferDescriptor.BufferIndex];
-
-            return true;
         }
     }
 }

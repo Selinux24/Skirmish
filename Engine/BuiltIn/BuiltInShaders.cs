@@ -13,6 +13,10 @@ namespace Engine.BuiltIn
     internal static partial class BuiltInShaders
     {
         /// <summary>
+        /// Game instance
+        /// </summary>
+        private static Game game = null;
+        /// <summary>
         /// Graphics
         /// </summary>
         private static Graphics graphics = null;
@@ -102,10 +106,11 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Initializes pool
         /// </summary>
-        /// <param name="graphics">Device</param>
-        public static void Initialize(Graphics graphics)
+        /// <param name="game">Game instance</param>
+        public static void Initialize(Game game)
         {
-            BuiltInShaders.graphics = graphics;
+            BuiltInShaders.game = game;
+            BuiltInShaders.graphics = game.Graphics;
         }
         /// <summary>
         /// Dispose of used resources
@@ -423,7 +428,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return (T)Activator.CreateInstance(typeof(T), [game]);
             }
 
             T dr = drawers.OfType<T>().FirstOrDefault();
@@ -432,7 +437,7 @@ namespace Engine.BuiltIn
                 return dr;
             }
 
-            dr = (T)Activator.CreateInstance(typeof(T));
+            dr = (T)Activator.CreateInstance(typeof(T), [game]);
             drawers.Add(dr);
             return dr;
         }

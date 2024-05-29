@@ -29,7 +29,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        public BuiltInPositionTexture() : base()
+        public BuiltInPositionTexture(Game game) : base(game)
         {
             SetVertexShader<PositionTextureVs>();
             SetPixelShader<PositionTexturePs>();

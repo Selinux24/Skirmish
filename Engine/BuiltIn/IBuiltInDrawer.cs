@@ -31,18 +31,16 @@ namespace Engine.BuiltIn
         /// Draws the specified meshes
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="meshes">Mesh list</param>
         /// <param name="instances">Number of instances</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0);
+        bool Draw(IEngineDeviceContext dc, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="options">Draw options</param>
-        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, DrawOptions options);
+        bool Draw(IEngineDeviceContext dc, DrawOptions options);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>

@@ -285,7 +285,7 @@ namespace Engine
             drawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
             drawer.UpdateMaterial(dc, BuiltInDrawerMaterialState.Default());
 
-            bool drawn = drawer.Draw(dc, BufferManager, new DrawOptions
+            bool drawn = drawer.Draw(dc, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
                 VertexDrawCount = drawCount,
@@ -302,7 +302,7 @@ namespace Engine
         {
             UpdateBufferData();
 
-            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, [.. bufferData]))
+            if (!Game.WriteVertexBuffer(dc, vertexBuffer, [.. bufferData]))
             {
                 return;
             }
