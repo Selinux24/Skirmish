@@ -216,29 +216,23 @@ namespace Engine.Common
 
             for (int i = 0; i < reservedSlots; i++)
             {
-                vertexBufferDescriptors.Add(new(VertexTypes.Unknown, true));
-            }
-
-            for (int i = 0; i < reservedSlots; i++)
-            {
-                var descriptor = vertexBufferDescriptors[i];
-
-                int bufferIndex = vertexBuffers.Count;
-                int bindingIndex = vertexBufferBindings.Count;
-
-                string name = $"Reserved buffer.{bufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                BufferManagerVertices descriptor = new(VertexTypes.Unknown, true)
+                {
+                    BufferIndex = vertexBuffers.Count,
+                    BufferBindingIndex = vertexBufferBindings.Count
+                };
 
                 //Empty buffer
                 vertexBuffers.Add(null);
                 vertexBufferBindings.Add(new());
 
                 descriptor.ClearInputs();
-
-                descriptor.BufferIndex = bufferIndex;
-                descriptor.BufferBindingIndex = bindingIndex;
                 descriptor.Allocate();
 
+                string name = GetVertexBufferName(descriptor, true);
                 Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
+
+                vertexBufferDescriptors.Add(descriptor);
             }
 
             Logger.WriteTrace(this, $"Loading Group {grId} => Reserved buffer descriptors created");
@@ -355,7 +349,7 @@ namespace Engine.Common
                     var oldBufferToDispose = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
-                    string name = $"InstancingBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetInstancingBufferName(descriptor);
                     var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
@@ -371,7 +365,7 @@ namespace Engine.Common
                     descriptor.BufferBindingIndex = vertexBufferBindings.Count;
 
                     //Create the buffer and binding
-                    string name = $"InstancingBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetInstancingBufferName(descriptor);
                     var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
 
                     vertexBuffers.Add(buffer);
@@ -409,7 +403,7 @@ namespace Engine.Common
                     var oldBufferToDispose = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
-                    string name = $"VertexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetVertexBufferName(descriptor, false);
                     var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
@@ -425,7 +419,7 @@ namespace Engine.Common
                     descriptor.BufferBindingIndex = vertexBufferBindings.Count;
 
                     //Create the buffer and binding
-                    string name = $"VertexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetVertexBufferName(descriptor, false);
                     var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     vertexBuffers.Add(buffer);
@@ -472,7 +466,7 @@ namespace Engine.Common
                     var oldBufferToDispose = indexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer
-                    string name = $"IndexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetIndexBufferName(descriptor);
                     var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     indexBuffers[descriptor.BufferIndex] = buffer;
@@ -486,7 +480,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = indexBuffers.Count;
 
                     //Recreate the buffer
-                    string name = $"IndexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+                    string name = GetIndexBufferName(descriptor);
                     var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     indexBuffers.Add(buffer);
@@ -497,6 +491,39 @@ namespace Engine.Common
                 //Updates the allocated buffer size
                 descriptor.Allocate();
             }
+        }
+
+        /// <summary>
+        /// Gets a buffer name for the specified descriptor
+        /// </summary>
+        /// <param name="descriptor">Descriptor</param>
+        private static string GetInstancingBufferName(BufferManagerInstances<VertexInstancingData> descriptor)
+        {
+            return $"InstancingBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+        }
+        /// <summary>
+        /// Gets a buffer name for the specified descriptor
+        /// </summary>
+        /// <param name="descriptor">Descriptor</param>
+        /// <param name="reserved">Is reserved</param>
+        private static string GetVertexBufferName(BufferManagerVertices descriptor, bool reserved)
+        {
+            if (reserved)
+            {
+                return $"Reserved buffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+            }
+            else
+            {
+                return $"VertexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
+            }
+        }
+        /// <summary>
+        /// Gets a buffer name for the specified descriptor
+        /// </summary>
+        /// <param name="descriptor">Descriptor</param>
+        private static string GetIndexBufferName(BufferManagerIndices descriptor)
+        {
+            return $"IndexBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
         }
 
         /// <summary>
@@ -522,7 +549,7 @@ namespace Engine.Common
 
                 //Create the buffer and binding
                 var data = new VertexInstancingData[newDescriptor.Instances];
-                string name = $"InstancingBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                string name = GetInstancingBufferName(newDescriptor);
                 var buffer = CreateInstancingBuffer(game.Graphics, name, newDescriptor.Dynamic, data);
 
                 tmpVBufferList[newDescriptor.BufferIndex] = buffer;
@@ -538,15 +565,7 @@ namespace Engine.Common
                 bm.vertexBufferDescriptors.Add(newDescriptor);
 
                 //Create the buffer and binding
-                string name;
-                if (i < reservedSlots)
-                {
-                    name = $"Reserved buffer.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
-                }
-                else
-                {
-                    name = $"VertexBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
-                }
+                string name = GetVertexBufferName(newDescriptor, i < reservedSlots);
                 var buffer = CreateVertexBuffer(game.Graphics, name, newDescriptor.Dynamic, newDescriptor.Data);
 
                 tmpVBufferList[newDescriptor.BufferIndex] = buffer;
@@ -562,7 +581,7 @@ namespace Engine.Common
                 bm.indexBufferDescriptors.Add(newDescriptor);
 
                 //Recreate the buffer
-                string name = $"IndexBuffer_v{newDescriptor.Allocations}.{newDescriptor.BufferIndex}.{(newDescriptor.Dynamic ? DynamicString : StaticString)}";
+                string name = GetIndexBufferName(newDescriptor);
                 var buffer = CreateIndexBuffer(game.Graphics, name, newDescriptor.Dynamic, newDescriptor.Data);
 
                 tmpIBufferList[newDescriptor.BufferIndex] = buffer;

@@ -428,7 +428,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), [game]);
+                return (T)Activator.CreateInstance(typeof(T), game);
             }
 
             T dr = drawers.OfType<T>().FirstOrDefault();
@@ -437,7 +437,7 @@ namespace Engine.BuiltIn
                 return dr;
             }
 
-            dr = (T)Activator.CreateInstance(typeof(T), [game]);
+            dr = (T)Activator.CreateInstance(typeof(T), game);
             drawers.Add(dr);
             return dr;
         }
