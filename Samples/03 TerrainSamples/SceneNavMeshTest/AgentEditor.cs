@@ -12,12 +12,7 @@ namespace TerrainSamples.SceneNavMeshTest
     {
         private const string ObjectName = nameof(AgentEditor);
 
-        private readonly Scene scene = scene;
         private Player agent;
-
-        private UIPanel mainPanel;
-
-        private UITextArea title;
 
         private EditorSlider height;
         private EditorSlider radius;
@@ -35,7 +30,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 height.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -47,7 +42,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 radius.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -59,7 +54,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 maxClimb.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -71,7 +66,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 maxSlope.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -83,7 +78,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 velocity.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -95,7 +90,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 velocitySlow.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
 
@@ -106,20 +101,14 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="font">Font</param>
         public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
         {
-            mainPanel = await InitializePanel($"{ObjectName}_MainPanel", "MainPanel");
+            height = await InitializePropertySlider(ObjectName, "Height", font, 0.1f, 5f, 0.1f, (index, value) => { AgentHeight = value; });
+            radius = await InitializePropertySlider(ObjectName, "Radius", font, 0f, 5f, 0.1f, (index, value) => { AgentRadius = value; });
+            maxClimb = await InitializePropertySlider(ObjectName, "Max Climb", font, 0.1f, 5f, 0.1f, (index, value) => { AgentMaxClimb = value; });
+            maxSlope = await InitializePropertySlider(ObjectName, "Max Slope", font, 0f, 90f, 1f, (index, value) => { AgentMaxSlopes = value; });
+            velocity = await InitializePropertySlider(ObjectName, "Velocity", font, 1f, 10f, 1f, (index, value) => { AgentVelocity = value; });
+            velocitySlow = await InitializePropertySlider(ObjectName, "Velocity Slow", font, 1f, 10f, 1f, (index, value) => { AgentVelocitySlow = value; });
 
-            title = await InitializeText($"{ObjectName}_Agent.Title", "Agent.Title", fontTitle, "Agent Parameters");
-
-            height = await InitializeProperty(ObjectName, "Height", font, 0.1f, 5f, 0.1f, (index, value) => { AgentHeight = value; });
-            radius = await InitializeProperty(ObjectName, "Radius", font, 0f, 5f, 0.1f, (index, value) => { AgentRadius = value; });
-            maxClimb = await InitializeProperty(ObjectName, "Max Climb", font, 0.1f, 5f, 0.1f, (index, value) => { AgentMaxClimb = value; });
-            maxSlope = await InitializeProperty(ObjectName, "Max Slope", font, 0f, 90f, 1f, (index, value) => { AgentMaxSlopes = value; });
-            velocity = await InitializeProperty(ObjectName, "Velocity", font, 1f, 10f, 1f, (index, value) => { AgentVelocity = value; });
-            velocitySlow = await InitializeProperty(ObjectName, "Velocity Slow", font, 1f, 10f, 1f, (index, value) => { AgentVelocitySlow = value; });
-
-            initialized = true;
-
-            UpdateLayout();
+            await base.Initialize(fontTitle);
         }
 
         /// <summary>
@@ -169,29 +158,14 @@ namespace TerrainSamples.SceneNavMeshTest
         }
 
         /// <inheritdoc/>
-        public override void UpdateLayout()
+        protected override void UpdateControlsLayout(float left, float width, ref float top)
         {
-            if (!initialized)
-            {
-                return;
-            }
-
-            float top = Position.Y + VerticalMarging;
-            float left = Position.X + HorizontalMarging;
-            float width = Width - (HorizontalMarging * 2);
-
-            SetGroupPosition(left, width, ref top, title, null, null);
             SetGroupPosition(left, width, ref top, height);
             SetGroupPosition(left, width, ref top, radius);
             SetGroupPosition(left, width, ref top, maxClimb);
             SetGroupPosition(left, width, ref top, maxSlope);
             SetGroupPosition(left, width, ref top, velocity);
             SetGroupPosition(left, width, ref top, velocitySlow);
-
-            mainPanel.SetPosition(Position);
-            mainPanel.Width = Width;
-            mainPanel.Height = top + VerticalMarging - Position.Y;
-            mainPanel.Visible = Visible;
         }
     }
 }

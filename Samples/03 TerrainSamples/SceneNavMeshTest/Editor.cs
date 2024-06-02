@@ -13,9 +13,13 @@ namespace TerrainSamples.SceneNavMeshTest
     abstract class Editor(Scene scene)
     {
         private readonly Scene scene = scene;
-        protected bool initialized = false;
-        protected bool isDirty = false;
+        protected bool IsDirty = false;
+
         private bool visible = false;
+        private bool initialized = false;
+
+        private UIPanel mainPanel;
+        private UITextArea title;
 
         /// <summary>
         /// Horizontal marging
@@ -61,8 +65,25 @@ namespace TerrainSamples.SceneNavMeshTest
         }
 
         /// <summary>
+        /// Initializes the editor
+        /// </summary>
+        /// <param name="font">Font</param>
+        public virtual async Task Initialize(TextDrawerDescription font)
+        {
+            string id = GetType().Name;
+
+            mainPanel = await InitializePanel($"{id}_MainPanel", "MainPanel");
+
+            title = await InitializeText($"{id}_Agent.Title", "Agent.Title", font, "Agent Parameters");
+
+            initialized = true;
+
+            UpdateLayout();
+        }
+        /// <summary>
         /// Initializes a panel
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         protected async Task<UIPanel> InitializePanel(string id, string name)
         {
@@ -70,31 +91,12 @@ namespace TerrainSamples.SceneNavMeshTest
             var desc = UIPanelDescription.Default(panelColor);
             desc.StartsVisible = false;
 
-            return await scene.AddComponentUI<UIPanel, UIPanelDescription>(id, name, desc);
-        }
-        /// <summary>
-        /// Initializes a property group
-        /// </summary>
-        /// <param name="objId">Object id</param>
-        /// <param name="id">Id</param>
-        /// <param name="font">Dont</param>
-        /// <param name="callback">Setter callback function</param>
-        protected async Task<EditorSlider> InitializeProperty(string objId, string id, TextDrawerDescription font, float min, float max, float step, Action<int, float> callback)
-        {
-            var caption = await InitializeText($"{objId}_Caption.{id}", "Caption.{id}", font, id);
-            var value = await InitializeText($"{objId}_Value.{id}", "Value.{id}", font);
-            var slider = await InitializeSlider($"{objId}.{id}", "{id}", min, max, step, callback);
-
-            return new()
-            {
-                Caption = caption,
-                Value = value,
-                Slider = slider
-            };
+            return await scene.AddComponentUI<UIPanel, UIPanelDescription>(id, name, desc, Scene.LayerUI);
         }
         /// <summary>
         /// Initializes a text area
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="font">Font</param>
         /// <param name="text">Text</param>
@@ -103,11 +105,12 @@ namespace TerrainSamples.SceneNavMeshTest
             var desc = UITextAreaDescription.Default(font, text);
             desc.StartsVisible = false;
 
-            return await scene.AddComponentUI<UITextArea, UITextAreaDescription>(id, name, desc);
+            return await scene.AddComponentUI<UITextArea, UITextAreaDescription>(id, name, desc, Scene.LayerUI + 1);
         }
         /// <summary>
         /// Initializes a slider
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
@@ -123,10 +126,65 @@ namespace TerrainSamples.SceneNavMeshTest
             desc.Step = step;
             desc.StartsVisible = false;
 
-            var slider = await scene.AddComponentUI<UISlider, UISliderDescription>(id, name, desc);
+            var slider = await scene.AddComponentUI<UISlider, UISliderDescription>(id, name, desc, Scene.LayerUI + 1);
             slider.OnValueChanged = callback;
 
             return slider;
+        }
+        /// <summary>
+        /// Initializes a checkbox
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="font">Font</param>
+        /// <param name="text">Caption text</param>
+        protected async Task<UICheckbox> InitializeCheckbox(string id, string name, TextDrawerDescription font, string text)
+        {
+            var desc = UICheckboxDescription.Default(font);
+            desc.Text = text;
+            desc.Height = 20;
+            desc.Width = 200;
+            desc.StartsVisible = false;
+
+            return await scene.AddComponentUI<UICheckbox, UICheckboxDescription>(id, name, desc, Scene.LayerUI + 1);
+        }
+        /// <summary>
+        /// Initializes a property group
+        /// </summary>
+        /// <param name="objId">Object id</param>
+        /// <param name="id">Id</param>
+        /// <param name="font">Font</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
+        /// <param name="step">Step value</param>
+        /// <param name="callback">Value callback</param>
+        protected async Task<EditorSlider> InitializePropertySlider(string objId, string id, TextDrawerDescription font, float min, float max, float step, Action<int, float> callback)
+        {
+            var caption = await InitializeText($"{objId}_Caption.{id}", $"Caption.{id}", font, id);
+            var value = await InitializeText($"{objId}_Value.{id}", $"Value.{id}", font);
+            var slider = await InitializeSlider($"{objId}.{id}", id, min, max, step, callback);
+
+            return new()
+            {
+                Caption = caption,
+                Value = value,
+                Slider = slider
+            };
+        }
+        /// <summary>
+        /// Initializes a property group
+        /// </summary>
+        /// <param name="objId">Object id</param>
+        /// <param name="id">Id</param>
+        /// <param name="font">Font</param>
+        protected async Task<EditorCheckbox> InitializePropertyCheckbox(string objId, string id, TextDrawerDescription font)
+        {
+            var checkbox = await InitializeCheckbox($"{objId}.{id}", id, font, id);
+
+            return new()
+            {
+                Checkbox = checkbox
+            };
         }
 
         /// <summary>
@@ -139,12 +197,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (isDirty)
+            if (IsDirty)
             {
                 UpdateTextValues();
                 UpdateLayout();
 
-                isDirty = false;
+                IsDirty = false;
             }
         }
         /// <summary>
@@ -155,8 +213,33 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Updates de editor layout
         /// </summary>
-        public abstract void UpdateLayout();
+        public void UpdateLayout()
+        {
+            if (!initialized)
+            {
+                return;
+            }
 
+            float top = Position.Y + VerticalMarging;
+            float left = Position.X + HorizontalMarging;
+            float width = Width - (HorizontalMarging * 2);
+
+            SetGroupPosition(left, width, ref top, title, null, null);
+
+            UpdateControlsLayout(left, width, ref top);
+
+            mainPanel.SetPosition(Position);
+            mainPanel.Width = Width;
+            mainPanel.Height = top + VerticalMarging - Position.Y;
+            mainPanel.Visible = Visible;
+        }
+        /// <summary>
+        /// Updates the controls layout
+        /// </summary>
+        /// <param name="left">Left</param>
+        /// <param name="width">Width</param>
+        /// <param name="top">Current top position</param>
+        protected abstract void UpdateControlsLayout(float left, float width, ref float top);
         /// <summary>
         /// Sets the editor group position
         /// </summary>
@@ -174,10 +257,23 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="left">Left</param>
         /// <param name="width">Width</param>
         /// <param name="top">Top</param>
+        /// <param name="checkboxEditor">Checkbox editor</param>
+        protected void SetGroupPosition(float left, float width, ref float top, EditorCheckbox checkboxEditor)
+        {
+            NextLine(ref top, null);
+
+            SetGroupPosition(left, width, ref top, null, null, checkboxEditor.Checkbox);
+        }
+        /// <summary>
+        /// Sets the editor group position
+        /// </summary>
+        /// <param name="left">Left</param>
+        /// <param name="width">Width</param>
+        /// <param name="top">Top</param>
         /// <param name="caption">Caption control</param>
-        /// <param name="value">Value control</param>
-        /// <param name="slider">Slider control</param>
-        protected void SetGroupPosition(float left, float width, ref float top, UITextArea caption, UITextArea value, UISlider slider)
+        /// <param name="value">Text value control</param>
+        /// <param name="ctrl">Property control</param>
+        protected void SetGroupPosition(float left, float width, ref float top, UITextArea caption, UITextArea value, IUIControl ctrl)
         {
             if (caption != null)
             {
@@ -195,16 +291,14 @@ namespace TerrainSamples.SceneNavMeshTest
                 NextLine(ref top, caption);
             }
 
-            if (slider != null)
+            if (ctrl != null)
             {
-                slider.SetPosition(left, top);
-                slider.Width = width;
-                slider.Visible = visible;
+                ctrl.SetPosition(left, top);
+                ctrl.Width = width;
+                ctrl.Visible = visible;
 
-                NextLine(ref top, slider);
+                NextLine(ref top, ctrl);
             }
-
-            NextLine(ref top, null);
         }
         /// <summary>
         /// Next line

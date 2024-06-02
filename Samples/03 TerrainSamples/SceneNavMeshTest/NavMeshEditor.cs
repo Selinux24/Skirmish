@@ -15,20 +15,20 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private BuildSettings settings;
 
-        private UIPanel mainPanel;
-
-        private UITextArea title;
-
         private EditorSlider cellSize;
         private EditorSlider cellHeight;
         private EditorSlider regionMinSize;
         private EditorSlider regionMergeSize;
+        private EditorCheckbox filterLedgeSpans;
+        private EditorCheckbox filterLowHangingObstacles;
+        private EditorCheckbox filterWalkableLowHeightSpans;
         private EditorSlider edgeMaxLenght;
         private EditorSlider edgeMaxError;
         private EditorSlider vertsPerPoly;
         private EditorSlider detailSampleDist;
         private EditorSlider detailSampleMaxError;
         private EditorSlider tileSize;
+        private EditorCheckbox buildAllTiles;
 
         /// <summary>
         /// Cell size
@@ -39,7 +39,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 cellSize.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -51,7 +51,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 cellHeight.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -63,7 +63,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 regionMinSize.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -75,7 +75,34 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 regionMergeSize.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
+            }
+        }
+        public bool FilterLedgeSpans
+        {
+            get { return filterLedgeSpans.Checkbox.Checked; }
+            set
+            {
+                filterLedgeSpans.Checkbox.Checked = value;
+                IsDirty = true;
+            }
+        }
+        public bool FilterLowHangingObstacles
+        {
+            get { return filterLowHangingObstacles.Checkbox.Checked; }
+            set
+            {
+                filterLowHangingObstacles.Checkbox.Checked = value;
+                IsDirty = true;
+            }
+        }
+        public bool FilterWalkableLowHeightSpans
+        {
+            get { return filterWalkableLowHeightSpans.Checkbox.Checked; }
+            set
+            {
+                filterWalkableLowHeightSpans.Checkbox.Checked = value;
+                IsDirty = true;
             }
         }
         /// <summary>
@@ -87,7 +114,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 edgeMaxLenght.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         public float EdgeMaxError
@@ -96,7 +123,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 edgeMaxError.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         public float VertsPerPoly
@@ -105,7 +132,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 vertsPerPoly.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         public float DetailSampleDist
@@ -114,7 +141,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 detailSampleDist.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         public float DetailSampleMaxError
@@ -123,7 +150,7 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 detailSampleMaxError.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
             }
         }
         public float TileSize
@@ -132,7 +159,16 @@ namespace TerrainSamples.SceneNavMeshTest
             set
             {
                 tileSize.Slider.SetValue(0, value);
-                isDirty = true;
+                IsDirty = true;
+            }
+        }
+        public bool BuildAllTiles
+        {
+            get { return buildAllTiles.Checkbox.Checked; }
+            set
+            {
+                buildAllTiles.Checkbox.Checked = value;
+                IsDirty = true;
             }
         }
 
@@ -143,24 +179,22 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="font">Font</param>
         public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
         {
-            mainPanel = await InitializePanel($"{ObjectName}_MainPanel", "MainPanel");
+            cellSize = await InitializePropertySlider(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, (index, value) => { });
+            cellHeight = await InitializePropertySlider(ObjectName, "Cell Height", font, 0.1f, 1f, 0.01f, (index, value) => { });
+            regionMinSize = await InitializePropertySlider(ObjectName, "Region Min Size", font, 0f, 150f, 1f, (index, value) => { RegionMinSize = value; });
+            regionMergeSize = await InitializePropertySlider(ObjectName, "Merge Region Size", font, 0f, 150f, 1f, (index, value) => { RegionMergeSize = value; });
+            filterLedgeSpans = await InitializePropertyCheckbox(ObjectName, "Filter Ledge Spans", font);
+            filterLowHangingObstacles = await InitializePropertyCheckbox(ObjectName, "Filter Low Hanging Obstacles", font);
+            filterWalkableLowHeightSpans = await InitializePropertyCheckbox(ObjectName, "Filter Walkable Low Height Spans", font);
+            edgeMaxLenght = await InitializePropertySlider(ObjectName, "Max Edge Length", font, 0f, 50f, 1f, (index, value) => { EdgeMaxLength = value; });
+            edgeMaxError = await InitializePropertySlider(ObjectName, "Max Edge Error", font, 0.1f, 3f, 0.1f, (index, value) => { EdgeMaxError = value; });
+            vertsPerPoly = await InitializePropertySlider(ObjectName, "Verts Per Poly", font, 3f, 12f, 1f, (index, value) => { VertsPerPoly = value; });
+            detailSampleDist = await InitializePropertySlider(ObjectName, "Detail Sample Dist", font, 0f, 16f, 1f, (index, value) => { DetailSampleDist = value; });
+            detailSampleMaxError = await InitializePropertySlider(ObjectName, "Detail Sample Max Error", font, 0f, 16f, 1f, (index, value) => { DetailSampleMaxError = value; });
+            tileSize = await InitializePropertySlider(ObjectName, "Tile Size", font, 16f, 1024f, 8f, (index, value) => { TileSize = value; });
+            buildAllTiles = await InitializePropertyCheckbox(ObjectName, "Build All Tiles", font);
 
-            title = await InitializeText($"{ObjectName}_NavMesh.Title", "NavMesh.Title", fontTitle, "NavMesh Parameters");
-
-            cellSize = await InitializeProperty(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, (index, value) => { CellSize = value; });
-            cellHeight = await InitializeProperty(ObjectName, "Cell Height", font, 0.1f, 1f, 0.01f, (index, value) => { CellHeight = value; });
-            regionMinSize = await InitializeProperty(ObjectName, "Region Min Size", font, 0f, 150f, 1f, (index, value) => { RegionMinSize = value; });
-            regionMergeSize = await InitializeProperty(ObjectName, "Merge Region Size", font, 0f, 150f, 1f, (index, value) => { RegionMergeSize = value; });
-            edgeMaxLenght = await InitializeProperty(ObjectName, "Max Edge Length", font, 0f, 50f, 1f, (index, value) => { EdgeMaxLength = value; });
-            edgeMaxError = await InitializeProperty(ObjectName, "Max Edge Error", font, 0.1f, 3f, 0.1f, (index, value) => { EdgeMaxError = value; });
-            vertsPerPoly = await InitializeProperty(ObjectName, "Verts Per Poly", font, 3f, 12f, 1f, (index, value) => { VertsPerPoly = value; });
-            detailSampleDist = await InitializeProperty(ObjectName, "Detail Sample Dist", font, 0f, 16f, 1f, (index, value) => { DetailSampleDist = value; });
-            detailSampleMaxError = await InitializeProperty(ObjectName, "Detail Sample Max Error", font, 0f, 16f, 1f, (index, value) => { DetailSampleMaxError = value; });
-            tileSize = await InitializeProperty(ObjectName, "Tile Size", font, 16f, 1024f, 8f, (index, value) => { TileSize = value; });
-
-            initialized = true;
-
-            UpdateLayout();
+            await base.Initialize(fontTitle);
         }
 
         /// <summary>
@@ -175,12 +209,16 @@ namespace TerrainSamples.SceneNavMeshTest
             CellHeight = settings.CellHeight;
             RegionMinSize = settings.RegionMinSize;
             RegionMergeSize = settings.RegionMergeSize;
+            FilterLedgeSpans = settings.FilterLedgeSpans;
+            FilterLowHangingObstacles = settings.FilterLowHangingObstacles;
+            FilterWalkableLowHeightSpans = settings.FilterWalkableLowHeightSpans;
             EdgeMaxLength = settings.EdgeMaxLength;
             EdgeMaxError = settings.EdgeMaxError;
             VertsPerPoly = settings.VertsPerPoly;
             DetailSampleDist = settings.DetailSampleDist;
             DetailSampleMaxError = settings.DetailSampleMaxError;
             TileSize = settings.TileSize;
+            BuildAllTiles = settings.BuildAllTiles;
 
             UpdateLayout();
         }
@@ -198,12 +236,16 @@ namespace TerrainSamples.SceneNavMeshTest
             settings.CellHeight = CellHeight;
             settings.RegionMinSize = RegionMinSize;
             settings.RegionMergeSize = RegionMergeSize;
+            settings.FilterLedgeSpans = FilterLedgeSpans;
+            settings.FilterLowHangingObstacles = FilterLowHangingObstacles;
+            settings.FilterWalkableLowHeightSpans = FilterWalkableLowHeightSpans;
             settings.EdgeMaxLength = EdgeMaxLength;
             settings.EdgeMaxError = EdgeMaxError;
             settings.VertsPerPoly = (int)VertsPerPoly;
             settings.DetailSampleDist = DetailSampleDist;
             settings.DetailSampleMaxError = DetailSampleMaxError;
             settings.TileSize = TileSize;
+            settings.BuildAllTiles = BuildAllTiles;
         }
 
         /// <inheritdoc/>
@@ -222,24 +264,17 @@ namespace TerrainSamples.SceneNavMeshTest
         }
 
         /// <inheritdoc/>
-        public override void UpdateLayout()
+        protected override void UpdateControlsLayout(float left, float width, ref float top)
         {
-            if (!initialized)
-            {
-                return;
-            }
-
-            float top = Position.Y + VerticalMarging;
-            float left = Position.X + HorizontalMarging;
-            float width = Width - (HorizontalMarging * 2);
-
-            SetGroupPosition(left, width, ref top, title, null, null);
             SetGroupPosition(left, width, ref top, cellSize);
             SetGroupPosition(left, width, ref top, cellHeight);
             NextLine(ref top, null);
 
             SetGroupPosition(left, width, ref top, regionMinSize);
             SetGroupPosition(left, width, ref top, regionMergeSize);
+            SetGroupPosition(left, width, ref top, filterLedgeSpans);
+            SetGroupPosition(left, width, ref top, filterLowHangingObstacles);
+            SetGroupPosition(left, width, ref top, filterWalkableLowHeightSpans);
             NextLine(ref top, null);
 
             SetGroupPosition(left, width, ref top, edgeMaxLenght);
@@ -252,11 +287,7 @@ namespace TerrainSamples.SceneNavMeshTest
             NextLine(ref top, null);
 
             SetGroupPosition(left, width, ref top, tileSize);
-
-            mainPanel.SetPosition(Position);
-            mainPanel.Width = Width;
-            mainPanel.Height = top + VerticalMarging - Position.Y;
-            mainPanel.Visible = Visible;
+            SetGroupPosition(left, width, ref top, buildAllTiles);
         }
     }
 }

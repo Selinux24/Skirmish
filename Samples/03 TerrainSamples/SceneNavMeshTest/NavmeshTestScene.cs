@@ -568,9 +568,6 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            agentEditor.InitializeAgentParameters(agent);
-            navMeshEditor.InitializeSettings(nmsettings);
-
             var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
             float maxD = MathF.Max(MathF.Max(bbox.Width, bbox.Height), bbox.Depth);
@@ -1736,6 +1733,7 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
             buildPanel.Visible = false;
 
+            agentEditor.InitializeAgentParameters(agent);
             agentEditor.Visible = true;
         }
         private void StartNavMeshState()
@@ -1744,6 +1742,7 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Visible = false;
             buildPanel.Visible = false;
 
+            navMeshEditor.InitializeSettings(nmsettings);
             navMeshEditor.Visible = true;
         }
         private void StartRasterizerState()

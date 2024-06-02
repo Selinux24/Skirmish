@@ -5,7 +5,7 @@ namespace TerrainSamples.SceneNavMeshTest
     /// <summary>
     /// Editor slider
     /// </summary>
-    struct EditorSlider
+    class EditorSlider
     {
         /// <summary>
         /// Caption
