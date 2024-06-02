@@ -349,6 +349,20 @@ namespace Engine
             return array;
         }
         /// <summary>
+        /// Generate an array initialized to function result
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="func">Function</param>
+        /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(int length, Func<int, T> func)
+        {
+            T[] array = new T[length];
+
+            InitializeArray(array, func);
+
+            return array;
+        }
+        /// <summary>
         /// Initializes the specified array with value
         /// </summary>
         /// <typeparam name="T">Type of array</typeparam>
@@ -372,6 +386,19 @@ namespace Engine
             for (int i = 0; i < arr.Length; i++)
             {
                 arr[i] = func.Invoke();
+            }
+        }
+        /// <summary>
+        /// Initializes the specified array with function result
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="arr">Array</param>
+        /// <param name="func">Function</param>
+        public static void InitializeArray<T>(this T[] arr, Func<int, T> func)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = func.Invoke(i);
             }
         }
         /// <summary>

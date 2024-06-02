@@ -116,9 +116,12 @@ namespace TerrainSamples.SceneNavMeshTest
         private string mapFileName;
         private Stopwatch swUpdateGraph = Stopwatch.StartNew();
 
+        private readonly AgentEditor agentEditor;
+
         public NavmeshTestScene(Game game) : base(game)
         {
             inputMapper = new InputMapper(Game);
+            agentEditor = new(this);
 
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
@@ -132,16 +135,18 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             base.Initialize();
 
-            InitializeComponents();
+            InitializeUI();
         }
 
-        private void InitializeComponents()
+        private void InitializeUI()
         {
             var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTweener,
-                    InitializeText,
-                    InitializeUI,
+                    InitializeTexts,
+                    InitializeDebugButtons,
+                    InitializeAgentEditor,
+                    InitializeDebugDrawers,
                 ],
                 InitializeComponentsCompleted);
 
@@ -153,7 +158,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             uiTweener = this.AddUIControlTweener();
         }
-        private async Task InitializeText()
+        private async Task InitializeTexts()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
             var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
@@ -177,7 +182,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
-        private async Task InitializeUI()
+        private async Task InitializeDebugButtons()
         {
             var btnFont = TextDrawerDescription.FromFamily(buttonFonts, 10, FontMapStyles.Bold, true);
             btnFont.ContentPath = resourcesUIFolder;
@@ -283,6 +288,33 @@ namespace TerrainSamples.SceneNavMeshTest
 
             return button;
         }
+        private async Task InitializeAgentEditor()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            await agentEditor.Initialize(defaultFont18, defaultFont12);
+        }
+        private async Task InitializeDebugDrawers()
+        {
+            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 100000,
+                DepthEnabled = false,
+                BlendMode = BlendModes.Alpha,
+            };
+            lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+
+            var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = 100000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+            };
+            triangleDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
+        }
         private void InitializeComponentsCompleted(LoadResourcesResult resUi)
         {
             if (!resUi.Completed)
@@ -300,8 +332,8 @@ namespace TerrainSamples.SceneNavMeshTest
             stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
 
             UpdateLayout();
-            InitializeInputMapping();
-            InitializeLights();
+            ConfigureInputMapping();
+            ConfigureLights();
 
             Camera.NearPlaneDistance = 0.01f;
             Camera.FarPlaneDistance *= 2;
@@ -310,7 +342,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             mapSelected = false;
         }
-        private void InitializeInputMapping()
+        private void ConfigureInputMapping()
         {
             InputMapperDescription mapperDescription = new()
             {
@@ -372,7 +404,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             addConnectionStartMessage = $"Press {GContac1Point} to add the start point. Then, press {GContac1Point} to add the end point.";
         }
-        private void InitializeLights()
+        private void ConfigureLights()
         {
             Lights.KeyLight.CastShadow = false;
             Lights.BackLight.Enabled = true;
@@ -404,10 +436,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void InitializeMapData()
         {
             var group = LoadResourceGroup.FromTasks(
-                [
-                    InitializeNavmesh,
-                    InitializeDebug,
-                ],
+                InitializeNavmesh,
                 InitializeMapDataCompleted);
 
             LoadResources(group);
@@ -484,30 +513,16 @@ namespace TerrainSamples.SceneNavMeshTest
 
             PathFinderDescription = new(nmsettings, nminput, [agent]);
         }
-        private async Task InitializeDebug()
-        {
-            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Count = 100000,
-                DepthEnabled = false,
-                BlendMode = BlendModes.Alpha,
-            };
-            lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
-
-            var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = 100000,
-                DepthEnabled = true,
-                BlendMode = BlendModes.Alpha,
-            };
-            triangleDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
-        }
         private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                ShowMessage(res.GetErrorMessage());
+
+                return;
             }
+
+            agentEditor.InitializeAgentParameters(agent);
 
             var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
@@ -564,6 +579,8 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
+            UpdateUI();
+
             if (GameHelp.JustReleased)
             {
                 help.Visible = !help.Visible;
@@ -584,6 +601,13 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             UpdateGameState();
+        }
+        private void UpdateUI()
+        {
+            if (agentEditor.Visible)
+            {
+                agentEditor.Update();
+            }
         }
         private void UpdateCameraInput()
         {
@@ -1709,6 +1733,10 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.Width = cellW + debugPanel.Padding.Left;
             debugPanel.Top = panel.Top + panel.Height;
             debugPanel.Anchor = Anchors.Right;
+
+            agentEditor.Width = 250;
+            agentEditor.Position = new Vector2(15, 200);
+            agentEditor.UpdateLayout();
         }
     }
 }

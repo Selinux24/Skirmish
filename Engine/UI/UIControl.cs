@@ -1235,7 +1235,7 @@ namespace Engine.UI
                 }
 
                 //Evaluate the just released event
-                if (!IsMouseOver && justReleasedButtons != MouseButtons.None)
+                if (!IsMouseOver && prevIsMouseOver && justReleasedButtons != MouseButtons.None)
                 {
                     //Update the control pressed state
                     PressedState = input.MouseButtonsState;
