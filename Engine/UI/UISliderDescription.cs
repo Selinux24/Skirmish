@@ -18,7 +18,7 @@ namespace Engine.UI
         /// Gets the default slider description
         /// </summary>
         /// <param name="rangeCount">Number of ranges</param>
-        public static UISliderDescription Default(int rangeCount = 1)
+        public static UISliderDescription Default(int rangeCount)
         {
             float step = 1f / rangeCount;
 

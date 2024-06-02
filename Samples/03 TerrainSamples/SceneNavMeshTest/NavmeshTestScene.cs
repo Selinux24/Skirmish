@@ -27,6 +27,8 @@ namespace TerrainSamples.SceneNavMeshTest
     {
         private const string resourcesUIFolder = "Common/UI/Fonts/";
         private const string resourcesUIControls = "Common/UI/Controls/";
+        private const string resourcesFont = "Tahoma";
+        private const string resourcesButtonFonts = "Verdana, Consolas";
 
         private readonly InputMapper inputMapper;
 
@@ -57,9 +59,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private UITextArea message = null;
 
         private UIPanel mainPanel = null;
+        private UIPanel buildPanel = null;
         private UIPanel debugPanel = null;
 
-        private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
@@ -117,11 +119,13 @@ namespace TerrainSamples.SceneNavMeshTest
         private Stopwatch swUpdateGraph = Stopwatch.StartNew();
 
         private readonly AgentEditor agentEditor;
+        private readonly NavMeshEditor navMeshEditor;
 
         public NavmeshTestScene(Game game) : base(game)
         {
             inputMapper = new InputMapper(Game);
             agentEditor = new(this);
+            navMeshEditor = new(this);
 
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
@@ -146,6 +150,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     InitializeTexts,
                     InitializeDebugButtons,
                     InitializeAgentEditor,
+                    InitializeNavMeshEditor,
                     InitializeDebugDrawers,
                 ],
                 InitializeComponentsCompleted);
@@ -160,8 +165,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -184,7 +189,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeDebugButtons()
         {
-            var btnFont = TextDrawerDescription.FromFamily(buttonFonts, 10, FontMapStyles.Bold, true);
+            var btnFont = TextDrawerDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Bold, true);
             btnFont.ContentPath = resourcesUIFolder;
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
@@ -196,7 +201,7 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
 
-            var btnBuild = await InitializeButton("btnBuild", "Build", btnDesc, EnqueueGraph);
+            var btnBuild = await InitializeButton("btnBuild", "Build", btnDesc, () => stateManager.StartState(States.Build));
             var btnRasterizer = await InitializeButton("btnRasterizer", "Rasterizer", btnDesc, () => stateManager.StartState(States.Rasterizer));
             var btnTiles = await InitializeButton("btnTiles", "Tiles", btnDesc, () => stateManager.StartState(States.Tiles));
             var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
@@ -229,37 +234,9 @@ namespace TerrainSamples.SceneNavMeshTest
                 mainPanel.AddChild(b);
             }
 
-            var enumValues = Enum.GetValues<GraphDebugTypes>();
+            await InitializeBuildPanel(btnDesc);
 
-            var debugDesc = UIPanelDescription.Default(Color.Transparent);
-            debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", debugDesc);
-            debugPanel.Spacing = 10;
-            debugPanel.Padding = 15;
-            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Length));
-            debugPanel.Visible = false;
-
-            foreach (var dType in enumValues)
-            {
-                var btn = await InitializeButton($"btnDebug{dType}", $"{dType}", btnDesc, async () =>
-                {
-                    if (debugType == dType)
-                    {
-                        stateManager.StartState(States.Default);
-
-                        return;
-                    }
-
-                    await Task.Delay(100);
-
-                    debugType = dType;
-
-                    DrawGraphNodes(agent);
-
-                    stateManager.StartState(States.Default);
-
-                });
-                debugPanel.AddChild(btn);
-            }
+            await InitializeDebugPanel(btnDesc);
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Action clickAction = null)
         {
@@ -288,14 +265,80 @@ namespace TerrainSamples.SceneNavMeshTest
 
             return button;
         }
+        private async Task InitializeBuildPanel(UIButtonDescription btnDesc)
+        {
+            var desc = UIPanelDescription.Default(Color.Transparent);
+            buildPanel = await AddComponentUI<UIPanel, UIPanelDescription>("BuildPanel", "BuildPanel", desc);
+            buildPanel.Spacing = 10;
+            buildPanel.Padding = 15;
+            buildPanel.SetGridLayout(GridLayout.FixedRows(3));
+            buildPanel.Visible = false;
+
+            var btnAgent = await InitializeButton("btnBuildAgent", "Agent", btnDesc, () =>
+            {
+                stateManager.StartState(States.Agent);
+            });
+            var btnNavMeshparams = await InitializeButton("btnNavMeshparams", "Navmesh", btnDesc, () =>
+            {
+                stateManager.StartState(States.NavMesh);
+            });
+            var btnBuild = await InitializeButton("btnBuildBuild", "Build", btnDesc, EnqueueGraph);
+
+            buildPanel.AddChild(btnAgent);
+            buildPanel.AddChild(btnNavMeshparams);
+            buildPanel.AddChild(btnBuild);
+        }
+        private async Task InitializeDebugPanel(UIButtonDescription btnDesc)
+        {
+            var enumValues = Enum.GetValues<GraphDebugTypes>();
+
+            var desc = UIPanelDescription.Default(Color.Transparent);
+            debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", desc);
+            debugPanel.Spacing = 10;
+            debugPanel.Padding = 15;
+            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Length));
+            debugPanel.Visible = false;
+
+            foreach (var dType in enumValues)
+            {
+                var btn = await InitializeButton($"btnDebug{dType}", $"{dType}", btnDesc, async () =>
+                {
+                    if (debugType == dType)
+                    {
+                        stateManager.StartState(States.Default);
+
+                        return;
+                    }
+
+                    await Task.Delay(100);
+
+                    debugType = dType;
+
+                    DrawGraphNodes(agent);
+
+                    stateManager.StartState(States.Default);
+
+                });
+                debugPanel.AddChild(btn);
+            }
+        }
         private async Task InitializeAgentEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
             await agentEditor.Initialize(defaultFont18, defaultFont12);
+        }
+        private async Task InitializeNavMeshEditor()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            await navMeshEditor.Initialize(defaultFont18, defaultFont12);
         }
         private async Task InitializeDebugDrawers()
         {
@@ -323,6 +366,9 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
+            stateManager.InitializeState(States.Build, StartBuildState, UpdateGameStateBuild);
+            stateManager.InitializeState(States.Agent, StartAgentState, UpdateGameStateAgent);
+            stateManager.InitializeState(States.NavMesh, StartNavMeshState, UpdateGameStateNavMesh);
             stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
             stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
@@ -523,6 +569,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             agentEditor.InitializeAgentParameters(agent);
+            navMeshEditor.InitializeSettings(nmsettings);
 
             var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
@@ -608,6 +655,11 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 agentEditor.Update();
             }
+
+            if (navMeshEditor.Visible)
+            {
+                navMeshEditor.Update();
+            }
         }
         private void UpdateCameraInput()
         {
@@ -683,6 +735,33 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UpdateNavmeshInput();
             UpdateGraphInput();
+        }
+        private void UpdateGameStateBuild()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+        }
+        private void UpdateGameStateAgent()
+        {
+            if (GameExit.JustReleased)
+            {
+                agentEditor.UpdateAgent();
+                agentEditor.Visible = false;
+
+                stateManager.StartState(States.Build);
+            }
+        }
+        private void UpdateGameStateNavMesh()
+        {
+            if (GameExit.JustReleased)
+            {
+                navMeshEditor.UpdateSettings();
+                navMeshEditor.Visible = false;
+
+                stateManager.StartState(States.Build);
+            }
         }
         private void UpdateGameStateRasterizer()
         {
@@ -1641,13 +1720,37 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = true;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             Rasterizer.EnableDebug = false;
+        }
+        private void StartBuildState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+            buildPanel.Visible = true;
+        }
+        private void StartAgentState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+            buildPanel.Visible = false;
+
+            agentEditor.Visible = true;
+        }
+        private void StartNavMeshState()
+        {
+            mainPanel.Visible = false;
+            debugPanel.Visible = false;
+            buildPanel.Visible = false;
+
+            navMeshEditor.Visible = true;
         }
         private void StartRasterizerState()
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             Rasterizer.EnableDebug = true;
 
@@ -1657,6 +1760,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to update a tile. SHIFT {GContac1Point} to remove a tile. CTRL {GContac1Point} to add a tile.");
         }
@@ -1664,6 +1768,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add obstacle. SHIFT {GContac1Point} to remove.");
         }
@@ -1671,6 +1776,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
         }
@@ -1678,6 +1784,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             addConnectionStart = null;
 
@@ -1690,6 +1797,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = false;
+            buildPanel.Visible = false;
 
             pathFindingStart = null;
             pathFindingEnd = null;
@@ -1704,6 +1812,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             mainPanel.Visible = false;
             debugPanel.Visible = true;
+            buildPanel.Visible = false;
         }
 
         public override void GameGraphicsResized()
@@ -1729,14 +1838,23 @@ namespace TerrainSamples.SceneNavMeshTest
             mainPanel.Top = panel.Top + panel.Height;
             mainPanel.Anchor = Anchors.Right;
 
+            buildPanel.Height = cellH * buildPanel.GetGridLayout().Rows;
+            buildPanel.Width = cellW + buildPanel.Padding.Left;
+            buildPanel.Top = panel.Top + panel.Height;
+            buildPanel.Anchor = Anchors.Right;
+
             debugPanel.Height = cellH * debugPanel.GetGridLayout().Rows;
             debugPanel.Width = cellW + debugPanel.Padding.Left;
             debugPanel.Top = panel.Top + panel.Height;
             debugPanel.Anchor = Anchors.Right;
 
             agentEditor.Width = 250;
-            agentEditor.Position = new Vector2(15, 200);
+            agentEditor.Position = new Vector2(15, panel.Height + 2);
             agentEditor.UpdateLayout();
+
+            navMeshEditor.Width = 350;
+            navMeshEditor.Position = new Vector2(15, panel.Height + 2);
+            navMeshEditor.UpdateLayout();
         }
     }
 }

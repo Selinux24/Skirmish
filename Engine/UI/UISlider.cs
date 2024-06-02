@@ -101,17 +101,15 @@ namespace Engine.UI
         {
             await base.ReadAssets(description);
 
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorInitialValues?.Length ?? 0, description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorColors?.Length ?? 0, description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan(description.BarRanges?.Length ?? 0, description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan((description.BarColors?.Length ?? 0) + 1, description.RangeCount);
+
             Minimum = description.Minimum;
             Maximum = description.Maximum;
             Step = description.Step;
-
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(description.RangeCount, "RangeCount must be greater than 0");
-
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorInitialValues?.Length ?? 0, description.RangeCount, "SelectorInitialValues must be equal to RangeCount");
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorColors?.Length ?? 0, description.RangeCount, "SelectorColors must be equal to RangeCount");
-
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.BarRanges?.Length ?? 0, description.RangeCount, "BarRanges must be equal to RangeCount");
-            ArgumentOutOfRangeException.ThrowIfLessThan((description.BarColors?.Length ?? 0) + 1, description.RangeCount, "BarColors must be equal to RangeCount + 1");
 
             Ranges = description.BarRanges;
             values.AddRange(description.SelectorInitialValues);
@@ -135,9 +133,9 @@ namespace Engine.UI
             desc.EventsEnabled = true;
             desc.Height = height;
 
-            string name = $"{Id}.Bar_{index}";
+            string barName = $"{Id}.Bar_{index}";
 
-            var bar = await Scene.CreateComponent<Sprite, SpriteDescription>(name, name, desc);
+            var bar = await Scene.CreateComponent<Sprite, SpriteDescription>(barName, barName, desc);
             bar.MouseJustPressed += BarJustPressed;
 
             return bar;
@@ -168,9 +166,9 @@ namespace Engine.UI
             desc.Width = width;
             desc.Height = height;
 
-            string name = $"{Id}.Selector_{index}";
+            string selectorName = $"{Id}.Selector_{index}";
 
-            var selector = await Scene.CreateComponent<Sprite, SpriteDescription>(name, name, desc);
+            var selector = await Scene.CreateComponent<Sprite, SpriteDescription>(selectorName, selectorName, desc);
             selector.MousePressed += SelectorPressed;
             selector.MouseJustReleased += SelectorReleased;
 

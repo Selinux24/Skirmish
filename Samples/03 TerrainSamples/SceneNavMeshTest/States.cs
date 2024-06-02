@@ -8,6 +8,18 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         Default,
         /// <summary>
+        /// Build
+        /// </summary>
+        Build,
+        /// <summary>
+        /// Agent parameters
+        /// </summary>
+        Agent,
+        /// <summary>
+        /// Navmesh parameters
+        /// </summary>
+        NavMesh,
+        /// <summary>
         /// Rasterizer
         /// </summary>
         Rasterizer,
