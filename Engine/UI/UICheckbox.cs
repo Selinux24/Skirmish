@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.UI
@@ -12,7 +13,6 @@ namespace Engine.UI
     public class UICheckbox(Scene scene, string id, string name) : UIControl<UICheckboxDescription>(scene, id, name)
     {
         private Sprite stateOn = null;
-        private Sprite stateOff = null;
         private bool isChecked = false;
 
         /// <summary>
@@ -30,10 +30,14 @@ namespace Engine.UI
             }
             set
             {
-                if (isChecked == value) return;
+                if (isChecked == value)
+                {
+                    return;
+                }
 
                 isChecked = value;
-                stateOn.Visible = isChecked;
+
+                OnValueChanged?.Invoke(isChecked);
             }
         }
         /// <summary>
@@ -47,7 +51,7 @@ namespace Engine.UI
             await base.ReadAssets(description);
 
             Caption = await CreateCaption();
-            stateOff = await CreateSpriteOff();
+            var stateOff = await CreateSpriteOff();
             stateOn = await CreateSpriteOn();
 
             AddChild(Caption, false);
@@ -106,7 +110,6 @@ namespace Engine.UI
             {
                 if (e.Buttons != MouseButtons.Left) return;
                 Checked = false;
-                OnValueChanged?.Invoke(false);
             };
 
             return state;
@@ -135,10 +138,20 @@ namespace Engine.UI
             {
                 if (e.Buttons != MouseButtons.Left) return;
                 Checked = true;
-                OnValueChanged?.Invoke(true);
             };
 
             return state;
+        }
+
+        /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            if (stateOn.Visible != isChecked)
+            {
+                stateOn.Visible = isChecked;
+            }
         }
     }
 }

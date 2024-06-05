@@ -94,6 +94,8 @@ namespace Engine.UI
         public void SetValue(int index, float value)
         {
             values[index] = CollapseValue(value);
+
+            OnValueChanged?.Invoke(index, value);
         }
 
         /// <inheritdoc/>
