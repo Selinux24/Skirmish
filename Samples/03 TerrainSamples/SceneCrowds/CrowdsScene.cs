@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneCrowds
             defaultFont10.LineAdjust = true;
 
             var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
-            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
+            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 128 };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
@@ -147,7 +147,7 @@ namespace TerrainSamples.SceneCrowds
                 Content = ContentDescription.FromFile(resourceTankFolder, resourceTankFile),
                 Instances = 5,
             };
-            var tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
+            var tanks = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
 
             tanks[0].Manipulator.SetScaling(0.2f);
             var tankbbox = tanks[0].GetBoundingBox();
@@ -220,6 +220,7 @@ namespace TerrainSamples.SceneCrowds
             var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 1000,
+                BlendMode = BlendModes.Alpha,
                 StartsVisible = true,
             };
             lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
@@ -227,6 +228,7 @@ namespace TerrainSamples.SceneCrowds
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
+                BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
             terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);

@@ -39,6 +39,11 @@ namespace Engine
                 return false;
             }
 
+            if (volume == null)
+            {
+                return false;
+            }
+
             bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
             if (!cull)
             {

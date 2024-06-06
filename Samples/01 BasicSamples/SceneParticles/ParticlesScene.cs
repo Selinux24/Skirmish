@@ -26,10 +26,10 @@ namespace BasicSamples.SceneParticles
         private const string particleSmokeExplosionString = "SmokeExplosion";
         private const string resourcesFloor = "Common/floors/floor.png";
 
-        private UITextArea text = null;
-        private UITextArea statistics = null;
-        private UITextArea text1 = null;
-        private UITextArea text2 = null;
+        private UITextArea title = null;
+        private UITextArea runtime = null;
+        private UITextArea particle1 = null;
+        private UITextArea particle2 = null;
         private UIConsole console = null;
         private Sprite backPanel = null;
 
@@ -79,15 +79,33 @@ namespace BasicSamples.SceneParticles
             var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
             var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
 
-            var textDesc = new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
-            var statisticsDesc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
-            var text1Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
-            var text2Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var titleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont20,
+                Text = "Particle System Drawing",
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.OrangeRed
+            };
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "title", titleDesc);
 
-            text = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "Text", textDesc);
-            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "Statistics", statisticsDesc);
-            text1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Text1", text1Desc);
-            text2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "Text2", text2Desc);
+            var runtimeDesc = new UITextAreaDescription
+            {
+                Font = defaultFont10,
+                MaxTextLength = 512,
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
+            };
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "runtime", runtimeDesc);
+
+            var particleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont10,
+                MaxTextLength = 128,
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
+            };
+            particle1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "particle1", particleDesc);
+            particle2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "particle2", particleDesc);
 
             var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("ui5", "Backpanel", backPanelDesc, LayerUI - 1);
@@ -504,8 +522,7 @@ namespace BasicSamples.SceneParticles
                 return;
             }
 
-            text.Text = "Particle System Drawing";
-            statistics.Text = Game.RuntimeText;
+            runtime.Text = Game.RuntimeText;
 
             if (!gameReady)
             {
@@ -515,8 +532,8 @@ namespace BasicSamples.SceneParticles
             var particle1 = pManager.GetParticleSystem(0);
             var particle2 = pManager.GetParticleSystem(1);
 
-            text1.Text = $"P1 - {particle1}";
-            text2.Text = $"P2 - {particle2}";
+            this.particle1.Text = $"P1 - {particle1}";
+            this.particle2.Text = $"P2 - {particle2}";
         }
 
         public override void GameGraphicsResized()
@@ -527,13 +544,13 @@ namespace BasicSamples.SceneParticles
         }
         private void UpdateLayout()
         {
-            text.SetPosition(Vector2.Zero);
-            statistics.SetPosition(0, text.AbsoluteRectangle.Bottom + 5);
-            text1.SetPosition(0, statistics.AbsoluteRectangle.Bottom + 5);
-            text2.SetPosition(0, text1.AbsoluteRectangle.Bottom + 5);
+            title.SetPosition(Vector2.Zero);
+            runtime.SetPosition(0, title.AbsoluteRectangle.Bottom + 5);
+            particle1.SetPosition(0, runtime.AbsoluteRectangle.Bottom + 5);
+            particle2.SetPosition(0, particle1.AbsoluteRectangle.Bottom + 5);
 
             backPanel.SetPosition(Vector2.Zero);
-            backPanel.Height = text2.Top + text2.Height + 5;
+            backPanel.Height = particle2.Top + particle2.Height + 5;
             backPanel.Width = Game.Form.RenderWidth;
 
             console.SetPosition(0, backPanel.AbsoluteRectangle.Bottom);

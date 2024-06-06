@@ -186,10 +186,13 @@ namespace BasicSamples.SceneLights
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                Count = 5000
+                Count = 5000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+                StartsVisible = false,
             };
 
-            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
+            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
         }
         private async Task InitializeBufferDrawer()
         {
@@ -198,8 +201,10 @@ namespace BasicSamples.SceneLights
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
-            bufferDrawer.Visible = false;
+            var desc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
+            desc.StartsVisible = false;
+
+            bufferDrawer = await AddComponentEffect<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", desc);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {

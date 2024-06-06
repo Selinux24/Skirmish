@@ -82,6 +82,7 @@ namespace BasicSamples.SceneUI
         {
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
+            desc.MaxTextLength = 512;
             desc.StartsVisible = false;
 
             textDebug = await AddComponentUI<UITextArea, UITextAreaDescription>("textDebug", "textDebug", desc);
@@ -179,6 +180,7 @@ namespace BasicSamples.SceneUI
             {
                 ContentPath = resourcesFolder,
                 Font = font,
+                MaxTextLength = 2048,
                 Padding = new Padding
                 {
                     Left = width * 0.1f,
@@ -300,6 +302,7 @@ namespace BasicSamples.SceneUI
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
+            areaDesc.MaxTextLength = 1024;
             areaDesc.Scroll = ScrollModes.Vertical;
             areaDesc.ScrollbarSize = 20;
             areaDesc.ScrollbarMarkerSize = 100;

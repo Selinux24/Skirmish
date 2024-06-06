@@ -345,6 +345,29 @@ namespace Engine
 
             return component;
         }
+        /// <summary>
+        /// Creates a component
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="additionalParams">Additional instace constructor parameters</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> CreateComponent<TObj, TDescription>(string id, string name, TDescription description, params object[] additionalParams)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            object[] instanceParams = [this, id, name, .. additionalParams ?? []];
+
+            var component = (TObj)Activator.CreateInstance(typeof(TObj), instanceParams);
+
+            await component.ReadAssets(description);
+            await component.InitializeAssets();
+
+            return component;
+        }
 
         /// <summary>
         /// Adds a component to the scene

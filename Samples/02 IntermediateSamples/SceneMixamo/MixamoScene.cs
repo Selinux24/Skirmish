@@ -25,6 +25,7 @@ namespace IntermediateSamples.SceneMixamo
         private Sprite backPanel = null;
         private UIConsole console = null;
 
+        private Model model = null;
         private readonly Vector3 modelInitPosition = new(0, 0, 0);
 
         private bool uiReady = false;
@@ -65,8 +66,8 @@ namespace IntermediateSamples.SceneMixamo
             var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
 
             title.Text = "Mixamo Model";
             runtime.Text = "";
@@ -98,7 +99,6 @@ namespace IntermediateSamples.SceneMixamo
             var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeFloor,
-                    InitializeModel,
                 ],
                 InitializeComponentsCompleted);
 
@@ -135,25 +135,6 @@ namespace IntermediateSamples.SceneMixamo
                 }
             }
         }
-        private async Task InitializeModel()
-        {
-            var model = await AddComponent<Model, ModelDescription>(
-                "TestModel",
-                "TestModel",
-                new ModelDescription()
-                {
-                    BlendMode = BlendModes.OpaqueTransparent,
-                    CastShadow = ShadowCastingAlgorihtms.All,
-                    Content = ContentDescription.FromFile(resourceModelFolder, resourceModelFile),
-                });
-
-            model.Manipulator.SetTransform(modelInitPosition, 0, MathUtil.DegreesToRadians(-90), 0, 0.1f);
-
-            var pDefault = new AnimationPath();
-            pDefault.AddLoop("rumba");
-
-            model.AnimationController.Start(new AnimationPlan(pDefault), 0);
-        }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -164,12 +145,11 @@ namespace IntermediateSamples.SceneMixamo
                 return;
             }
 
-            InitializeEnvironment();
+            StartEnvironment();
 
-            gameReady = true;
+            InitializeModels();
         }
-
-        private void InitializeEnvironment()
+        private void StartEnvironment()
         {
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
@@ -182,6 +162,51 @@ namespace IntermediateSamples.SceneMixamo
             Camera.FarPlaneDistance = 500;
             Camera.Goto(30, 25, -36f);
             Camera.LookTo(0, 10, 0);
+        }
+
+        private void InitializeModels()
+        {
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeModel,
+                ],
+                InitializeModelsCompleted);
+
+            LoadResources(group);
+        }
+        private async Task InitializeModel()
+        {
+            model = await AddComponent<Model, ModelDescription>(
+                "TestModel",
+                "TestModel",
+                new()
+                {
+                    BlendMode = BlendModes.OpaqueTransparent,
+                    CastShadow = ShadowCastingAlgorihtms.All,
+                    Content = ContentDescription.FromFile(resourceModelFolder, resourceModelFile),
+                    StartsVisible = false,
+                });
+
+            model.Manipulator.SetTransform(modelInitPosition, 0, MathUtil.DegreesToRadians(-90), 0, 0.1f);
+
+            var pDefault = new AnimationPath();
+            pDefault.AddLoop("rumba");
+
+            model.AnimationController.Start(new AnimationPlan(pDefault), 0);
+        }
+        private void InitializeModelsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Visible = true;
+
+                return;
+            }
+
+            model.Visible = true;
+
+            gameReady = true;
         }
 
         public override void Update(IGameTime gameTime)

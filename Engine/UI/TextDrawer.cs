@@ -19,13 +19,9 @@ namespace Engine.UI
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    class TextDrawer(Scene scene, string id, string name) : Drawable<TextDrawerDescription>(scene, id, name)
+    /// <param name="maxTextLength">Maximum text length</param>
+    class TextDrawer(Scene scene, string id, string name, int maxTextLength) : Drawable<TextDrawerDescription>(scene, id, name)
     {
-        /// <summary>
-        /// Maximum text length
-        /// </summary>
-        public const int MAXTEXTLENGTH = 1024 * 10;
-
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -41,7 +37,7 @@ namespace Engine.UI
         /// <summary>
         /// Vertex list
         /// </summary>
-        private readonly VertexFont[] vertices = new VertexFont[MAXTEXTLENGTH * 4];
+        private readonly VertexFont[] vertices = new VertexFont[maxTextLength * 4];
         /// <summary>
         /// Vertex count
         /// </summary>
@@ -49,11 +45,15 @@ namespace Engine.UI
         /// <summary>
         /// Index list
         /// </summary>
-        private readonly uint[] indices = new uint[MAXTEXTLENGTH * 6];
+        private readonly uint[] indices = new uint[maxTextLength * 6];
         /// <summary>
         /// Index count
         /// </summary>
         private int indicesCount = 0;
+        /// <summary>
+        /// Maximum text length
+        /// </summary>
+        private readonly int maxTextLength = maxTextLength;
 
         /// <summary>
         /// Font map
@@ -123,11 +123,6 @@ namespace Engine.UI
                 }
 
                 text = value;
-
-                if (text?.Length > MAXTEXTLENGTH)
-                {
-                    text = text[..MAXTEXTLENGTH];
-                }
 
                 updateInternals = true;
             }
@@ -297,7 +292,7 @@ namespace Engine.UI
             {
                 fontMap = FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
             }
-            else if (Description.FontMapping != null)
+            else if (!Description.FontMapping.IsEmpty)
             {
                 fontMap = FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
             }
@@ -306,11 +301,8 @@ namespace Engine.UI
                 fontMap = FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
             }
 
-            VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];
-            uint[] idx = new uint[MAXTEXTLENGTH * 6];
-
-            vertexBuffer = BufferManager.AddVertexData(Name, true, verts);
-            indexBuffer = BufferManager.AddIndexData(Name, true, idx);
+            vertexBuffer = BufferManager.AddVertexData(Name, true, vertices);
+            indexBuffer = BufferManager.AddIndexData(Name, true, indices);
 
             UseTextureColor = Description.UseTextureColor;
             FineSampling = Description.FineSampling;
@@ -534,8 +526,8 @@ namespace Engine.UI
                 vList.AddRange(colorS.Vertices);
             }
 
-            verticesCount = vList.Count;
-            indicesCount = iList.Count;
+            verticesCount = Math.Min(vList.Count, maxTextLength * 4);
+            indicesCount = Math.Min(iList.Count, maxTextLength * 6);
             Array.Copy(vList.ToArray(), vertices, verticesCount);
             Array.Copy(iList.ToArray(), indices, indicesCount);
         }

@@ -724,6 +724,11 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the volume</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
         {
+            if (volume == null)
+            {
+                return [];
+            }
+
             List<PickingQuadTreeNode<T>> nodes = [];
 
             if (children.Count == 0)

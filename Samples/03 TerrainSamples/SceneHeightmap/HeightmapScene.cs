@@ -248,9 +248,9 @@ namespace TerrainSamples.SceneHeightmap
             defaultFont11.LineAdjust = true;
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            help2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Help2", "Help2", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Orange });
+            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            help2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Help2", "Help2", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Orange, MaxTextLength = 256 });
 
             title.Text = "Heightmap Terrain test";
             stats.Text = "";

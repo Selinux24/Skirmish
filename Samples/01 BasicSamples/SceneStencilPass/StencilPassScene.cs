@@ -60,12 +60,13 @@ namespace BasicSamples.SceneStencilPass
                     InitializeFloor,
                     InitializeBuildingObelisk,
                     InitializeEmitter,
-                    InitializeLights,
                     InitializeLightsDrawer,
                 ],
                 (res) =>
                 {
                     res.ThrowExceptions();
+
+                    StartLights();
 
                     gameReady = true;
                 });
@@ -91,7 +92,7 @@ namespace BasicSamples.SceneStencilPass
                 Content = ContentDescription.FromContentData(geo, mat),
             };
 
-            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
+            await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -103,14 +104,14 @@ namespace BasicSamples.SceneStencilPass
                 Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
 
-            await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
+            await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeEmitter()
         {
             var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 32, 15);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
 
@@ -119,10 +120,20 @@ namespace BasicSamples.SceneStencilPass
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitter1 = await AddComponent<Model, ModelDescription>("Emitter1", "Emitter1", desc);
-            lightEmitter2 = await AddComponent<Model, ModelDescription>("Emitter2", "Emitter2", desc);
+            lightEmitter1 = await AddComponentAgent<Model, ModelDescription>("Emitter1", "Emitter1", desc);
+            lightEmitter2 = await AddComponentAgent<Model, ModelDescription>("Emitter2", "Emitter2", desc);
         }
-        private async Task InitializeLights()
+        private async Task InitializeLightsDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 5000,
+                BlendMode = BlendModes.Alpha
+            };
+
+            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
+        }
+        private void StartLights()
         {
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
@@ -131,17 +142,6 @@ namespace BasicSamples.SceneStencilPass
             Lights.Add(new SceneLightPoint("Point1", false, Color3.White, Color3.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
             Lights.Add(new SceneLightSpot("Spot1", false, Color3.White, Color3.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
-
-            await Task.CompletedTask;
-        }
-        private async Task InitializeLightsDrawer()
-        {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Count = 5000
-            };
-
-            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
 
         public override void Update(IGameTime gameTime)

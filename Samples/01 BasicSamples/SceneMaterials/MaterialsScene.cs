@@ -100,11 +100,26 @@ namespace BasicSamples.SceneMaterials
             var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
             var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White, TextShadowColor = Color.Orange });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Yellow, TextShadowColor = Color.Orange });
+            var titleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont18,
+                Text = "Scene Test - Materials",
+                TextForeColor = Color.White,
+                TextShadowColor = Color.Orange
+            };
 
-            title.Text = "Scene Test - Materials";
-            runtime.Text = "";
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
+
+            var runtimeDesc = new UITextAreaDescription
+            {
+                Font = defaultFont10,
+                Text = "",
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.Orange,
+                MaxTextLength = 1024,
+            };
+
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", runtimeDesc);
         }
         private async Task InitializeSkyEffects()
         {

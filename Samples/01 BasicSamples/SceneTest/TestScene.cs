@@ -144,19 +144,20 @@ namespace BasicSamples.SceneTest
             defaultFont10.LineAdjust = true;
 
             var titleDesc = UITextAreaDescription.Default(defaultFont18);
+            titleDesc.Text = "All Components Types Scene";
             titleDesc.TextForeColor = Color.Yellow;
             titleDesc.TextShadowColor = Color.Orange;
 
             var title = await AddComponentUI<UITextArea, UITextAreaDescription>("UITitle", "Title", titleDesc);
-            title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
             var runtimeDesc = UITextAreaDescription.Default(defaultFont10);
+            runtimeDesc.Text = "";
+            runtimeDesc.MaxTextLength = 512;
             runtimeDesc.TextForeColor = Color.Yellow;
             runtimeDesc.TextShadowColor = Color.Orange;
 
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("UIRuntime", "Runtime", runtimeDesc);
-            runtime.Text = "";
             runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
             spr = await AddComponentUI<Sprite, SpriteDescription>("UIBackpanel", "Backpanel", new SpriteDescription()

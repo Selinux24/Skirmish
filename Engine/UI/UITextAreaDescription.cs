@@ -141,6 +141,10 @@ namespace Engine.UI
         /// Horizontal scroll bar alignment
         /// </summary>
         public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; } = ScrollHorizontalAlign.Bottom;
+        /// <summary>
+        /// Maximum text length
+        /// </summary>
+        public int MaxTextLength { get; set; } = 64;
 
         /// <summary>
         /// Constructor

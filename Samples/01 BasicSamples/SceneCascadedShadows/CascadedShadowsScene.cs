@@ -25,12 +25,17 @@ namespace BasicSamples.SceneCascadedShadows
         private const string resourceObelisk = "Common/buildings/obelisk/";
         private const string resourceTrees = "Common/trees/";
 
+        private bool uiReady = false;
         private bool gameReady = false;
 
         private UITextArea title = null;
         private UITextArea help = null;
+        private UITextArea selector = null;
         private Sprite backPanel = null;
         private UIConsole console = null;
+        private bool showHelp = false;
+        private readonly string helpText1 = $"{Color.Yellow}Press {Color.Red}F1 {Color.Yellow}for help.";
+        private readonly string helpText2 = "F1 close help. F2 show shadow buffers.";
 
         private Sprite spLevel1 = null;
         private Sprite spLevel2 = null;
@@ -48,6 +53,7 @@ namespace BasicSamples.SceneCascadedShadows
         private UITextureRenderer bufferDrawer1 = null;
         private UITextureRenderer bufferDrawer2 = null;
         private UITextureRenderer bufferDrawer3 = null;
+        private bool showBuffers = false;
 
         private ModelInstanced buildingObelisks = null;
 
@@ -57,16 +63,11 @@ namespace BasicSamples.SceneCascadedShadows
         /// <param name="game">Game</param>
         public CascadedShadowsScene(Game game) : base(game)
         {
-#if DEBUG
-            Game.VisibleMouse = false;
+            Game.VisibleMouse = true;
             Game.LockMouse = false;
-#else
-            Game.VisibleMouse = false;
-            Game.LockMouse = true;
-#endif
 
             Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 5000;
+            Camera.FarPlaneDistance = 1000;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
         }
@@ -77,32 +78,50 @@ namespace BasicSamples.SceneCascadedShadows
 
             InitializeUI();
         }
+
         private void InitializeUI()
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    InitializeUITitle,
+                    InitializeUIText,
                     InitializeUILevelsControl,
                     InitializeUIDrawers,
-                    InitializeFloor,
-                    InitializeBuildingObelisk,
-                    InitializeTree,
-                    InitializeSkyEffects,
-                    InitializeLights,
                 ],
                 InitializeUICompleted);
 
             LoadResources(group);
         }
-        private async Task InitializeUITitle()
+        private async Task InitializeUIText()
         {
             var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
             var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Arial", 12);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
-            title.Text = "Cascaded Shadows";
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            help.Text = $"Press {Color.Red}F1";
+            var titleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont20,
+                Text = "Cascaded Shadows",
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.OrangeRed
+            };
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
+
+            var helpDesc = new UITextAreaDescription
+            {
+                Font = defaultFont14,
+                Text = helpText1,
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
+            };
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", helpDesc);
+
+            var selectorDesc = new UITextAreaDescription
+            {
+                Font = defaultFont12,
+                TextForeColor = Color.LightBlue,
+            };
+            selector = await AddComponentUI<UITextArea, UITextAreaDescription>("SelectorText", "SelectorText", selectorDesc);
+
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
@@ -126,53 +145,69 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUIDrawers()
         {
+            var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+
+            var bufferDesc = UITextureRendererDescription.Default();
+            bufferDesc.Channel = ColorChannels.Red;
+            bufferDesc.StartsVisible = false;
+
+            bufferDrawer1 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("Sh1", "Sh1", bufferDesc);
+            bufferDrawer2 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("Sh2", "Sh2", bufferDesc);
+            bufferDrawer3 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("Sh3", "Sh3", bufferDesc);
+
+            bufferDrawer1.Texture = shadowMap;
+            bufferDrawer2.Texture = shadowMap;
+            bufferDrawer3.Texture = shadowMap;
+
+            bufferDrawer1.TextureIndex = 0;
+            bufferDrawer2.TextureIndex = 1;
+            bufferDrawer3.TextureIndex = 2;
+
             var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
 
-            caption1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption1", "Caption1", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption2", "Caption2", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption3 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption3", "Caption3", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            var captionDesc = new UITextAreaDescription
+            {
+                Font = defaultFont14,
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue,
+                GrowControlWithText = false,
+                StartsVisible = false,
+            };
+
+            caption1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption1", "Caption1", captionDesc, LayerUI + 1);
+            caption2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption2", "Caption2", captionDesc, LayerUI + 1);
+            caption3 = await AddComponentUI<UITextArea, UITextAreaDescription>("Caption3", "Caption3", captionDesc, LayerUI + 1);
+
             caption1.Text = $"Hight Level Map";
             caption2.Text = $"Medium Level Map";
             caption3.Text = $"Low Level Map";
-            caption1.GrowControlWithText = false;
-            caption2.GrowControlWithText = false;
-            caption3.GrowControlWithText = false;
-
-            bufferDrawer1 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugTextureRenderer1", "DebugTextureRenderer1", UITextureRendererDescription.Default(), LayerEffects);
-            bufferDrawer2 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugTextureRenderer2", "DebugTextureRenderer2", UITextureRendererDescription.Default(), LayerEffects);
-            bufferDrawer3 = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugTextureRenderer3", "DebugTextureRenderer3", UITextureRendererDescription.Default(), LayerEffects);
-
-            var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
-
-            bufferDrawer1.Texture = shadowMap;
-            bufferDrawer1.TextureIndex = 0;
-            bufferDrawer1.Channel = ColorChannels.Red;
-
-            bufferDrawer2.Texture = shadowMap;
-            bufferDrawer2.TextureIndex = 1;
-            bufferDrawer2.Channel = ColorChannels.Red;
-
-            bufferDrawer3.Texture = shadowMap;
-            bufferDrawer3.TextureIndex = 2;
-            bufferDrawer3.Channel = ColorChannels.Red;
         }
         private void InitializeUICompleted(LoadResourcesResult res)
         {
-            if (!res.Completed)
-            {
-                res.ThrowExceptions();
-            }
+            res.ThrowExceptions();
+
+            uiReady = true;
+
+            selector.Visible = true;
 
             UpdateLayout();
 
-            buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-            buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-            buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-            buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
-
-            gameReady = true;
+            InitializeObjects();
         }
 
+        private void InitializeObjects()
+        {
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeFloor,
+                    InitializeBuildingObelisk,
+                    InitializeTree,
+                    InitializeSkyEffects,
+                ],
+                InitializeObjectsCompleted);
+
+            LoadResources(group);
+        }
         private async Task InitializeFloor()
         {
             float l = spaceSize;
@@ -192,7 +227,7 @@ namespace BasicSamples.SceneCascadedShadows
                 Content = ContentDescription.FromContentData(geo, mat),
             };
 
-            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
+            await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -204,7 +239,7 @@ namespace BasicSamples.SceneCascadedShadows
                 Content = ContentDescription.FromFile(resourceObelisk, "Obelisk.json"),
             };
 
-            buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
+            buildingObelisks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeTree()
         {
@@ -220,7 +255,7 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeSkyEffects()
         {
-            await AddComponentEffect<LensFlare, LensFlareDescription>("Flare", "Flare", new LensFlareDescription()
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flare", "Flare", new()
             {
                 ContentPath = resourceFlare,
                 GlowTexture = resourceGlowString,
@@ -239,7 +274,20 @@ namespace BasicSamples.SceneCascadedShadows
                 ]
             });
         }
-        private async Task InitializeLights()
+        private void InitializeObjectsCompleted(LoadResourcesResult res)
+        {
+            res.ThrowExceptions();
+
+            StartLights();
+
+            buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
+
+            gameReady = true;
+        }
+        private void StartLights()
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
@@ -249,8 +297,6 @@ namespace BasicSamples.SceneCascadedShadows
 
             Lights.BackLight.Enabled = true;
             Lights.FillLight.Enabled = true;
-
-            await Task.CompletedTask;
         }
 
         public override void Update(IGameTime gameTime)
@@ -262,24 +308,23 @@ namespace BasicSamples.SceneCascadedShadows
                 Game.SetScene<SceneStart.StartScene>();
             }
 
+            if (!uiReady)
+            {
+                return;
+            }
+
             if (!gameReady)
             {
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.R))
-            {
-                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
-                    SceneModes.DeferredLightning :
-                    SceneModes.ForwardLigthning);
-            }
-
             // Camera
             UpdateCamera(gameTime);
 
-            // Debug
-            UpdateDebug();
+            // Input
+            UpdateGameInput();
 
+            // Selector state
             UpdateSelector();
         }
 
@@ -330,18 +375,34 @@ namespace BasicSamples.SceneCascadedShadows
                 Camera.MoveDown(gameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateDebug()
+        private void UpdateGameInput()
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                bool visible = !bufferDrawer1.Visible;
+                showHelp = !showHelp;
 
-                bufferDrawer1.Visible = visible;
-                caption1.Visible = visible;
-                bufferDrawer2.Visible = visible;
-                caption2.Visible = visible;
-                bufferDrawer3.Visible = visible;
-                caption3.Visible = visible;
+                help.Text = showHelp ? helpText2 : helpText1;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F2))
+            {
+                showBuffers = !showBuffers;
+
+                bufferDrawer1.Visible = showBuffers;
+                caption1.Visible = showBuffers;
+                bufferDrawer2.Visible = showBuffers;
+                caption2.Visible = showBuffers;
+                bufferDrawer3.Visible = showBuffers;
+                caption3.Visible = showBuffers;
+
+                UpdateLayout();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.R))
+            {
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Oem5))
@@ -351,7 +412,7 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private void UpdateSelector()
         {
-            help.Text = $"HL: {GameEnvironment.ShadowDistanceHigh}; ML: {GameEnvironment.ShadowDistanceMedium}; LL:{GameEnvironment.ShadowDistanceLow};";
+            selector.Text = $"High: {GameEnvironment.ShadowDistanceHigh:0.00} - Medium: {GameEnvironment.ShadowDistanceMedium:0.00} - Low: {GameEnvironment.ShadowDistanceLow:0.00}";
 
             if (currentSelector != null)
             {
@@ -387,9 +448,19 @@ namespace BasicSamples.SceneCascadedShadows
         {
             UpdateLayoutUI();
 
-            UpdateLayoutUISelectors();
+            float selectorTop;
+            if (showBuffers)
+            {
+                selectorTop = Game.Form.RenderHeight - (Game.Form.RenderHeight * 0.33f) - 50f;
 
-            UpdateLayoutUIDrawers();
+                UpdateLayoutUIDrawers();
+            }
+            else
+            {
+                selectorTop = Game.Form.RenderHeight - 50f;
+            }
+
+            UpdateLayoutUISelectors(selectorTop);
         }
         private void UpdateLayoutUI()
         {
@@ -402,9 +473,11 @@ namespace BasicSamples.SceneCascadedShadows
             backPanel.Height = help.Top + help.Height + 5;
             backPanel.Width = Game.Form.RenderWidth;
         }
-        private void UpdateLayoutUISelectors()
+        private void UpdateLayoutUISelectors(float top)
         {
             float totalWidth = Game.Form.RenderWidth * 0.9f;
+            float left = (Game.Form.RenderWidth - totalWidth) * 0.5f;
+
             float tLevel = GameEnvironment.ShadowDistanceHigh + GameEnvironment.ShadowDistanceMedium + GameEnvironment.ShadowDistanceLow;
             float hLevel = GameEnvironment.ShadowDistanceHigh / tLevel;
             float mLevel = GameEnvironment.ShadowDistanceMedium / tLevel;
@@ -418,18 +491,18 @@ namespace BasicSamples.SceneCascadedShadows
             spLevel2.Height = 20f;
             spLevel3.Height = 20f;
 
-            float left = (Game.Form.RenderWidth - totalWidth) * 0.5f;
-
+            selector.Left = left;
             spLevel1.Left = left;
             spLevel2.Left = left + spLevel1.Width;
             spLevel3.Left = left + spLevel1.Width + spLevel2.Width;
 
-            float top = Game.Form.RenderHeight - (Game.Form.RenderHeight * 0.33f) - 25f;
-
+            selector.Top = top;
+            top += (int)selector.Height + 5;
             spLevel1.Top = top;
             spLevel2.Top = top;
             spLevel3.Top = top;
 
+            selector.Width = totalWidth;
             spSelect1.Width = 10;
             spSelect1.Height = 25;
             spSelect1.SetPosition(spLevel2.Left - 5f, spLevel2.Top - 2.5f);
@@ -441,12 +514,12 @@ namespace BasicSamples.SceneCascadedShadows
         private void UpdateLayoutUIDrawers()
         {
             int height = (int)(Game.Form.RenderHeight * 0.33f);
+            int top = Game.Form.RenderHeight - height;
+            int width = (int)(Game.Form.RenderWidth / 3f);
 
             bufferDrawer1.Height = height;
             bufferDrawer2.Height = height;
             bufferDrawer3.Height = height;
-
-            float width = Game.Form.RenderWidth / 3f;
 
             bufferDrawer1.Width = width - 1f;
             bufferDrawer2.Width = width - 1f;
@@ -464,9 +537,9 @@ namespace BasicSamples.SceneCascadedShadows
             caption2.Left = width;
             caption3.Left = width + width;
 
-            caption1.Top = Game.Form.RenderHeight - height;
-            caption2.Top = Game.Form.RenderHeight - height;
-            caption3.Top = Game.Form.RenderHeight - height;
+            caption1.Top = top;
+            caption2.Top = top;
+            caption3.Top = top;
 
             caption1.TextHorizontalAlign = TextHorizontalAlign.Center;
             caption2.TextHorizontalAlign = TextHorizontalAlign.Center;

@@ -1,13 +1,11 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.BuiltIn.PostProcess;
-using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,11 +39,25 @@ namespace IntermediateSamples.SceneDeferredLights
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
+        private const string titleText = "Deferred Ligthning test";
+        private bool showHelp = false;
+        private const string helpText1 = "Press H for Help";
+        private const string helpText2 = @"H: Hide this help.
+WASD Space/C: Move the camera.
+F: Toggle fog.
+G: Toggle shadows.
+L: Toggle lights.
+P: Toggle lights animation.
+Up/Down/Left/Right/PageUp/PageDown: Move the spotlight.
+Add/Subtract: Change the spotlight intensity.
+Tab: Show frustum.
+F1 to F5: View G-Buffer textures. 
+F6: Maximize/minimize G-Buffer view. 
+F7 to F10: Toggle object visibility.";
 
         private UITextArea title = null;
-        private UITextArea load = null;
         private UITextArea help = null;
-        private UITextArea statistics = null;
+        private UITextArea bufferText = null;
         private Sprite upperPanel = null;
 
         private Model helicopter = null;
@@ -58,7 +70,6 @@ namespace IntermediateSamples.SceneDeferredLights
         private UITextureRenderer bufferDrawer = null;
         private bool bufferDrawerFullscreen = false;
         private SceneRendererResults bufferType = SceneRendererResults.None;
-        private int textIntex = 0;
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
 
@@ -91,14 +102,6 @@ namespace IntermediateSamples.SceneDeferredLights
 
             LoadingTaskUI();
         }
-        private static async Task<double> InitializeAndTrace(Func<Task> action)
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Start();
-            await action();
-            sw.Stop();
-            return sw.Elapsed.TotalSeconds;
-        }
 
         private void LoadingTaskUI()
         {
@@ -126,31 +129,29 @@ namespace IntermediateSamples.SceneDeferredLights
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
-            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
-            var dLoad = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
-            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
-            var dStats = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Red };
-
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White, StartsVisible = false, Text = titleText };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
-            load = await AddComponentUI<UITextArea, UITextAreaDescription>("Load", "Load", dLoad);
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
-            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("Statistics", "Statistics", dStats);
 
-            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            var dBufferText = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, StartsVisible = false };
+            bufferText = await AddComponentUI<UITextArea, UITextAreaDescription>("BufferText", "BufferText", dBufferText);
 
-            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
-            bufferDrawer.Visible = false;
+            var dHelpText = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Yellow, StartsVisible = false, Text = helpText1, MaxTextLength = 512 };
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelpText);
+
+            var upperPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", upperPanelDesc, LayerUI - 1);
+
+            var bufferDwDesc = UITextureRendererDescription.Default();
+            bufferDwDesc.StartsVisible = false;
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", bufferDwDesc, LayerUI - 1);
         }
         private void LoadingTaskUICompleted(LoadResourcesResult res)
         {
-            if (!res.Completed)
-            {
-                res.ThrowExceptions();
-            }
+            res.ThrowExceptions();
 
-            title.Text = "Deferred Ligthning test";
-            help.Text = "";
-            statistics.Text = "";
+            title.Visible = true;
+            help.Visible = true;
+            bufferText.Visible = true;
 
             UpdateLayout();
 
@@ -163,11 +164,11 @@ namespace IntermediateSamples.SceneDeferredLights
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    ()=>InitializeAndTrace(InitializeSkydom),
-                    ()=>InitializeAndTrace(InitializeHelicopters),
-                    ()=>InitializeAndTrace(InitializeTerrain),
-                    ()=>InitializeAndTrace(InitializeGardener),
-                    ()=>InitializeAndTrace(InitializeTrees),
+                    InitializeSkydom,
+                    InitializeHelicopters,
+                    InitializeTerrain,
+                    InitializeGardener,
+                    InitializeTrees,
                     InitializeDebug,
                 ],
                 LoadingTaskObjectsCompleted);
@@ -261,10 +262,7 @@ namespace IntermediateSamples.SceneDeferredLights
         }
         private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
         {
-            if (!res.Completed)
-            {
-                res.ThrowExceptions();
-            }
+            res.ThrowExceptions();
 
             postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
             Renderer.ClearPostProcessingEffects();
@@ -380,6 +378,13 @@ namespace IntermediateSamples.SceneDeferredLights
             if (!gameReady)
             {
                 return;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.H))
+            {
+                showHelp = !showHelp;
+
+                help.Text = showHelp ? helpText2 : helpText1;
             }
 
             UpdateInput(gameTime);
@@ -510,7 +515,7 @@ namespace IntermediateSamples.SceneDeferredLights
             if (Game.Input.KeyJustReleased(Keys.F7))
             {
                 bufferDrawer.Visible = !bufferDrawer.Visible;
-                help.Visible = bufferDrawer.Visible;
+                bufferText.Visible = bufferDrawer.Visible;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F8))
@@ -655,7 +660,7 @@ namespace IntermediateSamples.SceneDeferredLights
             //Colors
             bufferDrawer.Texture = colorMap;
             bufferDrawer.Channel = ColorChannels.NoAlpha;
-            help.Text = "Colors";
+            bufferText.Text = "Colors";
 
             bufferDrawer.Visible = true;
         }
@@ -671,14 +676,14 @@ namespace IntermediateSamples.SceneDeferredLights
                 //Specular Power
                 bufferDrawer.Texture = normalMap;
                 bufferDrawer.Channel = ColorChannels.Alpha;
-                help.Text = "Specular Power";
+                bufferText.Text = "Specular Power";
             }
             else
             {
                 //Normals
                 bufferDrawer.Texture = normalMap;
                 bufferDrawer.Channel = ColorChannels.NoAlpha;
-                help.Text = "Normals";
+                bufferText.Text = "Normals";
             }
             bufferDrawer.Visible = true;
         }
@@ -694,14 +699,14 @@ namespace IntermediateSamples.SceneDeferredLights
                 //Specular Factor
                 bufferDrawer.Texture = depthMap;
                 bufferDrawer.Channel = ColorChannels.Alpha;
-                help.Text = "Specular Intensity";
+                bufferText.Text = "Specular Intensity";
             }
             else
             {
                 //Position
                 bufferDrawer.Texture = depthMap;
                 bufferDrawer.Channel = ColorChannels.NoAlpha;
-                help.Text = "Position";
+                bufferText.Text = "Position";
             }
             bufferDrawer.Visible = true;
         }
@@ -714,7 +719,7 @@ namespace IntermediateSamples.SceneDeferredLights
             if (shadowMap != null)
             {
                 //Shadow map
-                if (!help.Text.StartsWith("Shadow map"))
+                if (!bufferText.Text.StartsWith("Shadow map"))
                 {
                     bufferDrawer.Texture = shadowMap;
                     bufferDrawer.TextureIndex = 0;
@@ -741,11 +746,11 @@ namespace IntermediateSamples.SceneDeferredLights
                     bufferDrawer.TextureIndex = tIndex;
                 }
 
-                help.Text = string.Format("Shadow map {0}", bufferDrawer.TextureIndex);
+                bufferText.Text = string.Format("Shadow map {0}", bufferDrawer.TextureIndex);
             }
             else
             {
-                help.Text = "The Shadow map is empty";
+                bufferText.Text = "The Shadow map is empty";
             }
         }
         private void UpdateDebugLightMap()
@@ -760,11 +765,11 @@ namespace IntermediateSamples.SceneDeferredLights
                 bufferDrawer.Texture = lightMap;
                 bufferDrawer.Channel = ColorChannels.NoAlpha;
                 bufferDrawer.Visible = true;
-                help.Text = "Light map";
+                bufferText.Text = "Light map";
             }
             else
             {
-                help.Text = "The Light map is empty";
+                bufferText.Text = "The Light map is empty";
             }
         }
         private void UpdateDebugBufferDrawer()
@@ -783,11 +788,6 @@ namespace IntermediateSamples.SceneDeferredLights
                 return;
             }
 
-            if (Game.Form.IsFullscreen)
-            {
-                load.Text = Game.RuntimeText;
-            }
-
             title.Text = string.Format(
                 titleMask,
                 GetRenderMode(),
@@ -795,28 +795,6 @@ namespace IntermediateSamples.SceneDeferredLights
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
                 Lights.GetDirectionalShadowCastingLights(GameEnvironment).Count());
-
-            if (FrameCounters.Statistics.Length == 0)
-            {
-                statistics.Text = "No statistics";
-            }
-            else if (textIntex < 0)
-            {
-                statistics.Text = "Press . for more statistics";
-                textIntex = -1;
-            }
-            else if (textIntex >= FrameCounters.Statistics.Length)
-            {
-                statistics.Text = "Press , for more statistics";
-                textIntex = FrameCounters.Statistics.Length;
-            }
-            else
-            {
-                statistics.Text = string.Format(
-                    "{0} - {1}",
-                    FrameCounters.Statistics[textIntex],
-                    FrameCounters.GetStatistics(textIntex));
-            }
         }
 
         public override void GameGraphicsResized()
@@ -830,12 +808,11 @@ namespace IntermediateSamples.SceneDeferredLights
         private void UpdateLayout()
         {
             title.SetPosition(Vector2.Zero);
-            load.SetPosition(new Vector2(0, title.Top + title.Height + 2));
-            help.SetPosition(new Vector2(0, load.Top + load.Height + 2));
-            statistics.SetPosition(new Vector2(0, help.Top + help.Height + 2));
+            bufferText.SetPosition(new Vector2(0, title.Top + title.Height + 2));
+            help.SetPosition(new Vector2(0, bufferText.Top + bufferText.Height + 2));
 
             upperPanel.Width = Game.Form.RenderWidth;
-            upperPanel.Height = statistics.Top + statistics.Height + 3;
+            upperPanel.Height = bufferText.Top + bufferText.Height + 3;
 
             if (bufferDrawerFullscreen)
             {

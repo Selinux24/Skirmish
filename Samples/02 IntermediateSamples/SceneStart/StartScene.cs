@@ -106,7 +106,7 @@ namespace IntermediateSamples.SceneStart
             var panAnimationParts = await AddButtonPanel<SceneAnimationParts.AnimationPartsScene>(buttonDesc, "Animation Parts");
             var panSmoothTransitions = await AddButtonPanel<SceneSmoothTransitions.SmoothTransitionsScene>(buttonDesc, "Smooth Transitions");
             var panMixamo = await AddButtonPanel<SceneMixamo.MixamoScene>(buttonDesc, "Mixamo Models");
-            var panDeferredLights = await AddButtonPanel<SceneDeferredLights.DeferredLightsScene>(buttonDesc, "Deferred Lighting");
+            var panDeferredLights = await AddButtonPanel<SceneDeferredLights.DeferredLightsScene>(buttonDesc, "Deferred Lighting", SceneModes.DeferredLightning);
             var panInstancing = await AddButtonPanel<SceneInstancing.InstancingScene>(buttonDesc, "Instancing");
             var panTransforms = await AddButtonPanel<SceneTransforms.TransformsScene>(buttonDesc, "Transforms");
             var panGardener = await AddButtonPanel<SceneGardener.GardenerScene>(buttonDesc, "Gardener");
@@ -133,7 +133,7 @@ namespace IntermediateSamples.SceneStart
             mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty9", EmtpyNameString, emptyDesc));
             mainPanel.AddChild(panExit);
         }
-        private async Task<UIPanel> AddButtonPanel<T>(UIButtonDescription desc, string text) where T : Scene
+        private async Task<UIPanel> AddButtonPanel<T>(UIButtonDescription desc, string text, SceneModes mode = SceneModes.ForwardLigthning) where T : Scene
         {
             var button = await CreateButton(desc, text, (sender, args) =>
             {
@@ -142,7 +142,7 @@ namespace IntermediateSamples.SceneStart
                     return;
                 }
 
-                Game.SetScene<T>();
+                Game.SetScene<T>(mode);
             });
 
             var panel = await CreatePanel(text);

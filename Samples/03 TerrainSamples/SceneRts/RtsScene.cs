@@ -226,9 +226,9 @@ namespace TerrainSamples.SceneRts
             var defaultFont10 = TextDrawerDescription.FromFamily(fontFamily, 10);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            counters1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
-            counters2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
+            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            counters1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow, MaxTextLength = 256 });
+            counters2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow, MaxTextLength = 256 });
 
             title.Text = "Terrain collision and trajectories test";
             stats.Text = "";
@@ -843,10 +843,7 @@ namespace TerrainSamples.SceneRts
         }
         private void InitializeModelsCompleted(LoadResourcesResult res)
         {
-            if (!res.Completed)
-            {
-                res.ThrowExceptions();
-            }
+            res.ThrowExceptions();
 
             StartLights();
 
@@ -906,7 +903,9 @@ namespace TerrainSamples.SceneRts
 
             sw.Stop();
 
-            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
+            EnqueueNavigationGraphUpdate(
+                NavigationGraphLoaded,
+                (progress) => { stats.Text = $"Loading navigation mesh {progress:0.0%}..."; });
         }
         private void StartRocks(Random posRnd)
         {

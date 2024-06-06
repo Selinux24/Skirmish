@@ -343,7 +343,8 @@ namespace Engine.UI
             var td = await Scene.CreateComponent<TextDrawer, TextDrawerDescription>(
                 $"{Id}.TextDrawer",
                 $"{Name}.TextDrawer",
-                Description.Font);
+                Description.Font,
+                Description.MaxTextLength);
 
             td.Text = Description.Text;
             td.ForeColor = Description.TextForeColor;

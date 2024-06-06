@@ -113,8 +113,8 @@ namespace IntermediateSamples.SceneInstancing
             var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
@@ -123,7 +123,7 @@ namespace IntermediateSamples.SceneInstancing
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
 
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
             help.Visible = false;
             helpPanel = await AddComponentUI<Sprite, SpriteDescription>("HelpPanel", "Help panel", spDesc, LayerUI - 1);
             helpPanel.Visible = false;
@@ -477,7 +477,7 @@ namespace IntermediateSamples.SceneInstancing
         {
             title.SetPosition(Vector2.Zero);
             runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-            info.SetPosition(new Vector2(5, runtimeText.Top + runtimeText.Height + 3));
+            info.SetPosition(new Vector2(5, runtimeText.Top + (runtimeText.Height * 2) + 3));
 
             panel.Width = Game.Form.RenderWidth;
             panel.Height = info.Top + info.Height + 3;

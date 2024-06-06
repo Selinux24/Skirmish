@@ -196,7 +196,7 @@ namespace Engine.UI
     /// <summary>
     /// Font mapping description
     /// </summary>
-    public class FontMapping
+    public struct FontMapping
     {
         /// <summary>
         /// Image filename
@@ -206,5 +206,17 @@ namespace Engine.UI
         /// Map filename
         /// </summary>
         public string MapFile { get; set; }
+
+        /// <summary>
+        /// Map is empty
+        /// </summary>
+        public readonly bool IsEmpty
+        {
+            get
+            {
+                //Needs to be both informed
+                return string.IsNullOrEmpty(ImageFile) || string.IsNullOrEmpty(MapFile);
+            }
+        }
     }
 }

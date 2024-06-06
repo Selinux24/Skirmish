@@ -17,8 +17,7 @@ namespace BasicSamples.SceneNormalMap
 
         private Sprite panel = null;
         private UITextArea title = null;
-        private UITextArea fps = null;
-        private UITextArea picks = null;
+        private UITextArea runtime = null;
 
         private Model lightEmitter = null;
         private SceneLightPoint pointLight = null;
@@ -48,34 +47,43 @@ namespace BasicSamples.SceneNormalMap
         {
             var group = LoadResourceGroup.FromTasks(
                 [
-                    InitializeText,
-                    InitializeDungeon,
+                    InitializeUI,
+                    InitializeDungeonWall,
                     InitializeEmitter,
                 ],
                 InitializeComponentsCompleted);
 
             LoadResources(group);
         }
-        private async Task InitializeText()
+        private async Task InitializeUI()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
             var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new() { Font = defaultFont18, TextForeColor = Color.White });
-            title.Text = "Tiled Wall Test Scene";
+            var titleDesc = new UITextAreaDescription()
+            {
+                Font = defaultFont18,
+                Text = "Tiled Wall Test Scene",
+                TextForeColor = Color.White,
+            };
 
-            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new() { Font = defaultFont12, TextForeColor = Color.Yellow });
-            fps.Text = null;
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
-            picks = await AddComponentUI<UITextArea, UITextAreaDescription>("Picks", "Picks", new() { Font = defaultFont12, TextForeColor = Color.Yellow });
-            picks.Text = null;
+            var runtimeDesc = new UITextAreaDescription()
+            {
+                Font = defaultFont12,
+                MaxTextLength = 256,
+                TextForeColor = Color.Yellow,
+            };
+
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", runtimeDesc);
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("BackPanel", "BackPanel", spDesc, LayerUI - 1);
         }
-        private async Task InitializeDungeon()
+        private async Task InitializeDungeonWall()
         {
             var desc = new ModelInstancedDescription()
             {
@@ -105,7 +113,7 @@ namespace BasicSamples.SceneNormalMap
             var mat = MaterialPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 16, 5);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 15);
 
             var desc = new ModelDescription()
             {
@@ -172,7 +180,7 @@ namespace BasicSamples.SceneNormalMap
 
             UpdateLight(gameTime);
 
-            fps.Text = Game.RuntimeText;
+            runtime.Text = Game.RuntimeText;
         }
         private void UpdateCamera()
         {
@@ -248,10 +256,9 @@ namespace BasicSamples.SceneNormalMap
         private void UpdateLayout()
         {
             title.SetPosition(Vector2.Zero);
-            fps.SetPosition(new Vector2(0, 24));
-            picks.SetPosition(new Vector2(0, 48));
+            runtime.SetPosition(new Vector2(0, 24));
             panel.Width = Game.Form.RenderWidth;
-            panel.Height = picks.Top + picks.Height + 3;
+            panel.Height = runtime.Top + runtime.Height + 3;
         }
     }
 }
