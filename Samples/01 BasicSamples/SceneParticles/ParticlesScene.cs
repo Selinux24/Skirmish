@@ -529,11 +529,11 @@ namespace BasicSamples.SceneParticles
                 return;
             }
 
-            var particle1 = pManager.GetParticleSystem(0);
-            var particle2 = pManager.GetParticleSystem(1);
+            var particles1 = pManager.GetParticleSystem(0);
+            var particles2 = pManager.GetParticleSystem(1);
 
-            this.particle1.Text = $"P1 - {particle1}";
-            this.particle2.Text = $"P2 - {particle2}";
+            particle1.Text = $"P1 - {particles1}";
+            particle2.Text = $"P2 - {particles2}";
         }
 
         public override void GameGraphicsResized()

@@ -12,6 +12,9 @@ namespace TerrainSamples.SceneNavMeshTest
     class NavMeshEditor(Scene scene) : Editor(scene)
     {
         private const string ObjectName = nameof(NavMeshEditor);
+        private const string uMask = "{0:0}";
+        private const string dMask = "{0:0.0}";
+        private const string cMask = "{0:0.00}";
 
         private BuildSettings settings;
 
@@ -37,19 +40,19 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="font">Font</param>
         public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
         {
-            cellSize = await InitializePropertySlider(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, "{0:0.00}");
-            cellHeight = await InitializePropertySlider(ObjectName, "Cell Height", font, 0.1f, 1f, 0.01f, "{0:0.00}");
-            regionMinSize = await InitializePropertySlider(ObjectName, "Region Min Size", font, 0f, 150f, 1f, "{0:0}");
-            regionMergeSize = await InitializePropertySlider(ObjectName, "Merge Region Size", font, 0f, 150f, 1f, "{0:0}");
+            cellSize = await InitializePropertySlider(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, cMask);
+            cellHeight = await InitializePropertySlider(ObjectName, "Cell Height", font, 0.1f, 1f, 0.01f, cMask);
+            regionMinSize = await InitializePropertySlider(ObjectName, "Region Min Size", font, 0f, 150f, 1f, uMask);
+            regionMergeSize = await InitializePropertySlider(ObjectName, "Merge Region Size", font, 0f, 150f, 1f, uMask);
             filterLedgeSpans = await InitializePropertyCheckbox(ObjectName, "Filter Ledge Spans", font);
             filterLowHangingObstacles = await InitializePropertyCheckbox(ObjectName, "Filter Low Hanging Obstacles", font);
             filterWalkableLowHeightSpans = await InitializePropertyCheckbox(ObjectName, "Filter Walkable Low Height Spans", font);
-            edgeMaxLength = await InitializePropertySlider(ObjectName, "Max Edge Length", font, 0f, 50f, 1f, "{0:0}");
-            edgeMaxError = await InitializePropertySlider(ObjectName, "Max Edge Error", font, 0.1f, 3f, 0.1f, "{0:0.0}");
-            vertsPerPoly = await InitializePropertySlider(ObjectName, "Verts Per Poly", font, 3f, 12f, 1f, "{0:0}");
-            detailSampleDist = await InitializePropertySlider(ObjectName, "Detail Sample Dist", font, 0f, 16f, 1f, "{0:0}");
-            detailSampleMaxError = await InitializePropertySlider(ObjectName, "Detail Sample Max Error", font, 0f, 16f, 1f, "{0:0}");
-            tileSize = await InitializePropertySlider(ObjectName, "Tile Size", font, 16f, 1024f, 8f, "{0:0}");
+            edgeMaxLength = await InitializePropertySlider(ObjectName, "Max Edge Length", font, 0f, 50f, 1f, uMask);
+            edgeMaxError = await InitializePropertySlider(ObjectName, "Max Edge Error", font, 0.1f, 3f, 0.1f, dMask);
+            vertsPerPoly = await InitializePropertySlider(ObjectName, "Verts Per Poly", font, 3f, 12f, 1f, uMask);
+            detailSampleDist = await InitializePropertySlider(ObjectName, "Detail Sample Dist", font, 0f, 16f, 1f, uMask);
+            detailSampleMaxError = await InitializePropertySlider(ObjectName, "Detail Sample Max Error", font, 0f, 16f, 1f, uMask);
+            tileSize = await InitializePropertySlider(ObjectName, "Tile Size", font, 16f, 1024f, 8f, uMask);
             buildAllTiles = await InitializePropertyCheckbox(ObjectName, "Build All Tiles", font);
 
             await base.Initialize(fontTitle);

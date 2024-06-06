@@ -14,6 +14,7 @@ namespace BasicSamples.SceneCascadedShadows
     public class CascadedShadowsScene : Scene
     {
         private const float spaceSize = 80;
+        private const string fontFamilyName = "Arial";
         private const string resourceFlare = "Common/lensFlare/";
         private const string resourceGlowString = "lfGlow.png";
         private const string resourceFlare1String = "lfFlare1.png";
@@ -93,9 +94,9 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUIText()
         {
-            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
-            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Arial", 12);
+            var defaultFont20 = TextDrawerDescription.FromFamily(fontFamilyName, 20);
+            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamilyName, 12);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -163,7 +164,7 @@ namespace BasicSamples.SceneCascadedShadows
             bufferDrawer2.TextureIndex = 1;
             bufferDrawer3.TextureIndex = 2;
 
-            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
+            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamilyName, 14);
 
             var captionDesc = new UITextAreaDescription
             {
