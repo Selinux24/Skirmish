@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.UI;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -19,19 +20,21 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private UIPanel mainPanel;
         private UITextArea title;
+        private UIButton acceptButton;
+        private UIButton exitButton;
 
         /// <summary>
         /// Horizontal marging
         /// </summary>
-        public float HorizontalMarging { get; set; } = 25;
+        public float HorizontalMarging { get; set; } = 20;
         /// <summary>
         /// Vertical marging
         /// </summary>
-        public float VerticalMarging { get; set; } = 25;
+        public float VerticalMarging { get; set; } = 20;
         /// <summary>
         /// Vertical padding
         /// </summary>
-        public float VerticalPadding { get; set; } = 10;
+        public float VerticalPadding { get; set; } = 8;
         /// <summary>
         /// Editor top-left position
         /// </summary>
@@ -62,6 +65,10 @@ namespace TerrainSamples.SceneNavMeshTest
                 UpdateLayout();
             }
         }
+        /// <summary>
+        /// Close callback
+        /// </summary>
+        public Action<bool> CloseCallback { get; set; }
 
         /// <summary>
         /// Initializes the editor
@@ -74,6 +81,8 @@ namespace TerrainSamples.SceneNavMeshTest
             mainPanel = await InitializePanel($"{id}_MainPanel", "MainPanel");
 
             title = await InitializeText($"{id}_Agent.Title", "Agent.Title", font, "Agent Parameters");
+
+            await InitializeButtons(id);
 
             initialized = true;
 
@@ -105,6 +114,42 @@ namespace TerrainSamples.SceneNavMeshTest
             desc.StartsVisible = false;
 
             return await scene.AddComponentUI<UITextArea, UITextAreaDescription>(id, name, desc, Scene.LayerUI + 1);
+        }
+        /// <summary>
+        /// Initializes the accept and exit button
+        /// </summary>
+        /// <param name="id">Id</param>
+        protected async Task InitializeButtons(string id)
+        {
+            var font = TextDrawerDescription.FromFamily("Wingdings 2", 20, FontMapStyles.Bold, true);
+
+            var desc = UIButtonDescription.DefaultTwoStateButton(font);
+            desc.Width = 24;
+            desc.Height = 22;
+            desc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            desc.TextVerticalAlign = TextVerticalAlign.Middle;
+            desc.ColorReleased = UIConfiguration.BaseColor;
+            desc.ColorPressed = UIConfiguration.HighlightColor;
+            desc.StartsVisible = false;
+
+            acceptButton = await scene.AddComponentUI<UIButton, UIButtonDescription>($"{id}_AcceptButton", "AcceptButton", desc, Scene.LayerUI + 1);
+            exitButton = await scene.AddComponentUI<UIButton, UIButtonDescription>($"{id}_ExitButton", "ExitButton", desc, Scene.LayerUI + 1);
+
+            acceptButton.Caption.Text = "P";
+            exitButton.Caption.Text = "O";
+
+            acceptButton.MouseClick += (s, e) =>
+            {
+                CloseCallback?.Invoke(true);
+
+                Visible = false;
+            };
+            exitButton.MouseClick += (s, e) =>
+            {
+                CloseCallback?.Invoke(false);
+
+                Visible = false;
+            };
         }
         /// <summary>
         /// Initializes a slider
@@ -205,6 +250,11 @@ namespace TerrainSamples.SceneNavMeshTest
             float top = Position.Y + VerticalMarging;
             float left = Position.X + HorizontalMarging;
             float width = Width - (HorizontalMarging * 2);
+
+            acceptButton.SetPosition(Position.X + Width - acceptButton.Width - exitButton.Width - 1, Position.Y);
+            acceptButton.Visible = Visible;
+            exitButton.SetPosition(Position.X + Width - exitButton.Width, Position.Y);
+            exitButton.Visible = Visible;
 
             SetTitlePosition(left, width, ref top, title);
 

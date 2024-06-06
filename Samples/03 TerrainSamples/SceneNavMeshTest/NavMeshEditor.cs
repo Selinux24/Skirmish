@@ -16,8 +16,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private const string dMask = "{0:0.0}";
         private const string cMask = "{0:0.00}";
 
-        private BuildSettings settings;
-
         private EditorSlider cellSize;
         private EditorSlider cellHeight;
         private EditorSlider regionMinSize;
@@ -64,8 +62,6 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="settings">Navmesh settings</param>
         public void InitializeSettings(BuildSettings settings)
         {
-            this.settings = settings;
-
             cellSize.SetValue(settings.CellSize);
             cellHeight.SetValue(settings.CellHeight);
             regionMinSize.SetValue(settings.RegionMinSize);
@@ -86,7 +82,8 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Updates the settings data
         /// </summary>
-        public void UpdateSettings()
+        /// <param name="settings">Settings to update</param>
+        public void UpdateSettings(BuildSettings settings)
         {
             if (settings == null)
             {

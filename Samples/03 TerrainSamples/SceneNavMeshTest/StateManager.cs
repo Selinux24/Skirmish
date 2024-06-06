@@ -12,15 +12,22 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public void InitializeState(States state, Action startingAction, Action updatingAction)
         {
-            if (!stateStartingCallbacks.TryAdd(state, startingAction))
+            var stAction = startingAction ?? Empty;
+            var upAction = updatingAction ?? Empty;
+
+            if (!stateStartingCallbacks.TryAdd(state, stAction))
             {
-                stateStartingCallbacks[state] = startingAction;
+                stateStartingCallbacks[state] = stAction;
             }
 
-            if (!stateUpdatingCallbacks.TryAdd(state, updatingAction))
+            if (!stateUpdatingCallbacks.TryAdd(state, upAction))
             {
-                stateUpdatingCallbacks[state] = updatingAction;
+                stateUpdatingCallbacks[state] = upAction;
             }
+        }
+        private static void Empty()
+        {
+            //Empty action
         }
 
         public void StartState(States state)

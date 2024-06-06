@@ -282,7 +282,12 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 stateManager.StartState(States.NavMesh);
             });
-            var btnBuild = await InitializeButton("btnBuildBuild", "Build", btnDesc, EnqueueGraph);
+            var btnBuild = await InitializeButton("btnBuildBuild", "Build", btnDesc, () =>
+            {
+                EnqueueGraph();
+
+                stateManager.StartState(States.Build);
+            });
 
             buildPanel.AddChild(btnAgent);
             buildPanel.AddChild(btnNavMeshparams);
@@ -329,6 +334,18 @@ namespace TerrainSamples.SceneNavMeshTest
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
+            agentEditor.CloseCallback += (accept) =>
+            {
+                if (accept)
+                {
+                    agentEditor.UpdateAgent(agent);
+                }
+
+                agentEditor.Visible = false;
+
+                stateManager.StartState(States.Build);
+            };
+
             await agentEditor.Initialize(defaultFont18, defaultFont12);
         }
         private async Task InitializeNavMeshEditor()
@@ -337,6 +354,18 @@ namespace TerrainSamples.SceneNavMeshTest
             var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
+
+            navMeshEditor.CloseCallback += (accept) =>
+            {
+                if (accept)
+                {
+                    navMeshEditor.UpdateSettings(nmsettings);
+                }
+
+                navMeshEditor.Visible = false;
+
+                stateManager.StartState(States.Build);
+            };
 
             await navMeshEditor.Initialize(defaultFont18, defaultFont12);
         }
@@ -367,8 +396,8 @@ namespace TerrainSamples.SceneNavMeshTest
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
             stateManager.InitializeState(States.Build, StartBuildState, UpdateGameStateBuild);
-            stateManager.InitializeState(States.Agent, StartAgentState, UpdateGameStateAgent);
-            stateManager.InitializeState(States.NavMesh, StartNavMeshState, UpdateGameStateNavMesh);
+            stateManager.InitializeState(States.Agent, StartAgentState, null);
+            stateManager.InitializeState(States.NavMesh, StartNavMeshState, null);
             stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
             stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
@@ -592,7 +621,10 @@ namespace TerrainSamples.SceneNavMeshTest
 
             lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;
 
-            mainPanel.Visible = true;
+            if (stateManager.GameState == States.Default)
+            {
+                mainPanel.Visible = true;
+            }
 
             DrawGraphNodes(agent);
 
@@ -738,26 +770,6 @@ namespace TerrainSamples.SceneNavMeshTest
             if (GameExit.JustReleased)
             {
                 stateManager.StartState(States.Default);
-            }
-        }
-        private void UpdateGameStateAgent()
-        {
-            if (GameExit.JustReleased)
-            {
-                agentEditor.UpdateAgent();
-                agentEditor.Visible = false;
-
-                stateManager.StartState(States.Build);
-            }
-        }
-        private void UpdateGameStateNavMesh()
-        {
-            if (GameExit.JustReleased)
-            {
-                navMeshEditor.UpdateSettings();
-                navMeshEditor.Visible = false;
-
-                stateManager.StartState(States.Build);
             }
         }
         private void UpdateGameStateRasterizer()

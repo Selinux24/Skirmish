@@ -11,8 +11,8 @@ namespace TerrainSamples.SceneNavMeshTest
     class AgentEditor(Scene scene) : Editor(scene)
     {
         private const string ObjectName = nameof(AgentEditor);
-
-        private Player agent;
+        private const string uMask = "{0:0}";
+        private const string dMask = "{0:0.0}";
 
         private EditorSlider height;
         private EditorSlider radius;
@@ -28,12 +28,12 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="font">Font</param>
         public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
         {
-            height = await InitializePropertySlider(ObjectName, "Height", font, 0.1f, 5f, 0.1f, "{0:0.0}");
-            radius = await InitializePropertySlider(ObjectName, "Radius", font, 0f, 5f, 0.1f, "{0:0.0}");
-            maxClimb = await InitializePropertySlider(ObjectName, "Max Climb", font, 0.1f, 5f, 0.1f, "{0:0.0}");
-            maxSlope = await InitializePropertySlider(ObjectName, "Max Slope", font, 0f, 90f, 1f, "{0:0}");
-            velocity = await InitializePropertySlider(ObjectName, "Velocity", font, 1f, 10f, 1f, "{0:0}");
-            velocitySlow = await InitializePropertySlider(ObjectName, "Velocity Slow", font, 1f, 10f, 1f, "{0:0}");
+            height = await InitializePropertySlider(ObjectName, "Height", font, 0.1f, 5f, 0.1f, dMask);
+            radius = await InitializePropertySlider(ObjectName, "Radius", font, 0f, 5f, 0.1f, dMask);
+            maxClimb = await InitializePropertySlider(ObjectName, "Max Climb", font, 0.1f, 5f, 0.1f, dMask);
+            maxSlope = await InitializePropertySlider(ObjectName, "Max Slope", font, 0f, 90f, 1f, uMask);
+            velocity = await InitializePropertySlider(ObjectName, "Velocity", font, 1f, 10f, 1f, uMask);
+            velocitySlow = await InitializePropertySlider(ObjectName, "Velocity Slow", font, 1f, 10f, 1f, uMask);
 
             await base.Initialize(fontTitle);
         }
@@ -44,8 +44,6 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="agent">Agent</param>
         public void InitializeAgentParameters(Player agent)
         {
-            this.agent = agent;
-
             height.SetValue(agent?.Height ?? 0);
             radius.SetValue(agent?.Radius ?? 0);
             maxClimb.SetValue(agent?.MaxClimb ?? 0);
@@ -58,7 +56,8 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Updates the agent data
         /// </summary>
-        public void UpdateAgent()
+        /// <param name="agent">Agent to update</param>
+        public void UpdateAgent(Player agent)
         {
             if (agent == null)
             {
