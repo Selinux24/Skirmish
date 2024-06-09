@@ -29,6 +29,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private EditorSlider detailSampleDist;
         private EditorSlider detailSampleMaxError;
         private EditorSlider tileSize;
+        private EditorCheckbox useTileCache;
         private EditorCheckbox buildAllTiles;
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace TerrainSamples.SceneNavMeshTest
             detailSampleDist = await InitializePropertySlider(ObjectName, "Detail Sample Dist", font, 0f, 16f, 1f, uMask);
             detailSampleMaxError = await InitializePropertySlider(ObjectName, "Detail Sample Max Error", font, 0f, 16f, 1f, uMask);
             tileSize = await InitializePropertySlider(ObjectName, "Tile Size", font, 16f, 1024f, 8f, uMask);
+            useTileCache = await InitializePropertyCheckbox(ObjectName, "Use Tile Cache", font);
             buildAllTiles = await InitializePropertyCheckbox(ObjectName, "Build All Tiles", font);
 
             await base.Initialize(fontTitle);
@@ -75,6 +77,7 @@ namespace TerrainSamples.SceneNavMeshTest
             detailSampleDist.SetValue(settings.DetailSampleDist);
             detailSampleMaxError.SetValue(settings.DetailSampleMaxError);
             tileSize.SetValue(settings.TileSize);
+            useTileCache.SetValue(settings.UseTileCache);
             buildAllTiles.SetValue(settings.BuildAllTiles);
 
             UpdateLayout();
@@ -103,6 +106,7 @@ namespace TerrainSamples.SceneNavMeshTest
             settings.DetailSampleDist = detailSampleDist.GetValue();
             settings.DetailSampleMaxError = detailSampleMaxError.GetValue();
             settings.TileSize = tileSize.GetValue();
+            settings.UseTileCache = useTileCache.GetValue();
             settings.BuildAllTiles = buildAllTiles.GetValue();
         }
 
@@ -130,6 +134,7 @@ namespace TerrainSamples.SceneNavMeshTest
             NextLine(VerticalPadding, ref top, null);
 
             SetGroupPosition(left, width, ref top, tileSize);
+            SetGroupPosition(left, width, ref top, useTileCache);
             SetGroupPosition(left, width, ref top, buildAllTiles);
         }
     }

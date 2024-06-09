@@ -59,7 +59,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private UITextArea message = null;
 
         private UIPanel mainPanel = null;
-        private UIPanel buildPanel = null;
+        private UIPanel meshPanel = null;
         private UIPanel debugPanel = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
@@ -170,26 +170,46 @@ namespace TerrainSamples.SceneNavMeshTest
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            title.Text = "Navigation Mesh Test Scene";
+            var titleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont18,
+                Text = "Navigation Mesh Test Scene",
+                TextForeColor = Color.White
+            };
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
-            debug = await AddComponentUI<UITextArea, UITextAreaDescription>("Debug", "Debug", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Green });
-            debug.Text = null;
+            var debugDesc = new UITextAreaDescription
+            {
+                Font = defaultFont12,
+                TextForeColor = Color.Green
+            };
+            debug = await AddComponentUI<UITextArea, UITextAreaDescription>("Debug", "Debug", debugDesc);
 
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            help.Text = null;
-            help.Visible = false;
+            var helpDesc = new UITextAreaDescription
+            {
+                Font = defaultFont12,
+                TextForeColor = Color.Yellow,
+                StartsVisible = false,
+            };
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", helpDesc);
 
-            message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Orange, GrowControlWithText = false, TextHorizontalAlign = TextHorizontalAlign.Right });
-            message.Text = null;
-            message.Visible = false;
+            var messageDesc = new UITextAreaDescription
+            {
+                Font = defaultFont12,
+                MaxTextLength = 256,
+                TextForeColor = Color.Orange,
+                GrowControlWithText = false,
+                TextHorizontalAlign = TextHorizontalAlign.Right,
+                StartsVisible = false,
+            };
+            message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", messageDesc);
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDebugButtons()
         {
-            var btnFont = TextDrawerDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Bold, true);
+            var btnFont = TextDrawerDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Regular);
             btnFont.ContentPath = resourcesUIFolder;
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
@@ -201,7 +221,7 @@ namespace TerrainSamples.SceneNavMeshTest
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
 
-            var btnBuild = await InitializeButton("btnBuild", "Build", btnDesc, () => stateManager.StartState(States.Build));
+            var btnMesh = await InitializeButton("btnMesh", "Mesh", btnDesc, () => stateManager.StartState(States.Mesh));
             var btnRasterizer = await InitializeButton("btnRasterizer", "Rasterizer", btnDesc, () => stateManager.StartState(States.Rasterizer));
             var btnTiles = await InitializeButton("btnTiles", "Tiles", btnDesc, () => stateManager.StartState(States.Tiles));
             var btnObstacle = await InitializeButton("btnObstacle", "Obstacles", btnDesc, () =>
@@ -220,7 +240,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
             var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnBuild, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnDebug];
+            UIButton[] mainBtns = [btnMesh, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -234,7 +254,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 mainPanel.AddChild(b);
             }
 
-            await InitializeBuildPanel(btnDesc);
+            await InitializeMeshPanel(btnDesc);
 
             await InitializeDebugPanel(btnDesc);
         }
@@ -243,75 +263,69 @@ namespace TerrainSamples.SceneNavMeshTest
             var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, LayerUI);
             button.Caption.Text = caption;
 
-            if (clickAction != null)
+            if (clickAction == null)
             {
-                button.MouseClick += async (ctrl, args) =>
-                {
-                    if (!gameReady)
-                    {
-                        return;
-                    }
-
-                    if (!args.Buttons.HasFlag(MouseButtons.Left))
-                    {
-                        return;
-                    }
-
-                    await Task.Delay(100);
-
-                    clickAction();
-                };
+                return button;
             }
+
+            button.MouseClick += async (ctrl, args) =>
+            {
+                if (!gameReady)
+                {
+                    return;
+                }
+
+                if (!args.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                await Task.Delay(100);
+
+                clickAction();
+            };
 
             return button;
         }
-        private async Task InitializeBuildPanel(UIButtonDescription btnDesc)
+        private async Task InitializeMeshPanel(UIButtonDescription btnDesc)
         {
+            var btnModel = await InitializeButton("btnMeshModel", "Load Model", btnDesc, SelectMap);
+            var btnAgent = await InitializeButton("btnMeshAgent", "Agent", btnDesc, () =>
+            {
+                stateManager.StartState(States.MeshAgent);
+            });
+            var btnNavMesh = await InitializeButton("btnMeshNavmesh", "Navmesh", btnDesc, () =>
+            {
+                stateManager.StartState(States.MeshNavMesh);
+            });
+            var btnBuild = await InitializeButton("btnMeshBuild", "Build", btnDesc, EnqueueGraph);
+            var btnBack = await InitializeButton("btnMeshBack", "Back", btnDesc, () =>
+            {
+                stateManager.StartState(States.Default);
+            });
+
+            UIButton[] btnList = [btnModel, btnAgent, btnNavMesh, btnBuild, btnBack];
+
             var desc = UIPanelDescription.Default(Color.Transparent);
-            buildPanel = await AddComponentUI<UIPanel, UIPanelDescription>("BuildPanel", "BuildPanel", desc);
-            buildPanel.Spacing = 10;
-            buildPanel.Padding = 15;
-            buildPanel.SetGridLayout(GridLayout.FixedRows(3));
-            buildPanel.Visible = false;
+            meshPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MeshPanel", "MeshPanel", desc);
+            meshPanel.Spacing = 10;
+            meshPanel.Padding = 15;
+            meshPanel.SetGridLayout(GridLayout.FixedRows(btnList.Length));
+            meshPanel.Visible = false;
 
-            var btnAgent = await InitializeButton("btnBuildAgent", "Agent", btnDesc, () =>
-            {
-                stateManager.StartState(States.Agent);
-            });
-            var btnNavMeshparams = await InitializeButton("btnNavMeshparams", "Navmesh", btnDesc, () =>
-            {
-                stateManager.StartState(States.NavMesh);
-            });
-            var btnBuild = await InitializeButton("btnBuildBuild", "Build", btnDesc, () =>
-            {
-                EnqueueGraph();
-
-                stateManager.StartState(States.Build);
-            });
-
-            buildPanel.AddChild(btnAgent);
-            buildPanel.AddChild(btnNavMeshparams);
-            buildPanel.AddChild(btnBuild);
+            meshPanel.AddChildren(btnList);
         }
         private async Task InitializeDebugPanel(UIButtonDescription btnDesc)
         {
+            List<UIButton> btnList = [];
+
             var enumValues = Enum.GetValues<GraphDebugTypes>();
-
-            var desc = UIPanelDescription.Default(Color.Transparent);
-            debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", desc);
-            debugPanel.Spacing = 10;
-            debugPanel.Padding = 15;
-            debugPanel.SetGridLayout(GridLayout.FixedRows(enumValues.Length));
-            debugPanel.Visible = false;
-
             foreach (var dType in enumValues)
             {
                 var btn = await InitializeButton($"btnDebug{dType}", $"{dType}", btnDesc, async () =>
                 {
                     if (debugType == dType)
                     {
-                        stateManager.StartState(States.Default);
-
                         return;
                     }
 
@@ -320,12 +334,24 @@ namespace TerrainSamples.SceneNavMeshTest
                     debugType = dType;
 
                     DrawGraphNodes(agent);
-
-                    stateManager.StartState(States.Default);
-
                 });
-                debugPanel.AddChild(btn);
+                btnList.Add(btn);
             }
+
+            var btnBack = await InitializeButton("btnDebugBack", "Back", btnDesc, () =>
+            {
+                stateManager.StartState(States.Default);
+            });
+            btnList.Add(btnBack);
+
+            var desc = UIPanelDescription.Default(Color.Transparent);
+            debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", desc);
+            debugPanel.Spacing = 10;
+            debugPanel.Padding = 15;
+            debugPanel.SetGridLayout(GridLayout.FixedRows(btnList.Count));
+            debugPanel.Visible = false;
+
+            debugPanel.AddChildren(btnList);
         }
         private async Task InitializeAgentEditor()
         {
@@ -343,7 +369,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
                 agentEditor.Visible = false;
 
-                stateManager.StartState(States.Build);
+                stateManager.StartState(States.Mesh);
             };
 
             await agentEditor.Initialize(defaultFont18, defaultFont12);
@@ -364,7 +390,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
                 navMeshEditor.Visible = false;
 
-                stateManager.StartState(States.Build);
+                stateManager.StartState(States.Mesh);
             };
 
             await navMeshEditor.Initialize(defaultFont18, defaultFont12);
@@ -389,15 +415,12 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void InitializeComponentsCompleted(LoadResourcesResult resUi)
         {
-            if (!resUi.Completed)
-            {
-                resUi.ThrowExceptions();
-            }
+            resUi.ThrowExceptions();
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
-            stateManager.InitializeState(States.Build, StartBuildState, UpdateGameStateBuild);
-            stateManager.InitializeState(States.Agent, StartAgentState, null);
-            stateManager.InitializeState(States.NavMesh, StartNavMeshState, null);
+            stateManager.InitializeState(States.Mesh, StartBuildState, UpdateGameStateMesh);
+            stateManager.InitializeState(States.MeshAgent, StartAgentState, null);
+            stateManager.InitializeState(States.MeshNavMesh, StartNavMeshState, null);
             stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
             stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
             stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
@@ -511,12 +534,12 @@ namespace TerrainSamples.SceneNavMeshTest
         private void InitializeMapData()
         {
             var group = LoadResourceGroup.FromTasks(
-                InitializeNavmesh,
+                InitializeMesh,
                 InitializeMapDataCompleted);
 
             LoadResources(group);
         }
-        private async Task InitializeNavmesh()
+        private async Task InitializeMesh()
         {
             var desc = new ModelDescription()
             {
@@ -531,6 +554,15 @@ namespace TerrainSamples.SceneNavMeshTest
                 PathFindingHull = PickingHullTypes.Perfect,
                 StartsVisible = false,
             };
+
+            if (inputGeometry != null)
+            {
+                inputGeometry.Active = false;
+                inputGeometry.Visible = false;
+                RemoveComponent(inputGeometry);
+            }
+
+            await Task.Delay(100);
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
@@ -603,47 +635,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
             Camera.SetInterest(center);
             Camera.SetPosition(center + new Vector3(1f, 1.2f, 1f) * maxD * 0.8f);
-            Camera.FarPlaneDistance = maxD * 3f;
+            Camera.FarPlaneDistance = maxD * 2.2f;
+            Camera.MovementDelta = maxD;
+            Camera.SlowMovementDelta = maxD * 0.1f;
 
             inputGeometry.Visible = true;
 
             EnqueueGraph();
-        }
-        public void NavigationGraphLoaded(bool loaded)
-        {
-            if (!loaded)
-            {
-                return;
-            }
-
-            var mapTime = DateTime.Now.TimeOfDay;
-            loadState = null;
-
-            lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;
-
-            if (stateManager.GameState == States.Default)
-            {
-                mainPanel.Visible = true;
-            }
-
-            DrawGraphNodes(agent);
-
-            DrawGraphObstaclesAreasAndConnections();
-
-            gameReady = true;
-        }
-        public void NavigationGraphUpdated(GraphUpdateStates state)
-        {
-            if (state != GraphUpdateStates.Updated)
-            {
-                return;
-            }
-
-            swUpdateGraph.Stop();
-            lastElapsedSeconds = swUpdateGraph.ElapsedMilliseconds / 1000.0f;
-            loadState = null;
-
-            DrawGraphNodes(agent);
         }
 
         public override void Update(IGameTime gameTime)
@@ -765,7 +763,7 @@ namespace TerrainSamples.SceneNavMeshTest
             UpdateNavmeshInput();
             UpdateGraphInput();
         }
-        private void UpdateGameStateBuild()
+        private void UpdateGameStateMesh()
         {
             if (GameExit.JustReleased)
             {
@@ -891,6 +889,19 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             NavigationGraph.UpdateAt(tilePosition, NavigationGraphUpdated);
+        }
+        public void NavigationGraphUpdated(GraphUpdateStates state)
+        {
+            if (state != GraphUpdateStates.Updated)
+            {
+                return;
+            }
+
+            swUpdateGraph.Stop();
+            lastElapsedSeconds = swUpdateGraph.ElapsedMilliseconds / 1000.0f;
+            loadState = null;
+
+            DrawGraphNodes(agent);
         }
         private void UpdateGameStateAddObstacle()
         {
@@ -1700,8 +1711,36 @@ namespace TerrainSamples.SceneNavMeshTest
             loadState = "Updating navigation graph.";
 
             enqueueTime = DateTime.Now.TimeOfDay;
-            EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
+            EnqueueNavigationGraphUpdate(NavigationGraphLoaded, NavigationGraphLoading);
         }
+        public void NavigationGraphLoaded(bool loaded)
+        {
+            if (!loaded)
+            {
+                return;
+            }
+
+            var mapTime = DateTime.Now.TimeOfDay;
+            loadState = null;
+
+            lastElapsedSeconds = (float)(mapTime - enqueueTime).TotalMilliseconds / 1000.0f;
+
+            if (stateManager.GameState == States.Default)
+            {
+                mainPanel.Visible = true;
+            }
+
+            DrawGraphNodes(agent);
+
+            DrawGraphObstaclesAreasAndConnections();
+
+            gameReady = true;
+        }
+        public void NavigationGraphLoading(float progress)
+        {
+            loadState = $"Updating navigation graph. {progress:0%}";
+        }
+
         private void ShowMessage(string text, long duration = 5000)
         {
             message.Text = text;
@@ -1728,22 +1767,22 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartDefaultState()
         {
             mainPanel.Visible = true;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             Rasterizer.EnableDebug = false;
         }
         private void StartBuildState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = true;
             debugPanel.Visible = false;
-            buildPanel.Visible = true;
         }
         private void StartAgentState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             agentEditor.InitializeAgentParameters(agent);
             agentEditor.Visible = true;
@@ -1751,8 +1790,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartNavMeshState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             navMeshEditor.InitializeSettings(nmsettings);
             navMeshEditor.Visible = true;
@@ -1760,8 +1799,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartRasterizerState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             Rasterizer.EnableDebug = true;
 
@@ -1770,32 +1809,32 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartTilesState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to update a tile. SHIFT {GContac1Point} to remove a tile. CTRL {GContac1Point} to add a tile.");
         }
         private void StartAddObstacleState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add obstacle. SHIFT {GContac1Point} to remove.");
         }
         private void StartAddAreaState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
         }
         private void StartAddConnectionState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             addConnectionStart = null;
 
@@ -1807,8 +1846,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartPathFindingState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = false;
-            buildPanel.Visible = false;
 
             pathFindingStart = null;
             pathFindingEnd = null;
@@ -1822,8 +1861,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private void StartDebugState()
         {
             mainPanel.Visible = false;
+            meshPanel.Visible = false;
             debugPanel.Visible = true;
-            buildPanel.Visible = false;
         }
 
         public override void GameGraphicsResized()
@@ -1841,18 +1880,18 @@ namespace TerrainSamples.SceneNavMeshTest
             message.Width = Game.Form.RenderWidth;
             message.Anchor = Anchors.BottomRight;
 
-            float cellH = Game.Form.RenderHeight * 0.0666f;
-            float cellW = Game.Form.RenderWidth * 0.1f;
+            float cellH = MathF.Min(35, Game.Form.RenderHeight * 0.05f);
+            float cellW = MathF.Min(180, Game.Form.RenderWidth * 0.1f);
 
             mainPanel.Height = cellH + mainPanel.Padding.Top;
             mainPanel.Width = cellW * mainPanel.GetGridLayout().Columns;
             mainPanel.Top = panel.Top + panel.Height;
             mainPanel.Anchor = Anchors.Right;
 
-            buildPanel.Height = cellH * buildPanel.GetGridLayout().Rows;
-            buildPanel.Width = cellW + buildPanel.Padding.Left;
-            buildPanel.Top = panel.Top + panel.Height;
-            buildPanel.Anchor = Anchors.Right;
+            meshPanel.Height = cellH * meshPanel.GetGridLayout().Rows;
+            meshPanel.Width = cellW + meshPanel.Padding.Left;
+            meshPanel.Top = panel.Top + panel.Height;
+            meshPanel.Anchor = Anchors.Right;
 
             debugPanel.Height = cellH * debugPanel.GetGridLayout().Rows;
             debugPanel.Width = cellW + debugPanel.Padding.Left;

@@ -61,6 +61,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly IEnumerable<(int i, TileCacheContour c)> IterateContours()
         {
+            if (conts == null)
+            {
+                yield break;
+            }
+
             for (int i = 0; i < conts.Length; i++)
             {
                 yield return (i, conts[i]);
@@ -71,6 +76,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public readonly IEnumerable<(TileCacheContour c, ContourVertex va, ContourVertex vb)> IterateContoursVertices()
         {
+            if (conts == null)
+            {
+                yield break;
+            }
+
             for (int i = 0; i < conts.Length; i++)
             {
                 if (conts[i].GetVertexCount() < 3)
