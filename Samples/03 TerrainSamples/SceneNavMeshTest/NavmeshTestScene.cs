@@ -29,6 +29,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private const string resourcesUIControls = "Common/UI/Controls/";
         private const string resourcesFont = "Tahoma";
         private const string resourcesButtonFonts = "Verdana, Consolas";
+        private const string agentFileName = "agentState.json";
+        private const string buildSettingsFileName = "buildSettingsState.json";
 
         private readonly InputMapper inputMapper;
 
@@ -70,7 +72,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private Model inputGeometry = null;
         private Model debugGeometry = null;
         private InputGeometry nminput = null;
-        private Player agent;
+        private readonly Player agent = new();
         private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
@@ -131,8 +133,6 @@ namespace TerrainSamples.SceneNavMeshTest
 
             Game.VisibleMouse = true;
             Game.LockMouse = false;
-
-            Camera.MovementDelta = 25f;
         }
 
         public override void Initialize()
@@ -365,6 +365,8 @@ namespace TerrainSamples.SceneNavMeshTest
                 if (accept)
                 {
                     agentEditor.UpdateAgent(agent);
+
+                    SerializationHelper.SerializeToFile(agent, agentFileName);
                 }
 
                 agentEditor.Visible = false;
@@ -386,6 +388,8 @@ namespace TerrainSamples.SceneNavMeshTest
                 if (accept)
                 {
                     navMeshEditor.UpdateSettings(nmsettings);
+
+                    SerializationHelper.SerializeToFile(nmsettings, buildSettingsFileName);
                 }
 
                 navMeshEditor.Visible = false;
@@ -418,7 +422,7 @@ namespace TerrainSamples.SceneNavMeshTest
             resUi.ThrowExceptions();
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
-            stateManager.InitializeState(States.Mesh, StartBuildState, UpdateGameStateMesh);
+            stateManager.InitializeState(States.Mesh, StartBuildState, null);
             stateManager.InitializeState(States.MeshAgent, StartAgentState, null);
             stateManager.InitializeState(States.MeshNavMesh, StartNavMeshState, null);
             stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
@@ -511,8 +515,6 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void SelectMap()
         {
-            mapSelected = false;
-
             System.Windows.Forms.OpenFileDialog dlg = new()
             {
                 Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
@@ -525,6 +527,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
+            mapSelected = false;
             mapResourcesFolder = Path.GetDirectoryName(dlg.FileName);
             mapFileName = Path.GetFileName(dlg.FileName);
             mapSelected = true;
@@ -571,17 +574,72 @@ namespace TerrainSamples.SceneNavMeshTest
             pathFilter.SetAreaCost(NavAreaTypes.Soil, 2f);
             pathFilter.SetAreaCost(NavAreaTypes.Grass, 5f);
 
-            agent = new()
+            ConfigureAgent(pathFilter);
+
+            ConfigureNavmeshSettings();
+
+            nminput = new(GetTrianglesForNavigationGraph);
+
+            PathFinderDescription = new(nmsettings, nminput, [agent]);
+        }
+        private void ConfigureAgent(NavQueryFilter pathFilter)
+        {
+            //Try to read from disk
+            if (File.Exists(agentFileName))
             {
-                Name = "Player",
-                Height = 2.4f,
-                Radius = 1.3f,
-                MaxClimb = 0.2f,
-                MaxSlope = 40f,
-                Velocity = 3f,
-                VelocitySlow = 1f,
-                PathFilter = pathFilter,
-            };
+                var agentFile = SerializationHelper.DeserializeFromFile<Player>(agentFileName);
+
+                agent.Name = agentFile.Name;
+                agent.Height = agentFile.Height;
+                agent.Radius = agentFile.Radius;
+                agent.MaxClimb = agentFile.MaxClimb;
+                agent.MaxSlope = agentFile.MaxSlope;
+                agent.Velocity = agentFile.Velocity;
+                agent.VelocitySlow = agentFile.VelocitySlow;
+
+                agent.PathFilter = pathFilter;
+
+                return;
+            }
+
+            agent.Name = "Player";
+            agent.Height = 2.4f;
+            agent.Radius = 1.3f;
+            agent.MaxClimb = 0.2f;
+            agent.MaxSlope = 40f;
+            agent.Velocity = 3f;
+            agent.VelocitySlow = 1f;
+            agent.PathFilter = pathFilter;
+        }
+        private void ConfigureNavmeshSettings()
+        {
+            //Try to read from disk
+            if (File.Exists(buildSettingsFileName))
+            {
+                var settingsFile = SerializationHelper.DeserializeFromFile<BuildSettings>(buildSettingsFileName);
+
+                nmsettings.CellSize = settingsFile.CellSize;
+                nmsettings.CellHeight = settingsFile.CellHeight;
+                nmsettings.RegionMinSize = settingsFile.RegionMinSize;
+                nmsettings.RegionMergeSize = settingsFile.RegionMergeSize;
+                nmsettings.PartitionType = settingsFile.PartitionType;
+                nmsettings.FilterLedgeSpans = settingsFile.FilterLedgeSpans;
+                nmsettings.FilterLowHangingObstacles = settingsFile.FilterLowHangingObstacles;
+                nmsettings.FilterWalkableLowHeightSpans = settingsFile.FilterWalkableLowHeightSpans;
+                nmsettings.EdgeMaxLength = settingsFile.EdgeMaxLength;
+                nmsettings.EdgeMaxError = settingsFile.EdgeMaxError;
+                nmsettings.VertsPerPoly = settingsFile.VertsPerPoly;
+                nmsettings.DetailSampleDist = settingsFile.DetailSampleDist;
+                nmsettings.DetailSampleMaxError = settingsFile.DetailSampleMaxError;
+                nmsettings.BuildMode = settingsFile.BuildMode;
+                nmsettings.TileSize = settingsFile.TileSize;
+                nmsettings.BuildAllTiles = settingsFile.BuildAllTiles;
+                nmsettings.UseTileCache = settingsFile.UseTileCache;
+
+                nmsettings.EnableDebugInfo = true;
+
+                return;
+            }
 
             //Rasterization
             nmsettings.CellSize = 0.3f;
@@ -615,10 +673,6 @@ namespace TerrainSamples.SceneNavMeshTest
 
             //Debugging
             nmsettings.EnableDebugInfo = true;
-
-            nminput = new(GetTrianglesForNavigationGraph);
-
-            PathFinderDescription = new(nmsettings, nminput, [agent]);
         }
         private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
@@ -690,6 +744,11 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateCameraInput()
         {
+            if (InputProcessedByUI)
+            {
+                return;
+            }
+
             if (CamLeft.Pressed)
             {
                 Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
@@ -753,6 +812,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             stateManager.UpdateState();
         }
+
         private void UpdateGameStateDefault()
         {
             if (GameExit.JustReleased)
@@ -762,421 +822,6 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UpdateNavmeshInput();
             UpdateGraphInput();
-        }
-        private void UpdateGameStateMesh()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-        }
-        private void UpdateGameStateRasterizer()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased)
-            {
-                return;
-            }
-
-            UpdateRasterization();
-        }
-        private void UpdateRasterization()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            BoundingBox bounds;
-            int width;
-            int height;
-            if (nmsettings.BuildMode == BuildModes.Solo)
-            {
-                Config.CalcGridSize(nminput.BoundingBox, nmsettings.CellSize, out width, out height);
-                bounds = nminput.BoundingBox;
-            }
-            else
-            {
-                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, nminput.BoundingBox, out var tx, out var ty);
-                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, nminput.BoundingBox);
-
-                width = tiledCfg.Width;
-                height = tiledCfg.Height;
-                bounds = tiledCfg.CalculateTileBounds(tx, ty);
-            }
-
-            int walkableClimb = (int)MathF.Floor(agent.MaxClimb / nmsettings.CellHeight);
-
-            RasterizerSettings settings = new()
-            {
-                WalkableSlopeAngle = agent.MaxSlope,
-                WalkableClimb = walkableClimb,
-                Bounds = bounds,
-                Width = width,
-                Height = height,
-                CellSize = nmsettings.CellSize,
-                CellHeight = nmsettings.CellHeight,
-            };
-
-            triangleDrawer.Clear(Color.CornflowerBlue);
-            triangleDrawer.Clear(Color.OrangeRed);
-            triangleDrawer.Clear(Color.Yellow);
-            triangleDrawer.Clear(Color.Blue);
-
-            lineDrawer.Clear(Color.CornflowerBlue);
-            lineDrawer.Clear(Color.OrangeRed);
-            lineDrawer.Clear(Color.Yellow);
-            lineDrawer.Clear(Color.Blue);
-
-            var rData = Rasterizer.Rasterize([r.PickingResult.Primitive], settings).ToArray();
-            if (rData.Length > 0)
-            {
-                DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
-            }
-        }
-        private void UpdateGameStateTiles()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased)
-            {
-                return;
-            }
-
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            lastPosition = r.PickingResult.Position;
-
-            ToggleTile(lastPosition);
-        }
-        private void ToggleTile(Vector3 tilePosition)
-        {
-            if (NavigationGraph == null)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            bool create = Game.Input.ControlPressed;
-
-            lastElapsedSeconds = null;
-            loadState = $"Updating tile at {tilePosition}.";
-            swUpdateGraph = Stopwatch.StartNew();
-
-            if (create)
-            {
-                NavigationGraph.CreateAt(tilePosition, NavigationGraphUpdated);
-                return;
-            }
-
-            if (remove)
-            {
-                NavigationGraph.RemoveAt(tilePosition, NavigationGraphUpdated);
-                return;
-            }
-
-            NavigationGraph.UpdateAt(tilePosition, NavigationGraphUpdated);
-        }
-        public void NavigationGraphUpdated(GraphUpdateStates state)
-        {
-            if (state != GraphUpdateStates.Updated)
-            {
-                return;
-            }
-
-            swUpdateGraph.Stop();
-            lastElapsedSeconds = swUpdateGraph.ElapsedMilliseconds / 1000.0f;
-            loadState = null;
-
-            DrawGraphNodes(agent);
-        }
-        private void UpdateGameStateAddObstacle()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            if (remove)
-            {
-                UpdateObstacleRemove();
-            }
-            else
-            {
-                UpdateObstacleAdd();
-            }
-        }
-        private void UpdateObstacleAdd()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            var p = r.PickingResult.Position;
-            float h = 1f;
-            var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
-            var cy = new BoundingCylinder(center, 0.5f, h);
-            int id = NavigationGraph.AddObstacle(cy);
-            obstacles.Add(new()
-            {
-                Id = id,
-                Obstacle = cy,
-            });
-            DrawGraphObstaclesAreasAndConnections();
-
-            NavigationGraph.UpdateAt(p);
-
-            stateManager.StartState(States.Default);
-        }
-        private void UpdateObstacleRemove()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            var ray = (Ray)pRay;
-
-            foreach (var obs in obstacles)
-            {
-                if (obs.Bbox.Intersects(ref ray))
-                {
-                    NavigationGraph.RemoveObstacle(obs.Id);
-                    obstacles.Remove(obs);
-                    DrawGraphObstaclesAreasAndConnections();
-
-                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
-
-                    stateManager.StartState(States.Default);
-                    break;
-                }
-            }
-        }
-        private void UpdateGameStateAddArea()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            if (remove)
-            {
-                UpdateAreaRemove();
-            }
-            else
-            {
-                UpdateAreaAdd();
-            }
-        }
-        private void UpdateAreaAdd()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            float hmin = -0.5f;
-            float hmax = 1f;
-
-            var center = r.PickingResult.Position;
-            center.Y = 0;
-            float radius = 2.5f;
-            var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
-            Vector3[] verts = [.. circle.Vertices];
-
-            GraphAreaPolygon p = new(verts, hmin, hmax);
-            p.SetAreaType(NavAreaTypes.Grass);
-
-            int id = PathFinderDescription.AddArea(p);
-            areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });
-
-            EnqueueGraph();
-
-            stateManager.StartState(States.Default);
-        }
-        private void UpdateAreaRemove()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            var ray = (Ray)pRay;
-
-            var area = areas.Find(a => a.IntersectsRay(ray));
-            if (area == null)
-            {
-                return;
-            }
-
-            PathFinderDescription.RemoveArea(area.Id);
-            areas.Remove(area);
-
-            EnqueueGraph();
-
-            stateManager.StartState(States.Default);
-        }
-        private void UpdateGameStateAddConnection()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased)
-            {
-                return;
-            }
-
-            bool remove = Game.Input.ShiftPressed;
-            if (remove)
-            {
-                UpdateConnectionRemove();
-            }
-            else
-            {
-                UpdateConnectionAdd();
-            }
-        }
-        private void UpdateConnectionAdd()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            float rad = 0.5f;
-
-            if (addConnectionStart == null)
-            {
-                addConnectionStart = r.PickingResult.Position;
-                DrawCircle(addConnectionStart.Value, rad, connectionColorStart);
-
-                return;
-            }
-
-            var addConnectionEnd = r.PickingResult.Position;
-            DrawCircle(addConnectionEnd, rad, connectionColorEnd);
-
-            bool bidir = Game.Input.ControlPressed;
-            int id = PathFinderDescription.AddConnection(addConnectionStart.Value, addConnectionEnd, rad, bidir, NavAreaTypes.Rock, AgentActionTypes.Jump);
-            connections.Add(new() { Id = id, From = addConnectionStart.Value, To = addConnectionEnd, Radius = rad, BiDirectional = bidir });
-
-            EnqueueGraph();
-
-            lineDrawer.Clear(connectionColorStart);
-            lineDrawer.Clear(connectionColorEnd);
-
-            stateManager.StartState(States.Default);
-        }
-        private void UpdateConnectionRemove()
-        {
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            var ray = (Ray)pRay;
-
-            foreach (var con in connections)
-            {
-                if (!con.IntersectsRay(ray))
-                {
-                    continue;
-                }
-
-                PathFinderDescription.RemoveConnection(con.Id);
-                connections.Remove(con);
-
-                EnqueueGraph();
-
-                stateManager.StartState(States.Default);
-                break;
-            }
-        }
-        private void UpdateGameStateDebug()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-        }
-        private void UpdateGameStatePathFinding()
-        {
-            if (GameExit.JustReleased)
-            {
-                stateManager.StartState(States.Default);
-            }
-
-            if (!GContac1Point.JustReleased && !GContac2Point.JustReleased)
-            {
-                return;
-            }
-
-            var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-            {
-                return;
-            }
-
-            if (GContac2Point.JustReleased || pathFindingStart == null)
-            {
-                pathFindingStart = r.PickingResult.Position;
-
-                UpdatePathFindingData();
-
-                return;
-            }
-
-            pathFindingEnd = r.PickingResult.Position;
-
-            UpdatePathFindingData();
-        }
-        private void UpdatePathFindingData()
-        {
-            lineDrawer.Clear(pathFindingColorStart);
-            lineDrawer.Clear(pathFindingColorEnd);
-            lineDrawer.Clear(pathFindingColorPath);
-
-            ShowMessage(pathFinderHelpMessage);
-
-            var start = pathFindingStart;
-            var end = pathFindingEnd;
-
-            if (start != null)
-            {
-                DrawCircle(start.Value, agent.Radius * 2, pathFindingColorStart);
-                DrawPlayer(start.Value, pathFindingColorStart);
-            }
-
-            if (end != null)
-            {
-                DrawCircle(end.Value, agent.Radius * 2, pathFindingColorEnd);
-                DrawPlayer(end.Value, pathFindingColorEnd);
-            }
-
-            if (start != null && end != null)
-            {
-                var path = FindPath(agent, start.Value, end.Value, false);
-                DrawPath(path, pathFindingColorPath);
-            }
         }
         private void UpdateNavmeshInput()
         {
@@ -1426,6 +1071,421 @@ namespace TerrainSamples.SceneNavMeshTest
             return true;
         }
 
+        private void UpdateGameStateRasterizer()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            UpdateRasterization();
+        }
+        private void UpdateRasterization()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            BoundingBox bounds;
+            int width;
+            int height;
+            if (nmsettings.BuildMode == BuildModes.Solo)
+            {
+                Config.CalcGridSize(nminput.BoundingBox, nmsettings.CellSize, out width, out height);
+                bounds = nminput.BoundingBox;
+            }
+            else
+            {
+                NavMesh.GetTileAtPosition(r.PickingResult.Position, nmsettings.TileCellSize, nminput.BoundingBox, out var tx, out var ty);
+                var tiledCfg = TilesConfig.GetTilesConfig(nmsettings, agent, nminput.BoundingBox);
+
+                width = tiledCfg.Width;
+                height = tiledCfg.Height;
+                bounds = tiledCfg.CalculateTileBounds(tx, ty);
+            }
+
+            int walkableClimb = (int)MathF.Floor(agent.MaxClimb / nmsettings.CellHeight);
+
+            RasterizerSettings settings = new()
+            {
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableClimb = walkableClimb,
+                Bounds = bounds,
+                Width = width,
+                Height = height,
+                CellSize = nmsettings.CellSize,
+                CellHeight = nmsettings.CellHeight,
+            };
+
+            triangleDrawer.Clear(Color.CornflowerBlue);
+            triangleDrawer.Clear(Color.OrangeRed);
+            triangleDrawer.Clear(Color.Yellow);
+            triangleDrawer.Clear(Color.Blue);
+
+            lineDrawer.Clear(Color.CornflowerBlue);
+            lineDrawer.Clear(Color.OrangeRed);
+            lineDrawer.Clear(Color.Yellow);
+            lineDrawer.Clear(Color.Blue);
+
+            var rData = Rasterizer.Rasterize([r.PickingResult.Primitive], settings).ToArray();
+            if (rData.Length > 0)
+            {
+                DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
+            }
+        }
+
+        private void UpdateGameStateTiles()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            lastPosition = r.PickingResult.Position;
+
+            ToggleTile(lastPosition);
+        }
+        private void ToggleTile(Vector3 tilePosition)
+        {
+            if (NavigationGraph == null)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            bool create = Game.Input.ControlPressed;
+
+            lastElapsedSeconds = null;
+            loadState = $"Updating tile at {tilePosition}.";
+            swUpdateGraph = Stopwatch.StartNew();
+
+            if (create)
+            {
+                NavigationGraph.CreateAt(tilePosition, NavigationGraphUpdated);
+                return;
+            }
+
+            if (remove)
+            {
+                NavigationGraph.RemoveAt(tilePosition, NavigationGraphUpdated);
+                return;
+            }
+
+            NavigationGraph.UpdateAt(tilePosition, NavigationGraphUpdated);
+        }
+        public void NavigationGraphUpdated(GraphUpdateStates state)
+        {
+            if (state != GraphUpdateStates.Updated)
+            {
+                return;
+            }
+
+            swUpdateGraph.Stop();
+            lastElapsedSeconds = swUpdateGraph.ElapsedMilliseconds / 1000.0f;
+            loadState = null;
+
+            DrawGraphNodes(agent);
+        }
+
+        private void UpdateGameStateAddObstacle()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateObstacleRemove();
+            }
+            else
+            {
+                UpdateObstacleAdd();
+            }
+        }
+        private void UpdateObstacleAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            var p = r.PickingResult.Position;
+            float h = 1f;
+            var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
+            var cy = new BoundingCylinder(center, 0.5f, h);
+            int id = NavigationGraph.AddObstacle(cy);
+            obstacles.Add(new()
+            {
+                Id = id,
+                Obstacle = cy,
+            });
+            DrawGraphObstaclesAreasAndConnections();
+
+            NavigationGraph.UpdateAt(p);
+
+            stateManager.StartState(States.Default);
+        }
+        private void UpdateObstacleRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var obs in obstacles)
+            {
+                if (obs.Bbox.Intersects(ref ray))
+                {
+                    NavigationGraph.RemoveObstacle(obs.Id);
+                    obstacles.Remove(obs);
+                    DrawGraphObstaclesAreasAndConnections();
+
+                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
+
+                    stateManager.StartState(States.Default);
+                    break;
+                }
+            }
+        }
+
+        private void UpdateGameStateAddArea()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateAreaRemove();
+            }
+            else
+            {
+                UpdateAreaAdd();
+            }
+        }
+        private void UpdateAreaAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            float hmin = -0.5f;
+            float hmax = 1f;
+
+            var center = r.PickingResult.Position;
+            center.Y = 0;
+            float radius = 2.5f;
+            var circle = GeometryUtil.CreateCircle(Topology.LineList, center, radius, 12);
+            Vector3[] verts = [.. circle.Vertices];
+
+            GraphAreaPolygon p = new(verts, hmin, hmax);
+            p.SetAreaType(NavAreaTypes.Grass);
+
+            int id = PathFinderDescription.AddArea(p);
+            areas.Add(new ConvexAreaMarker() { Id = id, Vertices = verts, MinH = hmin, MaxH = hmax });
+
+            EnqueueGraph();
+
+            stateManager.StartState(States.Default);
+        }
+        private void UpdateAreaRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            var area = areas.Find(a => a.IntersectsRay(ray));
+            if (area == null)
+            {
+                return;
+            }
+
+            PathFinderDescription.RemoveArea(area.Id);
+            areas.Remove(area);
+
+            EnqueueGraph();
+
+            stateManager.StartState(States.Default);
+        }
+
+        private void UpdateGameStateAddConnection()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            bool remove = Game.Input.ShiftPressed;
+            if (remove)
+            {
+                UpdateConnectionRemove();
+            }
+            else
+            {
+                UpdateConnectionAdd();
+            }
+        }
+        private void UpdateConnectionAdd()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            float rad = 0.5f;
+
+            if (addConnectionStart == null)
+            {
+                addConnectionStart = r.PickingResult.Position;
+                DrawCircle(addConnectionStart.Value, rad, connectionColorStart);
+
+                return;
+            }
+
+            var addConnectionEnd = r.PickingResult.Position;
+            DrawCircle(addConnectionEnd, rad, connectionColorEnd);
+
+            bool bidir = Game.Input.ControlPressed;
+            int id = PathFinderDescription.AddConnection(addConnectionStart.Value, addConnectionEnd, rad, bidir, NavAreaTypes.Rock, AgentActionTypes.Jump);
+            connections.Add(new() { Id = id, From = addConnectionStart.Value, To = addConnectionEnd, Radius = rad, BiDirectional = bidir });
+
+            EnqueueGraph();
+
+            lineDrawer.Clear(connectionColorStart);
+            lineDrawer.Clear(connectionColorEnd);
+
+            stateManager.StartState(States.Default);
+        }
+        private void UpdateConnectionRemove()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            var ray = (Ray)pRay;
+
+            foreach (var con in connections)
+            {
+                if (!con.IntersectsRay(ray))
+                {
+                    continue;
+                }
+
+                PathFinderDescription.RemoveConnection(con.Id);
+                connections.Remove(con);
+
+                EnqueueGraph();
+
+                stateManager.StartState(States.Default);
+                break;
+            }
+        }
+
+        private void UpdateGameStatePathFinding()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Default);
+            }
+
+            if (!GContac1Point.JustReleased && !GContac2Point.JustReleased)
+            {
+                return;
+            }
+
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            if (GContac2Point.JustReleased || pathFindingStart == null)
+            {
+                pathFindingStart = r.PickingResult.Position;
+
+                UpdatePathFindingData();
+
+                return;
+            }
+
+            pathFindingEnd = r.PickingResult.Position;
+
+            UpdatePathFindingData();
+        }
+        private void UpdatePathFindingData()
+        {
+            lineDrawer.Clear(pathFindingColorStart);
+            lineDrawer.Clear(pathFindingColorEnd);
+            lineDrawer.Clear(pathFindingColorPath);
+
+            ShowMessage(pathFinderHelpMessage);
+
+            var start = pathFindingStart;
+            var end = pathFindingEnd;
+
+            if (start != null)
+            {
+                DrawCircle(start.Value, agent.Radius * 2, pathFindingColorStart);
+                DrawPlayer(start.Value, pathFindingColorStart);
+            }
+
+            if (end != null)
+            {
+                DrawCircle(end.Value, agent.Radius * 2, pathFindingColorEnd);
+                DrawPlayer(end.Value, pathFindingColorEnd);
+            }
+
+            if (start != null && end != null)
+            {
+                var path = FindPath(agent, start.Value, end.Value, false);
+                DrawPath(path, pathFindingColorPath);
+            }
+        }
+
+        private void UpdateGameStateDebug()
+        {
+            if (GContac1Point.JustReleased)
+            {
+                UpdateContactInput();
+            }
+        }
+
         private void DrawPoint(Vector3 position, float size, Color4 color)
         {
             var cross = Line3D.CreateCross(position, size);
@@ -1564,6 +1624,7 @@ namespace TerrainSamples.SceneNavMeshTest
                         return;
                     }
 
+                    tmp.Active = false;
                     tmp.Visible = false;
                     RemoveComponent(tmp);
                 });

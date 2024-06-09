@@ -30,11 +30,11 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Vertical marging
         /// </summary>
-        public float VerticalMarging { get; set; } = 20;
+        public float VerticalMarging { get; set; } = 12;
         /// <summary>
         /// Vertical padding
         /// </summary>
-        public float VerticalPadding { get; set; } = 8;
+        public float VerticalPadding { get; set; } = 6;
         /// <summary>
         /// Editor top-left position
         /// </summary>
