@@ -35,11 +35,20 @@ namespace Engine.UI
                     return;
                 }
 
+                if (OnValueChanging?.Invoke(value) == true)
+                {
+                    return;
+                }
+
                 isChecked = value;
 
                 OnValueChanged?.Invoke(isChecked);
             }
         }
+        /// <summary>
+        /// Value changing event
+        /// </summary>
+        public Func<bool, bool> OnValueChanging { get; set; }
         /// <summary>
         /// Value changed event
         /// </summary>

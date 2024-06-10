@@ -17,15 +17,15 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Caption
         /// </summary>
-        public UITextArea Caption { get; set; }
+        private readonly UITextArea caption;
         /// <summary>
         /// Value text
         /// </summary>
-        public UITextArea Value { get; set; }
+        private readonly UITextArea value;
         /// <summary>
         /// Slider
         /// </summary>
-        public UISlider Slider { get; set; }
+        private readonly UISlider slider;
 
         /// <summary>
         /// Constructor
@@ -36,13 +36,13 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="slider">Slider control</param>
         public EditorSlider(UITextArea caption, UITextArea value, string format, UISlider slider)
         {
-            Caption = caption ?? throw new ArgumentNullException(nameof(caption));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-            Slider = slider ?? throw new ArgumentNullException(nameof(slider));
+            this.caption = caption ?? throw new ArgumentNullException(nameof(caption));
+            this.value = value ?? throw new ArgumentNullException(nameof(value));
+            this.slider = slider ?? throw new ArgumentNullException(nameof(slider));
 
-            Slider.OnValueChanged = (index, value) =>
+            this.slider.OnValueChanged = (index, value) =>
             {
-                Value.Text = string.Format(format ?? "{0:0.00}", value);
+                this.value.Text = string.Format(format ?? "{0:0.00}", value);
 
                 float top = groupTop;
                 SetPosition(ref top);
@@ -55,7 +55,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <returns>Returns the value</returns>
         public float GetValue()
         {
-            return Slider.GetValue(0);
+            return slider.GetValue(0);
         }
         /// <summary>
         /// Sets the value
@@ -63,7 +63,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="value">Value</param>
         public void SetValue(float value)
         {
-            Slider.SetValue(0, value);
+            slider.SetValue(0, value);
         }
 
         /// <summary>
@@ -90,21 +90,21 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="top">Top position</param>
         private void SetPosition(ref float top)
         {
-            Caption.SetPosition(groupLeft, top);
-            Caption.Width = groupWidth;
-            Caption.Visible = groupVisible;
+            caption.SetPosition(groupLeft, top);
+            caption.Width = groupWidth;
+            caption.Visible = groupVisible;
 
-            Value.GrowControlWithText = true;
-            Value.SetPosition(groupLeft + groupWidth - Value.Width, top);
-            Value.Visible = groupVisible;
+            value.GrowControlWithText = true;
+            value.SetPosition(groupLeft + groupWidth - value.Width, top);
+            value.Visible = groupVisible;
 
-            Editor.NextLine(verticalPadding, ref top, Caption);
+            Editor.NextLine(verticalPadding, ref top, caption);
 
-            Slider.SetPosition(groupLeft, top);
-            Slider.Width = groupWidth;
-            Slider.Visible = groupVisible;
+            slider.SetPosition(groupLeft, top);
+            slider.Width = groupWidth;
+            slider.Visible = groupVisible;
 
-            Editor.NextLine(verticalPadding, ref top, Slider);
+            Editor.NextLine(verticalPadding, ref top, slider);
         }
     }
 }

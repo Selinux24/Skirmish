@@ -4,7 +4,7 @@ using System;
 namespace TerrainSamples.SceneNavMeshTest
 {
     /// <summary>
-    /// Checkbox group editor
+    /// Checkbox editor
     /// </summary>
     /// <remarks>
     /// Constructor
@@ -15,16 +15,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <summary>
         /// Checkbox
         /// </summary>
-        public UICheckbox Checkbox { get; set; } = checkbox ?? throw new ArgumentNullException(nameof(checkbox));
-
-        /// <summary>
-        /// Sets the caption
-        /// </summary>
-        /// <param name="caption">Caption text</param>
-        public void SetCaption(string caption)
-        {
-            Checkbox.Caption.Text = caption;
-        }
+        private readonly UICheckbox checkbox = checkbox ?? throw new ArgumentNullException(nameof(checkbox));
 
         /// <summary>
         /// Gets the value
@@ -32,7 +23,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <returns>Returns the value</returns>
         public bool GetValue()
         {
-            return Checkbox.Checked;
+            return checkbox.Checked;
         }
         /// <summary>
         /// Sets the value
@@ -40,7 +31,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="value">Value</param>
         public void SetValue(bool value)
         {
-            Checkbox.Checked = value;
+            checkbox.Checked = value;
         }
 
         /// <summary>
@@ -55,11 +46,11 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             Editor.NextLine(padding, ref top, null);
 
-            Checkbox.SetPosition(left, top);
-            Checkbox.Width = width;
-            Checkbox.Visible = visible;
+            checkbox.SetPosition(left, top);
+            checkbox.Width = width;
+            checkbox.Visible = visible;
 
-            Editor.NextLine(padding, ref top, Checkbox);
+            Editor.NextLine(padding, ref top, checkbox);
         }
     }
 }

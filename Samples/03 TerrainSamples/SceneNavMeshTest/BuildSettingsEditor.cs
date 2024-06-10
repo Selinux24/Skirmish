@@ -1,25 +1,28 @@
 ﻿using Engine;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
+using System;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
     /// <summary>
-    /// Navigation mesh editor
+    /// Build settings editor
     /// </summary>
     /// <param name="scene">Scene</param>
-    class NavMeshEditor(Scene scene) : Editor(scene)
+    class BuildSettingsEditor(Scene scene) : Editor(scene)
     {
-        private const string ObjectName = nameof(NavMeshEditor);
+        private const string ObjectName = nameof(BuildSettingsEditor);
         private const string uMask = "{0:0}";
         private const string dMask = "{0:0.0}";
         private const string cMask = "{0:0.00}";
 
+        private EditorCheckboxGroup<BuildModes> buildMode;
         private EditorSlider cellSize;
         private EditorSlider cellHeight;
         private EditorSlider regionMinSize;
         private EditorSlider regionMergeSize;
+        private EditorCheckboxGroup<SamplePartitionTypes> partition;
         private EditorCheckbox filterLedgeSpans;
         private EditorCheckbox filterLowHangingObstacles;
         private EditorCheckbox filterWalkableLowHeightSpans;
@@ -39,10 +42,12 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="font">Font</param>
         public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
         {
+            buildMode = await InitializePropertyCheckboxGroup(ObjectName, "Build Mode", font, Enum.GetValues<BuildModes>());
             cellSize = await InitializePropertySlider(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, cMask);
             cellHeight = await InitializePropertySlider(ObjectName, "Cell Height", font, 0.1f, 1f, 0.01f, cMask);
             regionMinSize = await InitializePropertySlider(ObjectName, "Region Min Size", font, 0f, 150f, 1f, uMask);
             regionMergeSize = await InitializePropertySlider(ObjectName, "Merge Region Size", font, 0f, 150f, 1f, uMask);
+            partition = await InitializePropertyCheckboxGroup(ObjectName, "Partition", font, Enum.GetValues<SamplePartitionTypes>());
             filterLedgeSpans = await InitializePropertyCheckbox(ObjectName, "Filter Ledge Spans", font);
             filterLowHangingObstacles = await InitializePropertyCheckbox(ObjectName, "Filter Low Hanging Obstacles", font);
             filterWalkableLowHeightSpans = await InitializePropertyCheckbox(ObjectName, "Filter Walkable Low Height Spans", font);
@@ -64,10 +69,12 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="settings">Navmesh settings</param>
         public void InitializeSettings(BuildSettings settings)
         {
+            buildMode.SetValue(settings.BuildMode);
             cellSize.SetValue(settings.CellSize);
             cellHeight.SetValue(settings.CellHeight);
             regionMinSize.SetValue(settings.RegionMinSize);
             regionMergeSize.SetValue(settings.RegionMergeSize);
+            partition.SetValue(settings.PartitionType);
             filterLedgeSpans.SetValue(settings.FilterLedgeSpans);
             filterLowHangingObstacles.SetValue(settings.FilterLowHangingObstacles);
             filterWalkableLowHeightSpans.SetValue(settings.FilterWalkableLowHeightSpans);
@@ -93,10 +100,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
+            settings.BuildMode = buildMode.GetValue();
             settings.CellSize = cellSize.GetValue();
             settings.CellHeight = cellHeight.GetValue();
             settings.RegionMinSize = regionMinSize.GetValue();
             settings.RegionMergeSize = regionMergeSize.GetValue();
+            settings.PartitionType = partition.GetValue();
             settings.FilterLedgeSpans = filterLedgeSpans.GetValue();
             settings.FilterLowHangingObstacles = filterLowHangingObstacles.GetValue();
             settings.FilterWalkableLowHeightSpans = filterWalkableLowHeightSpans.GetValue();
@@ -113,12 +122,20 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <inheritdoc/>
         protected override void UpdateControlsLayout(float left, float width, ref float top)
         {
+            SetGroupPosition(left, width, ref top, buildMode);
+            NextLine(VerticalPadding, ref top, null);
+
             SetGroupPosition(left, width, ref top, cellSize);
             SetGroupPosition(left, width, ref top, cellHeight);
             NextLine(VerticalPadding, ref top, null);
 
             SetGroupPosition(left, width, ref top, regionMinSize);
             SetGroupPosition(left, width, ref top, regionMergeSize);
+            NextLine(VerticalPadding, ref top, null);
+
+            SetGroupPosition(left, width, ref top, partition);
+            NextLine(VerticalPadding, ref top, null);
+
             SetGroupPosition(left, width, ref top, filterLedgeSpans);
             SetGroupPosition(left, width, ref top, filterLowHangingObstacles);
             SetGroupPosition(left, width, ref top, filterWalkableLowHeightSpans);

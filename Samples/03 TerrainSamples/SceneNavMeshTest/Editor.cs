@@ -218,6 +218,27 @@ namespace TerrainSamples.SceneNavMeshTest
 
             return new(checkbox);
         }
+        /// <summary>
+        /// Initializes a property group
+        /// </summary>
+        /// <typeparam name="T">Value type</typeparam>
+        /// <param name="objId">Object id</param>
+        /// <param name="id">Id</param>
+        /// <param name="font">Font</param>
+        /// <param name="values">Value list</param>
+        protected async Task<EditorCheckboxGroup<T>> InitializePropertyCheckboxGroup<T>(string objId, string id, TextDrawerDescription font, T[] values)
+        {
+            var caption = await InitializeText($"{objId}_Caption.{id}", $"Caption.{id}", font, id);
+
+            UICheckbox[] chkBoxes = new UICheckbox[values.Length];
+
+            for (var i = 0; i < values.Length; i++)
+            {
+                chkBoxes[i] = await InitializeCheckbox($"{objId}.{id}.{i}", $"{id}.{i}", font, values[i].ToString());
+            }
+
+            return new(caption, chkBoxes, values);
+        }
 
         /// <summary>
         /// Updates the editor
@@ -291,6 +312,17 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="top">Top</param>
         /// <param name="checkboxEditor">Checkbox editor</param>
         protected void SetGroupPosition(float left, float width, ref float top, EditorCheckbox checkboxEditor)
+        {
+            checkboxEditor.SetGroupPosition(visible, left, width, VerticalPadding, ref top);
+        }
+        /// <summary>
+        /// Sets the editor group position
+        /// </summary>
+        /// <param name="left">Left</param>
+        /// <param name="width">Width</param>
+        /// <param name="top">Top</param>
+        /// <param name="checkboxEditor">Checkbox editor</param>
+        protected void SetGroupPosition<T>(float left, float width, ref float top, EditorCheckboxGroup<T> checkboxEditor)
         {
             checkboxEditor.SetGroupPosition(visible, left, width, VerticalPadding, ref top);
         }

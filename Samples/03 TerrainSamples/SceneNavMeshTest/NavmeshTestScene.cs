@@ -47,9 +47,6 @@ namespace TerrainSamples.SceneNavMeshTest
         public InputEntry NmRndPoint { get; set; }
         public InputEntry GContac1Point { get; set; }
         public InputEntry GContac2Point { get; set; }
-        public InputEntry GBuild { get; set; }
-        public InputEntry GPartition { get; set; }
-        public InputEntry GTileCache { get; set; }
         public InputEntry GSave { get; set; }
         public InputEntry GLoad { get; set; }
 
@@ -121,7 +118,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private Stopwatch swUpdateGraph = Stopwatch.StartNew();
 
         private readonly AgentEditor agentEditor;
-        private readonly NavMeshEditor navMeshEditor;
+        private readonly BuildSettingsEditor navMeshEditor;
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -188,6 +185,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var helpDesc = new UITextAreaDescription
             {
                 Font = defaultFont12,
+                MaxTextLength = 256,
                 TextForeColor = Color.Yellow,
                 StartsVisible = false,
             };
@@ -463,9 +461,6 @@ namespace TerrainSamples.SceneNavMeshTest
                     new("NmRndPoint", Keys.R),
                     new("GContac1Point", MouseButtons.Left),
                     new("GContac2Point", MouseButtons.Right),
-                    new("GBuild", Keys.B),
-                    new("GPartition", Keys.P),
-                    new("GTileCache", Keys.T),
                     new("GSave", Keys.F5),
                     new("GLoad", Keys.F6),
                 ]
@@ -493,9 +488,6 @@ namespace TerrainSamples.SceneNavMeshTest
             NmRndPoint = inputMapper.Get("NmRndPoint");
             GContac1Point = inputMapper.Get("GContac1Point");
             GContac2Point = inputMapper.Get("GContac2Point");
-            GBuild = inputMapper.Get("GBuild");
-            GPartition = inputMapper.Get("GPartition");
-            GTileCache = inputMapper.Get("GTileCache");
             GSave = inputMapper.Get("GSave");
             GLoad = inputMapper.Get("GLoad");
 
@@ -525,6 +517,12 @@ namespace TerrainSamples.SceneNavMeshTest
             if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             {
                 return;
+            }
+
+            if (debugGeometry != null)
+            {
+                debugGeometry.Active = false;
+                debugGeometry.Visible = false;
             }
 
             mapSelected = false;
@@ -901,21 +899,6 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            if (GBuild.JustReleased)
-            {
-                updateGraph = ChangeBuilMode(!Game.Input.ShiftPressed);
-            }
-
-            if (GPartition.JustReleased)
-            {
-                updateGraph = ChangePartitionType(!Game.Input.ShiftPressed);
-            }
-
-            if (GTileCache.JustReleased)
-            {
-                updateGraph = ChangeUseTileCache(!nmsettings.UseTileCache);
-            }
-
             if (updateGraph)
             {
                 EnqueueGraph();
@@ -982,93 +965,6 @@ namespace TerrainSamples.SceneNavMeshTest
             DrawTriangle(r.PickingResult.Primitive, pColor);
 
             DrawGraphNodes(agent);
-        }
-        private bool ChangeBuilMode(bool next)
-        {
-            if (lastElapsedSeconds == null)
-            {
-                ShowOnGraphLoadingMessage();
-
-                return false;
-            }
-
-            var buildModes = Enum.GetNames(typeof(BuildModes)).Length;
-            BuildModes newBuildMode;
-            if (next)
-            {
-                newBuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, buildModes);
-            }
-            else
-            {
-                newBuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, buildModes);
-            }
-
-            nmsettings.BuildMode = newBuildMode;
-
-            if (nmsettings.BuildMode == BuildModes.Solo && nmsettings.UseTileCache)
-            {
-                ShowMessage($"TileCache disabled due to change to Build {newBuildMode}.");
-
-                nmsettings.UseTileCache = false;
-            }
-
-            return true;
-        }
-        private bool ChangePartitionType(bool next)
-        {
-            if (lastElapsedSeconds == null)
-            {
-                ShowOnGraphLoadingMessage();
-
-                return false;
-            }
-
-            var sampleTypes = Enum.GetNames(typeof(SamplePartitionTypes)).Length;
-            SamplePartitionTypes newPartitionType;
-            if (next)
-            {
-                newPartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, sampleTypes);
-            }
-            else
-            {
-                newPartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, sampleTypes);
-            }
-
-            if (nmsettings.UseTileCache)
-            {
-                ShowMessage("Partition type cannot be changed with TileCache Enabled.");
-
-                return false;
-            }
-
-            nmsettings.PartitionType = newPartitionType;
-
-            return true;
-        }
-        private bool ChangeUseTileCache(bool useTileCache)
-        {
-            if (lastElapsedSeconds == null)
-            {
-                ShowOnGraphLoadingMessage();
-
-                return false;
-            }
-
-            if (nmsettings.UseTileCache == useTileCache)
-            {
-                return false;
-            }
-
-            if (nmsettings.BuildMode == BuildModes.Solo)
-            {
-                ShowMessage($"TileCache cannot be activated with Build mode {nmsettings.BuildMode} Enabled.");
-
-                return false;
-            }
-
-            nmsettings.UseTileCache = useTileCache;
-
-            return true;
         }
 
         private void UpdateGameStateRasterizer()
@@ -1814,10 +1710,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private string GetHelpText()
         {
-            return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move, Mouse To look (Press {GameWindowedLook} in windowed mode). 
-{GBuild}: Change Build Mode (SHIFT reverse).
-{GPartition}: Change Partition Type (SHIFT reverse).
-{GTileCache}: Toggle using Tile Cache.
+            return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move.
+Mouse To look (Press {GameWindowedLook} in windowed mode). 
 {GSave}: Saves the graph to a file.
 {GLoad}: Loads the graph from a file.
 {GContac1Point}: Update current tile (SHIFT remove, CTRL add).
@@ -1935,7 +1829,7 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             title.SetPosition(Vector2.Zero);
             debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
-            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
+            help.SetPosition(new Vector2(0, debug.Top + (debug.Height + 3) * 5));
             panel.Width = Game.Form.RenderWidth;
             panel.Height = debug.Top + debug.Height + 3;
             message.Width = Game.Form.RenderWidth;
