@@ -29,12 +29,13 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="values">Value list</param>
         public EditorCheckboxGroup(UITextArea caption, UICheckbox[] checkboxes, T[] values)
         {
-            this.caption = caption ?? throw new ArgumentNullException(nameof(caption));
-            ArgumentNullException.ThrowIfNull(checkboxes, nameof(checkboxes));
-            ArgumentNullException.ThrowIfNull(values, nameof(values));
-            ArgumentOutOfRangeException.ThrowIfZero(checkboxes.Length, nameof(checkboxes));
-            ArgumentOutOfRangeException.ThrowIfNotEqual(checkboxes.Length, values.Length, nameof(checkboxes));
+            ArgumentNullException.ThrowIfNull(caption);
+            ArgumentNullException.ThrowIfNull(checkboxes);
+            ArgumentNullException.ThrowIfNull(values);
+            ArgumentOutOfRangeException.ThrowIfZero(checkboxes.Length);
+            ArgumentOutOfRangeException.ThrowIfNotEqual(checkboxes.Length, values.Length);
 
+            this.caption = caption;
             this.checkboxes = checkboxes;
             this.values = values;
 

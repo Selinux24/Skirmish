@@ -47,8 +47,6 @@ namespace TerrainSamples.SceneNavMeshTest
         public InputEntry NmRndPoint { get; set; }
         public InputEntry GContac1Point { get; set; }
         public InputEntry GContac2Point { get; set; }
-        public InputEntry GSave { get; set; }
-        public InputEntry GLoad { get; set; }
 
         private UIControlTweener uiTweener;
         private Sprite panel = null;
@@ -297,12 +295,14 @@ namespace TerrainSamples.SceneNavMeshTest
                 stateManager.StartState(States.MeshNavMesh);
             });
             var btnBuild = await InitializeButton("btnMeshBuild", "Build", btnDesc, EnqueueGraph);
+            var btnSave = await InitializeButton("btnMeshSave", "Save Navmesh", btnDesc, SaveNavmeshToFile);
+            var btnLoad = await InitializeButton("btnMeshLoad", "Load Navmesh", btnDesc, LoadNavmeshFromFile);
             var btnBack = await InitializeButton("btnMeshBack", "Back", btnDesc, () =>
             {
                 stateManager.StartState(States.Default);
             });
 
-            UIButton[] btnList = [btnModel, btnAgent, btnNavMesh, btnBuild, btnBack];
+            UIButton[] btnList = [btnModel, btnAgent, btnNavMesh, btnBuild, btnSave, btnLoad, btnBack];
 
             var desc = UIPanelDescription.Default(Color.Transparent);
             meshPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MeshPanel", "MeshPanel", desc);
@@ -461,8 +461,6 @@ namespace TerrainSamples.SceneNavMeshTest
                     new("NmRndPoint", Keys.R),
                     new("GContac1Point", MouseButtons.Left),
                     new("GContac2Point", MouseButtons.Right),
-                    new("GSave", Keys.F5),
-                    new("GLoad", Keys.F6),
                 ]
             };
 
@@ -488,8 +486,6 @@ namespace TerrainSamples.SceneNavMeshTest
             NmRndPoint = inputMapper.Get("NmRndPoint");
             GContac1Point = inputMapper.Get("GContac1Point");
             GContac2Point = inputMapper.Get("GContac2Point");
-            GSave = inputMapper.Get("GSave");
-            GLoad = inputMapper.Get("GLoad");
 
             help.Text = GetHelpText();
 
@@ -876,66 +872,9 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void UpdateGraphInput()
         {
-            bool updateGraph = false;
-
-            if (GSave.JustReleased)
-            {
-                UpdateGraphSaveInput();
-
-                return;
-            }
-
-            if (GLoad.JustReleased)
-            {
-                UpdateGraphLoadInput();
-
-                return;
-            }
-
             if (GContac1Point.JustReleased)
             {
                 UpdateContactInput();
-
-                return;
-            }
-
-            if (updateGraph)
-            {
-                EnqueueGraph();
-            }
-        }
-        private void UpdateGraphSaveInput()
-        {
-            if (lastElapsedSeconds == null)
-            {
-                ShowOnGraphLoadingMessage();
-
-                return;
-            }
-
-            using var dlg = new System.Windows.Forms.SaveFileDialog();
-            dlg.FileName = @"test.grf";
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
-            }
-        }
-        private void UpdateGraphLoadInput()
-        {
-            if (lastElapsedSeconds == null)
-            {
-                ShowOnGraphLoadingMessage();
-
-                return;
-            }
-
-            using var dlg = new System.Windows.Forms.OpenFileDialog();
-            dlg.FileName = @"test.grf";
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                LoadNavigationGraphFromFile(dlg.FileName);
             }
         }
         private void UpdateContactInput()
@@ -1404,7 +1343,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
-            var circle = Line3D.CreateCircle(position, radius, 12);
+            var circle = Line3D.CreateCircle(position, radius, 36);
             lineDrawer.AddPrimitives(color, circle);
         }
         private void DrawPlayer(Vector3 position, Color4 color)
@@ -1698,6 +1637,41 @@ namespace TerrainSamples.SceneNavMeshTest
             loadState = $"Updating navigation graph. {progress:0%}";
         }
 
+        private void SaveNavmeshToFile()
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.SaveFileDialog();
+            dlg.FileName = @"test.grf";
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                PathFinderDescription.Save(dlg.FileName, NavigationGraph);
+            }
+        }
+        private void LoadNavmeshFromFile()
+        {
+            if (lastElapsedSeconds == null)
+            {
+                ShowOnGraphLoadingMessage();
+
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.OpenFileDialog();
+            dlg.FileName = @"test.grf";
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                LoadNavigationGraphFromFile(dlg.FileName);
+            }
+        }
+
         private void ShowMessage(string text, long duration = 5000)
         {
             message.Text = text;
@@ -1712,9 +1686,6 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             return @$"Camera: {CamFwd} {CamLeft} {CamBwd} {CamRight} {CamUp} & {CamDown} to move.
 Mouse To look (Press {GameWindowedLook} in windowed mode). 
-{GSave}: Saves the graph to a file.
-{GLoad}: Loads the graph from a file.
-{GContac1Point}: Update current tile (SHIFT remove, CTRL add).
 {NmRndPointCircle}: Finds random point around circle (5 units).
 {NmRndPoint}: Finds random over navmesh";
         }
