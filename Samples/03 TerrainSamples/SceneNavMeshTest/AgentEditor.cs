@@ -35,7 +35,7 @@ namespace TerrainSamples.SceneNavMeshTest
             velocity = await InitializePropertySlider(ObjectName, "Velocity", font, 1f, 10f, 1f, uMask);
             velocitySlow = await InitializePropertySlider(ObjectName, "Velocity Slow", font, 1f, 10f, 1f, uMask);
 
-            await base.Initialize(fontTitle);
+            await base.Initialize(fontTitle, "Agent Parameters");
         }
 
         /// <summary>

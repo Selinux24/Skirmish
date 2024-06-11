@@ -74,13 +74,14 @@ namespace TerrainSamples.SceneNavMeshTest
         /// Initializes the editor
         /// </summary>
         /// <param name="font">Font</param>
-        public virtual async Task Initialize(TextDrawerDescription font)
+        /// <param name="title">Title</param>
+        public virtual async Task Initialize(TextDrawerDescription font, string titleText)
         {
             string id = GetType().Name;
 
             mainPanel = await InitializePanel($"{id}_MainPanel", "MainPanel");
 
-            title = await InitializeText($"{id}_Agent.Title", "Agent.Title", font, "Agent Parameters");
+            title = await InitializeText($"{id}_Agent.Title", "Agent.Title", font, titleText);
 
             await InitializeButtons(id);
 

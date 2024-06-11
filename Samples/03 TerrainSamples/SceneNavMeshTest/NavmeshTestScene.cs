@@ -31,6 +31,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private const string resourcesButtonFonts = "Verdana, Consolas";
         private const string agentFileName = "agentState.json";
         private const string buildSettingsFileName = "buildSettingsState.json";
+        private const string crowdSettingsFileName = "crowdSettingsState.json";
 
         private readonly InputMapper inputMapper;
 
@@ -57,6 +58,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private UIPanel mainPanel = null;
         private UIPanel meshPanel = null;
+        private UIPanel crowdPanel = null;
         private UIPanel debugPanel = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
@@ -69,6 +71,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private InputGeometry nminput = null;
         private readonly Player agent = new();
         private readonly BuildSettings nmsettings = BuildSettings.Default;
+        private CrowdSettings crowdSettings = CrowdSettings.Default;
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -117,12 +120,14 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private readonly AgentEditor agentEditor;
         private readonly BuildSettingsEditor navMeshEditor;
+        private readonly CrowdEditor crowdEditor;
 
         public NavmeshTestScene(Game game) : base(game)
         {
             inputMapper = new InputMapper(Game);
             agentEditor = new(this);
             navMeshEditor = new(this);
+            crowdEditor = new(this);
 
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
@@ -146,6 +151,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     InitializeDebugButtons,
                     InitializeAgentEditor,
                     InitializeNavMeshEditor,
+                    InitializeCrowdEditor,
                     InitializeDebugDrawers,
                 ],
                 InitializeComponentsCompleted);
@@ -234,9 +240,10 @@ namespace TerrainSamples.SceneNavMeshTest
             var btnArea = await InitializeButton("btnArea", "Areas", btnDesc, () => stateManager.StartState(States.AddArea));
             var btnConn = await InitializeButton("btnConn", "Connections", btnDesc, () => stateManager.StartState(States.AddConnection));
             var btnPathFinding = await InitializeButton("btnPathFinding", "Path Finding", btnDesc, () => stateManager.StartState(States.PathFinding));
+            var btnCrowds = await InitializeButton("btnCrowds", "Crowds", btnDesc, () => stateManager.StartState(States.Crowd));
             var btnDebug = await InitializeButton("btnDebug", "Debug", btnDesc, () => stateManager.StartState(States.Debug));
 
-            UIButton[] mainBtns = [btnMesh, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnDebug];
+            UIButton[] mainBtns = [btnMesh, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnCrowds, btnDebug];
 
             var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
@@ -251,6 +258,8 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             await InitializeMeshPanel(btnDesc);
+
+            await InitializeCrowdsPanel(btnDesc);
 
             await InitializeDebugPanel(btnDesc);
         }
@@ -312,6 +321,36 @@ namespace TerrainSamples.SceneNavMeshTest
             meshPanel.Visible = false;
 
             meshPanel.AddChildren(btnList);
+        }
+        private async Task InitializeCrowdsPanel(UIButtonDescription btnDesc)
+        {
+            var btnSettings = await InitializeButton("btnCrowdSettings", "Crowd Settings", btnDesc, () =>
+            {
+                stateManager.StartState(States.CrowdSettings);
+            });
+            var btnAddAgents = await InitializeButton("btnCrowdAddAgents", "Add Agents", btnDesc, () =>
+            {
+                stateManager.StartState(States.CrowdAddAgents);
+            });
+            var btnMoveTarget = await InitializeButton("btnCrowdMoveTarget", "Move Target", btnDesc, () =>
+            {
+                stateManager.StartState(States.CrowdMoveTarget);
+            });
+            var btnBack = await InitializeButton("btnCrowdBack", "Back", btnDesc, () =>
+            {
+                stateManager.StartState(States.Default);
+            });
+
+            UIButton[] btnList = [btnSettings, btnAddAgents, btnMoveTarget, btnBack];
+
+            var desc = UIPanelDescription.Default(Color.Transparent);
+            crowdPanel = await AddComponentUI<UIPanel, UIPanelDescription>("CrowdPanel", "CrowdPanel", desc);
+            crowdPanel.Spacing = 10;
+            crowdPanel.Padding = 15;
+            crowdPanel.SetGridLayout(GridLayout.FixedRows(btnList.Length));
+            crowdPanel.Visible = false;
+
+            crowdPanel.AddChildren(btnList);
         }
         private async Task InitializeDebugPanel(UIButtonDescription btnDesc)
         {
@@ -397,6 +436,29 @@ namespace TerrainSamples.SceneNavMeshTest
 
             await navMeshEditor.Initialize(defaultFont18, defaultFont12);
         }
+        private async Task InitializeCrowdEditor()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            crowdEditor.CloseCallback += (accept) =>
+            {
+                if (accept)
+                {
+                    crowdEditor.UpdateSettings(ref crowdSettings);
+
+                    SerializationHelper.SerializeToFile(crowdSettings, crowdSettingsFileName);
+                }
+
+                crowdEditor.Visible = false;
+
+                stateManager.StartState(States.Crowd);
+            };
+
+            await crowdEditor.Initialize(defaultFont18, defaultFont12);
+        }
         private async Task InitializeDebugDrawers()
         {
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -420,7 +482,7 @@ namespace TerrainSamples.SceneNavMeshTest
             resUi.ThrowExceptions();
 
             stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
-            stateManager.InitializeState(States.Mesh, StartBuildState, null);
+            stateManager.InitializeState(States.Mesh, StartMeshState, null);
             stateManager.InitializeState(States.MeshAgent, StartAgentState, null);
             stateManager.InitializeState(States.MeshNavMesh, StartNavMeshState, null);
             stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
@@ -429,6 +491,10 @@ namespace TerrainSamples.SceneNavMeshTest
             stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
             stateManager.InitializeState(States.AddConnection, StartAddConnectionState, UpdateGameStateAddConnection);
             stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
+            stateManager.InitializeState(States.Crowd, StartCrowdState, null);
+            stateManager.InitializeState(States.CrowdSettings, StartCrowdSettingsState, null);
+            stateManager.InitializeState(States.CrowdAddAgents, StartCrowdAddAgentsState, UpdateGameStateCrowdAddAgent);
+            stateManager.InitializeState(States.CrowdMoveTarget, StartCrowdMoveTargetState, UpdateGameStateCrowdMoveTarget);
             stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
 
             UpdateLayout();
@@ -734,6 +800,11 @@ namespace TerrainSamples.SceneNavMeshTest
             if (navMeshEditor.Visible)
             {
                 navMeshEditor.Update();
+            }
+
+            if (crowdEditor.Visible)
+            {
+                crowdEditor.Update();
             }
         }
         private void UpdateCameraInput()
@@ -1313,6 +1384,55 @@ namespace TerrainSamples.SceneNavMeshTest
             }
         }
 
+        private void UpdateGameStateCrowdAddAgent()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Crowd);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            UpdateCrowdAddAgent();
+        }
+        private void UpdateCrowdAddAgent()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            ShowMessage("TODO: Add crowd aggent!.");
+        }
+        private void UpdateGameStateCrowdMoveTarget()
+        {
+            if (GameExit.JustReleased)
+            {
+                stateManager.StartState(States.Crowd);
+            }
+
+            if (!GContac1Point.JustReleased)
+            {
+                return;
+            }
+
+            UpdateCrowdMoveTarget();
+        }
+        private void UpdateCrowdMoveTarget()
+        {
+            var pRay = GetPickingRay(PickingHullTypes.Perfect);
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            {
+                return;
+            }
+
+            ShowMessage("TODO: Move crowd target!.");
+        }
+
         private void UpdateGameStateDebug()
         {
             if (GContac1Point.JustReleased)
@@ -1694,20 +1814,23 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = true;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             Rasterizer.EnableDebug = false;
         }
-        private void StartBuildState()
+        private void StartMeshState()
         {
             mainPanel.Visible = false;
             meshPanel.Visible = true;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
         }
         private void StartAgentState()
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             agentEditor.InitializeAgentParameters(agent);
@@ -1717,15 +1840,48 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             navMeshEditor.InitializeSettings(nmsettings);
             navMeshEditor.Visible = true;
         }
+        private void StartCrowdState()
+        {
+            mainPanel.Visible = false;
+            meshPanel.Visible = false;
+            crowdPanel.Visible = true;
+            debugPanel.Visible = false;
+        }
+        private void StartCrowdSettingsState()
+        {
+            mainPanel.Visible = false;
+            meshPanel.Visible = false;
+            crowdPanel.Visible = false;
+            debugPanel.Visible = false;
+
+            crowdEditor.InitializeSettings(crowdSettings);
+            crowdEditor.Visible = true;
+        }
+        private void StartCrowdAddAgentsState()
+        {
+            mainPanel.Visible = false;
+            meshPanel.Visible = false;
+            crowdPanel.Visible = false;
+            debugPanel.Visible = false;
+        }
+        private void StartCrowdMoveTargetState()
+        {
+            mainPanel.Visible = false;
+            meshPanel.Visible = false;
+            crowdPanel.Visible = false;
+            debugPanel.Visible = false;
+        }
         private void StartRasterizerState()
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             Rasterizer.EnableDebug = true;
@@ -1736,6 +1892,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to update a tile. SHIFT {GContac1Point} to remove a tile. CTRL {GContac1Point} to add a tile.");
@@ -1744,6 +1901,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add obstacle. SHIFT {GContac1Point} to remove.");
@@ -1752,6 +1910,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             ShowMessage($"Press {GContac1Point} to add area. SHIFT {GContac1Point} to remove.");
@@ -1760,6 +1919,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             addConnectionStart = null;
@@ -1773,6 +1933,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = false;
 
             pathFindingStart = null;
@@ -1788,6 +1949,7 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             mainPanel.Visible = false;
             meshPanel.Visible = false;
+            crowdPanel.Visible = false;
             debugPanel.Visible = true;
         }
 
@@ -1819,6 +1981,11 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
             meshPanel.Top = panel.Top + panel.Height;
             meshPanel.Anchor = Anchors.Right;
 
+            crowdPanel.Height = cellH * crowdPanel.GetGridLayout().Rows;
+            crowdPanel.Width = cellW + crowdPanel.Padding.Left;
+            crowdPanel.Top = panel.Top + panel.Height;
+            crowdPanel.Anchor = Anchors.Right;
+
             debugPanel.Height = cellH * debugPanel.GetGridLayout().Rows;
             debugPanel.Width = cellW + debugPanel.Padding.Left;
             debugPanel.Top = panel.Top + panel.Height;
@@ -1831,6 +1998,10 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
             navMeshEditor.Width = 350;
             navMeshEditor.Position = new Vector2(15, panel.Height + 2);
             navMeshEditor.UpdateLayout();
+
+            crowdEditor.Width = 250;
+            crowdEditor.Position = new Vector2(15, panel.Height + 2);
+            crowdEditor.UpdateLayout();
         }
     }
 }

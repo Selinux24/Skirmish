@@ -44,6 +44,22 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         PathFinding,
         /// <summary>
+        /// Crowd
+        /// </summary>
+        Crowd,
+        /// <summary>
+        /// Crowd settings
+        /// </summary>
+        CrowdSettings,
+        /// <summary>
+        /// Add crowd agents
+        /// </summary>
+        CrowdAddAgents,
+        /// <summary>
+        /// Move crowd target
+        /// </summary>
+        CrowdMoveTarget,
+        /// <summary>
         /// Debug drawing selector state
         /// </summary>
         Debug,

@@ -60,7 +60,7 @@ namespace TerrainSamples.SceneNavMeshTest
             useTileCache = await InitializePropertyCheckbox(ObjectName, "Use Tile Cache", font);
             buildAllTiles = await InitializePropertyCheckbox(ObjectName, "Build All Tiles", font);
 
-            await base.Initialize(fontTitle);
+            await base.Initialize(fontTitle, "Build Settings");
         }
 
         /// <summary>
