@@ -11,32 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\Agents\Leopard\Leopard_0.bmp" />
-    <None Remove="Common\Agents\Leopard\Leopard_1.bmp" />
-    <None Remove="Common\Agents\Leopard\Leopard_2.bmp" />
-    <None Remove="Common\Buildings\Obelisk2\obelisk.json" />
-    <None Remove="Common\Buildings\Obelisk2\obelisk.mtl" />
-    <None Remove="Common\Buildings\Obelisk2\obelisk.obj" />
-    <None Remove="Common\Buildings\Obelisk2\obelisk_d.jpg" />
-    <None Remove="Common\Buildings\Obelisk2\obelisk_n.jpg" />
-    <None Remove="Common\Effects\Particles\explosion.png" />
-    <None Remove="Common\Effects\Particles\fire.dds" />
-    <None Remove="Common\Effects\Particles\fire.png" />
-    <None Remove="Common\Effects\Particles\floor.png" />
-    <None Remove="Common\Effects\Particles\smoke.png" />
-    <None Remove="Common\Props\Rocks\boulder.json" />
-    <None Remove="Common\Props\Rocks\boulder_1.dae" />
-    <None Remove="Common\Props\Rocks\boulder_2.dae" />
-    <None Remove="Common\Props\Rocks\boulder_3.dae" />
-    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_diffuse.dds" />
-    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_normal.dds" />
-    <None Remove="Common\Props\Rocks\boulder_granite_grey_01_specular.dds" />
-  </ItemGroup>
-
-  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Content Include="Common\Agents\Leopard\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

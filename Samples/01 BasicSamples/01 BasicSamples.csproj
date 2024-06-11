@@ -12,15 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\Floors\Dirt\dirt002.dds" />
-    <None Remove="Common\Floors\Dirt\normal001.dds" />
-    <None Remove="Common\Floors\floor.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Content Include="Common\buttons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

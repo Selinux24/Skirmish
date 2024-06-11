@@ -1,6 +1,5 @@
 ﻿using Engine.UI;
 using System;
-using System.Linq;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
@@ -75,8 +74,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <returns>Returns the value</returns>
         public T GetValue()
         {
-            var chkBox = checkboxes.FirstOrDefault(c => c.Checked);
-            int index = Array.IndexOf(checkboxes, chkBox);
+            int index = Array.FindIndex(checkboxes, c => c.Checked);
             if (index < 0)
             {
                 return default;

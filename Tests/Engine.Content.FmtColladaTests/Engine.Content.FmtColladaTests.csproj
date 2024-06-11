@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Content Include="Resources\Tank\Leopard_backed.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

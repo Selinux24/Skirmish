@@ -11,37 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\Soldier\soldier0.jpg" />
-    <None Remove="Common\Soldier\Soldier1.jpg" />
-    <None Remove="Common\Soldier\Soldier2.jpg" />
-    <None Remove="Common\Soldier\soldier_anim2.dae" />
-    <None Remove="Common\Soldier\soldier_anim2.json" />
-    <None Remove="SceneGardener\Resources\dirt002.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_d0.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_d1.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_d2.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_n0.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_n1.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_n2.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_p0.png" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_p1.png" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_p2.png" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_v0.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_v1.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\grass_v2.dds" />
-    <None Remove="SceneGardener\Resources\Foliage\map.png" />
-    <None Remove="SceneGardener\Resources\Foliage\mapTest.png" />
-    <None Remove="SceneGardener\Resources\normal001.dds" />
-    <None Remove="Common\Terrain\terrain.png" />
-    <None Remove="Common\Terrain\terrain_nmap.png" />
-    <None Remove="Common\Terrain\Tree1.dae" />
-    <None Remove="Common\Terrain\tree1.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Content Include="Common\Soldier\Soldier2.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

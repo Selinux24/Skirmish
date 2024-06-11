@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Content Include="ScenePhysics\Resources\Terrain\collisionTerrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

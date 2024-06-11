@@ -9,4 +9,8 @@
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
 </Project>
