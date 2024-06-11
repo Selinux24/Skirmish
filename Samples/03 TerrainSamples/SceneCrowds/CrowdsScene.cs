@@ -559,7 +559,7 @@ namespace TerrainSamples.SceneCrowds
 
             crowd = new Crowd(settings);
 
-            crowdManager.AddCrowd(crowd);
+            crowdManager.AddCrowd(crowd, CrowdSettings.Default);
 
             var par = new CrowdAgentParameters()
             {

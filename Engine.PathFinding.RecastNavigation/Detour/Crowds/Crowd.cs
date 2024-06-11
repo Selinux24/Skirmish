@@ -171,7 +171,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
 
         /// <inheritdoc/>
-        public void Initialize(IGraph graph)
+        public void Initialize(IGraph graph, CrowdSettings settings)
         {
             if (graph is not Graph gr)
             {

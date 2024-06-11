@@ -20,7 +20,8 @@ namespace Engine.PathFinding
         /// Initializes the crowd graph
         /// </summary>
         /// <param name="graph">Graph</param>
-        void Initialize(IGraph graph);
+        /// <param name="settings">Crowd settings</param>
+        void Initialize(IGraph graph, CrowdSettings settings);
 
         /// <summary>
         /// Adds a new agent to the crowd.

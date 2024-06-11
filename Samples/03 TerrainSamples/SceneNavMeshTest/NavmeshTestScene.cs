@@ -1406,7 +1406,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            ShowMessage("TODO: Add crowd aggent!.");
+            ShowMessage($"TODO: Add crowd aggent at {r.PickingResult.Position}!.");
         }
         private void UpdateGameStateCrowdMoveTarget()
         {
@@ -1430,7 +1430,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            ShowMessage("TODO: Move crowd target!.");
+            ShowMessage($"TODO: Move crowd target at {r.PickingResult.Position}!.");
         }
 
         private void UpdateGameStateDebug()

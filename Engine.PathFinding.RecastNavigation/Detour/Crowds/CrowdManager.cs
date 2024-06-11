@@ -19,9 +19,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private readonly List<ICrowd<GraphAgentType, CrowdAgent>> crowds = [];
 
         /// <inheritdoc/>
-        public void AddCrowd<TCrowd>(TCrowd crowd) where TCrowd : ICrowd<GraphAgentType, CrowdAgent>
+        public void AddCrowd<TCrowd>(TCrowd crowd, CrowdSettings settings) where TCrowd : ICrowd<GraphAgentType, CrowdAgent>
         {
-            crowd.Initialize(graph);
+            crowd.Initialize(graph, settings);
 
             crowds.Add(crowd);
         }

@@ -15,7 +15,8 @@ namespace Engine.PathFinding
         /// Adds a new crowd
         /// </summary>
         /// <param name="crowd">Crowd</param>
-        void AddCrowd<TCrowd>(TCrowd crowd) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
+        /// <param name="settings">Crowd settings</param>
+        void AddCrowd<TCrowd>(TCrowd crowd, CrowdSettings settings) where TCrowd : ICrowd<TAgent, TCrowdAgent>;
         /// <summary>
         /// Request move all agents in the crowd
         /// </summary>
