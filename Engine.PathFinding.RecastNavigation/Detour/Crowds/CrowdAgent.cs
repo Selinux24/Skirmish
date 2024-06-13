@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Represents an agent managed by a Crowd object.
     /// </summary>
-    public class CrowdAgent : ICrowdAgent
+    public class CrowdAgent
     {
         /// The maximum number of corners a crowd agent will look ahead in the path.
         /// This value is used for sizing the crowd agent corner buffers.
@@ -22,7 +22,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         private readonly List<CrowdNeighbour> neighbours = [];
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// True if the agent is active, false if the agent is in an unused slot in the agent pool.
+        /// </summary>
         public bool Active { get; set; } = false;
         /// <summary>
         /// The type of mesh polygon the agent is traversing.
@@ -49,7 +51,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public float DesiredSpeed { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// The current agent position. [(x, y, z)]
+        /// </summary>
         public Vector3 NPos { get; set; }
         /// <summary>
         /// A temporary value used to accumulate agent displacement during iterative collision resolution. [(x, y, z)]
@@ -71,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The agent's configuration parameters.
         /// </summary>
-        public CrowdAgentParameters Params { get; private set; }
+        public CrowdAgentParameters Params { get; set; }
 
         /// <summary>
         /// The local path corridor corners for the agent.
@@ -106,7 +110,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="parameters">Crowd agent parameters</param>
+        /// <param name="parameters">Agent parameters</param>
         public CrowdAgent(CrowdAgentParameters parameters)
         {
             Params = parameters;
@@ -114,6 +118,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
 
         /// <inheritdoc/>
+        public void UpdateSettings(CrowdAgentSettings settings)
+        {
+            Params.UpdateSettings(settings);
+        }
+
+        /// <summary>
+        /// Submits a new move request for the specified agent.
+        /// </summary>
+        /// <param name="r">The position's polygon reference.</param>
+        /// <param name="pos">The position within the polygon.</param>
+        /// <returns>True if the request was successfully submitted.</returns>
         public bool RequestMoveTarget(int r, Vector3 pos)
         {
             if (r == 0)
@@ -137,7 +152,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Submits a new move request for the specified agent.
+        /// </summary>
+        /// <param name="vel">The movement velocity. [(x, y, z)]</param>
+        /// <returns>True if the request was successfully submitted.</returns>
         public bool RequestMoveVelocity(Vector3 vel)
         {
             // Initialize request.
@@ -149,7 +168,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Resets any request for the specified agent.
+        /// </summary>
+        /// <returns>True if the request was successfully reseted.</returns>
         public bool ResetMoveTarget()
         {
             // Initialize request.

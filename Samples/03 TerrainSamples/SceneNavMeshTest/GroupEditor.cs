@@ -1,13 +1,17 @@
 ﻿using Engine;
-using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
-    class CrowdEditor(Scene scene) : Editor(scene)
+    /// <summary>
+    /// Group editor
+    /// </summary>
+    /// <param name="scene"></param>
+    class GroupEditor(Scene scene) : Editor(scene)
     {
-        private const string ObjectName = nameof(CrowdEditor);
+        private const string ObjectName = nameof(GroupEditor);
         private const string uMask = "{0:0}";
         private const string cMask = "{0:0.00}";
 
@@ -34,14 +38,14 @@ namespace TerrainSamples.SceneNavMeshTest
             separation = await InitializePropertyCheckbox(ObjectName, "Separation", font);
             separationWeight = await InitializePropertySlider(ObjectName, "Separation Weight", font, 0f, 20f, 0.01f, cMask);
 
-            await base.Initialize(fontTitle, "Crowd Settings");
+            await base.Initialize(fontTitle, "Group Settings");
         }
 
         /// <summary>
         /// Initializes settings parameters
         /// </summary>
-        /// <param name="settings">Crowd settings</param>
-        public void InitializeSettings(CrowdSettings settings)
+        /// <param name="settings">Settings</param>
+        public void InitializeSettings(CrowdAgentSettings settings)
         {
             optimizeVisibility.SetValue(settings.OptimizeVisibility);
             optimizeTopology.SetValue(settings.OptimizeTopology);
@@ -57,7 +61,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// Updates the settings data
         /// </summary>
         /// <param name="settings">Settings to update</param>
-        public void UpdateSettings(ref CrowdSettings settings)
+        public void UpdateSettings(ref CrowdAgentSettings settings)
         {
             settings.OptimizeVisibility = optimizeVisibility.GetValue();
             settings.OptimizeTopology = optimizeTopology.GetValue();

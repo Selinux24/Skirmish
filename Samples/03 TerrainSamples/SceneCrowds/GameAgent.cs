@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using System.Collections.Generic;
 
 namespace TerrainSamples.SceneCrowds
@@ -48,10 +47,6 @@ namespace TerrainSamples.SceneCrowds
         public ISceneObject Owner { get; set; }
         /// <inheritdoc/>
         public TAgent AgentType { get; set; } = agentType;
-        /// <summary>
-        /// Agent identifier
-        /// </summary>
-        public CrowdAgent CrowdAgent { get; set; }
         /// <inheritdoc/>
         public bool Active
         {
@@ -62,20 +57,6 @@ namespace TerrainSamples.SceneCrowds
             set
             {
                 model.Active = value;
-            }
-        }
-        /// <summary>
-        /// Gets or sets if the agent is visible
-        /// </summary>
-        public bool Visible
-        {
-            get
-            {
-                return model.Visible;
-            }
-            set
-            {
-                model.Visible = value;
             }
         }
         /// <inheritdoc/>
@@ -95,20 +76,6 @@ namespace TerrainSamples.SceneCrowds
             }
         }
         /// <summary>
-        /// Maximum speed
-        /// </summary>
-        public float MaximumSpeed
-        {
-            get
-            {
-                return controller.MaximumSpeed;
-            }
-            set
-            {
-                controller.MaximumSpeed = value;
-            }
-        }
-        /// <summary>
         /// Gets the agent lights
         /// </summary>
         public IEnumerable<ISceneLight> Lights
@@ -118,6 +85,10 @@ namespace TerrainSamples.SceneCrowds
                 return model?.Lights ?? [];
             }
         }
+        /// <summary>
+        /// Crowd agent id
+        /// </summary>
+        public int CrowdAgentId { get; set; }
 
         /// <inheritdoc/>
         public void EarlyUpdate(UpdateContext context)

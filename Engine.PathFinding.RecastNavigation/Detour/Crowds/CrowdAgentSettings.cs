@@ -1,15 +1,15 @@
 ﻿
-namespace Engine.PathFinding
+namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     /// <summary>
-    /// Crowd settings
+    /// Agent group settings
     /// </summary>
-    public struct CrowdSettings
+    public struct CrowdAgentSettings : IGroupAgentSettings
     {
         /// <summary>
         /// Default settings
         /// </summary>
-        public static CrowdSettings Default
+        public static CrowdAgentSettings Default
         {
             get
             {
@@ -26,6 +26,20 @@ namespace Engine.PathFinding
             }
         }
 
+        /// <inheritdoc/>
+        public float MaxAcceleration { get; set; }
+        /// <inheritdoc/>
+        public float MaxSpeed { get; set; }
+
+        /// <inheritdoc/>
+        public bool ObstacleAvoidance { get; set; }
+        /// <inheritdoc/>
+        public int AvoidanceQuality { get; set; }
+        /// <inheritdoc/>
+        public bool Separation { get; set; }
+        /// <inheritdoc/>
+        public float SeparationWeight { get; set; }
+
         /// <summary>
         /// Optimize visibility
         /// </summary>
@@ -38,21 +52,5 @@ namespace Engine.PathFinding
         /// Anticipate turns
         /// </summary>
         public bool AnticipateTurns { get; set; }
-        /// <summary>
-        /// Obstacle avoidance
-        /// </summary>
-        public bool ObstacleAvoidance { get; set; }
-        /// <summary>
-        /// Avoidance quality
-        /// </summary>
-        public int AvoidanceQuality { get; set; }
-        /// <summary>
-        /// Separation
-        /// </summary>
-        public bool Separation { get; set; }
-        /// <summary>
-        /// Separation weight
-        /// </summary>
-        public float SeparationWeight { get; set; }
     }
 }

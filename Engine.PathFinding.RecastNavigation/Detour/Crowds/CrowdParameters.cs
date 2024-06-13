@@ -9,16 +9,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// </remarks>
     /// <param name="agent">Agent</param>
     /// <param name="maxAgents">Max agents</param>
-    public class CrowdParameters(GraphAgentType agent, int maxAgents)
+    public class CrowdParameters(GraphAgentType agent, int maxAgents) : GroupSettings<GraphAgentType>(agent, maxAgents)
     {
-        /// <summary>
-        /// Agent type
-        /// </summary>
-        public GraphAgentType Agent { get; private set; } = agent;
-        /// <summary>
-        /// The maximum number of agents the crowd can manage.
-        /// </summary>
-        public int MaxAgents { get; set; } = maxAgents;
         /// <summary>
         /// The maximum radius of any agent that will be added to the crowd.
         /// </summary>

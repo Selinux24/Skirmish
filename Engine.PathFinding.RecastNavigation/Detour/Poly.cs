@@ -130,7 +130,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"FirstLink {FirstLink}; Flags {Flags}; Area: {Area}; Type: {Type}; Verts {Verts}; VertCount: {VertCount}; Neis: {Neis?.Join(",")}";
+            return $"FirstLink {FirstLink}; Flags {Flags}; Area: {Area}; Type: {Type}; Verts {Verts?.Take(VertCount).Join(",")}; Neis: {Neis?.Take(VertCount).Join(",")}";
         }
     }
 }

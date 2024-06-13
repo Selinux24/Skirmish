@@ -372,7 +372,7 @@ namespace TerrainSamples.SceneCrowds
                 return;
             }
 
-            crowdManager.UpdateCrowds(gameTime);
+            crowdManager.Update(gameTime);
 
             UpdateInputMouse();
             UpdateInputDebug();
@@ -449,11 +449,11 @@ namespace TerrainSamples.SceneCrowds
 
             if (Game.Input.ShiftPressed)
             {
-                crowdManager.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, r.PickingResult.Position);
+                crowd.RequestMove(tankAgents[0].CrowdAgentId, r.PickingResult.Position);
             }
             else
             {
-                crowdManager.RequestMoveCrowd(crowd, r.PickingResult.Position);
+                crowd.RequestMove(r.PickingResult.Position);
             }
         }
         private void UpdateInputDebug()
@@ -475,17 +475,17 @@ namespace TerrainSamples.SceneCrowds
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                var cag = tankAgents[i].CrowdAgent;
+                var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3.NearEqual(cag.NPos, pPos, new Vector3(0.001f)))
+                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
                 {
                     continue;
                 }
 
-                var tDir = cag.NPos - pPos;
-                tankAgents[i].Manipulator.SetPosition(cag.NPos);
-                tankAgents[i].Manipulator.RotateTo(cag.NPos + tDir, Axis.Y, 0.1f);
+                var tDir = aPos - pPos;
+                tankAgents[i].Manipulator.SetPosition(aPos);
+                tankAgents[i].Manipulator.RotateTo(aPos + tDir, Axis.Y, 0.1f);
             }
         }
         private void UpdateDebugProximityGridDrawer()
@@ -553,38 +553,15 @@ namespace TerrainSamples.SceneCrowds
                 return;
             }
 
-            crowdManager = new(nGraph);
-
-            var settings = new CrowdParameters(tankAgentType, tankAgents.Count);
-
-            crowd = new Crowd(settings);
-
-            crowdManager.AddCrowd(crowd, CrowdSettings.Default);
-
-            var par = new CrowdAgentParameters()
-            {
-                Radius = tankAgentType.Radius,
-                Height = tankAgentType.Height,
-                MaxAcceleration = 1f,
-                MaxSpeed = 15f,
-                CollisionQueryRange = tankAgentType.Radius * 12,
-                PathOptimizationRange = tankAgentType.Radius * 30,
-                UpdateFlags =
-                    UpdateFlagTypes.DT_CROWD_OBSTACLE_AVOIDANCE |
-                    UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS,
-                SeparationWeight = 3,
-                ObstacleAvoidanceType = 0,
-                QueryFilterTypeIndex = 0
-            };
+            crowd = new(nGraph, new(tankAgentType, tankAgents.Count));
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                var ag = new CrowdAgent(par);
-
-                crowd.AddAgent(ag, tankAgents[i].Manipulator.Position);
-
-                tankAgents[i].CrowdAgent = ag;
+                tankAgents[i].CrowdAgentId = crowd.AddAgent(tankAgents[i].Manipulator.Position);
             }
+
+            crowdManager = new();
+            crowdManager.Add(crowd);
 
             gameReady = true;
         }
