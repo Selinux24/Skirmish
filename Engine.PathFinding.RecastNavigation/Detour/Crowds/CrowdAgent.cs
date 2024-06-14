@@ -117,6 +117,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Corridor.Init(256);
         }
 
+        /// <summary>
+        /// Initializes the agent position
+        /// </summary>
+        /// <param name="poly">Initial polygon</param>
+        /// <param name="position">Initial position</param>
+        /// <param name="maxPathResult">Maximum path result</param>
+        public void Initialize(int poly, Vector3 position, int maxPathResult)
+        {
+            Corridor.Init(maxPathResult);
+            Corridor.Reset(poly, position);
+            Boundary.Reset();
+            ClearNeighbours();
+        }
+
         /// <inheritdoc/>
         public void UpdateSettings(CrowdAgentSettings settings)
         {
@@ -458,7 +472,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 // Calculate speed scale, which tells the agent to slowdown at the end of the path.
                 float slowDownRadius = Params.Radius * Params.SlowDownRadiusFactor;
-                float speedScale = GetDistanceToGoal(slowDownRadius) / slowDownRadius;
+                float speedScale = slowDownRadius > 0 ? GetDistanceToGoal(slowDownRadius) / slowDownRadius : 1;
 
                 DesiredSpeed = Params.MaxSpeed;
                 dvel *= DesiredSpeed * speedScale;

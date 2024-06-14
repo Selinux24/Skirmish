@@ -428,17 +428,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="count">Number of elements of the reference list</param>
         public void Merge(IEnumerable<int> rlist, int count)
         {
-            // Make space for the old path.
-            if (count - 1 + Count > maxSize)
-            {
-                Count = maxSize - (count - 1);
-            }
+            var l = rlist.ToList();
+            l.AddRange(referenceList.Take(Count));
 
-            // Copy old path in the beginning.
-            var tmp = new List<int>(referenceList);
-            tmp.InsertRange(0, rlist);
-            referenceList = [.. tmp];
-            Count += count - 1;
+            // Make space for the old path.
+            Count = Math.Min(maxSize, l.Count);
+            Array.Copy(l.ToArray(), referenceList, Count);
 
             // Remove trackbacks
             int j = 0;
@@ -558,6 +553,12 @@ namespace Engine.PathFinding.RecastNavigation
                 referenceList = [.. referenceList],
                 Count = Count,
             };
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Start}=>{End}. {Count} steps.";
         }
     }
 }

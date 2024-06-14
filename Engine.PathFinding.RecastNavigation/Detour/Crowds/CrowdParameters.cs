@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The maximum radius of any agent that will be added to the crowd.
         /// </summary>
-        public float MaxAgentRadius { get; set; } = agent.Radius;
+        public float MaxAgentRadius { get; set; } = agent?.Radius ?? 0f;
         /// <summary>
         /// Maximum path result
         /// </summary>

@@ -22,6 +22,11 @@ namespace Engine.PathFinding
         void RemoveAgent(int id);
 
         /// <summary>
+        /// Gets the agent count
+        /// </summary>
+        int Count();
+
+        /// <summary>
         /// Gets a list of the agent positions in the group.
         /// </summary>
         (int Id, Vector3 Position)[] GetPositions();

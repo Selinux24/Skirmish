@@ -380,7 +380,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
                 var vi = cur.Tile.Verts[cur.Poly.Verts[i]];
 
                 // Skip non-solid edges.
-                if (cur.Poly.NeighbourIsExternalLink(i))
+                if (cur.Poly.NeighbourIsExternalLink(j))
                 {
                     SkipExternalLink(filter, j, cur, ints, MAX_INTERVAL);
                 }

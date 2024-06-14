@@ -40,7 +40,7 @@ namespace TerrainSamples.SceneCrowds
         private GraphAgentType tankAgentType = null;
         private readonly List<GameAgent<GraphAgentType, SteerManipulatorController>> tankAgents = [];
 
-        private GroupManager<CrowdAgentSettings> crowdManager = null;
+        private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd = null;
 
         private Model tree = null;
@@ -560,7 +560,6 @@ namespace TerrainSamples.SceneCrowds
                 tankAgents[i].CrowdAgentId = crowd.AddAgent(tankAgents[i].Manipulator.Position);
             }
 
-            crowdManager = new();
             crowdManager.Add(crowd);
 
             gameReady = true;

@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>Returns the corner list</returns>
         public StraightPath FindCorners(NavMeshQuery navquery, int maxCorners)
         {
-            float MIN_TARGET_DIST = 0.01f;
+            const float MIN_TARGET_DIST = 0.0001f;
 
             navquery.FindStraightPath(m_pos, m_target, m_path, maxCorners, StraightPathOptions.None, out var cornerPolys);
 
@@ -59,7 +59,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             while (cornerPolys.Count > 0)
             {
                 if (cornerPolys.StartFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    Utils.DistanceSqr2D(cornerPolys.StartPath, m_pos) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
+                    Utils.DistanceSqr2D(cornerPolys.StartPath, m_pos) > MIN_TARGET_DIST)
                 {
                     break;
                 }
