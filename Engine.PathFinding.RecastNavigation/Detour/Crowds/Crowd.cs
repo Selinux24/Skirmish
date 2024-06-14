@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Agent id
         /// </summary>
-        private int id = 0;
+        private int agentId = 0;
         /// <summary>
         /// Graph
         /// </summary>
@@ -193,7 +193,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         private int NextId()
         {
-            return ++id;
+            return ++agentId;
         }
 
         /// <inheritdoc/>

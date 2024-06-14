@@ -73,7 +73,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Player agent = new();
         private readonly BuildSettings nmsettings = BuildSettings.Default;
 
-        private readonly CrowdManager crowdManager = new();
+        private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd;
         private CrowdAgentSettings crowdAgentSettings = CrowdAgentSettings.Default;
 
@@ -1399,14 +1399,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            try
-            {
-                crowdManager.Update(Game.GameTime);
-            }
-            catch
-            {
-
-            }
+            crowdManager.Update(Game.GameTime);
 
             DrawGroup();
         }
@@ -1435,6 +1428,8 @@ namespace TerrainSamples.SceneNavMeshTest
             ShowMessage($"Adding group agent at {r.PickingResult.Position}!.");
 
             crowd.AddAgent(r.PickingResult.Position);
+
+            DrawGroup();
         }
         private void UpdateGameStateGroupMoveTarget()
         {
@@ -1461,6 +1456,8 @@ namespace TerrainSamples.SceneNavMeshTest
             ShowMessage($"Move group target to {r.PickingResult.Position}!.");
 
             crowd.RequestMove(r.PickingResult.Position);
+       
+            DrawGroup();
         }
 
         private void UpdateGameStateDebug()

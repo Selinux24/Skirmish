@@ -4,8 +4,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Group manager interface
     /// </summary>
-    /// <typeparam name="TAgent">Agent type</typeparam>
-    /// <typeparam name="TGroupAgent">Group agent type</typeparam>
+    /// <typeparam name="TAgentParameters">Agent parameters type</typeparam>
     public interface IGroupManager<TAgentParameters>
         where TAgentParameters : IGroupAgentSettings
     {
