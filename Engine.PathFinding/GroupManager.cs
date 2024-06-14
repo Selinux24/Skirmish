@@ -13,12 +13,18 @@ namespace Engine.PathFinding
         /// </summary>
         private readonly List<IGroup<TAgentParameters>> groups = [];
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Adds a new group
+        /// </summary>
+        /// <param name="group">Group</param>
         public void Add<TGroup>(TGroup group) where TGroup : IGroup<TAgentParameters>
         {
             groups.Add(group);
         }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Updates state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public void Update(IGameTime gameTime)
         {
             foreach (var group in groups)
