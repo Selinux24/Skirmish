@@ -1922,12 +1922,6 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
         {
             HideAllPanels();
 
-            if (File.Exists(groupSettingsFileName))
-            {
-                var settingsFile = SerializationHelper.DeserializeFromFile<BuildSettings>(groupSettingsFileName);
-
-            }
-
             groupEditor.InitializeSettings(crowdAgentSettings);
             groupEditor.Visible = true;
         }
