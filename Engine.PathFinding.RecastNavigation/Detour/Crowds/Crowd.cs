@@ -35,6 +35,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         const int MAX_COMMON_NODES = 512;
 
         /// <summary>
+        /// Agent info structure
+        /// </summary>
+        struct AgentInfo
+        {
+            /// <summary>
+            /// Crowd agent id
+            /// </summary>
+            public int Id;
+            /// <summary>
+            /// Crowd agent
+            /// </summary>
+            public CrowdAgent Agent;
+            /// <summary>
+            /// Crowd agent debug information
+            /// </summary>
+            public CrowdAgentDebugInfo DebugInfo;
+        }
+
+        /// <summary>
         /// Agent id
         /// </summary>
         private int agentId = 0;
@@ -49,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Agent list
         /// </summary>
-        private readonly List<(int Id, CrowdAgent CrowdAgent)> crowdAgents;
+        private readonly List<AgentInfo> crowdAgents;
         /// <summary>
         /// Movement request queue
         /// </summary>
@@ -98,10 +117,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Agent placement extents
         /// </summary>
         private readonly Vector3 agentPlacementHalfExtents;
-        /// <summary>
-        /// Velocity sample count
-        /// </summary>
-        private int velocitySampleCount = 0;
         /// <summary>
         /// Target position
         /// </summary>
@@ -220,7 +235,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             cag.Initialize(poly, nP, maxPathResult);
 
             int id = NextId();
-            crowdAgents.Add((id, cag));
+            crowdAgents.Add(new() { Id = id, Agent = cag, DebugInfo = new(8) });
             return id;
         }
         /// <inheritdoc/>
@@ -244,14 +259,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public (int Id, Vector3 Position)[] GetPositions()
         {
             return crowdAgents
-                .Select(a => (a.Id, a.CrowdAgent.NPos))
+                .Select(a => (a.Id, a.Agent.NPos))
                 .ToArray();
         }
         /// <inheritdoc/>
         public Vector3 GetPosition(int id)
         {
             return crowdAgents
-                .Find(a => a.Id == id).CrowdAgent?.NPos ?? Vector3.Zero;
+                .Find(a => a.Id == id).Agent?.NPos ?? Vector3.Zero;
         }
 
         /// <summary>
@@ -268,13 +283,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             foreach (var ag in crowdAgents)
             {
-                ag.CrowdAgent.UpdateSettings(settings);
+                ag.Agent.UpdateSettings(settings);
             }
         }
         /// <inheritdoc/>
         public void UpdateSettings(int id, CrowdAgentSettings settings)
         {
-            crowdAgents.Find(a => a.Id == id).CrowdAgent?.UpdateSettings(settings);
+            crowdAgents.Find(a => a.Id == id).Agent?.UpdateSettings(settings);
         }
 
         /// <inheritdoc/>
@@ -300,13 +315,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             foreach (var ag in crowdAgents)
             {
-                ag.CrowdAgent.RequestMoveTarget(poly, nP);
+                ag.Agent.RequestMoveTarget(poly, nP);
             }
         }
         /// <inheritdoc/>
         public void RequestMove(int id, Vector3 pos)
         {
-            var ag = crowdAgents.Find(a => a.Id == id).CrowdAgent;
+            var ag = crowdAgents.Find(a => a.Id == id).Agent;
             if (ag == null)
             {
                 return;
@@ -336,25 +351,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <inheritdoc/>
         public void Update(IGameTime gameTime)
         {
-            float dt = gameTime.ElapsedSeconds;
-
-            velocitySampleCount = 0;
-
-            var allAgents = crowdAgents
-                .Select(a => a.CrowdAgent)
-                .ToArray();
-
-            var activeAgents = allAgents
-                .Where(a => a.Active)
-                .ToArray();
-            if (activeAgents.Length == 0)
+            var activeAgents = crowdAgents.Where(a => a.Agent.Active);
+            if (!activeAgents.Any())
             {
                 return;
             }
 
-            var walkingAgents = activeAgents
-                .Where(a => a.State == CrowdAgentState.DT_CROWDAGENT_STATE_WALKING)
+            var allAgents = crowdAgents
+                .Select(a => a.Agent)
                 .ToArray();
+
+            var toProcAgents = activeAgents
+                .Where(a => a.Agent.State == CrowdAgentState.DT_CROWDAGENT_STATE_WALKING)
+                .ToArray();
+
+            var walkingAgents = toProcAgents
+                .Select(a => a.Agent)
+                .ToArray();
+
+            float dt = gameTime.ElapsedSeconds;
 
             // Check that all agents still have valid paths.
             CheckPathValidity(walkingAgents, dt);
@@ -369,13 +384,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             UpdateTopologyOptimization(walkingAgents, dt);
 
             // Register agents to proximity grid.
-            GridRegisterAgents(activeAgents);
+            GridRegisterAgents(allAgents);
 
             // Get nearby navmesh segments and agents to collide with.
             FindColliders(walkingAgents);
 
             // Find next corner to steer to.
-            FindNextCorner(walkingAgents, []);
+            FindNextCorner(toProcAgents);
 
             // Trigger off-mesh connections (depends on corners).
             TriggerOffMeshConnections(walkingAgents);
@@ -384,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             CalculateSteering(walkingAgents);
 
             // Velocity planning.	
-            VelocityPlanning(walkingAgents, []);
+            VelocityPlanning(toProcAgents);
 
             // Integrate.
             IntegrateAgents(walkingAgents, dt);
@@ -417,7 +432,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // Try to replan path to goal.
                 if (!ag.RequestMoveTargetReplan(ag.TargetRef, ag.TargetPos))
                 {
-                    int idx = crowdAgents.FindIndex(a => a.CrowdAgent == ag);
+                    int idx = crowdAgents.FindIndex(a => a.Agent == ag);
 
                     Logger.WriteError(this, $"RequestMoveTargetReplan error: Id=>{idx} from {ag.TargetRef} to {ag.TargetPos}");
                 }
@@ -859,9 +874,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="walkingAgents">Agent list</param>
         /// <param name="debug">Crowd debug information</param>
-        private void FindNextCorner(CrowdAgent[] walkingAgents, IEnumerable<CrowdAgentDebugInfo> debug)
+        private void FindNextCorner(AgentInfo[] walkingAgents)
         {
-            foreach (var ag in walkingAgents)
+            foreach (var (ag, debug) in walkingAgents.Select(a => (a.Agent, a.DebugInfo)))
             {
                 if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
                     ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
@@ -871,7 +886,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 var filter = filters[ag.Params.QueryFilterTypeIndex];
 
-                ag.FindNextCorner(navquery, filter, debug?.FirstOrDefault(a => a.Agent == ag));
+                ag.FindNextCorner(navquery, filter, debug);
             }
         }
         /// <summary>
@@ -944,9 +959,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="walkingAgents">Agent list</param>
         /// <param name="debug">Crowd debug information</param>
-        private void VelocityPlanning(CrowdAgent[] walkingAgents, IEnumerable<CrowdAgentDebugInfo> debug)
+        private void VelocityPlanning(AgentInfo[] walkingAgents)
         {
-            foreach (var ag in walkingAgents)
+            foreach (var (ag, debug) in walkingAgents.Select(a => (a.Agent, a.DebugInfo)))
             {
                 if (!ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OBSTACLE_AVOIDANCE))
                 {
@@ -956,7 +971,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     continue;
                 }
 
-                ObstacleAvoidance(ag, debug?.FirstOrDefault(a => a.Agent == ag));
+                ObstacleAvoidance(ag, debug);
             }
         }
         /// <summary>
@@ -990,33 +1005,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Sample new safe velocity.
-            int ns;
-
             var req = new ObstacleAvoidanceSampleRequest
             {
                 Pos = ag.NPos,
                 Rad = ag.Params.Radius,
-                VMax = ag.DesiredSpeed,
+                MaxSpeed = ag.DesiredSpeed,
                 Vel = ag.Vel,
                 DVel = ag.DVel,
                 Param = obstacleQueryParams[ag.Params.ObstacleAvoidanceType],
-                Debug = d?.Vod,
+                Debug = d.Vod,
             };
 
+            Vector3 nvel;
             if (sampleVelocityAdaptative)
             {
-                ns = obstacleQuery.SampleVelocityAdaptive(req, out Vector3 nvel);
-
-                ag.NVel = nvel;
+                obstacleQuery.SampleVelocityAdaptive(req, out nvel);
             }
             else
             {
-                ns = obstacleQuery.SampleVelocityGrid(req, out Vector3 nvel);
-
-                ag.NVel = nvel;
+                obstacleQuery.SampleVelocityGrid(req, out nvel);
             }
-
-            velocitySampleCount += ns;
+            ag.NVel = nvel;
         }
         /// <summary>
         /// Integrates the specified agent list
@@ -1083,8 +1092,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 if (dist < THRESHOLD)
                 {
                     // Agents on top of each other, try to choose diverging separation directions.
-                    int agIdx = crowdAgents.FindIndex(a => a.CrowdAgent == ag);
-                    int niIdx = crowdAgents.FindIndex(a => a.CrowdAgent == nei);
+                    int agIdx = crowdAgents.FindIndex(a => a.Agent == ag);
+                    int niIdx = crowdAgents.FindIndex(a => a.Agent == nei);
 
                     if (agIdx > niIdx)
                     {

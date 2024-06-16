@@ -72,35 +72,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// <summary>
-        /// Vector normalization that ignores the y-component.
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static Vector3 Normalize2D(Vector3 v)
-        {
-            Vector2 n = Vector2.Normalize(v.XZ());
-
-            return new Vector3(n.X, v.Y, n.Y);
-        }
-        /// <summary>
-        /// vector normalization that ignores the y-component.
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="ang"></param>
-        /// <returns></returns>
-        public static Vector3 Rorate2D(Vector3 v, float ang)
-        {
-            float c = MathF.Cos(ang);
-            float s = MathF.Sin(ang);
-
-            Vector3 dest = Vector3.Zero;
-            dest.X = v.X * c - v.Z * s;
-            dest.Y = v.Y;
-            dest.Z = v.X * s + v.Z * c;
-
-            return dest;
-        }
 
         private readonly int m_maxCircles = maxCircles;
         private readonly List<ObstacleCircle> m_circles = [];
@@ -164,15 +135,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_params = req.Param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_invVmax = req.VMax > 0 ? 1.0f / req.VMax : float.MaxValue;
+            m_invVmax = req.MaxSpeed > 0 ? 1.0f / req.MaxSpeed : float.MaxValue;
 
             nvel = Vector3.Zero;
 
-            req.Debug?.Reset();
+            req.Debug.Reset();
 
             float cvx = req.DVel.X * m_params.VelBias;
             float cvz = req.DVel.Z * m_params.VelBias;
-            float cs = req.VMax * 2 * (1 - m_params.VelBias) / (float)(m_params.GridSize - 1);
+            float cs = req.MaxSpeed * 2f * (1 - m_params.VelBias) / (m_params.GridSize - 1);
             float half = (m_params.GridSize - 1) * cs * 0.5f;
 
             float minPenalty = float.MaxValue;
@@ -186,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     vcand.X = cvx + x * cs - half;
                     vcand.Z = cvz + y * cs - half;
 
-                    float vmaxCs = req.VMax + cs / 2;
+                    float vmaxCs = req.MaxSpeed + cs / 2;
 
                     if ((vcand.X * vcand.X) + (vcand.Z * vcand.Z) > (vmaxCs * vmaxCs))
                     {
@@ -202,10 +173,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         Vel = req.Vel,
                         DVel = req.DVel,
                         MinPenalty = minPenalty,
-                        Debug = req.Debug,
                     };
 
-                    float penalty = ProcessSample(sReq);
+                    var d = req.Debug;
+                    float penalty = ProcessSample(sReq, ref d);
+                    req.Debug = d;
 
                     ns++;
                     if (penalty < minPenalty)
@@ -224,9 +196,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_params = req.Param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_invVmax = req.VMax > 0 ? 1.0f / req.VMax : float.MaxValue;
+            m_invVmax = req.MaxSpeed > 0 ? 1.0f / req.MaxSpeed : float.MaxValue;
 
-            req.Debug?.Reset();
+            req.Debug.Reset();
 
             // Build sampling pattern aligned to desired velocity.
             Vector2[] pat = BuildSamplePattern(req.DVel, out int npat);
@@ -252,8 +224,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float sa = MathF.Sin(da);
 
             // desired direction
-            Vector3 ddir1 = Normalize2D(dvel);
-            Vector3 ddir2 = Rorate2D(ddir1, da * 0.5f); // rotated by da/2
+            Vector3 ddir1 = Utils.Normalize2D(dvel);
+            Vector3 ddir2 = Utils.Rotate2D(ddir1, da * 0.5f); // rotated by da/2
             Vector3[] ddir = [ddir1, ddir2];
 
             // Always add sample at zero
@@ -302,7 +274,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             ns = 0;
 
             // Start sampling.
-            float cr = req.VMax * (1.0f - m_params.VelBias);
+            float cr = req.MaxSpeed * (1.0f - m_params.VelBias);
             var res = new Vector3(req.DVel.X * m_params.VelBias, 0, req.DVel.Z * m_params.VelBias);
             int depth = m_params.AdaptiveDepth;
 
@@ -318,7 +290,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     vcand.Y = 0;
                     vcand.Z = res.Z + pat[i].Y * cr;
 
-                    float vmaxD = req.VMax + 0.001f;
+                    float vmaxD = req.MaxSpeed + 0.001f;
 
                     if ((vcand.X * vcand.X) + (vcand.Z * vcand.Z) > (vmaxD * vmaxD))
                     {
@@ -334,10 +306,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         Vel = req.Vel,
                         DVel = req.DVel,
                         MinPenalty = minPenalty,
-                        Debug = req.Debug,
                     };
 
-                    float penalty = ProcessSample(sReq);
+                    var d = req.Debug;
+                    float penalty = ProcessSample(sReq, ref d);
+                    req.Debug = d;
 
                     ns++;
                     if (penalty < minPenalty)
@@ -399,8 +372,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Calculate the collision penalty for a given velocity vector
         /// </summary>
         /// <param name="req">Request</param>
+        /// <param name="d">Debug data</param>
         /// <returns>Returns the penalty</returns>
-        private float ProcessSample(ObstacleAvoidanceProcessSampleRequest req)
+        private float ProcessSample(ObstacleAvoidanceProcessSampleRequest req, ref ObstacleAvoidanceDebugData d)
         {
             // penalty for straying away from the desired and current velocities
             float vpen = m_params.WeightDesVel * (Utils.Distance2D(req.VCand, req.DVel) * m_invVmax);
@@ -434,7 +408,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float penalty = vpen + vcpen + spen + tpen;
 
             // Store different penalties for debug viewing
-            req.Debug?.AddSample(req.VCand, req.Cs, penalty, vpen, vcpen, spen, tpen);
+            d.AddSample(req.VCand, req.Cs, penalty, vpen, vcpen, spen, tpen);
 
             return penalty;
         }

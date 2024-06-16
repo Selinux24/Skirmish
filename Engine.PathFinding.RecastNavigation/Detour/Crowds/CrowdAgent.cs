@@ -348,21 +348,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 Corridor.OptimizePathVisibility(query.GetAttachedNavMesh(), filter, target, Params.PathOptimizationRange);
 
                 // Copy data for debug purposes.
-                if (d != null)
-                {
-                    d.OptStart = Corridor.GetPos();
-                    d.OptEnd = target;
-                }
+                d.OptStart = Corridor.GetPos();
+                d.OptEnd = target;
+
+                return;
             }
-            else
-            {
-                // Copy data for debug purposes.
-                if (d != null)
-                {
-                    d.OptStart = Vector3.Zero;
-                    d.OptEnd = Vector3.Zero;
-                }
-            }
+
+            // Copy data for debug purposes.
+            d.OptStart = Vector3.Zero;
+            d.OptEnd = Vector3.Zero;
         }
         /// <summary>
         /// Sets the agent state over off-mesh connection

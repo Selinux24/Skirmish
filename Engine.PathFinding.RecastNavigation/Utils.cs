@@ -985,5 +985,33 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return MoveToWorldSpace(verts, orig, 0);
         }
+
+        /// <summary>
+        /// Vector normalization that ignores the y-component.
+        /// </summary>
+        /// <param name="v">Vector to normalize</param>
+        public static Vector3 Normalize2D(Vector3 v)
+        {
+            Vector2 n = Vector2.Normalize(v.XZ());
+
+            return new Vector3(n.X, v.Y, n.Y);
+        }
+        /// <summary>
+        /// vector normalization that ignores the y-component.
+        /// </summary>
+        /// <param name="v">Vector to rotate</param>
+        /// <param name="ang">Rotation angle</param>
+        public static Vector3 Rotate2D(Vector3 v, float ang)
+        {
+            float c = MathF.Cos(ang);
+            float s = MathF.Sin(ang);
+
+            Vector3 dest = Vector3.Zero;
+            dest.X = v.X * c - v.Z * s;
+            dest.Y = v.Y;
+            dest.Z = v.X * s + v.Z * c;
+
+            return dest;
+        }
     }
 }

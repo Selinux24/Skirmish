@@ -490,23 +490,9 @@ namespace TerrainSamples.SceneNavMeshTest
         {
             resUi.ThrowExceptions();
 
-            stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
-            stateManager.InitializeState(States.Mesh, StartMeshState, null);
-            stateManager.InitializeState(States.MeshAgent, StartAgentState, null);
-            stateManager.InitializeState(States.MeshNavMesh, StartNavMeshState, null);
-            stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
-            stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
-            stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
-            stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
-            stateManager.InitializeState(States.AddConnection, StartAddConnectionState, UpdateGameStateAddConnection);
-            stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
-            stateManager.InitializeState(States.Group, StartGroupState, UpdateGameStateGroup);
-            stateManager.InitializeState(States.GroupSettings, StartGroupSettingsState, null);
-            stateManager.InitializeState(States.GroupAddAgents, StartGroupAddAgentsState, UpdateGameStateGroupAddAgent);
-            stateManager.InitializeState(States.GroupMoveTarget, StartGroupMoveTargetState, UpdateGameStateGroupMoveTarget);
-            stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
-
             UpdateLayout();
+
+            ConfigureStateManager();
             ConfigureInputMapping();
             ConfigureLights();
 
@@ -516,6 +502,33 @@ namespace TerrainSamples.SceneNavMeshTest
             uiReady = true;
 
             mapSelected = false;
+        }
+        private void ConfigureStateManager()
+        {
+            stateManager.InitializeState(States.Default, StartDefaultState, UpdateGameStateDefault);
+
+            stateManager.InitializeState(States.Mesh, StartMeshState, null);
+            stateManager.InitializeState(States.MeshAgent, StartAgentState, null);
+            stateManager.InitializeState(States.MeshNavMesh, StartNavMeshState, null);
+
+            stateManager.InitializeState(States.Rasterizer, StartRasterizerState, UpdateGameStateRasterizer);
+
+            stateManager.InitializeState(States.Tiles, StartTilesState, UpdateGameStateTiles);
+
+            stateManager.InitializeState(States.AddObstacle, StartAddObstacleState, UpdateGameStateAddObstacle);
+
+            stateManager.InitializeState(States.AddArea, StartAddAreaState, UpdateGameStateAddArea);
+
+            stateManager.InitializeState(States.AddConnection, StartAddConnectionState, UpdateGameStateAddConnection);
+
+            stateManager.InitializeState(States.PathFinding, StartPathFindingState, UpdateGameStatePathFinding);
+
+            stateManager.InitializeState(States.Group, StartGroupState, UpdateGameStateGroup);
+            stateManager.InitializeState(States.GroupSettings, StartGroupSettingsState, null);
+            stateManager.InitializeState(States.GroupAddAgents, StartGroupAddAgentsState, UpdateGameStateGroupAddAgent);
+            stateManager.InitializeState(States.GroupMoveTarget, StartGroupMoveTargetState, UpdateGameStateGroupMoveTarget);
+
+            stateManager.InitializeState(States.Debug, StartDebugState, UpdateGameStateDebug);
         }
         private void ConfigureInputMapping()
         {
