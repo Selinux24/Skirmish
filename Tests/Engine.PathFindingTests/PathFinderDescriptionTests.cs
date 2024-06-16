@@ -1,4 +1,5 @@
 ﻿using Engine.Common;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Engine.PathFinding.Tests
+namespace Engine.PathFindingTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]

@@ -39,10 +39,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         private int agentId = 0;
         /// <summary>
-        /// Agent type
-        /// </summary>
-        private readonly GraphAgentType agent;
-        /// <summary>
         /// Agent parameters
         /// </summary>
         private readonly CrowdAgentParameters agentParameters;
@@ -107,6 +103,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         private int velocitySampleCount = 0;
         /// <summary>
+        /// Target position
+        /// </summary>
+        private Vector3? target;
+        /// <summary>
         /// Navigation query
         /// </summary>
         private readonly NavMeshQuery navquery;
@@ -131,8 +131,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(settings.MaxAgents);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(settings.MaxPathResult);
 
-            agent = settings.Agent;
-            agentParameters = CrowdAgentParameters.FromAgent(agent);
+            agentParameters = CrowdAgentParameters.FromAgent(settings.Agent);
             maxCrowdAgents = settings.MaxAgents;
             crowdAgents = new(settings.MaxAgents);
             movQueue = new(settings.MaxAgents);
@@ -237,6 +236,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
 
         /// <inheritdoc/>
+        public Vector3 GetTarget()
+        {
+            return target ?? new(float.MaxValue);
+        }
+        /// <inheritdoc/>
         public (int Id, Vector3 Position)[] GetPositions()
         {
             return crowdAgents
@@ -291,6 +295,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void RequestMove(Vector3 pos)
         {
             var (poly, nP) = FindNearestPoly(pos, 0);
+
+            target = nP;
 
             foreach (var ag in crowdAgents)
             {
@@ -909,9 +915,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     anim.StartPos = startPos;
                     anim.EndPos = endPos;
 
-                    ag.State = CrowdAgentState.DT_CROWDAGENT_STATE_OFFMESH;
-                    ag.Corners.Clear();
-                    ag.ClearNeighbours();
+                    ag.SetOverOffmeshConnection();
 
                     continue;
                 }

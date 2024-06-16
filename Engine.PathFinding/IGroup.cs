@@ -27,6 +27,11 @@ namespace Engine.PathFinding
         int Count();
 
         /// <summary>
+        /// Gets the target position of the group.
+        /// </summary>
+        /// <returns></returns>
+        Vector3 GetTarget();
+        /// <summary>
         /// Gets a list of the agent positions in the group.
         /// </summary>
         (int Id, Vector3 Position)[] GetPositions();

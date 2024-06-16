@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+    <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj" />
   </ItemGroup>
 
 </Project>

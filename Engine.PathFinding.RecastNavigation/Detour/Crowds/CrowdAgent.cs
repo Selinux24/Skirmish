@@ -131,7 +131,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             ClearNeighbours();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Updates agent settings
+        /// </summary>
+        /// <param name="settings">Settings</param>
         public void UpdateSettings(CrowdAgentSettings settings)
         {
             Params.UpdateSettings(settings);
@@ -140,45 +143,54 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Submits a new move request for the specified agent.
         /// </summary>
-        /// <param name="r">The position's polygon reference.</param>
-        /// <param name="pos">The position within the polygon.</param>
+        /// <param name="poly">The position's polygon reference.</param>
+        /// <param name="position">The position within the polygon.</param>
         /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveTarget(int r, Vector3 pos)
+        public bool RequestMoveTarget(int poly, Vector3 position)
         {
-            if (r == 0)
+            if (poly == 0)
             {
                 return false;
             }
 
             // Initialize request.
-            TargetRef = r;
-            TargetPos = pos;
+            TargetRef = poly;
+            TargetPos = position;
             TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
             TargetReplan = false;
-            if (TargetRef > 0)
-            {
-                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
-            }
-            else
-            {
-                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
-            }
+            TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
 
             return true;
         }
         /// <summary>
         /// Submits a new move request for the specified agent.
         /// </summary>
-        /// <param name="vel">The movement velocity. [(x, y, z)]</param>
+        /// <param name="velocity">The movement velocity. [(x, y, z)]</param>
         /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveVelocity(Vector3 vel)
+        public bool RequestMoveVelocity(Vector3 velocity)
         {
             // Initialize request.
             TargetRef = 0;
-            TargetPos = vel;
+            TargetPos = velocity;
             TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
             TargetReplan = false;
             TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY;
+
+            return true;
+        }
+        /// <summary>
+        /// Request move target replan
+        /// </summary>
+        /// <param name="targetPoly">Target reference</param>
+        /// <param name="targetPosition">Target position</param>
+        public bool RequestMoveTargetReplan(int targetPoly, Vector3 targetPosition)
+        {
+            // Initialize request.
+            TargetRef = targetPoly;
+            TargetPos = targetPosition;
+            TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
+            TargetReplan = true;
+            TargetState = TargetRef > 0 ? MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING : MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
 
             return true;
         }
@@ -211,7 +223,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="ag">Agent</param>
         /// <param name="dist">Distance</param>
-        public void AddNeighbour(CrowdAgent ag, float dist)
+        private void AddNeighbour(CrowdAgent ag, float dist)
         {
             neighbours.Add(new()
             {
@@ -227,132 +239,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Clears the neighbour list
         /// </summary>
-        public void ClearNeighbours()
+        private void ClearNeighbours()
         {
             neighbours.Clear();
-        }
-
-        /// <summary>
-        /// Integrates the crowd agent in time
-        /// </summary>
-        /// <param name="dt">Time</param>
-        public void Integrate(float dt)
-        {
-            // Fake dynamic constraint.
-            float maxDelta = Params.MaxAcceleration * dt;
-            Vector3 dv = NVel - Vel;
-            float ds = dv.Length();
-            if (ds > maxDelta)
-            {
-                dv *= maxDelta / ds;
-            }
-            Vel += dv;
-
-            // Integrate
-            if (Vel.Length() > 0.0001f)
-            {
-                NPos += Vel * dt;
-            }
-            else
-            {
-                Vel = Vector3.Zero;
-            }
-        }
-        /// <summary>
-        /// Gets whether the crowd agent is over the off-mesh connection or not
-        /// </summary>
-        /// <param name="radius">Search radius</param>
-        public bool OverOffmeshConnection(float radius)
-        {
-            if (Corners.Count <= 0)
-            {
-                return false;
-            }
-
-            bool offMeshConnection = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
-            if (offMeshConnection)
-            {
-                float distSq = Utils.DistanceSqr2D(NPos, Corners.EndPath);
-                if (distSq < radius * radius)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Returns the distance to goal
-        /// </summary>
-        /// <param name="range">Range to goal</param>
-        private float GetDistanceToGoal(float range)
-        {
-            if (Corners.Count <= 0)
-            {
-                return range;
-            }
-
-            bool endOfPath = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
-            if (endOfPath)
-            {
-                return MathF.Min(Utils.Distance2D(NPos, Corners.EndPath), range);
-            }
-
-            return range;
-        }
-        /// <summary>
-        /// Calculates the smooth steer direction
-        /// </summary>
-        /// <param name="dir">Direction</param>
-        private void CalcSmoothSteerDirection(out Vector3 dir)
-        {
-            dir = Vector3.Zero;
-
-            if (Corners.Count <= 0)
-            {
-                return;
-            }
-
-            int ip0 = 0;
-            int ip1 = Math.Min(1, Corners.Count - 1);
-            Vector3 p0 = Corners.GetPathPosition(ip0);
-            Vector3 p1 = Corners.GetPathPosition(ip1);
-
-            Vector3 dir0 = p0 - NPos;
-            Vector3 dir1 = p1 - NPos;
-            dir0.Y = 0;
-            dir1.Y = 0;
-
-            float len0 = dir0.Length();
-            float len1 = dir1.Length();
-            if (len1 > 0.001f)
-            {
-                dir1 *= 1.0f / len1;
-            }
-
-            dir.X = dir0.X - dir1.X * len0 * 0.5f;
-            dir.Y = 0;
-            dir.Z = dir0.Z - dir1.Z * len0 * 0.5f;
-
-            dir.Normalize();
-        }
-        /// <summary>
-        /// Calculates the straigh steer direction
-        /// </summary>
-        /// <param name="dir">Direction</param>
-        private void CalcStraightSteerDirection(out Vector3 dir)
-        {
-            dir = Vector3.Zero;
-
-            if (Corners.Count <= 0)
-            {
-                return;
-            }
-
-            dir = Corners.StartPath - NPos;
-            dir.Y = 0;
-
-            dir.Normalize();
         }
         /// <summary>
         /// Updates the agent's neighbor list
@@ -388,28 +277,56 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 AddNeighbour(ag, distSqr);
             }
         }
+
         /// <summary>
-        /// Request move target replan
+        /// Integrates the crowd agent in time
         /// </summary>
-        /// <param name="targetR">Target reference</param>
-        /// <param name="targetPos">Target position</param>
-        public bool RequestMoveTargetReplan(int targetR, Vector3 targetPos)
+        /// <param name="dt">Time</param>
+        public void Integrate(float dt)
         {
-            // Initialize request.
-            TargetRef = targetR;
-            TargetPos = targetPos;
-            TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
-            TargetReplan = true;
-            if (TargetRef > 0)
+            // Fake dynamic constraint.
+            float maxDelta = Params.MaxAcceleration * dt;
+            Vector3 dv = NVel - Vel;
+            float ds = dv.Length();
+            if (ds > maxDelta)
             {
-                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
+                dv *= maxDelta / ds;
+            }
+            Vel += dv;
+
+            // Integrate
+            if (Vel.Length() > 0.0001f)
+            {
+                NPos += Vel * dt;
             }
             else
             {
-                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
+                Vel = Vector3.Zero;
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the crowd agent is over the off-mesh connection or not
+        /// </summary>
+        /// <param name="radius">Search radius</param>
+        public bool OverOffmeshConnection(float radius)
+        {
+            if (Corners.Count <= 0)
+            {
+                return false;
             }
 
-            return true;
+            bool offMeshConnection = Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
+            if (offMeshConnection)
+            {
+                float distSq = Utils.DistanceSqr2D(NPos, Corners.EndPath);
+                if (distSq < radius * radius)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         /// <summary>
         /// Find next corner
@@ -448,35 +365,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
         /// <summary>
+        /// Sets the agent state over off-mesh connection
+        /// </summary>
+        public void SetOverOffmeshConnection()
+        {
+            State = CrowdAgentState.DT_CROWDAGENT_STATE_OFFMESH;
+            Corners.Clear();
+            ClearNeighbours();
+        }
+
+        /// <summary>
         /// Calculate agent steering
         /// </summary>
         public void CalculateSteering()
         {
-            Vector3 dvel;
-            if (TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
-            {
-                dvel = TargetPos;
-                DesiredSpeed = TargetPos.Length();
-            }
-            else
-            {
-                // Calculate steering direction.
-                if (Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS))
-                {
-                    CalcSmoothSteerDirection(out dvel);
-                }
-                else
-                {
-                    CalcStraightSteerDirection(out dvel);
-                }
+            var (dspeed, dvel) = CalculateDesiredVelocity();
 
-                // Calculate speed scale, which tells the agent to slowdown at the end of the path.
-                float slowDownRadius = Params.Radius * Params.SlowDownRadiusFactor;
-                float speedScale = slowDownRadius > 0 ? GetDistanceToGoal(slowDownRadius) / slowDownRadius : 1;
-
-                DesiredSpeed = Params.MaxSpeed;
-                dvel *= DesiredSpeed * speedScale;
-            }
+            DesiredSpeed = dspeed;
 
             if (!Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_SEPARATION))
             {
@@ -485,14 +390,153 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Separation
+            var (w, disp) = CalcDisplacement();
+            if (w > 0.0001f)
+            {
+                // Adjust desired velocity.
+                dvel += disp * (1.0f / w);
+
+                // Clamp desired velocity to desired speed.
+                float speedSqr = dvel.LengthSquared();
+                float desiredSqr = DesiredSpeed * DesiredSpeed;
+                if (speedSqr > desiredSqr)
+                {
+                    dvel *= desiredSqr / speedSqr;
+                }
+            }
+
+            // Set the desired velocity.
+            DVel = dvel;
+        }
+        /// <summary>
+        /// Calculates the desired velocity
+        /// </summary>
+        /// <returns>Returns the desired speed magnitude and velocity vector</returns>
+        private (float dspeed, Vector3 dvel) CalculateDesiredVelocity()
+        {
+            float dspeed;
+            Vector3 dvel;
+            if (TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
+            {
+                dspeed = TargetPos.Length();
+                dvel = TargetPos;
+            }
+            else
+            {
+                // Calculate steering direction.
+                if (Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS))
+                {
+                    dvel = CalcSmoothSteerDirection(Corners, NPos);
+                }
+                else
+                {
+                    dvel = CalcStraightSteerDirection(Corners, NPos);
+                }
+
+                // Calculate speed scale, which tells the agent to slowdown at the end of the path.
+                float speedScale = GetDistanceToGoal(Corners, NPos, Params);
+
+                dspeed = Params.MaxSpeed;
+                dvel *= dspeed * speedScale;
+            }
+
+            return (dspeed, dvel);
+        }
+        /// <summary>
+        /// Calculates the smooth steer direction
+        /// </summary>
+        /// <param name="corners">Local path corridor corners</param>
+        /// <param name="pos">Current position</param>
+        private static Vector3 CalcSmoothSteerDirection(StraightPath corners, Vector3 pos)
+        {
+            if (corners.Count <= 0)
+            {
+                return Vector3.Zero;
+            }
+
+            int ip0 = 0;
+            int ip1 = Math.Min(1, corners.Count - 1);
+            Vector3 p0 = corners.GetPathPosition(ip0);
+            Vector3 p1 = corners.GetPathPosition(ip1);
+
+            Vector3 dir0 = p0 - pos;
+            Vector3 dir1 = p1 - pos;
+            dir0.Y = 0;
+            dir1.Y = 0;
+
+            float len0 = dir0.Length();
+            float len1 = dir1.Length();
+            if (len1 > 0.001f)
+            {
+                dir1 *= 1.0f / len1;
+            }
+
+            float x = dir0.X - dir1.X * len0 * 0.5f;
+            float y = 0;
+            float z = dir0.Z - dir1.Z * len0 * 0.5f;
+
+            return Vector3.Normalize(new(x, y, z));
+        }
+        /// <summary>
+        /// Calculates the straigh steer direction
+        /// </summary>
+        /// <param name="corners">Local path corridor corners</param>
+        /// <param name="pos">Current position</param>
+        private static Vector3 CalcStraightSteerDirection(StraightPath corners, Vector3 pos)
+        {
+            if (corners.Count <= 0)
+            {
+                return Vector3.Zero;
+            }
+
+            var dir = corners.StartPath - pos;
+            dir.Y = 0;
+
+            return Vector3.Normalize(dir);
+        }
+        /// <summary>
+        /// Returns the distance to goal
+        /// </summary>
+        /// <param name="corners">Local path corridor corners</param>
+        /// <param name="pos">Current position</param>
+        /// <param name="parameters">Agent parameters</param>
+        private static float GetDistanceToGoal(StraightPath corners, Vector3 pos, CrowdAgentParameters parameters)
+        {
+            float slowDownRadius = parameters.Radius * parameters.SlowDownRadiusFactor;
+            if (slowDownRadius <= 0)
+            {
+                //Speed scale is 1
+                return 1;
+            }
+
+            if (corners.Count <= 0)
+            {
+                return slowDownRadius;
+            }
+
+            bool endOfPath = corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
+            if (endOfPath)
+            {
+                return MathF.Min(Utils.Distance2D(pos, corners.EndPath), slowDownRadius);
+            }
+
+            return slowDownRadius;
+        }
+        /// <summary>
+        /// Calculates the displacement to separate current agent from neighbours
+        /// </summary>
+        /// <returns>Returns the displacemente weight and the displacement vector</returns>
+        private (float w, Vector3 disp) CalcDisplacement()
+        {
             float separationDist = Params.CollisionQueryRange;
+            float separationDistSqr = separationDist * separationDist;
             float invSeparationDist = 1.0f / separationDist;
             float separationWeight = Params.SeparationWeight;
 
             float w = 0;
             Vector3 disp = Vector3.Zero;
 
-            var crowdNeiAgents = GetNeighbours()
+            var crowdNeiAgents = neighbours
                 .Select(crowdNei => crowdNei.Agent)
                 .ToArray();
 
@@ -506,7 +550,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     continue;
                 }
-                if (distSqr > separationDist * separationDist)
+                if (distSqr > separationDistSqr)
                 {
                     continue;
                 }
@@ -518,21 +562,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 w += 1.0f;
             }
 
-            if (w > 0.0001f)
-            {
-                // Adjust desired velocity.
-                dvel += disp * (1.0f / w);
-                // Clamp desired velocity to desired speed.
-                float speedSqr = dvel.LengthSquared();
-                float desiredSqr = DesiredSpeed * DesiredSpeed;
-                if (speedSqr > desiredSqr)
-                {
-                    dvel *= desiredSqr / speedSqr;
-                }
-            }
-
-            // Set the desired velocity.
-            DVel = dvel;
+            return (w, disp);
         }
     }
 }
