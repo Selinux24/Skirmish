@@ -76,6 +76,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd;
         private CrowdAgentSettings crowdAgentSettings;
+        private readonly Color groupColor = new(125, 97, 255, 255);
+        private readonly Color groupTargetColor = new(125, 197, 255, 255);
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -125,8 +127,6 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly AgentEditor agentEditor;
         private readonly BuildSettingsEditor navMeshEditor;
         private readonly GroupEditor groupEditor;
-        private readonly Color groupColor = new(125, 97, 255, 255);
-        private readonly Color groupTargetColor = new(125, 197, 255, 255);
 
         public NavmeshTestScene(Game game) : base(game)
         {
@@ -346,6 +346,8 @@ namespace TerrainSamples.SceneNavMeshTest
             var btnBack = await InitializeButton("btnGroupBack", "Back", btnDesc, () =>
             {
                 stateManager.StartState(States.Default);
+
+                ClearGroupData();
             });
 
             UIButton[] btnList = [btnSettings, btnAddAgents, btnMoveTarget, btnBack];
@@ -765,11 +767,22 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 var settingsFile = SerializationHelper.DeserializeFromFile<CrowdAgentSettings>(groupSettingsFileName);
 
+                crowdAgentSettings.Radius = settingsFile.Radius;
+                crowdAgentSettings.Height = settingsFile.Height;
+
                 crowdAgentSettings.MaxAcceleration = settingsFile.MaxAcceleration;
                 crowdAgentSettings.MaxSpeed = settingsFile.MaxSpeed;
+                crowdAgentSettings.SlowDownRadiusFactor = settingsFile.SlowDownRadiusFactor;
+
+                crowdAgentSettings.CollisionQueryRange = settingsFile.CollisionQueryRange;
+                crowdAgentSettings.PathOptimizationRange = settingsFile.PathOptimizationRange;
+                crowdAgentSettings.QueryFilterTypeIndex = settingsFile.QueryFilterTypeIndex;
+
+                crowdAgentSettings.ObstacleAvoidance = settingsFile.ObstacleAvoidance;
                 crowdAgentSettings.AvoidanceQuality = settingsFile.AvoidanceQuality;
                 crowdAgentSettings.Separation = settingsFile.Separation;
                 crowdAgentSettings.SeparationWeight = settingsFile.SeparationWeight;
+
                 crowdAgentSettings.OptimizeVisibility = settingsFile.OptimizeVisibility;
                 crowdAgentSettings.OptimizeTopology = settingsFile.OptimizeTopology;
                 crowdAgentSettings.AnticipateTurns = settingsFile.AnticipateTurns;
@@ -777,7 +790,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            crowdAgentSettings = CrowdAgentSettings.Default;
+            crowdAgentSettings = CrowdAgentSettings.FromAgent(agent);
         }
         private void InitializeMapDataCompleted(LoadResourcesResult res)
         {
@@ -1686,8 +1699,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            lineDrawer.Clear(groupColor);
-            lineDrawer.Clear(groupTargetColor);
+            ClearGroupData();
 
             var target = crowd.GetTarget();
             DrawPoint(target, 0.25f, groupTargetColor);
@@ -2039,6 +2051,11 @@ Mouse To look (Press {GameWindowedLook} in windowed mode).
             meshPanel.Visible = false;
             groupPanel.Visible = false;
             debugPanel.Visible = false;
+        }
+        private void ClearGroupData()
+        {
+            lineDrawer.Clear(groupColor);
+            lineDrawer.Clear(groupTargetColor);
         }
 
         public override void GameGraphicsResized()

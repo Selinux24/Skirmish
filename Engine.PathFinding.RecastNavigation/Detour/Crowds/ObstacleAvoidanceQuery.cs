@@ -1,88 +1,52 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="maxCircles">Max circles</param>
-    /// <param name="maxSegments">Max segments</param>
+    /// <param name="maxCircles">Max circle obstacles</param>
+    /// <param name="maxSegments">Max segment obstacles</param>
     public class ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
     {
-        public const int DT_MAX_PATTERN_DIVS = 32;  ///< Max numver of adaptive divs.
-        public const int DT_MAX_PATTERN_RINGS = 4;  ///< Max number of adaptive rings.
-
-        public static bool SweepCircleCircle(Vector3 c0, float r0, Vector3 v, Vector3 c1, float r1, out float tmin, out float tmax)
-        {
-            tmin = 0;
-            tmax = 0;
-
-            float EPS = 0.0001f;
-            Vector3 s = c1 - c0;
-            float r = r0 + r1;
-            float c = Vector2.Dot(s.XZ(), s.XZ()) - r * r;
-            float a = Vector2.Dot(v.XZ(), v.XZ());
-            if (a < EPS)
-            {
-                return false;  // not moving
-            }
-
-            // Overlap, calc time to exit.
-            float b = Vector2.Dot(v.XZ(), s.XZ());
-            float d = b * b - a * c;
-            if (d < 0.0f)
-            {
-                return false; // no intersection.
-            }
-
-            a = 1.0f / a;
-            float rd = MathF.Sqrt(d);
-            tmin = (b - rd) * a;
-            tmax = (b + rd) * a;
-
-            return true;
-        }
-        public static bool IsectRaySeg(Vector3 ap, Vector3 u, Vector3 bp, Vector3 bq, out float t)
-        {
-            t = 0;
-
-            Vector3 v = bq - bp;
-            Vector3 w = ap - bp;
-            float d = Vector2.Dot(u.XZ(), v.XZ());
-            if (MathF.Abs(d) < Utils.ZeroTolerance)
-            {
-                return false;
-            }
-
-            d = 1.0f / d;
-
-            t = Vector2.Dot(v.XZ(), w.XZ()) * d;
-            if (t < 0 || t > 1)
-            {
-                return false;
-            }
-
-            float s = Vector2.Dot(u.XZ(), w.XZ()) * d;
-            if (s < 0 || s > 1)
-            {
-                return false;
-            }
-
-            return true;
-        }
+        private const int DT_MAX_PATTERN_DIVS = 32;  ///< Max numver of adaptive divs.
+        private const int DT_MAX_PATTERN_RINGS = 4;  ///< Max number of adaptive rings.
+        private const float EPS = 0.0001f;
 
         private readonly int m_maxCircles = maxCircles;
-        private readonly List<ObstacleCircle> m_circles = [];
+        private readonly List<ObstacleCircle> m_circles = new(maxCircles);
 
         private readonly int m_maxSegments = maxSegments;
-        private readonly List<ObstacleSegment> m_segments = [];
+        private readonly List<ObstacleSegment> m_segments = new(maxSegments);
 
         private ObstacleAvoidanceParams m_params;
         private float m_invHorizTime;
         private float m_invVmax;
 
+        /// <summary>
+        /// Gets the circle obstacles
+        /// </summary>
+        public IEnumerable<ObstacleCircle> GetObstacleCircles()
+        {
+            return [.. m_circles];
+        }
+        /// <summary>
+        /// Gets the segment obstacles
+        /// </summary>
+        public IEnumerable<ObstacleSegment> GetObstacleSegments()
+        {
+            return [.. m_segments];
+        }
+        /// <summary>
+        /// Adds a circle obstacle
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="rad">Radius</param>
+        /// <param name="vel">Velocity vector</param>
+        /// <param name="dvel">Desired velocity vector</param>
         public void AddCircle(Vector3 pos, float rad, Vector3 vel, Vector3 dvel)
         {
             if (m_circles.Count >= m_maxCircles)
@@ -90,16 +54,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            var cir = new ObstacleCircle
+            m_circles.Add(new()
             {
                 P = pos,
                 Rad = rad,
                 Vel = vel,
                 DVel = dvel
-            };
-
-            m_circles.Add(cir);
+            });
         }
+        /// <summary>
+        /// Adds a segment obstacle
+        /// </summary>
+        /// <param name="p">Segment point p</param>
+        /// <param name="q">Segment point q</param>
         public void AddSegment(Vector3 p, Vector3 q)
         {
             if (m_segments.Count >= m_maxSegments)
@@ -107,28 +74,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            var seg = new ObstacleSegment
+            m_segments.Add(new()
             {
                 P = p,
                 Q = q
-            };
-
-            m_segments.Add(seg);
+            });
         }
-        public IEnumerable<ObstacleCircle> GetObstacleCircles()
-        {
-            return [.. m_circles];
-        }
-        public IEnumerable<ObstacleSegment> GetObstacleSegments()
-        {
-            return [.. m_segments];
-        }
+        /// <summary>
+        /// Resets the obstacles
+        /// </summary>
         public void Reset()
         {
             m_circles.Clear();
             m_segments.Clear();
         }
 
+        /// <summary>
+        /// Samples velocity over a grid
+        /// </summary>
+        /// <param name="req">Sample request</param>
+        /// <param name="nvel">Returns the new velocity vector</param>
+        /// <returns>Returns the number of samples</returns>
         public int SampleVelocityGrid(ObstacleAvoidanceSampleRequest req, out Vector3 nvel)
         {
             Prepare(req.Pos, req.DVel);
@@ -190,6 +156,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return ns;
         }
+       
+        /// <summary>
+        /// Samples velocity adaptive
+        /// </summary>
+        /// <param name="req">Sample request</param>
+        /// <param name="nvel">Returns the new velocity vector</param>
+        /// <returns>Returns the number of samples</returns>
         public int SampleVelocityAdaptive(ObstacleAvoidanceSampleRequest req, out Vector3 nvel)
         {
             Prepare(req.Pos, req.DVel);
@@ -201,18 +174,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             req.Debug.Reset();
 
             // Build sampling pattern aligned to desired velocity.
-            Vector2[] pat = BuildSamplePattern(req.DVel, out int npat);
+            Vector2[] pat = BuildSamplePattern(req.DVel);
 
             // Start sampling.
-            nvel = SamplePattern(req, pat, npat, out int ns);
+            nvel = SamplePattern(req, pat, out int ns);
 
             return ns;
         }
-        private Vector2[] BuildSamplePattern(Vector3 dvel, out int npat)
+        /// <summary>
+        /// Builds a sample pattern
+        /// </summary>
+        /// <param name="dvel">Desired velocity vector</param>
+        /// <returns>Returns the sample pattern</returns>
+        private Vector2[] BuildSamplePattern(Vector3 dvel)
         {
             // Build sampling pattern aligned to desired velocity.
-            Vector2[] pat = new Vector2[DT_MAX_PATTERN_DIVS * DT_MAX_PATTERN_RINGS + 1];
-            npat = 0;
+            var pat = new Vector2[DT_MAX_PATTERN_DIVS * DT_MAX_PATTERN_RINGS + 1];
+            int npat = 0;
 
             int ndivs = m_params.AdaptiveDivs;
             int nrings = m_params.AdaptiveRings;
@@ -224,9 +202,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float sa = MathF.Sin(da);
 
             // desired direction
-            Vector3 ddir1 = Utils.Normalize2D(dvel);
-            Vector3 ddir2 = Utils.Rotate2D(ddir1, da * 0.5f); // rotated by da/2
-            Vector3[] ddir = [ddir1, ddir2];
+            var ddir1 = Utils.Normalize2D(dvel);
+            var ddir2 = Utils.Rotate2D(ddir1, da * 0.5f); // rotated by da/2
+            var ddir = new Vector3[] { ddir1, ddir2 };
 
             // Always add sample at zero
             pat[npat + 0] = Vector2.Zero;
@@ -241,8 +219,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 float vZ = ddir[j % 2].Z * r;
                 pat[npat] = new Vector2(vX, vZ);
 
-                Vector2 last1 = pat[npat];
-                Vector2 last2 = last1;
+                var last1 = pat[npat];
+                var last2 = last1;
                 npat++;
 
                 for (int i = 1; i < nd - 1; i += 2)
@@ -267,9 +245,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            return pat;
+            return pat.Take(npat).ToArray();
         }
-        private Vector3 SamplePattern(ObstacleAvoidanceSampleRequest req, Vector2[] pat, int npat, out int ns)
+        /// <summary>
+        /// Samples the specified pattern
+        /// </summary>
+        /// <param name="req">Sample request</param>
+        /// <param name="pat">Pattern</param>
+        /// <param name="ns">Number of segments</param>
+        /// <returns>Returns the new velocity</returns>
+        private Vector3 SamplePattern(ObstacleAvoidanceSampleRequest req, Vector2[] pat, out int ns)
         {
             ns = 0;
 
@@ -283,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 float minPenalty = float.MaxValue;
                 var bvel = Vector3.Zero;
 
-                for (int i = 0; i < npat; ++i)
+                for (int i = 0; i < pat.Length; ++i)
                 {
                     var vcand = Vector3.Zero;
                     vcand.X = res.X + pat[i].X * cr;
@@ -327,9 +312,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return res;
         }
+       
+        /// <summary>
+        /// Prepares the obstacles for the query
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="dvel">Desired velocity</param>
         private void Prepare(Vector3 pos, Vector3 dvel)
         {
-            // Prepare obstacles
+            PrepareObstacleCircles(pos, dvel);
+
+            PrepareObstacleSegments(pos);
+        }
+        /// <summary>
+        /// Prepares the obstacle circles for the query
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="dvel">Desired velocity</param>
+        private void PrepareObstacleCircles(Vector3 pos, Vector3 dvel)
+        {
             foreach (var cir in m_circles)
             {
                 // Side
@@ -361,13 +362,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     cir.Np = np;
                 }
             }
-
+        }
+        /// <summary>
+        /// Prepares the obstacle segments for the query
+        /// </summary>
+        /// <param name="pos">Position</param>
+        private void PrepareObstacleSegments(Vector3 pos)
+        {
             foreach (var seg in m_segments)
             {
                 // Precalc if the agent is really close to the segment.
                 seg.Touch = Utils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out _) < 0.0001f;
             }
         }
+    
         /// <summary>
         /// Calculate the collision penalty for a given velocity vector
         /// </summary>
@@ -412,6 +420,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return penalty;
         }
+        /// <summary>
+        /// Calculates the collision penalty for a given velocity vector with the circle obstacles
+        /// </summary>
+        /// <param name="req">Sample request</param>
+        /// <param name="tThresold">Time threshold</param>
+        /// <param name="tmin">Minimum time</param>
+        /// <param name="side">Returns the side bias</param>
         private bool ProcessSampleCircles(ObstacleAvoidanceProcessSampleRequest req, float tThresold, ref float tmin, out float side)
         {
             side = 0;
@@ -429,7 +444,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 side += MathUtil.Clamp(MathF.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
                 nside++;
 
-                if (!SweepCircleCircle(req.Pos, req.Rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))
+                if (!SweepCircleCircle2D(req.Pos, req.Rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))
                 {
                     continue;
                 }
@@ -460,6 +475,53 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
+        /// <summary>
+        /// Gets whether the circle obstacles are overlapping
+        /// </summary>
+        /// <param name="c0">Center of the first circle</param>
+        /// <param name="r0">Radius of the first circle</param>
+        /// <param name="v">Velocity vector</param>
+        /// <param name="c1">Center of the second circle</param>
+        /// <param name="r1">Radius of the second circle</param>
+        /// <param name="tmin">Returns the minimum distance</param>
+        /// <param name="tmax">Returns the maximum distance</param>
+        /// <returns>Returns true if the circles has intersection between them</returns>
+        private static bool SweepCircleCircle2D(Vector3 c0, float r0, Vector3 v, Vector3 c1, float r1, out float tmin, out float tmax)
+        {
+            tmin = 0;
+            tmax = 0;
+
+            float a = Vector2.Dot(v.XZ(), v.XZ());
+            if (a < EPS)
+            {
+                return false;  // not moving
+            }
+
+            var s = c1 - c0;
+            float r = r0 + r1;
+            float c = Vector2.Dot(s.XZ(), s.XZ()) - r * r;
+
+            // Overlap, calc time to exit.
+            float b = Vector2.Dot(v.XZ(), s.XZ());
+            float d = b * b - a * c;
+            if (d < 0f)
+            {
+                return false; // no intersection.
+            }
+
+            a = 1.0f / a;
+            float rd = MathF.Sqrt(d);
+            tmin = (b - rd) * a;
+            tmax = (b + rd) * a;
+
+            return true;
+        }
+        /// <summary>
+        /// Calculates the collision penalty for a given velocity vector with the segment obstacles
+        /// </summary>
+        /// <param name="req">Sample request</param>
+        /// <param name="tThresold">Time threshold</param>
+        /// <param name="tmin">Minimum time</param>
         private bool ProcessSampleSegment(ObstacleAvoidanceProcessSampleRequest req, float tThresold, ref float tmin)
         {
             foreach (var seg in m_segments)
@@ -481,7 +543,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
                 else
                 {
-                    if (!IsectRaySeg(req.Pos, req.VCand, seg.P, seg.Q, out htmin))
+                    if (!IsectRaySeg2D(req.Pos, req.VCand, seg.P, seg.Q, out htmin))
                     {
                         continue;
                     }
@@ -499,6 +561,43 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         return false;
                     }
                 }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Gets whether the ray intersects the segment
+        /// </summary>
+        /// <param name="ap">Ray origin</param>
+        /// <param name="u">Ray direction</param>
+        /// <param name="bp">Segment point p</param>
+        /// <param name="bq">Segment point q</param>
+        /// <param name="t">Returns the intersection distance, if any</param>
+        /// <returns>Returns true if there are intersection</returns>
+        private static bool IsectRaySeg2D(Vector3 ap, Vector3 u, Vector3 bp, Vector3 bq, out float t)
+        {
+            t = 0;
+
+            Vector3 v = bq - bp;
+            Vector3 w = ap - bp;
+            float d = Vector2.Dot(u.XZ(), v.XZ());
+            if (MathF.Abs(d) < Utils.ZeroTolerance)
+            {
+                return false;
+            }
+
+            d = 1.0f / d;
+
+            t = Vector2.Dot(v.XZ(), w.XZ()) * d;
+            if (t < 0 || t > 1)
+            {
+                return false;
+            }
+
+            float s = Vector2.Dot(u.XZ(), w.XZ()) * d;
+            if (s < 0 || s > 1)
+            {
+                return false;
             }
 
             return true;

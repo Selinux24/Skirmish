@@ -73,9 +73,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public Vector3 Vel { get; set; }
 
         /// <summary>
-        /// The agent's configuration parameters.
+        /// The agent's configuration settings.
         /// </summary>
-        public CrowdAgentParameters Params { get; set; }
+        public CrowdAgentSettings Settings { get; set; }
 
         /// <summary>
         /// The local path corridor corners for the agent.
@@ -110,10 +110,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="parameters">Agent parameters</param>
-        public CrowdAgent(CrowdAgentParameters parameters)
+        /// <param name="settings">Agent settings</param>
+        public CrowdAgent(CrowdAgentSettings settings)
         {
-            Params = parameters;
+            Settings = settings;
             Corridor.Init(256);
         }
 
@@ -137,7 +137,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="settings">Settings</param>
         public void UpdateSettings(CrowdAgentSettings settings)
         {
-            Params.UpdateSettings(settings);
+            Settings = settings;
         }
 
         /// <summary>
@@ -250,8 +250,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void UpdateNeighbours(ProximityGrid<CrowdAgent> grid)
         {
             var pos = NPos;
-            float height = Params.Height;
-            float range = Params.CollisionQueryRange;
+            float height = Settings.Height;
+            float range = Settings.CollisionQueryRange;
 
             ClearNeighbours();
 
@@ -262,7 +262,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 // Check for overlap.
                 var diff = pos - ag.NPos;
-                if (MathF.Abs(diff.Y) >= (height + ag.Params.Height) / 2.0f)
+                if (MathF.Abs(diff.Y) >= (height + ag.Settings.Height) / 2.0f)
                 {
                     continue;
                 }
@@ -285,7 +285,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void Integrate(float dt)
         {
             // Fake dynamic constraint.
-            float maxDelta = Params.MaxAcceleration * dt;
+            float maxDelta = Settings.MaxAcceleration * dt;
             Vector3 dv = NVel - Vel;
             float ds = dv.Length();
             if (ds > maxDelta)
@@ -342,10 +342,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Corners = straightPath.Copy();
 
             // Check to see if the corner after the next corner is directly visible, and short cut to there.
-            if (Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_VIS) && Corners.Count > 0)
+            if (Settings.OptimizeVisibility && Corners.Count > 0)
             {
                 var target = Corners.GetPathPosition(Math.Min(1, Corners.Count - 1));
-                Corridor.OptimizePathVisibility(query.GetAttachedNavMesh(), filter, target, Params.PathOptimizationRange);
+                Corridor.OptimizePathVisibility(query.GetAttachedNavMesh(), filter, target, Settings.PathOptimizationRange);
 
                 // Copy data for debug purposes.
                 d.OptStart = Corridor.GetPos();
@@ -377,7 +377,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             DesiredSpeed = dspeed;
 
-            if (!Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_SEPARATION))
+            if (!Settings.Separation)
             {
                 // Set the desired velocity.
                 DVel = dvel;
@@ -418,7 +418,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             else
             {
                 // Calculate steering direction.
-                if (Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS))
+                if (Settings.AnticipateTurns)
                 {
                     dvel = CalcSmoothSteerDirection(Corners, NPos);
                 }
@@ -428,9 +428,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Calculate speed scale, which tells the agent to slowdown at the end of the path.
-                float speedScale = GetDistanceToGoal(Corners, NPos, Params);
+                float speedScale = GetDistanceToGoal(Corners, NPos, Settings);
 
-                dspeed = Params.MaxSpeed;
+                dspeed = Settings.MaxSpeed;
                 dvel *= dspeed * speedScale;
             }
 
@@ -493,10 +493,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="corners">Local path corridor corners</param>
         /// <param name="pos">Current position</param>
-        /// <param name="parameters">Agent parameters</param>
-        private static float GetDistanceToGoal(StraightPath corners, Vector3 pos, CrowdAgentParameters parameters)
+        /// <param name="settings">Agent settings</param>
+        private static float GetDistanceToGoal(StraightPath corners, Vector3 pos, CrowdAgentSettings settings)
         {
-            float slowDownRadius = parameters.Radius * parameters.SlowDownRadiusFactor;
+            float slowDownRadius = settings.Radius * settings.SlowDownRadiusFactor;
             if (slowDownRadius <= 0)
             {
                 //Speed scale is 1
@@ -522,10 +522,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>Returns the displacemente weight and the displacement vector</returns>
         private (float w, Vector3 disp) CalcDisplacement()
         {
-            float separationDist = Params.CollisionQueryRange;
+            float separationDist = Settings.CollisionQueryRange;
             float separationDistSqr = separationDist * separationDist;
             float invSeparationDist = 1.0f / separationDist;
-            float separationWeight = Params.SeparationWeight;
+            float separationWeight = Settings.SeparationWeight;
 
             float w = 0;
             Vector3 disp = Vector3.Zero;
