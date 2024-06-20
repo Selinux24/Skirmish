@@ -9,12 +9,12 @@ namespace Engine.UI
     /// <summary>
     /// Font map text parser
     /// </summary>
-    public abstract class FontMapParser
+    public static class FontMapParser
     {
         /// <summary>
         /// Color pattern used for text parse
         /// </summary>
-        public const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:\.|\,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:\.|\,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:\.|\,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:\.|\,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:\.|\,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:\.|\,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:\.|\,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:\.|\,)\d+)?)|)";
+        private const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:\.|\,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:\.|\,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:\.|\,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:\.|\,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:\.|\,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:\.|\,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:\.|\,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:\.|\,)\d+)?)|)";
         /// <summary>
         /// Color validator
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine.UI
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                return new FontMapParsedSentence();
+                return FontMapParsedSentence.Empty;
             }
 
             var sentenceParts = new List<string>();
@@ -94,12 +94,12 @@ namespace Engine.UI
                 shadowColorParts.Add([Color.Transparent]);
             }
 
-            return new FontMapParsedSentence
+            return new()
             {
                 Text = string.Join(string.Empty, sentenceParts),
-                Words = sentenceParts,
-                Colors = colorParts,
-                ShadowColors = shadowColorParts,
+                Parts = [.. sentenceParts],
+                Colors = [.. colorParts],
+                ShadowColors = [.. shadowColorParts],
             };
         }
         /// <summary>

@@ -1,6 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.UI
 {
@@ -10,16 +8,27 @@ namespace Engine.UI
     public struct FontMapParsedSentence
     {
         /// <summary>
+        /// Empty parsed sentence
+        /// </summary>
+        public static readonly FontMapParsedSentence Empty = new()
+        {
+            Text = string.Empty,
+            Parts = [],
+            Colors = [],
+            ShadowColors = [],
+        };
+        /// <summary>
         /// Creates a parsed sentencen result from sample
         /// </summary>
         /// <param name="sample">Text sample</param>
         public static FontMapParsedSentence FromSample(string sample)
         {
-            return new FontMapParsedSentence
+            return new()
             {
-                Words = new[] { sample },
-                Colors = Enumerable.Empty<IEnumerable<Color4>>(),
-                ShadowColors = Enumerable.Empty<IEnumerable<Color4>>(),
+                Text = sample,
+                Parts = [sample],
+                Colors = [],
+                ShadowColors = [],
             };
         }
 
@@ -28,42 +37,48 @@ namespace Engine.UI
         /// </summary>
         public string Text { get; set; }
         /// <summary>
-        /// Word list
+        /// Part list
         /// </summary>
-        public IEnumerable<string> Words { get; set; }
+        public string[] Parts { get; set; }
         /// <summary>
-        /// Colors by character of word list
+        /// Colors by character of part list
         /// </summary>
-        public IEnumerable<IEnumerable<Color4>> Colors { get; set; }
+        public Color4[][] Colors { get; set; }
         /// <summary>
-        /// Shadow colors by character of word list
+        /// Shadow colors by character of part list
         /// </summary>
-        public IEnumerable<IEnumerable<Color4>> ShadowColors { get; set; }
+        public Color4[][] ShadowColors { get; set; }
 
         /// <summary>
-        /// Gets the number of words in the sentence
+        /// Gets the number of part in the sentence
         /// </summary>
         public readonly int Count()
         {
-            return Words?.Count() ?? 0;
+            return Parts?.Length ?? 0;
         }
         /// <summary>
-        /// Gets the parsed word at index
+        /// Gets the parsed part at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly FontMapParsedWord GetWord(int index)
+        public readonly FontMapParsedPart GetPart(int index)
         {
-            if (index < Count())
+            if (index < 0 || index >= Count())
             {
-                return new FontMapParsedWord
-                {
-                    Word = Words.ElementAt(index),
-                    Colors = Colors.ElementAtOrDefault(index)?.ToArray() ?? Enumerable.Empty<Color4>(),
-                    ShadowColors = ShadowColors.ElementAtOrDefault(index)?.ToArray() ?? Enumerable.Empty<Color4>(),
-                };
+                return new();
             }
 
-            return new FontMapParsedWord();
+            return new()
+            {
+                Text = Parts[index],
+                Colors = index < Colors.Length ? Colors[index] : [],
+                ShadowColors = index < ShadowColors.Length ? ShadowColors[index] : [],
+            };
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"{Text}";
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Engine.Common;
+﻿using Engine;
+using Engine.Common;
+using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -6,7 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Engine.Content.Tests
+namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]

@@ -3,8 +3,9 @@ using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Engine.Content;
 
-namespace Engine.Content.Tests
+namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]

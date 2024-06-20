@@ -82,7 +82,7 @@ namespace BasicSamples.SceneUI
         {
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
-            desc.MaxTextLength = 512;
+            desc.MaxTextLength = 2048;
             desc.StartsVisible = false;
 
             textDebug = await AddComponentUI<UITextArea, UITextAreaDescription>("textDebug", "textDebug", desc);

@@ -21,12 +21,12 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public static InputElement[] Input(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 20, slot, InputClassification.PerVertexData, 0),
-            };
+            return
+            [
+                new("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, InputClassification.PerVertexData, 0),
+                new("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 20, slot, InputClassification.PerVertexData, 0),
+            ];
         }
         /// <summary>
         /// Generates a vertex array from specified components
@@ -37,12 +37,12 @@ namespace Engine.Common
         /// <returns>Returns the new generated vertex array</returns>
         public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
         {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-
             if (!vertices.Any())
             {
-                return Enumerable.Empty<VertexFont>();
+                return [];
             }
+
+            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
 
             return vertices
                 .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = color })
@@ -57,13 +57,13 @@ namespace Engine.Common
         /// <returns>Returns the new generated vertex array</returns>
         public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Color4> colors)
         {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
-
             if (!vertices.Any())
             {
-                return Enumerable.Empty<VertexFont>();
+                return [];
             }
+
+            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
             return vertices
                 .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = colors.ElementAt(index) })
