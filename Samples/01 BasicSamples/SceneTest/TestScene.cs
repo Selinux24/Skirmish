@@ -1,5 +1,12 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Components.Water;
 using Engine.Common;
 using Engine.Content;
 using Engine.Tween;
@@ -77,7 +84,7 @@ namespace BasicSamples.SceneTest
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = [];
         private ParticleManager pManager = null;
 
-        private IParticleSystem[] particlePlumes = null;
+        private IParticleSystem<ParticleEmitter, ParticleSystemParams>[] particlePlumes = null;
         private readonly Vector3 plumeGravity = new(0, 5, 0);
         private readonly float plumeMaxHorizontalVelocity = 25f;
         private Vector2 wind = new(0, 0);
@@ -322,9 +329,9 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeScenery()
         {
-            var sDesc = GroundDescription.FromFile(resourceScenery, "Clif.json");
+            var sDesc = SceneryDescription.FromFile(resourceScenery, "Clif.json");
 
-            scenery = await AddComponentGround<Scenery, GroundDescription>("Scenery", "Scenery", sDesc);
+            scenery = await AddComponentGround<Scenery, SceneryDescription>("Scenery", "Scenery", sDesc);
             var bbox = scenery.GetBoundingBox();
 
             var waterDesc = WaterDescription.CreateCalm(MathF.Max(bbox.Width, bbox.Depth), waterHeight);
@@ -767,7 +774,7 @@ namespace BasicSamples.SceneTest
             var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
             var cubeTris = Triangle.ComputeTriangleList(bbox);
 
-            particlePlumes = new IParticleSystem[positions.Length];
+            particlePlumes = new IParticleSystem<ParticleEmitter, ParticleSystemParams>[positions.Length];
             List<Triangle> markers = [];
             for (int i = 0; i < positions.Length; i++)
             {

@@ -5,8 +5,8 @@ using System.Linq;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Shadows;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Shadows;
     using Engine.Common;
 
     /// <summary>

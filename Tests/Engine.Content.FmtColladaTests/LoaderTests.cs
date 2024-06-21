@@ -1,4 +1,5 @@
-﻿using Engine.Content;
+﻿using Engine.BuiltIn.Components.Models;
+using Engine.Content;
 using Engine.Content.FmtCollada;
 using Engine.Content.FmtColladaTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

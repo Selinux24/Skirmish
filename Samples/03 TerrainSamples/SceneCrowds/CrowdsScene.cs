@@ -1,6 +1,10 @@
 ﻿using Engine;
 using Engine.Animation;
-using Engine.BuiltIn.PostProcess;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
@@ -190,9 +194,9 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeTerrain()
         {
-            var desc = GroundDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 2);
+            var desc = SceneryDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 2);
 
-            await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
+            await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeTrees()
         {

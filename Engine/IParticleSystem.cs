@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Particle system
     /// </summary>
-    public interface IParticleSystem : IDisposable
+    public interface IParticleSystem<TEmitter, TParams> : IDisposable
     {
         /// <summary>
         /// Gets the particle system name
@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Gets the particle emitter reference
         /// </summary>
-        ParticleEmitter Emitter { get; }
+        TEmitter Emitter { get; }
 
         /// <summary>
         /// Updates internal data
@@ -42,11 +42,11 @@ namespace Engine
         /// Gets current particle system parameters
         /// </summary>
         /// <returns>Returns the particle system parameters configuration</returns>
-        ParticleSystemParams GetParameters();
+        TParams GetParameters();
         /// <summary>
         /// Sets the particle system parameters
         /// </summary>
         /// <param name="particleParameters">Particle system parameters</param>
-        void SetParameters(ParticleSystemParams particleParameters);
+        void SetParameters(TParams particleParameters);
     }
 }

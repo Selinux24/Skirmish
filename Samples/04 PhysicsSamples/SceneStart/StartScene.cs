@@ -1,4 +1,6 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -161,7 +163,7 @@ namespace PhysicsSamples.SceneStart
                 res.ThrowExceptions();
             }
 
-            Renderer.PostProcessingObjectsEffects.AddToneMapping(Engine.BuiltIn.PostProcess.BuiltInToneMappingTones.Uncharted2);
+            Renderer.PostProcessingObjectsEffects.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
 
             UpdateLayout();
 

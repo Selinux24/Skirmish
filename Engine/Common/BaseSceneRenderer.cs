@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine;
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.PostProcess;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.PostProcess;
 
     /// <summary>
     /// Base scene renderer

@@ -1,5 +1,12 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
@@ -497,9 +504,9 @@ namespace TerrainSamples.SceneHeightmap
                 },
             };
 
-            var desc = GroundDescription.FromHeightmapDescription(hDesc, 5);
+            var desc = TerrainDescription.FromHeightmapDescription(hDesc, 5);
 
-            terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", desc);
+            terrain = await AddComponentGround<Terrain, TerrainDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeLensFlare()
         {

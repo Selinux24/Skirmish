@@ -1,6 +1,11 @@
 ﻿using Engine;
 using Engine.Animation;
-using Engine.BuiltIn.PostProcess;
+using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
@@ -208,9 +213,9 @@ F7 to F10: Toggle object visibility.";
         }
         private async Task InitializeTerrain()
         {
-            var desc = GroundDescription.FromFile(resourcesTerrainFolder, resourcesTerrainFile, 2);
+            var desc = SceneryDescription.FromFile(resourcesTerrainFolder, resourcesTerrainFile, 2);
 
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
+            terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeTrees()
         {

@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Sprites;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Sprites;
     using Engine.Common;
     using Engine.Content;
 

@@ -380,7 +380,7 @@ namespace Engine
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            BuiltIn.BuiltInShaders.Initialize(this);
+            BuiltIn.Drawers.BuiltInShaders.Initialize(this);
         }
         /// <summary>
         /// Destructor
@@ -419,7 +419,7 @@ namespace Engine
                     scenes.Clear();
                 }
 
-                BuiltIn.BuiltInShaders.DisposeResources();
+                BuiltIn.Drawers.BuiltInShaders.DisposeResources();
 
                 FontMapCache.Clear();
 

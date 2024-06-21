@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine;
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Fonts;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Fonts;
     using Engine.Common;
 
     /// <summary>

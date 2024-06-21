@@ -1,4 +1,7 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Content;
 using Engine.Physics;
@@ -100,12 +103,12 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeTerrain()
         {
-            var desc = GroundDescription.FromFile("ScenePhysics/resources/terrain", "collisionTerrain.json");
+            var desc = SceneryDescription.FromFile("ScenePhysics/resources/terrain", "collisionTerrain.json");
             desc.ColliderType = ColliderTypes.Box;
             desc.CullingVolumeType = CullingVolumeTypes.BoxVolume;
             desc.BlendMode = BlendModes.Opaque;
 
-            var terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
+            var terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", desc);
 
             var rbState = new RigidBodyState { Mass = float.PositiveInfinity };
             var pTerrain = new PhysicsTerrain(new RigidBody(rbState), terrain);

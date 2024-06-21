@@ -9,7 +9,9 @@ namespace TerrainSamples.SceneModularDungeon
 {
     using Engine;
     using Engine.Animation;
-    using Engine.BuiltIn.PostProcess;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Primitives;
+    using Engine.BuiltIn.Drawers.PostProcess;
     using Engine.Common;
     using Engine.Content;
     using Engine.Content.FmtObj;

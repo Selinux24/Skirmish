@@ -1,5 +1,11 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
@@ -15,6 +21,8 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneRts
 {
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Skies;
     using TerrainSamples.SceneRts.AI;
     using TerrainSamples.SceneRts.AI.Agents;
     using TerrainSamples.SceneRts.Controllers;
@@ -289,7 +297,7 @@ namespace TerrainSamples.SceneRts
                 res.ThrowExceptions();
             }
 
-            Renderer.PostProcessingObjectsEffects.AddToneMapping(Engine.BuiltIn.PostProcess.BuiltInToneMappingTones.Uncharted2);
+            Renderer.PostProcessingObjectsEffects.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
 
             UpdateLayout();
 
@@ -785,8 +793,8 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var terrainDescription = GroundDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 1);
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDescription);
+            var terrainDescription = SceneryDescription.FromFile(resourceTerrainFolder, resourceTerrainFile, 1);
+            terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", terrainDescription);
 
             sw.Stop();
             return new TaskResult()
@@ -2039,8 +2047,8 @@ namespace TerrainSamples.SceneRts
         }
         private void AddSmokePlumeSystem(AIAgent agent, bool unique)
         {
-            IParticleSystem plumeFire = null;
-            IParticleSystem plumeSmoke = null;
+            IParticleSystem<ParticleEmitter, ParticleSystemParams> plumeFire = null;
+            IParticleSystem<ParticleEmitter, ParticleSystemParams> plumeSmoke = null;
             string plumeFireSystemName = null;
             string plumeSmokeSystemName = null;
 
@@ -2094,7 +2102,7 @@ namespace TerrainSamples.SceneRts
         }
         private void AddSmokeSystem(AIAgent agent, bool unique)
         {
-            IParticleSystem smoke = null;
+            IParticleSystem<ParticleEmitter, ParticleSystemParams> smoke = null;
             string smokeSystemName = null;
 
             if (!unique)

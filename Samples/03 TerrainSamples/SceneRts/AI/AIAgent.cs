@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneRts.AI
 {
+    using Engine.BuiltIn.Components.Models;
     using TerrainSamples.SceneRts.AI.Behaviors;
 
     /// <summary>

@@ -8,8 +8,8 @@ using System.Linq;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Deferred;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Deferred;
     using Engine.Common;
 
     /// <summary>

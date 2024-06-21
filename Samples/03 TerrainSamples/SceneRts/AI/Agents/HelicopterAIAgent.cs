@@ -4,6 +4,7 @@ using SharpDX;
 
 namespace TerrainSamples.SceneRts.AI.Agents
 {
+    using Engine.BuiltIn.Components.Models;
     using TerrainSamples.SceneRts.AI.Behaviors;
     using TerrainSamples.SceneRts.Controllers;
 

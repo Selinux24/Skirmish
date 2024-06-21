@@ -10,57 +10,8 @@ namespace Engine
     /// <summary>
     /// Ground description
     /// </summary>
-    public class GroundDescription : SceneObjectDescription
+    public abstract class GroundDescription : SceneObjectDescription
     {
-        /// <summary>
-        /// Gets a ground description from data
-        /// </summary>
-        /// <param name="heightmap">Height map</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="maximumHeight">Maximum height</param>
-        /// <param name="heightCurve">Height curve</param>
-        /// <param name="textures">Heighmap textures</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmap(NoiseMap heightmap, float cellSize, float maximumHeight, Curve heightCurve, HeightmapTexturesDescription textures, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Heightmap = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve, textures),
-            };
-        }
-        /// <summary>
-        /// Gets a ground description heightmap description
-        /// </summary>
-        /// <param name="description">Heightmap description</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmapDescription(HeightmapDescription description, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Heightmap = description,
-            };
-        }
-        /// <summary>
-        /// Gets a ground description from a file
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">File name</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromFile(string contentFolder, string fileName, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Content = ContentDescription.FromFile(contentFolder, fileName),
-            };
-        }
-
-        /// <summary>
-        /// Heightmap description
-        /// </summary>
-        public HeightmapDescription Heightmap { get; set; }
         /// <summary>
         /// Content
         /// </summary>
@@ -91,14 +42,10 @@ namespace Engine
         /// <summary>
         /// Reads the content data from description
         /// </summary>
-        public async Task<IEnumerable<ContentData>> ReadContentData()
+        public virtual async Task<IEnumerable<ContentData>> ReadContentData()
         {
             // Read model content
-            if (Heightmap != null)
-            {
-                return [await Heightmap.ReadContentData()];
-            }
-            else if (Content != null)
+            if (Content != null)
             {
                 return await Content.ReadContentData();
             }
@@ -118,7 +65,7 @@ namespace Engine
         /// <summary>
         /// Reads the content library from description
         /// </summary>
-        public async Task<ContentLibrary> ReadContentLibrary()
+        public virtual async Task<ContentLibrary> ReadContentLibrary()
         {
             return new ContentLibrary(await ReadContentData());
         }
@@ -127,7 +74,7 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Quadtree item type</typeparam>
         /// <param name="items">Quadtree items</param>
-        public PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
+        public virtual PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
         {
             if (Quadtree != null)
             {

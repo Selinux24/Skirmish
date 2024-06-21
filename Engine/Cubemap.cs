@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Cubemap;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Cubemap;
     using Engine.Common;
     using Engine.Content;
 

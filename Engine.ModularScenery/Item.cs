@@ -1,4 +1,6 @@
-﻿
+﻿using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+
 namespace Engine.Modular
 {
     using Engine.Modular.Persistence;

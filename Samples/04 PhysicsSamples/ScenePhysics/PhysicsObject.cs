@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
 using Engine.Common;
 using Engine.Physics;
 using Engine.Physics.Colliders;
@@ -70,7 +71,7 @@ namespace PhysicsSamples.ScenePhysics
             };
             collider.Attach(rigidBody);
 
-            Colliders = new[] { collider };
+            Colliders = [collider];
         }
 
         /// <inheritdoc/>

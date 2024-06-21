@@ -1,4 +1,6 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;

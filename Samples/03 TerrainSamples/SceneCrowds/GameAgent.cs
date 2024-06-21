@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
 using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;

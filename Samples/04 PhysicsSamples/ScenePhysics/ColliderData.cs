@@ -1,27 +1,21 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
 using Engine.Physics;
 using SharpDX;
 using System.Collections.Generic;
 
 namespace PhysicsSamples.ScenePhysics
 {
-    class ColliderData
+    class ColliderData(RigidBodyState rbState, Model model)
     {
-        private readonly RigidBodyState rbState;
+        private readonly RigidBodyState rbState = rbState;
         private float time;
 
-        public IPhysicsObject PhysicsObject { get; private set; }
-        public Model Model { get; private set; }
+        public IPhysicsObject PhysicsObject { get; private set; } = new PhysicsObject(model, new RigidBody(rbState));
+        public Model Model { get; private set; } = model;
         public IEnumerable<Line3D> Lines { get; set; }
         public ISceneLightPoint Light { get; private set; }
-
-        public ColliderData(RigidBodyState rbState, Model model)
-        {
-            this.rbState = rbState;
-
-            PhysicsObject = new PhysicsObject(model, new RigidBody(rbState));
-            Model = model;
-        }
 
         public void Initialize()
         {

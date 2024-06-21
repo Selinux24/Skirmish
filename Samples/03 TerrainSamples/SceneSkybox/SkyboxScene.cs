@@ -1,5 +1,12 @@
 ﻿using Engine;
-using Engine.BuiltIn.PostProcess;
+using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Components.Water;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -268,12 +275,12 @@ namespace TerrainSamples.SceneSkybox
                 NormalMaps = [resourceLakeBottomNormalFile],
                 Scale = 0.0333f,
             };
-            var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
 
-            lakeBottom = await AddComponentEffect<Scenery, GroundDescription>("Lake Bottom", "Lake Bottom", groundDesc);
+            lakeBottom = await AddComponentEffect<Scenery, SceneryDescription>("Lake Bottom", "Lake Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -314,11 +321,11 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeRuins()
         {
-            var ruinsDesc = GroundDescription.FromFile(resourceRuinsFolder, resourceRuinsFile);
+            var ruinsDesc = SceneryDescription.FromFile(resourceRuinsFolder, resourceRuinsFile);
             ruinsDesc.Quadtree.MaximumDepth = 1;
             ruinsDesc.StartsVisible = false;
 
-            ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
+            ruins = await AddComponentGround<Scenery, SceneryDescription>("Ruins", "Ruins", ruinsDesc);
         }
         private async Task InitializeWater()
         {

@@ -1,4 +1,6 @@
-﻿using Engine.Content;
+﻿using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.Content;
 using System.Collections.Generic;
 
 namespace Engine.Modular

@@ -1,5 +1,10 @@
 ﻿using Engine;
-using Engine.BuiltIn.PostProcess;
+using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.Tween;
@@ -551,11 +556,11 @@ namespace Tanks
                 NormalMaps = ["Normal.jpg"],
                 Scale = 0.2f,
             };
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            SceneryDescription groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.StartsVisible = false;
 
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", groundDesc);
+            terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", groundDesc);
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
         }

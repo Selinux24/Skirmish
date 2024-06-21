@@ -1,5 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -13,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneGrid
 {
+    using Engine.BuiltIn.Components.Ground;
     using TerrainSamples.SceneGrid.Rules;
     using TerrainSamples.SceneGrid.Rules.Enum;
 
@@ -363,9 +366,9 @@ namespace TerrainSamples.SceneGrid
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", troopsDesc);
 
-            var terrainDesc = GroundDescription.FromFile(resourcesTerrain, "terrain.json");
+            var terrainDesc = SceneryDescription.FromFile(resourcesTerrain, "terrain.json");
             terrainDesc.StartsVisible = false;
-            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDesc);
+            terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", terrainDesc);
         }
         private async Task InitializeDebug()
         {

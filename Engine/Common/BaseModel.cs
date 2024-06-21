@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Deferred;
-    using Engine.BuiltIn.Forward;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Deferred;
+    using Engine.BuiltIn.Drawers.Forward;
     using Engine.Content;
 
     /// <summary>

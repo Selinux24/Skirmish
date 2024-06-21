@@ -1,7 +1,7 @@
 {
   "particleSystems": [
     {
-      "particleType": "Fire",
+      "particleType": 4,
       "name": "torchFire",
       "textureName": "fire.png",
       "maxDuration": 0.0,
@@ -38,7 +38,7 @@
       "emitterVelocitySensitivity": 0.0
     },
     {
-      "particleType": "Fire",
+      "particleType": 4,
       "name": "lampFire",
       "textureName": "candleLight.png",
       "maxDuration": 0.25,

@@ -1,4 +1,8 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Components.Water;
 using Engine.Tween;
 using SharpDX;
 using System;
@@ -146,11 +150,11 @@ namespace BasicSamples.SceneWater
                 NormalMaps = ["Normal.jpg"],
                 Scale = 0.0333f,
             };
-            var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
 
-            await AddComponentGround<Scenery, GroundDescription>("SeaBottom", "Sea Bottom", groundDesc);
+            await AddComponentGround<Scenery, SceneryDescription>("SeaBottom", "Sea Bottom", groundDesc);
         }
 
         public override void Update(IGameTime gameTime)

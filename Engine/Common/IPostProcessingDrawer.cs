@@ -1,8 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.PostProcess;
+    using Engine.BuiltIn.Drawers.PostProcess;
 
     /// <summary>
     /// Post-processing drawer interface
