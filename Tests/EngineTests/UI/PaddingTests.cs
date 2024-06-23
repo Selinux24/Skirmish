@@ -1,9 +1,11 @@
 using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.UI
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class PaddingTests
     {

@@ -1,8 +1,10 @@
 using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.UI
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class SpacingTests
     {
