@@ -32,7 +32,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public GroundDescription()
+        protected GroundDescription()
             : base()
         {
             BlendMode = BlendModes.Opaque;

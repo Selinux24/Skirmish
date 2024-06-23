@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Particle system
     /// </summary>
-    public interface IParticleSystem<TEmitter, TParams> : IDisposable
+    public interface IParticleSystem<out TEmitter, TParams> : IDisposable
     {
         /// <summary>
         /// Gets the particle system name

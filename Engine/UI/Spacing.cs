@@ -15,7 +15,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Spacing(0);
+                return new(0);
             }
         }
 

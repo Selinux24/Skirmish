@@ -165,10 +165,10 @@ namespace Engine.UI
             {
                 return new Padding
                 {
-                    Left = value[1],
-                    Top = value[2],
-                    Bottom = value[3],
-                    Right = value[4],
+                    Left = value[0],
+                    Top = value[1],
+                    Bottom = value[2],
+                    Right = value[3],
                 };
             }
 
@@ -219,10 +219,10 @@ namespace Engine.UI
             {
                 return new Padding
                 {
-                    Left = value[1],
-                    Top = value[2],
-                    Bottom = value[3],
-                    Right = value[4],
+                    Left = value[0],
+                    Top = value[1],
+                    Bottom = value[2],
+                    Right = value[3],
                 };
             }
 
