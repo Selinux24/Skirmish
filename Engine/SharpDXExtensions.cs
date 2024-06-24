@@ -697,19 +697,19 @@ namespace Engine
         /// 2 - Bottom Left
         /// 3 - Bottom Right
         /// </remarks>
-        public static IEnumerable<BoundingBox> QuadTree(this BoundingBox bbox)
+        public static IEnumerable<BoundingBox> SubdivideQuadtree(this BoundingBox bbox)
         {
             var M = bbox.Maximum;
             var c = (bbox.Maximum + bbox.Minimum) * 0.5f;
             var m = bbox.Minimum;
 
-            //-1-1-1   +0+1+0 - Top Left
+            //-1-1   +0+0 - Top Left
             yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-            //-1-1+0   +0+1+1 - Top Right
-            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-            //+0-1-1   +1+1+0 - Bottom Left
+            //+0-1   +1+0 - Top Right
             yield return new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-            //+0-1+0   +1+1+1 - Bottom Right
+            //-1+0   +0+1 - Bottom Left
+            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+            //+0+0   +1+1 - Bottom Right
             yield return new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
         }
         /// <summary>
@@ -728,7 +728,7 @@ namespace Engine
         /// 6 - Bottom Right Front
         /// 7 - Bottom Right Back
         /// </remarks>
-        public static IEnumerable<BoundingBox> Octree(this BoundingBox bbox)
+        public static IEnumerable<BoundingBox> SubdivideOctree(this BoundingBox bbox)
         {
             var m = bbox.Minimum;
             var M = bbox.Maximum;

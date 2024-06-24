@@ -104,7 +104,7 @@ namespace Engine.Collections.Generic
             int maxDepth,
             int nextTreeDepth)
         {
-            var boxes = bbox.QuadTree();
+            var boxes = bbox.SubdivideQuadtree();
 
             var topLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(0), items, maxDepth, nextTreeDepth);
             var topRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(1), items, maxDepth, nextTreeDepth);

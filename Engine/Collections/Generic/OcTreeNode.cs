@@ -101,7 +101,7 @@ namespace Engine.Collections.Generic
 
             int index = -1;
 
-            foreach (var childBoundary in boundary.Octree())
+            foreach (var childBoundary in boundary.SubdivideOctree())
             {
                 index++;
 

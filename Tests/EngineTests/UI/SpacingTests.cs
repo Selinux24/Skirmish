@@ -13,8 +13,8 @@ namespace EngineTests.UI
         {
             Spacing spacing0 = Spacing.Zero;
 
-            Assert.AreEqual(spacing0.Horizontal, 0);
-            Assert.AreEqual(spacing0.Vertical, 0);
+            Assert.AreEqual(0, spacing0.Horizontal);
+            Assert.AreEqual(0, spacing0.Vertical);
         }
 
         [TestMethod]
@@ -23,11 +23,11 @@ namespace EngineTests.UI
             Spacing spacing1 = new(1);
             Spacing spacing23 = new(2, 3);
 
-            Assert.AreEqual(spacing1.Horizontal, 1);
-            Assert.AreEqual(spacing1.Vertical, 1);
+            Assert.AreEqual(1, spacing1.Horizontal);
+            Assert.AreEqual(1, spacing1.Vertical);
 
-            Assert.AreEqual(spacing23.Horizontal, 2);
-            Assert.AreEqual(spacing23.Vertical, 3);
+            Assert.AreEqual(2, spacing23.Horizontal);
+            Assert.AreEqual(3, spacing23.Vertical);
         }
 
         [TestMethod]

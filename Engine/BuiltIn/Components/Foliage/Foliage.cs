@@ -381,7 +381,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <returns>Returns a node list</returns>
         private QuadTreeNode[] GetVisibleNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
-            var nodes = foliageQuadtree.GetNodesInVolume(ref sph);
+            var nodes = foliageQuadtree.FindNodesInVolume(sph);
             if (!nodes.Any())
             {
                 return [];

@@ -14,10 +14,10 @@ namespace EngineTests.UI
         {
             Padding padding0 = Padding.Zero;
 
-            Assert.AreEqual(padding0.Left, 0);
-            Assert.AreEqual(padding0.Top, 0);
-            Assert.AreEqual(padding0.Bottom, 0);
-            Assert.AreEqual(padding0.Right, 0);
+            Assert.AreEqual(0, padding0.Left);
+            Assert.AreEqual(0, padding0.Top);
+            Assert.AreEqual(0, padding0.Bottom);
+            Assert.AreEqual(0, padding0.Right);
         }
 
         [TestMethod]
@@ -27,20 +27,20 @@ namespace EngineTests.UI
             Padding spacing23 = new(2, 3);
             Padding spacing4567 = new(4, 5, 6, 7);
 
-            Assert.AreEqual(spacing1.Left, 1);
-            Assert.AreEqual(spacing1.Top, 1);
-            Assert.AreEqual(spacing1.Bottom, 1);
-            Assert.AreEqual(spacing1.Right, 1);
+            Assert.AreEqual(1, spacing1.Left);
+            Assert.AreEqual(1, spacing1.Top);
+            Assert.AreEqual(1, spacing1.Bottom);
+            Assert.AreEqual(1, spacing1.Right);
 
-            Assert.AreEqual(spacing23.Left, 2);
-            Assert.AreEqual(spacing23.Top, 3);
-            Assert.AreEqual(spacing23.Bottom, 3);
-            Assert.AreEqual(spacing23.Right, 2);
+            Assert.AreEqual(2, spacing23.Left);
+            Assert.AreEqual(3, spacing23.Top);
+            Assert.AreEqual(3, spacing23.Bottom);
+            Assert.AreEqual(2, spacing23.Right);
 
-            Assert.AreEqual(spacing4567.Left, 4);
-            Assert.AreEqual(spacing4567.Top, 5);
-            Assert.AreEqual(spacing4567.Bottom, 6);
-            Assert.AreEqual(spacing4567.Right, 7);
+            Assert.AreEqual(4, spacing4567.Left);
+            Assert.AreEqual(5, spacing4567.Top);
+            Assert.AreEqual(6, spacing4567.Bottom);
+            Assert.AreEqual(7, spacing4567.Right);
         }
 
         [TestMethod]
