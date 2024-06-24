@@ -7,27 +7,21 @@ namespace Engine.Collections.Generic
     /// OcTree
     /// </summary>
     /// <typeparam name="T">Item type</typeparam>
-    public class OcTree<T>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="boundary">Global boundary</param>
+    /// <param name="itemsPerNode">Maximum items per node</param>
+    public class OcTree<T>(BoundingBox boundary, int itemsPerNode)
     {
         /// <summary>
         /// Root node
         /// </summary>
-        private readonly OcTreeNode<T> root;
+        private readonly OcTreeNode<T> root = new(boundary, itemsPerNode, true);
         /// <summary>
         /// Result list
         /// </summary>
-        private readonly List<T> results;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="boundary">Global boundary</param>
-        /// <param name="itemsPerNode">Maximum items per node</param>
-        public OcTree(BoundingBox boundary, int itemsPerNode)
-        {
-            root = new OcTreeNode<T>(boundary, itemsPerNode, true);
-            results = new();
-        }
+        private readonly List<T> results = [];
 
         /// <summary>
         /// Inserts a item in the structure

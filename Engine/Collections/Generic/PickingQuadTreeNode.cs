@@ -188,19 +188,13 @@ namespace Engine.Collections.Generic
         public PickingQuadTreeNode<T> BottomRightNeighbor { get; private set; }
 
         /// <inheritdoc/>
-        public int Id { get; set; }
+        public int Id { get; private set; }
         /// <inheritdoc/>
-        public int Level { get; set; }
+        public int Level { get; private set; }
         /// <inheritdoc/>
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox BoundingBox { get; private set; }
         /// <inheritdoc/>
-        public Vector3 Center
-        {
-            get
-            {
-                return BoundingBox.GetCenter();
-            }
-        }
+        public Vector3 Center { get => BoundingBox.Center; }
         /// <inheritdoc/>
         public IEnumerable<PickingQuadTreeNode<T>> Children { get => children.AsReadOnly(); }
         /// <inheritdoc/>

@@ -23,8 +23,8 @@ namespace Engine.Collections.Generic
         /// Constructor
         /// </summary>
         /// <param name="items">Partitioning items</param>
-        /// <param name="description">Quadtree description</param>
-        public PickingQuadTree(IEnumerable<T> items, QuadtreeDescription description)
+        /// <param name="maxDepth">Maximum depth</param>
+        public PickingQuadTree(IEnumerable<T> items, int maxDepth)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
@@ -34,7 +34,7 @@ namespace Engine.Collections.Generic
             Root = PickingQuadTreeNode<T>.CreatePartitions(
                 null,
                 bbox, items,
-                description.MaximumDepth,
+                maxDepth,
                 0,
                 ref nodeCount);
         }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn.Components.Ground;
     using Engine.Collections.Generic;
     using Engine.Content;
 
@@ -67,7 +68,7 @@ namespace Engine
         /// </summary>
         public virtual async Task<ContentLibrary> ReadContentLibrary()
         {
-            return new ContentLibrary(await ReadContentData());
+            return new(await ReadContentData());
         }
         /// <summary>
         /// Reads a quadtree from description
@@ -78,7 +79,7 @@ namespace Engine
         {
             if (Quadtree != null)
             {
-                return new PickingQuadTree<T>(items, Quadtree);
+                return new(items, Quadtree.MaximumDepth);
             }
 
             return null;

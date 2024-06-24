@@ -1,3 +1,4 @@
+using Engine;
 using Engine.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
@@ -354,6 +355,40 @@ namespace EngineTests.Collections
             cn = q.FindClosestNode(new(-100, 0, 100));
             Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
+        }
+
+        [TestMethod]
+        public void TestTraverseVolume()
+        {
+            Vector3 min = Vector3.One * -10f;
+            Vector3 max = Vector3.One * +10f;
+            BoundingBox bbox = new(min, max);
+
+            QuadTree q = new(bbox, 1);
+
+            IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
+            var ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(Array.Empty<QuadTreeNode>(), ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.TopLeftChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.TopRightChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.BottomLeftChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.BottomRightChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
         }
     }
 }

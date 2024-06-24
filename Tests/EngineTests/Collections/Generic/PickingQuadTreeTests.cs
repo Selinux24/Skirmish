@@ -59,7 +59,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestConstructor()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(1));
+            PickingQuadTree<Triangle> q = new([], 1);
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -82,7 +82,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestParent()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -119,7 +119,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeaf()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -156,7 +156,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestIds()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -193,7 +193,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLevels()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -221,7 +221,7 @@ namespace EngineTests.Collections.Generic
             Vector3 bottomLeft = new(-5, 0, 5);
             Vector3 bottomRight = new(5, 0, 5);
 
-            PickingQuadTree<Triangle> q = new(mesh, QuadtreeDescription.Default(1));
+            PickingQuadTree<Triangle> q = new(mesh, 1);
 
             Assert.AreEqual(bbox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
@@ -247,7 +247,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestNeighbors()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(1));
+            PickingQuadTree<Triangle> q = new([], 1);
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -289,7 +289,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestGetBoundingBoxes()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             var boxes = q.GetBoundingBoxes();
             Assert.AreEqual(16, boxes.Count());
 
@@ -306,7 +306,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeafNodes()
         {
-            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
+            PickingQuadTree<Triangle> q = new([], 2);
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(16, nodes.Length);
 
@@ -324,7 +324,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestTraversePosition()
         {
-            PickingQuadTree<Triangle> q = new(mesh, QuadtreeDescription.Default(1));
+            PickingQuadTree<Triangle> q = new(mesh, 1);
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
@@ -368,6 +368,36 @@ namespace EngineTests.Collections.Generic
             cn = q.FindClosestNode(new(-100, 0, 100));
             Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
+        }
+
+        [TestMethod]
+        public void TestTraverseVolume()
+        {
+            PickingQuadTree<Triangle> q = new(mesh, 1);
+
+            IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
+            var ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(Array.Empty<PickingQuadTreeNode<Triangle>>(), ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopLeftChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopRightChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomLeftChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomRightChild }, ln.ToArray());
+
+            volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
+            ln = q.FindNodesInVolume(volume);
+            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
         }
     }
 }

@@ -66,25 +66,19 @@ namespace Engine.Collections
         /// <summary>
         /// Node Id
         /// </summary>
-        int Id { get; set; }
+        int Id { get; }
         /// <summary>
         /// Depth level
         /// </summary>
-        int Level { get; set; }
+        int Level { get; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        BoundingBox BoundingBox { get; set; }
+        BoundingBox BoundingBox { get; }
         /// <summary>
         /// Gets the node center position
         /// </summary>
-        Vector3 Center
-        {
-            get
-            {
-                return BoundingBox.GetCenter();
-            }
-        }
+        Vector3 Center { get; }
         /// <summary>
         /// Children list
         /// </summary>
