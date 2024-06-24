@@ -406,7 +406,7 @@ namespace Engine.BuiltIn.Components.Ground
                 return true;
             }
 
-            var nodes = GroundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            var nodes = GroundPickingQuadtree.FindNodesInVolume(volume).ToArray();
             if (nodes.Length == 0)
             {
                 return true;
@@ -436,7 +436,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             base.Update(context);
 
-            visibleNodes = GroundPickingQuadtree.GetNodesInVolume((IntersectionVolumeFrustum)Scene.Camera.Frustum).ToArray();
+            visibleNodes = GroundPickingQuadtree.FindNodesInVolume((IntersectionVolumeFrustum)Scene.Camera.Frustum).ToArray();
             if (visibleNodes.Length == 0)
             {
                 return;

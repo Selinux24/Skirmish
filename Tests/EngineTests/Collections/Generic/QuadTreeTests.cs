@@ -1,11 +1,11 @@
-using Engine.Collections;
+using Engine.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace EngineTests.Collections
+namespace EngineTests.Collections.Generic
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
@@ -17,7 +17,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 1;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -31,10 +31,10 @@ namespace EngineTests.Collections
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[3].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[0].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[1].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[2].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[3].Children.ToArray());
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -83,7 +83,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -123,7 +123,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -163,7 +163,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -191,7 +191,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new(min, max);
             int maxDepth = 1;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
 
             Assert.AreEqual(bbox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
@@ -222,7 +222,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new(min, max);
             int maxDepth = 1;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -267,7 +267,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             var boxes = q.GetBoundingBoxes();
             Assert.AreEqual(16, boxes.Count());
 
@@ -287,11 +287,11 @@ namespace EngineTests.Collections
             BoundingBox bbox = new();
             int maxDepth = 2;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(16, nodes.Length);
 
-            QuadTreeNode[] lNodes =
+            QuadTreeNode<int>[] lNodes =
             [
                 .. q.Root.Children.ToArray()[0].Children,
                 .. q.Root.Children.ToArray()[1].Children,
@@ -310,7 +310,7 @@ namespace EngineTests.Collections
             BoundingBox bbox = new(min, max);
             int maxDepth = 1;
 
-            QuadTree q = new(bbox, maxDepth);
+            QuadTree<int> q = new(bbox, [], maxDepth);
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);

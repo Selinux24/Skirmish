@@ -1,23 +1,65 @@
-using Engine.Collections;
+using Engine;
+using Engine.Collections.Generic;
+using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace EngineTests.Collections
+namespace EngineTests.Collections.Generic
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class QuadTreeTests
+    public class PickingQuadTreeTests
     {
+        static TestContext _testContext;
+
+        static Triangle[] mesh;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            _testContext = context;
+        }
+
+        [TestInitialize]
+        public void SetupTest()
+        {
+            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+
+            var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
+            var tris = Triangle.ComputeTriangleList(geom.Vertices, geom.Indices);
+            tris = Triangle.Transform(tris, Matrix.Translation(-7.5f, 0, -7.5f));
+
+            mesh =
+            [
+                .. Triangle.Transform(tris, Matrix.Translation(0,10,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,10,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(0,10,5)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,10,5)),
+
+                .. Triangle.Transform(tris, Matrix.Translation(10,5,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(15,5,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(0,5,5)),
+                .. Triangle.Transform(tris, Matrix.Translation(15,5,5)),
+
+                .. Triangle.Transform(tris, Matrix.Translation(0,-5,10)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,-5,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(0,-5,15)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,-5,15)),
+
+                .. Triangle.Transform(tris, Matrix.Translation(10,-10,10)),
+                .. Triangle.Transform(tris, Matrix.Translation(15,-10,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(0,-10,15)),
+                .. Triangle.Transform(tris, Matrix.Translation(15,-10,15)),
+            ];
+        }
+
         [TestMethod]
         public void TestConstructor()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 1;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(1));
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -31,19 +73,16 @@ namespace EngineTests.Collections
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[3].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[0].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[1].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[2].Children.ToArray());
+            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[3].Children.ToArray());
         }
 
         [TestMethod]
         public void TestParent()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -80,10 +119,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestLeaf()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -120,10 +156,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestIds()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -160,10 +193,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestLevels()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -184,14 +214,14 @@ namespace EngineTests.Collections
         {
             Vector3 min = Vector3.One * -10f;
             Vector3 max = Vector3.One * +10f;
+            BoundingBox bbox = new(min, max);
+
             Vector3 topLeft = new(-5, 0, -5);
             Vector3 topRight = new(5, 0, -5);
             Vector3 bottomLeft = new(-5, 0, 5);
             Vector3 bottomRight = new(5, 0, 5);
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
 
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new(mesh, QuadtreeDescription.Default(1));
 
             Assert.AreEqual(bbox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
@@ -217,12 +247,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestNeighbors()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(1));
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -264,10 +289,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestGetBoundingBoxes()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             var boxes = q.GetBoundingBoxes();
             Assert.AreEqual(16, boxes.Count());
 
@@ -284,14 +306,11 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestLeafNodes()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new([], QuadtreeDescription.Default(2));
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(16, nodes.Length);
 
-            QuadTreeNode[] lNodes =
+            PickingQuadTreeNode<Triangle>[] lNodes =
             [
                 .. q.Root.Children.ToArray()[0].Children,
                 .. q.Root.Children.ToArray()[1].Children,
@@ -305,12 +324,7 @@ namespace EngineTests.Collections
         [TestMethod]
         public void TestTraversePosition()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
-
-            QuadTree q = new(bbox, maxDepth);
+            PickingQuadTree<Triangle> q = new(mesh, QuadtreeDescription.Default(1));
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);

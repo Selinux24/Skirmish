@@ -110,25 +110,25 @@ namespace Engine.BuiltIn.Components.Ground
 
             var lodList = new[]
             {
-                    LevelOfDetail.High,
-                    LevelOfDetail.Medium,
-                    LevelOfDetail.Low,
-                    LevelOfDetail.Minimum,
-                };
+                LevelOfDetail.High,
+                LevelOfDetail.Medium,
+                LevelOfDetail.Low,
+                LevelOfDetail.Minimum,
+            };
             var shapeList = new[]
             {
-                    IndexBufferShapes.Full,
+                IndexBufferShapes.Full,
 
-                    IndexBufferShapes.SideTop,
-                    IndexBufferShapes.SideBottom,
-                    IndexBufferShapes.SideLeft,
-                    IndexBufferShapes.SideRight,
+                IndexBufferShapes.SideTop,
+                IndexBufferShapes.SideBottom,
+                IndexBufferShapes.SideLeft,
+                IndexBufferShapes.SideRight,
 
-                    IndexBufferShapes.CornerTopLeft,
-                    IndexBufferShapes.CornerTopRight,
-                    IndexBufferShapes.CornerBottomLeft,
-                    IndexBufferShapes.CornerBottomRight,
-                };
+                IndexBufferShapes.CornerTopLeft,
+                IndexBufferShapes.CornerTopRight,
+                IndexBufferShapes.CornerBottomLeft,
+                IndexBufferShapes.CornerBottomRight,
+            };
 
             //Populate shapes dictionary
             foreach (var lod in lodList)
@@ -239,7 +239,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="eyePosition">Eye position</param>
         private void UpdateNodes(Vector3 eyePosition)
         {
-            var node = drawingQuadTree.FindNode(eyePosition);
+            var node = drawingQuadTree.FindClosestNode(eyePosition);
 
             if (node == null || lastNode == node)
             {

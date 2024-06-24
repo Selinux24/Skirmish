@@ -1,28 +1,22 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Common;
+    using Engine.Collections.Helpers;
 
     /// <summary>
     /// Picking quad tree
     /// </summary>
-    public class PickingQuadTree<T> where T : IVertexList, IRayIntersectable
+    public class PickingQuadTree<T> : IQuadTree<PickingQuadTreeNode<T>> where T : IVertexList, IRayIntersectable
     {
-        /// <summary>
-        /// Node id
-        /// </summary>
-        private int nodeId = 0;
+        const string cName = nameof(PickingQuadTree<T>);
 
-        /// <summary>
-        /// Root node
-        /// </summary>
+        /// <inheritdoc/>
         public PickingQuadTreeNode<T> Root { get; private set; }
-        /// <summary>
-        /// Global bounding box
-        /// </summary>
+        /// <inheritdoc/>
         public BoundingBox BoundingBox { get; private set; }
 
         /// <summary>
@@ -36,13 +30,43 @@ namespace Engine.Collections.Generic
 
             BoundingBox = bbox;
 
+            int nodeCount = 0;
             Root = PickingQuadTreeNode<T>.CreatePartitions(
-                this, null,
+                null,
                 bbox, items,
                 description.MaximumDepth,
-                0);
+                0,
+                ref nodeCount);
+        }
 
-            Root.ConnectNodes();
+        /// <inheritdoc/>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
+        {
+            return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetBoundingBoxes(Root, maxDepth);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
+        {
+            return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetLeafNodes(Root);
+        }
+
+        /// <inheritdoc/>
+        public PickingQuadTreeNode<T> FindClosestNode(Vector3 position)
+        {
+            var node = QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetNodeAtPosition(Root, position);
+            if (node != null)
+            {
+                // Position is into a node
+                return node;
+            }
+
+            //Look for the closest node
+            return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetClosestNodeAtPosition(Root, position);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<PickingQuadTreeNode<T>> FindNodesInVolume(ICullingVolume volume)
+        {
+            return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetNodesInVolume(Root, volume);
         }
 
         /// <summary>
@@ -105,90 +129,17 @@ namespace Engine.Collections.Generic
                 FrameCounters.PickCounters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
-        /// <summary>
-        /// Gets bounding boxes of specified depth
-        /// </summary>
-        /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
-        /// <returns>Returns bounding boxes of specified depth</returns>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
-        {
-            return Root.GetBoundingBoxes(maxDepth);
-        }
-        /// <summary>
-        /// Gets the nodes contained into the specified volume
-        /// </summary>
-        /// <param name="volume">Volume</param>
-        /// <returns>Returns the nodes contained into the volume</returns>
-        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
-        {
-            Stopwatch w = Stopwatch.StartNew();
-            try
-            {
-                return Root.GetNodesInVolume(volume);
-            }
-            finally
-            {
-                w.Stop();
-
-                FrameCounters.PickCounters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
-            }
-        }
-        /// <summary>
-        /// Gets all leaf nodes
-        /// </summary>
-        /// <returns>Returns all leaf nodel</returns>
-        public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
-        {
-            return Root.GetLeafNodes();
-        }
-        /// <summary>
-        /// Gets the closest node to the specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <returns>Returns the closest node to the specified position</returns>
-        public PickingQuadTreeNode<T> FindNode(Vector3 position)
-        {
-            var node = Root.GetNode(position);
-
-            if (node == null)
-            {
-                //Look for the closest node
-                var leafNodes = GetLeafNodes();
-
-                float dist = float.MaxValue;
-                foreach (var leafNode in leafNodes)
-                {
-                    float d = Vector3.DistanceSquared(position, leafNode.Center);
-                    if (d < dist)
-                    {
-                        dist = d;
-                        node = leafNode;
-                    }
-                }
-            }
-
-            return node;
-        }
-
-        /// <summary>
-        /// Gets the node id
-        /// </summary>
-        /// <returns>Returns the next node id</returns>
-        public int GetNextNodeId()
-        {
-            return nodeId++;
-        }
 
         /// <inheritdoc/>
         public override string ToString()
         {
             if (Root != null)
             {
-                return $"{nameof(PickingQuadTree<T>)} Levels {Root.GetMaxLevel() + 1}";
+                return $"{cName} Levels {QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetMaxLevel(Root) + 1}";
             }
             else
             {
-                return $"{nameof(PickingQuadTree<T>)} Empty";
+                return $"{cName} Empty";
             }
         }
     }

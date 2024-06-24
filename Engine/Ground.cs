@@ -136,7 +136,7 @@ namespace Engine
             };
 
             // Use quadtree
-            var nodes = GroundPickingQuadtree.GetNodesInVolume(sphere);
+            var nodes = GroundPickingQuadtree.FindNodesInVolume(sphere);
             if (!nodes.Any())
             {
                 return false;
