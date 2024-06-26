@@ -12,6 +12,20 @@ namespace EngineTests.Collections
     [TestClass]
     public class QuadTreeTests
     {
+        static TestContext _testContext;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            _testContext = context;
+        }
+
+        [TestInitialize]
+        public void SetupTest()
+        {
+            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+        }
+
         [TestMethod]
         public void TestConstructor()
         {

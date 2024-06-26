@@ -151,6 +151,11 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns bounding boxes of specified depth</returns>
         public static IEnumerable<BoundingBox> GetBoundingBoxes(T node, int maxDepth = 0)
         {
+            if (node == null)
+            {
+                return [];
+            }
+
             if (maxDepth < 0)
             {
                 return [];
@@ -175,6 +180,11 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns all leaf nodes</returns>
         public static IEnumerable<T> GetLeafNodes(T node)
         {
+            if (node == null)
+            {
+                return [];
+            }
+
             if (node.IsLeaf)
             {
                 return [node];
@@ -189,6 +199,11 @@ namespace Engine.Collections.Helpers
         /// <returns></returns>
         public static int GetMaxLevel(T node)
         {
+            if (node == null)
+            {
+                return -1;
+            }
+
             if (node.IsLeaf)
             {
                 return node.Level;
@@ -214,15 +229,21 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns the leaf node which contains the specified position</returns>
         public static T GetNodeAtPosition(T node, Vector3 position)
         {
+            if (node == null)
+            {
+                return null;
+            }
+
+            if (node.BoundingBox.Contains(position) == ContainmentType.Disjoint)
+            {
+                // Early exit
+                return null;
+            }
+
             if (node.IsLeaf)
             {
-                // Leaf node. Test against boundaries
-                if (node.BoundingBox.Contains(position) != ContainmentType.Disjoint)
-                {
-                    return node;
-                }
-
-                return null;
+                // Leaf node
+                return node;
             }
 
             foreach (var child in node.Children)
@@ -244,6 +265,11 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns the closest leaf node to the specified position</returns>
         public static T GetClosestNodeAtPosition(T node, Vector3 position)
         {
+            if (node == null)
+            {
+                return null;
+            }
+
             T n = null;
             float dist = float.MaxValue;
             foreach (var child in node.Children)
@@ -256,7 +282,7 @@ namespace Engine.Collections.Helpers
                 }
             }
 
-            if (n?.Children.Count() > 0)
+            if (!n.IsLeaf)
             {
                 return GetClosestNodeAtPosition(n, position);
             }
@@ -272,19 +298,25 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns the leaf nodes contained into the bounding volume</returns>
         public static IEnumerable<T> GetNodesInVolume(T node, ICullingVolume volume)
         {
+            if (node == null)
+            {
+                yield break;
+            }
+
             if (volume == null)
             {
                 yield break;
             }
 
+            if (volume.Contains(node.BoundingBox) == ContainmentType.Disjoint)
+            {
+                // Early exit
+                yield break;
+            }
+
             if (node.IsLeaf)
             {
-                if (volume.Contains(node.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    yield return node;
-                }
-
-                yield break;
+                yield return node;
             }
 
             foreach (var child in node.Children)

@@ -4,6 +4,7 @@ using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -16,6 +17,19 @@ namespace EngineTests.Collections.Generic
         static TestContext _testContext;
 
         static Triangle[] mesh;
+
+        static Triangle t0;
+        static PickingRay t0PickingRay;
+        static Vector3 t0PickingPoint;
+        static float t0PickingDistance;
+
+        static PickingRay t1PickingRay;
+        static Triangle t10;
+        static Triangle t11;
+        static Vector3 t1PickingPoint0;
+        static Vector3 t1PickingPoint1;
+        static float t1PickingDistance0;
+        static float t1PickingDistance1;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -35,25 +49,41 @@ namespace EngineTests.Collections.Generic
             mesh =
             [
                 .. Triangle.Transform(tris, Matrix.Translation(0,10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,10,0)),
                 .. Triangle.Transform(tris, Matrix.Translation(0,10,5)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,10,0)),
                 .. Triangle.Transform(tris, Matrix.Translation(5,10,5)),
 
                 .. Triangle.Transform(tris, Matrix.Translation(10,5,0)),
+                .. Triangle.Transform(tris, Matrix.Translation(10,5,5)),
                 .. Triangle.Transform(tris, Matrix.Translation(15,5,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,5,5)),
                 .. Triangle.Transform(tris, Matrix.Translation(15,5,5)),
 
                 .. Triangle.Transform(tris, Matrix.Translation(0,-5,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,-5,0)),
                 .. Triangle.Transform(tris, Matrix.Translation(0,-5,15)),
+                .. Triangle.Transform(tris, Matrix.Translation(5,-5,10)),
                 .. Triangle.Transform(tris, Matrix.Translation(5,-5,15)),
 
                 .. Triangle.Transform(tris, Matrix.Translation(10,-10,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,-10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,-10,15)),
+                .. Triangle.Transform(tris, Matrix.Translation(10,-10,15)),
+                .. Triangle.Transform(tris, Matrix.Translation(15,-10,10)),
                 .. Triangle.Transform(tris, Matrix.Translation(15,-10,15)),
             ];
+
+            t0 = mesh[0];
+            t0PickingPoint = t0.GetCenter();
+            t0PickingDistance = 10f;
+            var r0Start = t0PickingPoint + new Vector3(0, t0PickingDistance, 0);
+            t0PickingRay = new Ray(r0Start, Vector3.Down);
+
+            t10 = mesh[0];
+            t11 = mesh[31];
+            t1PickingPoint0 = t10.GetCenter();
+            t1PickingPoint1 = t11.GetCenter();
+            t1PickingDistance0 = 10f;
+            t1PickingDistance1 = t1PickingDistance0 + Vector3.Distance(t1PickingPoint0, t1PickingPoint1);
+            var r1Dir = Vector3.Normalize(t1PickingPoint1 - t1PickingPoint0);
+            var r1Start = t1PickingPoint0 - (r1Dir * t1PickingDistance0);
+            t1PickingRay = new Ray(r1Start, r1Dir);
         }
 
         [TestMethod]
@@ -398,6 +428,124 @@ namespace EngineTests.Collections.Generic
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
             CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+        }
+
+        [TestMethod]
+        public void TestItems()
+        {
+            PickingQuadTree<Triangle> q = new(mesh, 1);
+
+            var nodes = q.GetLeafNodes().ToArray();
+            Assert.AreEqual(4, nodes.Length);
+
+            Assert.AreEqual(18, nodes[0].Items.Count());
+            Assert.AreEqual(12, nodes[1].Items.Count());
+            Assert.AreEqual(12, nodes[2].Items.Count());
+            Assert.AreEqual(8, nodes[3].Items.Count());
+
+            Triangle[] expected0 =
+            [
+                ..mesh.Take(8),
+                ..mesh.Skip(8).Take(4),
+                ..mesh.Skip(16).Take(2),
+                ..mesh.Skip(20).Take(2),
+                ..mesh.Skip(24).Take(2)
+            ];
+            Triangle[] expected1 =
+            [
+                ..mesh.Skip(8).Take(8),
+                ..mesh.Skip(24).Take(2),
+                ..mesh.Skip(28).Take(2)
+            ];
+            Triangle[] expected2 =
+            [
+                ..mesh.Skip(16).Take(8),
+                ..mesh.Skip(24).Take(4)
+            ];
+            Triangle[] expected3 =
+            [
+                ..mesh.Skip(24).Take(8)
+            ];
+
+            CollectionAssert.AreEquivalent(expected0, nodes[0].Items.ToArray());
+            CollectionAssert.AreEquivalent(expected1, nodes[1].Items.ToArray());
+            CollectionAssert.AreEquivalent(expected2, nodes[2].Items.ToArray());
+            CollectionAssert.AreEquivalent(expected3, nodes[3].Items.ToArray());
+        }
+
+        [TestMethod]
+        public void TestPickNearest()
+        {
+            PickingQuadTree<Triangle> q = new(mesh, 1);
+
+            //True pick
+            bool picked = q.PickNearest(t0PickingRay, out PickingResult<Triangle> t);
+            Assert.IsTrue(picked);
+            Assert.AreEqual(t0PickingDistance, t.Distance);
+            Assert.AreEqual(t0, t.Primitive);
+            Assert.AreEqual(t0PickingPoint, t.Position);
+
+            //Short pick
+            var t0Short = new PickingRay(t0PickingRay, t0PickingRay.RayPickingParams, t0PickingDistance * 0.5f);
+            picked = q.PickNearest(t0Short, out t);
+            Assert.IsFalse(picked);
+            Assert.AreEqual(float.MaxValue, t.Distance);
+        }
+
+        [TestMethod]
+        public void TestPickFirst()
+        {
+            PickingQuadTree<Triangle> q = new(mesh, 1);
+
+            bool picked = q.PickFirst(t1PickingRay, out PickingResult<Triangle> t);
+
+            Assert.IsTrue(picked);
+            Assert.AreEqual(t1PickingDistance0, t.Distance, 0.0001f);
+            Assert.AreEqual(t10, t.Primitive);
+            Assert.AreEqual(t1PickingPoint0, t.Position);
+
+            //Short pick
+            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
+            picked = q.PickFirst(t1Short, out t);
+            Assert.IsFalse(picked);
+            Assert.AreEqual(float.MaxValue, t.Distance);
+        }
+
+        [TestMethod]
+        public void TestPickAll()
+        {
+            PickingQuadTree<Triangle> q = new(mesh, 1);
+
+            bool picked = q.PickAll(t1PickingRay, out IEnumerable<PickingResult<Triangle>> tlist);
+            Assert.IsTrue(picked);
+            Assert.AreEqual(2, tlist.Count());
+
+            var t0 = tlist.ElementAt(0);
+            Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
+            Assert.AreEqual(t10, t0.Primitive);
+            Assert.AreEqual(t1PickingPoint0, t0.Position);
+
+            var t1 = tlist.ElementAt(1);
+            Assert.AreEqual(t1PickingDistance1, t1.Distance, 0.0001f);
+            Assert.AreEqual(t11, t1.Primitive);
+            Assert.AreEqual(t1PickingPoint1, t1.Position);
+
+            //Short pick
+            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
+            picked = q.PickAll(t1Short, out tlist);
+            Assert.IsFalse(picked);
+            CollectionAssert.AreEquivalent(Array.Empty<IEnumerable<PickingResult<Triangle>>>(), tlist.ToArray());
+
+            //Middle pick
+            t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance1 * 0.5f);
+            picked = q.PickAll(t1Short, out tlist);
+            Assert.AreEqual(1, tlist.Count());
+            Assert.IsTrue(picked);
+
+            t0 = tlist.ElementAt(0);
+            Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
+            Assert.AreEqual(t10, t0.Primitive);
+            Assert.AreEqual(t1PickingPoint0, t0.Position);
         }
     }
 }

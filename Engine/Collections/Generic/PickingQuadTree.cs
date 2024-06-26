@@ -80,7 +80,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return Root.PickNearest(ray, out result);
+                return PickingQuadTreeNodeHelper<T>.PickNearest(Root, ray, out result);
             }
             finally
             {
@@ -100,7 +100,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return Root.PickFirst(ray, out result);
+                return PickingQuadTreeNodeHelper<T>.PickFirst(Root, ray, out result);
             }
             finally
             {
@@ -120,7 +120,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return Root.PickAll(ray, out results);
+                return PickingQuadTreeNodeHelper<T>.PickAll(Root, ray, out results);
             }
             finally
             {

@@ -12,6 +12,20 @@ namespace EngineTests.Collections.Generic
     [TestClass]
     public class QuadTreeTests
     {
+        static TestContext _testContext;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            _testContext = context;
+        }
+
+        [TestInitialize]
+        public void SetupTest()
+        {
+            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+        }
+
         [TestMethod]
         public void TestConstructor()
         {
@@ -389,6 +403,44 @@ namespace EngineTests.Collections.Generic
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
             CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+        }
+
+        [TestMethod]
+        public void TestItems()
+        {
+            Vector3 min = new(-10, -10, -10);
+            Vector3 max = new(10, 10, 10);
+            BoundingBox bbox = new(min, max);
+
+            var qBoxes = bbox.SubdivideQuadtree().ToArray();
+
+            var bbox0 = qBoxes[0];
+            var bbox1 = qBoxes[1];
+            var bbox2 = qBoxes[2];
+            var bbox3 = qBoxes[3];
+
+            (BoundingBox, int)[] items =
+            [
+                (bbox0, 1), (bbox0, 2),
+                (bbox1, 3), (bbox1, 4),
+                (bbox2, 5), (bbox2, 6),
+                (bbox3, 7), (bbox3, 8),
+            ];
+
+            QuadTree<int> q = new(bbox, items, 1);
+
+            var nodes = q.GetLeafNodes().ToArray();
+            Assert.AreEqual(4, nodes.Length);
+
+            Assert.AreEqual(2, nodes[0].Items.Count());
+            Assert.AreEqual(2, nodes[1].Items.Count());
+            Assert.AreEqual(2, nodes[2].Items.Count());
+            Assert.AreEqual(2, nodes[3].Items.Count());
+
+            CollectionAssert.AreEquivalent(new[] { 1, 2 }, nodes[0].Items.ToArray());
+            CollectionAssert.AreEquivalent(new[] { 3, 4 }, nodes[1].Items.ToArray());
+            CollectionAssert.AreEquivalent(new[] { 5, 6 }, nodes[2].Items.ToArray());
+            CollectionAssert.AreEquivalent(new[] { 7, 8 }, nodes[3].Items.ToArray());
         }
     }
 }

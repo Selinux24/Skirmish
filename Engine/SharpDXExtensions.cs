@@ -316,10 +316,19 @@ namespace Engine
                 return box;
             }
 
+            if (!transform.Decompose(out var scale, out _, out var translation))
+            {
+                return box;
+            }
+
+            var extents = box.GetExtents();
+            var center = box.Center;
+
+            extents *= scale;
+            center = Vector3.TransformCoordinate(center, Matrix.Translation(translation));
+
             // Gets the new position
-            var min = Vector3.TransformCoordinate(box.Minimum, transform);
-            var max = Vector3.TransformCoordinate(box.Maximum, transform);
-            var trnBox = new BoundingBox(min, max);
+            var trnBox = new BoundingBox(-extents + center, +extents + center);
 
             return trnBox.Normalize();
         }
@@ -689,6 +698,8 @@ namespace Engine
         /// Generates a list of four bounding boxes which makes an QuadTree subdivision of the specified bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
+        /// <param name="separateBothAxis">Separate in X and Z axis</param>
+        /// <param name="separation">Boxes separation amount</param>
         /// <returns>Returns four boxes</returns>
         /// <remarks>
         /// By index:
@@ -697,25 +708,29 @@ namespace Engine
         /// 2 - Bottom Left
         /// 3 - Bottom Right
         /// </remarks>
-        public static IEnumerable<BoundingBox> SubdivideQuadtree(this BoundingBox bbox)
+        public static IEnumerable<BoundingBox> SubdivideQuadtree(this BoundingBox bbox, bool separateBothAxis = false, float separation = float.Epsilon)
         {
             var M = bbox.Maximum;
-            var c = (bbox.Maximum + bbox.Minimum) * 0.5f;
             var m = bbox.Minimum;
+            var c = bbox.Center;
+            float addAxis = separation;
+            float subAxis = separateBothAxis ? separation : 0;
 
             //-1-1   +0+0 - Top Left
-            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X - subAxis, M.Y, c.Z - subAxis));
             //+0-1   +1+0 - Top Right
-            yield return new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis));
+
             //-1+0   +0+1 - Bottom Left
-            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z + addAxis), new Vector3(c.X - subAxis, M.Y, M.Z));
             //+0+0   +1+1 - Bottom Right
-            yield return new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, c.Z + addAxis), new Vector3(M.X, M.Y, M.Z));
         }
         /// <summary>
         /// Generates a list of eight bounding boxes which makes an OcTree subdivision of the specified bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
+        /// <param name="separation">Boxes separation</param>
         /// <returns>Returns eight boxes</returns>
         /// <remarks>
         /// By index:
@@ -728,7 +743,7 @@ namespace Engine
         /// 6 - Bottom Right Front
         /// 7 - Bottom Right Back
         /// </remarks>
-        public static IEnumerable<BoundingBox> SubdivideOctree(this BoundingBox bbox)
+        public static IEnumerable<BoundingBox> SubdivideOctree(this BoundingBox bbox, float separation = float.Epsilon)
         {
             var m = bbox.Minimum;
             var M = bbox.Maximum;
@@ -737,22 +752,22 @@ namespace Engine
             //-1+0-1   +0+1+0 - Top Left Front
             yield return new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
             //-1+0+0   +0+1+1 - Top Left Back
-            yield return new BoundingBox(new Vector3(m.X, c.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+            yield return new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z));
 
             //+0+0-1   +1+1+0 - Top Right Front
-            yield return new BoundingBox(new Vector3(c.X, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
             //+0+0+0   +1+1+1 - Top Right Back
-            yield return new BoundingBox(new Vector3(c.X, c.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z));
 
             //-1-1-1   +0+0+0 - Bottom Left Front
-            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, c.Y, c.Z));
+            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z));
             //-1-1+0   +0+0+1 - Bottom Left Back
-            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, c.Y, M.Z));
+            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z));
 
             //+0-1-1   +1+0+0 - Bottom Right Front
-            yield return new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, c.Y, c.Z));
+            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z));
             //+0-1+0   +1+0+1 - Bottom Right Back
-            yield return new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, c.Y, M.Z));
+            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z));
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -50,7 +49,7 @@ namespace Engine.Collections.Generic
 
             //Find items into the bounding box
             var nodeItems = items
-                .Where(i => Intersection.BoxContainsBox(bbox, i.Box) != ContainmentType.Disjoint)
+                .Where(i => bbox.Contains(i.Box) != ContainmentType.Disjoint)
                 .ToList(); //Break the reference
 
             bool haltByDepth = treeDepth == maxDepth;

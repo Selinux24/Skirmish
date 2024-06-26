@@ -92,7 +92,7 @@ namespace Engine.Common
             bool intersects = Test(obj, ray);
             if (!intersects || !testGeom)
             {
-                results = Enumerable.Empty<PickingResult<T>>();
+                results = [];
 
                 return intersects;
             }
@@ -177,13 +177,13 @@ namespace Engine.Common
         {
             if (!collection.Any())
             {
-                results = Enumerable.Empty<PickingResult<T>>();
+                results = [];
 
                 return false;
             }
 
             //Create a sorted list to store the ray picks sorted by pick distance
-            SortedDictionary<float, PickingResult<T>> pickList = new();
+            SortedDictionary<float, PickingResult<T>> pickList = [];
 
             foreach (var intersectable in collection)
             {
@@ -212,7 +212,7 @@ namespace Engine.Common
                 pickList.Add(k, pick);
             }
 
-            results = pickList.Values.ToArray();
+            results = [.. pickList.Values];
 
             return results.Any();
         }
