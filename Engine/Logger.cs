@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Engine
 {
@@ -12,9 +12,18 @@ namespace Engine
     public static class Logger
     {
         /// <summary>
-        /// Internal log events list
+        /// Log entry array
         /// </summary>
-        private static readonly ConcurrentQueue<LogEntry> log = new();
+        private static LogEntry[] log = new LogEntry[100];
+        /// <summary>
+        /// Current log entry index
+        /// </summary>
+        private static int logIndex = 0;
+        /// <summary>
+        /// Log stack size
+        /// </summary>
+        private static int logStackSize = 100;
+
         /// <summary>
         /// Custom filter function
         /// </summary>
@@ -35,10 +44,6 @@ namespace Engine
         /// Console log level
         /// </summary>
         public static LogLevel ConsoleLogLevel { get; set; } = LogLevel.Warning;
-        /// <summary>
-        /// Log stack size
-        /// </summary>
-        public static int LogStackSize { get; set; }
 
         /// <summary>
         /// Constructor
@@ -50,8 +55,27 @@ namespace Engine
 #else
             LogLevel = LogLevel.Information;
 #endif
+        }
 
-            LogStackSize = 100;
+        /// <summary>
+        /// Sets the log stack size
+        /// </summary>
+        /// <param name="stackSize">Stack size</param>
+        public static void SetStackSize(int stackSize)
+        {
+            if (stackSize <= 0)
+            {
+                return;
+            }
+
+            if (stackSize == logStackSize)
+            {
+                return;
+            }
+
+            logStackSize = stackSize;
+            Array.Resize(ref log, logStackSize);
+            logIndex = Math.Min(logIndex, logStackSize);
         }
 
         /// <summary>
@@ -190,25 +214,21 @@ namespace Engine
                 return;
             }
 
-            var logEntry = new LogEntry { EventDate = DateTime.Now, CallerTypeName = callerTypeName, LogLevel = logLevel, Text = text, Exception = ex };
-            log.Enqueue(logEntry);
+            log[logIndex] = log[logIndex] ?? new LogEntry();
+            log[logIndex].EventDate = DateTime.Now;
+            log[logIndex].CallerTypeName = callerTypeName;
+            log[logIndex].LogLevel = logLevel;
+            log[logIndex].Text = text;
+            log[logIndex].Exception = ex;
 
             if (logLevel >= ConsoleLogLevel)
             {
                 // Console logger
-                Console.Write(DefaultFormatter(logEntry));
+                Console.Write(DefaultFormatter(log[logIndex]));
             }
 
-            if (LogStackSize <= 0)
-            {
-                // The stack never empties
-                return;
-            }
-
-            while (log.Count > LogStackSize)
-            {
-                log.TryDequeue(out _);
-            }
+            logIndex++;
+            logIndex %= logStackSize;
         }
 
         /// <summary>
@@ -243,10 +263,17 @@ namespace Engine
         /// <param name="count">Number of entries, from the last one</param>
         public static IEnumerable<LogEntry> Read(Func<LogEntry, bool> predicate, int count = 0)
         {
-            var logEntries = predicate == null ? [.. log] : log.Where(predicate).ToList();
+            var logCopy = log.ToArray();
+            logCopy = logCopy
+                .Skip(logIndex).Take(logStackSize - logIndex)
+                .Concat(logCopy.Take(logIndex))
+                .Where(l => l != null)
+                .ToArray();
 
-            int take = count <= 0 ? logEntries.Count : Math.Min(count, logEntries.Count);
-            int skip = Math.Max(0, logEntries.Count - take);
+            var logEntries = predicate == null ? logCopy : logCopy.Where(predicate).ToArray();
+
+            int take = count <= 0 ? logEntries.Length : Math.Min(count, logEntries.Length);
+            int skip = Math.Max(0, logEntries.Length - take);
 
             return logEntries.Skip(skip).Take(take).ToArray();
         }
@@ -299,15 +326,17 @@ namespace Engine
                 logEntries = logEntries.Reverse();
             }
 
-            string logText = new(logEntries.SelectMany(fncFormat ?? DefaultFormatter).ToArray());
-            var lines = logText.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var fmt = fncFormat ?? DefaultFormatter;
 
-            if (maxLines > 0 && lines.Length > maxLines)
+            StringBuilder logText = new();
+            int lineCount = logEntries.Count();
+            lineCount = maxLines > 0 ? Math.Min(lineCount, maxLines) : lineCount;
+            for (int i = 0; i < lineCount; i++)
             {
-                lines = lines.Take(maxLines).ToArray();
+                logText.Append(fmt(logEntries.ElementAt(i)));
             }
 
-            return string.Join(Environment.NewLine, lines);
+            return logText.ToString();
         }
 
         /// <summary>
@@ -362,9 +391,10 @@ namespace Engine
         /// </summary>
         public static void Clear()
         {
-            while (!log.IsEmpty)
+            logIndex = 0;
+            for (int i = 0; i < log.Length; i++)
             {
-                log.TryDequeue(out _);
+                log[i] = null;
             }
         }
 

@@ -15,7 +15,6 @@ namespace Tanks
             {
 #if DEBUG
                 Logger.LogLevel = LogLevel.Debug;
-                Logger.LogStackSize = 0;
                 Logger.EnableConsole = true;
 #else
                 Logger.LogLevel = LogLevel.Error;

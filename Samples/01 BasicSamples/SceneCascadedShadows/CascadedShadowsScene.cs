@@ -127,7 +127,9 @@ namespace BasicSamples.SceneCascadedShadows
 
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
+            consoleDesc.MaxTextLength = 5000;
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
         }
         private async Task InitializeUILevelsControl()
