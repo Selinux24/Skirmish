@@ -2,7 +2,6 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Collections.Generic
 {
@@ -21,7 +20,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node boundary
         /// </summary>
-        private readonly BoundingBox boundary = boundary;
+        public BoundingBox Boundary { get; private set; } = boundary;
         /// <summary>
         /// Items per node
         /// </summary>
@@ -73,21 +72,13 @@ namespace Engine.Collections.Generic
         public OcTreeNode<T> BottomRightBack { get; private set; }
 
         /// <summary>
-        /// Gets the actual items in the node
-        /// </summary>
-        public IEnumerable<T> GetItems()
-        {
-            return items.Take(storedItems).Select(i => i.item).ToArray();
-        }
-
-        /// <summary>
         /// Inserts a item in the node
         /// </summary>
         /// <param name="itemBoundary">Item boundary</param>
         /// <param name="item">Item</param>
         public void Insert(ICullingVolume itemBoundary, T item)
         {
-            if (itemBoundary.Contains(boundary) == ContainmentType.Disjoint)
+            if (itemBoundary.Contains(Boundary) == ContainmentType.Disjoint)
             {
                 return;
             }
@@ -101,7 +92,7 @@ namespace Engine.Collections.Generic
 
             int index = -1;
 
-            foreach (var childBoundary in boundary.SubdivideOctree())
+            foreach (var childBoundary in Boundary.SubdivideOctree())
             {
                 index++;
 
@@ -202,14 +193,27 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Returns all items intersecting with the specified boundary
         /// </summary>
+        /// <param name="node">Node</param>
         /// <param name="queryBoundary">Boundary to query</param>
         /// <param name="results">Results list</param>
-        public void Query(ICullingVolume queryBoundary, List<T> results)
+        public static void Query(OcTreeNode<T> node, ICullingVolume queryBoundary, List<T> results)
         {
-            ArgumentNullException.ThrowIfNull(results);
+            if (node == null)
+            {
+                return;
+            }
 
-            var containmentType = queryBoundary.Contains(boundary);
+            if (queryBoundary == null)
+            {
+                return;
+            }
 
+            if (results == null)
+            {
+                return;
+            }
+
+            var containmentType = queryBoundary.Contains(node.Boundary);
             if (containmentType == ContainmentType.Disjoint)
             {
                 // The query not contains the current node boundary. Exit
@@ -219,58 +223,70 @@ namespace Engine.Collections.Generic
             if (containmentType == ContainmentType.Contains)
             {
                 // The query contains the current node boundary. Return all items without any query
-                GetItems(results);
+                GetItems(node, results);
             }
 
             // Query items
-            QueryItems(queryBoundary, results);
+            QueryItems(node, queryBoundary, results);
         }
         /// <summary>
         /// Fills the results list with all items
         /// </summary>
+        /// <param name="node">Node</param>
         /// <param name="results">Results list</param>
-        private void GetItems(List<T> results)
+        private static void GetItems(OcTreeNode<T> node, List<T> results)
         {
-            for (int i = 0; i < storedItems; i++)
+            if (node == null)
             {
-                if (results.Contains(items[i].item))
+                return;
+            }
+
+            for (int i = 0; i < node.storedItems; i++)
+            {
+                if (results.Contains(node.items[i].item))
                 {
                     // Item already in the list
                     continue;
                 }
 
-                results.Add(items[i].item);
+                results.Add(node.items[i].item);
             }
 
             for (int i = 0; i < 8; i++)
             {
-                GetNode(i)?.GetItems(results);
+                GetItems(node.GetNode(i), results);
             }
         }
         /// <summary>
         /// Fills the results list with all items contained in the specified boundary
         /// </summary>
+        /// <param name="node">Node</param>
         /// <param name="queryBoundary">Query boundary</param>
         /// <param name="results">Results list</param>
-        private void QueryItems(ICullingVolume queryBoundary, List<T> results)
+        private static void QueryItems(OcTreeNode<T> node, ICullingVolume queryBoundary, List<T> results)
         {
-            for (int i = 0; i < storedItems; i++)
+            if (node == null)
             {
-                if (results.Contains(items[i].item))
+                return;
+            }
+
+            for (int i = 0; i < node.storedItems; i++)
+            {
+                if (results.Contains(node.items[i].item))
                 {
                     // Item already in the list
                     continue;
                 }
 
-                if (IntersectionHelper.Intersects(queryBoundary, items[i].volume))
+                if (IntersectionHelper.Intersects(queryBoundary, node.items[i].volume))
                 {
-                    results.Add(items[i].item);
+                    results.Add(node.items[i].item);
                 }
             }
 
             for (int i = 0; i < 8; i++)
             {
-                GetNode(i)?.Query(queryBoundary, results);
+                Query(node.GetNode(i), queryBoundary, results);
             }
         }
 

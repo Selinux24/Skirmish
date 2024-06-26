@@ -196,7 +196,6 @@ namespace Engine.Collections.Helpers
         /// Gets maximum level value
         /// </summary>
         /// <param name="node">Node</param>
-        /// <returns></returns>
         public static int GetMaxLevel(T node)
         {
             if (node == null)
@@ -270,6 +269,11 @@ namespace Engine.Collections.Helpers
                 return null;
             }
 
+            if (node.IsLeaf)
+            {
+                return node;
+            }
+
             T n = null;
             float dist = float.MaxValue;
             foreach (var child in node.Children)
@@ -282,12 +286,7 @@ namespace Engine.Collections.Helpers
                 }
             }
 
-            if (!n.IsLeaf)
-            {
-                return GetClosestNodeAtPosition(n, position);
-            }
-
-            return n;
+            return GetClosestNodeAtPosition(n, position);
         }
 
         /// <summary>

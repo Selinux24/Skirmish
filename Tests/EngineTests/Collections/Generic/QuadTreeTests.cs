@@ -14,6 +14,17 @@ namespace EngineTests.Collections.Generic
     {
         static TestContext _testContext;
 
+        static BoundingBox tenBox;
+        static (BoundingBox, int)[] items;
+        static int[] expectedArray0 = [1, 2];
+        static int[] expectedArray1 = [3, 4];
+        static int[] expectedArray2 = [5, 6];
+        static int[] expectedArray3 = [7, 8];
+        static Vector3 topLeft;
+        static Vector3 topRight;
+        static Vector3 bottomLeft;
+        static Vector3 bottomRight;
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
@@ -24,15 +35,40 @@ namespace EngineTests.Collections.Generic
         public void SetupTest()
         {
             Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+
+            Vector3 min = new(-10, -10, -10);
+            Vector3 max = new(10, 10, 10);
+            tenBox = new(min, max);
+
+            topLeft = new(-5, 0, -5);
+            topRight = new(5, 0, -5);
+            bottomLeft = new(-5, 0, 5);
+            bottomRight = new(5, 0, 5);
+
+            var qBoxes = tenBox.SubdivideQuadtree().ToArray();
+            var bbox0 = qBoxes[0];
+            var bbox1 = qBoxes[1];
+            var bbox2 = qBoxes[2];
+            var bbox3 = qBoxes[3];
+
+            items =
+            [
+                (bbox0, 1), (bbox0, 2),
+                (bbox1, 3), (bbox1, 4),
+                (bbox2, 5), (bbox2, 6),
+                (bbox3, 7), (bbox3, 8),
+            ];
+
+            expectedArray0 = [1, 2];
+            expectedArray1 = [3, 4];
+            expectedArray2 = [5, 6];
+            expectedArray3 = [7, 8];
         }
 
         [TestMethod]
         public void TestConstructor()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 1;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 1);
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -55,10 +91,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestParent()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -95,10 +128,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeaf()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -135,10 +165,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestIds()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -175,10 +202,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLevels()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -197,27 +221,18 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestBoundaries()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            Vector3 topLeft = new(-5, 0, -5);
-            Vector3 topRight = new(5, 0, -5);
-            Vector3 bottomLeft = new(-5, 0, 5);
-            Vector3 bottomRight = new(5, 0, 5);
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
+            QuadTree<int> q = new(tenBox, [], 1);
 
-            QuadTree<int> q = new(bbox, [], maxDepth);
-
-            Assert.AreEqual(bbox, q.BoundingBox);
+            Assert.AreEqual(tenBox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
             Assert.AreEqual(Vector3.Zero, q.Root.Center);
 
             var children = q.Root.Children.ToArray();
 
-            Assert.IsTrue(bbox.Contains(children[0].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[1].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[2].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[3].BoundingBox) == ContainmentType.Contains);
+            Assert.IsTrue(tenBox.Contains(children[0].BoundingBox) == ContainmentType.Contains);
+            Assert.IsTrue(tenBox.Contains(children[1].BoundingBox) == ContainmentType.Contains);
+            Assert.IsTrue(tenBox.Contains(children[2].BoundingBox) == ContainmentType.Contains);
+            Assert.IsTrue(tenBox.Contains(children[3].BoundingBox) == ContainmentType.Contains);
 
             Assert.IsTrue(children[0].BoundingBox.Contains(children[1].BoundingBox) != ContainmentType.Contains);
             Assert.IsTrue(children[0].BoundingBox.Contains(children[2].BoundingBox) != ContainmentType.Contains);
@@ -232,12 +247,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestNeighbors()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(tenBox, [], 1);
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -279,10 +289,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestGetBoundingBoxes()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             var boxes = q.GetBoundingBoxes();
             Assert.AreEqual(16, boxes.Count());
 
@@ -299,10 +306,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeafNodes()
         {
-            BoundingBox bbox = new();
-            int maxDepth = 2;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(new(), [], 2);
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(16, nodes.Length);
 
@@ -320,12 +324,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestTraversePosition()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            BoundingBox bbox = new(min, max);
-            int maxDepth = 1;
-
-            QuadTree<int> q = new(bbox, [], maxDepth);
+            QuadTree<int> q = new(tenBox, [], 1);
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
@@ -374,11 +373,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestTraverseVolume()
         {
-            Vector3 min = Vector3.One * -10f;
-            Vector3 max = Vector3.One * +10f;
-            BoundingBox bbox = new(min, max);
-
-            QuadTree<int> q = new(bbox, [], 1);
+            QuadTree<int> q = new(tenBox, [], 1);
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
@@ -408,26 +403,7 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestItems()
         {
-            Vector3 min = new(-10, -10, -10);
-            Vector3 max = new(10, 10, 10);
-            BoundingBox bbox = new(min, max);
-
-            var qBoxes = bbox.SubdivideQuadtree().ToArray();
-
-            var bbox0 = qBoxes[0];
-            var bbox1 = qBoxes[1];
-            var bbox2 = qBoxes[2];
-            var bbox3 = qBoxes[3];
-
-            (BoundingBox, int)[] items =
-            [
-                (bbox0, 1), (bbox0, 2),
-                (bbox1, 3), (bbox1, 4),
-                (bbox2, 5), (bbox2, 6),
-                (bbox3, 7), (bbox3, 8),
-            ];
-
-            QuadTree<int> q = new(bbox, items, 1);
+            QuadTree<int> q = new(tenBox, items, 1);
 
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(4, nodes.Length);
@@ -437,10 +413,10 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(2, nodes[2].Items.Count());
             Assert.AreEqual(2, nodes[3].Items.Count());
 
-            CollectionAssert.AreEquivalent(new[] { 1, 2 }, nodes[0].Items.ToArray());
-            CollectionAssert.AreEquivalent(new[] { 3, 4 }, nodes[1].Items.ToArray());
-            CollectionAssert.AreEquivalent(new[] { 5, 6 }, nodes[2].Items.ToArray());
-            CollectionAssert.AreEquivalent(new[] { 7, 8 }, nodes[3].Items.ToArray());
+            CollectionAssert.AreEquivalent(expectedArray0, nodes[0].Items.ToArray());
+            CollectionAssert.AreEquivalent(expectedArray1, nodes[1].Items.ToArray());
+            CollectionAssert.AreEquivalent(expectedArray2, nodes[2].Items.ToArray());
+            CollectionAssert.AreEquivalent(expectedArray3, nodes[3].Items.ToArray());
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Engine.Collections.Generic
         {
             results.Clear();
 
-            root.Query(queryBoundary, results);
+            OcTreeNode<T>.Query(root, queryBoundary, results);
 
             return results.AsReadOnly();
         }
@@ -51,6 +51,18 @@ namespace Engine.Collections.Generic
         public void Clear()
         {
             root.Clear();
+        }
+
+        /// <summary>
+        /// Gets the number of items in the OcTree
+        /// </summary>
+        public int CountItems()
+        {
+            results.Clear();
+
+            OcTreeNode<T>.Query(root, (IntersectionVolumeAxisAlignedBox)root.Boundary, results);
+
+            return results.Count;
         }
     }
 }
