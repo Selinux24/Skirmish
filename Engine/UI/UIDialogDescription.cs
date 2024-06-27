@@ -14,11 +14,14 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static UIDialogDescription Default(float width, float height)
         {
-            return new UIDialogDescription
+            return new()
             {
                 Width = width,
                 Height = height,
                 Anchor = Anchors.Center,
+                Background = UIPanelDescription.Default(),
+                TextArea = UITextAreaDescription.Default(),
+                Buttons = UIButtonDescription.DefaultTwoStateButton(),
             };
         }
 

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Length
         /// </summary>
-        public float Length
+        public readonly float Length
         {
             get
             {
@@ -42,7 +43,7 @@ namespace Engine
                 return line;
             }
 
-            return new Line3D(
+            return new(
                 Vector3.TransformCoordinate(line.Point1, transform),
                 Vector3.TransformCoordinate(line.Point2, transform));
         }
@@ -54,491 +55,377 @@ namespace Engine
         /// <returns>Returns new line list</returns>
         public static IEnumerable<Line3D> Transform(IEnumerable<Line3D> lines, Matrix transform)
         {
+            if (lines?.Any() != true)
+            {
+                return [];
+            }
+
             if (transform.IsIdentity)
             {
-                return new List<Line3D>(lines);
+                return Enumerable.AsEnumerable(lines);
             }
 
-            List<Line3D> trnLines = new List<Line3D>();
-
-            foreach (var line in lines)
-            {
-                trnLines.Add(Transform(line, transform));
-            }
-
-            return trnLines;
+            return lines
+                .Select(l => Transform(l, transform))
+                .AsEnumerable();
         }
 
-        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Triangle> triangleList)
+        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> path)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var triangle in triangleList)
-            {
-                lines.AddRange(CreateWiredTriangle(triangle));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
-        {
-            return CreateWiredTriangle(triangle.GetVertices());
-        }
-        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Vector3> corners)
-        {
-            int[] indexes = new int[6];
-
-            indexes[0] = 0;
-            indexes[1] = 1;
-
-            indexes[2] = 1;
-            indexes[3] = 2;
-
-            indexes[4] = 2;
-            indexes[5] = 0;
-
-            return CreateFromVertices(corners, indexes);
-        }
-        public static IEnumerable<Line3D> CreateWiredSquare(IEnumerable<Vector3> corners)
-        {
-            int[] indexes = new int[8];
-
-            indexes[0] = 0;
-            indexes[1] = 1;
-
-            indexes[2] = 1;
-            indexes[3] = 2;
-
-            indexes[4] = 2;
-            indexes[5] = 3;
-
-            indexes[6] = 3;
-            indexes[7] = 0;
-
-            return CreateFromVertices(corners, indexes);
-        }
-        public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
-        {
-            int count = points.Count();
-
-            int[] indexes = new int[count * 2];
-
-            int i1 = 0;
-            int i2 = 1;
-            for (int i = 0; i < count; i++)
-            {
-                indexes[i1] = i + 0;
-                indexes[i2] = i == count - 1 ? 0 : i + 1;
-
-                i1 += 2;
-                i2 += 2;
-            }
-
-            return CreateFromVertices(points, indexes);
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<BoundingBox> bboxList)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var bbox in bboxList)
-            {
-                lines.AddRange(CreateWiredBox(bbox));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(BoundingBox bbox)
-        {
-            return CreateWiredBox(bbox.GetCorners());
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<OrientedBoundingBox> obboxList)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var obbox in obboxList)
-            {
-                lines.AddRange(CreateWiredBox(obbox));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(OrientedBoundingBox obbox)
-        {
-            return CreateWiredBox(obbox.GetCorners());
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<Vector3> corners)
-        {
-            List<int> indexes = new List<int>(24)
-            {
-                0,
-                1,
-                0,
-                3,
-                1,
-                2,
-                3,
-                2,
-
-                4,
-                5,
-                4,
-                7,
-                5,
-                6,
-                7,
-                6,
-
-                0,
-                4,
-                1,
-                5,
-                2,
-                6,
-                3,
-                7
-            };
-
-            return CreateFromVertices(corners, indexes.ToArray());
-        }
-        public static IEnumerable<Line3D> CreateWiredSphere(IEnumerable<BoundingSphere> bsphList, int sliceCount, int stackCount)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var bsph in bsphList)
-            {
-                lines.AddRange(CreateWiredSphere(bsph, sliceCount, stackCount));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
-        {
-            return CreateWiredSphere(bsph.Center, bsph.Radius, sliceCount, stackCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<int> indexList = new List<int>();
-
-            //North pole
-            vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
-
-            float phiStep = MathUtil.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
-
-            //Compute vertices for each stack ring (do not count the poles as rings).
-            for (int st = 1; st < (stackCount + 1); ++st)
-            {
-                float phi = st * phiStep;
-
-                //Vertices of ring.
-                for (int sl = 0; sl <= sliceCount; ++sl)
-                {
-                    float theta = sl * thetaStep;
-
-                    //Spherical to cartesian
-                    Vector3 position = new Vector3(
-                        radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
-                        radius * (float)Math.Cos(phi),
-                        radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
-
-                    indexList.Add(vertList.Count);
-                    indexList.Add(sl == sliceCount ? vertList.Count - sliceCount : vertList.Count + 1);
-
-                    vertList.Add(position + center);
-                }
-            }
-
-            //South pole
-            vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
-
-            return CreateFromVertices(vertList, indexList);
-        }
-        public static IEnumerable<Line3D> CreateWiredConeAngle(float cupAngle, float height, int sliceCount)
-        {
-            float baseRadius = (float)Math.Tan(cupAngle) * height;
-
-            return CreateWiredConeBaseRadius(baseRadius, height, sliceCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredConeBaseRadius(float baseRadius, float height, int sliceCount)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<int> indexList = new List<int>();
-
-            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
-            vertList.Add(new Vector3(0.0f, -height, 0.0f));
-
-            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
-
-            for (int sl = 0; sl < sliceCount; sl++)
-            {
-                float theta = sl * thetaStep;
-
-                Vector3 position = new Vector3(
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
-                    -height,
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
-
-                vertList.Add(position);
-            }
-
-            for (int index = 0; index < sliceCount; index++)
-            {
-                indexList.Add(0);
-                indexList.Add(index + 2);
-
-                indexList.Add(1);
-                indexList.Add(index + 2);
-
-                indexList.Add(index + 2);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-            }
-
-            return CreateFromVertices(vertList, indexList);
-        }
-        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int segments)
-        {
-            List<Line3D> resultList = new List<Line3D>();
-
-            var verts = cylinder.GetVertices(segments).ToArray();
-
-            for (int i = 0; i < segments; i++)
-            {
-                if (i == segments - 1)
-                {
-                    resultList.Add(new Line3D(verts[i], verts[0]));
-                    resultList.Add(new Line3D(verts[i + segments], verts[0 + segments]));
-
-                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
-                }
-                else
-                {
-                    resultList.Add(new Line3D(verts[i], verts[i + 1]));
-                    resultList.Add(new Line3D(verts[i + segments], verts[i + 1 + segments]));
-
-                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
-                }
-            }
-
-            return resultList;
-        }
-        public static IEnumerable<Line3D> CreateWiredFrustum(BoundingFrustum frustum)
-        {
-            return CreateWiredBox(frustum.GetCorners());
-        }
-        public static IEnumerable<Line3D> CreateWiredPyramid(BoundingFrustum frustum)
-        {
-            FrustumCameraParams prms = frustum.GetCameraParams();
-            Vector3[] corners = frustum.GetCorners();
-
-            Vector3[] vertices = new Vector3[5];
-
-            vertices[0] = prms.Position;
-            vertices[1] = corners[4];
-            vertices[2] = corners[5];
-            vertices[3] = corners[6];
-            vertices[4] = corners[7];
-
-            List<int> indexes = new List<int>(16)
-            {
-                0,
-                1,
-                0,
-                2,
-                0,
-                3,
-                0,
-                4,
-
-                1,
-                2,
-                2,
-                3,
-                3,
-                4,
-                4,
-                1
-            };
-
-            return CreateFromVertices(vertices, indexes);
-        }
-        public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
-        {
-            List<Line3D> lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             var tmp = path.ToArray();
 
             for (int i = 0; i < tmp.Length - 1; i++)
             {
-                lines.Add(new Line3D(tmp[i], tmp[i + 1]));
+                lines.Add(new(tmp[i], tmp[i + 1]));
             }
 
-            return lines.ToArray();
-        }
-        public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            Vector3 p = transform.TranslationVector;
-
-            Vector3 up = p + (transform.Up * size);
-            Vector3 forward = p + (transform.Forward * size);
-            Vector3 left = p + (transform.Left * size);
-            Vector3 right = p + (transform.Right * size);
-
-            Vector3 c1 = (forward * 0.8f) + (left * 0.2f);
-            Vector3 c2 = (forward * 0.8f) + (right * 0.2f);
-
-            lines.Add(new Line3D(p, up));
-            lines.Add(new Line3D(p, forward));
-            lines.Add(new Line3D(p, left));
-
-            lines.Add(new Line3D(forward, c1));
-            lines.Add(new Line3D(forward, c2));
-
             return lines;
         }
-        public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
+        public static IEnumerable<Line3D> CreateTriangle(Vector3 v0, Vector3 v1, Vector3 v2)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            float h = size * 0.5f;
-            lines.Add(new Line3D(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
-            lines.Add(new Line3D(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
-            lines.Add(new Line3D(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
-            lines.Add(new Line3D(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
-
-            return lines;
+            int[] indexes = [0, 1, 1, 2, 2, 0];
+            return CreateFromVertices([v0, v1, v2], indexes);
         }
-        public static IEnumerable<Line3D> CreateCrossList(IEnumerable<Vector3> points, float size)
+        public static IEnumerable<Line3D> CreateTriangle(Triangle triangle)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var point in points)
+            return CreateTriangle(triangle.Point1, triangle.Point2, triangle.Point3);
+        }
+        public static IEnumerable<Line3D> CreateTriangle(IEnumerable<Triangle> triangleList)
+        {
+            if (triangleList?.Any() != true)
             {
-                lines.AddRange(CreateCross(point, size));
+                return [];
             }
 
-            return lines;
+            return triangleList
+                .SelectMany(CreateTriangle)
+                .AsEnumerable();
         }
-        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> points)
+        public static IEnumerable<Line3D> CreateSquare(IEnumerable<Vector3> corners)
         {
-            List<Line3D> lines = new List<Line3D>();
+            int[] indexes = [0, 1, 1, 2, 2, 3, 3, 0];
 
-            var tmp = points.ToArray();
-
-            Vector3 p0 = tmp[0];
-
-            for (int i = 1; i < tmp.Length; i++)
-            {
-                Vector3 p1 = tmp[i];
-
-                lines.Add(new Line3D(p0, p1));
-
-                p0 = p1;
-            }
-
-            return lines;
+            return CreateFromVertices(corners, indexes);
         }
-        public static IEnumerable<Line3D> CreateArc(Vector3 from, Vector3 to, float h, int points)
+        public static IEnumerable<Line3D> CreateRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            List<Line3D> lines = new List<Line3D>();
+            return
+            [
+                new(v0, v1),
+                new(v1, v2),
+                new(v2, v3),
+                new(v3, v0)
+            ];
+        }
+        public static IEnumerable<Line3D> CreatePyramid(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreatePyramid(Topology.LineList, center, width, height, depth);
 
-            float pad = 0.05f;
-            float scale = (1.0f - pad * 2) / points;
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBox(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateBox(Topology.LineList, center, width, height, depth);
 
-            Vector3 d = to - from;
-            float len = d.Length();
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBox(BoundingBox bbox)
+        {
+            var geometry = GeometryUtil.CreateBox(Topology.LineList, bbox);
 
-            EvalArc(from, d, len * h, pad, out Vector3 prev);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBox(OrientedBoundingBox obb)
+        {
+            var geometry = GeometryUtil.CreateBox(Topology.LineList, obb);
 
-            for (int i = 1; i <= points; i++)
-            {
-                float u = pad + i * scale;
-                EvalArc(from, d, len * h, u, out Vector3 pt);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBoxes(IEnumerable<BoundingBox> bboxes)
+        {
+            var geometry = GeometryUtil.CreateBoxes(Topology.LineList, bboxes);
 
-                lines.Add(new Line3D(prev, pt));
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateBoxes(IEnumerable<OrientedBoundingBox> obbs)
+        {
+            var geometry = GeometryUtil.CreateBoxes(Topology.LineList, obbs);
 
-                prev = pt;
-            }
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSphere(BoundingSphere sph, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSphere(Topology.LineList, sph, sliceCount, stackCount);
 
-            return lines;
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSphere(Vector3 center, float radius, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSphere(Topology.LineList, center, radius, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateSpheres(IEnumerable<BoundingSphere> sphList, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateSpheres(Topology.LineList, sphList, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateFrustum(BoundingFrustum frustum)
+        {
+            var geometry = GeometryUtil.CreateFrustum(Topology.LineList, frustum);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateConeCupAngle(float cupAngle, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateConeCupAngle(Topology.LineList, cupAngle, height, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateConeBaseRadius(float baseRadius, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateConeBaseRadius(Topology.LineList, baseRadius, height, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreatePolygon(IEnumerable<Vector3> points)
+        {
+            var geometry = GeometryUtil.CreatePolygon(Topology.LineList, points);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateCylinder(BoundingCylinder cylinder, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateCylinder(Topology.LineList, cylinder, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
+        {
+            var geometry = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);
+
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
+        {
+            var geometry = GeometryUtil.CreateCapsule(Topology.LineList, center, radius, height, sliceCount, stackCount);
+
+            return CreateFromVertices(geometry);
         }
         public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
-            List<Line3D> lines = new List<Line3D>();
+            List<Line3D> lines = [];
 
             float[] dir = new float[segments * 2];
 
             for (int i = 0; i < segments; ++i)
             {
                 float a = i / (float)segments * MathUtil.TwoPi;
-                dir[i * 2 + 0] = (float)Math.Cos(a);
-                dir[i * 2 + 1] = (float)Math.Sin(a);
+                dir[i * 2 + 0] = MathF.Cos(a);
+                dir[i * 2 + 1] = MathF.Sin(a);
             }
 
             for (int i = 0, j = segments - 1; i < segments; j = i++)
             {
-                Line3D line = new Line3D(
-                    new Vector3(center.X + dir[j * 2 + 0] * r, center.Y, center.Z + dir[j * 2 + 1] * r),
-                    new Vector3(center.X + dir[i * 2 + 0] * r, center.Y, center.Z + dir[i * 2 + 1] * r));
+                Line3D line = new(
+                    new(center.X + dir[j * 2 + 0] * r, center.Y, center.Z + dir[j * 2 + 1] * r),
+                    new(center.X + dir[i * 2 + 0] * r, center.Y, center.Z + dir[i * 2 + 1] * r));
 
                 lines.Add(line);
             }
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateArrow(Vector3 position, Vector3 point, float edgeSize)
+        public static IEnumerable<Line3D> CreateCircle(IEnumerable<(Vector3 center, float r)> circles, int segments)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            float eps = 0.001f;
-            if (Vector3.DistanceSquared(point, position) >= eps * eps)
+            if (circles?.Any() != true)
             {
-                var az = Vector3.Normalize(position - point);
-                var ax = Vector3.Cross(Vector3.Up, az);
-
-                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
-                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
+                return [];
             }
 
+            return circles
+                .SelectMany(c => CreateCircle(c.center, c.r, segments))
+                .AsEnumerable();
+        }
+        public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
+        {
+            List<Line3D> lines = [];
+
+            var p = transform.TranslationVector;
+
+            var up = p + (transform.Up * size);
+            var forward = p + (transform.Forward * size);
+            var left = p + (transform.Left * size);
+            var right = p + (transform.Right * size);
+
+            var c1 = (forward * 0.8f) + (left * 0.2f);
+            var c2 = (forward * 0.8f) + (right * 0.2f);
+
+            lines.Add(new(p, up));
+            lines.Add(new(p, forward));
+            lines.Add(new(p, left));
+
+            lines.Add(new(forward, c1));
+            lines.Add(new(forward, c2));
+
             return lines;
         }
-        public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+        public static IEnumerable<Line3D> CreateAxis(IEnumerable<Matrix> transforms, float size)
         {
-            List<Line3D> lines = new List<Line3D>
+            if (transforms?.Any() != true)
             {
-                new Line3D(v0, v1),
-                new Line3D(v1, v2),
-                new Line3D(v2, v3),
-                new Line3D(v3, v0)
-            };
+                return [];
+            }
+
+            return transforms
+                .SelectMany(t => CreateAxis(t, size))
+                .AsEnumerable();
+        }
+        public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
+        {
+            List<Line3D> lines = [];
+
+            float h = size * 0.5f;
+            lines.Add(new(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
+            lines.Add(new(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
+            lines.Add(new(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
+            lines.Add(new(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
 
             return lines;
         }
-
-        private static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
+        public static IEnumerable<Line3D> CreateCross(IEnumerable<Vector3> points, float size)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            var vTmp = vertices.ToArray();
-            var iTmp = indices.ToArray();
-
-            for (int i = 0; i < iTmp.Length; i += 2)
+            if (points?.Any() != true)
             {
-                Line3D l = new Line3D()
+                return [];
+            }
+
+            return points
+                .SelectMany(p => CreateCross(p, size))
+                .AsEnumerable();
+        }
+        public static IEnumerable<Line3D> CreateArc(Vector3 from, Vector3 to, float h, int points)
+        {
+            List<Line3D> lines = [];
+
+            float pad = 0.05f;
+            float scale = (1.0f - pad * 2) / points;
+
+            var d = to - from;
+            float len = d.Length();
+            var prev = from;
+
+            for (int i = 0; i <= points; i++)
+            {
+                float u = pad + i * scale;
+                EvalArc(from, d, len * h, u, out var pt);
+
+                lines.Add(new(prev, pt));
+
+                prev = pt;
+            }
+
+            lines.Add(new(prev, to));
+
+            return lines;
+        }
+        public static IEnumerable<Line3D> CreateArc(IEnumerable<(Vector3 from, Vector3 to)> arcs, float h, int points)
+        {
+            if (arcs?.Any() != true)
+            {
+                return [];
+            }
+
+            return arcs
+                .SelectMany(a => CreateArc(a.from, a.to, h, points))
+                .AsEnumerable();
+        }
+        public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, float edgeSize)
+        {
+            return CreateArrow(point, direction, Vector3.Up, edgeSize);
+        }
+        public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, Vector3 up, float edgeSize)
+        {
+            var lines = new List<Line3D>();
+
+            var az = Vector3.Normalize(direction);
+            var ax = Vector3.Cross(up, az);
+            az *= edgeSize;
+            ax *= edgeSize / 3f;
+
+            Vector3 pl = new(point.X - az.X + ax.X, point.Y - az.Y + ax.Y, point.Z - az.Z + ax.Z);
+            Vector3 pr = new(point.X - az.X - ax.X, point.Y - az.Y - ax.Y, point.Z - az.Z - ax.Z);
+
+            lines.Add(new(point, pl));
+            lines.Add(new(point, pr));
+
+            return lines;
+        }
+        public static IEnumerable<Line3D> CreateArrow(IEnumerable<(Vector3 position, Vector3 point)> arrows, float edgeSize)
+        {
+            if (arrows?.Any() != true)
+            {
+                return [];
+            }
+
+            return arrows
+                .SelectMany(a => CreateArrow(a.point, a.point, edgeSize))
+                .AsEnumerable();
+        }
+
+        public static IEnumerable<Line3D> CreateFromVertices(GeometryDescriptor geometry)
+        {
+            return CreateFromVertices(geometry.Vertices, geometry.Indices);
+        }
+        public static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
+        {
+            return CreateFromVertices(vertices, indices.Select(i => (int)i).ToArray());
+        }
+        public static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
+        {
+            if (vertices?.Any() != true)
+            {
+                return [];
+            }
+
+            var vArray = vertices.ToArray();
+
+            List<Line3D> lines = [];
+
+            if (indices?.Any() != true)
+            {
+                // Use vertices only
+                for (int i = 0; i < vArray.Length; i += 2)
                 {
-                    Point1 = vTmp[iTmp[i + 0]],
-                    Point2 = vTmp[iTmp[i + 1]],
-                };
+                    lines.Add(new()
+                    {
+                        Point1 = vArray[i],
+                        Point2 = vArray[i + 1],
+                    });
+                }
 
-                lines.Add(l);
+                return lines;
+            }
+
+            var iArray = indices.ToArray();
+
+            for (int i = 0; i < iArray.Length; i += 2)
+            {
+                lines.Add(new()
+                {
+                    Point1 = vArray[iArray[i]],
+                    Point2 = vArray[iArray[i + 1]],
+                });
             }
 
             return lines;
         }
+
         /// <summary>
-        /// Eval arc
+        /// Evaluates arc
         /// </summary>
         /// <param name="v0">First point</param>
         /// <param name="v1">Second point</param>
@@ -547,7 +434,7 @@ namespace Engine
         /// <param name="res">Resulting point</param>
         private static void EvalArc(Vector3 v0, Vector3 v1, float h, float u, out Vector3 res)
         {
-            res = new Vector3(
+            res = new(
                 v0.X + v1.X * u,
                 v0.Y + v1.Y * u + h * (1 - (u * 2 - 1) * (u * 2 - 1)),
                 v0.Z + v1.Z * u);
@@ -564,8 +451,8 @@ namespace Engine
         /// <param name="z2">Z coordinate of end point</param>
         public Line3D(float x1, float y1, float z1, float x2, float y2, float z2)
         {
-            Point1 = new Vector3(x1, y1, z1);
-            Point2 = new Vector3(x2, y2, z2);
+            Point1 = new(x1, y1, z1);
+            Point2 = new(x2, y2, z2);
         }
         /// <summary>
         /// Constructor
@@ -587,37 +474,28 @@ namespace Engine
             Point2 = ray.Position + ray.Direction;
         }
 
-        /// <summary>
-        /// Gets vertex position list
-        /// </summary>
-        /// <returns>Returns the vertex position list</returns>
-        public IEnumerable<Vector3> GetVertices()
+        /// <inheritdoc/>
+        public readonly IEnumerable<Vector3> GetVertices()
         {
-            return new[]
-            {
+            return
+            [
                 Point1,
                 Point2,
-            };
+            ];
         }
-        /// <summary>
-        /// Gets the vertex list stride
-        /// </summary>
-        /// <returns>Returns the list stride</returns>
-        public int GetStride()
+        /// <inheritdoc/>
+        public readonly int GetStride()
         {
             return 2;
         }
-        /// <summary>
-        /// Gets the vertex list topology
-        /// </summary>
-        /// <returns>Returns the list topology</returns>
-        public Topology GetTopology()
+        /// <inheritdoc/>
+        public readonly Topology GetTopology()
         {
             return Topology.LineList;
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"P1({Point1}) -> P2({Point2});";
         }

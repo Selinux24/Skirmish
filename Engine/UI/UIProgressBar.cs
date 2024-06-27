@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// Sprite progress bar
     /// </summary>
-    public sealed class UIProgressBar : UIControl<UIProgressBarDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIProgressBar(Scene scene, string id, string name) : UIControl<UIProgressBarDescription>(scene, id, name)
     {
         /// <summary>
         /// Progress sprite
@@ -79,22 +85,10 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIProgressBar(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIProgressBarDescription description)
+        public override async Task ReadAssets(UIProgressBarDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             ProgressValue = 0;
 

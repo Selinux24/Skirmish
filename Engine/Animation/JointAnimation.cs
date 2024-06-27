@@ -8,8 +8,19 @@ namespace Engine.Animation
     /// <summary>
     /// Bone animation
     /// </summary>
-    public struct JointAnimation : IEquatable<JointAnimation>
+    public readonly struct JointAnimation : IEquatable<JointAnimation>
     {
+        /// <inheritdoc/>
+        public static bool operator ==(JointAnimation left, JointAnimation right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(JointAnimation left, JointAnimation right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Joint name
         /// </summary>
@@ -46,7 +57,7 @@ namespace Engine.Animation
 
             if (keyframes?.Any() != true)
             {
-                Keyframes = new Keyframe[] { };
+                Keyframes = [];
                 StartTime = 0;
                 EndTime = 0;
 
@@ -54,15 +65,15 @@ namespace Engine.Animation
             }
 
             //Pre-normalize rotations
-            var tmp = new List<Keyframe>(keyframes);
+            List<Keyframe> tmp = new(keyframes);
             for (int i = 0; i < tmp.Count; i++)
             {
                 tmp[i].Rotation.Normalize();
             }
 
             Keyframes = tmp;
-            StartTime = tmp.First().Time;
-            EndTime = tmp.Last().Time;
+            StartTime = tmp[0].Time;
+            EndTime = tmp[^1].Time;
         }
 
         /// <summary>
@@ -93,7 +104,7 @@ namespace Engine.Animation
             rotation = Quaternion.Identity;
             scale = Vector3.One;
 
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
                 return;
             }
@@ -139,7 +150,7 @@ namespace Engine.Animation
         /// <param name="keyTime">Key time</param>
         private int FindFrame(float keyTime)
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
                 return 0;
             }
@@ -174,8 +185,18 @@ namespace Engine.Animation
             return
                 Joint == other.Joint &&
                 Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
-                StartTime == other.StartTime &&
-                EndTime == other.EndTime;
+                MathUtil.NearEqual(StartTime, other.StartTime) &&
+                MathUtil.NearEqual(EndTime, other.EndTime);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is JointAnimation animation && Equals(animation);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Joint, Keyframes, StartTime, EndTime);
         }
 
         /// <summary>
@@ -184,9 +205,9 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy()
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
-                return new JointAnimation(Joint, new Keyframe[] { });
+                return new JointAnimation(Joint, []);
             }
 
             Keyframe[] kfs = new Keyframe[Keyframes.Count];
@@ -202,9 +223,9 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy(int indexFrom, int indexTo)
         {
-            if (Keyframes?.Any() != true)
+            if (Keyframes.Count == 0)
             {
-                return new JointAnimation(Joint, new Keyframe[] { });
+                return new JointAnimation(Joint, []);
             }
 
             Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];

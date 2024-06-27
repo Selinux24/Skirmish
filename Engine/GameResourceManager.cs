@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -13,12 +12,16 @@ namespace Engine
     /// <summary>
     /// Engine resource manager
     /// </summary>
-    public class GameResourceManager : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    public class GameResourceManager(Game game) : IDisposable
     {
         /// <summary>
         /// Content loaders dictionary
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Func<ILoader>> contentLoaders = new ConcurrentDictionary<string, Func<ILoader>>();
+        private static readonly ConcurrentDictionary<string, Func<ILoader>> contentLoaders = new();
 
         /// <summary>
         /// Register content loader
@@ -101,19 +104,19 @@ namespace Engine
         /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game;
+        private readonly Game game = game;
         /// <summary>
         /// Requested resources dictionary
         /// </summary>
-        private readonly ConcurrentDictionary<string, IGameResourceRequest> requestedResources = new ConcurrentDictionary<string, IGameResourceRequest>();
+        private readonly ConcurrentDictionary<string, IGameResourceRequest> requestedResources = new();
         /// <summary>
         /// Resource dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> resources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> resources = [];
         /// <summary>
         /// Global resources dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> globalResources = [];
         /// <summary>
         /// Creating resources flag
         /// </summary>
@@ -126,18 +129,10 @@ namespace Engine
         {
             get
             {
-                return requestedResources.Any();
+                return !requestedResources.IsEmpty;
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        public GameResourceManager(Game game)
-        {
-            this.game = game;
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -146,9 +141,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -181,7 +174,7 @@ namespace Engine
         /// </summary>
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
-        public void CreateResources(string id, IProgress<LoadResourceProgress> progress)
+        public void CreateResources(string id, IProgress<LoadResourceProgress> progress = null)
         {
             if (allocating)
             {
@@ -193,16 +186,16 @@ namespace Engine
                 allocating = true;
 
                 var pendingRequests = requestedResources.ToArray();
-                if (!pendingRequests.Any())
+                if (pendingRequests.Length == 0)
                 {
                     return;
                 }
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Count()}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Length}");
 
-                ProcessPendingRequests(id, progress, pendingRequests);
+                ProcessPendingRequests(id, pendingRequests, progress);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Count()}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Length}");
             }
             catch (Exception ex)
             {
@@ -221,14 +214,14 @@ namespace Engine
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="pendingRequests">Pending request list</param>
-        private void ProcessPendingRequests(string id, IProgress<LoadResourceProgress> progress, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests)
+        private void ProcessPendingRequests(string id, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests, IProgress<LoadResourceProgress> progress = null)
         {
             // Get pending requests
             float total = pendingRequests.Count() + 1;
             float current = 0;
 
             // Process requests
-            List<string> toRemove = new List<string>();
+            var toRemove = new List<string>();
             try
             {
                 foreach (var resource in pendingRequests)
@@ -268,7 +261,7 @@ namespace Engine
         {
             var toRemove = requestKeys.ToList();
 
-            while (toRemove.Any())
+            while (toRemove.Count != 0)
             {
                 if (!requestedResources.ContainsKey(toRemove[0]))
                 {
@@ -343,7 +336,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            GameResourceValueArray<T> resource = new GameResourceValueArray<T>(name)
+            var resource = new GameResourceValueArray<T>(name)
             {
                 Values = values,
                 Size = size,
@@ -366,7 +359,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            GameResourceRandomTexture resource = new GameResourceRandomTexture(name)
+            var resource = new GameResourceRandomTexture(name)
             {
                 Size = size,
                 Min = min,
@@ -386,9 +379,9 @@ namespace Engine
         /// <param name="resource">Resource content</param>
         private void SetGlobalResource(string name, EngineShaderResourceView resource)
         {
-            if (globalResources.ContainsKey(name))
+            if (globalResources.TryGetValue(name, out var value))
             {
-                var cRes = globalResources[name];
+                var cRes = value;
                 var srv = cRes.GetResource();
                 srv?.Dispose();
                 cRes.SetResource(resource.GetResource());
@@ -406,17 +399,17 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            var (key, resource) = await TryGetResource(imageContent);
+            var (key, resource) = TryGetResource(imageContent);
             if (resource != null)
             {
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
@@ -435,9 +428,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
-            return await RequestResource(new FileImageContent(path), mipAutogen, dynamic);
+            return RequestResource(new FileImageContent(path), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -446,9 +439,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            return await RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
+            return RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -459,17 +452,17 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            var (key, resource) = await TryGetResource(identifier);
+            var (key, resource) = TryGetResource(identifier);
             if (resource != null)
             {
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceValueArray<T>(identifier.ToString("B"))
@@ -496,17 +489,17 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public async Task<EngineShaderResourceView> RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            var (key, resource) = await TryGetResource(identifier);
+            var (key, resource) = TryGetResource(identifier);
             if (resource != null)
             {
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceRandomTexture(identifier.ToString("B"))
@@ -532,48 +525,40 @@ namespace Engine
         /// <param name="imageContent">Image content</param>
         /// <param name="key">Resource key</param>
         /// <returns>Returns the resource if exists</returns>
-        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(IImageContent imageContent)
+        private (string Key, EngineShaderResourceView Resource) TryGetResource(IImageContent imageContent)
         {
-            EngineShaderResourceView resource = null;
-
             string key = imageContent?.GetResourceKey();
             if (key == null)
             {
-                return await Task.FromResult((key, resource));
+                return (key, null);
             }
 
-            if (!resources.ContainsKey(key))
+            if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, resource));
+                return (key, null);
             }
 
-            resource = resources[key];
-
-            return await Task.FromResult((key, resource));
+            return (key, resource);
         }
         /// <summary>
         /// Trys to get a resource by identifier
         /// </summary>
         /// <param name="identifier">Identifier</param>
         /// <returns>Returns the resource if exists</returns>
-        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(Guid identifier)
+        private (string Key, EngineShaderResourceView Resource) TryGetResource(Guid identifier)
         {
-            EngineShaderResourceView resource = null;
-
             string key = identifier.ToByteArray().GetMd5Sum();
             if (key == null)
             {
-                return await Task.FromResult((key, resource));
+                return (key, null);
             }
 
-            if (!resources.ContainsKey(key))
+            if (!resources.TryGetValue(key, out var resource))
             {
-                return await Task.FromResult((key, resource));
+                return (key, null);
             }
 
-            resource = resources[key];
-
-            return await Task.FromResult((key, resource));
+            return (key, resource);
         }
     }
 }

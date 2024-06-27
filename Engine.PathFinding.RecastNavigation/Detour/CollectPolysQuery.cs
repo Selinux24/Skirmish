@@ -4,21 +4,30 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    public class CollectPolysQuery : IPolyQuery
+    /// <summary>
+    /// Collect polygon guery
+    /// </summary>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="polys">Polygon list</param>
+    /// <param name="maxPolys">Maximum polygon count</param>
+    public class CollectPolysQuery(int[] polys, int maxPolys) : IPolyQuery
     {
-        public int[] Polys { get; protected set; }
-        public int MaxPolys { get; protected set; }
-        public int NumCollected { get; protected set; }
-        public bool Overflow { get; protected set; }
+        /// <summary>
+        /// Polygon list
+        /// </summary>
+        private readonly int[] polys = polys;
+        /// <summary>
+        /// Maximum number of polygons
+        /// </summary>
+        private readonly int maxPolys = maxPolys;
+        /// <summary>
+        /// Number of collected polygons
+        /// </summary>
+        private int numCollected = 0;
 
-        public CollectPolysQuery(int[] polys, int maxPolys)
-        {
-            Polys = polys;
-            MaxPolys = maxPolys;
-            NumCollected = 0;
-            Overflow = false;
-        }
-
+        /// <inheritdoc/>
         public void Process(MeshTile tile, IEnumerable<int> refs)
         {
             if (refs?.Any() != true)
@@ -26,17 +35,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            int numLeft = MaxPolys - NumCollected;
+            int numLeft = maxPolys - numCollected;
             int toCopy = refs.Count();
             if (toCopy > numLeft)
             {
-                Overflow = true;
                 toCopy = numLeft;
             }
 
-            Array.Copy(refs.ToArray(), 0, Polys, NumCollected, toCopy);
+            Array.Copy(refs.ToArray(), 0, polys, numCollected, toCopy);
 
-            NumCollected += toCopy;
+            numCollected += toCopy;
         }
     }
 }

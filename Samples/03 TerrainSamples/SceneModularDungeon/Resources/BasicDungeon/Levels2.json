@@ -1,0 +1,4322 @@
+{
+  "volumes": [
+    "volume",
+    "volumes",
+    "_volume",
+    "_volumes"
+  ],
+  "particleSystems": [
+    {
+      "particleType": 4,
+      "name": "torchFire",
+      "textureName": "fire.png",
+      "maxDuration": 0.0,
+      "maxDurationRandomness": 1.0,
+      "maxHorizontalVelocity": 0.0,
+      "minHorizontalVelocity": 0.0,
+      "maxVerticalVelocity": 0.0,
+      "minVerticalVelocity": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": -1.0,
+        "z": 0.0
+      },
+      "endVelocity": 1.0,
+      "minColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "maxColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "minRotateSpeed": 0.0,
+      "maxRotateSpeed": 0.0,
+      "minStartSize": 1.0,
+      "maxStartSize": 1.0,
+      "minEndSize": 1.0,
+      "maxEndSize": 1.0,
+      "blendMode": "Alpha",
+      "emitterVelocitySensitivity": 0.0
+    },
+    {
+      "particleType": 4,
+      "name": "lampFire",
+      "textureName": "candleLight.png",
+      "maxDuration": 0.25,
+      "maxDurationRandomness": 0.01,
+      "maxHorizontalVelocity": 0.0,
+      "minHorizontalVelocity": 0.0,
+      "maxVerticalVelocity": 0.0,
+      "minVerticalVelocity": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "endVelocity": 1.0,
+      "minColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 0
+      },
+      "maxColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 127
+      },
+      "minRotateSpeed": 0.0,
+      "maxRotateSpeed": 0.0,
+      "minStartSize": 0.25,
+      "maxStartSize": 0.5,
+      "minEndSize": 0.25,
+      "maxEndSize": 0.5,
+      "blendMode": "Alpha",
+      "emitterVelocitySensitivity": 0.0
+    }
+  ],
+  "levels": [
+    {
+      "name": "Lvl1",
+      "startPosition": {
+        "x": -6.0,
+        "y": 4.0,
+        "z": -26.0
+      },
+      "lookingVector": {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "map": [
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": -6.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "XCross1",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 6.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "CorridorEnd2",
+          "type": "None",
+          "position": {
+            "x": -12.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room3x3",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor2",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "TCross1",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 6.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 12.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "TCross1",
+          "type": "None",
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 24.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor2",
+          "type": "None",
+          "position": {
+            "x": 30.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "XCross1",
+          "type": "None",
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "PondRoom4x4",
+          "type": "None",
+          "position": {
+            "x": 35.0,
+            "y": 0.0,
+            "z": -19.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 42.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "OpenRoom3x3",
+          "type": "None",
+          "position": {
+            "x": 48.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff1",
+          "type": "None",
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff3",
+          "type": "None",
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -40.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "OpenRoom3x3",
+          "type": "None",
+          "position": {
+            "x": 48.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff1",
+          "type": "None",
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff2",
+          "type": "None",
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -2.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 42.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "BigRoom5x5",
+          "type": "None",
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 26.0,
+            "y": 0.0,
+            "z": -28.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "LCross1",
+          "type": "None",
+          "position": {
+            "x": 20.0,
+            "y": 0.0,
+            "z": -28.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 26.0,
+            "y": 0.0,
+            "z": -32.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "ToStairs1",
+          "type": "None",
+          "position": {
+            "x": 20.0,
+            "y": 0.0,
+            "z": -32.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Stairs1",
+          "type": "None",
+          "position": {
+            "x": 18.0,
+            "y": -4.0,
+            "z": -32.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "EnteringCorridor1",
+          "id": "exit",
+          "type": "None",
+          "position": {
+            "x": 12.0,
+            "y": -4.0,
+            "z": -32.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "EnteringCorridor1",
+          "id": "entrance",
+          "type": "None",
+          "position": {
+            "x": -6.0,
+            "y": 4.0,
+            "z": -26.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "LCross1",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 4.0,
+            "z": -26.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "ToStairs1",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 4.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Stairs1",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -18.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room3x5",
+          "type": "None",
+          "position": {
+            "x": 12.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5",
+          "type": "None",
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5_2",
+          "type": "None",
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff1",
+          "type": "None",
+          "position": {
+            "x": 59.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Cliff1",
+          "type": "None",
+          "position": {
+            "x": 59.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ],
+      "objects": [
+        {
+          "assetMapId": "entrance",
+          "assetId": "door",
+          "id": "start",
+          "type": "Entrance",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetMapId": "exit",
+          "assetId": "door",
+          "id": "end",
+          "type": "Exit",
+          "pathFinding": false,
+          "nextLevel": "Lvl2",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetId": "ladder",
+          "id": "door_trigger_1",
+          "name": "lever",
+          "assetName": "Dn_Anim_Ladder",
+          "type": "Trigger",
+          "pathFinding": false,
+          "animationPlans": [
+            {
+              "name": "pull",
+              "default": true,
+              "paths": [
+                {
+                  "name": "pull"
+                }
+              ]
+            },
+            {
+              "name": "push",
+              "default": false,
+              "paths": [
+                {
+                  "name": "push"
+                }
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "name": "pull",
+              "stateFrom": "up",
+              "stateTo": "down",
+              "animationPlan": "pull",
+              "items": [
+                {
+                  "id": "jail_door",
+                  "action": "open"
+                },
+                {
+                  "id": "door_trigger_2",
+                  "action": "pull"
+                }
+              ]
+            },
+            {
+              "name": "push",
+              "stateFrom": "down",
+              "stateTo": "up",
+              "animationPlan": "push",
+              "items": [
+                {
+                  "id": "jail_door",
+                  "action": "close"
+                },
+                {
+                  "id": "door_trigger_2",
+                  "action": "push"
+                }
+              ]
+            }
+          ],
+          "states": [
+            {
+              "name": "up",
+              "transitions": [
+                {
+                  "state": "down"
+                }
+              ]
+            },
+            {
+              "name": "down",
+              "transitions": [
+                {
+                  "state": "up"
+                }
+              ]
+            }
+          ],
+          "position": {
+            "x": 16.5,
+            "y": 1.75,
+            "z": -12.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetId": "ladder",
+          "id": "door_trigger_2",
+          "name": "lever",
+          "assetName": "Dn_Anim_Ladder",
+          "type": "Trigger",
+          "pathFinding": false,
+          "animationPlans": [
+            {
+              "name": "pull",
+              "default": true,
+              "paths": [
+                {
+                  "name": "pull"
+                }
+              ]
+            },
+            {
+              "name": "push",
+              "default": false,
+              "paths": [
+                {
+                  "name": "push"
+                }
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "name": "pull",
+              "stateFrom": "up",
+              "stateTo": "down",
+              "animationPlan": "pull",
+              "items": [
+                {
+                  "id": "jail_door",
+                  "action": "open"
+                },
+                {
+                  "id": "door_trigger_1",
+                  "action": "pull"
+                }
+              ]
+            },
+            {
+              "name": "push",
+              "stateFrom": "down",
+              "stateTo": "up",
+              "animationPlan": "push",
+              "items": [
+                {
+                  "id": "jail_door",
+                  "action": "close"
+                },
+                {
+                  "id": "door_trigger_1",
+                  "action": "push"
+                }
+              ]
+            }
+          ],
+          "states": [
+            {
+              "name": "up",
+              "transitions": [
+                {
+                  "state": "down"
+                }
+              ]
+            },
+            {
+              "name": "down",
+              "transitions": [
+                {
+                  "state": "up"
+                }
+              ]
+            }
+          ],
+          "position": {
+            "x": 16.5,
+            "y": 1.75,
+            "z": -15.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rug_2",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.760405958,
+            "z": 0.0,
+            "w": 0.649448037
+          },
+          "scale": {
+            "x": 1.9,
+            "y": 1.9,
+            "z": 1.9
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 2.0,
+            "z": 8.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -2.9,
+            "y": 2.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 2.9,
+            "y": 2.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 0.9,
+            "y": 2.0,
+            "z": -4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 0.9,
+            "y": 2.0,
+            "z": -8.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -5.0,
+            "y": 2.0,
+            "z": -0.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -12.0,
+            "y": 2.0,
+            "z": -0.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 5.0,
+            "y": 2.0,
+            "z": -0.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -0.9,
+            "y": 6.0,
+            "z": -19.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 0.9,
+            "y": 6.0,
+            "z": -19.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 2.0,
+            "z": 0.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Lamp",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 12.0,
+            "y": 3.25,
+            "z": 2.0
+          },
+          "rotation": {
+            "x": -0.06930859,
+            "y": 0.7037019,
+            "z": -0.06930859,
+            "w": 0.7037019
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Lamp",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 31.2,
+            "y": 0.5,
+            "z": -11.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.9971888,
+            "z": 0.0,
+            "w": 0.07492971
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Lamp",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 34.0,
+            "y": 0.02,
+            "z": -2.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": false,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Lamp",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 38.0,
+            "y": 3.3,
+            "z": -6.0
+          },
+          "rotation": {
+            "x": -0.06930859,
+            "y": 0.7037019,
+            "z": -0.06930859,
+            "w": 0.7037019
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": -0.95,
+            "y": 3.0,
+            "z": -8.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": -0.95,
+            "y": 3.0,
+            "z": -4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 7.0,
+            "z": -17.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": -2.25,
+            "y": 0.0,
+            "z": 8.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": -1.25,
+            "y": 0.0,
+            "z": 8.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": -2.25,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": -2.05,
+            "y": 1.0,
+            "z": 8.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.5646425,
+            "z": 0.0,
+            "w": 0.8253356
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Chest_2",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 2.1,
+            "y": 0.0,
+            "z": 4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.9969173,
+            "z": 0.0,
+            "w": -0.0784590542
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Chest_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 2.5,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": -4.371139E-08
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Chest_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 8.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.9304176,
+            "z": 0.0,
+            "w": 0.3665012
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 13.9,
+            "y": 0.0,
+            "z": -2.4
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.1494381,
+            "z": 0.0,
+            "w": 0.9887711
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 13.25,
+            "y": 1.0,
+            "z": -2.4
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.5646425,
+            "z": 0.0,
+            "w": 0.8253356
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 12.8,
+            "y": 0.0,
+            "z": -2.3
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.1741081,
+            "z": 0.0,
+            "w": 0.9847265
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Crate",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 13.8,
+            "y": 0.0,
+            "z": 1.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.9107101,
+            "z": 0.0,
+            "w": 0.4130462
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Barrel",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Barrel",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 10.0,
+            "y": 0.0,
+            "z": 4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.104528464,
+            "z": 0.0,
+            "w": 0.9945219
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Barrel",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 11.0,
+            "y": 0.0,
+            "z": 4.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 0.5,
+            "y": 4.0,
+            "z": -26.8
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -1.5,
+            "y": 4.0,
+            "z": -26.8
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -3.5,
+            "y": 4.0,
+            "z": -26.8
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": false,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -5.5,
+            "y": 4.0,
+            "z": -26.8
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": -7.5,
+            "y": 4.0,
+            "z": -26.8
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Stone_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 0.8,
+            "y": 4.0,
+            "z": -26.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Stone_2",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 32.0,
+            "y": 0.0,
+            "z": -8.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Stone_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 33.0,
+            "y": 0.0,
+            "z": -8.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Stone_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 37.0,
+            "y": 0.0,
+            "z": -8.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.2,
+            "y": 0.2,
+            "z": 0.2
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Stone_3",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 36.9,
+            "y": 0.0,
+            "z": -4.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Table_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -4.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 1.0,
+            "z": -4.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Floor_Gap_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Floor_Gap_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Chest_2",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -22.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "id": "Treasure",
+          "assetName": "Dn_Treasure_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -22.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "id": "jail_door",
+          "assetName": "Dn_Jail_1",
+          "type": "Door",
+          "pathFinding": false,
+          "animationPlans": [
+            {
+              "name": "open",
+              "default": false,
+              "paths": [
+                {
+                  "name": "open"
+                }
+              ]
+            },
+            {
+              "name": "close",
+              "default": false,
+              "paths": [
+                {
+                  "name": "close"
+                }
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "name": "open",
+              "stateFrom": "close",
+              "stateTo": "open",
+              "animationPlan": "open"
+            },
+            {
+              "name": "close",
+              "stateFrom": "open",
+              "stateTo": "close",
+              "animationPlan": "close"
+            }
+          ],
+          "states": [
+            {
+              "name": "close",
+              "transitions": [
+                {
+                  "state": "open"
+                }
+              ]
+            },
+            {
+              "name": "open",
+              "transitions": [
+                {
+                  "state": "close"
+                }
+              ]
+            }
+          ],
+          "position": {
+            "x": 18.0,
+            "y": 0.0,
+            "z": -15.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": -1.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": -2.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 12.0,
+            "y": 0.0,
+            "z": 5.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 32.0,
+            "y": 0.0,
+            "z": -13.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": 1.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": -3.0,
+            "y": 0.0,
+            "z": 4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 17.0,
+            "y": 0.0,
+            "z": -14.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 16.0,
+            "y": 0.0,
+            "z": -25.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rat_Hole_1",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 16.0,
+            "y": 0.0,
+            "z": -15.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Temple_Fire_1",
+          "type": "Light",
+          "pathFinding": true,
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -4.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 1.0,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Temple_Fire_1",
+          "type": "Light",
+          "pathFinding": true,
+          "position": {
+            "x": 53.0,
+            "y": 0.0,
+            "z": -38.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 1.0,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Floor_Gap_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Big_Lamp_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 34.0,
+            "y": 6.0,
+            "z": -30.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 48.0,
+            "y": 2.0,
+            "z": -9.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 48.0,
+            "y": 2.0,
+            "z": -14.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 48.0,
+            "y": 2.0,
+            "z": -27.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Torch",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 48.0,
+            "y": 2.0,
+            "z": -32.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 0.75,
+            "y": 0.75,
+            "z": 0.75
+          },
+          "loadLights": true,
+          "castShadows": false,
+          "particleLight": {
+            "name": "torchFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": 0.25,
+            "emissionRate": 0.1,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 32.0,
+            "y": 5.0,
+            "z": -25.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 5.0,
+            "z": -25.1
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 32.0,
+            "y": 5.0,
+            "z": -34.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Rag",
+          "type": "Default",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 5.0,
+            "z": -34.9
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Thomb_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -28.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Thomb_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -32.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Lab_1",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -22.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "id": "Potions",
+          "assetName": "Dn_Lab_1_Stuff",
+          "type": "Furniture",
+          "pathFinding": false,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -22.25
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 35.5,
+            "y": 1.15,
+            "z": -22.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Candle_1",
+          "type": "Light",
+          "pathFinding": false,
+          "position": {
+            "x": 36.5,
+            "y": 1.15,
+            "z": -22.5
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 0.4,
+            "y": 0.4,
+            "z": 0.4
+          },
+          "loadLights": true,
+          "castShadows": true,
+          "particleLight": {
+            "name": "lampFire",
+            "position": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "velocity": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "scale": 0.01,
+            "emissionRate": 0.01,
+            "duration": 0.0,
+            "infiniteDuration": true,
+            "maximumDistance": 100.0,
+            "distance": 0.0
+          }
+        },
+        {
+          "assetName": "Dn_Jail_Wall_Base_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 32.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_2",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 32.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_Base_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 34.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_Base_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_2",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 36.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_Base_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 38.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Jail_Wall_3",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 38.0,
+            "y": 0.0,
+            "z": -20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_Stairs_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 54.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_Stairs_Foundation_2",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 54.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_2",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 55.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_Arch_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 56.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_2",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 57.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_Stairs_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 58.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Bridge_Stairs_Foundation_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 58.0,
+            "y": 0.0,
+            "z": -12.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        }
+      ]
+    },
+    {
+      "name": "Lvl2",
+      "startPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "lookingVector": {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "map": [
+        {
+          "assetName": "EnteringCorridor1",
+          "id": "entrance",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "LCross1",
+          "type": "None",
+          "position": {
+            "x": 6.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "LCross1",
+          "type": "None",
+          "position": {
+            "x": 6.0,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5_3",
+          "type": "None",
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 6.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 14.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 26.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 8.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 20.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "XCross1",
+          "type": "None",
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5_3",
+          "type": "None",
+          "position": {
+            "x": 14.0,
+            "y": 0.0,
+            "z": 34.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5_3",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Room5x5",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 28.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 40.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 46.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "TCross1",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 34.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": -0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "Corridor1",
+          "type": "None",
+          "position": {
+            "x": 22.0,
+            "y": 0.0,
+            "z": 34.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        {
+          "assetName": "EnteringCorridor1",
+          "id": "exit",
+          "type": "None",
+          "position": {
+            "x": 28.0,
+            "y": 0.0,
+            "z": 52.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.707106769,
+            "z": 0.0,
+            "w": 0.707106769
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ],
+      "objects": [
+        {
+          "assetMapId": "entrance",
+          "assetId": "door",
+          "id": "start",
+          "type": "Entrance",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetMapId": "exit",
+          "assetId": "door",
+          "id": "end",
+          "type": "Exit",
+          "pathFinding": false,
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        },
+        {
+          "assetName": "Dn_Floor_Gap_1",
+          "type": "Default",
+          "pathFinding": true,
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 20.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "loadLights": true,
+          "castShadows": true
+        }
+      ]
+    },
+    {
+      "name": "Lvl3",
+      "startPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "lookingVector": {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "map": [
+        {
+          "assetName": "Stairs2",
+          "type": "None",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      ],
+      "objects": []
+    }
+  ]
+}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -44,7 +43,7 @@ namespace Engine.Common
             blendState.AlphaToCoverageEnable = obj.AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = obj.IndependentBlendEnable;
 
-            if (obj.RenderTarget?.Any() == true)
+            if ((obj.RenderTarget?.Length ?? 0) != 0)
             {
                 int count = Math.Min(MaxRenderTargetDescriptions, obj.RenderTarget.Length);
 
@@ -101,14 +100,14 @@ namespace Engine.Common
         /// <remarks>
         /// Because this structure contains an array, it is not possible to modify it without making an explicit clone method.
         /// </remarks>
-        public EngineBlendStateDescription Clone()
+        public readonly EngineBlendStateDescription Clone()
         {
             var blendState = Default();
 
             blendState.AlphaToCoverageEnable = AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = IndependentBlendEnable;
 
-            if (RenderTarget?.Any() == true)
+            if ((RenderTarget?.Length ?? 0) != 0)
             {
                 int count = Math.Min(MaxRenderTargetDescriptions, RenderTarget.Length);
 

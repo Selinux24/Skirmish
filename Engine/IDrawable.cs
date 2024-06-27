@@ -29,14 +29,6 @@ namespace Engine
         /// </summary>
         BlendModes BlendMode { get; }
         /// <summary>
-        /// Object usage
-        /// </summary>
-        SceneObjectUsages Usage { get; set; }
-        /// <summary>
-        /// Processing layer
-        /// </summary>
-        int Layer { get; set; }
-        /// <summary>
         /// Maximum instance count
         /// </summary>
         int InstanceCount { get; }
@@ -45,11 +37,13 @@ namespace Engine
         /// Draw shadows
         /// </summary>
         /// <param name="context">Context</param>
-        void DrawShadows(DrawContextShadows context);
+        /// <returns>Returns true if the draw calls the device</returns>
+        bool DrawShadows(DrawContextShadows context);
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        void Draw(DrawContext context);
+        /// <returns>Returns true if the draw calls the device</returns>
+        bool Draw(DrawContext context);
     }
 }

@@ -1,27 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Potential diagonal
+    /// </summary>
     public struct PotentialDiagonal
     {
-        public static readonly CompareDiagDist DefaultComparer = new CompareDiagDist();
+        /// <summary>
+        /// Default comparer
+        /// </summary>
+        public static readonly Comparison<PotentialDiagonal> DefaultComparer = (x, y) =>
+        {
+            if (x.Dist < y.Dist) return -1;
+            if (x.Dist > y.Dist) return 1;
+            return 0;
+        };
 
+        /// <summary>
+        /// Vertex
+        /// </summary>
         public int Vert { get; set; }
+        /// <summary>
+        /// Distance
+        /// </summary>
         public int Dist { get; set; }
 
-        public override string ToString()
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
-            return string.Format("Vertex: {0}; Distance: {1};", Vert, Dist);
-        }
-
-        public class CompareDiagDist : IComparer<PotentialDiagonal>
-        {
-            public int Compare(PotentialDiagonal x, PotentialDiagonal y)
-            {
-                if (x.Dist < y.Dist) return -1;
-                if (x.Dist > y.Dist) return 1;
-                return 0;
-            }
+            return $"Vertex: {Vert}; Distance: {Dist};";
         }
     }
 }

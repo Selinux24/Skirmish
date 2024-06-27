@@ -13,7 +13,7 @@ namespace Engine.Content
         /// <summary>
         /// Gets the loader delegate
         /// </summary>
-        /// <returns>Returns a delegate wich creates a loader</returns>
+        /// <returns>Returns a delegate which creates a loader</returns>
         Func<IAnimationLoader> GetLoaderDelegate();
         /// <summary>
         /// Gets the extensions list which this loader is valid

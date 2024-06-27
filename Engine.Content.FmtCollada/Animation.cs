@@ -25,13 +25,8 @@ namespace Engine.Collada
         {
             get
             {
-                return Array.Find(this.Sources, s => string.Equals("#" + s.Id, id));
+                return Array.Find(Sources, s => string.Equals("#" + s.Id, id));
             }
-        }
-
-        public override string ToString()
-        {
-            return "Animation; " + base.ToString();
         }
     }
 }

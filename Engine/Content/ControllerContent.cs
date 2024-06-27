@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Content
@@ -29,7 +30,7 @@ namespace Engine.Content
         /// <summary>
         /// Weight information by joint name
         /// </summary>
-        public Weight[] Weights { get; set; } = new Weight[] { };
+        public Weight[] Weights { get; set; } = Array.Empty<Weight>();
 
         /// <inheritdoc/>
         public override string ToString()

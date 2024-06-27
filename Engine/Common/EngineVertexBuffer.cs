@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Engine vertex buffer
     /// </summary>
@@ -18,19 +16,19 @@ namespace Engine.Common
         /// <summary>
         /// Buffer
         /// </summary>
-        protected Buffer VertexBuffer { get; set; }
+        protected EngineBuffer VertexBuffer { get; set; }
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
-        protected VertexBufferBinding[] VertexBufferBinding { get; set; }
+        protected EngineVertexBufferBinding[] VertexBufferBinding { get; set; }
         /// <summary>
         /// Stream-out binding
         /// </summary>
-        protected StreamOutputBufferBinding[] StreamOutBinding { get; set; }
+        protected EngineStreamOutputBufferBinding[] StreamOutBinding { get; set; }
         /// <summary>
         /// Input layout
         /// </summary>
-        protected InputLayout InputLayout { get; set; }
+        protected EngineInputLayout InputLayout { get; set; }
         /// <summary>
         /// Buffer slot
         /// </summary>
@@ -67,20 +65,20 @@ namespace Engine.Common
             {
                 VertexBuffer = graphics.CreateStreamOutBuffer(name, data);
 
-                StreamOutBinding = new[]
-                {
-                    new StreamOutputBufferBinding(VertexBuffer, 0),
-                };
+                StreamOutBinding =
+                [
+                    new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
+                ];
             }
             else
             {
                 VertexBuffer = graphics.CreateVertexBuffer(name, data, false);
             }
 
-            VertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
-            };
+            VertexBufferBinding =
+            [
+                new EngineVertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
+            ];
         }
         /// <summary>
         /// Constructor
@@ -106,20 +104,20 @@ namespace Engine.Common
             {
                 VertexBuffer = graphics.CreateStreamOutBuffer(name, sizeInBytes);
 
-                StreamOutBinding = new[]
-                {
-                    new StreamOutputBufferBinding(VertexBuffer, 0),
-                };
+                StreamOutBinding =
+                [
+                    new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
+                ];
             }
             else
             {
                 VertexBuffer = graphics.CreateVertexBuffer(name, sizeInBytes, false);
             }
 
-            VertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
-            };
+            VertexBufferBinding =
+            [
+                new EngineVertexBufferBinding (VertexBuffer, default(T).GetStride(), 0),
+            ];
         }
         /// <summary>
         /// Destructor
@@ -154,46 +152,46 @@ namespace Engine.Common
         /// <summary>
         /// Writes data to the buffer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="data">Data to write</param>
-        public void Write(IEnumerable<T> data)
+        public void Write(IEngineDeviceContext dc, T[] data)
         {
-            Graphics.WriteDiscardBuffer(VertexBuffer, data);
+            dc.WriteDiscardBuffer(VertexBuffer, data);
         }
 
         /// <inheritdoc/>
         public void CreateInputLayout(string name, byte[] signature, int bufferSlot)
         {
-            var inputElements = default(T).GetInput(bufferSlot);
-            var layout = Graphics.CreateInputLayout(name, signature, inputElements);
+            var layout = Graphics.CreateInputLayout<T>(name, signature, bufferSlot);
             BufferSlot = bufferSlot;
 
             InputLayout?.Dispose();
             InputLayout = layout;
         }
         /// <inheritdoc/>
-        public void SetVertexBuffers()
+        public void SetVertexBuffers(IEngineDeviceContext dc)
         {
-            Graphics.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
+            dc.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
         }
         /// <inheritdoc/>
-        public void SetInputLayout()
+        public void SetInputLayout(IEngineDeviceContext dc)
         {
-            Graphics.IAInputLayout = InputLayout;
+            dc.IAInputLayout = InputLayout;
         }
         /// <inheritdoc/>
-        public void SetStreamOutputTargets()
+        public void SetStreamOutputTargets(IEngineDeviceContext dc)
         {
-            Graphics.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
+            dc.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
-        public void Draw(int drawCount)
+        public void Draw(IEngineDeviceContext dc, int drawCount)
         {
-            Graphics.Draw(drawCount, 0);
+            dc.Draw(drawCount, 0);
         }
         /// <inheritdoc/>
-        public void DrawAuto()
+        public void DrawAuto(IEngineDeviceContext dc)
         {
-            Graphics.DrawAuto();
+            dc.DrawAuto();
         }
     }
 

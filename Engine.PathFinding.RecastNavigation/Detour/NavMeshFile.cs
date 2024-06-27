@@ -18,14 +18,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the navigation mesh file</returns>
         public static NavMeshFile FromNavmesh(NavMesh navmesh)
         {
-            NavMeshFile file = new NavMeshFile
+            var file = new NavMeshFile
             {
                 NavMeshParams = navmesh.GetParams(),
-                NavMeshData = new List<MeshData>(),
+                NavMeshData = [],
 
                 HasTileCache = navmesh.TileCache != null,
-                TileCacheParams = navmesh.TileCache != null ? navmesh.TileCache.GetParams() : new TileCacheParams(),
-                TileCacheData = new List<TileCacheData>()
+                TileCacheParams = navmesh.TileCache?.GetParams() ?? default,
+                TileCacheData = []
             };
 
             // Store navmesh tiles.
@@ -41,14 +41,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (navmesh.TileCache != null)
             {
                 // Store cache tiles.
-                var tileCount = navmesh.TileCache.GetTileCount();
+                var maxTileCount = navmesh.TileCache.GetMaxTileCount();
 
-                for (int i = 0; i < tileCount; ++i)
+                for (int i = 0; i < maxTileCount; ++i)
                 {
                     var tile = navmesh.TileCache.GetTile(i);
                     if (tile != null)
                     {
-                        file.TileCacheData.Add(new TileCacheData
+                        file.TileCacheData.Add(new()
                         {
                             Header = tile.Header,
                             Data = tile.Data
@@ -66,32 +66,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the navigation mesh</returns>
         public static NavMesh FromNavmeshFile(NavMeshFile file)
         {
-            NavMesh navmesh = new NavMesh(file.NavMeshParams);
+            var navmesh = new NavMesh(file.NavMeshParams);
 
             foreach (var tile in file.NavMeshData)
             {
-                if (tile == null || tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                if (tile == null || !tile.Header.IsValid())
                 {
                     continue;
                 }
 
-                navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA);
+                navmesh.AddTile(tile);
             }
 
             if (file.HasTileCache)
             {
-                var tmproc = new TileCacheMeshProcess(null);
-
-                navmesh.TileCache = new TileCache(navmesh, tmproc, file.TileCacheParams);
+                navmesh.CreateTileCache(null, file.TileCacheParams);
 
                 foreach (var tile in file.TileCacheData)
                 {
-                    if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+                    if (!tile.Header.IsValid())
                     {
                         continue;
                     }
 
-                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.Free);
                 }
             }
 
@@ -120,5 +118,4 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public List<TileCacheData> TileCacheData { get; set; }
     }
-
 }

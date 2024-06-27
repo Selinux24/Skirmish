@@ -5,59 +5,46 @@ using System.Linq;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Shadows;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Shadows;
     using Engine.Common;
 
     /// <summary>
     /// Shadow map
     /// </summary>
-    public abstract class ShadowMap : IShadowMap
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="width">Width</param>
+    /// <param name="height">Height</param>
+    /// <param name="arraySize">Array size</param>
+    public abstract class ShadowMap(Scene scene, string name, int width, int height, int arraySize) : IShadowMap
     {
         /// <summary>
         /// Scene
         /// </summary>
-        protected Scene Scene { get; private set; }
+        protected Scene Scene { get; private set; } = scene;
         /// <summary>
         /// Viewport
         /// </summary>
-        protected Viewport[] Viewports { get; set; }
+        protected Viewport[] Viewports { get; set; } = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
         /// <summary>
         /// Depth map
         /// </summary>
         protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
 
-        /// <summary>
-        /// Name
-        /// </summary>
-        public string Name { get; protected set; }
         /// <inheritdoc/>
-        public EngineShaderResourceView Texture { get; protected set; }
+        public string Name { get; protected set; } = name;
         /// <inheritdoc/>
-        public Matrix ToShadowMatrix { get; set; } = Matrix.Identity;
+        public ISceneLight LightSource { get; set; }
         /// <inheritdoc/>
-        public Vector3 LightPosition { get; set; } = Vector3.Zero;
+        public int CullIndex { get; set; }
         /// <inheritdoc/>
-        public Matrix[] FromLightViewProjectionArray { get; set; }
+        public EngineShaderResourceView DepthMapTexture { get; protected set; }
         /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="arraySize">Array size</param>
-        protected ShadowMap(Scene scene, string name, int width, int height, int arraySize)
-        {
-            Scene = scene;
-            Name = name;
-
-            Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
-
-            FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -89,29 +76,27 @@ namespace Engine
                 }
                 DepthMap = null;
 
-                Texture?.Dispose();
-                Texture = null;
+                DepthMapTexture?.Dispose();
+                DepthMapTexture = null;
             }
         }
 
         /// <inheritdoc/>
-        public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
-        /// <inheritdoc/>
-        public void Bind(Graphics graphics, int index)
+        public void Bind(IEngineDeviceContext dc)
         {
             //Set shadow mapper viewport
-            graphics.SetViewports(Viewports);
+            dc.SetViewports(Viewports);
 
             //Set shadow map depth map without render target
-            graphics.SetRenderTargets(
+            dc.SetRenderTargets(
                 null, false, Color.Transparent,
-                DepthMap.ElementAtOrDefault(index), true, false,
+                DepthMap.ElementAtOrDefault(LightSource?.ShadowMapIndex ?? -1), true, false,
                 true);
         }
         /// <inheritdoc/>
         public IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
-            if (useTextureAlpha)
+            if (useTextureAlpha && VertexData.IsTextured(vertexType))
             {
                 return GetTransparentDrawer(vertexType, instanced);
             }
@@ -125,7 +110,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
+        private static IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
         {
             bool skinned = VertexData.IsSkinned(vertexType);
 
@@ -157,7 +142,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
+        private static IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
         {
             bool skinned = VertexData.IsSkinned(vertexType);
 
@@ -184,8 +169,5 @@ namespace Engine
                 }
             }
         }
-
-        /// <inheritdoc/>
-        public abstract void UpdateGlobals();
     }
 }

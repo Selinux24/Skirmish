@@ -13,35 +13,33 @@ namespace Engine
         /// </summary>
         public float ArrivingThreshold { get; set; } = 0.01f;
 
-        /// <summary>
-        /// Computes current position and orientation in the curve
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator to update</param>
-        public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
-            if (this.HasPath)
+            if (!HasPath)
             {
-                var target = this.path.GetNextControlPoint(this.path.Length);
-                var position = manipulator.Position;
-                float dToTarget = (target - position).Length();
+                return;
+            }
 
-                if (dToTarget > this.ArrivingThreshold)
-                {
-                    float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
+            var target = path.GetNextControlPoint(path.Length);
+            var position = manipulator.Position;
+            float dToTarget = (target - position).Length();
 
-                    this.pathTime += maxSpeed;
+            if (dToTarget > ArrivingThreshold)
+            {
+                float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
 
-                    var next = this.path.GetPosition(this.pathTime);
-                    this.Velocity = next - position;
+                pathTime += maxSpeed;
 
-                    manipulator.SetPosition(next, true);
-                    manipulator.LookAt(next + this.Velocity, Axis.None, 0, true);
-                }
-                else
-                {
-                    this.Clear();
-                }
+                var next = path.GetPosition(pathTime);
+                Velocity = next - position;
+
+                manipulator.SetPosition(next);
+                manipulator.LookAt(next + Velocity);
+            }
+            else
+            {
+                Clear();
             }
         }
 
@@ -61,7 +59,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void SetState(IGameState state)
         {
-            if (!(state is BasicManipulatorControllerState basicManipulator))
+            if (state is not BasicManipulatorControllerState basicManipulator)
             {
                 return;
             }

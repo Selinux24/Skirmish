@@ -8,20 +8,24 @@ namespace Engine.Animation
     /// <summary>
     /// Animation controller
     /// </summary>
-    public class AnimationController : IHasGameState
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="obj">Skinning data object</param>
+    public class AnimationController(IUseSkinningData obj) : IHasGameState
     {
         /// <summary>
         /// Skinning data object
         /// </summary>
-        private readonly IUseSkinningData skinningDataObject;
+        private readonly IUseSkinningData skinningDataObject = obj;
         /// <summary>
         /// Animation plan
         /// </summary>
-        private readonly AnimationPlan animationPlan = new AnimationPlan();
+        private readonly AnimationPlan animationPlan = new();
         /// <summary>
         /// Transition animation plan
         /// </summary>
-        private readonly AnimationPlan transitionPlan = new AnimationPlan();
+        private readonly AnimationPlan transitionPlan = new();
         /// <summary>
         /// Animation active flag
         /// </summary>
@@ -96,15 +100,6 @@ namespace Engine.Animation
         public event AnimationControllerEventHandler PlanEnding;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="obj">Skinning data object</param>
-        public AnimationController(IUseSkinningData obj)
-        {
-            skinningDataObject = obj;
-        }
-
-        /// <summary>
         /// Calculates an animation plan with initial and end clips, and with a central looping clip
         /// </summary>
         /// <param name="clip">Clip name</param>
@@ -114,10 +109,10 @@ namespace Engine.Animation
         {
             if (SkinningData == null)
             {
-                return new AnimationPlan();
+                return new();
             }
 
-            AnimationPath path = new AnimationPath()
+            AnimationPath path = new()
             {
                 Name = clip,
             };
@@ -134,7 +129,7 @@ namespace Engine.Animation
             else
             {
                 float loopTime = planTime;
-                int fullLoops = (int)Math.Ceiling(loopTime);
+                int fullLoops = (int)MathF.Ceiling(loopTime);
                 float loopDelta = 1f;
                 if (fullLoops - loopTime > 0f)
                 {
@@ -147,7 +142,7 @@ namespace Engine.Animation
                 path.UpdateItems(SkinningData);
             }
 
-            return new AnimationPlan(path);
+            return new(path);
         }
 
         /// <summary>
@@ -254,7 +249,7 @@ namespace Engine.Animation
             }
 
             float tunedElapsedTime = elapsedSeconds * TimeDelta;
-            if (tunedElapsedTime == 0f)
+            if (MathUtil.IsZero(tunedElapsedTime))
             {
                 return;
             }
@@ -432,7 +427,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationControllerState animationControllerState))
+            if (state is not AnimationControllerState animationControllerState)
             {
                 return;
             }
@@ -450,7 +445,7 @@ namespace Engine.Animation
                 return "Inactive";
             }
 
-            StringBuilder res = new StringBuilder();
+            var res = new StringBuilder();
 
             res.AppendLine(animationPlan.CurrentPath.GetItemList() ?? string.Empty);
             res.AppendLine(animationPlan.NextPath?.GetItemList() ?? string.Empty);

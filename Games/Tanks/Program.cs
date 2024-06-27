@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Content.FmtCollada;
 using Engine.Windows;
 using System;
@@ -14,7 +15,6 @@ namespace Tanks
             {
 #if DEBUG
                 Logger.LogLevel = LogLevel.Debug;
-                Logger.LogStackSize = 0;
                 Logger.EnableConsole = true;
 #else
                 Logger.LogLevel = LogLevel.Error;
@@ -23,17 +23,16 @@ namespace Tanks
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("Tanks!!!"))
+                using Game cl = new("Tanks!!!");
 #endif
-                {
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameAudioManager.RegisterAudio<GameAudioLoader>(48000);
 
-                    cl.SetScene<SceneTanksGame>();
+                cl.SetScene<SceneTanksGame>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

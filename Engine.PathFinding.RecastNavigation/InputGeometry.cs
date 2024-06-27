@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -9,37 +10,52 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Input geometry
     /// </summary>
-    public class InputGeometry : PathFinderInput
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="fnc">Triangle function</param>
+    public class InputGeometry(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
     {
         /// <summary>
         /// Chunky mesh
         /// </summary>
         public ChunkyTriMesh ChunkyMesh { get; private set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="fnc">Triangle function</param>
-        public InputGeometry(Func<IEnumerable<Triangle>> fnc) : base(fnc)
-        {
-
-        }
-
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
+        public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
         {
-            var triangles = await GetTriangles();
-
-            return Create(settings, triangles);
+            return Create(settings, agentTypes, await GetTrianglesAsync(settings.Bounds), progressCallback);
+        }
+        /// <inheritdoc/>
+        public override IGraph CreateGraph(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)
+        {
+            return Create(settings, agentTypes, GetTriangles(settings.Bounds), progressCallback);
         }
         /// <summary>
         /// Creates a new graph from current geometry input
         /// </summary>
         /// <param name="settings">Settings</param>
+        /// <param name="agentTypes">Agent type list</param>
         /// <param name="triangles">Triangle list</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new graph</returns>
-        private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles)
+        private Graph Create(PathFinderSettings settings, AgentType[] agentTypes, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
+            var buildSettings = settings as BuildSettings;
+            ArgumentNullException.ThrowIfNull(buildSettings);
+
+            var agentList = agentTypes?.Cast<GraphAgentType>().ToArray() ?? [];
+            ArgumentOutOfRangeException.ThrowIfZero(agentList.Length);
+
+            if (!triangles.Any())
+            {
+                return new()
+                {
+                    Input = this,
+                    Settings = settings as BuildSettings,
+                };
+            }
+
             // Prepare input data
             ChunkyMesh = ChunkyTriMesh.Build(triangles);
 
@@ -47,20 +63,21 @@ namespace Engine.PathFinding.RecastNavigation
             var graph = new Graph()
             {
                 Input = this,
-                Settings = settings as BuildSettings,
+                Settings = buildSettings,
             };
 
             // Generate navigation meshes and gueries for each agent
-            foreach (var agent in graph.Settings.Agents)
+            var agentCount = agentList.Length;
+            for (int i = 0; i < agentCount; i++)
             {
-                var nm = NavMesh.Build(this, graph.Settings, agent);
+                var agent = agentList[i];
 
-                graph.AgentQueries.Add(new GraphAgentQuery
+                var nm = NavMesh.Build(graph.Settings, this, agent, (progress) =>
                 {
-                    Agent = agent,
-                    NavMesh = nm,
-                    MaxNodes = graph.Settings.MaxNodes,
+                    progressCallback?.Invoke(progress * (i + 1) / agentCount);
                 });
+
+                graph.AddAgent(agent, nm);
             }
 
             graph.Initialized = true;
@@ -68,32 +85,31 @@ namespace Engine.PathFinding.RecastNavigation
             return graph;
         }
         /// <inheritdoc/>
-        public override async Task Refresh()
+        public override async Task RefreshAsync(PathFinderSettings settings)
         {
-            ChunkyTriMesh mesh = null;
-
-            var triangles = await GetTriangles();
-
-            await Task.Run(() =>
-            {
-                // Recreate the input data
-                mesh = ChunkyTriMesh.Build(triangles);
-            });
-
-            ChunkyMesh = mesh;
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync(settings.Bounds));
+        }
+        /// <inheritdoc/>
+        public override void Refresh(PathFinderSettings settings)
+        {
+            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles(settings.Bounds));
         }
 
         /// <inheritdoc/>
-        public override async Task<string> GetHash(PathFinderSettings settings)
+        public override async Task<string> GetHashAsync(PathFinderSettings settings)
         {
-            var tris = await GetTriangles();
-            return GraphFile.GetHash(settings, tris);
+            return GraphFile.GetHash(settings, await GetTrianglesAsync(settings.Bounds));
         }
         /// <inheritdoc/>
-        public override async Task<IGraph> Load(string fileName, string hash = null)
+        public override string GetHash(PathFinderSettings settings)
+        {
+            return GraphFile.GetHash(settings, GetTriangles(settings.Bounds));
+        }
+        /// <inheritdoc/>
+        public override async Task<IGraph> LoadAsync(string fileName, string hash = null)
         {
             // Load file
-            var file = await GraphFile.Load(fileName);
+            var file = await GraphFile.LoadAsync(fileName);
 
             // Test hash
             if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
@@ -102,24 +118,52 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Create graph
-            Graph graph = await GraphFile.FromGraphFile(file, this);
+            var graph = await GraphFile.FromGraphFileAsync(file, this);
 
             // Initialize the input data
-            ChunkyMesh = ChunkyTriMesh.Build(await GetTriangles());
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTrianglesAsync(graph.Settings.Bounds));
 
             return graph;
         }
         /// <inheritdoc/>
-        public override async Task Save(string fileName, IGraph graph)
+        public override IGraph Load(string fileName, string hash = null)
         {
-            if (graph is Graph nmGraph)
+            // Load file
+            var file = GraphFile.Load(fileName);
+
+            // Test hash
+            if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
             {
-                await GraphFile.Save(fileName, nmGraph);
+                return null;
             }
-            else
+
+            // Create graph
+            var graph = GraphFile.FromGraphFile(file, this);
+
+            // Initialize the input data
+            ChunkyMesh = ChunkyTriMesh.Build(GetTriangles(graph.Settings.Bounds));
+
+            return graph;
+        }
+        /// <inheritdoc/>
+        public override async Task SaveAsync(string fileName, IGraph graph)
+        {
+            if (graph is not Graph nmGraph)
             {
-                throw new EngineException($"Bad navigation mesh graph type: {graph}");
+                throw new ArgumentException($"Bad navigation mesh graph type: {graph}", nameof(graph));
             }
+
+            await GraphFile.SaveAsync(fileName, nmGraph);
+        }
+        /// <inheritdoc/>
+        public override void Save(string fileName, IGraph graph)
+        {
+            if (graph is not Graph nmGraph)
+            {
+                throw new ArgumentException($"Bad navigation mesh graph type: {graph}", nameof(graph));
+            }
+
+            GraphFile.Save(fileName, nmGraph);
         }
     }
 }

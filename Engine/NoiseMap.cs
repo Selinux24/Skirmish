@@ -27,7 +27,7 @@ namespace Engine
 
             float[,] noiseMap = new float[mapWidth, mapHeight];
 
-            Random rnd = new Random(seed);
+            var rnd = Helper.NewGenerator(seed);
             Vector2[] octaveOffsets = new Vector2[octaves];
             for (int i = 0; i < octaves; i++)
             {
@@ -62,8 +62,8 @@ namespace Engine
                         frequency *= lacunarity;
                     }
 
-                    maxNoiseHeight = Math.Max(maxNoiseHeight, noiseHeight);
-                    minNoiseHeight = Math.Min(minNoiseHeight, noiseHeight);
+                    maxNoiseHeight = MathF.Max(maxNoiseHeight, noiseHeight);
+                    minNoiseHeight = MathF.Min(minNoiseHeight, noiseHeight);
 
                     noiseMap[x, y] = noiseHeight;
                 }
@@ -88,14 +88,12 @@ namespace Engine
         /// <returns>Returns the clamped value</returns>
         private static float InverseLerp(float a, float b, float value)
         {
-            if (a != b)
-            {
-                return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
-            }
-            else
+            if (MathUtil.NearEqual(a, b))
             {
                 return 0.0f;
             }
+
+            return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
         }
 
         /// <summary>
@@ -144,16 +142,17 @@ namespace Engine
             int width = Map.GetLength(0);
             int height = Map.GetLength(1);
 
-            Color4[,] colors = new Color4[width, height];
+            var image = new Image(width, height);
+
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    colors[x, y] = Color4.Lerp(Color4.White, Color4.Black, Map[x, y]);
+                    image.SetPixel(x, y, Color4.Lerp(Color4.White, Color4.Black, Map[x, y]));
                 }
             }
 
-            return new Image(colors);
+            return image;
         }
     }
 }

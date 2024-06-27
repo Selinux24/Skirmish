@@ -19,9 +19,9 @@ namespace Engine.Collada
 
         public Point()
         {
-            this.ConstantAttenuation = new BasicFloat { Value = 1 };
-            this.LinearAttenuation = new BasicFloat { Value = 0 };
-            this.QuadraticAttenuation = new BasicFloat { Value = 0 };
+            ConstantAttenuation = new BasicFloat { Value = 1 };
+            LinearAttenuation = new BasicFloat { Value = 0 };
+            QuadraticAttenuation = new BasicFloat { Value = 0 };
         }
     }
 }

@@ -17,9 +17,10 @@ namespace Engine.Collada
         [XmlAttribute("set")]
         public int Set { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Semantic: {0}; Source: {1}; Offset: {2}; Set: {3}", this.Semantic, this.Source, this.Offset, this.Set);
+            return $"Semantic: {Semantic}; Source: {Source}; Offset: {Offset}; Set: {Set}";
         }
     }
 }

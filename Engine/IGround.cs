@@ -11,6 +11,6 @@ namespace Engine
         /// Gets the culling volume, if any
         /// </summary>
         /// <returns>Returns a culling volume</returns>
-        IIntersectionVolume GetCullingVolume();
+        ICullingVolume GetCullingVolume();
     }
 }

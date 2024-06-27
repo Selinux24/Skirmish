@@ -32,10 +32,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int BMax { get; set; }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Checks if the link spans the whole edge
         /// </summary>
-        /// <returns>Returns a text representation of the instance</returns>
-        public override string ToString()
+        public readonly bool ExcedBoundaries()
+        {
+            return BMin == 0 && BMax == 255;
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
             return $"Ref {NRef}; Next {Next}; Edge {Edge}; Side {Side}; BMin {BMin}; BMax {BMax};";
         }

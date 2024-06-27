@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -11,6 +10,10 @@ namespace Engine
     /// </summary>
     public interface IUIControl : IUIEventsEvaluable
     {
+        /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; set; }
         /// <summary>
         /// Active
         /// </summary>
@@ -98,7 +101,7 @@ namespace Engine
         /// </summary>
         RectangleF AbsoluteRectangle { get; }
         /// <summary>
-        /// Gets the control's rectangle coordinates relative to inmediate parent control position
+        /// Gets the control's rectangle coordinates relative to immediate parent control position
         /// </summary>
         RectangleF RelativeToParentRectangle { get; }
         /// <summary>
@@ -146,7 +149,7 @@ namespace Engine
         float Alpha { get; set; }
 
         /// <summary>
-        /// Tooltip text
+        /// Tool-tip text
         /// </summary>
         string TooltipText { get; set; }
 
@@ -172,32 +175,39 @@ namespace Engine
         /// </summary>
         /// <param name="ctrl">Control</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void AddChild(IUIControl ctrl, bool fitToParent = true);
+        bool AddChild(IUIControl ctrl, bool fitToParent = false);
         /// <summary>
         /// Adds a children list to the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true);
+        bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = false);
         /// <summary>
         /// Removes a child from the children collection
         /// </summary>
         /// <param name="ctrl">Control</param>
         /// <param name="dispose">Removes from collection and disposes</param>
-        void RemoveChild(IUIControl ctrl, bool dispose = false);
+        bool RemoveChild(IUIControl ctrl, bool dispose = false);
         /// <summary>
         /// Removes a children list from the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="dispose">Removes from collection and disposes</param>
-        void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
+        bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
         /// <summary>
         /// Inserts a child at the specified index
         /// </summary>
         /// <param name="index">Index</param>
         /// <param name="ctrl">Control</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        void InsertChild(int index, IUIControl ctrl, bool fitToParent = true);
+        bool InsertChild(int index, IUIControl ctrl, bool fitToParent = false);
+        /// <summary>
+        /// Inserts a children list at the specified index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="controls">Control list</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = false);
 
         /// <summary>
         /// Gets whether the control contains the point or not
@@ -211,25 +221,25 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveLeft(GameTime gameTime, float distance = 1f);
+        void MoveLeft(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along right vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveRight(GameTime gameTime, float distance = 1f);
+        void MoveRight(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along up vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveUp(GameTime gameTime, float distance = 1f);
+        void MoveUp(IGameTime gameTime, float distance = 1f);
         /// <summary>
         /// Increments position component d distance along down vector
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        void MoveDown(GameTime gameTime, float distance = 1f);
+        void MoveDown(IGameTime gameTime, float distance = 1f);
 
         /// <summary>
         /// Sets the control left-top position
@@ -254,7 +264,7 @@ namespace Engine
         /// <summary>
         /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
-        /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
+        /// <param name="applyPadding">Apply the padding to the resulting rectangle, if any.</param>
         /// <returns>Returns the control render area</returns>
         RectangleF GetRenderArea(bool applyPadding);
         /// <summary>

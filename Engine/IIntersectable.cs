@@ -28,13 +28,13 @@ namespace Engine
         /// <param name="detectionModeThis">Detection mode for this object</param>
         /// <param name="volume">Volume</param>
         /// <returns>Returns true if have intersection</returns>
-        bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume);
+        bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume);
 
         /// <summary>
         /// Gets the intersection volume based on the specified detection mode
         /// </summary>
         /// <param name="detectionMode">Detection mode</param>
         /// <returns>Returns an intersection volume</returns>
-        IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode);
+        ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode);
     }
 }

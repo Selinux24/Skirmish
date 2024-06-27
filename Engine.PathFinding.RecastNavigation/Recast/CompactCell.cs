@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Default compact cell
         /// </summary>
-        public CompactCell Default
+        public static CompactCell Default
         {
             get
             {
@@ -30,13 +30,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int Count { get; set; }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
-            return string.Format("Index {0}; Count {1}", this.Index, this.Count);
+            return $"Index {Index}; Count {Count}";
         }
     }
 }

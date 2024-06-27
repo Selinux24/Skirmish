@@ -1,18 +1,23 @@
 ﻿using SharpDX;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Sprites;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Sprites;
     using Engine.Common;
     using Engine.Content;
 
     /// <summary>
     /// Render to texture control
     /// </summary>
-    public sealed class UITextureRenderer : UIControl<UITextureRendererDescription>
+    /// <remarks>
+    /// Contructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextureRenderer(Scene scene, string id, string name) : UIControl<UITextureRendererDescription>(scene, id, name)
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -25,7 +30,7 @@ namespace Engine.UI
         /// <summary>
         /// Effect
         /// </summary>
-        private readonly BuiltInSpriteTexture spriteDrawer;
+        private readonly BuiltInSpriteTexture spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
 
         /// <summary>
         /// Texture
@@ -50,17 +55,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Contructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextureRenderer(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-            spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -75,9 +69,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextureRendererDescription description)
+        public override async Task ReadAssets(UITextureRendererDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             var sprite = GeometryUtil.CreateUnitSprite();
 
@@ -87,7 +81,7 @@ namespace Engine.UI
             vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(Name, false, indices);
 
-            Texture = await InitializeTexture(Description.ContentPath, Description.Textures);
+            Texture = InitializeTexture(Description.ContentPath, Description.Textures);
             TextureIndex = Description.TextureIndex;
             Channel = Description.Channel;
         }
@@ -96,37 +90,39 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private async Task<EngineShaderResourceView> InitializeTexture(string contentPath, string[] textures)
+        private EngineShaderResourceView InitializeTexture(string contentPath, string[] textures)
         {
-            if (textures?.Any() != true)
+            if ((textures?.Length ?? 0) == 0)
             {
                 return null;
             }
 
             var image = new FileArrayImageContent(contentPath, textures);
-            return await Game.ResourceManager.RequestResource(image);
+            return Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
-            spriteDrawer.UpdateSprite(new BuiltInSpriteState
+            var dc = context.DeviceContext;
+
+            spriteDrawer.UpdateSprite(dc, new BuiltInSpriteState
             {
                 Local = Manipulator.LocalTransform,
                 Color1 = Color4.White,
@@ -135,17 +131,14 @@ namespace Engine.UI
                 Channel = Channel,
             });
 
-            spriteDrawer.Draw(BufferManager, new DrawOptions
+            bool drawn = spriteDrawer.Draw(dc, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             });
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            base.Draw(context);
+            return base.Draw(context) || drawn;
         }
     }
 }

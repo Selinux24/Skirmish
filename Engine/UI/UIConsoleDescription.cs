@@ -11,10 +11,12 @@ namespace Engine.UI
         /// <summary>
         /// Gets the default console description
         /// </summary>
-        public static UIConsoleDescription Default()
+        public static new UIConsoleDescription Default()
         {
-            return new UIConsoleDescription()
+            return new()
             {
+                Font = UIConfiguration.MonospacedFont,
+                Background = SpriteDescription.Default(),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -25,8 +27,9 @@ namespace Engine.UI
         /// <param name="backgroundColor">Background color</param>
         public static UIConsoleDescription Default(Color4 backgroundColor)
         {
-            return new UIConsoleDescription()
+            return new()
             {
+                Font = UIConfiguration.MonospacedFont,
                 Background = SpriteDescription.Default(backgroundColor),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
@@ -38,8 +41,9 @@ namespace Engine.UI
         /// <param name="backgroundImage">Background image</param>
         public static UIConsoleDescription FromFile(string backgroundImage)
         {
-            return new UIConsoleDescription()
+            return new()
             {
+                Font = UIConfiguration.MonospacedFont,
                 Background = SpriteDescription.Default(backgroundImage),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
@@ -76,7 +80,7 @@ namespace Engine.UI
         /// </summary>
         public UIConsoleDescription() : base()
         {
-            Font = UIConfiguration.MonospacedFont;
+
         }
     }
 }

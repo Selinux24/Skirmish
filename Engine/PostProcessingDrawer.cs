@@ -1,8 +1,8 @@
 ﻿
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.PostProcess;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.PostProcess;
     using Engine.Common;
 
     /// <summary>
@@ -22,6 +22,14 @@ namespace Engine
         /// Index buffer descriptor
         /// </summary>
         private BufferDescriptor indexBuffer = null;
+        /// <summary>
+        /// Target combine drawer
+        /// </summary>
+        private BuiltInCombine builtInCombine = null;
+        /// <summary>
+        /// Post-process effect drawer
+        /// </summary>
+        private BuiltInPostProcess builtInPostProcess = null;
 
         /// <summary>
         /// Constructor
@@ -47,42 +55,30 @@ namespace Engine
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
 
-            bufferManager.CreateBuffers();
+            bufferManager.CreateBuffers(nameof(PostProcessingDrawer));
         }
 
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectCombine(EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        public void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect, BuiltInPostProcessState state)
         {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
+            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
+            if (state != null) builtInPostProcess.UpdatePass(dc, state);
+            builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
 
-            drawer.Update(texture1, texture2);
-
-            return drawer;
+            builtInPostProcess.Draw(dc, new DrawOptions
+            {
+                Topology = Topology.TriangleList,
+                VertexBuffer = vertexBuffer,
+                IndexBuffer = indexBuffer,
+            });
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectParameters(BuiltInPostProcessState state)
+        public void Combine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
+            builtInCombine ??= BuiltInShaders.GetDrawer<BuiltInCombine>(false);
+            builtInCombine.Update(texture1, texture2);
 
-            drawer.UpdatePass(state);
-
-            return drawer;
-        }
-        /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffect(EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
-        {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
-
-            drawer.UpdateEffect(sourceTexture, effect);
-
-            return drawer;
-        }
-        /// <inheritdoc/>
-        public void Draw(IBuiltInDrawer drawer)
-        {
-            var bufferManager = game.BufferManager;
-
-            drawer.Draw(bufferManager, new DrawOptions
+            builtInCombine.Draw(dc, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,

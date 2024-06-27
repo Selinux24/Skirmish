@@ -11,7 +11,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface control
     /// </summary>
-    public abstract class UIControl<T> : Drawable<T>, IUIControl, IScreenFitted where T : UIControlDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class UIControl<T>(Scene scene, string id, string name) : Drawable<T>(scene, id, name), IUIControl, IScreenFitted where T : UIControlDescription
     {
         /// <inheritdoc/>
         public event MouseEventHandler MouseOver;
@@ -41,7 +47,7 @@ namespace Engine.UI
         /// <summary>
         /// Children collection
         /// </summary>
-        private readonly List<IUIControl> children = new List<IUIControl>();
+        private readonly List<IUIControl> children = [];
         /// <summary>
         /// Top position
         /// </summary>
@@ -139,7 +145,7 @@ namespace Engine.UI
         {
             get
             {
-                return children.ToArray();
+                return [.. children];
             }
         }
 
@@ -154,7 +160,11 @@ namespace Engine.UI
             {
                 base.Active = value;
 
-                children.ForEach(c => c.Active = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Active = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -168,7 +178,11 @@ namespace Engine.UI
             {
                 base.Visible = value;
 
-                children.ForEach(c => c.Visible = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Visible = value;
+                }
             }
         }
 
@@ -188,7 +202,7 @@ namespace Engine.UI
             }
             set
             {
-                if (width != value)
+                if (!MathUtil.NearEqual(width, value))
                 {
                     width = value;
 
@@ -205,7 +219,7 @@ namespace Engine.UI
             }
             set
             {
-                if (height != value)
+                if (!MathUtil.NearEqual(height, value))
                 {
                     height = value;
 
@@ -223,7 +237,7 @@ namespace Engine.UI
             }
             set
             {
-                if (scale != value)
+                if (!MathUtil.NearEqual(scale, value))
                 {
                     scale = value;
 
@@ -249,7 +263,7 @@ namespace Engine.UI
             set
             {
                 float v = value % MathUtil.TwoPi;
-                if (rotation != v)
+                if (!MathUtil.NearEqual(rotation, v))
                 {
                     rotation = v;
 
@@ -292,7 +306,7 @@ namespace Engine.UI
             }
             set
             {
-                if (left != value)
+                if (!MathUtil.NearEqual(left, value))
                 {
                     left = value;
 
@@ -317,7 +331,7 @@ namespace Engine.UI
             }
             set
             {
-                if (top != value)
+                if (!MathUtil.NearEqual(top, value))
                 {
                     top = value;
 
@@ -480,7 +494,11 @@ namespace Engine.UI
                     baseColor = value;
                 }
 
-                children.ForEach(c => c.BaseColor = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.BaseColor = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -497,7 +515,11 @@ namespace Engine.UI
                     tintColor = value;
                 }
 
-                children.ForEach(c => c.TintColor = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.TintColor = value;
+                }
             }
         }
         /// <inheritdoc/>
@@ -509,38 +531,33 @@ namespace Engine.UI
             }
             set
             {
-                if (alpha != value)
+                if (!MathUtil.NearEqual(alpha, value))
                 {
                     alpha = value;
                 }
 
-                children.ForEach(c => c.Alpha = value);
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray)
+                {
+                    c.Alpha = value;
+                }
             }
         }
 
         /// <inheritdoc/>
         public string TooltipText { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected UIControl(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                children
-                    .OfType<IDisposable>()
-                    .ToList()
-                    .ForEach(c => c.Dispose());
+                var childrenArray = children.ToArray();
+                foreach (var c in childrenArray.OfType<IDisposable>())
+                {
+                    c.Dispose();
+                }
+
                 children.Clear();
             }
 
@@ -548,9 +565,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
+        public override async Task ReadAssets(T description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             updateOrder = UIControlHelper.GetNextUpdateOrder();
 
@@ -599,10 +616,10 @@ namespace Engine.UI
                 UpdateInternals = false;
             }
 
-            var updatables = children.OfType<IUpdatable>().ToList();
-            if (updatables.Any())
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray.OfType<IUpdatable>())
             {
-                updatables.ForEach(c => c.Update(context));
+                c.Update(context);
             }
         }
         /// <summary>
@@ -615,9 +632,9 @@ namespace Engine.UI
                 UpdateAnchorPositions();
 
                 var rect = GetRenderArea(true);
-                Vector2 size = new Vector2(rect.Width, rect.Height);
-                Vector2 pos = new Vector2(rect.Left, rect.Top);
-                Vector2 sca = Vector2.One * AbsoluteScale;
+                var size = new Vector2(rect.Width, rect.Height);
+                var pos = new Vector2(rect.Left, rect.Top);
+                var sca = Vector2.One * AbsoluteScale;
                 float rot = AbsoluteRotation;
 
                 Manipulator.SetSize(size);
@@ -625,14 +642,15 @@ namespace Engine.UI
                 Manipulator.SetRotation(rot);
                 Manipulator.SetPosition(pos);
 
-                Vector2? parentPos = GetTransformationPivot();
+                var parentPos = GetTransformationPivot();
 
                 Manipulator.Update2D(parentPos);
             }
 
-            if (children.Any())
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray)
             {
-                children.ForEach(c => c.Invalidate());
+                c.Invalidate();
             }
         }
         /// <summary>
@@ -695,49 +713,38 @@ namespace Engine.UI
                 return null;
             }
 
-            RectangleF rect = AbsoluteRectangle;
+            var rect = AbsoluteRectangle;
             if (PivotAnchor.HasFlag(PivotAnchors.Root)) rect = Root.AbsoluteRectangle;
             if (PivotAnchor.HasFlag(PivotAnchors.Parent)) rect = Parent.AbsoluteRectangle;
-
-            Vector2 result;
-
-            switch (PivotAnchor)
+            return PivotAnchor switch
             {
-                case PivotAnchors.TopLeft:
-                    result = rect.TopLeft;
-                    break;
-                case PivotAnchors.TopRight:
-                    result = rect.TopRight;
-                    break;
-                case PivotAnchors.BottomLeft:
-                    result = rect.BottomLeft;
-                    break;
-                case PivotAnchors.BottomRight:
-                    result = rect.BottomRight;
-                    break;
-                default:
-                    result = rect.Center;
-                    break;
-            }
-
-            return result;
+                PivotAnchors.TopLeft => rect.TopLeft,
+                PivotAnchors.TopRight => rect.TopRight,
+                PivotAnchors.BottomLeft => rect.BottomLeft,
+                PivotAnchors.BottomRight => rect.BottomRight,
+                _ => rect.Center,
+            };
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             base.Draw(context);
 
             if (!Visible)
             {
-                return;
+                return false;
             }
 
-            var drawables = children.OfType<IDrawable>().ToList();
-            if (drawables.Any())
+            bool drawn = false;
+
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray.OfType<IDrawable>())
             {
-                drawables.ForEach(c => c.Draw(context));
+                drawn = c.Draw(context) || drawn;
             }
+
+            return drawn;
         }
 
         /// <inheritdoc/>
@@ -887,109 +894,239 @@ namespace Engine.UI
         {
             UpdateInternals = true;
 
-            if (children.Any())
+            var childrenArray = children.ToArray();
+            foreach (var c in childrenArray)
             {
-                children.ForEach(c => c.Resize());
+                c.Resize();
             }
         }
 
-        /// <inheritdoc/>
-        public void AddChild(IUIControl ctrl, bool fitToParent = true)
+        /// <summary>
+        /// Validates the control for adding to the children list
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        private bool ValidateAddChild(IUIControl ctrl)
         {
             if (ctrl == null)
             {
-                return;
+                return false;
             }
 
             if (ctrl == this)
             {
-                return;
-            }
-
-            ctrl.Parent = this;
-            ctrl.FitWithParent = fitToParent;
-            ctrl.PivotAnchor = PivotAnchors.Default;
-
-            if (!children.Contains(ctrl))
-            {
-                children.Add(ctrl);
-
-                Invalidate();
-                ctrl.Invalidate();
-            }
-        }
-        /// <inheritdoc/>
-        public void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true)
-        {
-            if (!controls.Any())
-            {
-                return;
-            }
-
-            foreach (var ctrl in controls)
-            {
-                AddChild(ctrl, fitToParent);
-            }
-        }
-        /// <inheritdoc/>
-        public void RemoveChild(IUIControl ctrl, bool dispose = false)
-        {
-            if (ctrl == null)
-            {
-                return;
+                return false;
             }
 
             if (children.Contains(ctrl))
             {
-                ctrl.Parent = null;
-                ctrl.FitWithParent = false;
-
-                children.Remove(ctrl);
-
-                if (dispose && ctrl is IDisposable ctrlDisposable)
-                {
-                    ctrlDisposable.Dispose();
-                }
-
-                Invalidate();
+                return false;
             }
+
+            return true;
         }
-        /// <inheritdoc/>
-        public void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
+        /// <summary>
+        /// Validates the control list for adding to the children list
+        /// </summary>
+        /// <param name="controls">Control list</param>
+        private bool ValidateAddChildren(IEnumerable<IUIControl> controls)
         {
             if (!controls.Any())
             {
-                return;
+                return false;
+            }
+
+            if (controls.Any(ctrl => !ValidateAddChild(ctrl)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Validates the control for removing from the children list
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        private bool ValidateRemoveChild(IUIControl ctrl)
+        {
+            if (ctrl == null)
+            {
+                return false;
+            }
+
+            if (!children.Contains(ctrl))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Validates the control list for removing from the children list
+        /// </summary>
+        /// <param name="controls">Control list</param>
+        private bool ValidateRemoveChildren(IEnumerable<IUIControl> controls)
+        {
+            if (!controls.Any())
+            {
+                return false;
+            }
+
+            if (controls.Any(ctrl => !ValidateRemoveChild(ctrl)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Adds the control to the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fits to parent</param>
+        private void AddChildInternal(IUIControl ctrl, bool fitToParent = true)
+        {
+            ctrl.Parent = this;
+            ctrl.FitWithParent = fitToParent;
+            ctrl.PivotAnchor = PivotAnchors.Default;
+
+            children.Add(ctrl);
+        }
+        /// <summary>
+        /// Removes the control from the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="dispose">Disposes the control, if possible</param>
+        private void RemoveChildInternal(IUIControl ctrl, bool dispose = false)
+        {
+            ctrl.Parent = null;
+            ctrl.FitWithParent = false;
+
+            children.Remove(ctrl);
+
+            if (dispose && ctrl is IDisposable ctrlDisposable)
+            {
+                ctrlDisposable.Dispose();
+            }
+        }
+        /// <summary>
+        /// Inserts the control to the children collection at position
+        /// </summary>
+        /// <param name="index">Position index</param>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fits to parent</param>
+        private void InsertChildInternal(int index, IUIControl ctrl, bool fitToParent = true)
+        {
+            ctrl.Parent = this;
+            ctrl.FitWithParent = fitToParent;
+            ctrl.PivotAnchor = PivotAnchors.Default;
+
+            children.Insert(index, ctrl);
+        }
+
+        /// <inheritdoc/>
+        public bool AddChild(IUIControl ctrl, bool fitToParent = false)
+        {
+            if (!ValidateAddChild(ctrl))
+            {
+                return false;
+            }
+
+            AddChildInternal(ctrl, fitToParent);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = false)
+        {
+            if (!ValidateAddChildren(controls))
+            {
+                return false;
             }
 
             foreach (var ctrl in controls)
             {
-                RemoveChild(ctrl, dispose);
+                AddChildInternal(ctrl, fitToParent);
             }
+
+            UpdateInternalState();
+
+            return true;
         }
         /// <inheritdoc/>
-        public void InsertChild(int index, IUIControl ctrl, bool fitToParent = true)
+        public bool RemoveChild(IUIControl ctrl, bool dispose = false)
         {
-            if (ctrl == null)
+            if (!ValidateRemoveChild(ctrl))
             {
-                return;
+                return false;
             }
 
-            if (ctrl == this)
+            RemoveChildInternal(ctrl, dispose);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
+        {
+            if (!ValidateRemoveChildren(controls))
             {
-                return;
+                return false;
             }
 
-            ctrl.Parent = this;
-            ctrl.FitWithParent = fitToParent;
-
-            if (!children.Contains(ctrl))
+            foreach (var ctrl in controls)
             {
-                children.Insert(index, ctrl);
-
-                Invalidate();
-                ctrl.Invalidate();
+                RemoveChildInternal(ctrl, dispose);
             }
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool InsertChild(int index, IUIControl ctrl, bool fitToParent = false)
+        {
+            if (index < 0 || index >= children.Count)
+            {
+                return false;
+            }
+
+            if (!ValidateAddChild(ctrl))
+            {
+                return false;
+            }
+
+            InsertChildInternal(index, ctrl, fitToParent);
+
+            UpdateInternalState();
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = false)
+        {
+            if (index < 0 || index >= children.Count)
+            {
+                return false;
+            }
+
+            if (!ValidateAddChildren(controls))
+            {
+                return false;
+            }
+
+            int i = index;
+            foreach (var ctrl in controls)
+            {
+                InsertChildInternal(i++, ctrl, fitToParent);
+            }
+
+            UpdateInternalState();
+
+            return true;
         }
 
         /// <inheritdoc/>
@@ -1003,22 +1140,22 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual void MoveLeft(GameTime gameTime, float distance = 1f)
+        public virtual void MoveLeft(IGameTime gameTime, float distance = 1f)
         {
             Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveRight(GameTime gameTime, float distance = 1f)
+        public virtual void MoveRight(IGameTime gameTime, float distance = 1f)
         {
             Left += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveUp(GameTime gameTime, float distance = 1f)
+        public virtual void MoveUp(IGameTime gameTime, float distance = 1f)
         {
             Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <inheritdoc/>
-        public virtual void MoveDown(GameTime gameTime, float distance = 1f)
+        public virtual void MoveDown(IGameTime gameTime, float distance = 1f)
         {
             Top += (int)(1f * distance * gameTime.ElapsedSeconds);
         }

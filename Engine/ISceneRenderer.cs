@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-    using Engine.BuiltIn.PostProcess;
+    using Engine.BuiltIn.Drawers.PostProcess;
     using Engine.Common;
 
     /// <summary>
@@ -28,15 +28,23 @@ namespace Engine
         BuiltInPostProcessState PostProcessingFinalEffects { get; set; }
 
         /// <summary>
+        /// Prepares the internal command list for deferred multithreaded rendering
+        /// </summary>
+        /// <remarks>
+        /// Enumerate each pass for each single deferred device context, used in the scene
+        /// </remarks>
+        void PrepareScene();
+
+        /// <summary>
         /// Updates scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Draw(GameTime gameTime);
+        void Draw(IGameTime gameTime);
 
         /// <summary>
         /// Clears the post-processing effect

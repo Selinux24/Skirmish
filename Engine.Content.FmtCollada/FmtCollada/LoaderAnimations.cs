@@ -26,7 +26,7 @@ namespace Engine.Content.FmtCollada
         /// <summary>
         /// Gets the loader delegate
         /// </summary>
-        /// <returns>Returns a delegate wich creates a loader</returns>
+        /// <returns>Returns a delegate which creates a loader</returns>
         public Func<IAnimationLoader> GetLoaderDelegate()
         {
             return () => { return new LoaderAnimations(); };
@@ -38,7 +38,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns a extension array list</returns>
         public IEnumerable<string> GetExtensions()
         {
-            return new string[] { ".dae" };
+            return [".dae"];
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Engine.Content.FmtCollada
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
             {
-                AnimationLibContentData res = new AnimationLibContentData();
+                var res = new AnimationLibContentData();
 
                 foreach (var model in modelList)
                 {
@@ -84,7 +84,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="animation">Animation description</param>
         private static Dictionary<string, IEnumerable<AnimationContent>> ProcessLibraryAnimations(Collada dae)
         {
-            Dictionary<string, IEnumerable<AnimationContent>> res = new Dictionary<string, IEnumerable<AnimationContent>>();
+            var res = new Dictionary<string, IEnumerable<AnimationContent>>();
 
             if (dae.LibraryAnimations?.Length > 0)
             {
@@ -108,12 +108,12 @@ namespace Engine.Content.FmtCollada
         /// <returns>Retuns animation content list</returns>
         public static IEnumerable<AnimationContent> ProcessAnimation(Animation animationLibrary)
         {
-            if (animationLibrary?.Channels?.Any() != true)
+            if ((animationLibrary?.Channels?.Length ?? 0) == 0)
             {
-                return Enumerable.Empty<AnimationContent>();
+                return [];
             }
 
-            List<AnimationContent> res = new List<AnimationContent>();
+            var res = new List<AnimationContent>();
 
             foreach (var channel in animationLibrary.Channels)
             {
@@ -130,7 +130,7 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Reads animation data from the specified sampler and builds an AnimationContent instance
@@ -154,28 +154,28 @@ namespace Engine.Content.FmtCollada
             //Keyframe interpolation types
             var interpolations = ReadInterpolations(sampler, animationLibrary);
 
-            List<Keyframe> keyframes = new List<Keyframe>();
+            var keyframes = new List<Keyframe>();
 
-            for (int i = 0; i < times.Count(); i++)
+            for (int i = 0; i < times.Length; i++)
             {
-                float time = times.ElementAt(i);
-                KeyframeInterpolations interpolation = i < interpolations.Count() ? interpolations.ElementAt(i) : KeyframeInterpolations.None;
+                float time = times[i];
+                var interpolation = i < interpolations.Length ? interpolations[i] : KeyframeInterpolations.None;
                 float position = -1;
                 Matrix transform = Matrix.Identity;
-                if (interpolation == KeyframeInterpolations.Linear && i < transforms.Count())
+                if (interpolation == KeyframeInterpolations.Linear && i < transforms.Length)
                 {
-                    transform = transforms.ElementAt(i);
+                    transform = transforms[i];
                 }
-                else if (interpolation == KeyframeInterpolations.Bezier && i < positions.Count())
+                else if (interpolation == KeyframeInterpolations.Bezier && i < positions.Length)
                 {
-                    position = positions.ElementAt(i);
+                    position = positions[i];
                 }
                 else
                 {
                     throw new NotImplementedException($"{interpolation} interpolation not supported.g");
                 }
 
-                Keyframe keyframe = new Keyframe()
+                var keyframe = new Keyframe()
                 {
                     Time = time,
                     Position = position,
@@ -190,7 +190,7 @@ namespace Engine.Content.FmtCollada
             {
                 JointName = jointName,
                 TransformType = jointTransformType,
-                Keyframes = keyframes.ToArray(),
+                Keyframes = [.. keyframes],
             };
         }
         /// <summary>
@@ -199,7 +199,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns the keyframe time list</returns>
-        private static IEnumerable<float> ReadTime(Sampler sampler, Animation animationLibrary)
+        private static float[] ReadTime(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Input];
             if (input != null)
@@ -207,7 +207,7 @@ namespace Engine.Content.FmtCollada
                 return animationLibrary[input.Source].ReadFloat();
             }
 
-            return new float[] { };
+            return [];
         }
         /// <summary>
         /// Reads the curve position output
@@ -215,7 +215,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns the keyframe curve position list</returns>
-        private static IEnumerable<float> ReadPosition(Sampler sampler, Animation animationLibrary)
+        private static float[] ReadPosition(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Output];
             if (input != null)
@@ -223,7 +223,7 @@ namespace Engine.Content.FmtCollada
                 return animationLibrary[input.Source].ReadFloat();
             }
 
-            return new float[] { };
+            return [];
         }
         /// <summary>
         /// Reads the linear transformation output
@@ -231,12 +231,12 @@ namespace Engine.Content.FmtCollada
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns the keyframe transform list</returns>
-        private static IEnumerable<Matrix> ReadMatrix(Sampler sampler, Animation animationLibrary)
+        private static Matrix[] ReadMatrix(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Output];
             if (input == null)
             {
-                return Enumerable.Empty<Matrix>();
+                return [];
             }
 
             var source = animationLibrary[input.Source];
@@ -245,7 +245,7 @@ namespace Engine.Content.FmtCollada
                 return source.ReadMatrix();
             }
 
-            return Enumerable.Empty<Matrix>();
+            return [];
         }
         /// <summary>
         /// Reads the interpolation modes
@@ -253,7 +253,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns the keyframe interpolation mode list</returns>
-        private static IEnumerable<KeyframeInterpolations> ReadInterpolations(Sampler sampler, Animation animationLibrary)
+        private static KeyframeInterpolations[] ReadInterpolations(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Interpolation];
             if (input != null)
@@ -261,23 +261,23 @@ namespace Engine.Content.FmtCollada
                 return ParseInterpolations(animationLibrary[input.Source].ReadNames());
             }
 
-            return new KeyframeInterpolations[] { };
+            return [];
         }
         /// <summary>
         /// Parses a interpolation list from string to enumeration
         /// </summary>
         /// <param name="interpolations">Interpolation list</param>
         /// <returns>Returns the parsed interpolation list</returns>
-        private static IEnumerable<KeyframeInterpolations> ParseInterpolations(IEnumerable<string> interpolations)
+        private static KeyframeInterpolations[] ParseInterpolations(IEnumerable<string> interpolations)
         {
-            List<KeyframeInterpolations> result = new List<KeyframeInterpolations>();
+            var result = new List<KeyframeInterpolations>();
 
             foreach (var interpolation in interpolations)
             {
                 result.Add(ParseInterpolation(interpolation));
             }
 
-            return result.ToArray();
+            return [.. result];
         }
         /// <summary>
         /// Parse a interpolation from string to enumeration

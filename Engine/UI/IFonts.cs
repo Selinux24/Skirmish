@@ -21,11 +21,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="generator">Keycode generator</param>
         /// <param name="mapParams">Font map parameters</param>
-        /// <param name="family">Font family</param>
+        /// <param name="familyName">Font family</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        FontMapDescription FromFamilyName(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string family, float size, FontMapStyles style);
+        FontMapDescription FromFamilyName(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string familyName, float size, FontMapStyles style);
         /// <summary>
         /// Find the first valid font of a comma separated font family string
         /// </summary>

@@ -1,6 +1,4 @@
-﻿using SharpDX.X3DAudio;
-using System.Linq;
-
+﻿
 namespace Engine.Audio
 {
     /// <summary>
@@ -36,25 +34,6 @@ namespace Engine.Audio
         };
 
         /// <summary>
-        /// Converts the game curve to the SharpDX curve
-        /// </summary>
-        /// <param name="points">Curve points</param>
-        /// <returns>Returns the SharpDX curve array</returns>
-        internal static CurvePoint[] ConvertCurve(GameAudioCurvePoint[] points)
-        {
-            return points?.Select(p => (CurvePoint)p).ToArray();
-        }
-        /// <summary>
-        /// Converts the game SharpDX curve to the curve
-        /// </summary>
-        /// <param name="points">SharpDX curve points</param>
-        /// <returns>Returns the curve array</returns>
-        internal static GameAudioCurvePoint[] ConvertCurve(CurvePoint[] points)
-        {
-            return points?.Select(p => (GameAudioCurvePoint)p).ToArray();
-        }
-
-        /// <summary>
         /// Normalized distance. This must be within 0.0f to 1.0f.
         /// </summary>
         public float Distance { get; set; }
@@ -62,30 +41,5 @@ namespace Engine.Audio
         /// DSP control setting.
         /// </summary>
         public float DspSetting { get; set; }
-
-        /// <summary>
-        /// Defines an explicit conversion of a SharpDX.X3DAudio.CurvePoint to GameAudioCurvePoint
-        /// </summary>
-        /// <param name="curvePoint">Curve point</param>
-        public static explicit operator GameAudioCurvePoint(CurvePoint curvePoint)
-        {
-            return new GameAudioCurvePoint()
-            {
-                Distance = curvePoint.Distance,
-                DspSetting = curvePoint.DspSetting,
-            };
-        }
-        /// <summary>
-        /// Defines an explicit conversion of a GameAudioCurvePoint to SharpDX.X3DAudio.CurvePoint
-        /// </summary>
-        /// <param name="curvePoint">Curve point</param>
-        public static explicit operator CurvePoint(GameAudioCurvePoint curvePoint)
-        {
-            return new CurvePoint()
-            {
-                Distance = curvePoint.Distance,
-                DspSetting = curvePoint.DspSetting,
-            };
-        }
     }
 }

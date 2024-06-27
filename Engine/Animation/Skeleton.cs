@@ -13,11 +13,11 @@ namespace Engine.Animation
         /// <summary>
         /// Joint names list
         /// </summary>
-        private readonly List<string> jointNames = new List<string>();
+        private readonly List<string> jointNames = [];
         /// <summary>
         /// Bone names list
         /// </summary>
-        private readonly List<string> boneNames = new List<string>();
+        private readonly List<string> boneNames = [];
 
         /// <summary>
         /// Skeleton name
@@ -53,7 +53,7 @@ namespace Engine.Animation
             joints.Add(joint.Name);
             bones.Add(joint.Bone);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -83,7 +83,7 @@ namespace Engine.Animation
 
             joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -121,7 +121,7 @@ namespace Engine.Animation
                 Matrix.RotationQuaternion(rotation) *
                 Matrix.Translation(translation);
 
-            if (joint.Childs?.Any() != true)
+            if ((joint.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -139,7 +139,7 @@ namespace Engine.Animation
         {
             UpdateToWorldTransform(joint);
 
-            if (joint?.Childs?.Any() != true)
+            if ((joint?.Childs?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -224,15 +224,15 @@ namespace Engine.Animation
         /// <param name="transforms">Returns the transforms list of the pose</param>
         private void ApplyTranforms(ref Matrix[] transforms)
         {
-            if (!boneNames.Any())
+            if (boneNames.Count == 0)
             {
                 return;
             }
 
             for (int i = 0; i < boneNames.Count; i++)
             {
-                var boneName = boneNames.ElementAt(i);
-                var joint = FindJoint(Root, boneName);
+                var boneName = boneNames[i];
+                var joint = Root.FindJoint(boneName);
 
                 transforms[i] = joint.Offset * joint.GlobalTransform;
             }
@@ -244,7 +244,7 @@ namespace Engine.Animation
         /// <returns>Returns the joint names list</returns>
         public IEnumerable<string> GetJointNames()
         {
-            return jointNames.ToArray();
+            return [.. jointNames];
         }
         /// <summary>
         /// Gets the bone names list
@@ -252,49 +252,27 @@ namespace Engine.Animation
         /// <returns>Returns the bone names list</returns>
         public IEnumerable<string> GetBoneNames()
         {
-            return boneNames.ToArray();
+            return [.. boneNames];
         }
 
-        /// <summary>
-        /// Finds a joint by name recursively
-        /// </summary>
-        /// <param name="joint">Joint</param>
-        /// <param name="boneName">Bone name</param>
-        /// <returns>Returns the joint with the specified name</returns>
-        private Joint FindJoint(Joint joint, string boneName)
-        {
-            if (joint == null)
-            {
-                return null;
-            }
-
-            if (string.Equals(joint.Bone, boneName, StringComparison.Ordinal))
-            {
-                return joint;
-            }
-
-            if (joint.Childs?.Any() != true)
-            {
-                return null;
-            }
-
-            foreach (var child in joint.Childs)
-            {
-                var j = FindJoint(child, boneName);
-                if (j != null)
-                {
-                    return j;
-                }
-            }
-
-            return null;
-        }
         /// <inheritdoc/>
         public bool Equals(Skeleton other)
         {
             return
                 Helper.CompareEnumerables(jointNames, other.jointNames) &&
-                Root.Equals(other.Root);
+                Helper.CompareEnumerables(boneNames, other.boneNames) &&
+                Name == other.Name &&
+                Root == other.Root;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Skeleton);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(jointNames, boneNames, Name, Root);
         }
     }
 }

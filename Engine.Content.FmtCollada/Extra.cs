@@ -15,9 +15,10 @@ namespace Engine.Collada
         [XmlElement("technique", typeof(Technique))]
         public Technique[] Techniques { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Type: {0}; ", this.Type) + base.ToString();
+            return base.ToString() + $" Type: {Type};";
         }
     }
 }

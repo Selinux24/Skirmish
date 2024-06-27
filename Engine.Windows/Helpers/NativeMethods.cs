@@ -2,9 +2,11 @@
 using SharpDX.Win32;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
+[assembly: DisableRuntimeMarshalling]
 namespace Engine.Windows.Helpers
 {
     /// <summary>
@@ -17,9 +19,9 @@ namespace Engine.Windows.Helpers
         /// </summary>
         /// <param name="lpKeyState">Key state array</param>
         /// <returns>Returns true if the state retrieved</returns>
-        [LibraryImport("user32.dll")]
+        [LibraryImport("user32.dll", EntryPoint = "GetKeyboardState")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool GetKeyboardState(byte[] lpKeyState);
+        private static partial bool GetKeyboardState([Out] byte[] lpKeyState);
         /// <summary>
         /// Converts key code to unicode string
         /// </summary>
@@ -30,16 +32,16 @@ namespace Engine.Windows.Helpers
         /// <param name="bufferSize">Result capacity</param>
         /// <param name="uFlags">Flags</param>
         /// <returns>Return the number of characters in the result buffer</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        private static extern int ToUnicode(uint uVirtKey, uint scanCode, byte[] lpKeyState, [Out] StringBuilder lpChar, int bufferSize, uint uFlags);
+        [LibraryImport("user32.dll", EntryPoint = "ToUnicode", StringMarshalling = StringMarshalling.Utf16)]
+        private static partial int ToUnicode(uint uVirtKey, uint scanCode, [In , Optional] byte[] lpKeyState, [Out] char[] lpChar, int bufferSize, uint uFlags);
         /// <summary>
         /// Maps a virtual key code
         /// </summary>
         /// <param name="uVirtKey">Virtual key code</param>
         /// <param name="uMapType">Map type</param>
         /// <returns>Returns the scan code</returns>
-        [LibraryImport("user32.dll")]
-        private static partial uint MapVirtualKey(uint uVirtKey, uint uMapType);
+        [LibraryImport("user32.dll", EntryPoint = "MapVirtualKeyA")]
+        private static partial uint MapVirtualKeyA(uint uVirtKey, uint uMapType);
 
         /// <summary>
         /// Main keyboard state buffer
@@ -52,7 +54,7 @@ namespace Engine.Windows.Helpers
         /// <summary>
         /// Pressed key collection
         /// </summary>
-        private static readonly List<Keys> pressedKeys = new List<Keys>(256);
+        private static readonly List<Keys> pressedKeys = new(256);
 
         /// <summary>
         /// Gets the pressed key collection
@@ -64,19 +66,21 @@ namespace Engine.Windows.Helpers
 
             prevKeyState = (byte[])keyState.Clone();
 
-            if (GetKeyboardState(keyState))
+            if (!GetKeyboardState(keyState))
             {
-                for (int i = 0; i < keyState.Length; i++)
+                return [.. pressedKeys];
+            }
+
+            for (int i = 0; i < keyState.Length; i++)
+            {
+                if ((keyState[i] & 0x80) != 0)
                 {
-                    if ((keyState[i] & 0x80) != 0)
-                    {
-                        //Pressed
-                        pressedKeys.Add((Keys)i);
-                    }
+                    //Pressed
+                    pressedKeys.Add((Keys)i);
                 }
             }
 
-            return pressedKeys.ToArray();
+            return [.. pressedKeys];
         }
 
         /// <summary>
@@ -102,7 +106,7 @@ namespace Engine.Windows.Helpers
         /// <returns>Returns the stroked key strings</returns>
         public static string GetStrokes()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             for (uint i = 0; i < keyState.Length; i++)
             {
@@ -168,22 +172,21 @@ namespace Engine.Windows.Helpers
 
             if (deadKey != 0 && lastIsDead)
             {
-                StringBuilder dsb = new StringBuilder(5);
-                _ = ToUnicode(deadKey, deadScanCode, deadKeyState, dsb, dsb.Capacity, 0);
+                _ = ToUnicode(deadKey, deadScanCode, deadKeyState, null, 5, 0);
                 lastIsDead = false;
                 deadKey = 0;
                 deadScanCode = 0;
             }
 
-            uint scanCode = MapVirtualKey(key, 0);
-            StringBuilder sb = new StringBuilder(5);
-            int result = ToUnicode(key, scanCode, keyState, sb, sb.Capacity, 0);
+            uint scanCode = MapVirtualKeyA(key, 0);
+            char[] buf = new char[5];
+            int result = ToUnicode(key, scanCode, keyState, buf, 5, 0);
             switch (result)
             {
                 case 0:
                     break;
                 case 1:
-                    res = sb[0].ToString();
+                    res = buf[0].ToString();
                     break;
                 default:
                     lastIsDead = true;
@@ -203,25 +206,24 @@ namespace Engine.Windows.Helpers
         /// <param name="scanCode">Scan code</param>
         private static void ClearKeyboardBuffer(uint key, uint scanCode)
         {
-            StringBuilder sb = new StringBuilder(10);
-
             int rc;
             do
             {
                 byte[] keyStateNull = new byte[256];
-                rc = ToUnicode(key, scanCode, keyStateNull, sb, sb.Capacity, 0);
+                rc = ToUnicode(key, scanCode, keyStateNull, null, 10, 0);
             } while (rc < 0);
         }
 
-        [DllImport("user32.dll", EntryPoint = "GetClientRect")]
-        public static extern bool GetClientRect(IntPtr hWnd, out RawRectangle lpRect);
-        [DllImport("user32.dll", EntryPoint = "PeekMessage")]
-        public static extern int PeekMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg);
-        [DllImport("user32.dll", EntryPoint = "GetMessage")]
-        public static extern int GetMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax);
-        [DllImport("user32.dll", EntryPoint = "TranslateMessage")]
-        public static extern int TranslateMessage(ref NativeMessage lpMsg);
-        [DllImport("user32.dll", EntryPoint = "DispatchMessage")]
-        public static extern int DispatchMessage(ref NativeMessage lpMsg);
+        [LibraryImport("user32.dll", EntryPoint = "GetClientRect")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool GetClientRect(IntPtr hWnd, out RawRectangle lpRect);
+        [LibraryImport("user32.dll", EntryPoint = "PeekMessageA", SetLastError = true)]
+        public static partial int PeekMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg);
+        [LibraryImport("user32.dll", EntryPoint = "GetMessageA")]
+        public static partial int GetMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax);
+        [LibraryImport("user32.dll", EntryPoint = "TranslateMessage")]
+        public static partial int TranslateMessage(ref NativeMessage lpMsg);
+        [LibraryImport("user32.dll", EntryPoint = "DispatchMessageA")]
+        public static partial int DispatchMessage(ref NativeMessage lpMsg);
     }
 }

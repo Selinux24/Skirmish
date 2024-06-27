@@ -9,18 +9,18 @@ namespace Engine
         /// <summary>
         /// None
         /// </summary>
-        None,
+        None = -1,
         /// <summary>
         /// X axis
         /// </summary>
-        X,
+        X = 0,
         /// <summary>
         /// Y axis
         /// </summary>
-        Y,
+        Y = 1,
         /// <summary>
         /// Z axis
         /// </summary>
-        Z,
+        Z = 2,
     }
 }

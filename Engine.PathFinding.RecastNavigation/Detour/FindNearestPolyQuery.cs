@@ -5,26 +5,38 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    public class FindNearestPolyQuery : IPolyQuery
+    /// <summary>
+    /// Find nearest polygon query
+    /// </summary>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="navMesh">Navigation mesh</param>
+    /// <param name="center">Look up center</param>
+    public class FindNearestPolyQuery(NavMesh navMesh, Vector3 center) : IPolyQuery
     {
-        private readonly NavMeshQuery m_query;
-        private readonly Vector3 m_center;
-        private float m_nearestDistanceSqr;
-        private int m_nearestRef;
-        private Vector3 m_nearestPoint;
+        /// <summary>
+        /// Navigation mesh
+        /// </summary>
+        private readonly NavMesh navMesh = navMesh;
+        /// <summary>
+        /// Look up center
+        /// </summary>
+        private readonly Vector3 center = center;
+        /// <summary>
+        /// Nearest distance squared
+        /// </summary>
+        private float nearestDistanceSqr = float.MaxValue;
+        /// <summary>
+        /// Nearest reference
+        /// </summary>
+        private int nearestRef = 0;
+        /// <summary>
+        /// Nearest point
+        /// </summary>
+        private Vector3 nearestPoint = Vector3.Zero;
 
-        public FindNearestPolyQuery(NavMeshQuery query, Vector3 center)
-        {
-            m_query = query;
-            m_center = center;
-            m_nearestDistanceSqr = float.MaxValue;
-            m_nearestRef = 0;
-            m_nearestPoint = Vector3.Zero;
-        }
-
-        public int NearestRef() { return m_nearestRef; }
-        public Vector3 NearestPoint() { return m_nearestPoint; }
-
+        /// <inheritdoc/>
         public void Process(MeshTile tile, IEnumerable<int> refs)
         {
             if (refs?.Any() != true)
@@ -34,15 +46,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             foreach (var r in refs)
             {
-                m_query.ClosestPointOnPoly(r, m_center, out Vector3 closestPtPoly, out bool posOverPoly);
+                navMesh.ClosestPointOnPoly(r, center, out var closestPtPoly, out bool posOverPoly);
 
                 // If a point is directly over a polygon and closer than
                 // climb height, favor that instead of straight line nearest point.
                 float d;
-                Vector3 diff = Vector3.Subtract(m_center, closestPtPoly);
+                var diff = Vector3.Subtract(center, closestPtPoly);
                 if (posOverPoly)
                 {
-                    d = Math.Abs(diff.Y) - tile.Header.WalkableClimb;
+                    d = MathF.Abs(diff.Y) - tile.Header.WalkableClimb;
                     d = d > 0 ? d * d : 0;
                 }
                 else
@@ -50,14 +62,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     d = diff.LengthSquared();
                 }
 
-                if (d < m_nearestDistanceSqr)
+                if (d < nearestDistanceSqr)
                 {
-                    m_nearestPoint = closestPtPoly;
+                    nearestPoint = closestPtPoly;
 
-                    m_nearestDistanceSqr = d;
-                    m_nearestRef = r;
+                    nearestDistanceSqr = d;
+                    nearestRef = r;
                 }
             }
+        }
+
+        /// <summary>
+        /// Nearest reference
+        /// </summary>
+        public int NearestRef()
+        {
+            return nearestRef;
+        }
+        /// <summary>
+        /// Nearest point
+        /// </summary>
+        public Vector3 NearestPoint()
+        {
+            return nearestPoint;
         }
     }
 }

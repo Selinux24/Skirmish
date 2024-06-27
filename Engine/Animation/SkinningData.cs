@@ -10,7 +10,11 @@ namespace Engine.Animation
     /// <summary>
     /// Skinning data
     /// </summary>
-    public sealed class SkinningData : IEquatable<SkinningData>, ISkinningData
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="skeleton">Skeleton</param>
+    public sealed class SkinningData(Skeleton skeleton) : IEquatable<SkinningData>, ISkinningData
     {
         /// <summary>
         /// Default clip name
@@ -25,19 +29,19 @@ namespace Engine.Animation
         /// <summary>
         /// Animations clip dictionary
         /// </summary>
-        private readonly List<AnimationClip> animations = new List<AnimationClip>();
+        private readonly List<AnimationClip> animations = [];
         /// <summary>
         /// Animation clip names collection
         /// </summary>
-        private readonly List<string> clips = new List<string>();
+        private readonly List<string> clips = [];
         /// <summary>
         /// Clip offsets in animation palette
         /// </summary>
-        private readonly List<int> offsets = new List<int>();
+        private readonly List<int> offsets = [];
         /// <summary>
         /// Skeleton
         /// </summary>
-        private readonly Skeleton skeleton = null;
+        private readonly Skeleton skeleton = skeleton;
 
         /// <inheritdoc/>
         public float TimeStep { get; private set; } = FixedTimeStep;
@@ -57,11 +61,11 @@ namespace Engine.Animation
         /// <param name="animationDescription">Animation description</param>
         private static Dictionary<string, IEnumerable<JointAnimation>> InitializeAnimationDictionary(IEnumerable<JointAnimation> jointAnimations, AnimationFile animationDescription)
         {
-            Dictionary<string, IEnumerable<JointAnimation>> dictAnimations = new Dictionary<string, IEnumerable<JointAnimation>>();
+            var dictAnimations = new Dictionary<string, IEnumerable<JointAnimation>>();
 
             foreach (var clip in animationDescription.Clips)
             {
-                List<JointAnimation> ja = new List<JointAnimation>(jointAnimations.Count());
+                var ja = new List<JointAnimation>(jointAnimations.Count());
 
                 foreach (var j in jointAnimations)
                 {
@@ -72,15 +76,6 @@ namespace Engine.Animation
             }
 
             return dictAnimations;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="skeleton">Skeleton</param>
-        public SkinningData(Skeleton skeleton)
-        {
-            this.skeleton = skeleton;
         }
 
         /// <inheritdoc/>
@@ -180,7 +175,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public IEnumerable<Matrix> GetPoseBase()
         {
-            if (animations.Any())
+            if (animations.Count != 0)
             {
                 return GetPoseAtTime(0, 0);
             }
@@ -224,8 +219,8 @@ namespace Engine.Animation
             if (clipIndex1 >= 0 && clipIndex2 >= 0)
             {
                 skeleton.GetPoseAtTime(
-                    time + offset1, animations.ElementAt(clipIndex1).Animations,
-                    time + offset2, animations.ElementAt(clipIndex2).Animations,
+                    time + offset1, animations[clipIndex1].Animations,
+                    time + offset2, animations[clipIndex2].Animations,
                     factor,
                     ref res);
             }
@@ -236,7 +231,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public IEnumerable<Vector4> Pack()
         {
-            List<Vector4> values = new List<Vector4>();
+            var values = new List<Vector4>();
 
             for (int i = 0; i < animations.Count; i++)
             {
@@ -257,14 +252,10 @@ namespace Engine.Animation
                 }
             }
 
-            return values.ToArray();
+            return [.. values];
         }
 
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(SkinningData other)
         {
             return
@@ -272,6 +263,16 @@ namespace Engine.Animation
                 clips.CompareEnumerables(other.clips) &&
                 offsets.CompareEnumerables(other.offsets) &&
                 skeleton.Equals(other.skeleton);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as SkinningData);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(animations, clips, offsets, skeleton);
         }
     }
 }

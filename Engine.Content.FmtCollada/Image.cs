@@ -25,9 +25,10 @@ namespace Engine.Collada
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Image; Format: {0}; Height: {1}; Width: {2}; Depth: {3}; ", this.Format, this.Height, this.Width, this.Depth) + base.ToString();
+            return base.ToString() + $" Format: {Format}; Height: {Height}; Width: {Width}; Depth: {Depth};";
         }
     }
 }

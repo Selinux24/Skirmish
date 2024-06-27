@@ -93,7 +93,7 @@ namespace Engine.Collada
         {
             if (!string.IsNullOrEmpty(value))
             {
-                List<T> res = new List<T>();
+                var res = new List<T>();
 
                 string oneLineText = value.Replace("\t", " ").Replace("\n", " ").Replace("\r", " ");
 
@@ -109,7 +109,7 @@ namespace Engine.Collada
             }
             else
             {
-                return new T[] { };
+                return Array.Empty<T>();
             }
         }
         internal static string ConvertToString<T>(T value)
@@ -120,11 +120,11 @@ namespace Engine.Collada
         {
             if (values != null && values.Length > 0)
             {
-                StringBuilder res = new StringBuilder();
+                var res = new StringBuilder();
 
                 for (int i = 0; i < values.Length; i++)
                 {
-                    if (i > 0) res.Append(" ");
+                    if (i > 0) res.Append(' ');
 
                     res.Append(string.Format(CultureInfo.InvariantCulture, "{0}", values[i]));
                 }
@@ -151,12 +151,10 @@ namespace Engine.Collada
 
             try
             {
-                using (StreamReader rd = new StreamReader(file, Encoding.Default))
-                {
-                    XmlSerializer sr = new XmlSerializer(typeof(Collada), "http://www.collada.org/2005/11/COLLADASchema");
+                using var rd = new StreamReader(file, Encoding.Default);
+                var sr = new XmlSerializer(typeof(Collada), "http://www.collada.org/2005/11/COLLADASchema");
 
-                    dae = (Collada)sr.Deserialize(rd);
-                }
+                dae = (Collada)sr.Deserialize(rd);
             }
             catch (Exception ex)
             {

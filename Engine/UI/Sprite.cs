@@ -1,18 +1,23 @@
 ﻿using SharpDX;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Sprites;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Sprites;
     using Engine.Common;
     using Engine.Content;
 
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public sealed class Sprite : UIControl<SpriteDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class Sprite(Scene scene, string id, string name) : UIControl<SpriteDescription>(scene, id, name)
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -29,11 +34,11 @@ namespace Engine.UI
         /// <summary>
         /// Color drawer
         /// </summary>
-        private readonly BuiltInSpriteColor spriteColorDrawer;
+        private readonly BuiltInSpriteColor spriteColorDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteColor>();
         /// <summary>
         /// Texture drawer
         /// </summary>
-        private readonly BuiltInSpriteTexture spriteTextureDrawer;
+        private readonly BuiltInSpriteTexture spriteTextureDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
 
         /// <summary>
         /// First color
@@ -96,18 +101,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public Sprite(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-            spriteColorDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteColor>();
-            spriteTextureDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -122,9 +115,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(SpriteDescription description)
+        public override async Task ReadAssets(SpriteDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Color1 = Description.Color1;
             Color2 = Description.Color2;
@@ -134,14 +127,14 @@ namespace Engine.UI
             Percentage2 = Description.Percentage2;
             Percentage3 = Description.Percentage3;
             DrawDirection = (uint)Description.DrawDirection;
-            Textured = Description.Textures?.Any() == true;
+            Textured = (Description.Textures?.Length ?? 0) != 0;
             TextureIndex = Description.TextureIndex;
 
             InitializeBuffers(Name, Textured, Description.UVMap);
 
             if (Textured)
             {
-                await InitializeTexture(Description.ContentPath, Description.Textures);
+                InitializeTexture(Description.ContentPath, Description.Textures);
             }
         }
         /// <summary>
@@ -181,39 +174,40 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private async Task InitializeTexture(string contentPath, string[] textures)
+        private void InitializeTexture(string contentPath, string[] textures)
         {
             var image = new FileArrayImageContent(contentPath, textures);
-            spriteTexture = await Game.ResourceManager.RequestResource(image);
+            spriteTexture = Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
-            Draw();
+            bool drawn = Draw(context.DeviceContext);
 
-            base.Draw(context);
+            return base.Draw(context) || drawn;
         }
         /// <summary>
         /// Default sprite draw
         /// </summary>
-        private void Draw()
+        /// <param name="dc">Device context</param>
+        private bool Draw(IEngineDeviceContext dc)
         {
             BuiltInSpriteState state;
 
@@ -257,19 +251,19 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
             };
 
+            bool drawn;
             if (Textured)
             {
-                spriteTextureDrawer.UpdateSprite(state);
-                spriteTextureDrawer.Draw(BufferManager, drawOptions);
+                spriteTextureDrawer.UpdateSprite(dc, state);
+                drawn = spriteTextureDrawer.Draw(dc, drawOptions);
             }
             else
             {
-                spriteColorDrawer.UpdateSprite(state);
-                spriteColorDrawer.Draw(BufferManager, drawOptions);
+                spriteColorDrawer.UpdateSprite(dc, state);
+                drawn = spriteColorDrawer.Draw(dc, drawOptions);
             }
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+            return drawn;
         }
 
         /// <summary>

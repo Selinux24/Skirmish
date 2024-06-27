@@ -70,6 +70,10 @@ namespace Engine
         bool VisibleMouse { get; set; }
 
         /// <summary>
+        /// Gets the pressed key list
+        /// </summary>
+        Keys[] GetPressedKeys();
+        /// <summary>
         /// Gets the just pressed key list
         /// </summary>
         /// <returns>Returns an array of just pressed keys</returns>
@@ -86,17 +90,38 @@ namespace Engine
         /// <returns>Returns true if the specified key is just pressed</returns>
         bool KeyJustPressed(Keys key);
         /// <summary>
+        /// Gets if specified key is just pressed
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="stringComparison">String comparison</param>
+        /// <returns>Returns true if the specified key is just pressed</returns>
+        bool KeyJustPressed(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
+        /// <summary>
         /// Gets if specified key is just released
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Returns true if the specified key is just released</returns>
         bool KeyJustReleased(Keys key);
         /// <summary>
+        /// Gets if specified key is just released
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="stringComparison">String comparison</param>
+        /// <returns>Returns true if the specified key is just released</returns>
+        bool KeyJustReleased(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
+        /// <summary>
         /// Gets if specified key is pressed now
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Returns true if the specified key is pressed now</returns>
         bool KeyPressed(Keys key);
+        /// <summary>
+        /// Gets if specified key is pressed now
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="stringComparison">String comparison</param>
+        /// <returns>Returns true if the specified key is pressed now</returns>
+        bool KeyPressed(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
         /// <summary>
         /// Gets if the specified mouse button is just pressed
         /// </summary>
@@ -135,7 +160,7 @@ namespace Engine
         /// Updates input state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        void Update(GameTime gameTime);
+        void Update(IGameTime gameTime);
         /// <summary>
         /// Gets the keyboard key strokes
         /// </summary>

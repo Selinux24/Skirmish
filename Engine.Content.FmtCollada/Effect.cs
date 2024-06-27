@@ -27,10 +27,5 @@ namespace Engine.Collada
         public ProfileGlsl ProfileGlsl { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
-
-        public override string ToString()
-        {
-            return "Effect; " + base.ToString();
-        }
     }
 }

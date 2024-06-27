@@ -1,11 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine;
+using Engine.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Engine.Common.Tests
+namespace EngineTests.Common
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -95,11 +97,11 @@ namespace Engine.Common.Tests
             box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Minimum, bbox5.Maximum);
 
 
-            tmesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1).ToArray();
-            tmesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box2).ToArray();
-            tmesh3 = Triangle.ComputeTriangleList(Topology.TriangleList, box3).ToArray();
-            tmesh4 = Triangle.ComputeTriangleList(Topology.TriangleList, box4).ToArray();
-            tmesh5 = Triangle.ComputeTriangleList(Topology.TriangleList, box5).ToArray();
+            tmesh1 = Triangle.ComputeTriangleList(box1).ToArray();
+            tmesh2 = Triangle.ComputeTriangleList(box2).ToArray();
+            tmesh3 = Triangle.ComputeTriangleList(box3).ToArray();
+            tmesh4 = Triangle.ComputeTriangleList(box4).ToArray();
+            tmesh5 = Triangle.ComputeTriangleList(box5).ToArray();
 
             mesh1 = new IntersectionVolumeMesh(tmesh1);
             mesh2 = new IntersectionVolumeMesh(tmesh2);
@@ -154,6 +156,17 @@ namespace Engine.Common.Tests
         public void SetupTest()
         {
             Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+        }
+
+        [TestMethod()]
+        public void IntersectsIntersectableTest()
+        {
+            Assert.IsFalse(IntersectionHelper.Intersects(null, null));
+
+            Assert.IsFalse(IntersectionHelper.Intersects(i1.Object, IntersectDetectionMode.Sphere, null));
+            Assert.IsFalse(IntersectionHelper.Intersects(i1.Object, IntersectDetectionMode.Sphere, null, IntersectDetectionMode.Sphere));
+
+            Assert.IsFalse(IntersectionHelper.Intersects(null, IntersectDetectionMode.Sphere, i1.Object, IntersectDetectionMode.Sphere));
         }
 
         [TestMethod()]
@@ -356,28 +369,28 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void IntersectableSphereConstructorTest()
         {
-            IntersectionVolumeSphere sph = new IntersectionVolumeSphere(bsph1);
+            var sph = new IntersectionVolumeSphere(bsph1);
 
             Assert.AreEqual(bsph1, (BoundingSphere)sph);
         }
         [TestMethod()]
         public void IntersectableBoxConstructorTest()
         {
-            IntersectionVolumeAxisAlignedBox box = new IntersectionVolumeAxisAlignedBox(bbox1);
+            var box = new IntersectionVolumeAxisAlignedBox(bbox1);
 
             Assert.AreEqual(bbox1, (BoundingBox)box);
         }
         [TestMethod()]
         public void IntersectableMeshConstructorTest()
         {
-            IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(tmesh1);
+            var mesh = new IntersectionVolumeMesh(tmesh1);
 
             CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh);
         }
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(new Triangle[] { }); });
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh([]); });
         }
 
         [TestMethod()]

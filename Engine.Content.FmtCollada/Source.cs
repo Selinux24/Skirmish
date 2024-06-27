@@ -28,9 +28,17 @@ namespace Engine.Collada
         [XmlElement("technique", typeof(Technique))]
         public Technique Technique { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return "Source; " + base.ToString();
+            string typeName = "None";
+            if (IdRefArray != null) typeName = nameof(IdRefArray);
+            if (NameArray != null) typeName = nameof(NameArray);
+            if (BoolArray != null) typeName = nameof(BoolArray);
+            if (IntArray != null) typeName = nameof(IntArray);
+            if (FloatArray != null) typeName = nameof(FloatArray);
+
+            return base.ToString() + $" Type: {typeName}";
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Particle system
     /// </summary>
-    public interface IParticleSystem : IDisposable
+    public interface IParticleSystem<out TEmitter, TParams> : IDisposable
     {
         /// <summary>
         /// Gets the particle system name
@@ -18,13 +18,13 @@ namespace Engine
         /// </summary>
         bool Active { get; }
         /// <summary>
-        /// Gest the maximum number of concurrent particles at the same time
+        /// Gets the maximum number of concurrent particles at the same time
         /// </summary>
         int MaxConcurrentParticles { get; }
         /// <summary>
         /// Gets the particle emitter reference
         /// </summary>
-        ParticleEmitter Emitter { get; }
+        TEmitter Emitter { get; }
 
         /// <summary>
         /// Updates internal data
@@ -35,17 +35,18 @@ namespace Engine
         /// Draws particles
         /// </summary>
         /// <param name="context">Drawing context</param>
-        void Draw(DrawContext context);
+        /// <returns>Returns true if the draw calls the device</returns>
+        bool Draw(DrawContext context);
 
         /// <summary>
         /// Gets current particle system parameters
         /// </summary>
         /// <returns>Returns the particle system parameters configuration</returns>
-        ParticleSystemParams GetParameters();
+        TParams GetParameters();
         /// <summary>
         /// Sets the particle system parameters
         /// </summary>
         /// <param name="particleParameters">Particle system parameters</param>
-        void SetParameters(ParticleSystemParams particleParameters);
+        void SetParameters(TParams particleParameters);
     }
 }

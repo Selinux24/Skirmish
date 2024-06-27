@@ -13,43 +13,33 @@ namespace Engine
         /// </summary>
         private Vector3[] path = null;
 
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
             {
-                return this.path[0];
+                return path[0];
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
             {
-                return this.path[this.path.Length - 1];
+                return path[^1];
             }
         }
-        /// <summary>
-        /// Gets the total length of the path
-        /// </summary>
+        /// <inheritdoc/>
         public float Length { get; private set; }
-        /// <summary>
-        /// Gets the total checkpoint number of the path
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount
         {
             get
             {
-                return this.path != null ? this.path.Length : 0;
+                return path?.Length ?? 0;
             }
         }
-        /// <summary>
-        /// Number of normals in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -65,7 +55,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3 origin, Vector3 destination)
         {
-            this.InitializePath(origin, null, destination);
+            InitializePath(origin, null, destination);
         }
         /// <summary>
         /// Constructor
@@ -75,7 +65,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3 origin, IEnumerable<Vector3> path, Vector3 destination)
         {
-            this.InitializePath(origin, path, destination);
+            InitializePath(origin, path, destination);
         }
         /// <summary>
         /// Constructor
@@ -84,7 +74,7 @@ namespace Engine
         /// <param name="path">Path</param>
         public SegmentPath(Vector3 origin, IEnumerable<Vector3> path)
         {
-            this.InitializePath(origin, path, null);
+            InitializePath(origin, path, null);
         }
         /// <summary>
         /// Constructor
@@ -93,7 +83,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3[] path, Vector3 destination)
         {
-            this.InitializePath(null, path, destination);
+            InitializePath(null, path, destination);
         }
         /// <summary>
         /// Constructor
@@ -101,7 +91,7 @@ namespace Engine
         /// <param name="path">Path</param>
         public SegmentPath(Vector3[] path)
         {
-            this.InitializePath(null, path, null);
+            InitializePath(null, path, null);
         }
 
         /// <summary>
@@ -112,7 +102,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         private void InitializePath(Vector3? origin, IEnumerable<Vector3> path, Vector3? destination)
         {
-            List<Vector3> lPath = new List<Vector3>();
+            var lPath = new List<Vector3>();
 
             if (origin.HasValue) lPath.Add(origin.Value);
             if (path != null) lPath.AddRange(path);
@@ -124,108 +114,102 @@ namespace Engine
                 length += Vector3.Distance(lPath[i], lPath[i - 1]);
             }
 
-            this.path = lPath.ToArray();
-            this.Length = length;
+            this.path = [.. lPath];
+            Length = length;
         }
-        /// <summary>
-        /// Gets the path position at specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the position at time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
-            if (this.PositionCount > 0)
-            {
-                if (time == 0) return path[0];
-                if (time >= this.Length) return path[path.Length - 1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < path.Length; i++)
-                {
-                    Vector3 segment = path[i] - path[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = path[i - 1] + (Vector3.Normalize(segment) * l);
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return path[0];
+            }
+
+            if (time >= Length)
+            {
+                return path[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < path.Length; i++)
+            {
+                Vector3 segment = path[i] - path[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = path[i - 1] + (Vector3.Normalize(segment) * l);
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             return Vector3.Up;
         }
-        /// <summary>
-        /// Gets the next control point at specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the next control path at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
-            if (this.PositionCount > 0)
-            {
-                if (time == 0) return path[0];
-                if (time >= this.Length) return path[path.Length - 1];
-
-                Vector3 res = Vector3.Zero;
-                float l = time;
-                for (int i = 1; i < path.Length; i++)
-                {
-                    Vector3 segment = path[i] - path[i - 1];
-                    float segmentLength = segment.Length();
-
-                    if (l - segmentLength <= 0)
-                    {
-                        res = path[i];
-
-                        break;
-                    }
-
-                    l -= segmentLength;
-                }
-
-                return res;
-            }
-            else
+            if (PositionCount <= 0)
             {
                 return Vector3.Zero;
             }
+
+            if (MathUtil.IsZero(time))
+            {
+                return path[0];
+            }
+
+            if (time >= Length)
+            {
+                return path[^1];
+            }
+
+            Vector3 res = Vector3.Zero;
+            float l = time;
+            for (int i = 1; i < path.Length; i++)
+            {
+                Vector3 segment = path[i] - path[i - 1];
+                float segmentLength = segment.Length();
+
+                if (l - segmentLength <= 0)
+                {
+                    res = path[i];
+
+                    break;
+                }
+
+                l -= segmentLength;
+            }
+
+            return res;
         }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            List<Vector3> returnPath = [];
 
             float time = 0;
-            while (time < this.Length)
+            while (time < Length)
             {
-                returnPath.Add(this.GetPosition(time));
+                returnPath.Add(GetPosition(time));
 
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return returnPath;
         }
     }
 }

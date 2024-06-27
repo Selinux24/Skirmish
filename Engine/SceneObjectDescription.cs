@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine
 {
     /// <summary>
@@ -30,53 +29,22 @@ namespace Engine
         /// <summary>
         /// Blend mode
         /// </summary>
-        public BlendModes BlendMode { get; set; } = BlendModes.Default;
+        public BlendModes BlendMode { get; set; } = BlendModes.Opaque;
         /// <summary>
         /// Culling volume by default
         /// </summary>
         public CullingVolumeTypes CullingVolumeType { get; set; } = CullingVolumeTypes.SphericVolume;
-    }
-
-    /// <summary>
-    /// Shadow casting algorihtms
-    /// </summary>
-    [Flags]
-    public enum ShadowCastingAlgorihtms : uint
-    {
         /// <summary>
-        /// None
+        /// Collider type
         /// </summary>
-        None = 0,
+        public ColliderTypes ColliderType { get; set; } = ColliderTypes.None;
         /// <summary>
-        /// Directional shadow casting
+        /// Picking hull
         /// </summary>
-        Directional = 1,
+        public PickingHullTypes PickingHull { get; set; } = PickingHullTypes.Default;
         /// <summary>
-        /// Spot shadow casting
+        /// Path finding hull
         /// </summary>
-        Spot = 2,
-        /// <summary>
-        /// Point shadow casting
-        /// </summary>
-        Point = 4,
-    }
-
-    /// <summary>
-    /// Culling volume types
-    /// </summary>
-    public enum CullingVolumeTypes : uint
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Box volume
-        /// </summary>
-        BoxVolume = 1,
-        /// <summary>
-        /// Spheric volume
-        /// </summary>
-        SphericVolume = 2,
+        public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.None;
     }
 }

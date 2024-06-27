@@ -1,17 +1,12 @@
 ﻿using SharpDX;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Coroutines;
-    using Engine.Tween;
 
     /// <summary>
     /// Render scene
@@ -44,65 +39,13 @@ namespace Engine
         public const int LayerCursor = int.MaxValue;
 
         /// <summary>
-        /// Gets first normal texture size for the specified pixel count
-        /// </summary>
-        /// <param name="pixelCount">Pixel count</param>
-        /// <returns>Returns the texture size</returns>
-        private static int GetTextureSize(int pixelCount)
-        {
-            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
-            int texHeight = 1;
-            while (texHeight < texWidth)
-            {
-                texHeight <<= 1;
-            }
-
-            return texHeight;
-        }
-
-        /// <summary>
         /// Scene world matrix
         /// </summary>
         private readonly Matrix world = Matrix.Identity;
         /// <summary>
-        /// Scene component list
-        /// </summary>
-        private List<ISceneObject> internalComponents = new List<ISceneObject>();
-        /// <summary>
         /// Scene mode
         /// </summary>
         private SceneModes sceneMode = SceneModes.Unknown;
-
-        /// <summary>
-        /// Update materials palette flag
-        /// </summary>
-        private bool updateMaterialsPalette;
-        /// <summary>
-        /// Material palette resource
-        /// </summary>
-        private EngineShaderResourceView materialPalette;
-        /// <summary>
-        /// Material palette width
-        /// </summary>
-        private uint materialPaletteWidth;
-
-        /// <summary>
-        /// Update animation palette flag
-        /// </summary>
-        private bool updateAnimationsPalette;
-        /// <summary>
-        /// Animation palette resource
-        /// </summary>
-        private EngineShaderResourceView animationPalette;
-        /// <summary>
-        /// Animation palette width
-        /// </summary>
-        private uint animationPaletteWidth;
-
-        /// <summary>
-        /// Corotine manager
-        /// </summary>
-        private readonly Yielder coroutineManager = new Yielder();
 
         /// <summary>
         /// Scene bounding box
@@ -112,10 +55,6 @@ namespace Engine
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
-        /// <summary>
-        /// Audio manager
-        /// </summary>
-        protected GameAudioManager AudioManager { get; private set; }
 
         /// <summary>
         /// Game class
@@ -124,7 +63,7 @@ namespace Engine
         /// <summary>
         /// Game environment
         /// </summary>
-        public GameEnvironment GameEnvironment { get; private set; } = new GameEnvironment();
+        public GameEnvironment GameEnvironment { get; private set; } = new();
         /// <summary>
         /// Camera
         /// </summary>
@@ -138,13 +77,17 @@ namespace Engine
         /// </summary>
         public int Order { get; set; }
         /// <summary>
+        /// Scene component list
+        /// </summary>
+        public SceneComponentCollection Components { get; private set; } = new();
+        /// <summary>
         /// Scene lights
         /// </summary>
         public SceneLights Lights { get; protected set; }
         /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
-        public bool PerformFrustumCulling { get; protected set; }
+        public bool PerformFrustumCulling { get; protected set; } = true;
 
         /// <summary>
         /// Gets or sets the top most control in the UI hierarchy
@@ -154,6 +97,10 @@ namespace Engine
         /// Gets or sets the focused control the UI
         /// </summary>
         public IUIControl FocusedControl { get; set; }
+        /// <summary>
+        /// Gets whether the input is being processed by user interface controls
+        /// </summary>
+        public bool InputProcessedByUI { get { return FocusedControl != null && TopMostControl != null; } }
 
         /// <summary>
         /// Constructor
@@ -161,26 +108,20 @@ namespace Engine
         /// <param name="game">Game class</param>
         public Scene(Game game)
         {
-            Game = game;
+            if (game != null)
+            {
+                Game = game;
+                Game.Graphics.Resized += FireGraphicsResized;
 
-            Game.Graphics.Resized += FireGraphicsResized;
-
-            AudioManager = new GameAudioManager();
-
-            Camera = Camera.CreateFree(
-                new Vector3(0.0f, 0.0f, -10.0f),
-                Vector3.Zero);
-
-            Camera.SetLens(
-                Game.Form.RenderWidth,
-                Game.Form.RenderHeight);
+                var form = Game.Form;
+                Camera = Camera.CreateFree(
+                    Vector3.ForwardLH * -10f,
+                    Vector3.Zero,
+                    form.RenderWidth,
+                    form.RenderHeight);
+            }
 
             Lights = SceneLights.CreateDefault(this);
-
-            PerformFrustumCulling = true;
-
-            updateMaterialsPalette = true;
-            updateAnimationsPalette = true;
         }
         /// <summary>
         /// Destructor
@@ -190,9 +131,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -204,67 +143,47 @@ namespace Engine
         /// <param name="disposing">Free managed resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing)
             {
-                Game.Graphics.Resized -= FireGraphicsResized;
-
-                Renderer?.Dispose();
-                Renderer = null;
-
-                AudioManager?.Dispose();
-                AudioManager = null;
-
-                Camera?.Dispose();
-                Camera = null;
-
-                if (internalComponents != null)
-                {
-                    for (int i = 0; i < internalComponents.Count; i++)
-                    {
-                        var disposableCmp = internalComponents[i] as IDisposable;
-                        disposableCmp?.Dispose();
-
-                        internalComponents[i] = null;
-                    }
-
-                    internalComponents.Clear();
-                    internalComponents = null;
-                }
+                return;
             }
+
+            Game.Graphics.Resized -= FireGraphicsResized;
+
+            Renderer?.Dispose();
+            Renderer = null;
+
+            Camera?.Dispose();
+            Camera = null;
+
+            Components?.Dispose();
+            Components = null;
         }
 
         /// <summary>
         /// Initialize scene
         /// </summary>
-        public virtual Task Initialize()
+        public virtual void Initialize()
         {
-            return Task.CompletedTask;
+
         }
         /// <summary>
         /// Update scene objects
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(IGameTime gameTime)
         {
             try
             {
-                bool updateEnvironment = GameEnvironment.Update(gameTime);
+                GameEnvironment.Update(gameTime);
 
-                UpdateGlobals(updateEnvironment);
+                this.EvaluateInput();
 
                 // Lights
                 Lights?.Update();
 
                 // Camera!
                 Camera?.Update(gameTime);
-
-                AudioManager?.Update(gameTime);
-
-                coroutineManager.ProcessCoroutines();
-
-                this.EvaluateInput();
-
-                FloatTweenManager.Update(gameTime);
 
                 // Action!
                 Renderer?.Update(gameTime);
@@ -280,10 +199,12 @@ namespace Engine
         /// Draw scene objects
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void Draw(GameTime gameTime)
+        public virtual void Draw(IGameTime gameTime)
         {
             try
             {
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
+
                 Renderer?.Draw(gameTime);
             }
             catch (EngineException ex)
@@ -326,10 +247,12 @@ namespace Engine
                 return false;
             }
 
+            renderer.PrepareScene();
+
             ReplaceRenderer(renderer);
             sceneMode = mode;
 
-            Counters.ClearAll();
+            FrameCounters.ClearAll();
 
             return true;
         }
@@ -351,179 +274,11 @@ namespace Engine
         }
 
         /// <summary>
-        /// Starts a new coroutine
-        /// </summary>
-        /// <param name="routine">Enumerator routine</param>
-        public Coroutine StartCoroutine(IEnumerator routine)
-        {
-            return coroutineManager.StartCoroutine(routine);
-        }
-
-        /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="task">Task</param>
-        public Task LoadResourcesAsync(Task task)
+        public void LoadResources(ILoadResourceGroup taskGroup)
         {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            return Game.LoadResourcesAsync(taskGroup);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="task">Task</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Task list</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="task">Task</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(Task task, Func<LoadResourcesResult, Task> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Task list</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks, Func<LoadResourcesResult, Task> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
-        }
-
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="task">Task</param>
-        public Task LoadResourcesAsync<T>(Task<T> task)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            return Game.LoadResourcesAsync(taskGroup);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="task">Task</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="tasks">Task list</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="task">Task</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(Task<T> task, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="tasks">Task list</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks), callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Game.LoadResourcesAsync(taskGroup, callback);
+            Game.LoadResources(taskGroup);
         }
 
         /// <summary>
@@ -535,7 +290,7 @@ namespace Engine
         {
             Renderer?.Resize();
 
-            var fittedComponents = GetComponents<IScreenFitted>();
+            var fittedComponents = Components.Get<IScreenFitted>();
             if (fittedComponents.Any())
             {
                 fittedComponents
@@ -547,22 +302,6 @@ namespace Engine
             GameGraphicsResized();
         }
 
-        /// <summary>
-        /// Progress reporting
-        /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public virtual void OnReportProgress(LoadResourceProgress value)
-        {
-
-        }
-        /// <summary>
-        /// Buffer progress reporting
-        /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public virtual void OnReportProgressBuffers(LoadResourceProgress value)
-        {
-
-        }
         /// <summary>
         /// Grame graphics resized
         /// </summary>
@@ -582,7 +321,7 @@ namespace Engine
             return Helper.UnprojectToScreen(
                 position,
                 Game.Graphics.Viewport,
-                Camera.View * Camera.Projection,
+                Camera.ViewProjection,
                 out inside);
         }
 
@@ -599,9 +338,33 @@ namespace Engine
             where TObj : BaseSceneObject<TDescription>
             where TDescription : SceneObjectDescription
         {
-            var component = (TObj)Activator.CreateInstance(typeof(TObj), new object[] { this, id, name });
+            var component = (TObj)Activator.CreateInstance(typeof(TObj), this, id, name);
 
-            await component.InitializeAssets(description);
+            await component.ReadAssets(description);
+            await component.InitializeAssets();
+
+            return component;
+        }
+        /// <summary>
+        /// Creates a component
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="additionalParams">Additional instace constructor parameters</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> CreateComponent<TObj, TDescription>(string id, string name, TDescription description, params object[] additionalParams)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            object[] instanceParams = [this, id, name, .. additionalParams ?? []];
+
+            var component = (TObj)Activator.CreateInstance(typeof(TObj), instanceParams);
+
+            await component.ReadAssets(description);
+            await component.InitializeAssets();
 
             return component;
         }
@@ -623,10 +386,11 @@ namespace Engine
         {
             var component = await CreateComponent<TObj, TDescription>(id, name, description);
 
-            AddComponent(component, usage, layer);
+            Components.AddComponent(component, usage, layer, ComponentsUpdated);
 
             return component;
         }
+
         /// <summary>
         /// Adds an agent component to the scene
         /// </summary>
@@ -740,355 +504,117 @@ namespace Engine
         {
             return await AddComponentInternal<TObj, TDescription>(id, name, description, usage, layer);
         }
-
         /// <summary>
-        /// Adds component to collection
+        /// Adds a component to the scene
         /// </summary>
-        /// <typeparam name="T">Component type</typeparam>
-        /// <param name="component">Component</param>
-        /// <param name="usage">Usage</param>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the added component</returns>
-        public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponent<TObj>(string id, string name, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+            where TObj : BaseSceneObject<SceneObjectDescription>
         {
-            Monitor.Enter(internalComponents);
-            try
-            {
-                if (internalComponents.Contains(component))
-                {
-                    return;
-                }
-
-                if (internalComponents.Any(c => component.Id == c.Id))
-                {
-                    throw new EngineException($"{nameof(Scene)} => The specified component id {component.Id} already exists.");
-                }
-
-                if (component is IDrawable drawable)
-                {
-                    drawable.Usage |= usage;
-
-                    if (layer != 0)
-                    {
-                        drawable.Layer = layer;
-                    }
-                }
-
-                internalComponents.Add(component);
-                internalComponents.Sort((p1, p2) =>
-                {
-                    //First by type
-                    bool p1D = p1 is IDrawable;
-                    bool p2D = p2 is IDrawable;
-                    int i = p1D.CompareTo(p2D);
-                    if (i != 0) return i;
-
-                    if (!p1D || !p2D)
-                    {
-                        return 0;
-                    }
-
-                    IDrawable drawable1 = (IDrawable)p1;
-                    IDrawable drawable2 = (IDrawable)p2;
-
-                    //First by order index
-                    i = drawable1.Layer.CompareTo(drawable2.Layer);
-                    if (i != 0) return i;
-
-                    //Then opaques
-                    i = drawable1.BlendMode.CompareTo(drawable2.BlendMode);
-                    if (i != 0) return i;
-
-                    //Then z-buffer writers
-                    i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
-
-                    return i;
-                });
-            }
-            finally
-            {
-                Monitor.Exit(internalComponents);
-            }
-
-            updateMaterialsPalette = true;
-            updateAnimationsPalette = true;
+            return await AddComponentInternal<TObj, SceneObjectDescription>(id, name, new(), usage, layer);
         }
         /// <summary>
-        /// Removes and disposes the specified component
+        /// Adds a component to the scene
         /// </summary>
-        /// <param name="component">Component</param>
-        public void RemoveComponent(ISceneObject component)
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="component">Component instance</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponent<TObj>(TObj component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+            where TObj : ISceneObject
         {
-            if (!internalComponents.Contains(component))
+            if (Equals(component, default(TObj)))
             {
-                return;
+                throw new ArgumentNullException(nameof(component));
             }
 
-            Monitor.Enter(internalComponents);
-            try
-            {
-                internalComponents.Remove(component);
-            }
-            finally
-            {
-                Monitor.Exit(internalComponents);
-            }
+            Components.AddComponent(component, usage, layer, ComponentsUpdated);
 
-            updateMaterialsPalette = true;
-            updateAnimationsPalette = true;
-
-            if (component is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
-        /// <summary>
-        /// Removes and disposes the specified component list
-        /// </summary>
-        /// <param name="components">List of components</param>
-        public void RemoveComponents(IEnumerable<ISceneObject> components)
-        {
-            Monitor.Enter(internalComponents);
-            try
-            {
-                foreach (var component in components)
-                {
-                    if (internalComponents.Contains(component))
-                    {
-                        internalComponents.Remove(component);
-
-                        updateMaterialsPalette = true;
-                        updateAnimationsPalette = true;
-                    }
-
-                    if (component is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-                Monitor.Exit(internalComponents);
-            }
+            return await Task.FromResult(component);
         }
 
         /// <summary>
-        /// Gets full component collection
+        /// Removes the specified component
         /// </summary>
-        /// <returns>Returns the full component collection</returns>
-        public IEnumerable<ISceneObject> GetComponents()
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="component">Component instance</param>
+        public void RemoveComponent<TObj>(TObj component) where TObj : ISceneObject
         {
-            return internalComponents.ToArray();
+            Components.RemoveComponent(component, ComponentsUpdated);
         }
         /// <summary>
-        /// Gets component collection of the specified type
+        /// Removes the specified component list
         /// </summary>
-        /// <typeparam name="T">Component type</typeparam>
-        /// <returns>Returns the component collection</returns>
-        public IEnumerable<T> GetComponents<T>()
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="components">Component instance list</param>
+        public void RemoveComponents<TObj>(IEnumerable<TObj> components) where TObj : ISceneObject
         {
-            return internalComponents
-                .OfType<T>()
-                .ToArray();
-        }
-        /// <summary>
-        /// Gets component collection of the specified type
-        /// </summary>
-        /// <typeparam name="T">Component type</typeparam>
-        /// <param name="predicate">Function to test every item in the collection</param>
-        /// <returns>Returns the component collection</returns>
-        public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate)
-        {
-            return internalComponents
-                .OfType<T>()
-                .Where(predicate)
-                .ToArray();
-        }
-        /// <summary>
-        /// Gets drawable component collection by usage
-        /// </summary>
-        /// <param name="usage">Usage</param>
-        /// <returns>Returns the component list</returns>
-        public IEnumerable<IDrawable> GetComponentsByUsage(SceneObjectUsages usage)
-        {
-            if (usage != SceneObjectUsages.None)
-            {
-                return GetComponents<IDrawable>(c => (c.Usage & usage) != SceneObjectUsages.None);
-            }
-
-            return GetComponents<IDrawable>();
+            Components.RemoveComponents(components.OfType<ISceneObject>(), ComponentsUpdated);
         }
 
         /// <summary>
-        /// Update global resources
+        /// Components updated event
         /// </summary>
-        protected virtual void UpdateGlobals(bool updateEnvironment)
+        private void ComponentsUpdated(IEnumerable<ISceneObject> components)
         {
-            bool updateGlobals = updateEnvironment;
-
-            if (updateMaterialsPalette)
-            {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Material palette.");
-
-                UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
-
-                updateGlobals = true;
-
-                updateMaterialsPalette = false;
-            }
-
-            if (updateAnimationsPalette)
-            {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Animation palette.");
-
-                UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
-
-                updateGlobals = true;
-
-                updateAnimationsPalette = false;
-            }
-
-            if (updateGlobals)
-            {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
-
-                Renderer?.UpdateGlobals();
-
-                BuiltInShaders.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-            }
-        }
-        /// <summary>
-        /// Updates the materials palette
-        /// </summary>
-        public virtual void UpdateMaterialPalette()
-        {
-            updateMaterialsPalette = true;
-
-            UpdateGlobals(false);
-        }
-        /// <summary>
-        /// Updates the global material palette
-        /// </summary>
-        /// <param name="materialPalette">Material palette</param>
-        /// <param name="materialPaletteWidth">Material palette width</param>
-        private void UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
-        {
-            List<IMeshMaterial> mats = new List<IMeshMaterial>
-            {
-                MeshMaterial.DefaultBlinnPhong,
-            };
-
-            var matComponents = GetComponents<IUseMaterials>();
-
-            foreach (var component in matComponents)
-            {
-                var matList = component.GetMaterials();
-                if (matList.Any())
-                {
-                    mats.AddRange(matList);
-                }
-            }
-
-            List<Vector4> values = new List<Vector4>();
-
-            for (int i = 0; i < mats.Count; i++)
-            {
-                var mat = mats[i];
-                var matV = mat.Material.Convert().Pack();
-
-                mat.UpdateResource((uint)i, (uint)values.Count, (uint)matV.Length);
-
-                values.AddRange(matV);
-            }
-
-            int texWidth = GetTextureSize(values.Count);
-
-            materialPalette = Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
-            materialPaletteWidth = (uint)texWidth;
-        }
-        /// <summary>
-        /// Updates the global animation palette
-        /// </summary>
-        /// <param name="animationPalette">Animation palette</param>
-        /// <param name="animationPaletteWidth">Animation palette width</param>
-        private void UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
-        {
-            var skData = GetComponents<IUseSkinningData>()
-                .Where(c => c.SkinningData != null)
-                .Select(c => c.SkinningData)
-                .ToArray();
-
-            List<ISkinningData> addedSks = new List<ISkinningData>();
-
-            List<Vector4> values = new List<Vector4>();
-
-            for (int i = 0; i < skData.Length; i++)
-            {
-                var sk = skData[i];
-
-                if (!addedSks.Contains(sk))
-                {
-                    var skV = sk.Pack();
-
-                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
-
-                    values.AddRange(skV);
-
-                    addedSks.Add(sk);
-                }
-                else
-                {
-                    var cMat = addedSks.Find(m => m.Equals(sk));
-
-                    sk.UpdateResource(cMat.ResourceIndex, cMat.ResourceOffset, cMat.ResourceSize);
-                }
-            }
-
-            int texWidth = GetTextureSize(values.Count);
-
-            animationPalette = Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
-            animationPaletteWidth = (uint)texWidth;
+            Renderer?.UpdateGlobals();
         }
 
         /// <summary>
         /// Gets the whole ground bounding box
         /// </summary>
+        /// <param name="usage">Object usage</param>
         /// <returns>Returns the whole ground bounding box.</returns>
-        public BoundingBox? GetGroundBoundingBox()
+        public BoundingBox GetBoundingBox(SceneObjectUsages usage)
         {
             if (BoundingBox.HasValue && BoundingBox != new BoundingBox())
             {
-                return BoundingBox;
+                return BoundingBox.Value;
             }
 
-            //Try to get a bounding box from the current ground objects
-            var cmpList = GetComponents<IDrawable>().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
-
-            if (cmpList.Any())
+            var boxes = GetBoundingBoxes(usage);
+            if (!boxes.Any())
             {
-                List<BoundingBox> boxes = new List<BoundingBox>();
+                return new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
+            }
 
-                foreach (var obj in cmpList)
+            BoundingBox = Helper.MergeBoundingBox(boxes);
+
+            return BoundingBox.Value;
+        }
+        /// <summary>
+        /// Gets the bounding box list
+        /// </summary>
+        /// <param name="usage">Object usage</param>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(SceneObjectUsages usage)
+        {
+            var cmpList = Components.Get(usage);
+            if (!cmpList.Any())
+            {
+                yield break;
+            }
+
+            foreach (var obj in cmpList)
+            {
+                if (obj is IComposed composed)
                 {
-                    if (obj is IComposed composed)
+                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
                     {
-                        var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
-                        foreach (var pickable in pickComponents)
-                        {
-                            boxes.Add(pickable.GetBoundingBox());
-                        }
-                    }
-                    else if (obj is IRayPickable<Triangle> pickable)
-                    {
-                        boxes.Add(pickable.GetBoundingBox());
+                        yield return pickable.GetBoundingBox();
                     }
                 }
-
-                BoundingBox = Helper.MergeBoundingBox(boxes);
+                else if (obj is IRayPickable<Triangle> pickable)
+                {
+                    yield return pickable.GetBoundingBox();
+                }
             }
-
-            return BoundingBox;
         }
 
         /// <summary>
@@ -1096,30 +622,40 @@ namespace Engine
         /// </summary>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns picking ray from current mouse position</returns>
-        public PickingRay GetPickingRay(RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetPickingRay(PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             int mouseX = Game.Input.MouseX;
             int mouseY = Game.Input.MouseY;
-            Matrix worldViewProjection = world * Camera.View * Camera.Projection;
+            var worldViewProjection = world * Camera.ViewProjection;
             float nDistance = Camera.NearPlaneDistance;
             float fDistance = Camera.FarPlaneDistance;
-            ViewportF viewport = Game.Graphics.Viewport;
+            var viewport = Game.Graphics.Viewport;
 
-            Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
-            Vector3 fVector = new Vector3(mouseX, mouseY, fDistance);
+            var nVector = new Vector3(mouseX, mouseY, nDistance);
+            var fVector = new Vector3(mouseX, mouseY, fDistance);
 
-            Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-            Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new PickingRay(nPoint, Vector3.Normalize(fPoint - nPoint), pickingParams);
         }
+
+        /// <summary>
+        /// Gets the scene volume for culling tests
+        /// </summary>
+        /// <returns>Returns the scene volume</returns>
+        public ICullingVolume GetSceneVolume()
+        {
+            return Components.First<IGround>(SceneObjectUsages.Ground)?.GetCullingVolume();
+        }
+
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Point position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -1129,7 +665,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector2 position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -1139,7 +675,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector3 position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Z, pickingParams);
         }
@@ -1150,32 +686,114 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(float x, float z, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(float x, float z, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
-            var bbox = GetGroundBoundingBox();
+            var bbox = GetBoundingBox(SceneObjectUsages.Ground);
 
-            if (!bbox.HasValue || bbox == new BoundingBox())
-            {
-                Logger.WriteWarning(this, $"{nameof(Scene)} => Picking test: A ground must be defined into the scene in the first place.");
-            }
-
-            float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
+            float maxY = bbox.Maximum.Y + 1.0f;
 
             return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
         }
 
         /// <summary>
-        /// Gets the scene volume for culling tests
+        /// Gets ground position giving x, z coordinates
         /// </summary>
-        /// <returns>Returns the scene volume</returns>
-        public IIntersectionVolume GetSceneVolume()
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindTopGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
         {
-            var ground = GetComponents<IDrawable>()
-                .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
-                .OfType<IGround>()
-                .FirstOrDefault();
+            var ray = GetTopDownRay(x, z);
 
-            return ground?.GetCullingVolume();
+            if (this.PickNearest<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(x, z);
+
+            if (this.PickFirst<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets all ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition<T>(float x, float z, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(x, z);
+
+            if (this.PickAll<T>(ray, SceneObjectUsages.Ground, out var res))
+            {
+                results = res.SelectMany(r => r.PickingResults);
+
+                return true;
+            }
+
+            results = [];
+
+            return false;
+        }
+        /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition<T>(Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var ray = GetTopDownRay(from.X, from.Z);
+
+            bool picked = this.PickAll<T>(ray, SceneObjectUsages.Ground, out var pResults);
+            if (picked)
+            {
+                result = pResults
+                    .SelectMany(r => r.PickingResults)
+                    .OrderBy(r => Vector3.DistanceSquared(from, r.Position))
+                    .First();
+
+                return true;
+            }
+
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
 
         /// <inheritdoc/>
@@ -1193,13 +811,13 @@ namespace Engine
                 GameEnvironment = GameEnvironment.GetState(),
                 SceneLights = Lights.GetState(),
                 Camera = Camera.GetState(),
-                Components = internalComponents.OfType<IHasGameState>().Select(c => c.GetState()).OfType<ISceneObjectState>().ToArray(),
+                Components = Components.Get<IHasGameState>().Select(c => c.GetState()).OfType<ISceneObjectState>().ToArray(),
             };
         }
         /// <inheritdoc/>
         public virtual void SetState(IGameState state)
         {
-            if (!(state is SceneState sceneState))
+            if (state is not SceneState sceneState)
             {
                 return;
             }
@@ -1220,10 +838,7 @@ namespace Engine
             Camera.SetState(sceneState.Camera);
             foreach (var componentState in sceneState.Components)
             {
-                var component = internalComponents
-                    .Where(c => c.Id == componentState.Id)
-                    .OfType<IHasGameState>()
-                    .FirstOrDefault();
+                var component = Components.ById(componentState.Id) as IHasGameState;
 
                 component?.SetState(componentState);
             }

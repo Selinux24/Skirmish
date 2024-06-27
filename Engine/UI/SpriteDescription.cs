@@ -14,7 +14,7 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static SpriteDescription Default(float width = 0, float height = 0)
         {
-            return new SpriteDescription()
+            return new()
             {
                 Width = width,
                 Height = height,
@@ -28,12 +28,9 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static SpriteDescription Default(Color4 baseColor, float width = 0, float height = 0)
         {
-            var blendMode = baseColor.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
-
-            return new SpriteDescription
+            return new()
             {
                 BaseColor = baseColor,
-                BlendMode = blendMode,
                 Width = width,
                 Height = height,
             };
@@ -46,9 +43,9 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static SpriteDescription Default(string fileName, float width = 0, float height = 0)
         {
-            return new SpriteDescription
+            return new()
             {
-                Textures = new[] { fileName },
+                Textures = [fileName],
                 BaseColor = Color4.White,
                 Width = width,
                 Height = height,
@@ -57,9 +54,11 @@ namespace Engine.UI
         /// <summary>
         /// Gets a background sprite description
         /// </summary>
-        public static SpriteDescription Background()
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public static SpriteDescription Background(float width = 0, float height = 0)
         {
-            var desc = Default();
+            var desc = Default(width, height);
             desc.FitParent = true;
             return desc;
         }
@@ -67,9 +66,11 @@ namespace Engine.UI
         /// Gets a background sprite description
         /// </summary>
         /// <param name="baseColor">Base color</param>
-        public static SpriteDescription Background(Color4 baseColor)
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public static SpriteDescription Background(Color4 baseColor, float width = 0, float height = 0)
         {
-            var desc = Default(baseColor);
+            var desc = Default(baseColor, width, height);
             desc.FitParent = true;
             return desc;
         }
@@ -77,9 +78,11 @@ namespace Engine.UI
         /// Gets a background sprite description
         /// </summary>
         /// <param name="fileName">Texture file name</param>
-        public static SpriteDescription Background(string fileName)
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public static SpriteDescription Background(string fileName, float width = 0, float height = 0)
         {
-            var desc = Default(fileName);
+            var desc = Default(fileName, width, height);
             desc.FitParent = true;
             return desc;
         }

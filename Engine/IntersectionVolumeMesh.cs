@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Mesh intersection volume
     /// </summary>
-    public struct IntersectionVolumeMesh : IIntersectionVolume
+    public struct IntersectionVolumeMesh : ICullingVolume
     {
         /// <summary>
         /// Triangle list
@@ -35,29 +35,29 @@ namespace Engine
             Vector3 center = Vector3.Zero;
             for (int i = 0; i < mesh.Count(); i++)
             {
-                center += mesh.ElementAt(i).Center;
+                center += mesh.ElementAt(i).GetCenter();
             }
 
             Position = center / mesh.Count();
         }
 
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingBox bbox)
+        public readonly ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.MeshContainsBox(mesh, bbox);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingSphere sphere)
+        public readonly ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.MeshContainsSphere(mesh, sphere);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingFrustum frustum)
+        public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.MeshContainsFrustum(mesh, frustum);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.MeshContainsMesh(this.mesh, mesh);
         }

@@ -1,7 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -10,41 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     /// </summary>
     public class ContourRegion
     {
-        /// <summary>
-        /// Gets whether the specified segments intersects
-        /// </summary>
-        /// <param name="d0">First segment</param>
-        /// <param name="d1">Second segment</param>
-        /// <param name="i">Incident vertex index</param>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="n">Number of vertices</param>
-        /// <returns></returns>
-        private static bool IntersectSegCountour(Int4 d0, Int4 d1, int i, IEnumerable<Int4> verts, int n)
-        {
-            // For each edge (k,k+1) of P
-            for (int k = 0; k < n; k++)
-            {
-                int k1 = RecastUtils.Next(k, n);
-                // Skip edges incident to i.
-                if (i == k || i == k1)
-                {
-                    continue;
-                }
-                var p0 = verts.ElementAt(k);
-                var p1 = verts.ElementAt(k1);
-                if (d0 == p0 || d1 == p0 || d0 == p1 || d1 == p1)
-                {
-                    continue;
-                }
-
-                if (RecastUtils.Intersect(d0, d1, p0, p1))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         /// <summary>
         /// Contour outline
         /// </summary>
@@ -57,6 +20,32 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Number of holes
         /// </summary>
         public int NHoles { get; set; }
+
+        /// <summary>
+        /// Find potential diagonals
+        /// </summary>
+        /// <param name="corner">Corner</param>
+        /// <param name="outline">Contour</param>
+        /// <returns>Returns a list of potential diagonals</returns>
+        private static PotentialDiagonal[] FindPotentialDiagonals(ContourVertex corner, Contour outline)
+        {
+            var diags = new List<PotentialDiagonal>();
+
+            foreach (var (i, ca, cb, cc) in outline.IterateTriangles())
+            {
+                if (TriangulationHelper.InCone2D(ca, cb, cc, corner.Coords))
+                {
+                    int dx = ca.X - corner.X;
+                    int dz = ca.Z - corner.Z;
+                    diags.Add(new() { Vert = i, Dist = dx * dx + dz * dz });
+                }
+            }
+
+            // Sort potential diagonals by distance, we want to make the connection as short as possible.
+            diags.Sort(PotentialDiagonal.DefaultComparer);
+
+            return [.. diags];
+        }
 
         /// <summary>
         /// Merges the region holes
@@ -83,6 +72,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
+        /// <summary>
+        /// Sort holes
+        /// </summary>
         private void SortHoles()
         {
             for (int i = 0; i < NHoles; i++)
@@ -93,14 +85,21 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Holes[i].Leftmost = leftmost;
             }
 
-            Array.Sort(Holes, ContourHole.DefaultComparer);
+            Array.Sort(Holes, ContourHole.Comparer);
         }
+        /// <summary>
+        /// Find best vertex
+        /// </summary>
+        /// <param name="hole">Contour hole</param>
+        /// <param name="outline">Contour</param>
+        /// <param name="i">Index</param>
+        /// <returns>Returns the bests vertices and indexes</returns>
         private (int BestVertex, int BestIndex) FindBestVertex(ContourHole hole, Contour outline, int i)
         {
             int index = -1;
             int bestVertex = hole.Leftmost;
 
-            for (int iter = 0; iter < hole.Contour.NVertices; iter++)
+            for (int iter = 0; iter < hole.Contour.GetVertexCount(); iter++)
             {
                 // Find potential diagonals.
                 // The 'best' vertex must be in the cone described by 3 cosequtive vertices of the outline.
@@ -110,7 +109,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 //   |
                 // j o-----o j+1
                 //         :
-                var corner = hole.Contour.Vertices[bestVertex];
+                var corner = hole.Contour.GetVertex(bestVertex);
                 var diags = FindPotentialDiagonals(corner, outline);
 
                 // Find a diagonal that is not intersecting the outline not the remaining holes.
@@ -124,45 +123,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // All the potential diagonals for the current vertex were intersecting, try next vertex.
-                bestVertex = (bestVertex + 1) % hole.Contour.NVertices;
+                bestVertex = (bestVertex + 1) % hole.Contour.GetVertexCount();
             }
 
             return (bestVertex, index);
         }
-        private IEnumerable<PotentialDiagonal> FindPotentialDiagonals(Int4 corner, Contour outline)
-        {
-            List<PotentialDiagonal> diags = new List<PotentialDiagonal>();
-
-            for (int j = 0; j < outline.NVertices; j++)
-            {
-                if (RecastUtils.InCone(j, outline.NVertices, outline.Vertices, corner))
-                {
-                    int dx = outline.Vertices[j].X - corner.X;
-                    int dz = outline.Vertices[j].Z - corner.Z;
-                    var pd = new PotentialDiagonal { Vert = j, Dist = dx * dx + dz * dz };
-                    diags.Add(pd);
-                }
-            }
-
-            // Sort potential diagonals by distance, we want to make the connection as short as possible.
-            diags.Sort(PotentialDiagonal.DefaultComparer);
-
-            return diags;
-        }
-        private int FindBestIndex(int i, Int4 corner, Contour outline, IEnumerable<PotentialDiagonal> diags)
+        /// <summary>
+        /// Find best index
+        /// </summary>
+        /// <param name="i">Index</param>
+        /// <param name="corner">Corner</param>
+        /// <param name="outline">Contour</param>
+        /// <param name="diags">List of potential diagonals</param>
+        private int FindBestIndex(int i, ContourVertex corner, Contour outline, PotentialDiagonal[] diags)
         {
             int bestIndex = -1;
-            for (int j = 0; j < diags.Count(); j++)
+
+            for (int j = 0; j < diags.Length; j++)
             {
-                var pt = outline.Vertices[diags.ElementAt(j).Vert];
-                bool intersect = IntersectSegCountour(pt, corner, diags.ElementAt(i).Vert, outline.Vertices, outline.NVertices);
+                var pt = outline.GetVertex(diags[j].Vert);
+
+                bool intersect = outline.IntersectSegCountour(pt, corner, diags[i].Vert);
                 for (int k = i; k < NHoles && !intersect; k++)
                 {
-                    intersect |= IntersectSegCountour(pt, corner, -1, Holes[k].Contour.Vertices, Holes[k].Contour.NVertices);
+                    intersect |= Holes[k].Contour.IntersectSegCountour(pt, corner, -1);
                 }
+
                 if (!intersect)
                 {
-                    bestIndex = diags.ElementAt(j).Vert;
+                    bestIndex = diags[j].Vert;
                     break;
                 }
             }

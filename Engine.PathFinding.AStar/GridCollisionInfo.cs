@@ -10,23 +10,20 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Collision point
         /// </summary>
-        public Vector3 Point;
+        public Vector3 Point { get; set; }
         /// <summary>
         /// Collision triangle
         /// </summary>
-        public Triangle Triangle;
+        public Triangle Triangle { get; set; }
         /// <summary>
         /// Distance to point
         /// </summary>
-        public float Distance;
+        public float Distance { get; set; }
 
-        /// <summary>
-        /// Gets text representarion of collision
-        /// </summary>
-        /// <returns>Returns text representarion of collision</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", this.Point);
+            return $"{Point}";
         }
     }
 }

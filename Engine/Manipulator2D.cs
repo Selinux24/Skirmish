@@ -2,15 +2,21 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 2D manipulator
     /// </summary>
-    public class Manipulator2D
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="game">Game</param>
+    public class Manipulator2D(Game game)
     {
         /// <summary>
         /// Game instance
         /// </summary>
-        private readonly Game game;
+        private readonly Game game = game;
         /// <summary>
         /// Update internals flag
         /// </summary>
@@ -53,15 +59,6 @@ namespace Engine
         public float LinearVelocity { get; set; } = 1f;
 
         /// <summary>
-        /// Contructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        public Manipulator2D(Game game)
-        {
-            this.game = game;
-        }
-
-        /// <summary>
         /// Updates the internal state
         /// </summary>
         /// <param name="parentPosition">Parent position</param>
@@ -88,14 +85,14 @@ namespace Engine
 
             updateInternals = false;
 
-            Counters.UpdatesPerFrame++;
+            FrameCounters.PickCounters.TransformUpdatesPerFrame++;
         }
 
         /// <summary>
         /// Increments position component d distance along left vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveLeft(GameTime gameTime, float d = 1f)
+        public void MoveLeft(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitX * -d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -105,7 +102,7 @@ namespace Engine
         /// Increments position component d distance along right vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveRight(GameTime gameTime, float d = 1f)
+        public void MoveRight(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitX * d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -115,7 +112,7 @@ namespace Engine
         /// Increments position component d distance along up vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveUp(GameTime gameTime, float d = 1f)
+        public void MoveUp(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitY * d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -125,7 +122,7 @@ namespace Engine
         /// Increments position component d distance along down vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveDown(GameTime gameTime, float d = 1f)
+        public void MoveDown(IGameTime gameTime, float d = 1f)
         {
             Position += Vector2.UnitY * -d * LinearVelocity * gameTime.ElapsedSeconds;
 
@@ -206,7 +203,7 @@ namespace Engine
             updateInternals = true;
         }
         /// <summary>
-        /// Stes rotation
+        /// Sets rotation
         /// </summary>
         /// <param name="angle">Rotation angle in radians</param>
         public void SetRotation(float angle)
@@ -216,10 +213,7 @@ namespace Engine
             updateInternals = true;
         }
 
-        /// <summary>
-        /// Gets manipulator text representation
-        /// </summary>
-        /// <returns>Returns manipulator text description</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Size: {SizeTransform.GetDescription()}; Sprite: {SpriteTransform.GetDescription()}";

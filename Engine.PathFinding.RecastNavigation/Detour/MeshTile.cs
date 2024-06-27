@@ -5,13 +5,16 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Mesh tile
     /// </summary>
     public class MeshTile
     {
+        /// <summary>
+        /// A value that indicates the entity does not link to anything.
+        /// </summary>
+        public const int DT_NULL_LINK = int.MaxValue;
+
         /// <summary>
         /// Tile index
         /// </summary>
@@ -81,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the polygon list
         /// </summary>
-        public IEnumerable<Poly> GetPolys()
+        public Poly[] GetPolys()
         {
             return Polys.Take(Header.PolyCount).ToArray();
         }
@@ -105,7 +108,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var verts = GetPolyVerts(poly);
 
-            if (!verts.Any())
+            if (verts.Length == 0)
             {
                 return center;
             }
@@ -115,7 +118,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 center += v;
             }
 
-            center *= 1.0f / verts.Count();
+            center *= 1.0f / verts.Length;
 
             return center;
         }
@@ -133,7 +136,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var va = Verts[p.Verts[0]];
                 var vb = Verts[p.Verts[j - 1]];
                 var vc = Verts[p.Verts[j]];
-                polyArea += DetourUtils.TriArea2D(va, vb, vc);
+                polyArea += Utils.TriArea2D(va, vb, vc);
             }
 
             return polyArea;
@@ -143,16 +146,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the vertex list</returns>
-        public IEnumerable<Vector3> GetPolyVerts(Poly poly)
+        public Vector3[] GetPolyVerts(Poly poly)
         {
-            Vector3[] verts = new Vector3[poly.VertCount];
+            Vector3[] res = new Vector3[poly.VertCount];
 
             for (int j = 0; j < poly.VertCount; j++)
             {
-                verts[j] = Verts[poly.Verts[j]];
+                res[j] = Verts[poly.Verts[j]];
             }
 
-            return verts;
+            return res;
         }
         /// <summary>
         /// Calculates the bounds of the Polygon
@@ -197,9 +200,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Gets the off-mesh connection list
         /// </summary>
-        public IEnumerable<OffMeshConnection> GetOffMeshConnections()
+        public OffMeshConnection[] GetOffMeshConnections()
         {
-            return OffMeshCons.Take(Header.OffMeshConCount).Where(o => o != null).ToArray();
+            return OffMeshCons
+                .Take(Header.OffMeshConCount)
+                .Where(o => o != null)
+                .ToArray();
         }
         /// <summary>
         /// Gets the off-mesh connection by off-mesh connection index
@@ -211,6 +217,28 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return OffMeshCons[index];
         }
 
+        /// <summary>
+        /// Allocates a link
+        /// </summary>
+        public int AllocLink()
+        {
+            if (LinksFreeList == DT_NULL_LINK)
+            {
+                return DT_NULL_LINK;
+            }
+            int link = LinksFreeList;
+            LinksFreeList = Links[link].Next;
+            return link;
+        }
+        /// <summary>
+        /// Frees the specified link
+        /// </summary>
+        /// <param name="link">Link</param>
+        public void FreeLink(int link)
+        {
+            Links[link].Next = LinksFreeList;
+            LinksFreeList = link;
+        }
         /// <summary>
         /// Find link that points to neighbour reference.
         /// </summary>
@@ -224,7 +252,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             left = Vector3.Zero;
             right = Vector3.Zero;
 
-            for (int i = fromPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            for (int i = fromPoly.FirstLink; i != DT_NULL_LINK; i = Links[i].Next)
             {
                 if (Links[i].NRef == r)
                 {
@@ -291,7 +319,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int idx1 = 1;
 
             // Find link that points to first vertex.
-            for (int i = poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            for (int i = poly.FirstLink; i != DT_NULL_LINK; i = Links[i].Next)
             {
                 if (Links[i].Edge == 0)
                 {
@@ -350,19 +378,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="p">Polygon</param>
         /// <returns>Returns a triangle array</returns>
-        public IEnumerable<Triangle> GetDetailTris(Poly p)
+        public List<Triangle> GetDetailTris(Poly p)
         {
-            PolyDetail pd = GetDetailMesh(p);
+            List<Triangle> tris = [];
 
-            List<Triangle> tris = new List<Triangle>();
+            var pd = GetDetailMesh(p);
 
             for (int k = 0; k < pd.TriCount; k++)
             {
-                PolyMeshTriangleIndices pmt = DetailTris[pd.TriBase + k];
+                var pmt = DetailTris[pd.TriBase + k];
 
-                Triangle t = GetDetailTri(p, pd.VertBase, pmt);
-
-                tris.Add(t);
+                tris.Add(GetDetailTri(p, pd.VertBase, pmt));
             }
 
             return tris;
@@ -389,25 +415,164 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="data">Mesh data</param>
         public void SetData(MeshData data)
         {
-            this.Data = data;
+            Data = data;
 
-            if (data.NavVerts.Count > 0) Verts = data.NavVerts.ToArray();
-            if (data.NavPolys.Count > 0) Polys = data.NavPolys.ToArray();
+            if (data.NavVerts.Count > 0) Verts = [.. data.NavVerts];
+            if (data.NavPolys.Count > 0) Polys = [.. data.NavPolys];
 
-            if (data.NavDMeshes.Count > 0) DetailMeshes = data.NavDMeshes.ToArray();
-            if (data.NavDVerts.Count > 0) DetailVerts = data.NavDVerts.ToArray();
-            if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
-            if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
-            if (data.OffMeshCons.Count > 0)
-            {
-                OffMeshCons = data.OffMeshCons.ToArray();
-            }
+            if (data.NavDMeshes.Count > 0) DetailMeshes = [.. data.NavDMeshes];
+            if (data.NavDVerts.Count > 0) DetailVerts = [.. data.NavDVerts];
+            if (data.NavDTris.Count > 0) DetailTris = [.. data.NavDTris];
+            if (data.NavBvtree.Count > 0) BvTree = [.. data.NavBvtree];
+            if (data.OffMeshCons.Count > 0) OffMeshCons = [.. data.OffMeshCons];
         }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Gets the closest point on edges
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <param name="poly">Polygon</param>
+        /// <param name="pos">Position</param>
+        /// <param name="onlyBoundary">Use only boundaries or not</param>
+        /// <param name="closest">Resulting closest point</param>
+        public void ClosestPointOnDetailEdges(Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
+        {
+            var pd = GetDetailMesh(poly);
+
+            float dmin = float.MaxValue;
+            float tmin = 0;
+            var pmin = Vector3.Zero;
+            var pmax = Vector3.Zero;
+
+            int ANY_BOUNDARY_EDGE =
+                ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 4);
+
+            for (int i = 0; i < pd.TriCount; i++)
+            {
+                var tris = DetailTris[pd.TriBase + i];
+
+                if (onlyBoundary && (tris.Flags & ANY_BOUNDARY_EDGE) == 0)
+                {
+                    continue;
+                }
+
+                var v = GetDetailTri(poly, pd.VertBase, tris);
+
+                for (int k = 0, j = 2; k < 3; j = k++)
+                {
+                    var edgeFlags = tris.GetDetailTriEdgeFlags(j);
+
+                    if (!edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary) &&
+                        (onlyBoundary || tris[j] < tris[k]))
+                    {
+                        // Only looking at boundary edges and this is internal, or
+                        // this is an inner edge that we will see again or have already seen.
+                        continue;
+                    }
+
+                    float d = Utils.DistancePtSegSqr2D(pos, v[j], v[k], out var t);
+                    if (d < dmin)
+                    {
+                        dmin = d;
+                        tmin = t;
+                        pmin = v[j];
+                        pmax = v[k];
+                    }
+                }
+            }
+
+            closest = Vector3.Lerp(pmin, pmax, tmin);
+        }
+        /// <summary>
+        /// Gets the polygon height
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="pos">Position</param>
+        /// <param name="height">Resulting height</param>
+        /// <returns>Returns true if the height were found</returns>
+        public bool GetPolyHeight(Poly poly, Vector3 pos, out float height)
+        {
+            height = 0;
+
+            // Off-mesh connections do not have detail polys and getting height
+            // over them does not make sense.
+            if (poly.Type == PolyTypes.OffmeshConnection)
+            {
+                return false;
+            }
+
+            var pd = GetDetailMesh(poly);
+
+            var verts = GetPolyVerts(poly);
+
+            if (!Utils.PointInPolygon2D(pos, [.. verts]))
+            {
+                return false;
+            }
+
+            // Find height at the location.
+            for (int j = 0; j < pd.TriCount; j++)
+            {
+                var t = DetailTris[pd.TriBase + j];
+                Vector3[] v = new Vector3[3];
+                for (int k = 0; k < 3; ++k)
+                {
+                    if (t[k] < poly.VertCount)
+                    {
+                        v[k] = Verts[poly.Verts[t[k]]];
+                    }
+                    else
+                    {
+                        v[k] = DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
+                    }
+                }
+
+                if (Utils.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
+                {
+                    height = h;
+                    return true;
+                }
+            }
+
+            // If all triangle checks failed above (can happen with degenerate triangles
+            // or larger floating point values) the point is on an edge, so just select
+            // closest. This should almost never happen so the extra iteration here is
+            // ok.
+            ClosestPointOnDetailEdges(poly, pos, false, out var closest);
+
+            height = closest.Y;
+
+            return true;
+        }
+        /// <summary>
+        /// Calculate quantized box
+        /// </summary>
+        public void CalculateQuantizedBox(BoundingBox bounds, out Int3 bmin, out Int3 bmax)
+        {
+            var tb = Header.Bounds;
+            float qfac = Header.BvQuantFactor;
+
+            // Clamp query box to world box.
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+
+            // Quantize
+            bmin = new Int3();
+            bmax = new Int3();
+            bmin.X = (int)(qfac * minx) & 0xfffe;
+            bmin.Y = (int)(qfac * miny) & 0xfffe;
+            bmin.Z = (int)(qfac * minz) & 0xfffe;
+            bmax.X = (int)(qfac * maxx + 1) | 1;
+            bmax.Y = (int)(qfac * maxy + 1) | 1;
+            bmax.Z = (int)(qfac * maxz + 1) | 1;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Index: {Index}; Salt: {Salt}; Links: {LinksFreeList}; Flags: {Flags}; Header: {Header}; Data: {Data}";

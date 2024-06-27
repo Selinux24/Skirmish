@@ -20,10 +20,6 @@ namespace Engine
         /// </summary>
         float Brightness { get; set; }
         /// <summary>
-        /// Shadow map index
-        /// </summary>
-        uint ShadowMapCount { get; set; }
-        /// <summary>
         /// From light view * projection matrix array
         /// </summary>
         Matrix ToShadowSpace { get; set; }
@@ -36,15 +32,21 @@ namespace Engine
         /// </summary>
         Vector4 ToCascadeOffsetY { get; set; }
         /// <summary>
-        /// Cascasde scale
+        /// Cascade scale
         /// </summary>
         Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
-        /// Gets light position at specified distance
+        /// Test the light shadow casting based on the viewer position
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns light position at specified distance</returns>
-        Vector3 GetPosition(float distance);
+        /// <param name="environment">Game environment</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        bool MarkForShadowCasting(GameEnvironment environment);
+        /// <summary>
+        /// Updates internal state 
+        /// </summary>
+        /// <param name="size">Map size</param>
+        /// <param name="cascades">Cascade distances</param>
+        void UpdateEnvironment(int size, float[] cascades);
     }
 }

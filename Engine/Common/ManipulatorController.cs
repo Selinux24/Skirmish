@@ -80,18 +80,10 @@ namespace Engine.Common
         /// </summary>
         public event EventHandler PathEnd;
 
-        /// <summary>
-        /// Computes current position and orientation in the curve
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator to update</param>
-        public abstract void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator);
+        /// <inheritdoc/>
+        public abstract void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator);
 
-        /// <summary>
-        /// Sets the path to follow
-        /// </summary>
-        /// <param name="newPath">Path to follow</param>
-        /// <param name="time">Path initial time</param>
+        /// <inheritdoc/>
         public virtual void Follow(IControllerPath newPath, float time = 0f)
         {
             path = newPath;
@@ -99,9 +91,7 @@ namespace Engine.Common
 
             PathStart?.Invoke(this, new EventArgs());
         }
-        /// <summary>
-        /// Clears current path
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void Clear()
         {
             path = null;
@@ -116,7 +106,7 @@ namespace Engine.Common
         /// <returns>Returns the current controller path</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime = 0.1f)
         {
-            return path?.SamplePath(sampleTime) ?? new Vector3[] { };
+            return path?.SamplePath(sampleTime) ?? Array.Empty<Vector3>();
         }
 
         /// <inheritdoc/>

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,34 +14,34 @@ namespace Tanks
         /// <summary>
         /// Controller list
         /// </summary>
-        private static readonly List<IController> trees = new List<IController>();
+        private static readonly List<IController> trees = [];
         /// <summary>
         /// Broken trees
         /// </summary>
-        private static readonly List<ModelInstance> brokenTrees = new List<ModelInstance>();
+        private static readonly List<ModelInstance> brokenTrees = [];
 
         /// <summary>
         /// Adds a tree to the controller
         /// </summary>
         /// <param name="tree">Tree</param>
         /// <param name="collision">Collision vector</param>
-        public static void AddFallingTree(ModelInstance tree, Vector3 collision)
+        public static void AddFallingTree(ModelInstance tree, Vector3 collisionVector)
         {
-            if (brokenTrees.Any(t => t == tree))
+            if (brokenTrees.Exists(t => t == tree))
             {
                 return;
             }
 
             brokenTrees.Add(tree);
 
-            trees.Add(new FallingTreeController() { Tree = tree, Collision = collision, Active = true });
+            trees.Add(new FallingTreeController() { Tree = tree, CollisionVector = collisionVector, Active = true });
         }
         /// <summary>
         /// Adds a tree to the controller
         /// </summary>
         /// <param name="tree">Tree</param>
-        /// <param name="durationSeconds">Seconds to disapear</param>
-        private static void AddBrokenTree(ModelInstance tree, float durationSeconds)
+        /// <param name="durationSeconds">Seconds to disappear</param>
+        public static void AddBrokenTree(ModelInstance tree, float durationSeconds)
         {
             trees.Add(new BrokenTreeController() { Tree = tree, DurationSeconds = durationSeconds, Active = true });
         }
@@ -48,21 +49,25 @@ namespace Tanks
         /// <summary>
         /// Updates the internal state
         /// </summary>
-        public static void Update(GameTime gameTime)
+        public static void Update(IGameTime gameTime)
         {
-            if (!trees.Any())
+            if (trees.Count == 0)
             {
                 return;
             }
 
             trees.RemoveAll(controller => !controller.Active);
 
-            if (!trees.Any())
+            if (trees.Count == 0)
             {
                 return;
             }
 
-            trees.ForEach(controller => controller.UpdateController(gameTime));
+            var activeTrees = trees.Where(controller => controller.Active).ToArray();
+            foreach (var tree in activeTrees)
+            {
+                tree.UpdateController(gameTime);
+            }
         }
 
         /// <summary>
@@ -71,7 +76,7 @@ namespace Tanks
         /// <param name="tree">Tree</param>
         public static bool IsBroken(ModelInstance tree)
         {
-            return brokenTrees.Any(t => t == tree);
+            return brokenTrees.Exists(t => t == tree);
         }
 
         /// <summary>
@@ -88,7 +93,7 @@ namespace Tanks
             /// Updates the controller
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            void UpdateController(GameTime gameTime);
+            void UpdateController(IGameTime gameTime);
         }
 
         /// <summary>
@@ -101,30 +106,23 @@ namespace Tanks
             /// </summary>
             public ModelInstance Tree { get; set; }
             /// <summary>
-            /// Collision
+            /// Collision vector
             /// </summary>
-            public Vector3 Collision { get; set; }
-            /// <summary>
-            /// Active
-            /// </summary>
+            public Vector3 CollisionVector { get; set; }
+            /// <inheritdoc/>
             public bool Active { get; set; }
 
-            /// <summary>
-            /// Updates the controller
-            /// </summary>
-            /// <param name="gameTime">Game time</param>
-            public void UpdateController(GameTime gameTime)
+            /// <inheritdoc/>
+            public void UpdateController(IGameTime gameTime)
             {
                 if (!Active)
                 {
                     return;
                 }
 
-                var target = Tree.Manipulator.Position + (Collision * 10f);
+                Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-                Tree.Manipulator.RotateTo(target, Axis.None, 0.1f);
-
-                if (MathUtil.NearEqual(1f, Vector3.Dot(Collision, Tree.Manipulator.Forward)))
+                if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
                 {
                     Active = false;
 
@@ -143,19 +141,14 @@ namespace Tanks
             /// </summary>
             public ModelInstance Tree { get; set; }
             /// <summary>
-            /// Disapearing duration
+            /// Disappearing duration
             /// </summary>
             public float DurationSeconds { get; set; }
-            /// <summary>
-            /// Active
-            /// </summary>
+            /// <inheritdoc/>
             public bool Active { get; set; }
 
-            /// <summary>
-            /// Updates the controller
-            /// </summary>
-            /// <param name="gameTime">Game time</param>
-            public void UpdateController(GameTime gameTime)
+            /// <inheritdoc/>
+            public void UpdateController(IGameTime gameTime)
             {
                 if (!Active)
                 {

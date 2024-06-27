@@ -1,9 +1,9 @@
-﻿using SharpDX.D3DCompiler;
-using System.IO;
+﻿using System.IO;
 
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX.D3DCompiler;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -19,23 +19,21 @@ namespace Engine
         /// <returns>Returns loaded effect</returns>
         public EngineEffect CompileEffect(byte[] bytes, string profile)
         {
-            using (var includeManager = new ShaderIncludeManager())
-            using (var cmpResult = ShaderBytecode.Compile(
+            using var includeManager = new ShaderIncludeManager();
+            using var cmpResult = ShaderBytecode.Compile(
                 bytes,
                 null,
                 profile,
                 ShaderFlags.EnableStrictness,
                 EffectFlags.None,
                 null,
-                includeManager))
-            {
-                var effect = new Effect(
-                    device,
-                    cmpResult.Bytecode.Data,
-                    EffectFlags.None);
+                includeManager);
+            var effect = new Effect(
+                device,
+                cmpResult.Bytecode.Data,
+                EffectFlags.None);
 
-                return new EngineEffect(effect);
-            }
+            return new EngineEffect(effect);
         }
         /// <summary>
         /// Loads an effect from pre-compiled file
@@ -44,30 +42,16 @@ namespace Engine
         /// <returns>Returns loaded effect</returns>
         public EngineEffect LoadEffect(byte[] bytes)
         {
-            using (var ms = new MemoryStream(bytes))
-            {
-                ms.Position = 0;
+            using var ms = new MemoryStream(bytes);
+            ms.Position = 0;
 
-                using (var effectCode = ShaderBytecode.FromStream(ms))
-                {
-                    var effect = new Effect(
-                        device,
-                        effectCode.Data,
-                        EffectFlags.None);
+            using var effectCode = ShaderBytecode.FromStream(ms);
+            var effect = new Effect(
+                device,
+                effectCode.Data,
+                EffectFlags.None);
 
-                    return new EngineEffect(effect);
-                }
-            }
-        }
-        /// <summary>
-        /// Apply effect pass
-        /// </summary>
-        /// <param name="technique"></param>
-        /// <param name="index"></param>
-        /// <param name="flags"></param>
-        public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
-        {
-            technique.GetPass(index).Apply(deviceContext, flags);
+            return new EngineEffect(effect);
         }
     }
 }

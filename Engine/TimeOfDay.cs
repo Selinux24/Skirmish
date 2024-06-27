@@ -23,7 +23,7 @@ namespace Engine
         /// <remarks>0 to 2PI</remarks>
         public static float CalcElevation(float lattitude, float decline, float meridianAngle)
         {
-            return (float)(Math.Asin(Math.Sin(lattitude) * Math.Sin(decline) + Math.Cos(lattitude) * Math.Cos(decline) * Math.Cos(meridianAngle)));
+            return MathF.Asin(MathF.Sin(lattitude) * MathF.Sin(decline) + MathF.Cos(lattitude) * MathF.Cos(decline) * MathF.Cos(meridianAngle));
         }
         /// <summary>
         /// Gets azimuth
@@ -35,7 +35,7 @@ namespace Engine
         /// <remarks>0 to PI</remarks>
         public static float CalcAzimuth(float lattitude, float decline, float meridianAngle)
         {
-            return (float)(Math.Atan2(Math.Sin(meridianAngle), Math.Cos(meridianAngle) * Math.Sin(lattitude) - Math.Tan(decline) * Math.Cos(lattitude))) + MathUtil.Pi;
+            return MathF.Atan2(MathF.Sin(meridianAngle), MathF.Cos(meridianAngle) * MathF.Sin(lattitude) - MathF.Tan(decline) * MathF.Cos(lattitude)) + MathUtil.Pi;
         }
         /// <summary>
         /// Gets the sun light direction based upon elevation and azimuth angles
@@ -164,7 +164,7 @@ namespace Engine
         {
             get
             {
-                return PreviuosElevation != Elevation;
+                return !MathUtil.NearEqual(PreviuosElevation, Elevation);
             }
         }
 
@@ -195,7 +195,7 @@ namespace Engine
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public void Update(IGameTime gameTime)
         {
             if (Animate)
             {
@@ -212,15 +212,7 @@ namespace Engine
         {
             PreviuosElevation = NextElevation;
 
-            if (AzimuthOverride != 0f)
-            {
-                Elevation = MeridianAngle;
-                Azimuth = AzimuthOverride;
-
-                //Already normalized
-                NextElevation = Elevation;
-            }
-            else
+            if (MathUtil.IsZero(AzimuthOverride))
             {
                 //Simplified azimuth/elevation calculation.
 
@@ -245,6 +237,14 @@ namespace Engine
 
                 NextElevation = normalizedElevation;
             }
+            else
+            {
+                Elevation = MeridianAngle;
+                Azimuth = AzimuthOverride;
+
+                //Already normalized
+                NextElevation = Elevation;
+            }
 
             LightDirection = CalcLightDirection(Elevation, Azimuth);
         }
@@ -256,7 +256,7 @@ namespace Engine
         /// <param name="update">Sets whether update internal state or not</param>
         public void SetTimeOfDay(float time, bool update = false)
         {
-            StartTimeOfDayValue = Math.Abs(time) % 1.0f;
+            StartTimeOfDayValue = MathF.Abs(time) % 1.0f;
 
             if (update)
             {

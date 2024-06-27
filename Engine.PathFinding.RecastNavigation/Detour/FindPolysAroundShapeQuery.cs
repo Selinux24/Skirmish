@@ -1,28 +1,26 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     /// <summary>
     /// Find polygons around a shape query
     /// </summary>
-    public class FindPolysAroundShapeQuery : IFindPolysQuery
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="vertices"></param>
+    public class FindPolysAroundShapeQuery(Vector3[] vertices) : IFindPolysQuery
     {
         /// <summary>
         /// Shape vertices (polygon)
         /// </summary>
-        public IEnumerable<Vector3> Vertices { get; set; }
+        private readonly Vector3[] vertices = vertices;
 
-        /// <summary>
-        /// Performs the query against a segment
-        /// </summary>
-        /// <param name="va">Segment point A</param>
-        /// <param name="vb">Segment point B</param>
-        /// <returns>Returns true if the query passes</returns>
+        /// <inheritdoc/>
         public bool Contains(Vector3 va, Vector3 vb)
         {
             // If the poly is not touching the edge to the next polygon, skip the connection it.
-            if (!DetourUtils.IntersectSegmentPoly2D(va, vb, Vertices, out float tmin, out float tmax, out _, out _))
+            if (!Utils.IntersectSegmentPoly2D(va, vb, vertices, out float tmin, out float tmax, out _, out _))
             {
                 return false;
             }

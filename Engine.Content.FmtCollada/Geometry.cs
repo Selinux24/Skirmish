@@ -19,9 +19,15 @@ namespace Engine.Collada
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return "Geometry;";
+            string typeName = "None";
+            if (ConvexMesh != null) typeName = nameof(ConvexMesh);
+            if (Mesh != null) typeName = nameof(Mesh);
+            if (Spline != null) typeName = nameof(Spline);
+
+            return base.ToString() + $" Type: {typeName};";
         }
     }
 }

@@ -6,8 +6,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Oriented box obstacle
     /// </summary>
-    public struct ObstacleOrientedBox : IObstacle
+    public readonly struct ObstacleOrientedBox : IObstacle
     {
+        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
+
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix
         /// </summary>
@@ -31,22 +33,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            var yRotation = 0f;
+            if (MathUtil.IsZero(rotation.Angle))
+            {
+                return 0f;
+            }
 
             // Validates the angle and axis
-            if (rotation.Angle != 0)
+            var yRotation = 0f;
+
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
             {
-                Vector3 epsilon = Vector3.Up * 0.0001f;
+                yRotation = rotation.Angle;
+            }
 
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
-                {
-                    yRotation = rotation.Angle;
-                }
-
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
-                {
-                    yRotation = -rotation.Angle;
-                }
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
+            {
+                yRotation = -rotation.Angle;
             }
 
             return yRotation;
@@ -55,28 +57,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Box center
         /// </summary>
-        public Vector3 Center { get; set; }
+        private readonly Vector3 center;
         /// <summary>
         /// Half extents
         /// </summary>
-        public Vector3 HalfExtents { get; set; }
+        private readonly Vector3 halfExtents;
         /// <summary>
         /// Y axis rotation in radians
         /// </summary>
-        public float YRadians { get; set; }
-        /// <summary>
-        /// Auxiliary rotation vector
-        /// </summary>
-        /// <remarks>{ cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }</remarks>
-        public Vector2 RotAux
-        {
-            get
-            {
-                float coshalf = (float)Math.Cos(0.5f * YRadians);
-                float sinhalf = (float)Math.Sin(-0.5f * YRadians);
-                return new Vector2(coshalf * sinhalf, coshalf * coshalf - 0.5f);
-            }
-        }
+        private readonly float yRadians;
 
         /// <summary>
         /// Constructor
@@ -86,49 +75,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             var yRotation = GetYRotation(obbox.Transformation);
 
-            Center = obbox.Center;
-            HalfExtents = obbox.Extents;
-            YRadians = yRotation;
+            center = obbox.Center;
+            halfExtents = obbox.Extents;
+            yRadians = yRotation;
         }
 
-        /// <summary>
-        /// Gets the obstacle bounds
-        /// </summary>
-        /// <returns>Returns a bounding box</returns>
-        public BoundingBox GetBounds()
+        /// <inheritdoc/>
+        public readonly BoundingBox GetBounds()
         {
-            float maxr = 1.41f * Math.Max(HalfExtents.X, HalfExtents.Z);
+            float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
 
             Vector3 bmin;
             Vector3 bmax;
 
-            bmin.X = Center.X - maxr;
-            bmax.X = Center.X + maxr;
-            bmin.Y = Center.Y - HalfExtents.Y;
-            bmax.Y = Center.Y + HalfExtents.Y;
-            bmin.Z = Center.Z - maxr;
-            bmax.Z = Center.Z + maxr;
+            bmin.X = center.X - maxr;
+            bmax.X = center.X + maxr;
+            bmin.Y = center.Y - halfExtents.Y;
+            bmax.Y = center.Y + halfExtents.Y;
+            bmin.Z = center.Z - maxr;
+            bmax.Z = center.Z + maxr;
 
             return new BoundingBox(bmin, bmax);
         }
-        /// <summary>
-        /// Marks the build context area with the specified area type
-        /// </summary>
-        /// <param name="tc">Build context</param>
-        /// <param name="orig">Origin</param>
-        /// <param name="cs">Cell size</param>
-        /// <param name="ch">Cell height</param>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns true if all layer areas were marked</returns>
-        public bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        /// <inheritdoc/>
+        public bool MarkArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            float cx = (Center.X - orig.X) * ics;
-            float cz = (Center.Z - orig.Z) * ics;
+            float cx = (center.X - orig.X) * ics;
+            float cz = (center.Z - orig.Z) * ics;
 
             var bounds = ComputeBounds(orig, w, h, cx, cz, ics, ich);
             if (!bounds.HasValue)
@@ -139,8 +117,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var min = bounds.Value.Min;
             var max = bounds.Value.Max;
 
-            float xhalf = HalfExtents.X * ics + 0.5f;
-            float zhalf = HalfExtents.Z * ics + 0.5f;
+            float xhalf = halfExtents.X * ics + 0.5f;
+            float zhalf = halfExtents.Z * ics + 0.5f;
 
             for (int z = min.Z; z <= max.Z; ++z)
             {
@@ -154,27 +132,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         continue;
                     }
 
-                    int y = tc.Layer.Heights[x + z * w];
+                    int idx = x + z * w;
+
+                    int y = layer.GetHeight(idx);
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    tc.Layer.Areas[x + z * w] = area;
+                    layer.SetArea(idx, area);
                 }
             }
 
             return true;
         }
-        private bool FilterRotation(float x2, float z2, float xhalf, float zhalf)
+        /// <summary>
+        /// Filters the rotation
+        /// </summary>
+        private readonly bool FilterRotation(float x2, float z2, float xhalf, float zhalf)
         {
-            float xrot = RotAux.Y * x2 + RotAux.X * z2;
+            var rotAux = GetRotAux();
+
+            float xrot = rotAux.Y * x2 + rotAux.X * z2;
             if (xrot > xhalf || xrot < -xhalf)
             {
                 return true;
             }
 
-            float zrot = RotAux.Y * z2 - RotAux.X * x2;
+            float zrot = rotAux.Y * z2 - rotAux.X * x2;
             if (zrot > zhalf || zrot < -zhalf)
             {
                 return true;
@@ -182,15 +167,28 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return false;
         }
+        /// <summary>
+        /// Auxiliary rotation vector
+        /// </summary>
+        /// <remarks>{ cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }</remarks>
+        private readonly Vector2 GetRotAux()
+        {
+            float coshalf = MathF.Cos(0.5f * yRadians);
+            float sinhalf = MathF.Sin(-0.5f * yRadians);
+            return new Vector2(coshalf * sinhalf, coshalf * coshalf - 0.5f);
+        }
+        /// <summary>
+        /// Computes the obstacle bounds
+        /// </summary>
         private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
         {
-            float maxr = 1.41f * Math.Max(HalfExtents.X, HalfExtents.Z);
-            int minx = (int)Math.Floor(cx - maxr * ics);
-            int maxx = (int)Math.Floor(cx + maxr * ics);
-            int minz = (int)Math.Floor(cz - maxr * ics);
-            int maxz = (int)Math.Floor(cz + maxr * ics);
-            int miny = (int)Math.Floor((Center.Y - HalfExtents.Y - orig.Y) * ich);
-            int maxy = (int)Math.Floor((Center.Y + HalfExtents.Y - orig.Y) * ich);
+            float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
+            int minx = (int)MathF.Floor(cx - maxr * ics);
+            int maxx = (int)MathF.Floor(cx + maxr * ics);
+            int minz = (int)MathF.Floor(cz - maxr * ics);
+            int maxz = (int)MathF.Floor(cz + maxr * ics);
+            int miny = (int)MathF.Floor((center.Y - halfExtents.Y - orig.Y) * ich);
+            int maxy = (int)MathF.Floor((center.Y + halfExtents.Y - orig.Y) * ich);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

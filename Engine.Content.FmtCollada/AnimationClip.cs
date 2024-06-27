@@ -21,12 +21,13 @@ namespace Engine.Collada
 
         public AnimationClip()
         {
-            this.Start = 0;
+            Start = 0;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("AnimationClip; Start: {0}; End {1}; ", this.Start, this.End) + base.ToString();
+            return base.ToString() + $" Start: {Start}; End {End};";
         }
     }
 }

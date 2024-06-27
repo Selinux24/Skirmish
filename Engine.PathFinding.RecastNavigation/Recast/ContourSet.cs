@@ -11,488 +11,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class ContourSet
     {
         /// <summary>
-        /// The value returned by #rcGetCon if the specified direction is not connected
-        /// to another span. (Has no neighbor.)
-        /// </summary>
-        public const int RC_NOT_CONNECTED = 0x3f;
-        /// <summary>
-        /// Heighfield border flag.
-        /// If a heightfield region ID has this bit set, then the region is a border 
-        /// region and its spans are considered unwalkable.
-        /// (Used during the region and contour build process.)
-        /// </summary>
-        public const int RC_BORDER_REG = 0x8000;
-        /// <summary>
-        /// Applied to the region id field of contour vertices in order to extract the region id.
-        /// The region id field of a vertex may have several flags applied to it.  So the
-        /// fields value can't be used directly.
-        /// </summary>
-        public const int RC_CONTOUR_REG_MASK = 0xffff;
-        /// <summary>
-        /// Area border flag.
-        /// If a region ID has this bit set, then the associated element lies on
-        /// the border of an area.
-        /// (Used during the region and contour build process.)
-        /// </summary>
-        public const int RC_AREA_BORDER = 0x20000;
-        /// <summary>
-        /// Border vertex flag.
-        /// If a region ID has this bit set, then the associated element lies on
-        /// a tile border. If a contour vertex's region ID has this bit set, the 
-        /// vertex will later be removed in order to match the segments and vertices 
-        /// at tile boundaries.
-        /// (Used during the build process.)
-        /// </summary>
-        public const int RC_BORDER_VERTEX = 0x10000;
-
-        /// <summary>
-        /// Builds a new contour set
-        /// </summary>
-        /// <param name="chf">Compact heightfield</param>
-        /// <param name="maxError">Maximum error value</param>
-        /// <param name="maxEdgeLen">Maximum edge length</param>
-        /// <param name="buildFlags">Build flags</param>
-        /// <returns>Returns the new contour</returns>
-        public static ContourSet Build(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
-        {
-            var cset = CreateContourSet(chf, maxError, maxEdgeLen, buildFlags);
-
-            // Merge holes if needed.
-            cset.MergeHoles(chf);
-
-            return cset;
-        }
-        private static ContourSet CreateContourSet(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
-        {
-            int w = chf.Width;
-            int h = chf.Height;
-            int borderSize = chf.BorderSize;
-            int maxContours = Math.Max(chf.MaxRegions, 8);
-
-            var bmin = chf.BoundingBox.Minimum;
-            var bmax = chf.BoundingBox.Maximum;
-            if (borderSize > 0)
-            {
-                // If the heightfield was build with bordersize, remove the offset.
-                float pad = borderSize * chf.CellSize;
-                bmin.X += pad;
-                bmin.Z += pad;
-                bmax.X -= pad;
-                bmax.Z -= pad;
-            }
-
-            ContourSet cset = new ContourSet
-            {
-                BMin = bmin,
-                BMax = bmax,
-                CellSize = chf.CellSize,
-                CellHeight = chf.CellHeight,
-                Width = chf.Width - chf.BorderSize * 2,
-                Height = chf.Height - chf.BorderSize * 2,
-                BorderSize = chf.BorderSize,
-                MaxError = maxError,
-                Conts = new Contour[maxContours],
-                NConts = 0
-            };
-
-            int[] flags = InitializeFlags(chf);
-
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    cset.AddCompactCell(x, y, chf, maxError, maxEdgeLen, buildFlags, ref flags);
-                }
-            }
-
-            return cset;
-        }
-        private static int[] InitializeFlags(CompactHeightfield chf)
-        {
-            int[] flags = new int[chf.SpanCount];
-
-            int w = chf.Width;
-            int h = chf.Height;
-
-            // Mark boundaries.
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    InitializeCellFlags(x, y, chf, ref flags);
-                }
-            }
-
-            return flags;
-        }
-        private static void InitializeCellFlags(int x, int y, CompactHeightfield chf, ref int[] flags)
-        {
-            int w = chf.Width;
-
-            var c = chf.Cells[x + y * w];
-            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
-            {
-                if (chf.Spans[i].Reg == 0 || (chf.Spans[i].Reg & RC_BORDER_REG) != 0)
-                {
-                    flags[i] = 0;
-                    continue;
-                }
-
-                int res = 0;
-                var s = chf.Spans[i];
-                for (int dir = 0; dir < 4; ++dir)
-                {
-                    int r = 0;
-                    if (s.GetCon(dir) != RC_NOT_CONNECTED)
-                    {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
-                        int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
-                        r = chf.Spans[ai].Reg;
-                    }
-                    if (r == chf.Spans[i].Reg)
-                    {
-                        res |= (1 << dir);
-                    }
-                }
-                flags[i] = res ^ 0xf; // Inverse, mark non connected edges.
-            }
-        }
-
-        private static IEnumerable<Int4> SimplifyContour(IEnumerable<Int4> points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
-        {
-            // Add initial points.
-            var simplified = Initialize(points);
-
-            // Add points until all raw points are within
-            // error tolerance to the simplified shape.
-            simplified = AddPoints(points, simplified, maxError);
-
-            // Split too long edges.
-            simplified = SplitLongEdges(points, simplified, maxEdgeLen, buildFlags);
-
-            simplified = UpdateNeighbors(points, simplified);
-
-            simplified = RemoveDegenerateSegments(simplified);
-
-            return simplified;
-        }
-        /// <summary>
-        /// Add initial points.
-        /// </summary>
-        private static IEnumerable<Int4> Initialize(IEnumerable<Int4> points)
-        {
-            List<Int4> simplified = new List<Int4>();
-
-            bool hasConnections = PointsHasConnections(points);
-            if (hasConnections)
-            {
-                // The contour has some portals to other regions.
-                // Add a new point to every location where the region changes.
-                var changePoints = GetChangePoints(points);
-                simplified.AddRange(changePoints);
-            }
-
-            if (simplified.Count == 0)
-            {
-                // If there is no connections at all,
-                // create some initial points for the simplification process.
-                // Find lower-left and upper-right vertices of the contour.
-                var initialPoints = CreateInitialPoints(points);
-                simplified.AddRange(initialPoints);
-            }
-
-            return simplified;
-        }
-        private static bool PointsHasConnections(IEnumerable<Int4> points)
-        {
-            bool hasConnections = false;
-            for (int i = 0; i < points.Count(); i++)
-            {
-                if ((points.ElementAt(i).W & RC_CONTOUR_REG_MASK) != 0)
-                {
-                    hasConnections = true;
-                    break;
-                }
-            }
-            return hasConnections;
-        }
-        /// <summary>
-        /// Add a new point to every location where the region changes.
-        /// </summary>
-        private static IEnumerable<Int4> GetChangePoints(IEnumerable<Int4> points)
-        {
-            List<Int4> changes = new List<Int4>();
-
-            for (int i = 0, ni = points.Count(); i < ni; ++i)
-            {
-                int ii = (i + 1) % ni;
-                bool differentRegs = (points.ElementAt(i).W & RC_CONTOUR_REG_MASK) != (points.ElementAt(ii).W & RC_CONTOUR_REG_MASK);
-                bool areaBorders = (points.ElementAt(i).W & RC_AREA_BORDER) != (points.ElementAt(ii).W & RC_AREA_BORDER);
-                if (differentRegs || areaBorders)
-                {
-                    changes.Add(new Int4(points.ElementAt(i).X, points.ElementAt(i).Y, points.ElementAt(i).Z, i));
-                }
-            }
-
-            return changes;
-        }
-        /// <summary>
-        /// Find lower-left and upper-right vertices of the contour.
-        /// </summary>
-        private static IEnumerable<Int4> CreateInitialPoints(IEnumerable<Int4> points)
-        {
-            List<Int4> initialPoints = new List<Int4>();
-
-            int llx = points.First().X;
-            int lly = points.First().Y;
-            int llz = points.First().Z;
-            int lli = 0;
-            int urx = points.First().X;
-            int ury = points.First().Y;
-            int urz = points.First().Z;
-            int uri = 0;
-            for (int i = 0; i < points.Count(); i++)
-            {
-                int x = points.ElementAt(i).X;
-                int y = points.ElementAt(i).Y;
-                int z = points.ElementAt(i).Z;
-                if (x < llx || (x == llx && z < llz))
-                {
-                    llx = x;
-                    lly = y;
-                    llz = z;
-                    lli = i;
-                }
-                if (x > urx || (x == urx && z > urz))
-                {
-                    urx = x;
-                    ury = y;
-                    urz = z;
-                    uri = i;
-                }
-            }
-            initialPoints.Add(new Int4(llx, lly, llz, lli));
-            initialPoints.Add(new Int4(urx, ury, urz, uri));
-
-            return initialPoints;
-        }
-        private static IEnumerable<Int4> AddPoints(IEnumerable<Int4> points, IEnumerable<Int4> list, float maxError)
-        {
-            List<Int4> simplified = new List<Int4>(list);
-
-            int pn = points.Count();
-            for (int i = 0; i < simplified.Count;)
-            {
-                int ii = (i + 1) % simplified.Count;
-
-                int ax = simplified[i].X;
-                int az = simplified[i].Z;
-                int ai = simplified[i].W;
-
-                int bx = simplified[ii].X;
-                int bz = simplified[ii].Z;
-                int bi = simplified[ii].W;
-
-                // Find maximum deviation from the segment.
-                float maxd = 0;
-                int maxi = -1;
-                int ci, cinc, endi;
-
-                // Traverse the segment in lexilogical order so that the
-                // max deviation is calculated similarly when traversing
-                // opposite segments.
-                if (bx > ax || (bx == ax && bz > az))
-                {
-                    cinc = 1;
-                    ci = (ai + cinc) % pn;
-                    endi = bi;
-                }
-                else
-                {
-                    cinc = pn - 1;
-                    ci = (bi + cinc) % pn;
-                    endi = ai;
-                    Helper.Swap(ref ax, ref bx);
-                    Helper.Swap(ref az, ref bz);
-                }
-
-                // Tessellate only outer edges or edges between areas.
-                if ((points.ElementAt(ci).W & RC_CONTOUR_REG_MASK) == 0 ||
-                    (points.ElementAt(ci).W & RC_AREA_BORDER) != 0)
-                {
-                    while (ci != endi)
-                    {
-                        float d = RecastUtils.DistancePtSeg2D(points.ElementAt(ci).X, points.ElementAt(ci).Z, ax, az, bx, bz);
-                        if (d > maxd)
-                        {
-                            maxd = d;
-                            maxi = ci;
-                        }
-                        ci = (ci + cinc) % pn;
-                    }
-                }
-
-                // If the max deviation is larger than accepted error,
-                // add new point, else continue to next segment.
-                if (maxi != -1 && maxd > (maxError * maxError))
-                {
-                    // Add the point.
-                    simplified.Insert(i + 1, new Int4(points.ElementAt(maxi).X, points.ElementAt(maxi).Y, points.ElementAt(maxi).Z, maxi));
-                }
-                else
-                {
-                    ++i;
-                }
-            }
-
-            return simplified;
-        }
-        private static IEnumerable<Int4> SplitLongEdges(IEnumerable<Int4> points, IEnumerable<Int4> list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
-        {
-            bool tesselate = maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0;
-            if (!tesselate)
-            {
-                return list.ToArray();
-            }
-
-            List<Int4> simplified = new List<Int4>(list);
-
-            int pn = points.Count();
-            for (int i = 0; i < simplified.Count;)
-            {
-                int ii = (i + 1) % simplified.Count;
-
-                int ax = simplified[i].X;
-                int az = simplified[i].Z;
-                int ai = simplified[i].W;
-
-                int bx = simplified[ii].X;
-                int bz = simplified[ii].Z;
-                int bi = simplified[ii].W;
-
-                // Find maximum deviation from the segment.
-                int maxi = -1;
-                int ci = (ai + 1) % pn;
-
-                // Tessellate only outer edges or edges between areas.
-                bool tess = false;
-
-                // Wall edges.
-                if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
-                    (points.ElementAt(ci).W & RC_CONTOUR_REG_MASK) == 0)
-                {
-                    tess = true;
-                }
-
-                // Edges between areas.
-                if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
-                    (points.ElementAt(ci).W & RC_AREA_BORDER) != 0)
-                {
-                    tess = true;
-                }
-
-                if (tess)
-                {
-                    int dx = bx - ax;
-                    int dz = bz - az;
-                    if (dx * dx + dz * dz > maxEdgeLen * maxEdgeLen)
-                    {
-                        // Round based on the segments in lexilogical order so that the
-                        // max tesselation is consistent regardles in which direction
-                        // segments are traversed.
-                        int n = bi < ai ? (bi + pn - ai) : (bi - ai);
-                        if (n > 1)
-                        {
-                            if (bx > ax || (bx == ax && bz > az))
-                            {
-                                maxi = (ai + n / 2) % pn;
-                            }
-                            else
-                            {
-                                maxi = (ai + (n + 1) / 2) % pn;
-                            }
-                        }
-                    }
-                }
-
-                // If the max deviation is larger than accepted error,
-                // add new point, else continue to next segment.
-                if (maxi != -1)
-                {
-                    // Add the point.
-                    simplified.Insert(i + 1, new Int4(points.ElementAt(maxi).X, points.ElementAt(maxi).Y, points.ElementAt(maxi).Z, maxi));
-                }
-                else
-                {
-                    ++i;
-                }
-            }
-
-            return simplified;
-        }
-        private static IEnumerable<Int4> UpdateNeighbors(IEnumerable<Int4> points, IEnumerable<Int4> list)
-        {
-            List<Int4> simplified = new List<Int4>(list);
-
-            int pn = points.Count();
-            for (int i = 0; i < simplified.Count; ++i)
-            {
-                // The edge vertex flag is take from the current raw point,
-                // and the neighbour region is take from the next raw point.
-                var sv = simplified[i];
-                int ai = (sv.W + 1) % pn;
-                int bi = sv.W;
-                sv.W = (points.ElementAt(ai).W & (RC_CONTOUR_REG_MASK | RC_AREA_BORDER)) | (points.ElementAt(bi).W & RC_BORDER_VERTEX);
-                simplified[i] = sv;
-            }
-
-            return simplified;
-        }
-        private static IEnumerable<Int4> RemoveDegenerateSegments(IEnumerable<Int4> list)
-        {
-            List<Int4> simplified = new List<Int4>(list);
-
-            // Remove adjacent vertices which are equal on xz-plane,
-            // or else the triangulator will get confused.
-            int npts = simplified.Count;
-            for (int i = 0; i < npts; ++i)
-            {
-                int ni = RecastUtils.Next(i, npts);
-
-                if (!VEqualXZ(simplified[i], simplified[ni]))
-                {
-                    continue;
-                }
-
-                // Degenerate segment, remove.
-                simplified.RemoveAt(i);
-                npts = simplified.Count;
-            }
-
-            return simplified;
-        }
-        private static bool VEqualXZ(Int4 a, Int4 b)
-        {
-            return a.X == b.X && a.Z == b.Z;
-        }
-
-        /// <summary>
         /// An array of the contours in the set. [Size: #nconts]
         /// </summary>
-        public Contour[] Conts { get; set; }
+        private Contour[] conts;
         /// <summary>
         /// The number of contours in the set.
         /// </summary>
-        public int NConts { get; set; }
+        private int nconts;
+
         /// <summary>
-        /// The minimum bounds in world space. [(x, y, z)]
+        /// The bounds in world space.
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds in world space. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
@@ -518,161 +48,622 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public float MaxError { get; set; }
 
-        private void AddContour(int reg, AreaTypes area, IEnumerable<Int4> verts, IEnumerable<Int4> simplified, int maxContours, int borderSize)
+        /// <summary>
+        /// Gets whether the contour set has contours
+        /// </summary>
+        public bool HasContours()
         {
-            if (NConts >= maxContours)
-            {
-                // Allocate more contours.
-                // This happens when a region has holes.
-                Contour[] newConts = new Contour[maxContours * 2];
-                for (int j = 0; j < NConts; ++j)
-                {
-                    newConts[j] = Conts[j];
-                }
-                Conts = newConts;
-            }
-
-            var cont = new Contour
-            {
-                NVertices = simplified.Count(),
-                Vertices = simplified.ToArray(),
-                NRawVertices = verts.Count(),
-                RawVertices = verts.ToArray(),
-                RegionId = reg,
-                Area = area
-            };
-
-            if (borderSize > 0)
-            {
-                // If the heightfield was build with bordersize, remove the offset.
-                for (int j = 0; j < cont.NVertices; ++j)
-                {
-                    var v = cont.Vertices[j];
-                    v.X -= borderSize;
-                    v.Z -= borderSize;
-                    cont.Vertices[j] = v;
-                }
-
-                // If the heightfield was build with bordersize, remove the offset.
-                for (int j = 0; j < cont.NRawVertices; ++j)
-                {
-                    var v = cont.RawVertices[j];
-                    v.X -= borderSize;
-                    v.Z -= borderSize;
-                    cont.RawVertices[j] = v;
-                }
-            }
-
-            Conts[NConts++] = cont;
+            return nconts > 0;
         }
-        private void AddCompactCell(int x, int y, CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags, ref int[] flags)
+
+        /// <summary>
+        /// Iterates over the contour list
+        /// </summary>
+        public IEnumerable<(int i, Contour c)> IterateContours()
+        {
+            for (int i = 0; i < nconts; i++)
+            {
+                yield return (i, conts[i]);
+            }
+        }
+
+        /// <summary>
+        /// Builds a new contour set
+        /// </summary>
+        /// <param name="chf">Compact heightfield</param>
+        /// <param name="maxError">Maximum error value</param>
+        /// <param name="maxEdgeLen">Maximum edge length</param>
+        /// <param name="buildFlags">Build flags</param>
+        /// <returns>Returns the new contour</returns>
+        public static ContourSet Build(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             int w = chf.Width;
+            int h = chf.Height;
             int borderSize = chf.BorderSize;
-            int maxContours = Math.Max(chf.MaxRegions, 8);
+            float cellSize = chf.CellSize;
+            float cellHeight = chf.CellHeight;
+            int maxRegions = chf.MaxRegions;
+            int maxContours = Math.Max(maxRegions, 8);
+            var bounds = chf.GetBoundsWithBorder();
 
-            var c = chf.Cells[x + y * w];
-            for (int i = c.Index, ni = c.Index + c.Count; i < ni; ++i)
+            var cset = new ContourSet
             {
-                if (flags[i] == 0 || flags[i] == 0xf)
-                {
-                    flags[i] = 0;
-                    continue;
-                }
+                Bounds = bounds,
+                CellSize = cellSize,
+                CellHeight = cellHeight,
+                Width = w - borderSize * 2,
+                Height = h - borderSize * 2,
+                BorderSize = borderSize,
+                MaxError = maxError,
+                conts = new Contour[maxContours],
+                nconts = 0
+            };
 
-                int reg = chf.Spans[i].Reg;
-                if (reg == 0 || (reg & RC_BORDER_REG) != 0)
-                {
-                    continue;
-                }
+            int[] flags = chf.InitializeFlags();
 
-                var area = chf.Areas[i];
-                var verts = chf.WalkContour(x, y, i, ref flags);
-                var simplified = SimplifyContour(verts, maxError, maxEdgeLen, buildFlags);
+            var cells = GridUtils.Iterate(w, h).SelectMany((item) => chf.BuildCompactCells(item.row, item.col, flags));
 
-                if (simplified.Count() < 3)
+            foreach (var (Reg, Area, RawVerts) in cells)
+            {
+                var cont = SimplifyContour(RawVerts, maxError, maxEdgeLen, buildFlags);
+                if (cont.Length < 3)
                 {
                     continue;
                 }
 
                 // Store region->contour remap info.
-                // Create contour.
-                AddContour(reg, area, verts, simplified, maxContours, borderSize);
+                cset.AddContour(Reg, Area, RawVerts, cont, maxContours, borderSize);
+            }
+
+            // Merge holes if needed.
+            cset.MergeHoles(maxRegions + 1);
+
+            return cset;
+        }
+        /// <summary>
+        /// Simplifies the contour
+        /// </summary>
+        /// <param name="points">Contour points</param>
+        /// <param name="maxError">Max error</param>
+        /// <param name="maxEdgeLen">Max edge length</param>
+        /// <param name="buildFlags">Build flags</param>
+        /// <returns>Returns the simplified contour</returns>
+        public static ContourVertex[] SimplifyContour(ContourVertex[] points, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        {
+            // Add initial points.
+            var simplified = Initialize(points);
+
+            // Add points until all raw points are within
+            // error tolerance to the simplified shape.
+            simplified = AddPoints(points, simplified, maxError);
+
+            // Split too long edges.
+            simplified = SplitLongEdges(points, simplified, maxEdgeLen, buildFlags);
+
+            simplified = UpdateNeighbors(points, simplified);
+
+            simplified = RemoveDegenerateSegments(simplified);
+
+            return [.. simplified];
+        }
+        /// <summary>
+        /// Add initial points.
+        /// </summary>
+        private static ContourVertex[] Initialize(ContourVertex[] points)
+        {
+            var simplified = new List<ContourVertex>();
+
+            bool hasConnections = PointsHasConnections(points);
+            if (hasConnections)
+            {
+                // The contour has some portals to other regions.
+                // Add a new point to every location where the region changes.
+                var changePoints = GetChangePoints(points);
+                simplified.AddRange(changePoints);
+            }
+
+            if (simplified.Count == 0)
+            {
+                // If there is no connections at all,
+                // create some initial points for the simplification process.
+                // Find lower-left and upper-right vertices of the contour.
+                var initialPoints = CreateInitialPoints(points);
+                simplified.AddRange(initialPoints);
+            }
+
+            return [.. simplified];
+        }
+        /// <summary>
+        /// Gets whether at least, one of the point of the list has connections
+        /// </summary>
+        /// <param name="points">Point list</param>
+        private static bool PointsHasConnections(ContourVertex[] points)
+        {
+            bool hasConnections = false;
+            for (int i = 0; i < points.Length; i++)
+            {
+                if (Contour.IsRegion(points[i].Flag))
+                {
+                    hasConnections = true;
+                    break;
+                }
+            }
+            return hasConnections;
+        }
+        /// <summary>
+        /// Add a new point to every location where the region changes.
+        /// </summary>
+        private static ContourVertex[] GetChangePoints(ContourVertex[] points)
+        {
+            var changes = new List<ContourVertex>();
+
+            for (int i = 0, ni = points.Length; i < ni; ++i)
+            {
+                int ii = (i + 1) % ni;
+                var pi = points[i];
+                var pii = points[ii];
+
+                bool differentRegs = (pi.Flag & Contour.RC_CONTOUR_REG_MASK) != (pii.Flag & Contour.RC_CONTOUR_REG_MASK);
+                bool areaBorders = (pi.Flag & Contour.RC_AREA_BORDER) != (pii.Flag & Contour.RC_AREA_BORDER);
+                if (differentRegs || areaBorders)
+                {
+                    changes.Add(new(pi.X, pi.Y, pi.Z, i));
+                }
+            }
+
+            return [.. changes];
+        }
+        /// <summary>
+        /// Find lower-left and upper-right vertices of the contour.
+        /// </summary>
+        private static ContourVertex[] CreateInitialPoints(ContourVertex[] points)
+        {
+            var first = points[0];
+            first.Flag = 0;
+
+            var ll = first;
+            var ur = first;
+            for (int i = 1; i < points.Length; i++)
+            {
+                var p = points[i];
+                if (p.X < ll.X || (p.X == ll.X && p.Z < ll.Z))
+                {
+                    ll = p;
+                    ll.Flag = i;
+                }
+
+                if (p.X > ur.X || (p.X == ur.X && p.Z > ur.Z))
+                {
+                    ur = p;
+                    ur.Flag = i;
+                }
+            }
+
+            return [ll, ur];
+        }
+        /// <summary>
+        /// Adds the point list to de point array
+        /// </summary>
+        /// <param name="points">Point list to add</param>
+        /// <param name="list">Point list</param>
+        /// <param name="maxError">Max error</param>
+        /// <returns>Returns the updated list</returns>
+        private static ContourVertex[] AddPoints(ContourVertex[] points, ContourVertex[] list, float maxError)
+        {
+            var simplified = new List<ContourVertex>(list);
+
+            float error = maxError * maxError;
+
+            int pn = points.Length;
+            int i = 0;
+            while (i < simplified.Count)
+            {
+                int ii = (i + 1) % simplified.Count;
+
+                // Find maximum deviation from the segment.
+                var (maxd, maxi) = FindMaximumDeviationFromSegment(simplified[i], simplified[ii], points, pn);
+
+                // If the max deviation is larger than accepted error,
+                // add new point, else continue to next segment.
+                if (maxi != -1 && maxd > error)
+                {
+                    // Add the point.
+                    var maxPoint = points[maxi];
+
+                    simplified.Insert(i + 1, new(maxPoint.X, maxPoint.Y, maxPoint.Z, maxi));
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+
+            return [.. simplified];
+        }
+        /// <summary>
+        /// Split long edgest
+        /// </summary>
+        /// <param name="points">Point list to add</param>
+        /// <param name="list">Point list</param>
+        /// <param name="maxEdgeLen">Max edge length</param>
+        /// <param name="buildFlags">Build flags</param>
+        /// <returns>Returns the updated list</returns>
+        private static ContourVertex[] SplitLongEdges(ContourVertex[] points, ContourVertex[] list, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
+        {
+            bool tesselate = maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0;
+            if (!tesselate)
+            {
+                return [.. list];
+            }
+
+            var simplified = new List<ContourVertex>(list);
+
+            int pn = points.Length;
+            int i = 0;
+            while (i < simplified.Count)
+            {
+                int ii = (i + 1) % simplified.Count;
+
+                // Find maximum deviation from the segment.
+                int maxi = FindMaximumDeviationFromSegment(simplified[i], simplified[ii], maxEdgeLen, buildFlags, points, pn);
+
+                // If the max deviation is larger than accepted error,
+                // add new point, else continue to next segment.
+                if (maxi != -1)
+                {
+                    // Add the point.
+                    var maxPoint = points[maxi];
+
+                    simplified.Insert(i + 1, new(maxPoint.X, maxPoint.Y, maxPoint.Z, maxi));
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+
+            return [.. simplified];
+        }
+        /// <summary>
+        /// Finds the maximum deviation distance point from segment
+        /// </summary>
+        /// <param name="pA">Segment point A</param>
+        /// <param name="pB">Segment point B</param>
+        /// <param name="points">Point list to test</param>
+        /// <param name="npoints">Number of points in the list</param>
+        /// <returns>Returns the maximum distance and the point index</returns>
+        private static (float MaxD, int MaxI) FindMaximumDeviationFromSegment(ContourVertex pA, ContourVertex pB, ContourVertex[] points, int npoints)
+        {
+            int ax = pA.X;
+            int az = pA.Z;
+            int ai = pA.Flag;
+
+            int bx = pB.X;
+            int bz = pB.Z;
+            int bi = pB.Flag;
+
+            int ci;
+            int cinc;
+            int endi;
+
+            // Traverse the segment in lexilogical order so that the
+            // max deviation is calculated similarly when traversing
+            // opposite segments.
+            if (bx > ax || (bx == ax && bz > az))
+            {
+                cinc = 1;
+                ci = (ai + cinc) % npoints;
+                endi = bi;
+            }
+            else
+            {
+                cinc = npoints - 1;
+                ci = (bi + cinc) % npoints;
+                endi = ai;
+                Helper.Swap(ref ax, ref bx);
+                Helper.Swap(ref az, ref bz);
+            }
+
+            // Tessellate only outer edges or edges between areas.
+            if (Contour.IsRegion(points[ci].Flag) && !Contour.IsAreaBorder(points[ci].Flag))
+            {
+                return (0, -1);
+            }
+
+            float maxd = 0;
+            int maxi = -1;
+
+            while (ci != endi)
+            {
+                var p = points[ci];
+
+                float d = Utils.DistancePtSegSqr2D(p.X, p.Z, ax, az, bx, bz);
+                if (d > maxd)
+                {
+                    maxd = d;
+                    maxi = ci;
+                }
+                ci = (ci + cinc) % npoints;
+            }
+
+            return (maxd, maxi);
+        }
+        /// <summary>
+        /// Finds the maximum deviation distance point from segment
+        /// </summary>
+        /// <param name="pA">Segment point A</param>
+        /// <param name="pB">Segment point B</param>
+        /// <param name="maxEdgeLen">Maximum edge length</param>
+        /// <param name="buildFlags">Build flags</param>
+        /// <param name="points">Point list to test</param>
+        /// <param name="npoints">Number of points in the list</param>
+        /// <returns>Returns the point index</returns>
+        private static int FindMaximumDeviationFromSegment(ContourVertex pA, ContourVertex pB, float maxEdgeLen, BuildContoursFlagTypes buildFlags, ContourVertex[] points, int npoints)
+        {
+            int ai = pA.Flag;
+            int bi = pB.Flag;
+            int ci = (ai + 1) % npoints;
+
+            // Tessellate only outer edges or edges between areas.
+
+            // Wall edges.
+            if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) == 0 || Contour.IsRegion(points[ci].Flag))
+            {
+                return -1;
+            }
+
+            // Edges between areas.
+            if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) == 0 || !Contour.IsBorderVertex(points[ci].Flag))
+            {
+                return -1;
+            }
+
+            int ax = pA.X;
+            int az = pA.Z;
+            int bx = pB.X;
+            int bz = pB.Z;
+
+            int dx = bx - ax;
+            int dz = bz - az;
+            if (dx * dx + dz * dz <= maxEdgeLen * maxEdgeLen)
+            {
+                return -1;
+            }
+
+            int n = bi < ai ? (bi + npoints - ai) : (bi - ai);
+            if (n <= 1)
+            {
+                return -1;
+            }
+
+            // Round based on the segments in lexilogical order so that the
+            // max tesselation is consistent regardles in which direction
+            // segments are traversed.
+            if (bx > ax || (bx == ax && bz > az))
+            {
+                return (ai + n / 2) % npoints;
+            }
+            else
+            {
+                return (ai + (n + 1) / 2) % npoints;
             }
         }
-        private void MergeHoles(CompactHeightfield chf)
+        /// <summary>
+        /// Update neighbors
+        /// </summary>
+        /// <param name="points">Point list to add</param>
+        /// <param name="list">Point list</param>
+        /// <returns>Returns the updated list</returns>
+        private static ContourVertex[] UpdateNeighbors(ContourVertex[] points, ContourVertex[] list)
         {
-            if (NConts <= 0)
+            var simplified = new List<ContourVertex>(list);
+
+            int pn = points.Length;
+            for (int i = 0; i < simplified.Count; ++i)
+            {
+                // The edge vertex flag is take from the current raw point,
+                // and the neighbour region is take from the next raw point.
+                var sv = simplified[i];
+                int ai = (sv.Flag + 1) % pn;
+                int bi = sv.Flag;
+                sv.Flag = (points[ai].Flag & (Contour.RC_CONTOUR_REG_MASK | Contour.RC_AREA_BORDER)) | (points[bi].Flag & Contour.RC_BORDER_VERTEX);
+                simplified[i] = sv;
+            }
+
+            return [.. simplified];
+        }
+        /// <summary>
+        /// Removes degenerate segments
+        /// </summary>
+        /// <param name="list">Point list</param>
+        /// <returns>Returns the updated list</returns>
+        private static ContourVertex[] RemoveDegenerateSegments(ContourVertex[] list)
+        {
+            var simplified = new List<ContourVertex>(list);
+
+            // Remove adjacent vertices which are equal on xz-plane,
+            // or else the triangulator will get confused.
+            int npts = simplified.Count;
+            for (int i = 0; i < npts; ++i)
+            {
+                int ni = ArrayUtils.Next(i, npts);
+
+                if (!Utils.VEqual2D(simplified[i].Coords, simplified[ni].Coords))
+                {
+                    continue;
+                }
+
+                // Degenerate segment, remove.
+                simplified.RemoveAt(i);
+                npts = simplified.Count;
+            }
+
+            return [.. simplified];
+        }
+
+        /// <summary>
+        /// Gets the geometry configuration of the contour set
+        /// </summary>
+        /// <param name="maxVertices">Maximum vertices</param>
+        /// <param name="maxPolys">Maximum polygons</param>
+        /// <param name="maxVertsPerCont">Maximum vertices per contour</param>
+        public void GetGeometryConfiguration(out int maxVertices, out int maxPolys, out int maxVertsPerCont)
+        {
+            maxVertices = 0;
+            maxPolys = 0;
+            maxVertsPerCont = 0;
+
+            for (int i = 0; i < nconts; ++i)
+            {
+                var nverts = conts[i].GetVertexCount();
+
+                // Skip null contours.
+                if (nverts < 3)
+                {
+                    continue;
+                }
+
+                maxVertices += nverts;
+                maxPolys += nverts - 2;
+                maxVertsPerCont = Math.Max(maxVertsPerCont, nverts);
+            }
+        }
+        /// <summary>
+        /// Finds the contour by region id
+        /// </summary>
+        /// <param name="reg">Region id</param>
+        public Contour FindContour(int reg)
+        {
+            for (int i = 0; i < nconts; ++i)
+            {
+                if (conts[i].RegionId == reg)
+                {
+                    return conts[i];
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Adds the contour
+        /// </summary>
+        /// <param name="reg">Region</param>
+        /// <param name="area">Area type</param>
+        /// <param name="rawVerts">Raw vertices</param>
+        /// <param name="verts">Contour vertices</param>
+        /// <param name="maxContours">Maximum number of contours</param>
+        /// <param name="borderSize">Border size</param>
+        public void AddContour(int reg, AreaTypes area, ContourVertex[] rawVerts, ContourVertex[] verts, int maxContours, int borderSize)
+        {
+            if (nconts >= maxContours)
+            {
+                // Allocate more contours.
+                // This happens when a region has holes.
+                Contour[] newConts = new Contour[maxContours * 2];
+                for (int j = 0; j < nconts; ++j)
+                {
+                    newConts[j] = conts[j];
+                }
+                conts = newConts;
+            }
+
+            Contour cont = new(reg, area, rawVerts, verts);
+
+            cont.RemoveBorderSize(borderSize);
+
+            conts[nconts++] = cont;
+        }
+        /// <summary>
+        /// Merge holes
+        /// </summary>
+        /// <param name="nregions">Number of regions</param>
+        private void MergeHoles(int nregions)
+        {
+            if (nconts <= 0)
             {
                 return;
             }
 
             // Calculate winding of all polygons.
-            int[] winding = new int[NConts];
-            int nholes = 0;
-            for (int i = 0; i < NConts; ++i)
-            {
-                var cont = Conts[i];
-                // If the contour is wound backwards, it is a hole.
-                winding[i] = RecastUtils.CalcAreaOfPolygon2D(cont.Vertices, cont.NVertices) < 0 ? -1 : 1;
-                if (winding[i] < 0)
-                {
-                    nholes++;
-                }
-            }
-
-            if (nholes <= 0)
+            if (!CalculateWindings(out var winding))
             {
                 return;
             }
 
             // Collect outline contour and holes contours per region.
             // We assume that there is one outline and multiple holes.
-            int nregions = chf.MaxRegions + 1;
-            var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
-            var holes = Helper.CreateArray(NConts, () => { return new ContourHole(); });
+            var regions = CollectOutlinesAndHolesPerRegion(nregions, winding);
 
-            for (int i = 0; i < NConts; ++i)
+            // Finally merge each regions holes into the outline.
+            MergeIntoOutline(regions, nregions);
+        }
+        /// <summary>
+        /// Collect outline contour and holes contours per region
+        /// </summary>
+        /// <param name="nregions">Number of regions</param>
+        /// <param name="winding">Winding of all polygons</param>
+        /// <returns>Returns the contour per region list</returns>
+        /// <remarks>We assume that there is one outline and multiple holes</remarks>
+        private ContourRegion[] CollectOutlinesAndHolesPerRegion(int nregions, int[] winding)
+        {
+            var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
+            var holes = Helper.CreateArray(nconts, () => { return new ContourHole(); });
+
+            for (int i = 0; i < nconts; ++i)
             {
-                var cont = Conts[i];
+                var cont = conts[i];
+
                 // Positively would contours are outlines, negative holes.
-                if (winding[i] > 0)
-                {
-                    if (regions[cont.RegionId].Outline != null)
-                    {
-                        Logger.WriteWarning(nameof(ContourSet), $"Multiple outlines for region {cont.RegionId}");
-                    }
-                    regions[cont.RegionId].Outline = cont;
-                }
-                else
+                if (winding[i] <= 0)
                 {
                     regions[cont.RegionId].NHoles++;
+
+                    continue;
                 }
+
+                if (regions[cont.RegionId].Outline != null)
+                {
+                    Logger.WriteWarning(this, $"Multiple outlines for region {cont.RegionId}");
+                }
+
+                regions[cont.RegionId].Outline = cont;
             }
 
             int index = 0;
             for (int i = 0; i < nregions; i++)
             {
-                if (regions[i].NHoles > 0)
+                if (regions[i].NHoles <= 0)
                 {
-                    regions[i].Holes = new ContourHole[regions[i].NHoles];
-                    Array.Copy(holes, index, regions[i].Holes, 0, regions[i].NHoles);
-                    index += regions[i].NHoles;
-                    regions[i].NHoles = 0;
+                    continue;
                 }
+
+                regions[i].Holes = new ContourHole[regions[i].NHoles];
+                Array.Copy(holes, index, regions[i].Holes, 0, regions[i].NHoles);
+                index += regions[i].NHoles;
+                regions[i].NHoles = 0;
             }
 
-            for (int i = 0; i < NConts; ++i)
+            for (int i = 0; i < nconts; ++i)
             {
-                var cont = Conts[i];
-                var reg = regions[cont.RegionId];
-                if (winding[i] < 0)
+                if (winding[i] >= 0)
                 {
-                    reg.Holes[reg.NHoles++].Contour = cont;
+                    continue;
                 }
+
+                var cont = conts[i];
+                var reg = regions[cont.RegionId];
+                reg.Holes[reg.NHoles++].Contour = cont;
             }
 
-            // Finally merge each regions holes into the outline.
+            return regions;
+        }
+        /// <summary>
+        /// Merges each region hole into the outline
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="nregions">Number of regions in the list</param>
+        private void MergeIntoOutline(ContourRegion[] regions, int nregions)
+        {
             for (int i = 0; i < nregions; i++)
             {
                 var reg = regions[i];
@@ -689,9 +680,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     // The region does not have an outline.
                     // This can happen if the contour becames selfoverlapping because of too aggressive simplification settings.
-                    Logger.WriteWarning(nameof(ContourSet), $"Bad outline for region {i}, contour simplification is likely too aggressive.");
+                    Logger.WriteWarning(this, $"Bad outline for region {i}, contour simplification is likely too aggressive.");
                 }
             }
         }
-    };
+        /// <summary>
+        /// Calculate windings
+        /// </summary>
+        /// <param name="winding">Resulting winding list</param>
+        private bool CalculateWindings(out int[] winding)
+        {
+            winding = new int[nconts];
+            int nholes = 0;
+            for (int i = 0; i < nconts; ++i)
+            {
+                var cont = conts[i];
+                // If the contour is wound backwards, it is a hole.
+                winding[i] = cont.CalcAreaOfPolygon2D() < 0 ? -1 : 1;
+                if (winding[i] < 0)
+                {
+                    nholes++;
+                }
+            }
+
+            if (nholes <= 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
 }

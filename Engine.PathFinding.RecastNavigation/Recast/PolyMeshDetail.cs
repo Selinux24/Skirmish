@@ -11,6 +11,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     class PolyMeshDetail
     {
         /// <summary>
+        /// The sub-mesh data.
+        /// </summary>
+        public List<PolyMeshIndices> Meshes { get; set; } = [];
+        /// <summary>
+        /// The mesh vertices.
+        /// </summary>
+        public List<Vector3> Vertices { get; set; } = [];
+        /// <summary>
+        /// The mesh triangles.
+        /// </summary>
+        public List<PolyMeshTriangleIndices> Triangles { get; set; } = [];
+
+        /// <summary>
         /// Builds a new polygon mesh detail
         /// </summary>
         /// <param name="mesh">Polygon mesh</param>
@@ -20,45 +33,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh detail</returns>
         public static PolyMeshDetail Build(PolyMesh mesh, CompactHeightfield chf, float sampleDist, float sampleMaxError)
         {
-            PolyMeshDetail dmesh;
-
-            if (mesh.NVerts == 0 || mesh.NPolys == 0)
+            if (mesh.GetVertexCount() == 0 || mesh.GetPolyCount() == 0)
             {
                 return null;
             }
 
-            Vector3 orig = mesh.BMin;
-            int borderSize = mesh.BorderSize;
-            int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
+            var orig = mesh.Bounds.Minimum;
+            int heightSearchRadius = Math.Max(1, (int)MathF.Ceiling(mesh.MaxEdgeError));
 
-            var (Bounds, MaxHWidth, MaxHHeight) = FindBounds(mesh, chf);
-            var bounds = Bounds;
-            int maxhw = MaxHWidth;
-            int maxhh = MaxHHeight;
+            var (bounds, _, _) = mesh.FindBounds(chf);
 
-            HeightPatch hp = new HeightPatch()
+            var dmesh = new PolyMeshDetail();
+
+            foreach (var (i, mPoly, mRegion, _) in mesh.IteratePolygons())
             {
-                Data = new int[maxhw * maxhh],
-            };
-
-            dmesh = new PolyMeshDetail();
-
-            for (int i = 0; i < mesh.NPolys; ++i)
-            {
-                var iPoly = mesh.Polys.ElementAt(i);
-                var region = mesh.Regs.ElementAt(i);
-                var b = bounds.ElementAt(i);
-
-                // Store polygon vertices for processing.
-                var poly = BuildPolyVertices(iPoly, mesh);
+                var rect = bounds[i].GetRectangle();
 
                 // Get the height data from the area of the polygon.
-                hp.Bounds = new Rectangle(b.X, b.Z, b.Y - b.X, b.W - b.Z);
+                var hp = chf.GetHeightData(mPoly, mRegion, mesh.GetVertices(), rect);
 
-                chf.GetHeightData(iPoly, mesh.Verts, borderSize, hp, region);
+                // Store polygon vertices for processing.
+                var poly = mesh.BuildPolyVertices(mPoly);
 
                 // Build detail mesh.
-                BuildPolyDetailParams param = new BuildPolyDetailParams
+                var param = new BuildPolyDetailParams
                 {
                     SampleDist = sampleDist,
                     SampleMaxError = sampleMaxError,
@@ -67,164 +65,38 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 chf.BuildPolyDetail(poly, param, hp, out var verts, out var tris);
 
                 // Move detail verts to world space.
-                verts = MoveToWorldSpace(verts, orig, chf.CellHeight);
+                verts = Utils.MoveToWorldSpace(verts, orig, chf.CellHeight);
 
                 // Offset poly too, will be used to flag checking.
-                poly = MoveToWorldSpace(poly, orig);
+                poly = Utils.MoveToWorldSpace(poly, orig);
 
                 // Store detail submesh.
-                dmesh.Meshes.Add(new PolyMeshDetailIndices
+                dmesh.Meshes.Add(new PolyMeshIndices
                 {
                     VertBase = dmesh.Vertices.Count,
-                    VertCount = verts.Count(),
+                    VertCount = verts.Length,
                     TriBase = dmesh.Triangles.Count,
-                    TriCount = tris.Count(),
+                    TriCount = tris.Length,
                 });
 
                 // Store vertices
                 dmesh.Vertices.AddRange(verts);
 
                 // Store triangles
-                var triIndices = BuildTriangleList(tris, verts, poly);
+                var triIndices = PolyMeshTriangleIndices.BuildTriangleList(tris, verts, poly);
                 dmesh.Triangles.AddRange(triIndices);
             }
 
             return dmesh;
         }
-        private static (IEnumerable<Int4> Bounds, int MaxHWidth, int MaxHHeight) FindBounds(PolyMesh mesh, CompactHeightfield chf)
-        {
-            List<Int4> bounds = new List<Int4>();
-
-            int nPolyVerts = 0;
-            int maxhw = 0;
-            int maxhh = 0;
-
-            // Find max size for a polygon area.
-            for (int i = 0; i < mesh.NPolys; ++i)
-            {
-                var p = mesh.Polys.ElementAt(i);
-
-                var (XMin, XMax, YMin, YMax, PolyVerts) = FindMaxSizeArea(mesh, chf, p);
-
-                bounds.Add(new Int4(XMin, XMax, YMin, YMax));
-                nPolyVerts += PolyVerts;
-
-                // Try to store max size
-                if (XMin >= XMax || YMin >= YMax)
-                {
-                    continue;
-                }
-
-                maxhw = Math.Max(maxhw, XMax - XMin);
-                maxhh = Math.Max(maxhh, YMax - YMin);
-            }
-
-            return (bounds, maxhw, maxhh);
-        }
-        private static (int XMin, int XMax, int YMin, int YMax, int PolyVerts) FindMaxSizeArea(PolyMesh mesh, CompactHeightfield chf, IndexedPolygon p)
-        {
-            int xmin = chf.Width;
-            int xmax = 0;
-            int ymin = chf.Height;
-            int ymax = 0;
-            int polyVerts = 0;
-
-            for (int j = 0; j < mesh.NVP; ++j)
-            {
-                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
-                {
-                    break;
-                }
-
-                var v = mesh.Verts[p[j]];
-                xmin = Math.Min(xmin, v.X);
-                xmax = Math.Max(xmax, v.X);
-                ymin = Math.Min(ymin, v.Z);
-                ymax = Math.Max(ymax, v.Z);
-                polyVerts++;
-            }
-            xmin = Math.Max(0, xmin - 1);
-            xmax = Math.Min(chf.Width, xmax + 1);
-            ymin = Math.Max(0, ymin - 1);
-            ymax = Math.Min(chf.Height, ymax + 1);
-
-            return (xmin, xmax, ymin, ymax, polyVerts);
-        }
-        private static IEnumerable<Vector3> BuildPolyVertices(IndexedPolygon p, PolyMesh mesh)
-        {
-            List<Vector3> res = new List<Vector3>();
-
-            float cs = mesh.CS;
-            float ch = mesh.CH;
-
-            for (int j = 0; j < mesh.NVP; ++j)
-            {
-                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
-                {
-                    break;
-                }
-
-                var v = mesh.Verts[p[j]];
-                var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
-
-                res.Add(pv);
-            }
-
-            return res.ToArray();
-        }
-        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> verts, Vector3 orig, float cellHeight)
-        {
-            List<Vector3> res = new List<Vector3>();
-
-            for (int j = 0; j < verts.Count(); ++j)
-            {
-                var v = verts.ElementAt(j) + orig;
-                v.Y += cellHeight;// Is this offset necessary?
-
-                res.Add(v);
-            }
-
-            return res.ToArray();
-        }
-        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> poly, Vector3 orig)
-        {
-            List<Vector3> res = new List<Vector3>();
-
-            for (int j = 0; j < poly.Count(); ++j)
-            {
-                var p = poly.ElementAt(j) + orig;
-
-                res.Add(p);
-            }
-
-            return res.ToArray();
-        }
-        private static IEnumerable<PolyMeshTriangleIndices> BuildTriangleList(IEnumerable<Int3> tris, IEnumerable<Vector3> verts, IEnumerable<Vector3> poly)
-        {
-            List<PolyMeshTriangleIndices> res = new List<PolyMeshTriangleIndices>();
-
-            foreach (var t in tris)
-            {
-                res.Add(new PolyMeshTriangleIndices
-                {
-                    Point1 = t.X,
-                    Point2 = t.Y,
-                    Point3 = t.Z,
-                    Flags = GetTriFlags(verts.ElementAt(t.X), verts.ElementAt(t.Y), verts.ElementAt(t.Z), poly),
-                });
-            }
-
-            return res.ToArray();
-        }
- 
         /// <summary>
         /// Merges a list of polygon mesh details
         /// </summary>
         /// <param name="meshes">Mesh list</param>
         /// <returns>Returns the merged polygon mesh detail</returns>
-        public static PolyMeshDetail Merge(IEnumerable<PolyMeshDetail> meshes)
+        public static PolyMeshDetail Merge(PolyMeshDetail[] meshes)
         {
-            PolyMeshDetail res = new PolyMeshDetail();
+            var res = new PolyMeshDetail();
 
             int maxVerts = 0;
             int maxTris = 0;
@@ -251,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 foreach (var src in dm.Meshes)
                 {
-                    var dst = new PolyMeshDetailIndices
+                    var dst = new PolyMeshIndices
                     {
                         VertBase = res.Vertices.Count + src.VertBase,
                         VertCount = src.VertCount,
@@ -269,44 +141,58 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return res;
         }
-        private static int GetEdgeFlags(Vector3 va, Vector3 vb, IEnumerable<Vector3> vpoly)
-        {
-            int npoly = vpoly.Count();
 
-            // Return true if edge (va,vb) is part of the polygon.
-            float thrSqr = 0.001f * 0.001f;
-            for (int i = 0, j = npoly - 1; i < npoly; j = i++)
+        /// <summary>
+        /// Iterates over the mesh triangle vertices
+        /// </summary>
+        /// <returns>Returns the mesh index, and three triangle vertices</returns>
+        public IEnumerable<(int meshIndex, Vector3 p0, Vector3 p1, Vector3 p2)> IterateMeshTriangles()
+        {
+            for (int i = 0; i < Meshes.Count; i++)
             {
-                var vi = vpoly.ElementAt(i);
-                var vj = vpoly.ElementAt(j);
-                if (RecastUtils.DistancePtSeg2D(va, vj, vi) < thrSqr &&
-                    RecastUtils.DistancePtSeg2D(vb, vj, vi) < thrSqr)
+                var m = Meshes[i];
+                int bverts = m.VertBase;
+                int btris = m.TriBase;
+                int ntris = m.TriCount;
+                var verts = Vertices.Skip(bverts).ToArray();
+                var tris = Triangles.Skip(btris).ToArray();
+
+                for (int j = 0; j < ntris; ++j)
                 {
-                    return 1;
+                    var t = tris[j];
+
+                    yield return (i, verts[t.Point1], verts[t.Point2], verts[t.Point3]);
                 }
             }
-            return 0;
         }
-        private static int GetTriFlags(Vector3 va, Vector3 vb, Vector3 vc, IEnumerable<Vector3> vpoly)
+        /// <summary>
+        /// Iterates over the mesh segment vertices
+        /// </summary>
+        /// <returns>Returns the segment vertices, the edge flag and the internal flag</returns>
+        public IEnumerable<(Vector3 a, Vector3 b, DetailTriEdgeFlagTypes flag, bool isInternal)> IterateMeshEdges()
         {
-            int flags = 0;
-            flags |= GetEdgeFlags(va, vb, vpoly) << 0;
-            flags |= GetEdgeFlags(vb, vc, vpoly) << 2;
-            flags |= GetEdgeFlags(vc, va, vpoly) << 4;
-            return flags;
-        }
+            for (int i = 0; i < Meshes.Count; i++)
+            {
+                var m = Meshes[i];
+                int bverts = m.VertBase;
+                int btris = m.TriBase;
+                int ntris = m.TriCount;
+                var verts = Vertices.Skip(bverts).ToArray();
+                var tris = Triangles.Skip(btris).ToArray();
 
-        /// <summary>
-        /// The sub-mesh data.
-        /// </summary>
-        public List<PolyMeshDetailIndices> Meshes { get; set; } = new List<PolyMeshDetailIndices>();
-        /// <summary>
-        /// The mesh vertices.
-        /// </summary>
-        public List<Vector3> Vertices { get; set; } = new List<Vector3>();
-        /// <summary>
-        /// The mesh triangles.
-        /// </summary>
-        public List<PolyMeshTriangleIndices> Triangles { get; set; } = new List<PolyMeshTriangleIndices>();
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+
+                    for (int k = 0, kp = 2; k < 3; kp = k++)
+                    {
+                        var ef = t.GetDetailTriEdgeFlags(kp);
+                        bool isInternal = t[kp] >= t[k];
+
+                        yield return (verts[t[kp]], verts[t[k]], ef, isInternal);
+                    }
+                }
+            }
+        }
     }
 }

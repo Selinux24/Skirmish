@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -37,14 +38,14 @@ namespace Engine.UI
         /// <summary>
         /// Generated texture stream
         /// </summary>
-        public MemoryStream ImageStream;
+        public MemoryStream ImageStream { get; set; }
 
         /// <summary>
         /// Gets the font's white space size
         /// </summary>
         /// <param name="width">White space width</param>
         /// <param name="height">White space height</param>
-        public void GetSpaceSize(out float width, out float height)
+        public readonly void GetSpaceSize(out float width, out float height)
         {
             char defChar = GetSampleCharacter();
 
@@ -58,13 +59,13 @@ namespace Engine.UI
         /// </summary>
         /// <returns>Returns the sample character</returns>
         /// <remarks>Used for map the space if not specified</remarks>
-        public char GetSampleCharacter()
+        public readonly char GetSampleCharacter()
         {
             char defChar = 'X';
 
             var keys = GetKeys();
 
-            if (!keys.Any(c => c == defChar))
+            if (!Array.Exists(keys, c => c == defChar))
             {
                 defChar = keys.FirstOrDefault();
             }
@@ -74,7 +75,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the map keys
         /// </summary>
-        public char[] GetKeys()
+        public readonly char[] GetKeys()
         {
             return Map.Keys.ToArray();
         }

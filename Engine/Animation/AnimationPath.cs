@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation path items list
         /// </summary>
-        private readonly List<AnimationPathItem> items = new List<AnimationPathItem>();
+        private readonly List<AnimationPathItem> items = [];
         /// <summary>
         /// Current item index
         /// </summary>
@@ -87,6 +88,14 @@ namespace Engine.Animation
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="pathItemName">Path item name</param>
+        public AnimationPath(string pathItemName)
+        {
+            items.Add(new AnimationPathItem(pathItemName, false, 1, 1));
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="pathItems">Path items</param>
         public AnimationPath(IEnumerable<AnimationPathItem> pathItems)
         {
@@ -112,7 +121,7 @@ namespace Engine.Animation
             Add(clipName, false, 1, timeDelta);
         }
         /// <summary>
-        /// Adds a new animation item to the animation path, wich repeats N times
+        /// Adds a new animation item to the animation path, which repeats N times
         /// </summary>
         /// <param name="clipName">Clip name to play</param>
         /// <param name="repeats">Number of iterations</param>
@@ -122,7 +131,7 @@ namespace Engine.Animation
             Add(clipName, false, repeats, timeDelta);
         }
         /// <summary>
-        /// Adds a new animation item to the animation path, wich loops for ever!!!
+        /// Adds a new animation item to the animation path, which loops for ever!!!
         /// </summary>
         /// <param name="clipName">Clip name to play</param>
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
@@ -152,9 +161,9 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData">Skinning data</param>
         /// <param name="animationPath">Animation path to connect with current path</param>
-        public AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
+        public static AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
         {
-            if (animationPath?.items?.Any() != true)
+            if ((animationPath?.items?.Count ?? 0) == 0)
             {
                 return new AnimationPath();
             }
@@ -175,7 +184,7 @@ namespace Engine.Animation
                 return;
             }
 
-            if (!items.Any())
+            if (items.Count == 0)
             {
                 return;
             }
@@ -219,7 +228,7 @@ namespace Engine.Animation
 
             UpdateItems(skData);
 
-            if (elapsedSeconds == 0f)
+            if (MathUtil.IsZero(elapsedSeconds))
             {
                 return false;
             }
@@ -274,10 +283,10 @@ namespace Engine.Animation
         /// <param name="interpolationValue">Path item interpolation value</param>
         /// <param name="atEnd">Returns whether the path is at end or not</param>
         /// <returns>Returns true if the time is into the path</returns>
-        private TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
+        private static TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
         {
             var itemTotalDuration = item.TotalDuration * item.TimeDelta;
-            if (itemTotalDuration == 0)
+            if (MathUtil.IsZero(itemTotalDuration))
             {
                 return new TimeInItemData
                 {
@@ -294,13 +303,13 @@ namespace Engine.Animation
                 float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
 
                 //This is the item
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.Found,
                     PathItemDuration = targetTime - acumDuration,
                     PathItemInterpolationValue = interpolationValue % item.Duration,
                     AtEnd = false,
-                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                    LoopCount = (int)MathF.Ceiling(interpolationValue / item.Duration),
                 };
             }
             else if (item.Loop)
@@ -308,19 +317,19 @@ namespace Engine.Animation
                 float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
 
                 //Do loop, continue path
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.InLoop,
                     PathItemDuration = targetTime - acumDuration,
                     PathItemInterpolationValue = interpolationValue % item.Duration,
                     AtEnd = false,
-                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                    LoopCount = (int)MathF.Ceiling(interpolationValue / item.Duration),
                 };
             }
             else if (targetTime - acumDuration >= itemTotalDuration && isLastItem)
             {
                 //Item passed, it's the end item
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.Found,
                     PathItemDuration = targetTime - acumDuration,
@@ -332,7 +341,7 @@ namespace Engine.Animation
             else
             {
                 //Not in time
-                return new TimeInItemData
+                return new()
                 {
                     Result = TimeInItemResults.NotFound,
                     PathItemDuration = itemTotalDuration,
@@ -406,7 +415,7 @@ namespace Engine.Animation
 
             Updated = true;
 
-            if (!items.Any())
+            if (items.Count == 0)
             {
                 return;
             }
@@ -458,7 +467,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationPathState animationPathState))
+            if (state is not AnimationPathState animationPathState)
             {
                 return;
             }

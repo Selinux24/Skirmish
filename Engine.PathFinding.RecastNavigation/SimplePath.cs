@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Maximum nodes
         /// </summary>
-        public const int MaxSimplePath = 256;
+        const int MaxSimplePath = 256;
 
         /// <summary>
         /// Fix ups corridor
@@ -100,7 +100,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Get connected polygons
             int maxNeis = 16;
-            List<int> neis = new List<int>();
+            var neis = new List<int>();
 
             var cur = navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start);
             if (cur.Ref == 0)
@@ -108,7 +108,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return;
             }
 
-            for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
+            for (int k = cur.Poly.FirstLink; k != MeshTile.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
             {
                 var link = cur.Tile.Links[k];
                 if (link.NRef != 0 && neis.Count < maxNeis)
@@ -138,7 +138,11 @@ namespace Engine.PathFinding.RecastNavigation
                 path.Cut(offset);
             }
         }
-
+        /// <summary>
+        /// Merge corridor start
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorStartMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -192,7 +196,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             path.Count = req + size;
         }
-
+        /// <summary>
+        /// Merge corridor end
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorEndMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -234,7 +242,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             path.Count = ppos + count;
         }
-
+        /// <summary>
+        /// Merge corridor start shortcut
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="visited">Visited path</param>
         public static void MergeCorridorStartShortcut(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
@@ -348,15 +360,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             maxSize = max;
 
-            this.referenceList = new int[maxSize];
-            this.Count = 0;
+            referenceList = new int[maxSize];
+            Count = 0;
         }
 
         /// <summary>
         /// Gets the current path
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public IEnumerable<int> GetPath()
+        public int[] GetPath()
         {
             return referenceList.Take(Count).ToArray();
         }
@@ -416,20 +428,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="count">Number of elements of the reference list</param>
         public void Merge(IEnumerable<int> rlist, int count)
         {
-            // Make space for the old path.
-            if (count - 1 + Count > maxSize)
-            {
-                Count = maxSize - (count - 1);
-            }
+            var l = rlist.ToList();
+            l.AddRange(referenceList.Take(Count));
 
-            // Copy old path in the beginning.
-            List<int> tmp = new List<int>(referenceList);
-            tmp.InsertRange(0, rlist);
-            referenceList = tmp.ToArray();
-            Count += count - 1;
+            // Make space for the old path.
+            Count = Math.Min(maxSize, l.Count);
+            Array.Copy(l.ToArray(), referenceList, Count);
 
             // Remove trackbacks
-            for (int j = 0; j < Count; ++j)
+            int j = 0;
+            while (j < Count)
             {
                 if (j - 1 >= 0 && j + 1 < Count)
                 {
@@ -441,6 +449,8 @@ namespace Engine.PathFinding.RecastNavigation
                         j -= 2;
                     }
                 }
+
+                j++;
             }
         }
         /// <summary>
@@ -512,7 +522,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new SimplePath(maxSize)
                 {
-                    referenceList = referenceList.ToArray(),
+                    referenceList = [.. referenceList],
                     Count = Count,
                 };
             }
@@ -540,9 +550,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             return new SimplePath(max)
             {
-                referenceList = referenceList.ToArray(),
+                referenceList = [.. referenceList],
                 Count = Count,
             };
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Start}=>{End}. {Count} steps.";
         }
     }
 }

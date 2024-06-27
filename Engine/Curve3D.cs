@@ -9,16 +9,16 @@ namespace Engine
     /// </summary>
     public class Curve3D : IControllerPath
     {
-        private readonly Curve cX = new Curve();
-        private readonly Curve cY = new Curve();
-        private readonly Curve cZ = new Curve();
+        private readonly Curve cX = new();
+        private readonly Curve cY = new();
+        private readonly Curve cZ = new();
 
         /// <summary>
         /// Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.
         /// </summary>
         public bool IsConstant
         {
-            get { return this.PositionCount <= 1; }
+            get { return PositionCount <= 1; }
         }
         /// <summary>
         /// Defines how to handle weighting values that are greater than the last control point in the curve.
@@ -27,13 +27,13 @@ namespace Engine
         {
             get
             {
-                return this.cX.PostLoop;
+                return cX.PostLoop;
             }
             set
             {
-                this.cX.PostLoop = value;
-                this.cY.PostLoop = value;
-                this.cZ.PostLoop = value;
+                cX.PostLoop = value;
+                cY.PostLoop = value;
+                cZ.PostLoop = value;
             }
         }
         /// <summary>
@@ -43,28 +43,24 @@ namespace Engine
         {
             get
             {
-                return this.cX.PreLoop;
+                return cX.PreLoop;
             }
             set
             {
-                this.cX.PreLoop = value;
-                this.cY.PreLoop = value;
-                this.cZ.PreLoop = value;
+                cX.PreLoop = value;
+                cY.PreLoop = value;
+                cZ.PreLoop = value;
             }
         }
-        /// <summary>
-        /// Gets the key count
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount
         {
             get
             {
-                return this.cX.Keys.Count;
+                return cX.Keys.Count;
             }
         }
-        /// <summary>
-        /// Number of normals in the curve
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -72,24 +68,20 @@ namespace Engine
                 return 0;
             }
         }
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
             {
-                return this.Start.Value;
+                return Start.Value;
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
             {
-                return this.End.Value;
+                return End.Value;
             }
         }
 
@@ -100,7 +92,7 @@ namespace Engine
         {
             get
             {
-                return this.GetKey(0);
+                return GetKey(0);
             }
         }
         /// <summary>
@@ -110,11 +102,11 @@ namespace Engine
         {
             get
             {
-                Curve3DKey[] keys = new Curve3DKey[this.PositionCount];
+                Curve3DKey[] keys = new Curve3DKey[PositionCount];
 
-                for (int i = 0; i < this.PositionCount; i++)
+                for (int i = 0; i < PositionCount; i++)
                 {
-                    keys[i] = this.GetKey(i);
+                    keys[i] = GetKey(i);
                 }
 
                 return keys;
@@ -127,17 +119,15 @@ namespace Engine
         {
             get
             {
-                return this.GetKey(this.PositionCount - 1);
+                return GetKey(PositionCount - 1);
             }
         }
-        /// <summary>
-        /// Gets the curve total length
-        /// </summary>
+        /// <inheritdoc/>
         public float Length
         {
             get
             {
-                return this.End.Position;
+                return End.Position;
             }
         }
         /// <summary>
@@ -147,14 +137,36 @@ namespace Engine
         {
             get
             {
-                Vector3[] points = new Vector3[this.PositionCount];
+                Vector3[] points = new Vector3[PositionCount];
 
-                for (int i = 0; i < this.PositionCount; i++)
+                for (int i = 0; i < PositionCount; i++)
                 {
-                    points[i] = this.GetKey(i).Value;
+                    points[i] = GetKey(i).Value;
                 }
 
                 return points;
+            }
+        }
+
+        /// <summary>
+        /// Sets the curve tangents for the current key, by previous and next keys
+        /// </summary>
+        /// <param name="prev">Previous key</param>
+        /// <param name="curr">Current key</param>
+        /// <param name="next">Next key</param>
+        private static void SetCurveKeyTangent(ref CurveKey prev, ref CurveKey curr, ref CurveKey next)
+        {
+            float dt = next.Position - prev.Position;
+            float dv = next.Value - prev.Value;
+            if (MathF.Abs(dv) < float.Epsilon)
+            {
+                curr.TangentIn = 0;
+                curr.TangentOut = 0;
+            }
+            else
+            {
+                curr.TangentIn = dv * (curr.Position - prev.Position) / dt;
+                curr.TangentOut = dv * (next.Position - curr.Position) / dt;
             }
         }
 
@@ -163,13 +175,13 @@ namespace Engine
         /// </summary>
         public Curve3D()
         {
-            this.cX.PreLoop = CurveLoopType.Oscillate;
-            this.cY.PreLoop = CurveLoopType.Oscillate;
-            this.cZ.PreLoop = CurveLoopType.Oscillate;
+            cX.PreLoop = CurveLoopType.Oscillate;
+            cY.PreLoop = CurveLoopType.Oscillate;
+            cZ.PreLoop = CurveLoopType.Oscillate;
 
-            this.cX.PostLoop = CurveLoopType.Oscillate;
-            this.cY.PostLoop = CurveLoopType.Oscillate;
-            this.cZ.PostLoop = CurveLoopType.Oscillate;
+            cX.PostLoop = CurveLoopType.Oscillate;
+            cY.PostLoop = CurveLoopType.Oscillate;
+            cZ.PostLoop = CurveLoopType.Oscillate;
         }
 
         /// <summary>
@@ -179,9 +191,9 @@ namespace Engine
         /// <param name="vector">Position</param>
         public void AddPosition(float position, Vector3 vector)
         {
-            this.cX.Keys.Add(new CurveKey(position, vector.X));
-            this.cY.Keys.Add(new CurveKey(position, vector.Y));
-            this.cZ.Keys.Add(new CurveKey(position, vector.Z));
+            cX.Keys.Add(new CurveKey(position, vector.X));
+            cY.Keys.Add(new CurveKey(position, vector.Y));
+            cZ.Keys.Add(new CurveKey(position, vector.Z));
         }
         /// <summary>
         /// Gets the curve key at specified index
@@ -190,9 +202,9 @@ namespace Engine
         /// <returns>Returns the key at specified index</returns>
         public Curve3DKey GetKey(int index)
         {
-            var keyX = this.cX.Keys[index];
-            var keyY = this.cY.Keys[index];
-            var keyZ = this.cZ.Keys[index];
+            var keyX = cX.Keys[index];
+            var keyY = cY.Keys[index];
+            var keyZ = cZ.Keys[index];
 
             return new Curve3DKey(
                 keyX.Position,
@@ -201,38 +213,26 @@ namespace Engine
                 new Vector3(keyX.TangentOut, keyY.TangentOut, keyZ.TangentOut),
                 keyX.Continuity);
         }
-        /// <summary>
-        /// Gets the curve position at specified time
-        /// </summary>
-        /// <param name="time">Curve time</param>
-        /// <returns>Returns the curve position at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
             return new Vector3(
-                this.cX.Evaluate(time),
-                this.cY.Evaluate(time),
-                this.cZ.Evaluate(time));
+                cX.Evaluate(time),
+                cY.Evaluate(time),
+                cZ.Evaluate(time));
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             return Vector3.Up;
         }
-        /// <summary>
-        /// Gets the next control point at specified time
-        /// </summary>
-        /// <param name="time">Curve time</param>
-        /// <returns>Returns the next control point at specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
             return new Vector3(
-                this.cX.Evaluate(time),
-                this.cY.Evaluate(time),
-                this.cZ.Evaluate(time));
+                cX.Evaluate(time),
+                cY.Evaluate(time),
+                cZ.Evaluate(time));
         }
         /// <summary>
         /// Sets the curve tangents
@@ -244,73 +244,48 @@ namespace Engine
             CurveKey next;
             int prevIndex;
             int nextIndex;
-            for (int i = 0; i < this.cX.Keys.Count; i++)
+            for (int i = 0; i < cX.Keys.Count; i++)
             {
                 prevIndex = i - 1;
                 if (prevIndex < 0) prevIndex = i;
 
                 nextIndex = i + 1;
-                if (nextIndex == this.cX.Keys.Count) nextIndex = i;
+                if (nextIndex == cX.Keys.Count) nextIndex = i;
 
-                prev = this.cX.Keys[prevIndex];
-                next = this.cX.Keys[nextIndex];
-                curr = this.cX.Keys[i];
+                prev = cX.Keys[prevIndex];
+                next = cX.Keys[nextIndex];
+                curr = cX.Keys[i];
                 SetCurveKeyTangent(ref prev, ref curr, ref next);
-                this.cX.Keys[i] = curr;
+                cX.Keys[i] = curr;
 
-                prev = this.cY.Keys[prevIndex];
-                next = this.cY.Keys[nextIndex];
-                curr = this.cY.Keys[i];
+                prev = cY.Keys[prevIndex];
+                next = cY.Keys[nextIndex];
+                curr = cY.Keys[i];
                 SetCurveKeyTangent(ref prev, ref curr, ref next);
-                this.cY.Keys[i] = curr;
+                cY.Keys[i] = curr;
 
-                prev = this.cZ.Keys[prevIndex];
-                next = this.cZ.Keys[nextIndex];
-                curr = this.cZ.Keys[i];
+                prev = cZ.Keys[prevIndex];
+                next = cZ.Keys[nextIndex];
+                curr = cZ.Keys[i];
                 SetCurveKeyTangent(ref prev, ref curr, ref next);
-                this.cZ.Keys[i] = curr;
+                cZ.Keys[i] = curr;
             }
 
         }
-        /// <summary>
-        /// Sets the curve tangents for the current key, by previous and next keys
-        /// </summary>
-        /// <param name="prev">Previous key</param>
-        /// <param name="curr">Current key</param>
-        /// <param name="next">Next key</param>
-        private void SetCurveKeyTangent(ref CurveKey prev, ref CurveKey curr, ref CurveKey next)
-        {
-            float dt = next.Position - prev.Position;
-            float dv = next.Value - prev.Value;
-            if (Math.Abs(dv) < float.Epsilon)
-            {
-                curr.TangentIn = 0;
-                curr.TangentOut = 0;
-            }
-            else
-            {
-                curr.TangentIn = dv * (curr.Position - prev.Position) / dt;
-                curr.TangentOut = dv * (next.Position - curr.Position) / dt;
-            }
-        }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            var returnPath = new List<Vector3>();
 
             float time = 0;
-            while (time < this.Length)
+            while (time < Length)
             {
-                returnPath.Add(this.GetPosition(time));
+                returnPath.Add(GetPosition(time));
 
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return [.. returnPath];
         }
     }
 }

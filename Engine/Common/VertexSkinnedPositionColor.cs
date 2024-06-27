@@ -1,5 +1,9 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -18,13 +22,60 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public static InputElement[] Input(int slot)
         {
-            return new InputElement[]
-            {
+            return
+            [
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, slot, InputClassification.PerVertexData, 0),
                 new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 40, slot, InputClassification.PerVertexData, 0 ),
-            };
+            ];
+        }
+        /// <summary>
+        /// Converts a vertex data list to a vertex array
+        /// </summary>
+        /// <param name="vertices">Vertices list</param>
+        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
+        {
+            var vArray = vertices.ToArray();
+            var vWeights = weights.ToArray();
+            var vBones = skinBoneNames.ToArray();
+
+            var res = new IVertexData[vArray.Length];
+
+            Parallel.For(0, vArray.Length, (index) =>
+            {
+                var v = vArray[index];
+
+                var p = v.Position ?? Vector3.Zero;
+                var c = v.Color ?? Color4.White;
+
+                var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
+                int vwCount = vw?.Length ?? 0;
+
+                var wg0 = vwCount > 0 ? vw[0].WeightValue : 0f;
+                var wg1 = vwCount > 1 ? vw[1].WeightValue : 0f;
+                var wg2 = vwCount > 2 ? vw[2].WeightValue : 0f;
+
+                var bn0 = vwCount > 0 ? Math.Max(0, Array.IndexOf(vBones, vw[0].Joint)) : 0;
+                var bn1 = vwCount > 1 ? Math.Max(0, Array.IndexOf(vBones, vw[1].Joint)) : 0;
+                var bn2 = vwCount > 2 ? Math.Max(0, Array.IndexOf(vBones, vw[2].Joint)) : 0;
+                var bn3 = vwCount > 3 ? Math.Max(0, Array.IndexOf(vBones, vw[3].Joint)) : 0;
+
+                res[index] = new VertexSkinnedPositionColor
+                {
+                    Position = p,
+                    Color = c,
+                    Weight1 = wg0,
+                    Weight2 = wg1,
+                    Weight3 = wg2,
+                    BoneIndex1 = (byte)bn0,
+                    BoneIndex2 = (byte)bn1,
+                    BoneIndex3 = (byte)bn2,
+                    BoneIndex4 = (byte)bn3,
+                };
+            });
+
+            return await Task.FromResult(res);
         }
 
         /// <summary>
@@ -66,7 +117,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType
+        public readonly VertexTypes VertexType
         {
             get
             {
@@ -79,7 +130,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns true if structure contains data for the specified channel</returns>
-        public bool HasChannel(VertexDataChannels channel)
+        public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Color) return true;
@@ -93,7 +144,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns data for the specified channel</returns>
-        public T GetChannelValue<T>(VertexDataChannels channel)
+        public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else if (channel == VertexDataChannels.Color) return (T)(object)Color;
@@ -134,7 +185,7 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexSkinnedPositionColor));
         }
@@ -143,13 +194,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public InputElement[] GetInput(int slot)
+        public readonly InputElement[] GetInput(int slot)
         {
             return Input(slot);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Skinned; Position: {Position}; Color: {Color};";
         }

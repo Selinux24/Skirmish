@@ -27,7 +27,7 @@ namespace Engine.UI
         /// Gets text representation of character map
         /// </summary>
         /// <returns>Returns text representation of character map</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"X: {X}; Y: {Y}; Width: {Width}; Height: {Height}";
         }

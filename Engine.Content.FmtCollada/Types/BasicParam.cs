@@ -11,9 +11,10 @@ namespace Engine.Collada.Types
         [XmlAttribute("ref")]
         public string Reference { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Reference: {0};", this.Reference);
+            return $"Reference: {Reference};";
         }
     }
 }

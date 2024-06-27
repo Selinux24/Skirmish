@@ -1,66 +1,134 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    /// <summary>
+    /// Height field
+    /// </summary>
     class Heightfield
     {
         /// <summary>
+        /// Heightfield of spans (width*height).
+        /// </summary>
+        private Span[] spans;
+        /// <summary>
+        /// Linked list of span pools.
+        /// </summary>
+        private readonly List<SpanPool> pools = [];
+        /// <summary>
+        /// The next free span.
+        /// </summary>
+        private Span freeList;
+
+        /// <summary>
+        /// The size of each cell. (On the xz-plane.)
+        /// </summary>
+        public float CellSize { get; private set; }
+        /// <summary>
+        /// The height of each cell. (The minimum increment along the y-axis.)
+        /// </summary>
+        public float CellHeight { get; private set; }
+        /// <summary>
+        /// Bounds in world space. [(x, y, z)]
+        /// </summary>
+        public BoundingBox Bounds { get; private set; }
+        /// <summary>
+        /// The width of the heightfield. (Along the x-axis in cell units.)
+        /// </summary>
+        public int Width { get; private set; }
+        /// <summary>
+        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// </summary>
+        public int Height { get; private set; }
+
+        /// <summary>
         /// Builds a new empty heightfield
         /// </summary>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="bbox">Bounds</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="cellHeight">Cell height</param>
+        /// <param name="cfg">Config</param>
+        /// <param name="bounds">Generation bounds</param>
         /// <returns>Returns a new heightfield</returns>
-        public static Heightfield Build(int width, int height, BoundingBox bbox, float cellSize, float cellHeight)
+        public static Heightfield Build(Config cfg, BoundingBox bounds)
         {
-            return new Heightfield
+            return new()
             {
-                Width = width,
-                Height = height,
-                BoundingBox = bbox,
-                CellSize = cellSize,
-                CellHeight = cellHeight,
-                Spans = new Span[width * height],
+                CellSize = cfg.CellSize,
+                CellHeight = cfg.CellHeight,
+
+                Bounds = bounds,
+
+                Width = cfg.Width,
+                Height = cfg.Height,
+
+                spans = new Span[cfg.Width * cfg.Height],
             };
         }
 
         /// <summary>
-        /// The width of the heightfield. (Along the x-axis in cell units.)
+        /// Rasterizes the specified triangle list
         /// </summary>
-        public int Width;
+        /// <param name="tris">Triangle list</param>
+        /// <param name="walkableSlopeAngle">Slope angle</param>
+        /// <param name="walkableClimb">Maximum climb</param>
+        public void Rasterize(Triangle[] tris, float walkableSlopeAngle, int walkableClimb)
+        {
+            // Rasterizer settings
+            RasterizerSettings settings = new()
+            {
+                WalkableSlopeAngle = walkableSlopeAngle,
+                WalkableClimb = walkableClimb,
+                Width = Width,
+                Height = Height,
+                CellSize = CellSize,
+                CellHeight = CellHeight,
+                Bounds = Bounds,
+            };
+
+            // Rasterize triangles.
+            var rData = Rasterizer.Rasterize(tris, settings);
+            foreach (var r in rData)
+            {
+                AddSpan(r);
+            }
+        }
+
         /// <summary>
-        /// The height of the heightfield. (Along the z-axis in cell units.)
+        /// Iterates over the span list
         /// </summary>
-        public int Height;
+        public IEnumerable<(int x, int y, Span span)> IterateSpans()
+        {
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    var span = spans[x + y * Width];
+                    if (span == null)
+                    {
+                        // If there are no spans at this cell, just leave the data to index=0, count=0.
+                        continue;
+                    }
+
+                    yield return (x, y, span);
+                }
+            }
+        }
         /// <summary>
-        /// Bounds in world space. [(x, y, z)]
+        /// Iterates over the span list and it's next span
         /// </summary>
-        public BoundingBox BoundingBox;
-        /// <summary>
-        /// The size of each cell. (On the xz-plane.)
-        /// </summary>
-        public float CellSize;
-        /// <summary>
-        /// The height of each cell. (The minimum increment along the y-axis.)
-        /// </summary>
-        public float CellHeight;
-        /// <summary>
-        /// Heightfield of spans (width*height).
-        /// </summary>
-        public Span[] Spans;
-        /// <summary>
-        /// Linked list of span pools.
-        /// </summary>
-        public List<SpanPool> Pools = new List<SpanPool>();
-        /// <summary>
-        /// The next free span.
-        /// </summary>
-        public Span FreeList;
+        public IEnumerable<(int x, int y, Span span)> IterateSpansWithNexts()
+        {
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    for (var s = spans[x + y * Width]; s != null; s = s.Next)
+                    {
+                        yield return (x, y, s);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the span count
@@ -68,23 +136,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the span count</returns>
         public int GetSpanCount()
         {
-            int w = this.Width;
-            int h = this.Height;
-
             int spanCount = 0;
 
-            for (int y = 0; y < h; ++y)
+            foreach (var (x, y, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < w; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (Span s = this.Spans[x + y * w]; s != null; s = s.next)
-                    {
-                        if (s.area != AreaTypes.RC_NULL_AREA)
-                        {
-                            spanCount++;
-                        }
-                    }
+                    continue;
                 }
+
+                spanCount++;
             }
 
             return spanCount;
@@ -92,171 +154,164 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Allocates a new span
         /// </summary>
+        /// <param name="smin">Lower limit</param>
+        /// <param name="smax">Upper limit</param>
+        /// <param name="area">Area type</param>
         /// <returns>Returns the new span</returns>
-        public Span AllocSpan()
+        private Span AllocSpan(int smin, int smax, AreaTypes area)
         {
             // If running out of memory, allocate new page and update the freelist.
-            if (this.FreeList == null || this.FreeList.next == null)
+            if (freeList == null || freeList.Next == null)
             {
                 // Create new page.
-                // Allocate memory for the new pool.
-                SpanPool pool = new SpanPool
-                {
-                    // Add the pool into the list of pools.
-                    next = this.Pools.Count > 0 ? this.Pools.Last() : null
-                };
-                this.Pools.Add(pool);
+                var pool = new SpanPool();
+                pools.Add(pool);
+
                 // Add new items to the free list.
-                Span freelist = this.FreeList;
-                int itIndex = SpanPool.RC_SPANS_PER_POOL;
-                do
-                {
-                    var it = pool.items[--itIndex];
-                    it.next = freelist;
-                    freelist = it;
-                }
-                while (itIndex > 0);
-                this.FreeList = pool.items[itIndex];
+                freeList = pool.Add(freeList);
             }
 
             // Pop item from in front of the free list.
-            Span s = this.FreeList;
-            this.FreeList = this.FreeList.next;
+            var s = freeList;
+            freeList = freeList.Next;
+            s.Initialize(smin, smax, area);
+
             return s;
         }
         /// <summary>
         /// Frees the specified span
         /// </summary>
         /// <param name="cur">Span</param>
-        public void FreeSpan(Span cur)
+        private void FreeSpan(Span cur)
         {
             if (cur == null) return;
 
             // Add the node in front of the free list.
-            cur.next = this.FreeList;
-            this.FreeList = cur;
+            cur.Next = freeList;
+            freeList = cur;
         }
         /// <summary>
         /// Adds a span to the heightfield
         /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        /// <param name="smin">Lower limit</param>
-        /// <param name="smax">Upper limit</param>
-        /// <param name="area">Area type</param>
-        /// <param name="flagMergeThr">Merge threshold</param>
-        public void AddSpan(int x, int y, int smin, int smax, AreaTypes area, int flagMergeThr)
+        /// <param name="data">Rasterize data</param>
+        public void AddSpan(RasterizeData data)
         {
-            int idx = x + y * this.Width;
+            int x = data.X;
+            int y = data.Y;
+            int smin = data.SMin;
+            int smax = data.SMax;
+            AreaTypes area = data.Area;
+            int flagMergeThr = data.FlagMergeThr;
 
-            Span s = AllocSpan();
-            s.smin = smin;
-            s.smax = smax;
-            s.area = area;
-            s.next = null;
+            int idx = x + y * Width;
+
+            Span s = AllocSpan(smin, smax, area);
 
             // Empty cell, add the first span.
-            if (this.Spans[idx] == null)
+            if (spans[idx] == null)
             {
-                this.Spans[idx] = s;
+                spans[idx] = s;
                 return;
             }
             Span prev = null;
-            Span cur = this.Spans[idx];
+            Span cur = spans[idx];
 
             // Insert and merge spans.
             while (cur != null)
             {
-                if (cur.smin > s.smax)
+                if (cur.Min > s.Max)
                 {
                     // Current span is further than the new span, break.
                     break;
                 }
-                else if (cur.smax < s.smin)
+
+                if (cur.Max < s.Min)
                 {
                     // Current span is before the new span advance.
                     prev = cur;
-                    cur = cur.next;
+                    cur = cur.Next;
+
+                    continue;
+                }
+
+                // Merge spans.
+                s.Merge(cur, flagMergeThr);
+
+                // Remove current span.
+                var next = cur.Next;
+                FreeSpan(cur);
+                if (prev != null)
+                {
+                    prev.Next = next;
                 }
                 else
                 {
-                    // Merge spans.
-                    if (cur.smin < s.smin)
-                    {
-                        s.smin = cur.smin;
-                    }
-                    if (cur.smax > s.smax)
-                    {
-                        s.smax = cur.smax;
-                    }
-
-                    // Merge flags.
-                    if (Math.Abs(s.smax - cur.smax) <= flagMergeThr)
-                    {
-                        s.area = (AreaTypes)Math.Max((int)s.area, (int)cur.area);
-                    }
-
-                    // Remove current span.
-                    Span next = cur.next;
-                    FreeSpan(cur);
-                    if (prev != null)
-                    {
-                        prev.next = next;
-                    }
-                    else
-                    {
-                        this.Spans[idx] = next;
-                    }
-
-                    cur = next;
+                    spans[idx] = next;
                 }
+
+                cur = next;
             }
 
             // Insert new span.
             if (prev != null)
             {
-                s.next = prev.next;
-                prev.next = s;
+                s.Next = prev.Next;
+                prev.Next = s;
             }
             else
             {
-                s.next = this.Spans[idx];
-                this.Spans[idx] = s;
+                s.Next = spans[idx];
+                spans[idx] = s;
             }
         }
 
         /// <summary>
+        /// Filter heightfield
+        /// </summary>
+        /// <param name="cfg">Configuration</param>
+        public void FilterHeightfield(Config cfg)
+        {
+            // Once all geometry is rasterized, we do initial pass of filtering to
+            // remove unwanted overhangs caused by the conservative rasterization
+            // as well as filter spans where the character cannot possibly stand.
+            if (cfg.FilterLowHangingObstacles)
+            {
+                FilterLowHangingWalkableObstacles(cfg.WalkableClimb);
+            }
+            if (cfg.FilterLedgeSpans)
+            {
+                FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb);
+            }
+            if (cfg.FilterWalkableLowHeightSpans)
+            {
+                FilterWalkableLowHeightSpans(cfg.WalkableHeight);
+            }
+        }
+        /// <summary>
         /// Filters the low-hanging obstables
         /// </summary>
         /// <param name="walkableClimb">Walkable climb</param>
-        public void FilterLowHangingWalkableObstacles(int walkableClimb)
+        private void FilterLowHangingWalkableObstacles(int walkableClimb)
         {
-            int w = Width;
-            int h = Height;
-
-            for (int y = 0; y < h; y++)
+            foreach (var (_, _, span) in IterateSpans())
             {
-                for (int x = 0; x < w; x++)
+                bool previousWalkable = false;
+                AreaTypes previousArea = AreaTypes.RC_NULL_AREA;
+
+                Span ps = null;
+                for (Span s = span; s != null; ps = s, s = s.Next)
                 {
-                    bool previousWalkable = false;
-                    AreaTypes previousArea = AreaTypes.RC_NULL_AREA;
+                    bool walkable = s.Area != AreaTypes.RC_NULL_AREA;
 
-                    Span ps = null;
-
-                    for (Span s = Spans[x + y * w]; s != null; ps = s, s = s.next)
+                    // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
+                    if (!walkable && previousWalkable && Math.Abs(s.Max - ps.Max) <= walkableClimb)
                     {
-                        bool walkable = s.area != AreaTypes.RC_NULL_AREA;
-
-                        // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
-                        if (!walkable && previousWalkable && Math.Abs(s.smax - ps.smax) <= walkableClimb)
-                        {
-                            s.area = previousArea;
-                        }
-
-                        // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
-                        previousWalkable = walkable;
-                        previousArea = s.area;
+                        s.Area = previousArea;
                     }
+
+                    // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
+                    previousWalkable = walkable;
+                    previousArea = s.Area;
                 }
             }
         }
@@ -265,48 +320,52 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="walkableHeight">Walkable height</param>
         /// <param name="walkableClimb">Walkable climb</param>
-        public void FilterLedgeSpans(int walkableHeight, int walkableClimb)
+        private void FilterLedgeSpans(int walkableHeight, int walkableClimb)
         {
             // Mark border spans.
-            for (int y = 0; y < Height; ++y)
+            foreach (var (x, y, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < Width; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (Span s = Spans[x + y * Width]; s != null; s = s.next)
-                    {
-                        // Skip non walkable spans.
-                        if (s.area == AreaTypes.RC_NULL_AREA)
-                        {
-                            continue;
-                        }
-
-                        FilterLedgeSpan(s, x, y, Width, Height, walkableHeight, walkableClimb);
-                    }
+                    continue;
                 }
+
+                FilterLedgeSpan(s, x, y, Width, Height, walkableHeight, walkableClimb);
             }
         }
+        /// <summary>
+        /// Filter ledge span
+        /// </summary>
+        /// <param name="span">Span</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="width">Span width</param>
+        /// <param name="height">Span height</param>
+        /// <param name="walkableHeight">Walkable height</param>
+        /// <param name="walkableClimb">Walkable climb</param>
         private void FilterLedgeSpan(Span span, int x, int y, int width, int height, int walkableHeight, int walkableClimb)
         {
             // Find neighbours minimum height.
             int minh = int.MaxValue;
 
             // Min and max height of accessible neighbours.
-            int asmin = span.smax;
-            int asmax = span.smax;
+            int asmin = span.Max;
+            int asmax = span.Max;
 
             for (int dir = 0; dir < 4; ++dir)
             {
                 // Skip neighbours which are out of bounds.
-                int dx = x + RecastUtils.GetDirOffsetX(dir);
-                int dy = y + RecastUtils.GetDirOffsetY(dir);
+                int dx = x + GridUtils.GetDirOffsetX(dir);
+                int dy = y + GridUtils.GetDirOffsetY(dir);
                 if (dx < 0 || dy < 0 || dx >= width || dy >= height)
                 {
-                    minh = Math.Min(minh, -walkableClimb - span.smax);
+                    minh = Math.Min(minh, -walkableClimb - span.Max);
                     continue;
                 }
 
-                var ns = Spans[dx + dy * width];
-                var (MinHeight, AsMin, AsMax) = FindMinimumHeight(ns, span, walkableHeight, walkableClimb, minh, asmin, asmax);
+                var ns = spans[dx + dy * width];
+                var (MinHeight, AsMin, AsMax) = span.FindMinimumHeight(ns, walkableHeight, walkableClimb, minh, asmin, asmax);
                 minh = MinHeight;
                 asmin = AsMin;
                 asmax = AsMax;
@@ -315,82 +374,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (minh < -walkableClimb)
             {
                 // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
-                span.area = AreaTypes.RC_NULL_AREA;
+                span.Area = AreaTypes.RC_NULL_AREA;
             }
             else if ((asmax - asmin) > walkableClimb)
             {
                 // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
-                span.area = AreaTypes.RC_NULL_AREA;
+                span.Area = AreaTypes.RC_NULL_AREA;
             }
-        }
-        private (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
-        {
-            int minh = minHeight;
-            int asmin = minimumAccessibleNeigbor;
-            int asmax = maximumAccessibleNeigbor;
-
-            int bot = span.smax;
-            int top = span.next != null ? span.next.smin : int.MaxValue;
-
-            // From minus infinity to the first span.
-            int nbot = -walkableClimb;
-            int ntop = nSpan != null ? nSpan.smin : int.MaxValue;
-
-            // Skip neightbour if the gap between the spans is too small.
-            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-            {
-                minh = Math.Min(minh, nbot - bot);
-            }
-
-            var ns = nSpan;
-            while (ns != null)
-            {
-                nbot = ns.smax;
-                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
-
-                // Skip neightbour if the gap between the spans is too small.
-                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-                {
-                    minh = Math.Min(minh, nbot - bot);
-
-                    // Find min/max accessible neighbour height. 
-                    if (Math.Abs(nbot - bot) <= walkableClimb)
-                    {
-                        if (nbot < asmin) asmin = nbot;
-                        if (nbot > asmax) asmax = nbot;
-                    }
-
-                }
-
-                ns = ns.next;
-            }
-
-            return (minh, asmin, asmax);
         }
         /// <summary>
         /// Filters the low-height spans
         /// </summary>
         /// <param name="walkableHeight">Walkable height</param>
-        public void FilterWalkableLowHeightSpans(int walkableHeight)
+        private void FilterWalkableLowHeightSpans(int walkableHeight)
         {
-            int w = Width;
-            int h = Height;
-
             // Remove walkable flag from spans which do not have enough space above them for the agent to stand there.
-            for (int y = 0; y < h; ++y)
+            foreach (var (_, _, s) in IterateSpansWithNexts())
             {
-                for (int x = 0; x < w; ++x)
+                // Skip non walkable spans.
+                if (s.Area == AreaTypes.RC_NULL_AREA)
                 {
-                    for (var s = Spans[x + y * w]; s != null; s = s.next)
-                    {
-                        int bot = s.smax;
-                        int top = s.next != null ? s.next.smin : int.MaxValue;
+                    continue;
+                }
 
-                        if ((top - bot) <= walkableHeight)
-                        {
-                            s.area = AreaTypes.RC_NULL_AREA;
-                        }
-                    }
+                int bot = s.Max;
+                int top = s.Next?.Min ?? int.MaxValue;
+
+                if ((top - bot) <= walkableHeight)
+                {
+                    s.Area = AreaTypes.RC_NULL_AREA;
                 }
             }
         }

@@ -16,9 +16,10 @@ namespace Engine.Collada.Types
 
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}", this.Reference);
+            return $"{Reference}";
         }
     }
 }

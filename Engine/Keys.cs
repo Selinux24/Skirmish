@@ -1,11 +1,10 @@
-﻿using System;
+﻿#pragma warning disable CA1069
 
 namespace Engine
 {
     /// <summary>
     ///  Specifies key codes and modifiers.
     /// </summary>
-    [Flags]
     public enum Keys
     {
         /// <summary>
@@ -979,3 +978,4 @@ namespace Engine
         Alt = 0x00040000,
     }
 }
+#pragma warning restore CA1069

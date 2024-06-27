@@ -6,7 +6,13 @@ namespace Engine.Common
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable<T> : BaseSceneObject<T>, IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public abstract class Drawable<T>(Scene scene, string id, string name) : BaseSceneObject<T>(scene, id, name), IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
     {
         /// <summary>
         /// Buffer manager
@@ -24,23 +30,8 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual BlendModes BlendMode { get; protected set; }
         /// <inheritdoc/>
-        public virtual SceneObjectUsages Usage { get; set; }
-        /// <inheritdoc/>
-        public virtual int Layer { get; set; }
-        /// <inheritdoc/>
         public virtual int InstanceCount { get; protected set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        protected Drawable(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -65,17 +56,15 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
+        public override async Task ReadAssets(T description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Visible = description.StartsVisible;
             CastShadow = description.CastShadow;
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
-            Usage = SceneObjectUsages.None;
-            Layer = 0;
             InstanceCount = 1;
         }
 
@@ -96,18 +85,18 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public virtual void DrawShadows(DrawContextShadows context)
+        public virtual bool DrawShadows(DrawContextShadows context)
         {
-
+            return false;
         }
         /// <inheritdoc/>
-        public virtual void Draw(DrawContext context)
+        public virtual bool Draw(DrawContext context)
         {
-
+            return false;
         }
 
         /// <inheritdoc/>
-        public virtual bool Cull(IIntersectionVolume volume, out float distance)
+        public virtual bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

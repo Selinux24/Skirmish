@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -7,6 +10,26 @@ namespace Engine
     /// </summary>
     public static class SharpDXExtensions
     {
+        /// <summary>
+        /// Project the point in the vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="point">Point</param>
+        public static Vector3 ProjectPoint(this Vector3 vector, Vector3 point)
+        {
+            // Normalize the projection vector
+            if (!vector.IsNormalized)
+            {
+                vector = Vector3.Normalize(vector);
+            }
+
+            // Calculate the dot product between the point and the projection vector
+            float dotProduct = Vector3.Dot(point, vector);
+
+            // Calculate the projection of the point onto the projection vector
+            return dotProduct * vector;
+        }
+
         /// <summary>
         /// Limits the vector length to specified magnitude
         /// </summary>
@@ -220,6 +243,120 @@ namespace Engine
         }
 
         /// <summary>
+        /// Constructs a BoundingSphere that fully contains the given points.
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public static BoundingSphere BoundingSphereFromPoints(IEnumerable<Vector3> points)
+        {
+            return BoundingSphere.FromPoints(points.ToArray());
+        }
+        /// <summary>
+        /// Constructs a BoundingBox that fully contains the given points.
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public static BoundingBox BoundingBoxFromPoints(IEnumerable<Vector3> points)
+        {
+            var box = BoundingBox.FromPoints(points.ToArray());
+
+            return box.Normalize();
+        }
+
+        /// <summary>
+        /// Normalizes the minimum and maximum bounding box limits.
+        /// </summary>
+        /// <param name="box">Bounding box</param>
+        /// <returns>Returns a bounding box which assures that the minimum vector contains the minimum values, and the maximum vector contains the maximum values</returns>
+        public static BoundingBox Normalize(this BoundingBox box)
+        {
+            var newBox = box;
+
+            var min = newBox.Minimum;
+            var max = newBox.Maximum;
+            newBox.Minimum = new(MathF.Min(max.X, min.X), MathF.Min(max.Y, min.Y), MathF.Min(max.Z, min.Z));
+            newBox.Maximum = new(MathF.Max(max.X, min.X), MathF.Max(max.Y, min.Y), MathF.Max(max.Z, min.Z));
+
+            return newBox;
+        }
+
+        /// <summary>
+        /// Gets a sphere transformed by the given matrix
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="transform">Transform</param>
+        public static BoundingSphere SetTransform(this BoundingSphere sphere, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return sphere;
+            }
+
+            // Try to extract scaling component
+            if (!transform.Decompose(out var scale, out _, out _))
+            {
+                return sphere;
+            }
+
+            // Adjust the radius
+            var radius = sphere.Radius * MathF.Max(MathF.Max(scale.X, scale.Y), scale.Z);
+
+            // Gets the new position
+            var center = Vector3.TransformCoordinate(sphere.Center, transform);
+
+            return new BoundingSphere(center, radius);
+        }
+        /// <summary>
+        /// Gets a box transformed by the given matrix
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="transform">Transform</param>
+        public static BoundingBox SetTransform(this BoundingBox box, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return box;
+            }
+
+            if (!transform.Decompose(out var scale, out _, out var translation))
+            {
+                return box;
+            }
+
+            var extents = box.GetExtents();
+            var center = box.Center;
+
+            extents *= scale;
+            center = Vector3.TransformCoordinate(center, Matrix.Translation(translation));
+
+            // Gets the new position
+            var trnBox = new BoundingBox(-extents + center, +extents + center);
+
+            return trnBox.Normalize();
+        }
+        /// <summary>
+        /// Gets a oriented bounding box transformed by the given matrix
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="transform">Transform</param>
+        public static OrientedBoundingBox SetTransform(this OrientedBoundingBox obb, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return obb;
+            }
+
+
+            if (!transform.Decompose(out var scale, out var rotation, out var translation))
+            {
+                return obb;
+            }
+
+            var trnObb = obb;
+            trnObb.Scale(scale);
+            trnObb.Transformation = Matrix.RotationQuaternion(rotation) * Matrix.Translation(translation);
+            return trnObb;
+        }
+
+        /// <summary>
         /// Gets the bounding box center
         /// </summary>
         /// <param name="bbox">Bounding box</param>
@@ -237,7 +374,7 @@ namespace Engine
         {
             var center = bbox.GetCenter();
 
-            return (bbox.Maximum - center);
+            return bbox.Maximum - center;
         }
         /// <summary>
         /// Gets the XY rectangle of the box
@@ -268,6 +405,405 @@ namespace Engine
                 Right = bbox.Maximum.X,
                 Bottom = bbox.Maximum.Z,
             };
+        }
+
+        /// <summary>
+        /// Gets the bounding box edge list
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the edge list of the current bounding box</returns>
+        public static IEnumerable<Segment> GetEdges(this BoundingBox bbox)
+        {
+            return GetEdges(bbox.GetVertices());
+        }
+        /// <summary>
+        /// Gets the oriented bounding box edge list
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns the edge list of the current oriented bounding box</returns>
+        public static IEnumerable<Segment> GetEdges(this OrientedBoundingBox obb)
+        {
+            return GetEdges(obb.GetVertices());
+        }
+        /// <summary>
+        /// Gets the edge list
+        /// </summary>
+        /// <param name="vertices">Box vertices</param>
+        /// <returns>Returns the edge list of the current box vertices</returns>
+        public static IEnumerable<Segment> GetEdges(IEnumerable<Vector3> vertices)
+        {
+            //Top edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.BackRightTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackLeftTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontRightTop));
+
+            //Bottom edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightBottom), vertices.ElementAt((int)BoxVertices.BackRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightBottom), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftBottom), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftBottom), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
+
+            //Vertical edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
+        }
+
+        /// <summary>
+        /// Gets the bounding box face planes list
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static IEnumerable<Plane> GetFaces(this BoundingBox bbox)
+        {
+            var vertices = bbox.GetVertices();
+
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box face planes list
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static IEnumerable<Plane> GetFaces(this OrientedBoundingBox obb)
+        {
+            var vertices = obb.GetVertices();
+
+            var edges = GetEdges(vertices);
+
+            var topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
+
+            var bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
+
+            var frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
+
+            var backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
+
+            var leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
+
+            var rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
+        }
+
+        /// <summary>
+        /// Gets the bounding box face plane
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="face">Face</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this BoundingBox bbox, BoxFaces face)
+        {
+            return GetFace(bbox.GetFaces(), face);
+        }
+        /// <summary>
+        /// Gets the bounding box face plane
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="faceIndex">Face index</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this BoundingBox bbox, int faceIndex)
+        {
+            return GetFace(bbox.GetFaces(), faceIndex);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box face plane
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="face">Face</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this OrientedBoundingBox obb, BoxFaces face)
+        {
+            return GetFace(obb.GetFaces(), face);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box face plane
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="faceIndex">Face index</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this OrientedBoundingBox obb, int faceIndex)
+        {
+            return GetFace(obb.GetFaces(), faceIndex);
+        }
+        /// <summary>
+        /// Gets the specified box face
+        /// </summary>
+        /// <param name="faces">Box faces collection</param>
+        /// <param name="face">Face</param>
+        public static Plane GetFace(IEnumerable<Plane> faces, BoxFaces face)
+        {
+            return faces.ElementAtOrDefault((int)face);
+        }
+        /// <summary>
+        /// Gets the specified box face
+        /// </summary>
+        /// <param name="faces">Box faces collection</param>
+        /// <param name="faceIndex">Face index</param>
+        public static Plane GetFace(IEnumerable<Plane> faces, int faceIndex)
+        {
+            return faces.ElementAtOrDefault(faceIndex);
+        }
+
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(this BoundingBox box, BoxVertices vertex)
+        {
+            return GetVertex(box.GetVertices(), (int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(this BoundingBox box, int index)
+        {
+            return GetVertex(box.GetVertices(), index);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(this OrientedBoundingBox obb, BoxVertices vertex)
+        {
+            return GetVertex(obb.GetVertices(), (int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(this OrientedBoundingBox obb, int index)
+        {
+            return GetVertex(obb.GetVertices(), index);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, BoxVertices vertex)
+        {
+            return vertices.ElementAtOrDefault((int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, int index)
+        {
+            return vertices.ElementAtOrDefault(index);
+        }
+
+        /// <summary>
+        /// Gets the bounding box vertices
+        /// </summary>
+        /// <param name="box">Bounding box</param>
+        public static IEnumerable<Vector3> GetVertices(this BoundingBox box)
+        {
+            var min = box.Minimum;
+            var max = box.Maximum;
+
+            yield return new Vector3(max.X, max.Y, max.Z);
+            yield return new Vector3(max.X, max.Y, min.Z);
+            yield return new Vector3(min.X, max.Y, min.Z);
+            yield return new Vector3(min.X, max.Y, max.Z);
+            yield return new Vector3(max.X, min.Y, max.Z);
+            yield return new Vector3(max.X, min.Y, min.Z);
+            yield return new Vector3(min.X, min.Y, min.Z);
+            yield return new Vector3(min.X, min.Y, max.Z);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box vertices
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        public static IEnumerable<Vector3> GetVertices(this OrientedBoundingBox obb)
+        {
+            var extents = obb.Extents;
+            var trn = obb.Transformation;
+
+            var normal = new Vector3(extents.X, 0f, 0f);
+            var normal2 = new Vector3(0f, extents.Y, 0f);
+            var normal3 = new Vector3(0f, 0f, extents.Z);
+            Vector3.TransformNormal(ref normal, ref trn, out normal);
+            Vector3.TransformNormal(ref normal2, ref trn, out normal2);
+            Vector3.TransformNormal(ref normal3, ref trn, out normal3);
+            Vector3 translationVector = trn.TranslationVector;
+
+            yield return translationVector + normal + normal2 + normal3;
+            yield return translationVector + normal + normal2 - normal3;
+            yield return translationVector - normal + normal2 - normal3;
+            yield return translationVector - normal + normal2 + normal3;
+            yield return translationVector + normal - normal2 + normal3;
+            yield return translationVector + normal - normal2 - normal3;
+            yield return translationVector - normal - normal2 - normal3;
+            yield return translationVector - normal - normal2 + normal3;
+        }
+
+        /// <summary>
+        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points)
+        {
+            return FromPoints(points, Matrix.Identity);
+        }
+        /// <summary>
+        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return new OrientedBoundingBox(points.ToArray());
+            }
+
+            //First, get item points
+            var ptArray = points.ToArray();
+
+            //Next, remove any point transform and set points to origin
+            var inv = Matrix.Invert(transform);
+            Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
+
+            //Create the OBB from origin points
+            var obb = new OrientedBoundingBox(ptArray);
+
+            //Apply the original transform to OBB
+            obb.Transformation *= transform;
+
+            return obb;
+        }
+
+        /// <summary>
+        /// Generates a list of four bounding boxes which makes an QuadTree subdivision of the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="separateBothAxis">Separate in X and Z axis</param>
+        /// <param name="separation">Boxes separation amount</param>
+        /// <returns>Returns four boxes</returns>
+        /// <remarks>
+        /// By index:
+        /// 0 - Top Left
+        /// 1 - Top Right
+        /// 2 - Bottom Left
+        /// 3 - Bottom Right
+        /// </remarks>
+        public static IEnumerable<BoundingBox> SubdivideQuadtree(this BoundingBox bbox, bool separateBothAxis = false, float separation = float.Epsilon)
+        {
+            var M = bbox.Maximum;
+            var m = bbox.Minimum;
+            var c = bbox.Center;
+            float addAxis = separation;
+            float subAxis = separateBothAxis ? separation : 0;
+
+            //-1-1   +0+0 - Top Left
+            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X - subAxis, M.Y, c.Z - subAxis));
+            //+0-1   +1+0 - Top Right
+            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis));
+
+            //-1+0   +0+1 - Bottom Left
+            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z + addAxis), new Vector3(c.X - subAxis, M.Y, M.Z));
+            //+0+0   +1+1 - Bottom Right
+            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, c.Z + addAxis), new Vector3(M.X, M.Y, M.Z));
+        }
+        /// <summary>
+        /// Generates a list of eight bounding boxes which makes an OcTree subdivision of the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="separation">Boxes separation</param>
+        /// <returns>Returns eight boxes</returns>
+        /// <remarks>
+        /// By index:
+        /// 0 - Top Left Front
+        /// 1 - Top Left Back
+        /// 2 - Top Right Front
+        /// 3 - Top Right Back
+        /// 4 - Bottom Left Front
+        /// 5 - Bottom Left Back
+        /// 6 - Bottom Right Front
+        /// 7 - Bottom Right Back
+        /// </remarks>
+        public static IEnumerable<BoundingBox> SubdivideOctree(this BoundingBox bbox, float separation = float.Epsilon)
+        {
+            var m = bbox.Minimum;
+            var M = bbox.Maximum;
+            var c = bbox.Center;
+
+            //-1+0-1   +0+1+0 - Top Left Front
+            yield return new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            //-1+0+0   +0+1+1 - Top Left Back
+            yield return new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z));
+
+            //+0+0-1   +1+1+0 - Top Right Front
+            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            //+0+0+0   +1+1+1 - Top Right Back
+            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z));
+
+            //-1-1-1   +0+0+0 - Bottom Left Front
+            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z));
+            //-1-1+0   +0+0+1 - Bottom Left Back
+            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z));
+
+            //+0-1-1   +1+0+0 - Bottom Right Front
+            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z));
+            //+0-1+0   +1+0+1 - Bottom Right Back
+            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z));
+        }
+
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(this BoundingBox box, Vector3 vector)
+        {
+            return ProjectToVector(box.GetExtents(), Matrix.Identity, vector);
+        }
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(this OrientedBoundingBox box, Vector3 vector)
+        {
+            return ProjectToVector(box.Extents, box.Transformation, vector);
+        }
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="extents">Box extents</param>
+        /// <param name="trn">Box transform</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(Vector3 extents, Matrix trn, Vector3 vector)
+        {
+            var xAxis = trn.Right;
+            var yAxis = trn.Up;
+            var zAxis = trn.Backward;
+
+            return
+                extents.X * MathF.Abs(Vector3.Dot(vector, xAxis)) +
+                extents.Y * MathF.Abs(Vector3.Dot(vector, yAxis)) +
+                extents.Z * MathF.Abs(Vector3.Dot(vector, zAxis));
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace Engine
         /// <returns>Returns data for the specified channel</returns>
         T GetChannelValue<T>(VertexDataChannels channel);
         /// <summary>
-        /// Sets the channer value
+        /// Sets the channel value
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Channel</param>

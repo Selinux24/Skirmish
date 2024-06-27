@@ -7,6 +7,7 @@ using System.Linq;
 namespace Engine.Content
 {
     using Engine.Common;
+    using System.Text;
 
     /// <summary>
     /// Image content array from file
@@ -171,12 +172,27 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return paths.GetHashCode() ^ cropRectangle.GetHashCode();
+            return HashCode.Combine(paths, cropRectangle);
         }
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Path array: {paths.Count()} elements;";
+            int maxCount = 2;
+            int count = paths.Count();
+
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < Math.Min(maxCount, count); i++)
+            {
+                sb.AppendLine(paths.ElementAt(i));
+            }
+
+            if (count > maxCount)
+            {
+                sb.AppendLine("[...]");
+            }
+
+            return $"Path array [{count}]: {sb}";
         }
     }
 }

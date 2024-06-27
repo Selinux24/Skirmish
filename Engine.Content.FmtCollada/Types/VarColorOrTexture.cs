@@ -13,12 +13,14 @@ namespace Engine.Collada.Types
         [XmlElement("param", typeof(BasicParam))]
         public BasicParam Param { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Color != null) return this.Color.ToString();
-            else if (this.Texture != null) return this.Texture.ToString();
-            else if (this.Param != null) return this.Param.ToString();
-            else return "Empty";
+            return
+                Color?.ToString() ??
+                Texture?.ToString() ??
+                Param?.ToString() ??
+                "Empty";
         }
     }
 }

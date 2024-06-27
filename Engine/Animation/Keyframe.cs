@@ -8,6 +8,17 @@ namespace Engine.Animation
     /// </summary>
     public struct Keyframe : IEquatable<Keyframe>
     {
+        /// <inheritdoc/>
+        public static bool operator ==(Keyframe left, Keyframe right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Keyframe left, Keyframe right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Frame transformation
         /// </summary>
@@ -27,7 +38,7 @@ namespace Engine.Animation
         /// </summary>
         public Matrix Transform
         {
-            get
+            readonly get
             {
                 return transform;
             }
@@ -66,7 +77,7 @@ namespace Engine.Animation
         public KeyframeInterpolations Interpolation { get; set; }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             if (Interpolation == KeyframeInterpolations.Linear)
             {
@@ -77,20 +88,26 @@ namespace Engine.Animation
                 return $"Time: {Time:0.00000}: {Interpolation} {Position:0.00000}";
             }
         }
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
-        public bool Equals(Keyframe other)
+        /// <inheritdoc/>
+        public readonly bool Equals(Keyframe other)
         {
             return
-                Time == other.Time &&
-                Position == other.Position &&
+                MathUtil.NearEqual(Time, other.Time) &&
+                MathUtil.NearEqual(Position, other.Position) &&
                 Translation == other.Translation &&
                 Rotation == other.Rotation &&
                 Scale == other.Scale &&
                 Interpolation == other.Interpolation;
+        }
+        /// <inheritdoc/>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Keyframe keyframe && Equals(keyframe);
+        }
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Time, Position, Translation, Rotation, Scale, Interpolation);
         }
     }
 }

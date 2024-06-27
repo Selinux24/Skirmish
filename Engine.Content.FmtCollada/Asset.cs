@@ -27,9 +27,10 @@ namespace Engine.Collada
         [XmlElement("up_axis", typeof(EnumAxis))]
         public EnumAxis UpAxis { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Title: {0}; {1}", this.Title, this.Contributor);
+            return $"Title: {Title}; {Contributor}";
         }
     }
 }

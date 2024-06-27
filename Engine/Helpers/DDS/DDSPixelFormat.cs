@@ -27,7 +27,7 @@ namespace Engine.Helpers.DDS
             byte ch2 = (byte)text[2];
             byte ch3 = (byte)text[3];
 
-            return (ch0 | (ch1 << 8) | (ch2 << 16) | (ch3 << 24));
+            return ch0 | (ch1 << 8) | (ch2 << 16) | (ch3 << 24);
         }
         /// <summary>
         /// Gets the surface info
@@ -124,129 +124,19 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the bits per pixel</returns>
         public static int BitsPerPixel(Format fmt)
         {
-            switch (fmt)
+            return fmt switch
             {
-                case Format.R32G32B32A32_Typeless:
-                case Format.R32G32B32A32_Float:
-                case Format.R32G32B32A32_UInt:
-                case Format.R32G32B32A32_SInt:
-                    return 128;
-
-                case Format.R32G32B32_Typeless:
-                case Format.R32G32B32_Float:
-                case Format.R32G32B32_UInt:
-                case Format.R32G32B32_SInt:
-                    return 96;
-
-                case Format.R16G16B16A16_Typeless:
-                case Format.R16G16B16A16_Float:
-                case Format.R16G16B16A16_UNorm:
-                case Format.R16G16B16A16_UInt:
-                case Format.R16G16B16A16_SNorm:
-                case Format.R16G16B16A16_SInt:
-                case Format.R32G32_Typeless:
-                case Format.R32G32_Float:
-                case Format.R32G32_UInt:
-                case Format.R32G32_SInt:
-                case Format.R32G8X24_Typeless:
-                case Format.D32_Float_S8X24_UInt:
-                case Format.R32_Float_X8X24_Typeless:
-                case Format.X32_Typeless_G8X24_UInt:
-                    return 64;
-
-                case Format.R10G10B10A2_Typeless:
-                case Format.R10G10B10A2_UNorm:
-                case Format.R10G10B10A2_UInt:
-                case Format.R11G11B10_Float:
-                case Format.R8G8B8A8_Typeless:
-                case Format.R8G8B8A8_UNorm:
-                case Format.R8G8B8A8_UNorm_SRgb:
-                case Format.R8G8B8A8_UInt:
-                case Format.R8G8B8A8_SNorm:
-                case Format.R8G8B8A8_SInt:
-                case Format.R16G16_Typeless:
-                case Format.R16G16_Float:
-                case Format.R16G16_UNorm:
-                case Format.R16G16_UInt:
-                case Format.R16G16_SNorm:
-                case Format.R16G16_SInt:
-                case Format.R32_Typeless:
-                case Format.D32_Float:
-                case Format.R32_Float:
-                case Format.R32_UInt:
-                case Format.R32_SInt:
-                case Format.R24G8_Typeless:
-                case Format.D24_UNorm_S8_UInt:
-                case Format.R24_UNorm_X8_Typeless:
-                case Format.X24_Typeless_G8_UInt:
-                case Format.R9G9B9E5_Sharedexp:
-                case Format.R8G8_B8G8_UNorm:
-                case Format.G8R8_G8B8_UNorm:
-                case Format.B8G8R8A8_UNorm:
-                case Format.B8G8R8X8_UNorm:
-                case Format.R10G10B10_Xr_Bias_A2_UNorm:
-                case Format.B8G8R8A8_Typeless:
-                case Format.B8G8R8A8_UNorm_SRgb:
-                case Format.B8G8R8X8_Typeless:
-                case Format.B8G8R8X8_UNorm_SRgb:
-                    return 32;
-
-                case Format.R8G8_Typeless:
-                case Format.R8G8_UNorm:
-                case Format.R8G8_UInt:
-                case Format.R8G8_SNorm:
-                case Format.R8G8_SInt:
-                case Format.R16_Typeless:
-                case Format.R16_Float:
-                case Format.D16_UNorm:
-                case Format.R16_UNorm:
-                case Format.R16_UInt:
-                case Format.R16_SNorm:
-                case Format.R16_SInt:
-                case Format.B5G6R5_UNorm:
-                case Format.B5G5R5A1_UNorm:
-                case Format.B4G4R4A4_UNorm:
-                    return 16;
-
-                case Format.R8_Typeless:
-                case Format.R8_UNorm:
-                case Format.R8_UInt:
-                case Format.R8_SNorm:
-                case Format.R8_SInt:
-                case Format.A8_UNorm:
-                    return 8;
-
-                case Format.R1_UNorm:
-                    return 1;
-
-                case Format.BC1_Typeless:
-                case Format.BC1_UNorm:
-                case Format.BC1_UNorm_SRgb:
-                case Format.BC4_Typeless:
-                case Format.BC4_UNorm:
-                case Format.BC4_SNorm:
-                    return 4;
-
-                case Format.BC2_Typeless:
-                case Format.BC2_UNorm:
-                case Format.BC2_UNorm_SRgb:
-                case Format.BC3_Typeless:
-                case Format.BC3_UNorm:
-                case Format.BC3_UNorm_SRgb:
-                case Format.BC5_Typeless:
-                case Format.BC5_UNorm:
-                case Format.BC5_SNorm:
-                case Format.BC6H_Typeless:
-                case Format.BC6H_Uf16:
-                case Format.BC6H_Sf16:
-                case Format.BC7_Typeless:
-                case Format.BC7_UNorm:
-                case Format.BC7_UNorm_SRgb:
-                    return 8;
-
-                default:
-                    return 0;
-            }
+                Format.R32G32B32A32_Typeless or Format.R32G32B32A32_Float or Format.R32G32B32A32_UInt or Format.R32G32B32A32_SInt => 128,
+                Format.R32G32B32_Typeless or Format.R32G32B32_Float or Format.R32G32B32_UInt or Format.R32G32B32_SInt => 96,
+                Format.R16G16B16A16_Typeless or Format.R16G16B16A16_Float or Format.R16G16B16A16_UNorm or Format.R16G16B16A16_UInt or Format.R16G16B16A16_SNorm or Format.R16G16B16A16_SInt or Format.R32G32_Typeless or Format.R32G32_Float or Format.R32G32_UInt or Format.R32G32_SInt or Format.R32G8X24_Typeless or Format.D32_Float_S8X24_UInt or Format.R32_Float_X8X24_Typeless or Format.X32_Typeless_G8X24_UInt => 64,
+                Format.R10G10B10A2_Typeless or Format.R10G10B10A2_UNorm or Format.R10G10B10A2_UInt or Format.R11G11B10_Float or Format.R8G8B8A8_Typeless or Format.R8G8B8A8_UNorm or Format.R8G8B8A8_UNorm_SRgb or Format.R8G8B8A8_UInt or Format.R8G8B8A8_SNorm or Format.R8G8B8A8_SInt or Format.R16G16_Typeless or Format.R16G16_Float or Format.R16G16_UNorm or Format.R16G16_UInt or Format.R16G16_SNorm or Format.R16G16_SInt or Format.R32_Typeless or Format.D32_Float or Format.R32_Float or Format.R32_UInt or Format.R32_SInt or Format.R24G8_Typeless or Format.D24_UNorm_S8_UInt or Format.R24_UNorm_X8_Typeless or Format.X24_Typeless_G8_UInt or Format.R9G9B9E5_Sharedexp or Format.R8G8_B8G8_UNorm or Format.G8R8_G8B8_UNorm or Format.B8G8R8A8_UNorm or Format.B8G8R8X8_UNorm or Format.R10G10B10_Xr_Bias_A2_UNorm or Format.B8G8R8A8_Typeless or Format.B8G8R8A8_UNorm_SRgb or Format.B8G8R8X8_Typeless or Format.B8G8R8X8_UNorm_SRgb => 32,
+                Format.R8G8_Typeless or Format.R8G8_UNorm or Format.R8G8_UInt or Format.R8G8_SNorm or Format.R8G8_SInt or Format.R16_Typeless or Format.R16_Float or Format.D16_UNorm or Format.R16_UNorm or Format.R16_UInt or Format.R16_SNorm or Format.R16_SInt or Format.B5G6R5_UNorm or Format.B5G5R5A1_UNorm or Format.B4G4R4A4_UNorm => 16,
+                Format.R8_Typeless or Format.R8_UNorm or Format.R8_UInt or Format.R8_SNorm or Format.R8_SInt or Format.A8_UNorm => 8,
+                Format.R1_UNorm => 1,
+                Format.BC1_Typeless or Format.BC1_UNorm or Format.BC1_UNorm_SRgb or Format.BC4_Typeless or Format.BC4_UNorm or Format.BC4_SNorm => 4,
+                Format.BC2_Typeless or Format.BC2_UNorm or Format.BC2_UNorm_SRgb or Format.BC3_Typeless or Format.BC3_UNorm or Format.BC3_UNorm_SRgb or Format.BC5_Typeless or Format.BC5_UNorm or Format.BC5_SNorm or Format.BC6H_Typeless or Format.BC6H_Uf16 or Format.BC6H_Sf16 or Format.BC7_Typeless or Format.BC7_UNorm or Format.BC7_UNorm_SRgb => 8,
+                _ => 0,
+            };
         }
 
         /// <summary>
@@ -283,33 +173,33 @@ namespace Engine.Helpers.DDS
         public uint ABitMask;
 
         /// <summary>
-        /// Gets wether this pixel format has a DDS_HEADER_DXT10 structure
+        /// Gets whether this pixel format has a DDS_HEADER_DXT10 structure
         /// </summary>
-        public bool IsDX10()
+        public readonly bool IsDX10()
         {
             return
-                (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC)) &&
-                (MakeFourCC("DX10") == this.FourCC);
+                Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC) &&
+                (MakeFourCC("DX10") == FourCC);
         }
         /// <summary>
         /// Gets the equivalent DXGI format
         /// </summary>
         /// <returns>Returns the equivalent DXGI format</returns>
-        public Format GetDXGIFormat()
+        public readonly Format GetDXGIFormat()
         {
-            if (this.Flags.HasFlag(DdsPixelFormats.DDPF_RGB))
+            if (Flags.HasFlag(DdsPixelFormats.DDPF_RGB))
             {
                 return GetFormatDDPFRGB();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_LUMINANCE))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_LUMINANCE))
             {
                 return GetFormatDDPFLuminance();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_ALPHA))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_ALPHA))
             {
                 return GetFormatDDPFAlpha();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC))
             {
                 return GetFormatDDPFFOURCC();
             }
@@ -320,38 +210,34 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF RGB Format (32, 24, 16 bits)
         /// </summary>
         /// <returns>Returns the DDPF RGB Format</returns>
-        private Format GetFormatDDPFRGB()
+        private readonly Format GetFormatDDPFRGB()
         {
             // Note that sRGB formats are written using the "DX10" extended header
-            switch (this.RGBBitCount)
+            return RGBBitCount switch
             {
-                case 32:
-                    return GetFormatDDPFRGB32();
-                case 24:
-                    return GetFormatDDPFRGB24();
-                case 16:
-                    return GetFormatDDPFRGB16();
-            }
-
-            return Format.Unknown;
+                32 => GetFormatDDPFRGB32(),
+                24 => GetFormatDDPFRGB24(),
+                16 => GetFormatDDPFRGB16(),
+                _ => Format.Unknown,
+            };
         }
         /// <summary>
         /// Gets the DDPF RGB Format (32 bits)
         /// </summary>
         /// <returns>Returns the DDPF RGB Format</returns>
-        private Format GetFormatDDPFRGB32()
+        private readonly Format GetFormatDDPFRGB32()
         {
-            if (this.IsBitMask(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
+            if (IsBitMask(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
             {
                 return Format.R8G8B8A8_UNorm;
             }
 
-            if (this.IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
+            if (IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
             {
                 return Format.B8G8R8A8_UNorm;
             }
 
-            if (this.IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000))
+            if (IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000))
             {
                 return Format.B8G8R8X8_UNorm;
             }
@@ -365,19 +251,19 @@ namespace Engine.Helpers.DDS
             // header extension and specify the DXGI_FORMAT_R10G10B10A2_UNORM format directly
 
             // For 'correct' writers, this should be 0x000003ff, 0x000ffc00, 0x3ff00000 for RGB data
-            if (this.IsBitMask(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
+            if (IsBitMask(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
             {
                 return Format.R10G10B10A2_UNorm;
             }
 
             // No DXGI format maps to ISBITMASK(0x000003ff, 0x000ffc00, 0x3ff00000, 0xc0000000) aka D3DFMT_A2R10G10B10
 
-            if (this.IsBitMask(0x0000ffff, 0xffff0000, 0x00000000, 0x00000000))
+            if (IsBitMask(0x0000ffff, 0xffff0000, 0x00000000, 0x00000000))
             {
                 return Format.R16G16_UNorm;
             }
 
-            if (this.IsBitMask(0xffffffff, 0x00000000, 0x00000000, 0x00000000))
+            if (IsBitMask(0xffffffff, 0x00000000, 0x00000000, 0x00000000))
             {
                 // Only 32-bit color channel format in D3D9 was R32F
                 return Format.R32_Float; // D3DX writes this out as a FourCC of 114
@@ -389,7 +275,7 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF RGB Format (24 bits)
         /// </summary>
         /// <returns>Returns the DDPF RGB Format</returns>
-        private Format GetFormatDDPFRGB24()
+        private static Format GetFormatDDPFRGB24()
         {
             // No 24bpp DXGI formats aka D3DFMT_R8G8B8
             return Format.Unknown;
@@ -398,19 +284,19 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF RGB Format (16 bits)
         /// </summary>
         /// <returns>Returns the DDPF RGB Format</returns>
-        private Format GetFormatDDPFRGB16()
+        private readonly Format GetFormatDDPFRGB16()
         {
-            if (this.IsBitMask(0x7c00, 0x03e0, 0x001f, 0x8000))
+            if (IsBitMask(0x7c00, 0x03e0, 0x001f, 0x8000))
             {
                 return Format.B5G5R5A1_UNorm;
             }
-            if (this.IsBitMask(0xf800, 0x07e0, 0x001f, 0x0000))
+            if (IsBitMask(0xf800, 0x07e0, 0x001f, 0x0000))
             {
                 return Format.B5G6R5_UNorm;
             }
 
             // No DXGI format maps to ISBITMASK(0x7c00, 0x03e0, 0x001f, 0x0000) aka D3DFMT_X1R5G5B5
-            if (this.IsBitMask(0x0f00, 0x00f0, 0x000f, 0xf000))
+            if (IsBitMask(0x0f00, 0x00f0, 0x000f, 0xf000))
             {
                 return Format.B4G4R4A4_UNorm;
             }
@@ -424,21 +310,21 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF Luminance Format
         /// </summary>
         /// <returns>Returns the DDPF Luminance Format</returns>
-        private Format GetFormatDDPFLuminance()
+        private readonly Format GetFormatDDPFLuminance()
         {
-            if (8 == this.RGBBitCount && this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
+            if (8 == RGBBitCount && IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
             {
                 return Format.R8_UNorm; // D3DX10/11 writes this out as DX10 extension
             }
             // No DXGI format maps to ISBITMASK(0x0f, 0x00, 0x00, 0xf0) aka D3DFMT_A4L4
 
-            if (16 == this.RGBBitCount)
+            if (16 == RGBBitCount)
             {
-                if (this.IsBitMask(0x0000ffff, 0x00000000, 0x00000000, 0x00000000))
+                if (IsBitMask(0x0000ffff, 0x00000000, 0x00000000, 0x00000000))
                 {
                     return Format.R16_UNorm; // D3DX10/11 writes this out as DX10 extension
                 }
-                if (this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x0000ff00))
+                if (IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x0000ff00))
                 {
                     return Format.R8G8_UNorm; // D3DX10/11 writes this out as DX10 extension
                 }
@@ -450,9 +336,9 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF Alpha Format
         /// </summary>
         /// <returns>Returns the DDPF Alpha Format</returns>
-        private Format GetFormatDDPFAlpha()
+        private readonly Format GetFormatDDPFAlpha()
         {
-            if (8 == this.RGBBitCount)
+            if (8 == RGBBitCount)
             {
                 return Format.A8_UNorm;
             }
@@ -463,98 +349,90 @@ namespace Engine.Helpers.DDS
         /// Gets the DDPF Four CC Format
         /// </summary>
         /// <returns>Returns the DDPF Four CC Format</returns>
-        private Format GetFormatDDPFFOURCC()
+        private readonly Format GetFormatDDPFFOURCC()
         {
-            if (MakeFourCC("DXT1") == this.FourCC)
+            if (MakeFourCC("DXT1") == FourCC)
             {
                 return Format.BC1_UNorm;
             }
-            if (MakeFourCC("DXT3") == this.FourCC)
+            if (MakeFourCC("DXT3") == FourCC)
             {
                 return Format.BC2_UNorm;
             }
-            if (MakeFourCC("DXT5") == this.FourCC)
+            if (MakeFourCC("DXT5") == FourCC)
             {
                 return Format.BC3_UNorm;
             }
 
             // While pre-mulitplied alpha isn't directly supported by the DXGI formats,
             // they are basically the same as these BC formats so they can be mapped
-            if (MakeFourCC("DXT2") == this.FourCC)
+            if (MakeFourCC("DXT2") == FourCC)
             {
                 return Format.BC2_UNorm;
             }
-            if (MakeFourCC("DXT4") == this.FourCC)
+            if (MakeFourCC("DXT4") == FourCC)
             {
                 return Format.BC3_UNorm;
             }
 
-            if (MakeFourCC("ATI1") == this.FourCC)
+            if (MakeFourCC("ATI1") == FourCC)
             {
                 return Format.BC4_UNorm;
             }
-            if (MakeFourCC("BC4U") == this.FourCC)
+            if (MakeFourCC("BC4U") == FourCC)
             {
                 return Format.BC4_UNorm;
             }
-            if (MakeFourCC("BC4S") == this.FourCC)
+            if (MakeFourCC("BC4S") == FourCC)
             {
                 return Format.BC4_SNorm;
             }
 
-            if (MakeFourCC("ATI2") == this.FourCC)
+            if (MakeFourCC("ATI2") == FourCC)
             {
                 return Format.BC5_UNorm;
             }
-            if (MakeFourCC("BC5U") == this.FourCC)
+            if (MakeFourCC("BC5U") == FourCC)
             {
                 return Format.BC5_UNorm;
             }
-            if (MakeFourCC("BC5S") == this.FourCC)
+            if (MakeFourCC("BC5S") == FourCC)
             {
                 return Format.BC5_SNorm;
             }
 
             // BC6H and BC7 are written using the "DX10" extended header
 
-            if (MakeFourCC("RGBG") == this.FourCC)
+            if (MakeFourCC("RGBG") == FourCC)
             {
                 return Format.R8G8_B8G8_UNorm;
             }
-            if (MakeFourCC("GRGB") == this.FourCC)
+            if (MakeFourCC("GRGB") == FourCC)
             {
                 return Format.G8R8_G8B8_UNorm;
             }
 
             // Check for D3DFORMAT enums being set here
-            switch (this.FourCC)
+            return FourCC switch
             {
-                case 36: // D3DFMT_A16B16G16R16
-                    return Format.R16G16B16A16_UNorm;
-
-                case 110: // D3DFMT_Q16W16V16U16
-                    return Format.R16G16B16A16_SNorm;
-
-                case 111: // D3DFMT_R16F
-                    return Format.R16_Float;
-
-                case 112: // D3DFMT_G16R16F
-                    return Format.R16G16_Float;
-
-                case 113: // D3DFMT_A16B16G16R16F
-                    return Format.R16G16B16A16_Float;
-
-                case 114: // D3DFMT_R32F
-                    return Format.R32_Float;
-
-                case 115: // D3DFMT_G32R32F
-                    return Format.R32G32_Float;
-
-                case 116: // D3DFMT_A32B32G32R32F
-                    return Format.R32G32B32A32_Float;
-            }
-
-            return Format.Unknown;
+                // D3DFMT_A16B16G16R16
+                36 => Format.R16G16B16A16_UNorm,
+                // D3DFMT_Q16W16V16U16
+                110 => Format.R16G16B16A16_SNorm,
+                // D3DFMT_R16F
+                111 => Format.R16_Float,
+                // D3DFMT_G16R16F
+                112 => Format.R16G16_Float,
+                // D3DFMT_A16B16G16R16F
+                113 => Format.R16G16B16A16_Float,
+                // D3DFMT_R32F
+                114 => Format.R32_Float,
+                // D3DFMT_G32R32F
+                115 => Format.R32G32_Float,
+                // D3DFMT_A32B32G32R32F
+                116 => Format.R32G32B32A32_Float,
+                _ => Format.Unknown,
+            };
         }
         /// <summary>
         /// Gets if the specified color components were the bit mask
@@ -564,9 +442,13 @@ namespace Engine.Helpers.DDS
         /// <param name="b">Blue</param>
         /// <param name="a">Alpha</param>
         /// <returns>Returns true if the specified color components were the bit mask</returns>
-        private bool IsBitMask(uint r, uint g, uint b, uint a)
+        private readonly bool IsBitMask(uint r, uint g, uint b, uint a)
         {
-            return (this.RBitMask == r && this.GBitMask == g && this.BBitMask == b && this.ABitMask == a);
+            return
+                RBitMask == r &&
+                GBitMask == g &&
+                BBitMask == b &&
+                ABitMask == a;
         }
     };
 }

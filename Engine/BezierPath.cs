@@ -14,15 +14,15 @@ namespace Engine
         /// </summary>
         /// <param name="points">Point list</param>
         /// <returns>Returns total segment's distance represented by a point list</returns>
-        public static float SegmentDistance(params Vector3[] points)
+        private static float SegmentDistance(List<Vector3> points)
         {
             float length = 0;
 
             Vector3 p0 = points[0];
 
-            for (int i = 1; i < points.Length; i++)
+            for (int i = 1; i < points.Count; i++)
             {
-                Vector3 p1 = points[i];
+                var p1 = points[i];
 
                 length += Vector3.Distance(p0, p1);
 
@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Initial control points
         /// </summary>
-        private readonly List<Vector3> initialControlPoints = new List<Vector3>();
+        private readonly List<Vector3> initialControlPoints = [];
         /// <summary>
         /// Initial minimum distance squared
         /// </summary>
@@ -51,11 +51,11 @@ namespace Engine
         /// <summary>
         /// Control points
         /// </summary>
-        private readonly List<Vector3> controlPoints = new List<Vector3>();
+        private readonly List<Vector3> controlPoints = [];
         /// <summary>
         /// Curve times dictionary
         /// </summary>
-        private readonly Dictionary<int, float> curveTimes = new Dictionary<int, float>();
+        private readonly Dictionary<int, float> curveTimes = [];
 
         /// <summary>
         /// Control points
@@ -64,50 +64,42 @@ namespace Engine
         {
             get
             {
-                List<Vector3> points = new List<Vector3>();
-
-                if (this.PositionCount > 0)
+                if (PositionCount <= 0)
                 {
-                    points.Add(this.controlPoints[0]);
-
-                    for (int i = 0; i < this.PositionCount; i++)
-                    {
-                        int index = (i * 3) + 3;
-
-                        points.Add(this.controlPoints[index]);
-                    }
+                    return [];
                 }
 
-                return points.ToArray();
+                List<Vector3> points = [controlPoints[0]];
+
+                for (int i = 0; i < PositionCount; i++)
+                {
+                    int index = (i * 3) + 3;
+
+                    points.Add(controlPoints[index]);
+                }
+
+                return [.. points];
             }
         }
-        /// <summary>
-        /// First point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 First
         {
             get
             {
-                return this.Points[0];
+                return Points[0];
             }
         }
-        /// <summary>
-        /// Last point
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Last
         {
             get
             {
-                return this.Points[this.Points.Length - 1];
+                return Points[^1];
             }
         }
-        /// <summary>
-        /// Number of segments in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int PositionCount { get; private set; }
-        /// <summary>
-        /// Number of normals in the path
-        /// </summary>
+        /// <inheritdoc/>
         public int NormalCount
         {
             get
@@ -115,9 +107,7 @@ namespace Engine
                 return 0;
             }
         }
-        /// <summary>
-        /// Total length of path
-        /// </summary>
+        /// <inheritdoc/>
         public float Length { get; private set; }
 
         /// <summary>
@@ -137,7 +127,7 @@ namespace Engine
         /// </remarks>
         public void SetControlPoints(Vector3[] points)
         {
-            this.SetControlPoints(points, 1f);
+            SetControlPoints(points, 1f);
         }
         /// <summary>
         /// Sets control points
@@ -149,17 +139,17 @@ namespace Engine
         /// </remarks>
         public void SetControlPoints(Vector3[] points, float scale)
         {
-            this.initialControlPoints.Clear();
-            this.initialMinSqrDistance = null;
-            this.initialMaxSqrDistance = null;
-            this.initialScale = scale;
+            initialControlPoints.Clear();
+            initialMinSqrDistance = null;
+            initialMaxSqrDistance = null;
+            initialScale = scale;
 
             if (points.Length > 0)
             {
-                this.initialControlPoints.AddRange(points);
+                initialControlPoints.AddRange(points);
             }
 
-            this.controlPoints.Clear();
+            controlPoints.Clear();
 
             if (points.Length < 2)
             {
@@ -177,8 +167,8 @@ namespace Engine
                     Vector3 tangent = (p2 - p1);
                     Vector3 q1 = p1 + scale * tangent;
 
-                    this.controlPoints.Add(p1);
-                    this.controlPoints.Add(q1);
+                    controlPoints.Add(p1);
+                    controlPoints.Add(q1);
                 }
                 else if (i == points.Length - 1)
                 {
@@ -188,8 +178,8 @@ namespace Engine
                     Vector3 tangent = (p1 - p0);
                     Vector3 q0 = p1 - scale * tangent;
 
-                    this.controlPoints.Add(q0);
-                    this.controlPoints.Add(p1);
+                    controlPoints.Add(q0);
+                    controlPoints.Add(p1);
                 }
                 else
                 {
@@ -200,13 +190,13 @@ namespace Engine
                     Vector3 q0 = p1 - scale * tangent * (p1 - p0).Length();
                     Vector3 q1 = p1 + scale * tangent * (p2 - p1).Length();
 
-                    this.controlPoints.Add(q0);
-                    this.controlPoints.Add(p1);
-                    this.controlPoints.Add(q1);
+                    controlPoints.Add(q0);
+                    controlPoints.Add(p1);
+                    controlPoints.Add(q1);
                 }
             }
 
-            this.UpdateCurveInfo();
+            UpdateCurveInfo();
         }
         /// <summary>
         /// Sets control points
@@ -225,11 +215,11 @@ namespace Engine
                 return;
             }
 
-            Stack<Vector3> samplePoints = new Stack<Vector3>();
+            var samplePoints = new Stack<Vector3>();
 
             samplePoints.Push(points[0]);
 
-            Vector3 potentialSamplePoint = points[1];
+            var potentialSamplePoint = points[1];
 
             for (int i = 2; i < points.Length; i++)
             {
@@ -243,9 +233,9 @@ namespace Engine
             }
 
             //now handle last bit of curve
-            Vector3 p1 = samplePoints.Pop(); //last sample point
-            Vector3 p0 = samplePoints.Peek(); //second last sample point
-            Vector3 tangent = Vector3.Normalize(p0 - potentialSamplePoint);
+            var p1 = samplePoints.Pop(); //last sample point
+            var p0 = samplePoints.Peek(); //second last sample point
+            var tangent = Vector3.Normalize(p0 - potentialSamplePoint);
             float d2 = (potentialSamplePoint - p1).Length();
             float d1 = (p1 - p0).Length();
             p1 += tangent * ((d1 - d2) / 2);
@@ -253,27 +243,27 @@ namespace Engine
             samplePoints.Push(p1);
             samplePoints.Push(potentialSamplePoint);
 
-            Vector3[] sampledPoints = samplePoints.ToArray();
+            var sampledPoints = samplePoints.ToArray();
 
             Array.Reverse(sampledPoints);
 
-            this.SetControlPoints(sampledPoints, scale);
+            SetControlPoints(sampledPoints, scale);
 
-            this.initialMinSqrDistance = minSqrDistance;
-            this.initialMaxSqrDistance = maxSqrDistance;
+            initialMinSqrDistance = minSqrDistance;
+            initialMaxSqrDistance = maxSqrDistance;
         }
         /// <summary>
         /// Updates curve internal information
         /// </summary>
         private void UpdateCurveInfo()
         {
-            this.PositionCount = (this.controlPoints.Count - 1) / 3;
-            this.curveTimes.Clear();
-            this.Length = 0;
+            PositionCount = (controlPoints.Count - 1) / 3;
+            curveTimes.Clear();
+            Length = 0;
 
-            List<Vector3> curvePoint = new List<Vector3>();
+            List<Vector3> curvePoint = [];
 
-            for (int i = 0; i < this.PositionCount; i++)
+            for (int i = 0; i < PositionCount; i++)
             {
                 curvePoint.Clear();
 
@@ -281,21 +271,21 @@ namespace Engine
                 {
                     //Only do this for the first end point. 
                     //When i != 0, this coincides with the end point of the previous segment,
-                    curvePoint.Add(this.CalculateBezierPoint(i, 0));
+                    curvePoint.Add(CalculateBezierPoint(i, 0));
                 }
 
                 for (int j = 1; j <= 50; j++)
                 {
-                    float t = (float)j / (float)50;
+                    float t = (float)j / 50;
 
-                    curvePoint.Add(this.CalculateBezierPoint(i, t));
+                    curvePoint.Add(CalculateBezierPoint(i, t));
                 }
 
-                float length = SegmentDistance(curvePoint.ToArray());
+                float length = SegmentDistance(curvePoint);
 
-                this.Length += length;
+                Length += length;
 
-                this.curveTimes.Add(i, length);
+                curveTimes.Add(i, length);
             }
         }
 
@@ -305,19 +295,21 @@ namespace Engine
         /// <param name="point">Point</param>
         public void AddPoint(Vector3 point)
         {
-            this.initialControlPoints.Add(point);
+            initialControlPoints.Add(point);
 
-            if (this.initialMinSqrDistance.HasValue && this.initialMaxSqrDistance.HasValue)
+            if (initialMinSqrDistance.HasValue && initialMaxSqrDistance.HasValue)
             {
-                this.SetControlPoints(
-                    this.initialControlPoints.ToArray(),
-                    this.initialMinSqrDistance.Value,
-                    this.initialMaxSqrDistance.Value,
-                    this.initialScale);
+                SetControlPoints(
+                    [.. initialControlPoints],
+                    initialMinSqrDistance.Value,
+                    initialMaxSqrDistance.Value,
+                    initialScale);
             }
             else
             {
-                this.SetControlPoints(this.initialControlPoints.ToArray(), this.initialScale);
+                SetControlPoints(
+                    [.. initialControlPoints],
+                    initialScale);
             }
         }
 
@@ -329,62 +321,49 @@ namespace Engine
         /// <param name="segmentTime">Relative time value for curve</param>
         public void FindCurve(float time, out int curve, out float segmentTime)
         {
-            curve = -1;
-            segmentTime = 0;
-
-            if (time == 0)
+            if (MathUtil.IsZero(time))
             {
                 curve = 0;
                 segmentTime = 0;
+
+                return;
             }
-            else
+
+            curve = -1;
+            segmentTime = 0;
+
+            float distance = 0;
+            for (int i = 0; i < PositionCount; i++)
             {
-                float distance = 0;
+                distance += curveTimes[i];
 
-                for (int i = 0; i < this.PositionCount; i++)
+                if (time <= distance)
                 {
-                    distance += this.curveTimes[i];
+                    curve = i;
+                    segmentTime = 1f - ((distance - time) / curveTimes[i]);
 
-                    if (time <= distance)
-                    {
-                        curve = i;
-                        segmentTime = 1f - ((distance - time) / this.curveTimes[i]);
-
-                        break;
-                    }
+                    break;
                 }
             }
         }
-        /// <summary>
-        /// Gets curve position in specified time
-        /// </summary>
-        /// <param name="time">Global time value</param>
-        /// <returns>Returns curve position in specified time</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float time)
         {
-            this.FindCurve(time, out int segment, out float segmentTime);
+            FindCurve(time, out int segment, out float segmentTime);
 
             return CalculateBezierPoint(segment, segmentTime);
         }
-        /// <summary>
-        /// Gets path normal in specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns path normal</returns>
+        /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
             return Vector3.Up;
         }
-        /// <summary>
-        /// Gets the next control point in the specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <returns>Returns the next control point in time</returns>
+        /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
         {
-            this.FindCurve(time, out int segment, out _);
+            FindCurve(time, out int segment, out _);
 
-            return this.controlPoints[segment];
+            return controlPoints[segment];
         }
         /// <summary>
         /// Calculates a point on the path.
@@ -396,12 +375,12 @@ namespace Engine
         {
             int nodeIndex = curve * 3;
 
-            Vector3 p0 = this.controlPoints[nodeIndex + 0];
-            Vector3 p1 = this.controlPoints[nodeIndex + 1];
-            Vector3 p2 = this.controlPoints[nodeIndex + 2];
-            Vector3 p3 = this.controlPoints[nodeIndex + 3];
+            Vector3 p0 = controlPoints[nodeIndex + 0];
+            Vector3 p1 = controlPoints[nodeIndex + 1];
+            Vector3 p2 = controlPoints[nodeIndex + 2];
+            Vector3 p3 = controlPoints[nodeIndex + 3];
 
-            return this.CalculateBezierPoint(p0, p1, p2, p3, t);
+            return CalculateBezierPoint(p0, p1, p2, p3, t);
         }
         /// <summary>
         /// Calculates a point on the path.
@@ -412,7 +391,7 @@ namespace Engine
         /// <param name="p3">Control point 3</param>
         /// <param name="t">Relative time value for curve</param>
         /// <returns>Returns curve position in specified time</returns>
-        private Vector3 CalculateBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+        private static Vector3 CalculateBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
         {
             float u = 1 - t;
             float uu = u * u;
@@ -428,24 +407,20 @@ namespace Engine
 
             return p;
         }
-        /// <summary>
-        /// Samples current path in a vector array
-        /// </summary>
-        /// <param name="sampleTime">Time delta</param>
-        /// <returns>Returns a vector array</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            List<Vector3> returnPath = [];
 
             float time = 0;
-            while (time < this.Length)
+            while (time < Length)
             {
-                returnPath.Add(this.GetPosition(time));
+                returnPath.Add(GetPosition(time));
 
                 time += sampleTime;
             }
 
-            return returnPath.ToArray();
+            return returnPath;
         }
     }
 }

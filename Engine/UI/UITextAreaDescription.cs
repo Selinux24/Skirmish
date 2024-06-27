@@ -10,13 +10,17 @@ namespace Engine.UI
         /// <summary>
         /// Gets the default text area description
         /// </summary>
-        /// <param name="text">Text</param>
-        public static UITextAreaDescription Default(string text = null)
+        public static UITextAreaDescription Default()
         {
-            return new UITextAreaDescription()
-            {
-                Text = text,
-            };
+            return Default(null, null);
+        }
+        /// <summary>
+        /// Gets the default text area description
+        /// </summary>
+        /// <param name="text">Text</param>
+        public static UITextAreaDescription Default(string text)
+        {
+            return Default(null, text);
         }
         /// <summary>
         /// Gets the default text area description from a font description
@@ -25,9 +29,9 @@ namespace Engine.UI
         /// <param name="text">Text</param>
         public static UITextAreaDescription Default(TextDrawerDescription font, string text = null)
         {
-            return new UITextAreaDescription
+            return new()
             {
-                Font = font,
+                Font = font ?? UIConfiguration.Font,
                 Text = text,
             };
         }
@@ -37,24 +41,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
-        /// <param name="fineSampling">Fine sampling</param>
-        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
-        {
-            return new UITextAreaDescription
-            {
-                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
-            };
-        }
-        /// <summary>
-        /// Gets the default text area description from a font family name
-        /// </summary>
-        /// <param name="fontFamilyName">Font family name</param>
-        /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="fineSampling">Fine sampling</param>
-        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
+        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool fineSampling = false)
         {
-            return new UITextAreaDescription
+            return new()
             {
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
@@ -65,24 +56,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="size">Size</param>
-        /// <param name="lineAdjust">Line adjust</param>
-        public static UITextAreaDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
-        {
-            return new UITextAreaDescription()
-            {
-                Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
-            };
-        }
-        /// <summary>
-        /// Gets the default text area description from a font file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UITextAreaDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
+        public static UITextAreaDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool lineAdjust = false)
         {
-            return new UITextAreaDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
@@ -95,7 +73,7 @@ namespace Engine.UI
         /// <param name="fontMapFileName">Font map file name</param>
         public static UITextAreaDescription DefaultFromMap(string fontImageFileName, string fontMapFileName)
         {
-            return new UITextAreaDescription
+            return new()
             {
                 Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
@@ -163,6 +141,10 @@ namespace Engine.UI
         /// Horizontal scroll bar alignment
         /// </summary>
         public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; } = ScrollHorizontalAlign.Bottom;
+        /// <summary>
+        /// Maximum text length
+        /// </summary>
+        public int MaxTextLength { get; set; } = 64;
 
         /// <summary>
         /// Constructor

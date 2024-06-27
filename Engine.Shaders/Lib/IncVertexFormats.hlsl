@@ -147,7 +147,7 @@ struct VSVertexPositionColorSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -163,7 +163,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -178,7 +178,7 @@ struct VSVertexPositionTextureSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -194,7 +194,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -211,7 +211,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;

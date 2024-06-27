@@ -3,7 +3,7 @@
 namespace Engine
 {
     /// <summary>
-    /// Scene object usajes enumeration
+    /// Scene object usages enumeration
     /// </summary>
     [Flags]
     public enum SceneObjectUsages
@@ -13,24 +13,20 @@ namespace Engine
         /// </summary>
         None = 0,
         /// <summary>
-        /// Full triangle list for path finding
+        /// Object
         /// </summary>
-        FullPathFinding = 1,
-        /// <summary>
-        /// Coarse list for path finding
-        /// </summary>
-        CoarsePathFinding = 2,
+        Object = 1,
         /// <summary>
         /// Scene ground
         /// </summary>
-        Ground = 4,
+        Ground = 2,
         /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 8,
+        Agent = 4,
         /// <summary>
         /// User interface
         /// </summary>
-        UI = 16,
+        UI = 8,
     }
 }

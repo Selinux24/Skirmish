@@ -121,9 +121,7 @@ namespace Engine.Windows
                 {
                     allowUserResizing = value;
                     MaximizeBox = allowUserResizing;
-                    FormBorderStyle = IsFullscreen
-                        ? FormBorderStyle.None
-                        : allowUserResizing ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+                    FormBorderStyle = GetFormBorderStyle();
                 }
             }
         }
@@ -225,6 +223,19 @@ namespace Engine.Windows
                 RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
                 ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
             }
+        }
+
+        /// <summary>
+        /// Gets the Form Border Style
+        /// </summary>
+        private FormBorderStyle GetFormBorderStyle()
+        {
+            if (IsFullscreen)
+            {
+                return FormBorderStyle.None;
+            }
+
+            return allowUserResizing ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
         }
 
         /// <summary>
@@ -482,68 +493,14 @@ namespace Engine.Windows
             switch (m.Msg)
             {
                 case WM_SIZE:
-                    if (wparam == SIZE_MINIMIZED)
-                    {
-                        previousWindowState = FormWindowState.Minimized;
-                        OnPauseRendering(EventArgs.Empty);
-                    }
-                    else
-                    {
-                        NativeMethods.GetClientRect(m.HWnd, out RawRectangle rect);
-                        if (rect.Bottom - rect.Top == 0)
-                        {
-                            // Rapidly clicking the task bar to minimize and restore a window
-                            // can cause a WM_SIZE message with SIZE_RESTORED when 
-                            // the window has actually become minimized due to rapid change
-                            // so just ignore this message
-                        }
-                        else if (wparam == SIZE_MAXIMIZED)
-                        {
-                            if (previousWindowState == FormWindowState.Minimized)
-                                OnResumeRendering(EventArgs.Empty);
-
-                            previousWindowState = FormWindowState.Maximized;
-
-                            OnUserResized(EventArgs.Empty);
-                            cachedSize = Size;
-                        }
-                        else if (wparam == SIZE_RESTORED)
-                        {
-                            if (previousWindowState == FormWindowState.Minimized)
-                                OnResumeRendering(EventArgs.Empty);
-
-                            if (!Resizing && (Size != cachedSize || previousWindowState == FormWindowState.Maximized))
-                            {
-                                previousWindowState = FormWindowState.Normal;
-
-                                // Only update when cachedSize is != 0
-                                if (cachedSize != Size.Empty)
-                                {
-                                    isSizeChangedWithoutResizeBegin = true;
-                                }
-                            }
-                            else
-                                previousWindowState = FormWindowState.Normal;
-                        }
-                    }
+                    OnMessageSize(wparam, m.HWnd);
                     break;
                 case WM_ACTIVATEAPP:
-                    if (wparam != 0)
-                        OnAppActivated(EventArgs.Empty);
-                    else
-                        OnAppDeactivated(EventArgs.Empty);
+                    OnMessageActivateApp(wparam);
                     break;
                 case WM_POWERBROADCAST:
-                    if (wparam == PBT_APMQUERYSUSPEND)
+                    if (OnMessagePowerBroadcast(wparam, ref m))
                     {
-                        OnSystemSuspend(EventArgs.Empty);
-                        m.Result = new IntPtr(1);
-                        return;
-                    }
-                    else if (wparam == PBT_APMRESUMESUSPEND)
-                    {
-                        OnSystemResume(EventArgs.Empty);
-                        m.Result = new IntPtr(1);
                         return;
                     }
                     break;
@@ -552,15 +509,9 @@ namespace Engine.Windows
                     return;
                 case WM_SYSCOMMAND:
                     wparam &= 0xFFF0;
-                    if (wparam == SC_MONITORPOWER || wparam == SC_SCREENSAVE)
+                    if (OnMessageSysCommand(wparam, ref m))
                     {
-                        var e = new CancelEventArgs();
-                        OnScreensaver(e);
-                        if (e.Cancel)
-                        {
-                            m.Result = IntPtr.Zero;
-                            return;
-                        }
+                        return;
                     }
                     break;
                 case WM_DISPLAYCHANGE:
@@ -570,6 +521,104 @@ namespace Engine.Windows
 
             base.WndProc(ref m);
         }
+        private void OnMessageSize(long wparam, nint hwnd)
+        {
+            if (wparam == SIZE_MINIMIZED)
+            {
+                previousWindowState = FormWindowState.Minimized;
+                OnPauseRendering(EventArgs.Empty);
+                return;
+            }
+
+            NativeMethods.GetClientRect(hwnd, out RawRectangle rect);
+            if (rect.Bottom - rect.Top == 0)
+            {
+                // Rapidly clicking the task bar to minimize and restore a window
+                // can cause a WM_SIZE message with SIZE_RESTORED when 
+                // the window has actually become minimized due to rapid change
+                // so just ignore this message
+                return;
+            }
+
+            if (wparam == SIZE_MAXIMIZED)
+            {
+                if (previousWindowState == FormWindowState.Minimized)
+                {
+                    OnResumeRendering(EventArgs.Empty);
+                }
+
+                previousWindowState = FormWindowState.Maximized;
+
+                OnUserResized(EventArgs.Empty);
+                cachedSize = Size;
+                return;
+            }
+
+            if (wparam != SIZE_RESTORED)
+            {
+                return;
+            }
+
+            if (previousWindowState == FormWindowState.Minimized)
+            {
+                OnResumeRendering(EventArgs.Empty);
+            }
+
+            if (!Resizing && (Size != cachedSize || previousWindowState == FormWindowState.Maximized))
+            {
+                previousWindowState = FormWindowState.Normal;
+
+                // Only update when cachedSize is != 0
+                if (cachedSize != Size.Empty)
+                {
+                    isSizeChangedWithoutResizeBegin = true;
+                }
+
+                return;
+            }
+
+            previousWindowState = FormWindowState.Normal;
+        }
+        private void OnMessageActivateApp(long wparam)
+        {
+            if (wparam != 0)
+                OnAppActivated(EventArgs.Empty);
+            else
+                OnAppDeactivated(EventArgs.Empty);
+        }
+        private bool OnMessagePowerBroadcast(long wparam, ref Message m)
+        {
+            if (wparam == PBT_APMQUERYSUSPEND)
+            {
+                OnSystemSuspend(EventArgs.Empty);
+                m.Result = new IntPtr(1);
+                return true;
+            }
+            else if (wparam == PBT_APMRESUMESUSPEND)
+            {
+                OnSystemResume(EventArgs.Empty);
+                m.Result = new IntPtr(1);
+                return true;
+            }
+
+            return false;
+        }
+        private bool OnMessageSysCommand(long wparam, ref Message m)
+        {
+            if (wparam == SC_MONITORPOWER || wparam == SC_SCREENSAVE)
+            {
+                var e = new CancelEventArgs();
+                OnScreensaver(e);
+                if (e.Cancel)
+                {
+                    m.Result = IntPtr.Zero;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <inheritdoc/>
         protected override bool ProcessDialogKey(System.Windows.Forms.Keys keyData)
         {

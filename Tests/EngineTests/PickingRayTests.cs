@@ -1,9 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Engine.Tests
+namespace EngineTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -14,10 +15,10 @@ namespace Engine.Tests
         static Vector3 position;
         static Vector3 direction;
         static Ray testRay;
-        static RayPickingParams testRayParams;
+        static PickingHullTypes testRayParams;
         static float testRayLength;
-        static RayPickingParams facingOnlyParams;
-        static RayPickingParams allFacesParams;
+        static PickingHullTypes facingOnlyParams;
+        static PickingHullTypes allFacesParams;
         static float badRayLength;
 
         [ClassInitialize]
@@ -28,11 +29,11 @@ namespace Engine.Tests
             position = Vector3.One;
             direction = Vector3.Normalize(Vector3.One);
             testRay = new Ray(position, direction);
-            testRayParams = RayPickingParams.Objects;
+            testRayParams = PickingHullTypes.Geometry;
             testRayLength = 100f;
 
-            facingOnlyParams = RayPickingParams.FacingOnly;
-            allFacesParams = RayPickingParams.None;
+            facingOnlyParams = PickingHullTypes.FacingOnly;
+            allFacesParams = PickingHullTypes.None;
 
             badRayLength = -1;
         }
@@ -46,17 +47,17 @@ namespace Engine.Tests
         [TestMethod()]
         public void RayConstructorTest1()
         {
-            PickingRay p = new PickingRay(testRay);
+            var p = new PickingRay(testRay);
 
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void RayConstructorTest2()
         {
-            PickingRay p = new PickingRay(testRay, testRayParams);
+            var p = new PickingRay(testRay, testRayParams);
 
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
@@ -66,7 +67,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void RayConstructorTest3()
         {
-            PickingRay p = new PickingRay(testRay, testRayParams, testRayLength);
+            var p = new PickingRay(testRay, testRayParams, testRayLength);
 
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
@@ -76,17 +77,17 @@ namespace Engine.Tests
         [TestMethod()]
         public void RayConstructorTest4()
         {
-            PickingRay p = new PickingRay(position, direction);
+            var p = new PickingRay(position, direction);
 
             Assert.AreEqual(position, p.Position);
             Assert.AreEqual(direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void RayConstructorTest5()
         {
-            PickingRay p = new PickingRay(position, direction, testRayParams);
+            var p = new PickingRay(position, direction, testRayParams);
 
             Assert.AreEqual(position, p.Position);
             Assert.AreEqual(direction, p.Direction);
@@ -96,7 +97,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void RayConstructorTest6()
         {
-            PickingRay p = new PickingRay(position, direction, testRayParams, testRayLength);
+            var p = new PickingRay(position, direction, testRayParams, testRayLength);
 
             Assert.AreEqual(position, p.Position);
             Assert.AreEqual(direction, p.Direction);
@@ -107,14 +108,14 @@ namespace Engine.Tests
         [TestMethod()]
         public void FacingOnlyTest()
         {
-            PickingRay p = new PickingRay(position, direction, facingOnlyParams);
+            var p = new PickingRay(position, direction, facingOnlyParams);
 
             Assert.IsTrue(p.FacingOnly);
         }
         [TestMethod()]
         public void AllFacesTest()
         {
-            PickingRay p = new PickingRay(position, direction, allFacesParams);
+            var p = new PickingRay(position, direction, allFacesParams);
 
             Assert.IsFalse(p.FacingOnly);
         }
@@ -122,7 +123,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void MaxDistanceTest()
         {
-            PickingRay p = new PickingRay(position, direction, allFacesParams, badRayLength);
+            var p = new PickingRay(position, direction, allFacesParams, badRayLength);
 
             Assert.AreEqual(badRayLength, p.RayLength);
             Assert.AreEqual(float.MaxValue, p.MaxDistance);
@@ -131,18 +132,18 @@ namespace Engine.Tests
         [TestMethod()]
         public void ImplicitConversionTest1()
         {
-            Ray ray = new Ray(position, direction);
+            var ray = new Ray(position, direction);
             PickingRay p = ray;
 
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void ImplicitConversionTest2()
         {
-            PickingRay ray = new PickingRay(position, direction);
+            var ray = new PickingRay(position, direction);
             Ray p = ray;
 
             Assert.AreEqual(testRay.Position, p.Position);

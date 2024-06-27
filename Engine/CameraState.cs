@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Content;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Engine
@@ -54,6 +55,10 @@ namespace Engine
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public IsometricAxis IsometricAxis { get; set; }
+        /// <summary>
+        /// Isometric distance to interest
+        /// </summary>
+        public float IsometricDistanceToInterest { get; set; }
         /// <summary>
         /// Isometric current forward
         /// </summary>

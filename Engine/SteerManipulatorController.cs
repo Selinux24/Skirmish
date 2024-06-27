@@ -20,7 +20,7 @@ namespace Engine
         /// <returns>Returns mapped value of n</returns>
         public static float Map(float n, float start1, float stop1, float start2, float stop2)
         {
-            return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+            return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
         }
 
         /// <summary>
@@ -32,66 +32,66 @@ namespace Engine
         /// </summary>
         public float ArrivingThreshold { get; set; } = 0.01f;
 
-        /// <summary>
-        /// Updates the manipulator's view and position
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="manipulator">Manipulator</param>
-        public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        /// <inheritdoc/>
+        public override void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator)
         {
-            if (this.HasPath)
+            if (!HasPath)
             {
-                var target = this.path.GetNextControlPoint(this.path.Length);
-                var position = manipulator.Position;
-                float dToTarget = (target - position).Length();
-
-                if (dToTarget > this.ArrivingThreshold)
-                {
-                    float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
-                    float maxForce = this.MaximumForce * gameTime.ElapsedSeconds;
-
-                    var next = this.path.GetNextControlPoint(this.pathTime + maxSpeed);
-
-                    // A vector pointing from the location to the target
-                    var desired = (next - position);
-                    float dToNext = desired.Length();
-                    if (dToNext != 0)
-                    {
-                        if (dToTarget < this.ArrivingRadius)
-                        {
-                            var m = Map(dToTarget, 0, this.ArrivingRadius, 0, maxSpeed);
-                            desired = Vector3.Normalize(desired) * m;
-                        }
-                        else
-                        {
-                            desired = Vector3.Normalize(desired) * maxSpeed;
-                        }
-
-                        // Steering = Desired minus Velocity
-                        var steer = desired - this.Velocity;
-
-                        // Limit to maximum steering force
-                        steer = steer.Limit(maxForce);
-
-                        // Update velocity
-                        this.Velocity += steer;
-
-                        // Limit speed
-                        this.Velocity = this.Velocity.Limit(maxSpeed);
-
-                        this.pathTime += this.Velocity.Length();
-                        var newPosition = this.path.GetPosition(this.pathTime);
-                        var newNormal = this.path.GetNormal(this.pathTime);
-
-                        manipulator.SetPosition(newPosition, true);
-                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
-                    }
-                }
-                else
-                {
-                    this.Clear();
-                }
+                return;
             }
+
+            var target = path.GetNextControlPoint(path.Length);
+            var position = manipulator.Position;
+            float dToTarget = (target - position).Length();
+
+            if (dToTarget <= ArrivingThreshold)
+            {
+                Clear();
+
+                return;
+            }
+
+            float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
+            float maxForce = MaximumForce * gameTime.ElapsedSeconds;
+
+            var next = path.GetNextControlPoint(pathTime + maxSpeed);
+
+            // A vector pointing from the location to the target
+            var desired = next - position;
+            float dToNext = desired.Length();
+            if (MathUtil.IsZero(dToNext))
+            {
+                return;
+            }
+
+            if (dToTarget < ArrivingRadius)
+            {
+                var m = Map(dToTarget, 0, ArrivingRadius, 0, maxSpeed);
+                desired = Vector3.Normalize(desired) * m;
+            }
+            else
+            {
+                desired = Vector3.Normalize(desired) * maxSpeed;
+            }
+
+            // Steering = Desired minus Velocity
+            var steer = desired - Velocity;
+
+            // Limit to maximum steering force
+            steer = steer.Limit(maxForce);
+
+            // Update velocity
+            Velocity += steer;
+
+            // Limit speed
+            Velocity = Velocity.Limit(maxSpeed);
+
+            pathTime += Velocity.Length();
+            var newPosition = path.GetPosition(pathTime);
+            var newNormal = path.GetNormal(pathTime);
+
+            manipulator.SetPosition(newPosition);
+            manipulator.RotateTo(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
         }
 
         /// <inheritdoc/>
@@ -111,7 +111,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void SetState(IGameState state)
         {
-            if (!(state is SteerManipulatorControllerState steerManipulator))
+            if (state is not SteerManipulatorControllerState steerManipulator)
             {
                 return;
             }

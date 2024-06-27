@@ -133,6 +133,19 @@ namespace Engine.UI
         public bool FitY { get; set; }
 
         /// <summary>
+        /// Gets the current cell size
+        /// </summary>
+        public Vector2 CurrentCellSize { get; private set; }
+        /// <summary>
+        /// Gets the current number of rows
+        /// </summary>
+        public int CurrentRows { get; private set; }
+        /// <summary>
+        /// Gets the current number of columns
+        /// </summary>
+        public int CurrentColumns { get; private set; }
+
+        /// <summary>
         /// Updates the grid layout
         /// </summary>
         /// <param name="controls">Control list</param>
@@ -140,17 +153,20 @@ namespace Engine.UI
         /// <param name="bounds">Bounds</param>
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
-        public static void UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
+        /// <returns>Returns the layout updated state</returns>
+        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {
-                return;
+                return parameters;
             }
 
             if (parameters.FitType == GridFitTypes.None)
             {
-                return;
+                return parameters;
             }
+
+            GridLayout res = parameters;
 
             GridFitTypes fitType = parameters.FitType;
             int rows = parameters.Rows;
@@ -161,18 +177,18 @@ namespace Engine.UI
 
             if (fitType == GridFitTypes.Width || fitType == GridFitTypes.Height || fitType == GridFitTypes.Uniform)
             {
-                float sqrt = (float)Math.Sqrt(controls.Count());
-                rows = (int)Math.Ceiling(sqrt);
-                cols = (int)Math.Ceiling(sqrt);
+                float sqrt = MathF.Sqrt(controls.Count());
+                rows = (int)MathF.Ceiling(sqrt);
+                cols = (int)MathF.Ceiling(sqrt);
             }
 
             if (fitType == GridFitTypes.Width || fitType == GridFitTypes.FixedColumns)
             {
-                rows = (int)Math.Ceiling(controls.Count() / (float)cols);
+                rows = (int)MathF.Ceiling(controls.Count() / (float)cols);
             }
             else if (fitType == GridFitTypes.Height || fitType == GridFitTypes.FixedRows)
             {
-                cols = (int)Math.Ceiling(controls.Count() / (float)rows);
+                cols = (int)MathF.Ceiling(controls.Count() / (float)rows);
             }
 
             float cellWidth = (bounds.Width / cols) - (spacing.Horizontal / cols * (cols - 1)) - (padding.Left / cols) - (padding.Right / cols);
@@ -194,6 +210,12 @@ namespace Engine.UI
                 item.Width = cellSize.X;
                 item.Height = cellSize.Y;
             }
+
+            res.CurrentCellSize = cellSize;
+            res.CurrentRows = rows;
+            res.CurrentColumns = cols;
+
+            return res;
         }
     }
 }

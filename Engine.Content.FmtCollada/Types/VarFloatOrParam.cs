@@ -11,11 +11,13 @@ namespace Engine.Collada.Types
         [XmlElement("param", typeof(BasicParam))]
         public BasicParam Param { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Float != null) return this.Float.ToString();
-            else if (this.Param != null) return this.Param.ToString();
-            else return "Empty";
+            return
+                Float?.ToString() ??
+                Param?.ToString() ??
+                "Empty";
         }
     }
 }

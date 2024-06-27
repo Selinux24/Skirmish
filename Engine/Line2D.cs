@@ -22,7 +22,7 @@ namespace Engine
         {
             get
             {
-                return Vector2.Distance(this.Point1, this.Point2);
+                return Vector2.Distance(Point1, Point2);
             }
         }
         /// <summary>
@@ -32,7 +32,7 @@ namespace Engine
         {
             get
             {
-                return Vector2.Normalize(this.Point2 - this.Point1);
+                return Vector2.Normalize(Point2 - Point1);
             }
         }
 
@@ -75,8 +75,8 @@ namespace Engine
         /// <param name="y2">Y coordinate of end point</param>
         public Line2D(float x1, float y1, float x2, float y2)
         {
-            this.Point1 = new Vector2(x1, y1);
-            this.Point2 = new Vector2(x2, y2);
+            Point1 = new Vector2(x1, y1);
+            Point2 = new Vector2(x2, y2);
         }
         /// <summary>
         /// Constructor
@@ -85,16 +85,14 @@ namespace Engine
         /// <param name="p2">End point</param>
         public Line2D(Vector2 p1, Vector2 p2)
         {
-            this.Point1 = p1;
-            this.Point2 = p2;
+            Point1 = p1;
+            Point2 = p2;
         }
 
-        /// <summary>
-        /// Text representation
-        /// </summary>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"P1({this.Point1}) -> P2({this.Point2});";
+            return $"P1({Point1}) -> P2({Point2});";
         }
     }
 }

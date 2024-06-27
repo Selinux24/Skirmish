@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -93,9 +92,9 @@ namespace Engine.Common
         /// Updates the texture data
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="game">Game instance</param>
+        /// <param name="dc">Device context</param>
         /// <param name="data">New data</param>
-        public void Update<T>(Game game, IEnumerable<T> data) where T : struct
+        public void Update<T>(IEngineDeviceContext dc, T[] data) where T : struct
         {
             if (srv == null)
             {
@@ -104,11 +103,11 @@ namespace Engine.Common
 
             if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture1D)
             {
-                game.Graphics.UpdateTexture1D(this, data);
+                dc.UpdateTexture1D(this, data);
             }
             else if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture2D)
             {
-                game.Graphics.UpdateTexture2D(this, data);
+                dc.UpdateTexture2D(this, data);
             }
         }
 

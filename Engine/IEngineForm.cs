@@ -71,7 +71,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Rneder area center
+        /// Render area center
         /// </summary>
         Point RenderCenter { get; }
         /// <summary>
@@ -103,7 +103,7 @@ namespace Engine
         /// </summary>
         int MouseWheelDelta { get; }
         /// <summary>
-        /// Mouse wheel delta timestamp
+        /// Mouse wheel delta time stamp
         /// </summary>
         long MouseWheelDeltaTimestamp { get; }
 
@@ -121,9 +121,9 @@ namespace Engine
         /// <returns></returns>
         Viewport GetViewport();
         /// <summary>
-        /// Gets the current ortho projection matrix
+        /// Gets the current ortho-projection matrix
         /// </summary>
-        /// <returns>Returns the current ortho projection matrix</returns>
+        /// <returns>Returns the current ortho-projection matrix</returns>
         Matrix GetOrthoProjectionMatrix();
         /// <summary>
         /// Transform to screen space using the form view ortho projection matrix
@@ -142,11 +142,11 @@ namespace Engine
         /// </summary>
         void Close();
         /// <summary>
-        ///  Computes the location of the screen point p in client coords.
+        ///  Computes the location of the screen point p in client coordinates.
         /// </summary>
         Point PointToClient(Point p);
         /// <summary>
-        ///  Computes the location of the client point p in screen coords.
+        ///  Computes the location of the client point p in screen coordinates.
         /// </summary>
         Point PointToScreen(Point p);
     }

@@ -9,10 +9,6 @@ namespace Engine
     public interface ISceneLightSpot : ISceneLight, IHasGameState
     {
         /// <summary>
-        /// Position
-        /// </summary>
-        Vector3 Position { get; set; }
-        /// <summary>
         /// Light direction
         /// </summary>
         Vector3 Direction { get; set; }
@@ -40,15 +36,14 @@ namespace Engine
         /// Local matrix
         /// </summary>
         Matrix Local { get; }
-        /// <summary>
-        /// Shadow map index
-        /// </summary>
-        uint ShadowMapCount { get; set; }
-        /// <summary>
-        /// From light view * projection matrix array
-        /// </summary>
-        Matrix[] FromLightVP { get; set; }
 
+        /// <summary>
+        /// Test the light shadow casting based on the viewer position
+        /// </summary>
+        /// <param name="environment">Game environment</param>
+        /// <param name="eyePosition">Viewer eye position</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
         /// <summary>
         /// Gets the light volume
         /// </summary>

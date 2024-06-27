@@ -39,10 +39,10 @@ namespace Engine.Collada.FX
 
         public Surface()
         {
-            this.Size = new BasicInt3 { Values = new[] { 0, 0, 0 } };
-            this.ViewportRatio = new BasicFloat2 { Values = new[] { 1f, 1f } };
-            this.MipLevels = 0;
-            this.MipMapGenerate = false;
+            Size = new BasicInt3 { Values = new[] { 0, 0, 0 } };
+            ViewportRatio = new BasicFloat2 { Values = new[] { 1f, 1f } };
+            MipLevels = 0;
+            MipMapGenerate = false;
         }
     }
 }

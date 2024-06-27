@@ -1,29 +1,374 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
     /// <summary>
     /// Region
     /// </summary>
-    public class Region
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="id">Region id</param>
+    public class Region(int id)
     {
+        /// <summary>
+        /// Connection list
+        /// </summary>
+        private readonly List<int> connections = [];
+        /// <summary>
+        /// Floor list
+        /// </summary>
+        private readonly List<int> floors = [];
+
+        /// <summary>
+        /// ID of the region
+        /// </summary>
+        public int Id { get; set; } = id;
+        /// <summary>
+        /// Number of spans belonging to this region
+        /// </summary>
+        public int SpanCount { get; set; } = 0;
+        /// <summary>
+        /// Area type.
+        /// </summary>
+        public AreaTypes AreaType { get; set; } = AreaTypes.RC_NULL_AREA;
+        /// <summary>
+        /// Remap flag
+        /// </summary>
+        public bool Remap { get; set; } = false;
+        /// <summary>
+        /// Visited flag
+        /// </summary>
+        public bool Visited { get; set; } = false;
+        /// <summary>
+        /// Overlap flag
+        /// </summary>
+        public bool Overlap { get; set; } = false;
+        /// <summary>
+        /// Connect to border flag
+        /// </summary>
+        public bool ConnectsToBorder { get; set; } = false;
+        /// <summary>
+        /// Minimum height
+        /// </summary>
+        public int YMin { get; set; } = int.MaxValue;
+        /// <summary>
+        /// Maximum height
+        /// </summary>
+        public int YMax { get; set; } = 0;
+
+        /// <summary>
+        /// Initializes a region list
+        /// </summary>
+        /// <param name="nreg">Number of regions in the list</param>
+        /// <returns></returns>
+        public static List<Region> InitializeRegionList(int nreg)
+        {
+            var regions = new List<Region>(nreg);
+
+            // Construct regions
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions.Add(new(i));
+            }
+
+            return regions;
+        }
+        /// <summary>
+        /// Resets region ids
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        public static void ResetIds(List<Region> regions)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                regions[i].Id = 0;
+            }
+        }
+        /// <summary>
+        /// Removes all the regions smaller than the specified area
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        public static void RemoveSmallRegions(List<Region> regions, int minRegionArea)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                if (regions[i].SpanCount <= 0 || regions[i].SpanCount >= minRegionArea || regions[i].ConnectsToBorder)
+                {
+                    continue;
+                }
+
+                int reg = regions[i].Id;
+                for (int j = 0; j < regions.Count; ++j)
+                {
+                    if (regions[j].Id == reg)
+                    {
+                        regions[j].Id = 0;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Removes smallest regions
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="minRegionArea">Minimum region area</param>
+        public static void RemoveSmallestRegions(List<Region> regions, int minRegionArea)
+        {
+            var stack = new List<int>();
+            var trace = new List<int>();
+
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                var reg = regions[i];
+                if (reg.Id == 0 || CompactHeightfield.IsBorder(reg.Id))
+                {
+                    continue;
+                }
+                if (reg.SpanCount == 0)
+                {
+                    continue;
+                }
+                if (reg.Visited)
+                {
+                    continue;
+                }
+
+                stack.Clear();
+                trace.Clear();
+
+                reg.Visited = true;
+                stack.Add(i);
+
+                // Count the total size of all the connected regions.
+                // Also keep track of the regions connects to a tile border.
+                var (spanCount, connectsToBorder) = Region.ProcessRegions(regions, stack, trace);
+
+                // If the accumulated regions size is too small, remove it.
+                // Do not remove areas which connect to tile borders
+                // as their size cannot be estimated correctly and removing them
+                // can potentially remove necessary areas.
+                if (spanCount >= minRegionArea || connectsToBorder)
+                {
+                    continue;
+                }
+
+                // Kill all visited regions.
+                for (int j = 0; j < trace.Count; ++j)
+                {
+                    regions[trace[j]].SpanCount = 0;
+                    regions[trace[j]].Id = 0;
+                }
+            }
+        }
+        /// <summary>
+        /// Process regions
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="stack">Stack</param>
+        /// <param name="trace">Trace</param>
+        private static (int spanCount, bool connectsToBorder) ProcessRegions(List<Region> regions, List<int> stack, List<int> trace)
+        {
+            bool connectsToBorder = false;
+            int spanCount = 0;
+
+            while (stack.Count > 0)
+            {
+                // Pop
+                int ri = stack.PopLast();
+                var creg = regions[ri];
+
+                spanCount += creg.SpanCount;
+                trace.Add(ri);
+
+                foreach (var connection in creg.GetConnections())
+                {
+                    if (CompactHeightfield.IsBorder(connection))
+                    {
+                        connectsToBorder = true;
+                        continue;
+                    }
+
+                    var neireg = regions[connection];
+                    if (neireg.Visited)
+                    {
+                        continue;
+                    }
+
+                    if (neireg.Id == 0 || CompactHeightfield.IsBorder(neireg.Id))
+                    {
+                        continue;
+                    }
+
+                    // Visit
+                    stack.Add(neireg.Id);
+                    neireg.Visited = true;
+                }
+            }
+
+            return (spanCount, connectsToBorder);
+        }
+        /// <summary>
+        /// Compress region ids
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <returns>Returns the last region id</returns>
+        public static int CompressRegionIds(List<Region> regions)
+        {
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                regions[i].Remap = false;
+                if (regions[i].Id == 0)
+                {
+                    // Skip nil regions.
+                    continue;
+                }
+                if (CompactHeightfield.IsBorder(regions[i].Id))
+                {
+                    // Skip external regions.
+                    continue;
+                }
+                regions[i].Remap = true;
+            }
+
+            int regIdGen = 0;
+            for (int i = 0; i < regions.Count; ++i)
+            {
+                if (!regions[i].Remap)
+                {
+                    continue;
+                }
+                int oldId = regions[i].Id;
+                int newId = ++regIdGen;
+                for (int j = i; j < regions.Count; ++j)
+                {
+                    if (regions[j].Id == oldId)
+                    {
+                        regions[j].Id = newId;
+                        regions[j].Remap = false;
+                    }
+                }
+            }
+
+            return regIdGen;
+        }
+        /// <summary>
+        /// Merges montone regions to create non-overlapping areas.
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        public static void MergeMonotoneRegions(List<Region> regions)
+        {
+            int layerId = 1;
+            var stack = new Stack<int>(32);
+
+            Region.ResetIds(regions);
+
+            // Merge montone regions to create non-overlapping areas.
+            for (int i = 1; i < regions.Count; ++i)
+            {
+                var root = regions[i];
+
+                // Skip already visited.
+                if (root.Id != 0)
+                {
+                    continue;
+                }
+
+                // Start search.
+                root.Id = layerId;
+
+                stack.Push(i);
+
+                Region.ProcessMergeMonotoneStack(stack, root, regions, layerId);
+
+                layerId++;
+            }
+        }
+        /// <summary>
+        /// Process the monotone region stack
+        /// </summary>
+        /// <param name="stack">Stack to process</param>
+        /// <param name="root">Root region</param>
+        /// <param name="regions">Region list</param>
+        /// <param name="layerId">Layer id</param>
+        private static void ProcessMergeMonotoneStack(Stack<int> stack, Region root, List<Region> regions, int layerId)
+        {
+            while (stack.Count > 0)
+            {
+                // Pop front
+                var reg = regions[stack.Pop()];
+
+                foreach (var nei in reg.GetConnections())
+                {
+                    var regn = regions[nei];
+
+                    // Skip already visited.
+                    if (regn.Id != 0)
+                    {
+                        continue;
+                    }
+
+                    // Skip if the neighbour is overlapping root region.
+                    bool overlap = root.OverlapWithNeighbour(nei);
+                    if (overlap)
+                    {
+                        continue;
+                    }
+
+                    // Deepen
+                    stack.Push(nei);
+
+                    // Mark layer id
+                    regn.Id = layerId;
+
+                    // Merge current layers to root.
+                    root.MergeFloors(regn);
+                }
+            }
+        }
+        /// <summary>
+        /// Updates overlapping region floors
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="regs">Floor region id list</param>
+        public static void UpdateOverlappingRegionFloors(List<Region> regions, List<int> regs)
+        {
+            for (int i = 0; i < regs.Count - 1; ++i)
+            {
+                for (int j = i + 1; j < regs.Count; ++j)
+                {
+                    if (regs[i] == regs[j])
+                    {
+                        continue;
+                    }
+
+                    var ri = regions[regs[i]];
+                    var rj = regions[regs[j]];
+                    ri.AddUniqueFloorRegion(regs[j]);
+                    rj.AddUniqueFloorRegion(regs[i]);
+                }
+            }
+        }
+
         /// <summary>
         /// Gets whether a region can merge with another
         /// </summary>
-        /// <param name="rega">First region</param>
-        /// <param name="regb">Second region</param>
+        /// <param name="reg">Region</param>
         /// <returns>Returns true if the regions can merge</returns>
-        public static bool CanMergeWithRegion(Region rega, Region regb)
+        public bool CanMergeWithRegion(Region reg)
         {
-            if (rega.AreaType != regb.AreaType)
+            if (AreaType != reg.AreaType)
             {
                 return false;
             }
 
             int n = 0;
-            for (int i = 0; i < rega.connections.Count; ++i)
+            for (int i = 0; i < connections.Count; ++i)
             {
-                if (rega.connections[i] == regb.Id)
+                if (connections[i] == reg.Id)
                 {
                     n++;
                 }
@@ -34,9 +379,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return false;
             }
 
-            for (int i = 0; i < rega.floors.Count; ++i)
+            for (int i = 0; i < floors.Count; ++i)
             {
-                if (rega.floors[i] == regb.Id)
+                if (floors[i] == reg.Id)
                 {
                     return false;
                 }
@@ -45,19 +390,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return true;
         }
         /// <summary>
-        /// Merges the second region with the first region, and clears the second region
+        /// Merges the specified region into the current region, and clears the specified region
         /// </summary>
-        /// <param name="rega">First region</param>
-        /// <param name="regb">Second region</param>
+        /// <param name="reg">Second region</param>
         /// <returns>Returns true if the regions merge</returns>
-        public static bool MergeRegions(Region rega, Region regb)
+        public bool Merge(Region reg)
         {
-            int aid = rega.Id;
-            int bid = regb.Id;
+            int aid = Id;
+            int bid = reg.Id;
 
             // Duplicate current neighbourhood.
-            List<int> acon = new List<int>(rega.connections);
-            List<int> bcon = regb.connections;
+            var acon = new List<int>(connections);
+            var bcon = reg.connections;
 
             // Find insertion point on A.
             int insa = -1;
@@ -90,91 +434,28 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Merge neighbours.
-            rega.connections.Clear();
+            connections.Clear();
             for (int i = 0, ni = acon.Count; i < ni - 1; ++i)
             {
-                rega.connections.Add(acon[(insa + 1 + i) % ni]);
+                connections.Add(acon[(insa + 1 + i) % ni]);
             }
 
             for (int i = 0, ni = bcon.Count; i < ni - 1; ++i)
             {
-                rega.connections.Add(bcon[(insb + 1 + i) % ni]);
+                connections.Add(bcon[(insb + 1 + i) % ni]);
             }
 
-            rega.RemoveAdjacentNeighbours();
+            RemoveAdjacentNeighbours();
 
-            for (int j = 0; j < regb.floors.Count; ++j)
+            for (int j = 0; j < reg.floors.Count; ++j)
             {
-                rega.AddUniqueFloorRegion(regb.floors[j]);
+                AddUniqueFloorRegion(reg.floors[j]);
             }
-            rega.SpanCount += regb.SpanCount;
-            regb.SpanCount = 0;
-            regb.connections.Clear();
+            SpanCount += reg.SpanCount;
+            reg.SpanCount = 0;
+            reg.connections.Clear();
 
             return true;
-        }
-
-        /// <summary>
-        /// Connection list
-        /// </summary>
-        private readonly List<int> connections = new List<int>();
-        /// <summary>
-        /// Floor list
-        /// </summary>
-        private readonly List<int> floors = new List<int>();
-
-        /// <summary>
-        /// ID of the region
-        /// </summary>
-        public int Id { get; set; }
-        /// <summary>
-        /// Number of spans belonging to this region
-        /// </summary>
-        public int SpanCount { get; set; }
-        /// <summary>
-        /// Area type.
-        /// </summary>
-        public AreaTypes AreaType { get; set; }
-        /// <summary>
-        /// Remap flag
-        /// </summary>
-        public bool Remap { get; set; }
-        /// <summary>
-        /// Visited flag
-        /// </summary>
-        public bool Visited { get; set; }
-        /// <summary>
-        /// Overlap flag
-        /// </summary>
-        public bool Overlap { get; set; }
-        /// <summary>
-        /// Connect to border flag
-        /// </summary>
-        public bool ConnectsToBorder { get; set; }
-        /// <summary>
-        /// Minimum height
-        /// </summary>
-        public int YMin { get; set; }
-        /// <summary>
-        /// Maximum height
-        /// </summary>
-        public int YMax { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="id">Region id</param>
-        public Region(int id)
-        {
-            Id = id;
-            SpanCount = 0;
-            AreaType = AreaTypes.RC_NULL_AREA;
-            Remap = false;
-            Visited = false;
-            Overlap = false;
-            ConnectsToBorder = false;
-            YMin = int.MaxValue;
-            YMax = 0;
         }
 
         /// <summary>
@@ -195,7 +476,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="neighbours">Neighbour list</param>
         /// <remarks>Removes adjacent neigbours after addition</remarks>
-        public void AddConnections(IEnumerable<int> neighbours)
+        public void AddConnections(int[] neighbours)
         {
             connections.AddRange(neighbours);
 
@@ -216,7 +497,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public void RemoveAdjacentNeighbours()
         {
             // Remove adjacent duplicates.
-            for (int i = 0; i < connections.Count && connections.Count > 1;)
+            int i = 0;
+            while (i < connections.Count && connections.Count > 1)
             {
                 // Next index
                 int ni = (i + 1) % connections.Count;
@@ -284,9 +566,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the connection list
         /// </summary>
         /// <returns>Returns the list of connections</returns>
-        public IEnumerable<int> GetConnections()
+        public int[] GetConnections()
         {
-            return connections.ToArray();
+            return [.. connections];
         }
         /// <summary>
         /// Gets the connection count
@@ -300,9 +582,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the floor list
         /// </summary>
         /// <returns>Returns the list of floors</returns>
-        public IEnumerable<int> GetFloors()
+        public int[] GetFloors()
         {
-            return floors.ToArray();
+            return [.. floors];
         }
         /// <summary>
         /// Gets the floor count
@@ -312,5 +594,209 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return floors.Count;
         }
-    };
+        /// <summary>
+        /// Gets whether the region overlaps with the specified neighbour
+        /// </summary>
+        /// <param name="nei">Neighbour index</param>
+        public bool OverlapWithNeighbour(int nei)
+        {
+            return floors.Contains(nei);
+        }
+        /// <summary>
+        /// Merges the specified region floors with current
+        /// </summary>
+        /// <param name="regn">Region</param>
+        public void MergeFloors(Region regn)
+        {
+            if (regn == null)
+            {
+                return;
+            }
+
+            foreach (var floor in regn.floors)
+            {
+                AddUniqueFloorRegion(floor);
+            }
+
+            // Update bounds
+            YMin = Math.Min(YMin, regn.YMin);
+            YMax = Math.Max(YMax, regn.YMax);
+
+            // Move the span count to current instance, and clears the other instace
+            SpanCount += regn.SpanCount;
+            regn.SpanCount = 0;
+
+            // Updates border connection
+            ConnectsToBorder = ConnectsToBorder || regn.ConnectsToBorder;
+        }
+
+        /// <summary>
+        /// Merges small regions to nearest neighbours
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="mergeRegionSize">Merge region size</param>
+        public static void MergeSmallRegionsToNeighbours(List<Region> regions, int mergeRegionSize)
+        {
+            int mergeCount;
+            do
+            {
+                mergeCount = 0;
+
+                for (int i = 0; i < regions.Count; ++i)
+                {
+                    var reg = regions[i];
+
+                    if (!reg.MergeIntoRegions(regions, mergeRegionSize))
+                    {
+                        continue;
+                    }
+
+                    mergeCount++;
+                }
+            }
+            while (mergeCount > 0);
+        }
+        /// <summary>
+        /// Merges current region into the specified valid region in the list
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="mergeRegionSize">Merge region size</param>
+        private bool MergeIntoRegions(List<Region> regions, int mergeRegionSize)
+        {
+            if (Id == 0)
+            {
+                return false;
+            }
+            if (CompactHeightfield.IsBorder(Id))
+            {
+                return false;
+            }
+            if (Overlap)
+            {
+                return false;
+            }
+            if (SpanCount == 0)
+            {
+                return false;
+            }
+
+            // Check to see if the region should be merged.
+            if (SpanCount > mergeRegionSize && IsRegionConnectedToBorder())
+            {
+                return false;
+            }
+
+            // Small region with more than 1 connection.
+            // Or region which is not connected to a border at all.
+            // Find smallest neighbour region that connects to this one.
+            int mergeId = FindSmallestNeighbourRegion(regions);
+            if (mergeId == Id)
+            {
+                return false;
+            }
+
+            // Found new id.
+            int oldId = Id;
+            var target = regions[mergeId];
+
+            // Merge neighbours.
+            if (!target.Merge(this))
+            {
+                return false;
+            }
+
+            // Fixup regions pointing to current region.
+            Region.FixupRegions(regions, mergeId, oldId);
+
+            return true;
+        }
+        /// <summary>
+        /// Finds the smalles neighbour region in the specified region list
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <returns>Returns the region identifier</returns>
+        private int FindSmallestNeighbourRegion(List<Region> regions)
+        {
+            int smallest = int.MaxValue;
+            int mergeId = Id;
+            foreach (var connection in GetConnections())
+            {
+                if (CompactHeightfield.IsBorder(connection))
+                {
+                    continue;
+                }
+
+                var mreg = regions[connection];
+                if (mreg.Id == 0 || CompactHeightfield.IsBorder(mreg.Id) || mreg.Overlap)
+                {
+                    continue;
+                }
+
+                if (mreg.SpanCount < smallest && CanMergeWithRegion(mreg) && mreg.CanMergeWithRegion(this))
+                {
+                    smallest = mreg.SpanCount;
+                    mergeId = mreg.Id;
+                }
+            }
+
+            return mergeId;
+        }
+        /// <summary>
+        /// Fixup region ids in the region list
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <param name="newId">New id</param>
+        /// <param name="oldId">Old id</param>
+        private static void FixupRegions(List<Region> regions, int newId, int oldId)
+        {
+            for (int j = 0; j < regions.Count; ++j)
+            {
+                if (regions[j].Id == 0 || CompactHeightfield.IsBorder(regions[j].Id))
+                {
+                    continue;
+                }
+
+                // If another region was already merged into current region
+                // change the nid of the previous region too.
+                if (regions[j].Id == oldId)
+                {
+                    regions[j].Id = newId;
+                }
+
+                // Replace the current region with the new one if the
+                // current regions is neighbour.
+                regions[j].ReplaceNeighbour(oldId, newId);
+            }
+        }
+
+        /// <summary>
+        /// Gets overlaping regions
+        /// </summary>
+        /// <param name="regions">Region list</param>
+        /// <returns>Returns the overlaping region ids</returns>
+        public static int[] GetOverlapingRegions(List<Region> regions)
+        {
+            return regions
+                .Where(r => r.Overlap)
+                .Select(r => r.Id)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Remap region ids
+        /// </summary>
+        /// <param name="regions">Region data list</param>
+        /// <param name="srcReg">Region id list</param>
+        /// <param name="nregs">Number of region ids in the list</param>
+        public static void RemapRegions(List<Region> regions, int[] srcReg, int nregs)
+        {
+            for (int i = 0; i < nregs; ++i)
+            {
+                if (!CompactHeightfield.IsBorder(srcReg[i]))
+                {
+                    srcReg[i] = regions[srcReg[i]].Id;
+                }
+            }
+        }
+    }
 }

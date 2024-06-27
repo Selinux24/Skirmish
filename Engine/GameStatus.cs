@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Internal status dictionary
         /// </summary>
-        internal readonly Dictionary<string, double> status = new Dictionary<string, double>();
+        internal readonly Dictionary<string, double> status = [];
 
         /// <summary>
         /// Constructor
@@ -27,7 +27,7 @@ namespace Engine
         /// <param name="otherStatus">Game status dictionary</param>
         private GameStatus(GameStatus otherStatus) : this()
         {
-            this.status = new Dictionary<string, double>(otherStatus.status);
+            status = new(otherStatus.status);
         }
 
         /// <summary>
@@ -37,11 +37,7 @@ namespace Engine
         /// <param name="value">Line value</param>
         public void Add(string key, double value)
         {
-            if (!status.ContainsKey(key))
-            {
-                status.Add(key, value);
-            }
-            else
+            if (!status.TryAdd(key, value))
             {
                 status[key] += value;
             }
@@ -54,17 +50,17 @@ namespace Engine
         /// <remarks>Gets the elapsed milliseconds from the Stopwatch</remarks>
         public void Add(string key, Stopwatch stopwatch)
         {
-            this.Add(key, stopwatch.Elapsed.TotalMilliseconds);
+            Add(key, stopwatch.Elapsed.TotalMilliseconds);
         }
         /// <summary>
         /// Adds the dictionary to the status
         /// </summary>
         /// <param name="dictionary">Dictionary</param>
-        public void Add(Dictionary<string, double> dictionary)
+        public void Add(IDictionary<string, double> dictionary)
         {
             foreach (var item in dictionary)
             {
-                this.Add(item.Key, item.Value);
+                Add(item.Key, item.Value);
             }
         }
         /// <summary>
@@ -73,7 +69,7 @@ namespace Engine
         /// <param name="otherStatus">Other status</param>
         public void Add(GameStatus otherStatus)
         {
-            this.Add(otherStatus.status);
+            Add(otherStatus.status);
         }
 
         /// <summary>
