@@ -413,11 +413,7 @@ namespace Engine
 
             for (int i = 0; i < array.Length; i++)
             {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) < 0)
+                if (i == 0 || res.CompareTo(array[i]) < 0)
                 {
                     res = array[i];
                 }
@@ -437,11 +433,7 @@ namespace Engine
 
             for (int i = 0; i < array.Length; i++)
             {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) > 0)
+                if (i == 0 || res.CompareTo(array[i]) > 0)
                 {
                     res = array[i];
                 }
