@@ -1,8 +1,8 @@
 # Skirmish
 Game and prototypes with SharpDX and Directx 11
 
-![Build](https://github.com/Selinux24/Skirmish/actions/workflows/dev.yml/badge.svg)
-[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_dev) 
+![Build](https://github.com/Selinux24/Skirmish/actions/workflows/master.yml/badge.svg)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_master) 
 
 ### What is it?
 
@@ -103,14 +103,14 @@ There are several prototypes:
  
  Thanks a lot, Mikko. You are a genius!
 
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
 
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_dev)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Selinux24_Skirmish_master)
