@@ -1,10 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine;
+using Engine.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Engine.Common.Tests
+namespace EngineTests.Common
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -274,8 +276,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshIntersectsMeshContainsTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
@@ -287,8 +289,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshIntersectsMeshContainedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
@@ -300,8 +302,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshIntersectsMeshIntersectedPerfectFaceTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
@@ -313,8 +315,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshIntersectsMeshNotIntersectedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
@@ -325,8 +327,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshIntersectsMeshIntersectedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box6);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box6);
 
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
@@ -454,7 +456,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.SphereIntersectsMesh(sph1, mesh, out var p);
 
@@ -465,7 +467,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.SphereIntersectsMesh(sph1, mesh, out var p);
 
@@ -476,7 +478,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.SphereIntersectsMesh(sph1, mesh, out var p);
 
@@ -487,7 +489,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.SphereIntersectsMesh(sph1, mesh, out var p);
 
@@ -499,7 +501,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshAllContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
@@ -511,7 +513,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshAllContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
@@ -523,7 +525,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshAllIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
@@ -535,7 +537,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereIntersectsMeshAllNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
@@ -546,7 +548,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxIntersectsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.BoxIntersectsMesh(box1, mesh);
 
@@ -556,7 +558,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxIntersectsMeshContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.BoxIntersectsMesh(box1, mesh);
 
@@ -566,7 +568,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxIntersectsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.BoxIntersectsMesh(box1, mesh);
 
@@ -575,7 +577,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxIntersectsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.BoxIntersectsMesh(box1, mesh);
 
@@ -1525,7 +1527,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles);
 
@@ -1536,7 +1538,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles);
 
@@ -1546,7 +1548,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles);
 
@@ -1557,7 +1559,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshResultContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
 
@@ -1569,7 +1571,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshResultIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
 
@@ -1580,7 +1582,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsMeshResultNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
 
@@ -1818,21 +1820,21 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void PointInMeshContainedTest()
         {
-            var res = Intersection.PointInMesh(pointIn, new[] { tri1 });
+            var res = Intersection.PointInMesh(pointIn, [tri1]);
 
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void PointInMeshOverTest()
         {
-            var res = Intersection.PointInMesh(pointOver, new[] { tri1 });
+            var res = Intersection.PointInMesh(pointOver, [tri1]);
 
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void PointInMeshBelowTest()
         {
-            var res = Intersection.PointInMesh(pointBelow, new[] { tri1 });
+            var res = Intersection.PointInMesh(pointBelow, [tri1]);
 
             Assert.IsFalse(res);
         }
@@ -2000,7 +2002,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshCenterTest()
         {
-            Intersection.ClosestPointInMesh(triCenterPlane, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triCenterPlane, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
             Assert.AreEqual(triCenterPlane, closestPoint);
@@ -2008,7 +2010,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshCenterOverTest()
         {
-            Intersection.ClosestPointInMesh(triCenterOver, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triCenterOver, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
             Assert.AreEqual(triCenterPlane, closestPoint);
@@ -2016,7 +2018,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshCenterBelowTest()
         {
-            Intersection.ClosestPointInMesh(triCenterBelow, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triCenterBelow, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
             Assert.AreEqual(triCenterPlane, closestPoint);
@@ -2024,7 +2026,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP1PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triP1Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP1Perfect, closestPoint);
@@ -2032,7 +2034,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP1Test()
         {
-            Intersection.ClosestPointInMesh(triP1, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP1Perfect, closestPoint);
@@ -2040,7 +2042,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP2PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triP2Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP2Perfect, closestPoint);
@@ -2048,7 +2050,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP2Test()
         {
-            Intersection.ClosestPointInMesh(triP2, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP2Perfect, closestPoint);
@@ -2056,7 +2058,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP3PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triP3Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP3Perfect, closestPoint);
@@ -2064,7 +2066,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshP3Test()
         {
-            Intersection.ClosestPointInMesh(triP3, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triP3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triP3Perfect, closestPoint);
@@ -2072,7 +2074,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS1PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triS1Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS1Perfect, closestPoint);
@@ -2080,7 +2082,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS1Test()
         {
-            Intersection.ClosestPointInMesh(triS1, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS1Perfect, closestPoint);
@@ -2088,7 +2090,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS2PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triS2Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS2Perfect, closestPoint);
@@ -2096,7 +2098,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS2Test()
         {
-            Intersection.ClosestPointInMesh(triS2, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS2Perfect, closestPoint);
@@ -2104,7 +2106,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS3PerfectTest()
         {
-            Intersection.ClosestPointInMesh(triS3Perfect, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS3Perfect, closestPoint);
@@ -2112,7 +2114,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void ClosestPointInMeshS3Test()
         {
-            Intersection.ClosestPointInMesh(triS3, new[] { tri1, tri3, tri7, tri8 }, out var closest, out var closestPoint);
+            Intersection.ClosestPointInMesh(triS3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
             Assert.AreEqual(triS3Perfect, closestPoint);
@@ -2208,7 +2210,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxContainsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.BoxContainsMesh(box1, mesh);
 
@@ -2218,7 +2220,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxContainsMeshContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.BoxContainsMesh(box1, mesh);
 
@@ -2228,7 +2230,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxContainsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.BoxContainsMesh(box1, mesh);
 
@@ -2237,7 +2239,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxContainsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.BoxContainsMesh(box1, mesh);
 
@@ -2363,7 +2365,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereContainsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.SphereContainsMesh(sph1, mesh);
 
@@ -2372,7 +2374,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereContainsMeshContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.SphereContainsMesh(sph1, mesh);
 
@@ -2381,7 +2383,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereContainsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.SphereContainsMesh(sph1, mesh);
 
@@ -2390,7 +2392,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void SphereContainsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.SphereContainsMesh(sph1, mesh);
 
@@ -2545,7 +2547,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void FrustumContainsMeshContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.FrustumContainsMesh(frustum1, mesh);
 
@@ -2555,7 +2557,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void FrustumContainsMeshContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.FrustumContainsMesh(frustum1, mesh);
 
@@ -2565,7 +2567,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void FrustumContainsMeshIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.FrustumContainsMesh(frustum2, mesh);
 
@@ -2574,7 +2576,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void FrustumContainsMeshNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.FrustumContainsMesh(frustum1, mesh);
 
@@ -2584,7 +2586,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsSphereContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsSphere(mesh, sph2);
 
@@ -2593,7 +2595,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsSphereContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsSphere(mesh, sph3);
 
@@ -2602,7 +2604,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsSphereIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsSphere(mesh, sph4);
 
@@ -2611,7 +2613,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsSphereNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsSphere(mesh, sph5);
 
@@ -2621,8 +2623,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsMeshContainsTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.MeshContainsMesh(mesh1, mesh2);
 
@@ -2632,8 +2634,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsMeshContainedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box3);
 
             var res = Intersection.MeshContainsMesh(mesh1, mesh2);
 
@@ -2643,8 +2645,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsMeshIntersectedPerfectFaceTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box4);
 
             var res = Intersection.MeshContainsMesh(mesh1, mesh2);
 
@@ -2654,8 +2656,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsMeshNotIntersectedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box5);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box5);
 
             var res = Intersection.MeshContainsMesh(mesh1, mesh2);
 
@@ -2664,8 +2666,8 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsMeshIntersectedTest()
         {
-            var mesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
-            var mesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box6);
+            var mesh1 = Triangle.ComputeTriangleList(box1);
+            var mesh2 = Triangle.ComputeTriangleList(box6);
 
             var res = Intersection.MeshContainsMesh(mesh1, mesh2);
 
@@ -2675,7 +2677,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsBoxContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsBox(mesh, box2);
 
@@ -2684,7 +2686,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsBoxContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsBox(mesh, box3);
 
@@ -2693,7 +2695,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsBoxIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsBox(mesh, box4);
 
@@ -2702,7 +2704,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsBoxNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsBox(mesh, box5);
 
@@ -2712,7 +2714,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsFrustumContainsTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsFrustum(mesh, frustum2);
 
@@ -2721,7 +2723,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsFrustumContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+            var mesh = Triangle.ComputeTriangleList(box2);
 
             var res = Intersection.MeshContainsFrustum(mesh, frustum3);
 
@@ -2730,7 +2732,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsFrustumIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsFrustum(mesh, frustum4);
 
@@ -2739,11 +2741,37 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsFrustumNotIntersectedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(box1);
 
             var res = Intersection.MeshContainsFrustum(mesh, frustum5);
 
             Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [DataTestMethod()]
+        [DataRow(0f, 1f, false)]
+        [DataRow(0f, 0.5f, false)]
+        [DataRow(0f, 0f, true)]
+        [DataRow(0f, -1f, true)]
+        [DataRow(0f, -2f, true)]
+        [DataRow(0f, -3f, true)]
+        [DataRow(MathUtil.PiOverFour, 1f, false)]
+        [DataRow(MathUtil.PiOverFour, 0.5f, true)]
+        [DataRow(MathUtil.PiOverFour, 0f, true)]
+        [DataRow(MathUtil.PiOverFour, -1f, true)]
+        [DataRow(MathUtil.PiOverFour, -2f, true)]
+        [DataRow(MathUtil.PiOverFour, -3f, true)]
+        public void CyliderIntersectsPlaneOverTest(float planeAngle, float cylinderHeight, bool intersects)
+        {
+            float r = 1;
+            float h = 2;
+            var cylinder = new BoundingCylinder(Vector3.Up * (cylinderHeight + h * 0.5f), r, h);
+
+            var plane = new Plane(Vector3.Zero, Vector3.TransformNormal(Vector3.Up, Matrix.RotationX(planeAngle)));
+
+            var res = Intersection.CylinderIntersectsPlane(cylinder, plane);
+
+            Assert.AreEqual(intersects, res);
         }
     }
 }

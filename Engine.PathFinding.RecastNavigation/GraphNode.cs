@@ -7,7 +7,6 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 
     /// <summary>
     /// Graph node
@@ -18,17 +17,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets a graph node list from a navigation mesh
         /// </summary>
         /// <param name="mesh">Navigation mesh</param>
-        /// <returns>Returns graph node</returns>
-        public static IEnumerable<GraphNode> Build(NavMesh mesh)
+        /// <returns>Returns a list of graph nodes</returns>
+        public static List<GraphNode> FindAll(NavMesh mesh)
         {
-            List<GraphNode> nodes = new List<GraphNode>();
+            List<GraphNode> nodes = [];
 
             if (mesh.TileCache != null)
             {
                 var tileHeaders = mesh.TileCache
                     .GetTiles()
                     .Select(tile => tile.Header)
-                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC)
+                    .Where(header => header.IsValid())
                     .ToArray();
 
                 foreach (var header in tileHeaders)
@@ -39,142 +38,177 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    nodes.AddRange(BuildNodes(mesh, tile));
+                    nodes.AddRange(FindAllNodes(mesh, tile));
                 }
             }
             else
             {
-                for (int i = 0; i < mesh.MaxTiles; ++i)
-                {
-                    var tile = mesh.Tiles[i];
-                    if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
-                    {
-                        continue;
-                    }
+                var tiles = mesh.Tiles
+                    .Take(mesh.MaxTiles)
+                    .Where(tile => tile.Header.IsValid())
+                    .ToArray();
 
-                    nodes.AddRange(BuildNodes(mesh, tile));
+                foreach (var tile in tiles)
+                {
+                    nodes.AddRange(FindAllNodes(mesh, tile));
                 }
             }
 
             return nodes;
         }
         /// <summary>
-        /// Build graph nodes from tile
+        /// Gets a graph nodes from tile
         /// </summary>
         /// <param name="mesh">Navigation mesh</param>
         /// <param name="tile">Tile</param>
         /// <returns>Returns a list of graph nodes</returns>
-        private static IEnumerable<GraphNode> BuildNodes(NavMesh mesh, MeshTile tile)
+        private static List<GraphNode> FindAllNodes(NavMesh mesh, MeshTile tile)
         {
-            List<GraphNode> nodes = new List<GraphNode>();
+            List<GraphNode> nodes = [];
 
-            var polys = tile.GetPolys();
+            var bse = mesh.GetTileRef(tile);
+            int tileNum = mesh.DecodePolyIdTile(bse);
+
+            var polys = tile
+                .GetPolys()
+                .Where(p => p.Type != PolyTypes.OffmeshConnection)
+                .ToArray();
+
+            var tris = polys.SelectMany(tile.GetDetailTris);
+
+            nodes.Add(new()
+            {
+                Id = tileNum,
+                Triangles = [.. tris],
+                TotalCost = 1,
+            });
+
+            return nodes;
+        }
+        /// <summary>
+        /// Finds the graph node which contains the specified point, from a navigation mesh
+        /// </summary>
+        /// <param name="mesh">Navigation mesh</param>
+        /// <returns>Returns a graph node</returns>
+        public static GraphNode FindNode(NavMesh mesh, Vector3 point)
+        {
+            if (mesh.TileCache != null)
+            {
+                var tileHeaders = mesh.TileCache
+                    .GetTiles()
+                    .Select(tile => tile.Header)
+                    .Where(header => header.IsValid());
+
+                foreach (var header in tileHeaders)
+                {
+                    var tile = mesh.GetTileAt(header.TX, header.TY, header.TLayer);
+                    if (tile == null)
+                    {
+                        continue;
+                    }
+
+                    var node = FindNode(mesh, tile, point);
+                    if (node != null)
+                    {
+                        return node;
+                    }
+                }
+            }
+            else
+            {
+                var tiles = mesh.Tiles
+                    .Take(mesh.MaxTiles)
+                    .Where(tile => tile.Header.IsValid());
+
+                foreach (var tile in tiles)
+                {
+                    var node = FindNode(mesh, tile, point);
+                    if (node != null)
+                    {
+                        return node;
+                    }
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Finds the graph node which contains the specified point, from tile
+        /// </summary>
+        /// <param name="mesh">Navigation mesh</param>
+        /// <param name="tile">Tile</param>
+        /// <returns>Returns a graph node</returns>
+        private static GraphNode FindNode(NavMesh mesh, MeshTile tile, Vector3 point)
+        {
+            var bse = mesh.GetTileRef(tile);
+            int tileNum = mesh.DecodePolyIdTile(bse);
+
+            var polys = tile
+                .GetPolys()
+                .Where(p => p.Type != PolyTypes.OffmeshConnection)
+                .ToArray();
+
+            List<Triangle> tris = [];
+
             foreach (var p in polys)
             {
-                if (p.Type == PolyTypes.OffmeshConnection)
+                var dtris = tile.GetDetailTris(p);
+
+                if (!Intersection.PointInMesh(point, dtris))
                 {
                     continue;
                 }
 
-                var bse = mesh.GetTileRef(tile);
-
-                int tileNum = mesh.DecodePolyIdTile(bse);
-                var tileColor = IntToCol(tileNum, 128);
-
-                var tris = tile.GetDetailTris(p);
-
-                nodes.Add(new GraphNode()
-                {
-                    Triangles = tris.ToArray(),
-                    TotalCost = 1,
-                    Color = tileColor,
-                });
+                tris.AddRange(dtris);
             }
 
-            return nodes.ToArray();
-        }
-        /// <summary>
-        /// Bitwise secret wisdoms
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static int Bit(int a, int b)
-        {
-            return (a & (1 << b)) >> b;
-        }
-        /// <summary>
-        /// Converts an integer value to Color4
-        /// </summary>
-        /// <param name="value">Integer value</param>
-        /// <param name="alpha">Alpha value from 0 to 255</param>
-        /// <returns>Returns the Color4 value</returns>
-        public static Color4 IntToCol(int value, int alpha)
-        {
-            int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;
-            int g = Bit(value, 1) + Bit(value, 4) * 2 + 1;
-            int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
-
-            return new Color4(
-                1 - r * 63.0f / 255.0f,
-                1 - g * 63.0f / 255.0f,
-                1 - b * 63.0f / 255.0f,
-                alpha / 255.0f);
+            return new()
+            {
+                Id = tileNum,
+                Triangles = tris,
+                TotalCost = 1,
+            };
         }
 
-        /// <summary>
-        /// Node triangle list
-        /// </summary>
-        public IEnumerable<Triangle> Triangles { get; private set; }
-        /// <summary>
-        /// Center point
-        /// </summary>
+        /// <inheritdoc/>
+        public int Id { get; set; }
+        /// <inheritdoc/>
+        public float TotalCost { get; set; }
+        /// <inheritdoc/>
         public Vector3 Center
         {
             get
             {
                 Vector3 center = Vector3.Zero;
 
-                foreach (var tri in Triangles)
+                foreach (var pos in Triangles.Select(tri => tri.GetCenter()))
                 {
-                    center += tri.Center;
+                    center += pos;
                 }
 
                 return center / Math.Max(1, Triangles.Count());
             }
         }
         /// <summary>
-        /// Node color
+        /// Node triangle list
         /// </summary>
-        public Color4 Color { get; set; }
-        /// <summary>
-        /// Total cost
-        /// </summary>
-        public float TotalCost { get; set; }
+        public IEnumerable<Triangle> Triangles { get; private set; }
 
-        /// <summary>
-        /// Gets if the node contains the specified node
-        /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns true if the current node contains the specified point</returns>
+        /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
             return Intersection.PointInMesh(point, Triangles);
         }
-        /// <summary>
-        /// Gets node points (triangle list)
-        /// </summary>
-        /// <returns>Returns the node point list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()
         {
-            List<Vector3> vList = new List<Vector3>();
+            return Triangles.SelectMany(t => t.GetVertices());
+        }
 
-            foreach (var tri in Triangles)
-            {
-                vList.AddRange(tri.GetVertices());
-            }
-
-            return vList.ToArray();
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Center: {Center}; Cost: {TotalCost:0.00}";
         }
     }
 }

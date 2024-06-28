@@ -6,69 +6,76 @@ namespace Engine
     using Engine.Common;
 
     /// <summary>
-    /// Camera 3D
+    /// 3D Camera
     /// </summary>
-    public class Camera : IManipulator, IIntersectable, IHasGameState, IDisposable
+    public class Camera : ITransform, IIntersectable, IHasGameState, IDisposable
     {
+        /// <summary>
+        /// Creates a free camera
+        /// </summary>
+        /// <param name="position">Viewer position</param>
+        /// <param name="interest">Interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns the new camera</returns>
+        public static Camera CreateFree(Vector3 position, Vector3 interest, int width, int height)
+        {
+            var cam = new Camera();
+
+            cam.SetFree(position, interest, width, height);
+
+            return cam;
+        }
         /// <summary>
         /// Creates an isometric camera
         /// </summary>
         /// <param name="axis">Isometric axis</param>
         /// <param name="interest">Interest point</param>
         /// <param name="distance">Distance from viewer to interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public static Camera CreateIsometric(IsometricAxis axis, Vector3 interest, float distance)
+        public static Camera CreateIsometric(IsometricAxis axis, Vector3 interest, float distance, int width, int height)
         {
-            Camera cam = new Camera();
+            var cam = new Camera();
 
-            cam.SetIsometric(axis, interest, distance);
+            cam.SetIsometric(axis, interest, distance, width, height);
 
             return cam;
-        }
-        /// <summary>
-        /// Creates a free camera
-        /// </summary>
-        /// <param name="position">Viewer position</param>
-        /// <param name="interest">Interest point</param>
-        /// <returns>Returns the new camera</returns>
-        public static Camera CreateFree(Vector3 position, Vector3 interest)
-        {
-            return new Camera
-            {
-                mode = CameraModes.Free,
-                position = position,
-                interest = interest
-            };
         }
         /// <summary>
         /// Creates 2D camera
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="interest">Interest</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
         /// <returns>Returns new 2D camera</returns>
         public static Camera CreateOrtho(Vector3 position, Vector3 interest, int width, int height)
         {
-            Camera camera = new Camera
-            {
-                Position = position,
-                Interest = interest
-            };
+            var cam = new Camera();
 
-            camera.SetLens(width, height);
+            cam.SetOrtho(position, interest, width, height);
 
-            return camera;
+            return cam;
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="area">Area of interest (extents of a bounding box)</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public static Camera CreateOrtho(BoundingBox area, float nearPlane, float width, float height)
+        {
+            var cam = new Camera();
+
+            cam.SetOrtho(area, nearPlane, width, height);
+
+            return cam;
         }
 
-        /// <summary>
-        /// Position
-        /// </summary>
-        private Vector3 position;
-        /// <summary>
-        /// Interest
-        /// </summary>
-        private Vector3 interest;
         /// <summary>
         /// Field of view angle
         /// </summary>
@@ -99,161 +106,30 @@ namespace Engine
         private CameraModes mode;
 
         /// <summary>
-        /// Forward vector
+        /// Velocity
         /// </summary>
-        public Vector3 Forward
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return isoMetricForward;
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return Vector3.Normalize(Interest - Position);
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    var v = Interest - Position;
+        private Vector3 velocity;
+        /// <summary>
+        /// Position
+        /// </summary>
+        private Vector3 position;
+        /// <summary>
+        /// Interest
+        /// </summary>
+        private Vector3 interest;
 
-                    return Vector3.Normalize(new Vector3(v.X, 0, v.Z));
-                }
-                else
-                {
-                    return Vector3.Normalize(Interest - Position);
-                }
-            }
-        }
         /// <summary>
-        /// Backward vector
+        /// Next position
         /// </summary>
-        public Vector3 Backward
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return isoMetricBackward;
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return -Forward;
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    return -Forward;
-                }
-                else
-                {
-                    return -Forward;
-                }
-            }
-        }
+        private Vector3 nextPosition;
         /// <summary>
-        /// Left vector
+        /// Next interest
         /// </summary>
-        public Vector3 Left
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return isoMetricLeft;
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return Vector3.Cross(Forward, Vector3.Up);
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    return Vector3.Cross(Forward, Vector3.Up);
-                }
-                else
-                {
-                    return Vector3.Cross(Forward, Vector3.Up);
-                }
-            }
-        }
+        private Vector3 nextInterest;
         /// <summary>
-        /// Right vector
+        /// Update needed flag
         /// </summary>
-        public Vector3 Right
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return isoMetricRight;
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return -Left;
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    return -Left;
-                }
-                else
-                {
-                    return -Left;
-                }
-            }
-        }
-        /// <summary>
-        /// Up vector
-        /// </summary>
-        public Vector3 Up
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return new Vector3(0f, 1f, 0f);
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return Vector3.Cross(Left, Forward);
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    return Vector3.Up;
-                }
-                else
-                {
-                    return Vector3.Cross(Left, Forward);
-                }
-            }
-        }
-        /// <summary>
-        /// Down vector
-        /// </summary>
-        public Vector3 Down
-        {
-            get
-            {
-                if (mode == CameraModes.FreeIsometric)
-                {
-                    return new Vector3(0f, -1f, 0f);
-                }
-                else if (mode == CameraModes.Free)
-                {
-                    return -Up;
-                }
-                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
-                {
-                    return -Up;
-                }
-                else
-                {
-                    return -Up;
-                }
-            }
-        }
-        /// <summary>
-        /// Velocity vector
-        /// </summary>
-        public Vector3 Velocity { get; private set; }
+        private bool updateNeeded = false;
 
         #region Isometric
 
@@ -262,21 +138,25 @@ namespace Engine
         /// </summary>
         private IsometricAxis isometricAxis = IsometricAxis.NW;
         /// <summary>
+        /// Isometric distance to interest
+        /// </summary>
+        private float isometricDistanceToInterest = 50f;
+        /// <summary>
         /// Isometric current forward
         /// </summary>
-        private Vector3 isoMetricForward = new Vector3(-1f, 0f, -1f);
+        private Vector3 isoMetricForward = new(-1f, 0f, -1f);
         /// <summary>
         /// Isometric current backward
         /// </summary>
-        private Vector3 isoMetricBackward = new Vector3(1f, 0f, 1f);
+        private Vector3 isoMetricBackward = new(1f, 0f, 1f);
         /// <summary>
         /// Isometric current left
         /// </summary>
-        private Vector3 isoMetricLeft = new Vector3(1f, 0f, -1f);
+        private Vector3 isoMetricLeft = new(1f, 0f, -1f);
         /// <summary>
         /// Isometric current right
         /// </summary>
-        private Vector3 isoMetricRight = new Vector3(-1f, 0f, 1f);
+        private Vector3 isoMetricRight = new(-1f, 0f, 1f);
 
         #endregion
 
@@ -305,6 +185,219 @@ namespace Engine
 
         #endregion
 
+        /// <inheritdoc/>
+        public Vector3 Velocity
+        {
+            get
+            {
+                return velocity;
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>Point of view</remarks>
+        public Vector3 Position
+        {
+            get
+            {
+                return position;
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>Rotation quaternion of direction from up vector</remarks>
+        public Quaternion Rotation
+        {
+            get
+            {
+                return Helper.RotateFromDirection(Direction, Up);
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>Scale is always one</remarks>
+        public Vector3 Scaling
+        {
+            get
+            {
+                return Vector3.One;
+            }
+        }
+        /// <summary>
+        /// Camera interest
+        /// </summary>
+        public Vector3 Interest
+        {
+            get
+            {
+                return interest;
+            }
+        }
+        /// <summary>
+        /// Camera direction
+        /// </summary>
+        public Vector3 Direction
+        {
+            get
+            {
+                return Vector3.Normalize(interest - position);
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Forward
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return isoMetricForward;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Direction;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    var dir = Direction;
+
+                    return Vector3.Normalize(new Vector3(dir.X, 0, dir.Z));
+                }
+                else
+                {
+                    return Direction;
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Backward
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return isoMetricBackward;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -Forward;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -Forward;
+                }
+                else
+                {
+                    return -Forward;
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Left
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return isoMetricLeft;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Vector3.Cross(Forward, Vector3.Up);
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return Vector3.Cross(Forward, Vector3.Up);
+                }
+                else
+                {
+                    return Vector3.Cross(Forward, Vector3.Up);
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Right
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return isoMetricRight;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -Left;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -Left;
+                }
+                else
+                {
+                    return -Left;
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Up
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return new Vector3(0f, 1f, 0f);
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Vector3.Cross(Left, Forward);
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return Vector3.Up;
+                }
+                else
+                {
+                    return Vector3.Cross(Left, Forward);
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Down
+        {
+            get
+            {
+                if (mode == CameraModes.FreeIsometric)
+                {
+                    return new Vector3(0f, -1f, 0f);
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -Up;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -Up;
+                }
+                else
+                {
+                    return -Up;
+                }
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>The view * projection transform</remarks>
+        public Matrix LocalTransform
+        {
+            get
+            {
+                return ViewProjection;
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>The view * projection transform</remarks>
+        public Matrix GlobalTransform
+        {
+            get
+            {
+                return ViewProjection;
+            }
+        }
         /// <summary>
         /// Gets or sets camera mode
         /// </summary>
@@ -316,11 +409,16 @@ namespace Engine
             }
             set
             {
+                if (mode == value)
+                {
+                    return;
+                }
+
                 mode = value;
 
                 if (mode == CameraModes.FreeIsometric)
                 {
-                    SetIsometric(IsometricAxis.SE, Vector3.Zero, ZoomMin * 2f);
+                    SetIsometric(isometricAxis, interest, isometricDistanceToInterest);
                 }
                 else if (mode == CameraModes.Free)
                 {
@@ -328,46 +426,8 @@ namespace Engine
                 }
                 else if (mode == CameraModes.Ortho)
                 {
-                    SetOrtho();
+                    SetOrtho(position, interest);
                 }
-            }
-        }
-        /// <summary>
-        /// Camera viewer position
-        /// </summary>
-        public Vector3 Position
-        {
-            get
-            {
-                return Following?.Position ?? position;
-            }
-            set
-            {
-                position = value;
-            }
-        }
-        /// <summary>
-        /// Camera interest
-        /// </summary>
-        public Vector3 Interest
-        {
-            get
-            {
-                return Following?.Interest ?? interest;
-            }
-            set
-            {
-                interest = value;
-            }
-        }
-        /// <summary>
-        /// Camera direction
-        /// </summary>
-        public Vector3 Direction
-        {
-            get
-            {
-                return Vector3.Normalize(Interest - Position);
             }
         }
         /// <summary>
@@ -475,6 +535,10 @@ namespace Engine
         /// </summary>
         public Matrix Projection { get; private set; }
         /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        public Matrix ViewProjection { get; private set; }
+        /// <summary>
         /// Camera frustum
         /// </summary>
         public BoundingFrustum Frustum { get; private set; }
@@ -499,12 +563,9 @@ namespace Engine
             position = Vector3.One;
             interest = Vector3.Zero;
 
-            View = Matrix.LookAtLH(
-                position,
-                interest,
-                Vector3.UnitY);
-
+            View = Matrix.LookAtLH(position, interest, Vector3.UnitY);
             Projection = Matrix.Identity;
+            ViewProjection = View * Projection;
 
             InvertY = false;
         }
@@ -516,9 +577,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -548,282 +607,23 @@ namespace Engine
             UpdateLens();
         }
         /// <summary>
-        /// Updates camera state
+        /// Sets dimensions of viewport
         /// </summary>
-        public void Update(GameTime gameTime)
+        /// <param name="width">Viewport width</param>
+        /// <param name="height">Viewport height</param>
+        /// <param name="area">Area of interest</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        public void SetLens(float width, float height, BoundingBox area, float nearPlane)
         {
-            Velocity = Vector3.Zero;
+            aspectRelation = height / width;
 
-            Following?.Update(gameTime);
+            var extents = area.Size;
+            viewportWidth = extents.X / aspectRelation;
+            viewportHeight = extents.Z;
+            nearPlaneDistance = nearPlane;
+            farPlaneDistance = extents.Y + nearPlane;
 
-            UpdateTranslations(gameTime);
-
-            if (mode == CameraModes.Ortho)
-            {
-                View = Matrix.LookAtLH(
-                    Position,
-                    Interest,
-                    Vector3.UnitZ);
-            }
-            else
-            {
-                View = Matrix.LookAtLH(
-                    Position,
-                    Interest,
-                    Vector3.UnitY);
-            }
-
-            Frustum = new BoundingFrustum(View * Projection);
-        }
-        /// <summary>
-        /// Sets previous isometrix axis
-        /// </summary>
-        public void PreviousIsometricAxis()
-        {
-            if (mode == CameraModes.FreeIsometric)
-            {
-                int current = (int)isometricAxis;
-                int previous;
-
-                if (current <= 0)
-                {
-                    previous = 3;
-                }
-                else
-                {
-                    previous = current - 1;
-                }
-
-                SetIsometric((IsometricAxis)previous, Interest, Vector3.Distance(Position, Interest));
-            }
-        }
-        /// <summary>
-        /// Sets next isometrix axis
-        /// </summary>
-        public void NextIsometricAxis()
-        {
-            if (mode == CameraModes.FreeIsometric)
-            {
-                int current = (int)isometricAxis;
-                int next;
-
-                if (current >= 3)
-                {
-                    next = 0;
-                }
-                else
-                {
-                    next = current + 1;
-                }
-
-                SetIsometric((IsometricAxis)next, Interest, Vector3.Distance(Position, Interest));
-            }
-        }
-        /// <summary>
-        /// Move forward
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveForward(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Forward, slow);
-        }
-        /// <summary>
-        /// Move backward
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveBackward(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Backward, slow);
-        }
-        /// <summary>
-        /// Move left
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveLeft(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Left, slow);
-        }
-        /// <summary>
-        /// Move right
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveRight(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Right, slow);
-        }
-        /// <summary>
-        /// Move up
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveUp(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Up, slow);
-        }
-        /// <summary>
-        /// Move down
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void MoveDown(GameTime gameTime, bool slow)
-        {
-            Move(gameTime, Down, slow);
-        }
-        /// <summary>
-        /// Rotate up
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void RotateUp(GameTime gameTime, bool slow)
-        {
-            Rotate(gameTime, Left, slow);
-        }
-        /// <summary>
-        /// Rotate down
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void RotateDown(GameTime gameTime, bool slow)
-        {
-            Rotate(gameTime, Right, slow);
-        }
-        /// <summary>
-        /// Rotate left
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void RotateLeft(GameTime gameTime, bool slow)
-        {
-            Rotate(gameTime, Down, slow);
-        }
-        /// <summary>
-        /// Rotate right
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void RotateRight(GameTime gameTime, bool slow)
-        {
-            Rotate(gameTime, Up, slow);
-        }
-        /// <summary>
-        /// Rotate camera by mouse
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="deltaX">X mouse delta</param>
-        /// <param name="deltaY">Y mouse delta</param>
-        public void RotateMouse(GameTime gameTime, float deltaX, float deltaY)
-        {
-            if (deltaX != 0f)
-            {
-                Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
-            }
-            if (deltaY != 0f)
-            {
-                if (InvertY) deltaY = -deltaY;
-
-                Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
-            }
-        }
-        /// <summary>
-        /// Zoom in
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void ZoomIn(GameTime gameTime, bool slow)
-        {
-            Zoom(gameTime, true, slow);
-        }
-        /// <summary>
-        /// Zoom out
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="slow">Slow movement</param>
-        public void ZoomOut(GameTime gameTime, bool slow)
-        {
-            Zoom(gameTime, false, slow);
-        }
-
-        /// <summary>
-        /// Sets camera to free mode
-        /// </summary>
-        /// <param name="newPosition">New position</param>
-        /// <param name="newInterest">New interest point</param>
-        private void SetFree(Vector3 newPosition, Vector3 newInterest)
-        {
-            StopTranslations();
-
-            Position = newPosition;
-            Interest = newInterest;
-
-            mode = CameraModes.Free;
-        }
-        /// <summary>
-        /// Sets camera to isometric mode
-        /// </summary>
-        /// <param name="axis">Isometrix axis</param>
-        /// <param name="newInterest">Interest point</param>
-        /// <param name="distance">Distance to interest point from viewer point</param>
-        private void SetIsometric(IsometricAxis axis, Vector3 newInterest, float distance)
-        {
-            StopTranslations();
-
-            Vector3 tmpPosition = Vector3.Zero;
-
-            if (axis == IsometricAxis.NW)
-            {
-                tmpPosition = new Vector3(1, 1, 1);
-                isoMetricForward = new Vector3(-1f, 0f, -1f);
-                isoMetricBackward = new Vector3(1f, 0f, 1f);
-                isoMetricLeft = new Vector3(1f, 0f, -1f);
-                isoMetricRight = new Vector3(-1f, 0f, 1f);
-            }
-            else if (axis == IsometricAxis.NE)
-            {
-                tmpPosition = new Vector3(-1, 1, 1);
-                isoMetricForward = new Vector3(1f, 0f, -1f);
-                isoMetricBackward = new Vector3(-1f, 0f, 1f);
-                isoMetricLeft = new Vector3(1f, 0f, 1f);
-                isoMetricRight = new Vector3(-1f, 0f, -1f);
-            }
-            else if (axis == IsometricAxis.SW)
-            {
-                tmpPosition = new Vector3(1, 1, -1);
-                isoMetricForward = new Vector3(-1f, 0f, 1f);
-                isoMetricBackward = new Vector3(1f, 0f, -1f);
-                isoMetricLeft = new Vector3(-1f, 0f, -1f);
-                isoMetricRight = new Vector3(1f, 0f, 1f);
-            }
-            else if (axis == IsometricAxis.SE)
-            {
-                tmpPosition = new Vector3(-1, 1, -1);
-                isoMetricForward = new Vector3(1f, 0f, 1f);
-                isoMetricBackward = new Vector3(-1f, 0f, -1f);
-                isoMetricLeft = new Vector3(-1f, 0f, 1f);
-                isoMetricRight = new Vector3(1f, 0f, -1f);
-            }
-
-            mode = CameraModes.FreeIsometric;
-            isometricAxis = axis;
-
-            Position = Vector3.Normalize(tmpPosition) * distance;
-            Position += newInterest;
-            Interest = newInterest;
-        }
-        /// <summary>
-        /// Sets camero to ortho mode
-        /// </summary>
-        private void SetOrtho()
-        {
-            StopTranslations();
-
-            Position = Vector3.Up;
-            Interest = Vector3.Zero;
-
-            mode = CameraModes.Ortho;
+            UpdateLens();
         }
         /// <summary>
         /// Update projections
@@ -849,11 +649,580 @@ namespace Engine
         }
 
         /// <summary>
+        /// Updates camera state
+        /// </summary>
+        public void Update(IGameTime gameTime)
+        {
+            if (Following != null)
+            {
+                Following.Update(gameTime);
+                nextPosition = Following.Position;
+                nextInterest = Following.Interest;
+            }
+
+            UpdateTranslations(gameTime);
+
+            if (updateNeeded)
+            {
+                velocity = Vector3.Zero;
+                position = nextPosition;
+                interest = nextInterest;
+                updateNeeded = false;
+            }
+
+            var upVector = mode == CameraModes.Ortho ? Vector3.UnitZ : Vector3.UnitY;
+            View = Matrix.LookAtLH(position, interest, upVector);
+
+            ViewProjection = View * Projection;
+
+            Frustum = new BoundingFrustum(ViewProjection);
+        }
+        /// <summary>
+        /// Performs translation to target
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        private void UpdateTranslations(IGameTime gameTime)
+        {
+            if (translationMode == CameraTranslations.None)
+            {
+                return;
+            }
+
+            var diff = translationInterest - nextInterest;
+            var pos = nextPosition + diff;
+            var dir = pos - nextPosition;
+
+            float distanceToTarget = dir.Length();
+            float distanceThisMove = 0f;
+
+            if (translationMode == CameraTranslations.UseDelta)
+            {
+                distanceThisMove = MovementDelta * gameTime.ElapsedSeconds;
+            }
+            else if (translationMode == CameraTranslations.UseSlowDelta)
+            {
+                distanceThisMove = SlowMovementDelta * gameTime.ElapsedSeconds;
+            }
+            else if (translationMode == CameraTranslations.Quick)
+            {
+                distanceThisMove = distanceToTarget * translationOutOfRadius;
+            }
+
+            Vector3 movingVector;
+            if (distanceThisMove >= distanceToTarget)
+            {
+                //This movement goes beyond the destination.
+                movingVector = Vector3.Normalize(dir) * distanceToTarget * translationIntoRadius;
+            }
+            else if (distanceToTarget < translationRadius)
+            {
+                //Into slow radius
+                movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / translationRadius);
+            }
+            else
+            {
+                //On flight
+                movingVector = Vector3.Normalize(dir) * distanceThisMove;
+            }
+
+            if (movingVector != Vector3.Zero)
+            {
+                nextPosition += movingVector;
+                nextInterest += movingVector;
+
+                updateNeeded = true;
+            }
+
+            if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
+            {
+                StopTranslations();
+            }
+        }
+
+        /// <summary>
+        /// Sets previous isometrix axis
+        /// </summary>
+        public void PreviousIsometricAxis()
+        {
+            if (mode != CameraModes.FreeIsometric)
+            {
+                return;
+            }
+
+            int current = (int)isometricAxis;
+            int previous;
+
+            if (current <= 0)
+            {
+                previous = 3;
+            }
+            else
+            {
+                previous = current - 1;
+            }
+
+            SetIsometric((IsometricAxis)previous, interest, Vector3.Distance(position, interest));
+        }
+        /// <summary>
+        /// Sets next isometrix axis
+        /// </summary>
+        public void NextIsometricAxis()
+        {
+            if (mode != CameraModes.FreeIsometric)
+            {
+                return;
+            }
+
+            int current = (int)isometricAxis;
+            int next;
+
+            if (current >= 3)
+            {
+                next = 0;
+            }
+            else
+            {
+                next = current + 1;
+            }
+
+            SetIsometric((IsometricAxis)next, interest, Vector3.Distance(position, interest));
+        }
+
+        /// <summary>
+        /// Sets the camera position
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        public void SetPosition(float x, float y, float z)
+        {
+            nextPosition = new(x, y, z);
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void SetPosition(Vector3 position)
+        {
+            nextPosition = position;
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera point of interest
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        public void SetInterest(float x, float y, float z)
+        {
+            nextInterest = new(x, y, z);
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera point of interest
+        /// </summary>
+        /// <param name="interest">Point of interest</param>
+        public void SetInterest(Vector3 interest)
+        {
+            nextInterest = interest;
+            updateNeeded = true;
+        }
+
+        /// <summary>
+        /// Move forward
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveForward(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Forward, slow);
+        }
+        /// <summary>
+        /// Move backward
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveBackward(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Backward, slow);
+        }
+        /// <summary>
+        /// Move left
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveLeft(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Left, slow);
+        }
+        /// <summary>
+        /// Move right
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveRight(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Right, slow);
+        }
+        /// <summary>
+        /// Move up
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveUp(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Up, slow);
+        }
+        /// <summary>
+        /// Move down
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 MoveDown(IGameTime gameTime, bool slow)
+        {
+            return Move(gameTime, Down, slow);
+        }
+        /// <summary>
+        /// Movement
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="vector">Movement vector</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 Move(IGameTime gameTime, Vector3 vector, bool slow)
+        {
+            StopTranslations();
+
+            float delta = slow ? SlowMovementDelta : MovementDelta;
+
+            var nextVelocity = vector * delta * gameTime.ElapsedSeconds;
+            if (nextVelocity != Vector3.Zero)
+            {
+                nextPosition += nextVelocity;
+                nextInterest += nextVelocity;
+            }
+            updateNeeded = true;
+
+            return nextVelocity;
+        }
+        /// <summary>
+        /// Movement
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="slow">Slow movement</param>
+        public Vector3 Move(IGameTime gameTime, float x, float y, float z, bool slow)
+        {
+            return Move(gameTime, new(x, y, z), slow);
+        }
+
+        /// <summary>
+        /// Rotate up
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Quaternion RotateUp(IGameTime gameTime, bool slow)
+        {
+            return Rotate(gameTime, Left, slow);
+        }
+        /// <summary>
+        /// Rotate down
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Quaternion RotateDown(IGameTime gameTime, bool slow)
+        {
+            return Rotate(gameTime, Right, slow);
+        }
+        /// <summary>
+        /// Rotate left
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Quaternion RotateLeft(IGameTime gameTime, bool slow)
+        {
+            return Rotate(gameTime, Down, slow);
+        }
+        /// <summary>
+        /// Rotate right
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public Quaternion RotateRight(IGameTime gameTime, bool slow)
+        {
+            return Rotate(gameTime, Up, slow);
+        }
+        /// <summary>
+        /// Rotate camera by mouse
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="deltaX">X mouse delta</param>
+        /// <param name="deltaY">Y mouse delta</param>
+        public Quaternion RotateMouse(IGameTime gameTime, float deltaX, float deltaY)
+        {
+            Quaternion r = Quaternion.Identity;
+
+            r += Rotate(Up, gameTime.ElapsedSeconds * deltaX * 10f);
+
+            if (InvertY) deltaY = -deltaY;
+
+            r += Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
+
+            return r;
+        }
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="axis">Rotation axis</param>
+        /// <param name="slow">Slow movement</param>
+        private Quaternion Rotate(IGameTime gameTime, Vector3 axis, bool slow)
+        {
+            float degrees = slow ? SlowRotationDelta : RotationDelta;
+
+            return Rotate(axis, degrees * gameTime.ElapsedSeconds);
+        }
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        /// <param name="axis">Rotation axis</param>
+        /// <param name="degrees">Degrees</param>
+        /// <param name="clampY">Sets if the current roation must be clamped around the Y vector</param>
+        /// <param name="clampFrom">Clamp from angle in degrees</param>
+        /// <param name="clampTo">Clamp to angle in degrees</param>
+        private Quaternion Rotate(Vector3 axis, float degrees, bool clampY = false, float clampFrom = 0, float clampTo = 0)
+        {
+            StopTranslations();
+
+            //Smooth rotation
+            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
+            Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
+
+            Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
+            Vector3 newDir = Vector3.Transform(curDir, r);
+
+            if (clampY)
+            {
+                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
+                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
+                {
+                    nextInterest = nextPosition + newDir;
+                    updateNeeded = true;
+                }
+            }
+            else
+            {
+                nextInterest = nextPosition + newDir;
+                updateNeeded = true;
+            }
+
+            return r;
+        }
+
+        /// <summary>
+        /// Zoom in
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public float ZoomIn(IGameTime gameTime, bool slow)
+        {
+            return Zoom(gameTime, true, slow);
+        }
+        /// <summary>
+        /// Zoom out
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public float ZoomOut(IGameTime gameTime, bool slow)
+        {
+            return Zoom(gameTime, false, slow);
+        }
+        /// <summary>
+        /// Zoom
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="zoomIn">True if camera goes in. False otherwise</param>
+        /// <param name="slow">Slow movement</param>
+        private float Zoom(IGameTime gameTime, bool zoomIn, bool slow)
+        {
+            StopTranslations();
+
+            float delta = slow ? SlowZoomDelta : ZoomDelta;
+            float zooming = zoomIn ? +delta : -delta;
+
+            if (MathUtil.IsZero(zooming))
+            {
+                return 0;
+            }
+
+            float s = gameTime.ElapsedSeconds;
+
+            var dir = Vector3.Normalize(nextInterest - nextPosition);
+            var newPosition = nextPosition + (dir * zooming * s);
+
+            float distance = Vector3.Distance(newPosition, nextInterest);
+            if (distance < ZoomMax && distance > ZoomMin)
+            {
+                nextPosition = newPosition;
+                updateNeeded = true;
+
+                return distance;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Creates a free camera
+        /// </summary>
+        /// <param name="position">Viewer position</param>
+        /// <param name="interest">Interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns the new camera</returns>
+        public void SetFree(Vector3 position, Vector3 interest, int width, int height)
+        {
+            SetFree(position, interest);
+            SetLens(width, height);
+        }
+        /// <summary>
+        /// Sets camera to free mode
+        /// </summary>
+        /// <param name="newPosition">New position</param>
+        /// <param name="newInterest">New interest point</param>
+        private void SetFree(Vector3 newPosition, Vector3 newInterest)
+        {
+            StopTranslations();
+
+            nextPosition = newPosition;
+            nextInterest = newInterest;
+            updateNeeded = true;
+
+            mode = CameraModes.Free;
+        }
+        /// <summary>
+        /// Creates an isometric camera
+        /// </summary>
+        /// <param name="axis">Isometric axis</param>
+        /// <param name="interest">Interest point</param>
+        /// <param name="distance">Distance from viewer to interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns the new camera</returns>
+        public void SetIsometric(IsometricAxis axis, Vector3 interest, float distance, int width, int height)
+        {
+            SetIsometric(axis, interest, distance);
+            SetLens(width, height);
+        }
+        /// <summary>
+        /// Sets camera to isometric mode
+        /// </summary>
+        /// <param name="axis">Isometrix axis</param>
+        /// <param name="newInterest">Interest point</param>
+        /// <param name="distanceToInterest">Distance to interest point from viewer point</param>
+        private void SetIsometric(IsometricAxis axis, Vector3 newInterest, float distanceToInterest)
+        {
+            StopTranslations();
+
+            Vector3 camPosition = Vector3.Zero;
+
+            if (axis == IsometricAxis.NW)
+            {
+                camPosition = new Vector3(1, 1, 1);
+                isoMetricForward = new Vector3(-1f, 0f, -1f);
+                isoMetricBackward = new Vector3(1f, 0f, 1f);
+                isoMetricLeft = new Vector3(1f, 0f, -1f);
+                isoMetricRight = new Vector3(-1f, 0f, 1f);
+            }
+            else if (axis == IsometricAxis.NE)
+            {
+                camPosition = new Vector3(-1, 1, 1);
+                isoMetricForward = new Vector3(1f, 0f, -1f);
+                isoMetricBackward = new Vector3(-1f, 0f, 1f);
+                isoMetricLeft = new Vector3(1f, 0f, 1f);
+                isoMetricRight = new Vector3(-1f, 0f, -1f);
+            }
+            else if (axis == IsometricAxis.SW)
+            {
+                camPosition = new Vector3(1, 1, -1);
+                isoMetricForward = new Vector3(-1f, 0f, 1f);
+                isoMetricBackward = new Vector3(1f, 0f, -1f);
+                isoMetricLeft = new Vector3(-1f, 0f, -1f);
+                isoMetricRight = new Vector3(1f, 0f, 1f);
+            }
+            else if (axis == IsometricAxis.SE)
+            {
+                camPosition = new Vector3(-1, 1, -1);
+                isoMetricForward = new Vector3(1f, 0f, 1f);
+                isoMetricBackward = new Vector3(-1f, 0f, -1f);
+                isoMetricLeft = new Vector3(-1f, 0f, 1f);
+                isoMetricRight = new Vector3(1f, 0f, -1f);
+            }
+
+            mode = CameraModes.FreeIsometric;
+            isometricAxis = axis;
+            isometricDistanceToInterest = distanceToInterest;
+
+            nextPosition = Vector3.Normalize(camPosition) * isometricDistanceToInterest;
+            nextPosition += newInterest;
+            nextInterest = newInterest;
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="interest">Interest</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public void SetOrtho(Vector3 position, Vector3 interest, int width, int height)
+        {
+            SetOrtho(position, interest);
+            SetLens(width, height);
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="area">Area of interest (extents of a bounding box)</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public void SetOrtho(BoundingBox area, float nearPlane, float width, float height)
+        {
+            //Sets the position over the maximum area height, plus the near plane distance
+            var eyePosition = new Vector3(0, area.Size.Y + nearPlane, 0);
+            var eyeInterest = Vector3.Zero;
+
+            SetOrtho(eyePosition, eyeInterest);
+            SetLens(width, height, area, nearPlane);
+        }
+        /// <summary>
+        /// Sets camero to ortho mode
+        /// </summary>
+        /// <param name="newPosition">New position</param>
+        /// <param name="newInterest">New interest point</param>
+        private void SetOrtho(Vector3 newPosition, Vector3 newInterest)
+        {
+            StopTranslations();
+
+            nextPosition = newPosition;
+            nextInterest = newInterest;
+            updateNeeded = true;
+
+            mode = CameraModes.Ortho;
+        }
+
+        /// <summary>
         /// Move camera to position
         /// </summary>
-        /// <param name="x">X position component</param>
-        /// <param name="y">Y position component</param>
-        /// <param name="z">Z position component</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
         /// <param name="translation">Translation mode</param>
         public void Goto(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {
@@ -866,26 +1235,27 @@ namespace Engine
         /// <param name="translation">Translation mode</param>
         public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
         {
-            Vector3 diff = newPosition - Position;
+            var diff = newPosition - nextPosition;
 
             if (translation != CameraTranslations.None)
             {
-                StartTranslations(translation, Interest + diff);
+                StartTranslations(translation, nextInterest + diff);
             }
             else
             {
                 StopTranslations();
 
-                Position += diff;
-                Interest += diff;
+                nextPosition += diff;
+                nextInterest += diff;
+                updateNeeded = true;
             }
         }
         /// <summary>
         /// Center camera in new interest
         /// </summary>
-        /// <param name="x">X position component</param>
-        /// <param name="y">Y position component</param>
-        /// <param name="z">Z position component</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="z">Z coordinate</param>
         /// <param name="translation">Translation mode</param>
         public void LookTo(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {
@@ -908,104 +1278,16 @@ namespace Engine
 
                 if (mode == CameraModes.FreeIsometric)
                 {
-                    Vector3 diff = newInterest - Interest;
+                    var diff = newInterest - nextInterest;
 
-                    Position += diff;
-                    Interest += diff;
+                    nextPosition += diff;
+                    nextInterest += diff;
+                    updateNeeded = true;
                 }
                 else
                 {
-                    Interest = newInterest;
-                }
-            }
-        }
-        /// <summary>
-        /// Movement
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="vector">Movement vector</param>
-        /// <param name="slow">Slow movement</param>
-        public void Move(GameTime gameTime, Vector3 vector, bool slow)
-        {
-            StopTranslations();
-
-            float delta = (slow) ? SlowMovementDelta : MovementDelta;
-
-            Velocity = vector * delta * gameTime.ElapsedSeconds;
-            if (Velocity != Vector3.Zero)
-            {
-                Position += Velocity;
-                Interest += Velocity;
-            }
-        }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="axis">Rotation axis</param>
-        /// <param name="slow">Slow movement</param>
-        private void Rotate(GameTime gameTime, Vector3 axis, bool slow)
-        {
-            float degrees = (slow) ? SlowRotationDelta : RotationDelta;
-
-            Rotate(axis, degrees * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        /// <param name="axis">Rotation axis</param>
-        /// <param name="degrees">Degrees</param>
-        /// <param name="clampY">Sets if the current roation must be clamped around the Y vector</param>
-        /// <param name="clampFrom">Clamp from angle in degrees</param>
-        /// <param name="clampTo">Clamp to angle in degrees</param>
-        private void Rotate(Vector3 axis, float degrees, bool clampY = false, float clampFrom = 0, float clampTo = 0)
-        {
-            StopTranslations();
-
-            //Smooth rotation
-            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
-            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
-            Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
-
-            Vector3 curDir = Vector3.Normalize(Interest - Position);
-            Vector3 newDir = Vector3.Transform(curDir, r);
-
-            if (clampY)
-            {
-                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
-                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
-                {
-                    Interest = position + newDir;
-                }
-            }
-            else
-            {
-                Interest = position + newDir;
-            }
-        }
-        /// <summary>
-        /// Zoom
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="zoomIn">True if camera goes in. False otherwise</param>
-        /// <param name="slow">Slow movement</param>
-        private void Zoom(GameTime gameTime, bool zoomIn, bool slow)
-        {
-            StopTranslations();
-
-            float delta = (slow) ? SlowZoomDelta : ZoomDelta;
-            float zooming = (zoomIn) ? +delta : -delta;
-
-            if (zooming != 0f)
-            {
-                float s = gameTime.ElapsedSeconds;
-
-                Vector3 newPosition = Position + (Direction * zooming * s);
-
-                float distance = Vector3.Distance(newPosition, Interest);
-                if (distance < ZoomMax && distance > ZoomMin)
-                {
-                    Position = newPosition;
+                    nextInterest = newInterest;
+                    updateNeeded = true;
                 }
             }
         }
@@ -1025,79 +1307,26 @@ namespace Engine
         /// </summary>
         private void StopTranslations()
         {
-            if (translationMode != CameraTranslations.None)
-            {
-                translationMode = CameraTranslations.None;
-                translationInterest = Vector3.Zero;
-            }
+            translationMode = CameraTranslations.None;
+            translationInterest = Vector3.Zero;
         }
+
         /// <summary>
-        /// Performs translation to target
+        /// Gets the next position in the frame
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="newInterest">New interest</param>
-        /// <param name="radius">Radius to decelerate</param>
-        /// <param name="slow">Slow</param>
-        private void UpdateTranslations(GameTime gameTime)
+        public Vector3 GetNextPosition()
         {
-            if (translationMode != CameraTranslations.None)
-            {
-                Vector3 diff = translationInterest - Interest;
-                Vector3 pos = Position + diff;
-                Vector3 dir = pos - Position;
-
-                float distanceToTarget = dir.Length();
-                float distanceThisMove = 0f;
-
-                if (translationMode == CameraTranslations.UseDelta)
-                {
-                    distanceThisMove = MovementDelta * gameTime.ElapsedSeconds;
-                }
-                else if (translationMode == CameraTranslations.UseSlowDelta)
-                {
-                    distanceThisMove = SlowMovementDelta * gameTime.ElapsedSeconds;
-                }
-                else if (translationMode == CameraTranslations.Quick)
-                {
-                    distanceThisMove = distanceToTarget * translationOutOfRadius;
-                }
-
-                Vector3 movingVector;
-                if (distanceThisMove >= distanceToTarget)
-                {
-                    //This movement goes beyond the destination.
-                    movingVector = Vector3.Normalize(dir) * distanceToTarget * translationIntoRadius;
-                }
-                else if (distanceToTarget < translationRadius)
-                {
-                    //Into slow radius
-                    movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / translationRadius);
-                }
-                else
-                {
-                    //On flight
-                    movingVector = Vector3.Normalize(dir) * distanceThisMove;
-                }
-
-                if (movingVector != Vector3.Zero)
-                {
-                    Position += movingVector;
-                    Interest += movingVector;
-                }
-
-                if (Vector3.NearEqual(Interest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
-                {
-                    StopTranslations();
-                }
-            }
+            return nextPosition;
+        }
+        /// <summary>
+        /// Gets the next interest in the frame
+        /// </summary>
+        public Vector3 GetNextInterest()
+        {
+            return nextInterest;
         }
 
-        /// <summary>
-        /// Gets whether the sphere intersects with the current object
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="result">Picking results</param>
-        /// <returns>Returns true if intersects</returns>
+        /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
@@ -1105,7 +1334,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var bsph = new BoundingSphere(position, Math.Max(1f, CameraRadius));
+            var bsph = new BoundingSphere(position, MathF.Max(1f, CameraRadius));
             if (bsph.Intersects(sphere))
             {
                 float distance = Vector3.Distance(position, sphere.Position);
@@ -1118,46 +1347,25 @@ namespace Engine
 
             return false;
         }
-
-        /// <summary>
-        /// Gets whether the actual object have intersection with the intersectable or not
-        /// </summary>
-        /// <param name="detectionModeThis">Detection mode for this object</param>
-        /// <param name="other">Other intersectable</param>
-        /// <param name="detectionModeOther">Detection mode for the other object</param>
-        /// <returns>Returns true if have intersection</returns>
+        /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
-        /// <summary>
-        /// Gets whether the actual object have intersection with the volume or not
-        /// </summary>
-        /// <param name="detectionModeThis">Detection mode for this object</param>
-        /// <param name="volume">Volume</param>
-        /// <returns>Returns true if have intersection</returns>
-        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        /// <inheritdoc/>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
-
-        /// <summary>
-        /// Gets the intersection volume based on the specified detection mode
-        /// </summary>
-        /// <param name="detectionMode">Detection mode</param>
-        /// <returns>Returns an intersection volume</returns>
-        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        /// <inheritdoc/>
+        public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
-            if (detectionMode == IntersectDetectionMode.Sphere)
+            return detectionMode switch
             {
-                var bsph = new BoundingSphere(position, Math.Max(1f, CameraRadius));
-
-                return (IntersectionVolumeSphere)bsph;
-            }
-            else
-            {
-                return (IntersectionVolumeFrustum)Frustum;
-            }
+                IntersectDetectionMode.Sphere => (IntersectionVolumeSphere)new BoundingSphere(position, farPlaneDistance),
+                IntersectDetectionMode.Box => (IntersectionVolumeAxisAlignedBox)new BoundingBox(position - new Vector3(farPlaneDistance * 0.5f), position + new Vector3(farPlaneDistance * 0.5f)),
+                _ => (IntersectionVolumeFrustum)Frustum
+            };
         }
 
         /// <inheritdoc/>
@@ -1174,8 +1382,9 @@ namespace Engine
                 ViewportWidth = viewportWidth,
                 ViewportHeight = viewportHeight,
                 Mode = mode,
-                Velocity = Velocity,
+                Velocity = velocity,
                 IsometricAxis = isometricAxis,
+                IsometricDistanceToInterest = isometricDistanceToInterest,
                 IsoMetricForward = isoMetricForward,
                 IsoMetricBackward = isoMetricBackward,
                 IsoMetricLeft = isoMetricLeft,
@@ -1201,7 +1410,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is CameraState cameraState))
+            if (state is not CameraState cameraState)
             {
                 return;
             }
@@ -1215,8 +1424,9 @@ namespace Engine
             viewportWidth = cameraState.ViewportWidth;
             viewportHeight = cameraState.ViewportHeight;
             mode = cameraState.Mode;
-            Velocity = cameraState.Velocity;
+            velocity = cameraState.Velocity;
             isometricAxis = cameraState.IsometricAxis;
+            isometricDistanceToInterest = cameraState.IsometricDistanceToInterest;
             isoMetricForward = cameraState.IsoMetricForward;
             isoMetricBackward = cameraState.IsoMetricBackward;
             isoMetricLeft = cameraState.IsoMetricLeft;
@@ -1233,6 +1443,7 @@ namespace Engine
             SlowZoomDelta = cameraState.SlowZoomDelta;
             View = cameraState.View;
             Projection = cameraState.Projection;
+            ViewProjection = cameraState.View * cameraState.Projection;
             Frustum = new BoundingFrustum(cameraState.Frustum);
             Following = null;
             InvertY = cameraState.InvertY;

@@ -9,7 +9,13 @@ namespace Engine.UI
     /// <summary>
     /// Text area
     /// </summary>
-    public sealed class UITextArea : UIControl<UITextAreaDescription>, IScrollable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextArea(Scene scene, string id, string name) : UIControl<UITextAreaDescription>(scene, id, name), IScrollable
     {
         /// <summary>
         /// Button text drawer
@@ -59,16 +65,23 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.Text;
+                return textDrawer?.Text;
             }
             set
             {
-                if (!string.Equals(value, textDrawer.Text))
+                if (textDrawer == null)
                 {
-                    textDrawer.Text = value;
-
-                    GrowControl();
+                    return;
                 }
+
+                if (string.Equals(value, textDrawer.Text))
+                {
+                    return;
+                }
+
+                textDrawer.Text = value;
+
+                GrowControl();
             }
         }
         /// <summary>
@@ -78,7 +91,7 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ParsedText;
+                return textDrawer?.ParsedText;
             }
         }
         /// <summary>
@@ -88,10 +101,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ForeColor;
+                return textDrawer?.ForeColor ?? Color.Transparent;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ForeColor = value;
             }
         }
@@ -102,10 +120,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ShadowColor;
+                return textDrawer?.ShadowColor ?? Color.Transparent;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ShadowColor = value;
             }
         }
@@ -116,10 +139,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ShadowDelta;
+                return textDrawer?.ShadowDelta ?? Vector2.Zero;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ShadowDelta = value;
             }
         }
@@ -130,10 +158,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.HorizontalAlign;
+                return textDrawer?.HorizontalAlign ?? TextHorizontalAlign.Left;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.HorizontalAlign = value;
             }
         }
@@ -144,10 +177,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.VerticalAlign;
+                return textDrawer?.VerticalAlign ?? TextVerticalAlign.Top;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.VerticalAlign = value;
             }
         }
@@ -158,7 +196,7 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.GetLineHeight();
+                return textDrawer?.GetLineHeight() ?? 0;
             }
         }
         /// <summary>
@@ -260,17 +298,6 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextArea(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
@@ -284,9 +311,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextAreaDescription description)
+        public override async Task ReadAssets(UITextAreaDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             growControlWithText = Description.GrowControlWithText;
             Scroll = Description.Scroll;
@@ -300,13 +327,13 @@ namespace Engine.UI
             if (Scroll.HasFlag(ScrollModes.Vertical))
             {
                 sbVertical = await CreateScrollBar(ScrollModes.Vertical);
-                AddChild(sbVertical, false);
+                AddChild(sbVertical);
             }
 
             if (Scroll.HasFlag(ScrollModes.Horizontal))
             {
                 sbHorizontal = await CreateScrollBar(ScrollModes.Horizontal);
-                AddChild(sbHorizontal, false);
+                AddChild(sbHorizontal);
             }
 
             GrowControl();
@@ -316,7 +343,8 @@ namespace Engine.UI
             var td = await Scene.CreateComponent<TextDrawer, TextDrawerDescription>(
                 $"{Id}.TextDrawer",
                 $"{Name}.TextDrawer",
-                Description.Font);
+                Description.Font,
+                Description.MaxTextLength);
 
             td.Text = Description.Text;
             td.ForeColor = Description.TextForeColor;
@@ -329,10 +357,7 @@ namespace Engine.UI
         }
         private async Task<UIScrollBar> CreateScrollBar(ScrollModes scrollMode)
         {
-            var desc = UIScrollBarDescription.Default(scrollMode);
-            desc.BaseColor = Description.ScrollbarBaseColor;
-            desc.MarkerColor = Description.ScrollbarMarkerColor;
-            desc.MarkerSize = Description.ScrollbarMarkerSize;
+            var desc = UIScrollBarDescription.Default(Description.ScrollbarBaseColor, Description.ScrollbarMarkerColor, Description.ScrollbarMarkerSize, scrollMode);
             desc.EventsEnabled = true;
 
             var sb = await Scene.CreateComponent<UIScrollBar, UIScrollBarDescription>(
@@ -356,7 +381,7 @@ namespace Engine.UI
                 return;
             }
 
-            textDrawer.Update(context);
+            textDrawer?.Update(context);
 
             UpdateScrollBarsLayout();
             UpdateScrollBarsState();
@@ -417,7 +442,7 @@ namespace Engine.UI
         {
             base.UpdateInternalState();
 
-            textDrawer.UpdateInternals();
+            textDrawer?.UpdateInternals();
         }
         /// <inheritdoc/>
         public override Vector2? GetTransformationPivot()
@@ -435,16 +460,16 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             base.Draw(context);
 
             if (!Visible)
             {
-                return;
+                return false;
             }
 
-            textDrawer.Draw(context);
+            return textDrawer?.Draw(context) ?? false;
         }
 
         /// <inheritdoc/>
@@ -461,15 +486,15 @@ namespace Engine.UI
             var absRect = base.GetRenderArea(false);
 
             //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
-            if ((GrowControlWithText && !HasParent) || absRect.Width == 0) absRect.Width = Game.Form.RenderWidth - absRect.Left;
-            if ((GrowControlWithText && !HasParent) || absRect.Height == 0) absRect.Height = Game.Form.RenderHeight - absRect.Top;
+            if ((GrowControlWithText && !HasParent) || MathUtil.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
+            if ((GrowControlWithText && !HasParent) || MathUtil.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
             return applyPadding ? Padding.Apply(absRect) : absRect;
         }
         /// <inheritdoc/>
         public override RectangleF GetControlArea()
         {
-            var size = textDrawer.TextSize;
+            var size = textDrawer?.TextSize ?? Vector2.Zero;
 
             return new RectangleF
             {
@@ -480,11 +505,40 @@ namespace Engine.UI
             };
         }
 
+        /// <summary>
+        /// Sets the text value, drawing the first key character occurence with the keyColor, and the other characters with the text color
+        /// </summary>
+        /// <param name="text">Text</param>
+        /// <param name="keyChar">Key character</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="keyColor">Key color</param>
+        public void SetTextWithKeyChar(string text, char keyChar, Color textColor, Color keyColor)
+        {
+            string res;
+            int keyIndex = text.IndexOf(keyChar);
+            if (keyIndex < 0)
+            {
+                res = $"{textColor}{text}";
+            }
+            else
+            {
+                string pre = text[..keyIndex];
+                string key = text[keyIndex].ToString();
+                string suf = text[(keyIndex + 1)..];
+                pre = pre.Length > 0 ? $"{textColor}{pre}" : pre;
+                key = key.Length > 0 ? $"{keyColor}{key}" : key;
+                suf = suf.Length > 0 ? $"{textColor}{suf}" : suf;
+                res = pre + key + suf;
+            }
+
+            Text = res;
+        }
+
         /// <inheritdoc/>
         public void ScrollUp(float amount)
         {
             ScrollVerticalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Max(0, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Max(0f, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollDown(float amount)
@@ -492,7 +546,7 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumVerticalOffset();
 
             ScrollVerticalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Min(maxOffset, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Min(maxOffset, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollLeft(float amount)
@@ -500,13 +554,13 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumHorizontalOffset();
 
             ScrollHorizontalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Min(maxOffset, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Min(maxOffset, ScrollHorizontalOffset);
         }
         /// <inheritdoc/>
         public void ScrollRight(float amount)
         {
             ScrollHorizontalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Max(0f, ScrollHorizontalOffset);
         }
         /// <summary>
         /// Scroll bar mouse just pressed event
@@ -551,12 +605,12 @@ namespace Engine.UI
                 return;
             }
 
-            var size = textDrawer.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign);
-            var minHeight = textDrawer.GetLineHeight();
+            var size = textDrawer?.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign) ?? Vector2.Zero;
+            var minHeight = textDrawer?.GetLineHeight() ?? 0;
 
             //Set sizes if grow control with text or sizes not setted
-            if (GrowControlWithText || Width == 0) Width = size.X;
-            if (GrowControlWithText || Height == 0) Height = size.Y == 0 ? minHeight : size.Y;
+            if (GrowControlWithText || MathUtil.IsZero(Width)) Width = size.X;
+            if (GrowControlWithText || MathUtil.IsZero(Height)) Height = MathUtil.IsZero(size.Y) ? minHeight : size.Y;
         }
     }
 }

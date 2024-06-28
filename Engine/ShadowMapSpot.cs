@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine
 {
     /// <summary>
@@ -20,39 +19,13 @@ namespace Engine
             var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, width, height, 1, arraySize);
 
             DepthMap = DepthStencils;
-            Texture = ShaderResource;
-        }
-
-        /// <inheritdoc/>
-        public override void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
-        {
-            if (light is ISceneLightSpot lightSpot)
-            {
-                var near = 1f;
-                var projection = Matrix.PerspectiveFovLH(lightSpot.FallOffAngleRadians * 2f, 1f, near, lightSpot.Radius);
-
-                var pos = lightSpot.Position;
-                var look = lightSpot.Position + (lightSpot.Direction * lightSpot.Radius);
-                var view = Matrix.LookAtLH(pos, look, Vector3.Up);
-
-                var vp = view * projection;
-
-                ToShadowMatrix = vp;
-                LightPosition = lightSpot.Position;
-                FromLightViewProjectionArray = new[] { vp };
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void UpdateGlobals()
-        {
-
+            DepthMapTexture = ShaderResource;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{nameof(ShadowMapSpot)} - LightPosition: {LightPosition} HighResolutionMap: {HighResolutionMap}";
+            return $"{nameof(ShadowMapSpot)} - Light: {LightSource} HighResolutionMap: {HighResolutionMap}";
         }
     }
 }

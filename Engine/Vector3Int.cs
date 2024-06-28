@@ -4,10 +4,17 @@ using System.Runtime.InteropServices;
 namespace Engine
 {
     /// <summary>
-    /// A integer vertex
+    /// A 3d vector represented by integers.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="Vector3Int"/> struct.
+    /// </remarks>
+    /// <param name="x">The X coordinate.</param>
+    /// <param name="y">The Y coordinate.</param>
+    /// <param name="z">The Z coordinate.</param>
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3Int : IEquatable<Vector3Int>
+    public struct Vector3Int(int x, int y, int z) : IEquatable<Vector3Int>
     {
         /// <summary>
         /// Calculates the component-wise minimum of two vertices.
@@ -62,68 +69,41 @@ namespace Engine
         /// <summary>
         /// The X coordinate.
         /// </summary>
-        public int X { get; set; }
+        public int X { get; set; } = x;
         /// <summary>
         /// The Y coordinate.
         /// </summary>
-        public int Y { get; set; }
+        public int Y { get; set; } = y;
         /// <summary>
         /// The Z coordinate.
         /// </summary>
-        public int Z { get; set; }
+        public int Z { get; set; } = z;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Vector3Int"/> struct.
-        /// </summary>
-        /// <param name="x">The X coordinate.</param>
-        /// <param name="y">The Y coordinate.</param>
-        /// <param name="z">The Z coordinate.</param>
-        public Vector3Int(int x, int y, int z)
+        /// <inheritdoc/>
+        public readonly bool Equals(Vector3Int other)
         {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
+            return X == other.X && Y == other.Y && Z == other.Z;
         }
-
-        /// <summary>
-        /// Compares another <see cref="Vector3Int"/> with this instance for equality.
-        /// </summary>
-        /// <param name="other">The other instance.</param>
-        /// <returns>A value indicating whether the two vertices are equal.</returns>
-        public bool Equals(Vector3Int other)
-        {
-            return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
-        }
-        /// <summary>
-        /// Compares an object with this instance for equality.
-        /// </summary>
-        /// <param name="obj">An object.</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
-        public override bool Equals(object obj)
+        /// <inheritdoc/>
+        public override readonly bool Equals(object obj)
         {
             Vector3Int? p = obj as Vector3Int?;
             if (p.HasValue)
             {
-                return this.Equals(p.Value);
+                return Equals(p.Value);
             }
 
             return false;
         }
-        /// <summary>
-        /// Gets a hash code unique to the contents of this instance.
-        /// </summary>
-        /// <returns>A hash code.</returns>
-        public override int GetHashCode()
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
         {
-            return this.X.GetHashCode() ^ this.Y.GetHashCode() ^ this.Z.GetHashCode();
+            return HashCode.Combine(X, Y, Z);
         }
-        /// <summary>
-        /// Gets a human-readable version of the vertex.
-        /// </summary>
-        /// <returns>A string.</returns>
-        public override string ToString()
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
-            return string.Format("X: {0}; Y: {1}; Z: {2}", this.X, this.Y, this.Z);
+            return $"X: {X}; Y: {Y}; Z: {Z}";
         }
     }
 }

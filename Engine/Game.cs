@@ -1,26 +1,66 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.UI;
+using SharpDX;
 using SharpDX.DXGI;
-using SharpDX.Windows;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.UI;
-
     /// <summary>
     /// Game class
     /// </summary>
     public class Game : IDisposable
     {
+        private const string LogLineString = "**************************************************************************";
+        private const string NoIdString = "no-id";
+
+        private static int loadResourceId = 0;
+        private static int GetLoadResourceId()
+        {
+            return ++loadResourceId;
+        }
+
+        /// <summary>
+        /// Images helper static instance
+        /// </summary>
+        private static IImages images;
+        /// <summary>
+        /// Images helper
+        /// </summary>
+        public static IImages Images
+        {
+            get
+            {
+                images ??= EngineServiceFactory.Instance<IImages>();
+
+                return images;
+            }
+        }
+        /// <summary>
+        /// Fonts helper static instance
+        /// </summary>
+        private static IFonts fonts;
+        /// <summary>
+        /// Fonts helper
+        /// </summary>
+        public static IFonts Fonts
+        {
+            get
+            {
+                fonts ??= EngineServiceFactory.Instance<IFonts>();
+
+                return fonts;
+            }
+        }
+
         /// <summary>
         /// Scene list
         /// </summary>
-        private List<Scene> scenes = new List<Scene>();
+        private readonly List<Scene> scenes = [];
         /// <summary>
         /// Next scene to load
         /// </summary>
@@ -33,6 +73,14 @@ namespace Engine
         /// Game paused
         /// </summary>
         private bool paused = false;
+        /// <summary>
+        /// Resource request queue
+        /// </summary>
+        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
+        /// <summary>
+        /// Resource integration running flag
+        /// </summary>
+        private bool integratingResources = false;
 
         /// <summary>
         /// Name
@@ -49,19 +97,15 @@ namespace Engine
         /// <summary>
         /// Game form
         /// </summary>
-        public EngineForm Form { get; private set; }
+        public IEngineForm Form { get; private set; }
         /// <summary>
         /// Game time
         /// </summary>
-        public GameTime GameTime { get; private set; }
-        /// <summary>
-        /// CPU stats
-        /// </summary>
-        public PerformanceCounter CPUStats { get; private set; }
+        public IGameTime GameTime { get; private set; }
         /// <summary>
         /// Input helper
         /// </summary>
-        public Input Input { get; private set; }
+        public IInput Input { get; private set; }
         /// <summary>
         /// Graphics helper
         /// </summary>
@@ -143,21 +187,9 @@ namespace Engine
         /// </summary>
         public bool CollectGameStatus { get; set; }
         /// <summary>
-        /// Progress reporter
-        /// </summary>
-        public readonly IProgress<LoadResourceProgress> Progress;
-        /// <summary>
-        /// Buffer progress reporter
-        /// </summary>
-        public readonly IProgress<LoadResourceProgress> ProgressBuffers;
-        /// <summary>
-        /// Gets wheter a resource loading is running
-        /// </summary>
-        public bool ResourceLoadRuning { get; private set; } = false;
-        /// <summary>
         /// Game status
         /// </summary>
-        public readonly GameStatus GameStatus = new GameStatus();
+        public readonly GameStatus GameStatus = new();
 
         /// <summary>
         /// Game status collected event
@@ -170,19 +202,13 @@ namespace Engine
         /// <returns>Returns current desktop mode description</returns>
         private static OutputDescription1 GetDesktopMode()
         {
-            using (var factory = new Factory1())
-            using (var factory5 = factory.QueryInterface<Factory5>())
-            {
-                using (var adapter = factory5.GetAdapter1(0))
-                using (var adapter4 = adapter.QueryInterface<Adapter4>())
-                {
-                    using (var adapterOutput = adapter4.GetOutput(0))
-                    using (var adapterOutput6 = adapterOutput.QueryInterface<Output6>())
-                    {
-                        return adapterOutput6.Description1;
-                    }
-                }
-            }
+            using var factory = new Factory1();
+            using var factory5 = factory.QueryInterface<Factory5>();
+            using var adapter = factory5.GetAdapter1(0);
+            using var adapter4 = adapter.QueryInterface<Adapter4>();
+            using var adapterOutput = adapter4.GetOutput(0);
+            using var adapterOutput6 = adapterOutput.QueryInterface<Output6>();
+            return adapterOutput6.Description1;
         }
         /// <summary>
         /// Gets the log level base on frame time
@@ -278,14 +304,9 @@ namespace Engine
 
             GameTime = new GameTime();
 
-            Progress = new Progress<LoadResourceProgress>(ReportProgress);
-            ProgressBuffers = new Progress<LoadResourceProgress>(ReportProgressBuffers);
-
             BufferManager = new BufferManager(this);
 
             ResourceManager = new GameResourceManager(this);
-
-            CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             #region Form
 
@@ -299,7 +320,9 @@ namespace Engine
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            Form = new EngineForm(name, screenWidth, screenHeight, isFullScreen);
+            Form = EngineServiceFactory.Instance<IEngineForm>();
+
+            Form.Initialize(name, screenWidth, screenHeight, isFullScreen);
 
             Form.ResizeBegin += (sender, e) =>
             {
@@ -352,11 +375,12 @@ namespace Engine
 
             #endregion
 
-            Input = new Input(Form);
+            Input = EngineServiceFactory.Instance<IInput>();
+            Input.SetForm(Form);
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            BuiltIn.BuiltInShaders.Initialize(Graphics);
+            BuiltIn.Drawers.BuiltInShaders.Initialize(this);
         }
         /// <summary>
         /// Destructor
@@ -393,10 +417,9 @@ namespace Engine
                     }
 
                     scenes.Clear();
-                    scenes = null;
                 }
 
-                BuiltIn.BuiltInShaders.DisposeResources();
+                BuiltIn.Drawers.BuiltInShaders.DisposeResources();
 
                 FontMapCache.Clear();
 
@@ -422,11 +445,42 @@ namespace Engine
         /// </summary>
         public void Run()
         {
-            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, LogLineString);
             Logger.WriteInformation(this, "** Game started                                                         **");
-            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, LogLineString);
 
-            RenderLoop.Run(Form, Frame);
+#if DEBUG
+            Form.Render(() =>
+            {
+                try
+                {
+                    Frame();
+                }
+                catch (System.Runtime.InteropServices.SEHException ex)
+                {
+                    Logger.WriteError(this, ex);
+
+                    if (Graphics.GetRemovedDeviceStatus(out string removedReason))
+                    {
+                        Logger.WriteError(this, $"{nameof(Frame)}: Device Removed: {removedReason}", ex);
+                    }
+
+                    string deviceErrors = Graphics.GetDebugInfo();
+                    if (!string.IsNullOrWhiteSpace(deviceErrors))
+                    {
+                        Logger.WriteError(this, $"{nameof(Frame)}: {deviceErrors}", ex);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, ex);
+
+                    throw;
+                }
+            });
+#else
+            Form.Render(Frame);
+#endif
         }
 
         /// <summary>
@@ -441,6 +495,7 @@ namespace Engine
         /// Creates a new scene and sets it as the unique active scene
         /// </summary>
         /// <typeparam name="T">Type of scene</typeparam>
+        /// <param name="sceneMode">Scene mode</param>
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
         public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
@@ -449,7 +504,35 @@ namespace Engine
             {
                 Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
 
-                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+                scene = (T)Activator.CreateInstance(typeof(T), this);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Game: Error setting scene: {ex.Message}", ex);
+            }
+
+            SetScene(scene, sceneMode);
+        }
+        /// <summary>
+        /// Creates a new scene and sets it as the unique active scene
+        /// </summary>
+        /// <param name="sceneType">Type of scene</param>
+        /// <param name="sceneMode">Scene mode</param>
+        /// <remarks>Current scenes will be removed from internal scene collection</remarks>
+        public void SetScene(Type sceneType, SceneModes sceneMode = SceneModes.ForwardLigthning)
+        {
+            bool isScene = typeof(Scene).IsAssignableFrom(sceneType);
+            if (!isScene)
+            {
+                throw new ArgumentException($"The {nameof(sceneType)} argument must implement {typeof(Scene)}.", nameof(sceneType));
+            }
+
+            Scene scene = null;
+            try
+            {
+                Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
+
+                scene = (Scene)Activator.CreateInstance(sceneType, this);
             }
             catch (Exception ex)
             {
@@ -462,6 +545,7 @@ namespace Engine
         /// Sets the specified scene to next scene to load
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="sceneMode">Scene mode</param>
         public void SetScene(Scene scene, SceneModes sceneMode = SceneModes.ForwardLigthning)
         {
             if (scene == null)
@@ -483,7 +567,7 @@ namespace Engine
             scenes.ForEach(s => s.Active = false);
 
             //Copy collection for disposing
-            List<Scene> toDispose = new List<Scene>(scenes);
+            List<Scene> toDispose = new(scenes);
 
             //Clear scene collection
             scenes.Clear();
@@ -491,24 +575,17 @@ namespace Engine
             toDispose.ForEach(s => s.Dispose());
             toDispose.Clear();
 
-            Task.WhenAll(StartScene(sceneToLoad));
+            StartScene(sceneToLoad);
 
             scenes.Add(sceneToLoad);
-            scenes.Sort(
-                delegate (Scene p1, Scene p2)
-                {
-                    return p2.Order.CompareTo(p1.Order);
-                });
+            scenes.Sort((p1, p2) => p2.Order.CompareTo(p1.Order));
         }
         /// <summary>
         /// Adds a scene to the internal scene collection
         /// </summary>
         /// <param name="scene">New scene</param>
-        private async Task StartScene(Scene scene)
+        private void StartScene(Scene scene)
         {
-            // Start background thread
-            await Task.Delay(1).ConfigureAwait(false);
-
             Logger.WriteInformation(this, "Game: Begin StartScene");
 
             try
@@ -516,7 +593,7 @@ namespace Engine
                 scene.Active = false;
 
                 Logger.WriteInformation(this, "Scene: Initialize start");
-                await scene.Initialize();
+                scene.Initialize();
                 Logger.WriteInformation(this, "Scene: Initialize end");
 
                 scene.Active = true;
@@ -530,377 +607,86 @@ namespace Engine
 
             Logger.WriteInformation(this, "Game: End StartScene");
         }
-
         /// <summary>
-        /// Report progress callback
+        /// Gets the active scene
         /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public void ReportProgress(LoadResourceProgress value)
+        public Scene GetActiveScene()
         {
-            var activeScene = scenes?.FirstOrDefault(s => s.Active);
-            activeScene?.OnReportProgress(value);
-        }
-        /// <summary>
-        /// Report buffer progress callback
-        /// </summary>
-        /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public void ReportProgressBuffers(LoadResourceProgress value)
-        {
-            var activeScene = scenes?.FirstOrDefault(s => s.Active);
-            activeScene?.OnReportProgressBuffers(value);
+            return scenes.Find(s => s.Active);
         }
 
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
+        public void LoadResources(ILoadResourceGroup taskGroup)
         {
-            return Task.Run(async () =>
+            if (taskGroup == null)
             {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    callback?.Invoke(result);
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    await callback?.Invoke(result);
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    callback?.Invoke(result);
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
-        {
-            Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    await callback?.Invoke(result);
-                }
-            });
-
-            return Task.CompletedTask;
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
-
-            var taskList = taskGroup.Tasks.ToList();
-
-            int totalTasks = taskList.Count;
-            int currentTask = 0;
-            while (taskList.Any())
-            {
-                var t = await Task.WhenAny(taskList);
-
-                taskList.Remove(t);
-
-                bool completedOk = t.Status == TaskStatus.RanToCompletion;
-
-                TaskResult<T> res = new TaskResult<T>
-                {
-                    Completed = completedOk,
-                    Exception = t.Exception, // Store the excetion
-                    Result = completedOk ? (await t) : default, // Avoid throwing the exception now
-                };
-
-                loadResult.Add(res);
-
-                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
+                return;
             }
 
-            await IntegrateResources(taskGroup.Id);
+            taskGroup.Id ??= $"{GetLoadResourceId()}_{taskGroup.GetType()}";
 
-            return new LoadResourcesResult<T>
-            {
-                Results = loadResult,
-            };
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            List<TaskResult> loadResult = new List<TaskResult>();
-
-            var taskList = taskGroup.Tasks.ToList();
-
-            int totalTasks = taskList.Count;
-            int currentTask = 0;
-            while (taskList.Any())
-            {
-                var t = await Task.WhenAny(taskList);
-
-                taskList.Remove(t);
-
-                TaskResult res = new TaskResult
-                {
-                    Completed = t.Status == TaskStatus.RanToCompletion,
-                    Exception = t.Exception, // Store the excetion
-                };
-
-                loadResult.Add(res);
-
-                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
-            }
-
-            await IntegrateResources(taskGroup.Id);
-
-            return new LoadResourcesResult
-            {
-                Results = loadResult,
-            };
+            resourceRequests.Enqueue(taskGroup);
         }
 
         /// <summary>
         /// Integrates the requested resources into the resource manager
         /// </summary>
-        /// <param name="id">Resource group id</param>
-        private async Task IntegrateResources(string id)
+        private void IntegrateResources()
         {
+            if (integratingResources)
+            {
+                return;
+            }
+
+            if (resourceRequests.IsEmpty && !ResourceManager.HasRequests)
+            {
+                return;
+            }
+
+            integratingResources = true;
+
+            var groups = Task.Run(IntegrateResourcesAsync).ConfigureAwait(false).GetAwaiter().GetResult();
+            foreach (var gr in groups)
+            {
+                gr.End();
+            }
+        }
+        /// <summary>
+        /// Integrates the resource groups in the resource queue
+        /// </summary>
+        /// <returns>Returns the integrated resource groups</returns>
+        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
+        {
+            List<ILoadResourceGroup> res = [];
+
             try
             {
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Recreating buffers");
-                await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Buffers recreated");
+                while (resourceRequests.TryDequeue(out var loadResourceGroup))
+                {
+                    string logText = $"{nameof(Game)}.{nameof(IntegrateResources)}.{loadResourceGroup.Id ?? NoIdString}";
 
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(id, ProgressBuffers);
-                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: New resources created");
+                    await loadResourceGroup.Process();
+
+                    Logger.WriteInformation(this, $"{logText} => BufferManager: Recreating buffers");
+                    BufferManager.CreateBuffers(loadResourceGroup.Id);
+                    Logger.WriteInformation(this, $"{logText} => BufferManager: Buffers recreated");
+
+                    Logger.WriteInformation(this, $"{logText} => ResourceManager: Creating new resources");
+                    ResourceManager.CreateResources(loadResourceGroup.Id);
+                    Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
+
+                    res.Add(loadResourceGroup);
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => error: {ex.Message}", ex);
-
-                throw;
+                integratingResources = false;
             }
+
+            return [.. res];
         }
 
         /// <summary>
@@ -918,9 +704,9 @@ namespace Engine
         {
             if (exiting)
             {
-                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, LogLineString);
                 Logger.WriteInformation(this, "** Game closed                                                          **");
-                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, LogLineString);
 
                 //Exit form
                 Form.Close();
@@ -943,49 +729,46 @@ namespace Engine
                 return;
             }
 
-            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            var activeScene = GetActiveScene();
             if (activeScene == null)
             {
                 return;
             }
 
-            Counters.FrameCount++;
+            FrameCounters.FrameCount++;
 
-            Logger.WriteInformation(this, $"##### Frame {Counters.FrameCount} Start ####");
+            Logger.WriteInformation(this, $"##### Frame {FrameCounters.FrameCount} Start ####");
 
-            Stopwatch gSW = new Stopwatch();
+            Stopwatch gSW = new();
             gSW.Start();
 
             FrameInput();
 
             FrameSceneUpdate(activeScene);
 
-            if (BufferManager.SetVertexBuffers())
-            {
-                FrameBegin(activeScene);
+            FrameSceneDraw(activeScene);
 
-                FrameSceneDraw(activeScene);
-
-                FrameEnd();
-            }
+            FramePresent();
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
             LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
-            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+
+            Task.Run(IntegrateResources).ConfigureAwait(false);
 
             if (ResourceManager.HasRequests)
             {
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources($"ResourceManager.Frame{Counters.FrameCount}", null);
+                ResourceManager.CreateResources($"ResourceManager.Frame({FrameCounters.FrameCount})");
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
             }
 
-            Counters.FramesPerSecond++;
-            Counters.FrameTime += GameTime.ElapsedSeconds;
+            FrameCounters.FramesPerSecond++;
+            FrameCounters.FrameTime += GameTime.ElapsedSeconds;
 
-            if (Counters.FrameTime >= 1.0f)
+            if (FrameCounters.FrameTime >= 1.0f)
             {
                 FrameRefreshCounters();
             }
@@ -997,46 +780,17 @@ namespace Engine
 
             GameStatus.Clear();
 
-            Counters.ClearFrame();
+            FrameCounters.ClearFrame();
         }
         /// <summary>
         /// Update input
         /// </summary>
         private void FrameInput()
         {
-            try
-            {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                Input.Update(GameTime);
-                pSW.Stop();
-                GameStatus.Add("Input", pSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Input Update error: {ex.Message}", ex);
-            }
-        }
-        /// <summary>
-        /// Begin frame
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        private void FrameBegin(Scene scene)
-        {
-            try
-            {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                Graphics.Begin(scene);
-                pSW.Stop();
-                GameStatus.Add("Begin", pSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Graphics Begin error: {ex.Message}", ex);
-
-                throw;
-            }
+            var iSW = Stopwatch.StartNew();
+            Input.Update(GameTime);
+            iSW.Stop();
+            GameStatus.Add(nameof(FrameInput), iSW);
         }
         /// <summary>
         /// Update scene state
@@ -1044,18 +798,10 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            try
-            {
-                Stopwatch uSW = new Stopwatch();
-                uSW.Start();
-                scene.Update(GameTime);
-                uSW.Stop();
-                GameStatus.Add($"Scene {scene}.Update", uSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Scene: Update error: {ex.Message}", ex);
-            }
+            var uSW = Stopwatch.StartNew();
+            scene.Update(GameTime);
+            uSW.Stop();
+            GameStatus.Add(nameof(FrameSceneUpdate), uSW);
         }
         /// <summary>
         /// Draw scene
@@ -1063,91 +809,64 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            try
-            {
-                Stopwatch dSW = new Stopwatch();
-                dSW.Start();
-                scene.Draw(GameTime);
-                dSW.Stop();
-                GameStatus.Add($"Scene {scene}.Draw", dSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Scene: Draw error: {ex.Message}", ex);
-            }
+            var dSW = Stopwatch.StartNew();
+            scene.Draw(GameTime);
+            dSW.Stop();
+            GameStatus.Add(nameof(FrameSceneDraw), dSW);
         }
         /// <summary>
-        /// End frame
+        /// Present frame
         /// </summary>
-        private void FrameEnd()
+        private void FramePresent()
         {
-            try
-            {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                Graphics.End();
-                pSW.Stop();
-                GameStatus.Add("End", pSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Graphics End error: {ex.Message}", ex);
-
-                throw;
-            }
+            var pSW = Stopwatch.StartNew();
+            Graphics.Present();
+            pSW.Stop();
+            GameStatus.Add(nameof(FramePresent), pSW);
         }
         /// <summary>
         /// Refreshes frame counters
         /// </summary>
         private void FrameRefreshCounters()
         {
-            try
-            {
-                RuntimeText = string.Format(
-                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs) CPU: {13:0.00}%",
-                    Graphics.DeviceDescription,
-                    Name,
-                    Counters.FrameCount,
-                    Counters.FramesPerSecond,
-                    Counters.DrawCallsPerFrame,
-                    Counters.InstancesPerFrame,
-                    Counters.MaxInstancesPerFrame,
-                    Counters.UpdatesPerFrame,
-                    Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
-                    GameTime.ElapsedSeconds,
-                    GameTime.TotalSeconds,
-                    CPUStats.NextValue());
+            RuntimeText = GetRuntimeText();
+
 #if DEBUG
-                Form.Text = RuntimeText;
+            Form.Text = RuntimeText;
 #endif
-                Counters.FramesPerSecond = 0;
-                Counters.FrameTime = 0f;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Refresh Counters error: {ex.Message}", ex);
-            }
+            FrameCounters.FramesPerSecond = 0;
+            FrameCounters.FrameTime = 0f;
         }
         /// <summary>
         /// Collects frame status
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            try
+            GameStatusCollected?.Invoke(this, new()
             {
-                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
-                {
-                    Trace = GameStatus.Copy(),
-                };
+                Trace = GameStatus.Copy(),
+            });
 
-                GameStatusCollected?.Invoke(this, e);
+            CollectGameStatus = false;
+        }
 
-                CollectGameStatus = false;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
-            }
+        /// <summary>
+        /// Gets the runtime text with frame counters data
+        /// </summary>
+        public string GetRuntimeText()
+        {
+            var counters = FrameCounters.GetFrameCounters(-1);
+
+            return string.Format(
+                "{0} - {1} - Frame {2} FPS: {3:000} Updates: {4:00} {5} F. Time: {6:0.0000} (secs) T. Time: {7:0000} (secs)",
+                Graphics.DeviceDescription,
+                GetActiveScene()?.GetRenderMode() ?? SceneModes.Unknown,
+                FrameCounters.FrameCount,
+                FrameCounters.FramesPerSecond,
+                FrameCounters.PickCounters.TransformUpdatesPerFrame,
+                counters,
+                GameTime.ElapsedSeconds,
+                GameTime.TotalSeconds);
         }
     }
 }

@@ -19,13 +19,14 @@ namespace Engine.Collada
 
         public Accessor()
         {
-            this.Offset = 0;
-            this.Stride = 1;
+            Offset = 0;
+            Stride = 1;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Source: {0}; Offset: {1}; Stride: {2};", this.Source, this.Offset, this.Stride);
+            return $"Source: {Source}; Offset: {Offset}; Stride: {Stride};";
         }
     }
 }

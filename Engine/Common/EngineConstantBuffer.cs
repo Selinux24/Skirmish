@@ -1,27 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
-    using System.Runtime.InteropServices;
-
-    /// <summary>
-    /// Engine constant buffer interface
-    /// </summary>
-    public interface IEngineConstantBuffer : IDisposable
-    {
-        /// <summary>
-        /// Name
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Gets the internal buffer
-        /// </summary>
-        Buffer GetBuffer();
-    }
-
     /// <summary>
     /// Engine constant buffer
     /// </summary>
@@ -29,26 +10,17 @@ namespace Engine.Common
     public class EngineConstantBuffer<T> : IEngineConstantBuffer where T : struct, IBufferData
     {
         /// <summary>
-        /// Graphics
-        /// </summary>
-        private readonly Graphics graphics;
-        /// <summary>
-        /// Buffer
-        /// </summary>
-        private readonly Buffer buffer;
-        /// <summary>
-        /// Data stream to update the buffer in memory
-        /// </summary>
-        private readonly DataStream dataStream;
-        /// <summary>
-        /// Current data value
-        /// </summary>
-        private T currentData;
-
-        /// <summary>
         /// Name
         /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// Gets the internal buffer
+        /// </summary>
+        public EngineBuffer Buffer { get; private set; }
+        /// <summary>
+        /// Gets the internal data stream
+        /// </summary>
+        public EngineDataStream DataStream { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -57,11 +29,11 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         public EngineConstantBuffer(Graphics graphics, string name)
         {
-            this.graphics = graphics;
+            if (graphics == null) throw new ArgumentNullException(nameof(graphics), "Must specify the graphics instance to create the constant buffer in the graphics device.");
 
             Name = name;
-            dataStream = new DataStream(Marshal.SizeOf(typeof(T)), true, true);
-            buffer = graphics.CreateConstantBuffer<T>(name);
+            DataStream = new EngineDataStream(Marshal.SizeOf(typeof(T)), true, true);
+            Buffer = graphics.CreateConstantBuffer<T>(name);
         }
         /// <summary>
         /// Destructor
@@ -71,9 +43,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -87,33 +57,15 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                dataStream?.Dispose();
-                buffer?.Dispose();
+                DataStream?.Dispose();
+                Buffer?.Dispose();
             }
         }
 
-        /// <summary>
-        /// Writes data to de constant buffer
-        /// </summary>
-        /// <param name="data">Data</param>
-        public void WriteData(T data)
+        /// <inheritdoc/>
+        public override string ToString()
         {
-            if (data.Equals(currentData))
-            {
-                return;
-            }
-
-            graphics.UpdateConstantBuffer(dataStream, buffer, data);
-
-            currentData = data;
-        }
-
-        /// <summary>
-        /// Gets the internal buffer
-        /// </summary>
-        public Buffer GetBuffer()
-        {
-            return buffer;
+            return $"{nameof(EngineConstantBuffer<T>)} {Name}";
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
-    using System.Linq;
 
     /// <summary>
     /// Graph file
@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the hash string</returns>
         public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
-            List<byte> buffer = new List<byte>();
+            List<byte> buffer = [];
 
             var tris = triangles.ToList();
             tris.Sort((t1, t2) =>
@@ -39,8 +39,8 @@ namespace Engine.PathFinding.RecastNavigation
                 })
                 .ToArray();
 
-            buffer.AddRange(serTris.SerializeBinary());
-            buffer.AddRange(settings.SerializeBinary());
+            buffer.AddRange(serTris.SerializeJson());
+            buffer.AddRange(settings.SerializeJson());
 
             return buffer.ToArray().GetMd5Sum();
         }
@@ -50,27 +50,38 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="graph">Graph</param>
         /// <returns>Returns the graph file</returns>
-        public static async Task<GraphFile> FromGraph(Graph graph)
+        public static async Task<GraphFile> FromGraphAsync(Graph graph)
         {
             //Calculate hash
-            var tris = await graph.Input.GetTriangles();
+            var tris = await graph.Input.GetTrianglesAsync(graph.Settings.Bounds);
             string hash = GetHash(graph.Settings, tris);
 
-            var meshFileDict = new Dictionary<Agent, NavMeshFile>();
-
-            foreach (var agentQ in graph.AgentQueries)
-            {
-                var nm = agentQ.NavMesh;
-
-                var rcFile = NavMeshFile.FromNavmesh(nm);
-
-                meshFileDict.Add(agentQ.Agent, rcFile);
-            }
+            var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
 
             return new GraphFile()
             {
                 Settings = graph.Settings,
-                Dictionary = meshFileDict,
+                GraphList = meshFiles,
+                Hash = hash,
+            };
+        }
+        /// <summary>
+        /// Creates a graph file from a graph
+        /// </summary>
+        /// <param name="graph">Graph</param>
+        /// <returns>Returns the graph file</returns>
+        public static GraphFile FromGraph(Graph graph)
+        {
+            //Calculate hash
+            var tris = graph.Input.GetTriangles(graph.Settings.Bounds);
+            string hash = GetHash(graph.Settings, tris);
+
+            var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
+
+            return new GraphFile()
+            {
+                Settings = graph.Settings,
+                GraphList = meshFiles,
                 Hash = hash,
             };
         }
@@ -80,50 +91,91 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="file">Graph file</param>
         /// <param name="inputGeometry">Input geometry</param>
         /// <returns>Returns the graph</returns>
-        public static async Task<Graph> FromGraphFile(GraphFile file, InputGeometry inputGeometry)
+        public static async Task<Graph> FromGraphFileAsync(GraphFile file, InputGeometry inputGeometry)
         {
-            var agentQueries = new List<GraphAgentQuery>();
-
-            await Task.Run(() =>
-            {
-                foreach (var agent in file.Dictionary.Keys)
-                {
-                    var rcFile = file.Dictionary[agent];
-                    var nm = NavMeshFile.FromNavmeshFile(rcFile);
-
-                    agentQueries.Add(new GraphAgentQuery
-                    {
-                        Agent = agent,
-                        NavMesh = nm,
-                        MaxNodes = file.Settings.MaxNodes,
-                    });
-                }
-            });
-
-            return new Graph
+            var graph = new Graph
             {
                 Settings = file.Settings,
-                AgentQueries = agentQueries,
                 Input = inputGeometry,
                 Initialized = true,
             };
+
+            await Task.Run(() =>
+            {
+                foreach (var agentData in file.GraphList)
+                {
+                    var agent = agentData.Agent;
+                    var navMesh = NavMeshFile.FromNavmeshFile(agentData.NavMesh);
+
+                    graph.AddAgent(agent, navMesh);
+                }
+            });
+
+            return graph;
+        }
+        /// <summary>
+        /// Creates a graph from a graph file
+        /// </summary>
+        /// <param name="file">Graph file</param>
+        /// <param name="inputGeometry">Input geometry</param>
+        /// <returns>Returns the graph</returns>
+        public static Graph FromGraphFile(GraphFile file, InputGeometry inputGeometry)
+        {
+            var graph = new Graph
+            {
+                Settings = file.Settings,
+                Input = inputGeometry,
+                Initialized = true,
+            };
+
+            foreach (var agentData in file.GraphList)
+            {
+                var agent = agentData.Agent;
+                var navMesh = NavMeshFile.FromNavmeshFile(agentData.NavMesh);
+
+                graph.AddAgent(agent, navMesh);
+            }
+
+            return graph;
         }
         /// <summary>
         /// Loads the graph file from a file name
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <returns>Returns the graph file</returns>
-        public static async Task<GraphFile> Load(string fileName)
+        public static async Task<GraphFile> LoadAsync(string fileName)
         {
-            byte[] buffer = File.ReadAllBytes(fileName);
-
             try
             {
-                return await Task.FromResult(buffer.Decompress<GraphFile>());
+                var buffer = await File.ReadAllBytesAsync(fileName);
+
+                return buffer.Decompress<GraphFile>();
             }
             catch (Exception ex)
             {
-                throw new EngineException("Error loading the graph from a file.", ex);
+                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// Loads the graph file from a file name
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the graph file</returns>
+        public static GraphFile Load(string fileName)
+        {
+            try
+            {
+                var buffer = File.ReadAllBytes(fileName);
+
+                return buffer.Decompress<GraphFile>();
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+
+                throw;
             }
         }
         /// <summary>
@@ -131,19 +183,43 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph</param>
-        public static async Task Save(string fileName, Graph graph)
+        public static async Task SaveAsync(string fileName, Graph graph)
         {
-            var file = await FromGraph(graph);
-
             try
             {
-                byte[] buffer = file.Compress();
+                var graphFile = await FromGraphAsync(graph);
+
+                var buffer = graphFile.Compress();
+
+                await File.WriteAllBytesAsync(fileName, buffer);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="graph">Graph</param>
+        public static void Save(string fileName, Graph graph)
+        {
+            try
+            {
+                var graphFile = FromGraph(graph);
+
+                var buffer = graphFile.Compress();
 
                 File.WriteAllBytes(fileName, buffer);
             }
             catch (Exception ex)
             {
-                throw new EngineException("Error saving the graph to a file.", ex);
+                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+
+                throw;
             }
         }
 
@@ -152,9 +228,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public BuildSettings Settings { get; set; }
         /// <summary>
-        /// Graph dictionary
+        /// Graph list
         /// </summary>
-        public Dictionary<Agent, NavMeshFile> Dictionary { get; set; }
+        public List<(GraphAgentType Agent, NavMeshFile NavMesh)> GraphList { get; set; }
         /// <summary>
         /// File source hash
         /// </summary>

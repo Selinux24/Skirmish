@@ -19,9 +19,9 @@ namespace Engine.Collada.FX
         {
             get
             {
-                if (this.Params != null)
+                if (Params != null)
                 {
-                    return Array.Find(this.Params, p => string.Equals(p.SId, param));
+                    return Array.Find(Params, p => string.Equals(p.SId, param));
                 }
                 else
                 {
@@ -30,9 +30,10 @@ namespace Engine.Collada.FX
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return "ProfileCOMMON;";
+            return $"{nameof(ProfileCommon)};";
         }
     }
 }

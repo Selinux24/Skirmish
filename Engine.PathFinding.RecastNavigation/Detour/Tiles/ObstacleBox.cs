@@ -6,12 +6,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// <summary>
     /// Axis aligned box obstacle
     /// </summary>
-    public struct ObstacleBox : IObstacle
+    public readonly struct ObstacleBox : IObstacle
     {
         /// <summary>
         /// Box
         /// </summary>
-        public BoundingBox Box { get; set; }
+        private readonly BoundingBox bbox;
 
         /// <summary>
         /// Constructor
@@ -19,7 +19,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="bbox">Bounding box</param>
         public ObstacleBox(BoundingBox bbox)
         {
-            Box = bbox;
+            this.bbox = bbox;
         }
         /// <summary>
         /// Constructor
@@ -28,30 +28,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="max">Box maximum</param>
         public ObstacleBox(Vector3 min, Vector3 max)
         {
-            Box = new BoundingBox(min, max);
+            bbox = new BoundingBox(min, max);
         }
 
-        /// <summary>
-        /// Gets the obstacle bounds
-        /// </summary>
-        /// <returns>Returns a bounding box</returns>
-        public BoundingBox GetBounds()
+        /// <inheritdoc/>
+        public readonly BoundingBox GetBounds()
         {
-            return Box;
+            return bbox;
         }
-        /// <summary>
-        /// Marks the build context area with the specified area type
-        /// </summary>
-        /// <param name="tc">Build context</param>
-        /// <param name="orig">Origin</param>
-        /// <param name="cs">Cell size</param>
-        /// <param name="ch">Cell height</param>
-        /// <param name="area">Area type</param>
-        /// <returns>Returns true if all layer areas were marked</returns>
-        public bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        /// <inheritdoc/>
+        public bool MarkArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, AreaTypes area)
         {
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -68,26 +57,36 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 for (int x = min.X; x <= max.X; ++x)
                 {
-                    int y = tc.Layer.Heights[x + z * w];
+                    int idx = x + z * w;
+
+                    int y = layer.GetHeight(idx);
                     if (y < min.Y || y > max.Y)
                     {
                         continue;
                     }
 
-                    tc.Layer.Areas[x + z * w] = area;
+                    layer.SetArea(idx, area);
                 }
             }
 
             return true;
         }
+        /// <summary>
+        /// Computes the obstacle bounds
+        /// </summary>
+        /// <param name="orig">Origin</param>
+        /// <param name="w">Width</param>
+        /// <param name="h">Height</param>
+        /// <param name="ics">Cell size</param>
+        /// <param name="ich">Cell height</param>
         private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float ics, float ich)
         {
-            int minx = (int)Math.Floor((Box.Minimum.X - orig.X) * ics);
-            int miny = (int)Math.Floor((Box.Minimum.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((Box.Minimum.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((Box.Maximum.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((Box.Maximum.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((Box.Maximum.Z - orig.Z) * ics);
+            int minx = (int)MathF.Floor((bbox.Minimum.X - orig.X) * ics);
+            int miny = (int)MathF.Floor((bbox.Minimum.Y - orig.Y) * ich);
+            int minz = (int)MathF.Floor((bbox.Minimum.Z - orig.Z) * ics);
+            int maxx = (int)MathF.Floor((bbox.Maximum.X - orig.X) * ics);
+            int maxy = (int)MathF.Floor((bbox.Maximum.Y - orig.Y) * ich);
+            int maxz = (int)MathF.Floor((bbox.Maximum.Z - orig.Z) * ics);
 
             if (maxx < 0) return null;
             if (minx >= w) return null;

@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// Text box
     /// </summary>
-    public sealed class UITextBox : UIControl<UITextBoxDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITextBox(Scene scene, string id, string name) : UIControl<UITextBoxDescription>(scene, id, name)
     {
         /// <summary>
         /// Focus flag
@@ -36,22 +42,10 @@ namespace Engine.UI
         /// </summary>
         public bool MultiLine { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITextBox(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITextBoxDescription description)
+        public override async Task ReadAssets(UITextBoxDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Cursor = Description.Cursor;
             TabSpaces = Description.TabSpaces;
@@ -61,15 +55,15 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 var background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
 
                 textArea = await CreateText();
-                background.AddChild(textArea);
+                background.AddChild(textArea, true);
             }
             else
             {
                 textArea = await CreateText();
-                AddChild(textArea);
+                AddChild(textArea, true);
             }
         }
         private async Task<Sprite> CreateBackground()
@@ -145,7 +139,7 @@ namespace Engine.UI
                 return;
             }
 
-            SetText(Helpers.NativeMethods.GetStrokes());
+            SetText(Game.Input.GetStrokes());
         }
         /// <summary>
         /// Evaluates the size limit

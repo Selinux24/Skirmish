@@ -9,14 +9,14 @@ namespace Engine.Content.FmtObj
     {
         public static void WriteObj(StreamWriter wr, IEnumerable<Triangle> triangles)
         {
-            List<Vector3> points = new List<Vector3>();
+            var points = new List<Vector3>();
             triangles.ToList().ForEach(t => points.AddRange(new[] { t.Point1, t.Point2, t.Point3 }));
 
-            List<Vector3> normals = new List<Vector3>();
+            var normals = new List<Vector3>();
             triangles.ToList().ForEach(t => normals.AddRange(new[] { t.Normal, t.Normal, t.Normal }));
 
             int index = 0;
-            List<Int3> indices = new List<Int3>();
+            var indices = new List<Int3>();
             triangles.ToList().ForEach(t => indices.Add(new Int3(index++, index++, index++)));
 
             // Write the file

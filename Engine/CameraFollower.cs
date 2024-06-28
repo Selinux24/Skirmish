@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Manipulator to follow
         /// </summary>
-        private readonly Manipulator3D manipulator;
+        private readonly IManipulator3D manipulator;
         /// <summary>
         /// Position offset
         /// </summary>
@@ -20,24 +20,18 @@ namespace Engine
         /// </summary>
         private readonly Vector3 interestOffset = Vector3.ForwardLH;
 
-        /// <summary>
-        /// Position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Position { get; private set; }
-        /// <summary>
-        /// Interest
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Interest { get; private set; }
-        /// <summary>
-        /// Velocity
-        /// </summary>
+        /// <inheritdoc/>
         public float Velocity { get; set; } = 1f;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        public CameraFollower(Manipulator3D manipulator)
+        public CameraFollower(IManipulator3D manipulator)
         {
             this.manipulator = manipulator;
         }
@@ -48,7 +42,7 @@ namespace Engine
         /// <param name="position">Position offset</param>
         /// <param name="interest">Interest offset</param>
         /// <param name="velocity">Velocity</param>
-        public CameraFollower(Manipulator3D manipulator, Vector3 position, Vector3 interest, float velocity)
+        public CameraFollower(IManipulator3D manipulator, Vector3 position, Vector3 interest, float velocity)
         {
             this.manipulator = manipulator;
             positionOffset = position;
@@ -56,11 +50,8 @@ namespace Engine
             Velocity = velocity;
         }
 
-        /// <summary>
-        /// Updates the follower position and interest
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <inheritdoc/>
+        public void Update(IGameTime gameTime)
         {
             Matrix transform = manipulator.LocalTransform;
 

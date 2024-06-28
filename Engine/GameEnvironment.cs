@@ -11,7 +11,16 @@ namespace Engine
         /// <summary>
         /// Degree of paralelism
         /// </summary>
-        public static readonly int DegreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
+        public static readonly int DegreeOfParalelism = (int)MathF.Ceiling(Environment.ProcessorCount * 0.75f * 2.0f);
+
+        /// <summary>
+        /// Frame time
+        /// </summary>
+        public static float FrameTime { get; set; } = 1f / 60f;
+        /// <summary>
+        /// Double click interval
+        /// </summary>
+        public static float DoubleClickTime { get; set; } = 500;
 
         /// <summary>
         /// Background color
@@ -68,7 +77,7 @@ namespace Engine
             }
             set
             {
-                if (lodDistanceHigh != value)
+                if (!MathUtil.NearEqual(lodDistanceHigh, value))
                 {
                     lodDistanceHigh = value;
 
@@ -87,7 +96,7 @@ namespace Engine
             }
             set
             {
-                if (lodDistanceMedium != value)
+                if (!MathUtil.NearEqual(lodDistanceMedium, value))
                 {
                     lodDistanceMedium = value;
 
@@ -106,7 +115,7 @@ namespace Engine
             }
             set
             {
-                if (lodDistanceLow != value)
+                if (!MathUtil.NearEqual(lodDistanceLow, value))
                 {
                     lodDistanceLow = value;
 
@@ -125,7 +134,7 @@ namespace Engine
             }
             set
             {
-                if (lodDistanceMinimum != value)
+                if (!MathUtil.NearEqual(lodDistanceMinimum, value))
                 {
                     lodDistanceMinimum = value;
 
@@ -144,7 +153,7 @@ namespace Engine
             }
             set
             {
-                if (shadowRadiusDistanceThreshold != value)
+                if (!MathUtil.NearEqual(shadowRadiusDistanceThreshold, value))
                 {
                     shadowRadiusDistanceThreshold = value;
 
@@ -164,7 +173,7 @@ namespace Engine
             }
             set
             {
-                if (shadowDistanceHigh != value)
+                if (!MathUtil.NearEqual(shadowDistanceHigh, value))
                 {
                     shadowDistanceHigh = value;
 
@@ -183,7 +192,7 @@ namespace Engine
             }
             set
             {
-                if (shadowDistanceMedium != value)
+                if (!MathUtil.NearEqual(shadowDistanceMedium, value))
                 {
                     shadowDistanceMedium = value;
 
@@ -202,7 +211,7 @@ namespace Engine
             }
             set
             {
-                if (shadowDistanceLow != value)
+                if (!MathUtil.NearEqual(shadowDistanceLow, value))
                 {
                     shadowDistanceLow = value;
 
@@ -217,12 +226,12 @@ namespace Engine
         {
             get
             {
-                return new[]
-                {
+                return
+                [
                     shadowDistanceHigh,
                     shadowDistanceMedium,
                     shadowDistanceLow,
-                };
+                ];
             }
         }
 
@@ -240,7 +249,7 @@ namespace Engine
         /// Updates the task list
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public bool Update(GameTime gameTime)
+        public bool Update(IGameTime gameTime)
         {
             TimeOfDay.Update(gameTime);
 
@@ -295,6 +304,15 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Gets the level of detail distances packed into a vector
+        /// </summary>
+        /// <returns>Returns a vector with high, medium and low level of detail distances</returns>
+        public Vector3 GetLODDistances()
+        {
+            return new Vector3(LODDistanceHigh, LODDistanceMedium, LODDistanceLow);
+        }
+
         /// <inheritdoc/>
         public IGameState GetState()
         {
@@ -316,7 +334,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is GameEnvironmentState environmentState))
+            if (state is not GameEnvironmentState environmentState)
             {
                 return;
             }

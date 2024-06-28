@@ -78,7 +78,7 @@ namespace Engine.UI
         /// Applies padding to rectangle
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
-        public RectangleF Apply(RectangleF rectangle)
+        public readonly RectangleF Apply(RectangleF rectangle)
         {
             return new RectangleF(
                 rectangle.Left + Left,
@@ -88,16 +88,16 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public bool Equals(Padding other)
+        public readonly bool Equals(Padding other)
         {
             return
-                other.Left == Left &&
-                other.Top == Top &&
-                other.Bottom == Bottom &&
-                other.Right == Right;
+                MathUtil.NearEqual(other.Left, Left) &&
+                MathUtil.NearEqual(other.Top, Top) &&
+                MathUtil.NearEqual(other.Bottom, Bottom) &&
+                MathUtil.NearEqual(other.Right, Right);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is Padding padding)
             {
@@ -107,19 +107,13 @@ namespace Engine.UI
             return false;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = Left.GetHashCode();
-                hashCode = (hashCode * 397) ^ Top.GetHashCode();
-                hashCode = (hashCode * 397) ^ Bottom.GetHashCode();
-                hashCode = (hashCode * 397) ^ Right.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(Left, Top, Bottom, Right);
         }
+
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Left: {Left}; Top: {Top}; Bottom: {Bottom}; Right: {Right};";
         }
@@ -171,10 +165,10 @@ namespace Engine.UI
             {
                 return new Padding
                 {
-                    Left = value[1],
-                    Top = value[2],
-                    Bottom = value[3],
-                    Right = value[4],
+                    Left = value[0],
+                    Top = value[1],
+                    Bottom = value[2],
+                    Right = value[3],
                 };
             }
 
@@ -225,10 +219,10 @@ namespace Engine.UI
             {
                 return new Padding
                 {
-                    Left = value[1],
-                    Top = value[2],
-                    Bottom = value[3],
-                    Right = value[4],
+                    Left = value[0],
+                    Top = value[1],
+                    Bottom = value[2],
+                    Right = value[3],
                 };
             }
 

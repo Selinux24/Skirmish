@@ -13,8 +13,11 @@ namespace Engine.UI
         /// <param name="tabs">Number of tabs</param>
         public static UITabPanelDescription Default(int tabs)
         {
-            return new UITabPanelDescription()
+            return new()
             {
+                Background = SpriteDescription.Default(),
+                ButtonDescription = UIButtonDescription.DefaultTwoStateButton(),
+                PanelDescription = UIPanelDescription.Default(),
                 Tabs = tabs,
             };
         }
@@ -26,7 +29,6 @@ namespace Engine.UI
         {
             var desc = Default(tabCaptions.Length);
             desc.TabCaptions = tabCaptions;
-
             return desc;
         }
         /// <summary>
@@ -38,7 +40,7 @@ namespace Engine.UI
         /// <param name="selectedColor">Highlight color</param>
         public static UITabPanelDescription Default(int tabs, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
-            return new UITabPanelDescription()
+            return new()
             {
                 Background = SpriteDescription.Default(backgroundColor),
                 ButtonDescription = UIButtonDescription.DefaultTwoStateButton(baseColor, selectedColor),
@@ -79,7 +81,7 @@ namespace Engine.UI
         /// <summary>
         /// Tab button captions
         /// </summary>
-        public string[] TabCaptions { get; set; } = new string[] { "Tab 1" };
+        public string[] TabCaptions { get; set; } = ["Tab 1"];
 
         /// <summary>
         /// Tab button text padding

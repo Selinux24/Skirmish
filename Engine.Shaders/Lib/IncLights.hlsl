@@ -193,11 +193,9 @@ inline float CalcFogFactor(float distToEye, float fogStart, float fogRange)
 {
     return saturate((distToEye - fogStart) / fogRange);
 }
-inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
+inline float4 ApplyFog(float4 litColor, float4 fogColor, float fog)
 {
-    float fogLerp = saturate((distToEye - fogStart) / fogRange);
-
-    return float4(lerp(litColor.rgb, fogColor.rgb, fogLerp), litColor.a);
+    return float4(lerp(litColor.rgb, fogColor.rgb, fog), litColor.a);
 }
 
 inline float DistributionBeckmann(float roughness, float NdotH)
@@ -869,6 +867,16 @@ inline float4 ComputeLights(ComputeLightsInput input)
 {
     float distToEye = length(input.eyePosition - input.objectPosition);
 
+    float fog = 0;
+    if (input.fogRange > 0)
+    {
+        fog = CalcFogFactor(distToEye, input.fogStart, input.fogRange);
+        if (fog >= 1)
+        {
+            return input.fogColor;
+        }
+    }
+    
     float4 color = 0;
     if (distToEye < input.levelOfDetailRanges.x)
     {
@@ -883,12 +891,7 @@ inline float4 ComputeLights(ComputeLightsInput input)
         color = ComputeLightsLOD3(input);
     }
 
-    if (input.fogRange > 0)
-    {
-        color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
-    }
-    
-    return color;
+    return ApplyFog(color, input.fogColor, fog);
 }
 
 #endif

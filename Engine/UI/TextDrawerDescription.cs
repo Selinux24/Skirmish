@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.UI
 {
@@ -180,7 +179,7 @@ namespace Engine.UI
         /// <summary>
         /// Custom key codes to add to the default key code collection
         /// </summary>
-        public IEnumerable<char> CustomKeycodes { get; set; } = Enumerable.Empty<char>();
+        public IEnumerable<char> CustomKeycodes { get; set; } = [];
 
         /// <summary>
         /// Constructor
@@ -188,7 +187,6 @@ namespace Engine.UI
         public TextDrawerDescription()
             : base()
         {
-            CastShadow = false;
             DeferredEnabled = false;
             DepthEnabled = false;
             BlendMode = BlendModes.Alpha;
@@ -198,7 +196,7 @@ namespace Engine.UI
     /// <summary>
     /// Font mapping description
     /// </summary>
-    public class FontMapping
+    public struct FontMapping
     {
         /// <summary>
         /// Image filename
@@ -208,5 +206,17 @@ namespace Engine.UI
         /// Map filename
         /// </summary>
         public string MapFile { get; set; }
+
+        /// <summary>
+        /// Map is empty
+        /// </summary>
+        public readonly bool IsEmpty
+        {
+            get
+            {
+                //Needs to be both informed
+                return string.IsNullOrEmpty(ImageFile) || string.IsNullOrEmpty(MapFile);
+            }
+        }
     }
 }

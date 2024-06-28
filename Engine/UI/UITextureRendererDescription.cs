@@ -14,7 +14,7 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static UITextureRendererDescription Default(float width = 0, float height = 0)
         {
-            return new UITextureRendererDescription
+            return new()
             {
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
@@ -30,9 +30,9 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static UITextureRendererDescription Default(string fileName, float width = 0, float height = 0)
         {
-            return new UITextureRendererDescription
+            return new()
             {
-                Textures = new[] { fileName },
+                Textures = [fileName],
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
@@ -45,7 +45,7 @@ namespace Engine.UI
         /// <param name="bounds">Control bounds</param>
         public static UITextureRendererDescription Default(RectangleF bounds)
         {
-            return new UITextureRendererDescription
+            return new()
             {
                 Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
@@ -62,9 +62,9 @@ namespace Engine.UI
         /// <param name="bounds">Control bounds</param>
         public static UITextureRendererDescription Default(string fileName, RectangleF bounds)
         {
-            return new UITextureRendererDescription
+            return new()
             {
-                Textures = new[] { fileName },
+                Textures = [fileName],
                 Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
                 Top = bounds.Top,
@@ -82,7 +82,7 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static UITextureRendererDescription Default(float left, float top, float width, float height)
         {
-            return new UITextureRendererDescription
+            return new()
             {
                 Channel = ColorChannels.NoAlpha,
                 Left = left,
@@ -102,9 +102,9 @@ namespace Engine.UI
         /// <param name="height">Height</param>
         public static UITextureRendererDescription Default(string fileName, float left, float top, float width, float height)
         {
-            return new UITextureRendererDescription
+            return new()
             {
-                Textures = new[] { fileName },
+                Textures = [fileName],
                 Channel = ColorChannels.NoAlpha,
                 Left = left,
                 Top = top,

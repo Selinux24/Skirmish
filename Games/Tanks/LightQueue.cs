@@ -40,7 +40,7 @@ namespace Tanks
             /// Updates the internal tweener state
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            public void UpdateTweener(GameTime gameTime)
+            public void UpdateTweener(IGameTime gameTime)
             {
                 float deltaTime = gameTime.TotalSeconds - ActivationTime;
                 if (deltaTime > MaxDuration)
@@ -73,11 +73,11 @@ namespace Tanks
         /// <summary>
         /// Lights collection
         /// </summary>
-        private static readonly List<SceneLightPoint> lights = new List<SceneLightPoint>();
+        private static readonly List<SceneLightPoint> lights = [];
         /// <summary>
         /// Tweeners collection
         /// </summary>
-        private static readonly List<LightTweener> lightTweeners = new List<LightTweener>();
+        private static readonly List<LightTweener> lightTweeners = [];
 
         /// <summary>
         /// Initializes the queue
@@ -95,14 +95,14 @@ namespace Tanks
         /// <param name="position">Position</param>
         /// <param name="description">Tween description</param>
         /// <param name="maxDuration">Maximum duration</param>
-        public static void QueueLight(GameTime gameTime, Vector3 position, LightTweenDescription description, float maxDuration)
+        public static void QueueLight(IGameTime gameTime, Vector3 position, LightTweenDescription description, float maxDuration)
         {
-            if (!lights.Any())
+            if (lights.Count == 0)
             {
                 return;
             }
 
-            var freeLight = lights.FirstOrDefault(l => !l.Enabled);
+            var freeLight = lights.Find(l => !l.Enabled);
             if (freeLight == null)
             {
                 return;
@@ -128,9 +128,9 @@ namespace Tanks
         /// Updates the queue state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public static void Update(GameTime gameTime)
+        public static void Update(IGameTime gameTime)
         {
-            if (!lightTweeners.Any())
+            if (lightTweeners.Count == 0)
             {
                 return;
             }

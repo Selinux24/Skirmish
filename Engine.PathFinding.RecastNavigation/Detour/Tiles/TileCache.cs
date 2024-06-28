@@ -10,29 +10,79 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public class TileCache
     {
+        /// <summary>
+        /// Maximum tiles
+        /// </summary>
         const int MAX_TILES = 32;
+        /// <summary>
+        /// Maximum number of requests
+        /// </summary>
+        const int MAX_REQUESTS = 64;
+        /// <summary>
+        /// Maximum number of updates
+        /// </summary>
+        const int MAX_UPDATE = 64;
+        /// <summary>
+        /// Maximum number of touched tiles
+        /// </summary>
+        const int MAX_TOUCHED_TILES = 8;
 
+        /// <summary>
+        /// Navigation mesh
+        /// </summary>
         private readonly NavMesh m_navMesh;
+        /// <summary>
+        /// Parameters
+        /// </summary>
         private TileCacheParams m_params;
-        private readonly TileCacheMeshProcess m_tmproc;
-        private readonly TileCacheObstacle[] m_obstacles = null;
+        /// <summary>
+        /// Mesh processor
+        /// </summary>
+        private readonly InputGeometry m_geom;
+        /// <summary>
+        /// Obstacle list
+        /// </summary>
+        private readonly TileCacheObstacle[] m_obstacles;
+        /// <summary>
+        /// Next free obstacle
+        /// </summary>
         private int m_nextFreeObstacle;
+        /// <summary>
+        /// Tile lut mask
+        /// </summary>
         private readonly int m_tileLutMask;
-        private readonly CompressedTile[] m_tiles = null;
-        private readonly CompressedTile[] m_posLookup = null;
+        /// <summary>
+        /// Compressed tile list
+        /// </summary>
+        private readonly CompressedTile[] m_tiles;
+        /// <summary>
+        /// Look up compressed tile list
+        /// </summary>
+        private readonly CompressedTile[] m_posLookup;
+        /// <summary>
+        /// Next free tile
+        /// </summary>
         private CompressedTile m_nextFreeTile = null;
-        private readonly int m_tileBits;
+        /// <summary>
+        /// Salt bits
+        /// </summary>
         private readonly int m_saltBits;
-        private readonly List<ObstacleRequest> m_reqs = new List<ObstacleRequest>();
-        private readonly List<CompressedTile> m_update = new List<CompressedTile>();
+        /// <summary>
+        /// Obstacle requests
+        /// </summary>
+        private readonly List<ObstacleRequest> m_reqs = [];
+        /// <summary>
+        /// Compressed tiles to update
+        /// </summary>
+        private readonly List<CompressedTile> m_update = [];
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public TileCache(NavMesh navMesh, TileCacheMeshProcess tmproc, TileCacheParams tcparams)
+        public TileCache(NavMesh navMesh, InputGeometry geometry, TileCacheParams tcparams)
         {
-            m_navMesh = navMesh;
-            m_tmproc = tmproc;
+            m_navMesh = navMesh ?? throw new ArgumentNullException(nameof(navMesh));
+            m_geom = geometry ?? throw new ArgumentNullException(nameof(geometry));
             m_params = tcparams;
 
             // Alloc space for obstacles.
@@ -40,17 +90,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             m_nextFreeObstacle = -1;
             for (int i = tcparams.MaxObstacles - 1; i >= 0; i--)
             {
-                m_obstacles[i] = new TileCacheObstacle
+                m_obstacles[i] = new(null, 1)
                 {
-                    Salt = 1,
                     Next = m_nextFreeObstacle
                 };
                 m_nextFreeObstacle = i;
             }
 
             // Init tiles
-            var m_tileLutSize = Helper.NextPowerOfTwo(tcparams.MaxTiles / 4);
-            if (m_tileLutSize == 0) m_tileLutSize = 1;
+            int m_tileLutSize = Math.Max(1, Helper.NextPowerOfTwo(tcparams.MaxTiles / 4));
             m_tileLutMask = m_tileLutSize - 1;
 
             m_tiles = new CompressedTile[tcparams.MaxTiles];
@@ -58,7 +106,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             for (int i = tcparams.MaxTiles - 1; i >= 0; i--)
             {
-                m_tiles[i] = new CompressedTile
+                m_tiles[i] = new()
                 {
                     Salt = 1,
                     Next = m_nextFreeTile
@@ -67,14 +115,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Init ID generator values.
-            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
+            int tileBits = (int)MathF.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
 
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
-            m_saltBits = Math.Min(31, 32 - m_tileBits);
+            m_saltBits = Math.Min(31, 32 - tileBits);
             if (m_saltBits < 10)
             {
                 throw new EngineException("NavMesh DT_INVALID_PARAM");
             }
+        }
+
+        /// <summary>
+        /// Encodes an obstacle id.
+        /// </summary>
+        private static int EncodeObstacleId(int salt, int it)
+        {
+            return (salt << 16) | it;
+        }
+        /// <summary>
+        /// Decodes an obstacle salt.
+        /// </summary>
+        private static int DecodeObstacleIdSalt(int r)
+        {
+            int saltMask = (1 << 16) - 1;
+            return (r >> 16) & saltMask;
+        }
+        /// <summary>
+        /// Decodes an obstacle id.
+        /// </summary>
+        private static int DecodeObstacleIdObstacle(int r)
+        {
+            int tileMask = (1 << 16) - 1;
+            return r & tileMask;
         }
 
         /// <summary>
@@ -87,10 +159,61 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
 
         /// <summary>
+        /// Builds the tile chache
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="agent">Agent</param>
+        /// <param name="tiledCfg">Configuration</param>
+        /// <param name="progressCallback">Optional progress callback</param>
+        public void BuildAllTiles(InputGeometry geometry, GraphAgentType agent, TilesConfig tiledCfg, Action<float> progressCallback)
+        {
+            float total = m_params.TileHeight * m_params.TileWidth * 2;
+            int curr = 0;
+
+            foreach (var (x, y) in GridUtils.Iterate(m_params.TileWidth, m_params.TileHeight))
+            {
+                var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
+                foreach (var tile in tiles)
+                {
+                    AddTile(tile, CompressedTileFlagTypes.Free);
+                }
+
+                progressCallback?.Invoke(++curr / total);
+            }
+
+            // Build initial meshes
+            foreach (var (x, y) in GridUtils.Iterate(m_params.TileWidth, m_params.TileHeight))
+            {
+                BuildTilesAt(x, y, agent);
+
+                progressCallback?.Invoke(++curr / total);
+            }
+        }
+        /// <summary>
+        /// Builds the tile at coordinates
+        /// </summary>
+        /// <param name="x">Tile x coordinate</param>
+        /// <param name="y">Tile y coordinate</param>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="agent">Agent</param>
+        /// <param name="tiledCfg">Configuration</param>
+        public void BuildTileAt(int x, int y, InputGeometry geometry, GraphAgentType agent, TilesConfig tiledCfg)
+        {
+            var tiles = TileCacheData.RasterizeTileLayers(x, y, geometry, tiledCfg);
+
+            foreach (var tile in tiles)
+            {
+                AddTile(tile, CompressedTileFlagTypes.Free, false);
+            }
+
+            BuildTilesAt(x, y, agent);
+        }
+
+        /// <summary>
         /// Gets maximum tile count
         /// </summary>
         /// <returns>Returns the maximum tile count</returns>
-        public int GetTileCount()
+        public int GetMaxTileCount()
         {
             return m_params.MaxTiles;
         }
@@ -103,57 +226,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             return m_tiles[i];
         }
-        /// <summary>
-        /// Gets a tile by reference
-        /// </summary>
-        /// <param name="r">Reference</param>
-        /// <returns>Returns a tile</returns>
-        public CompressedTile GetTileByRef(int r)
-        {
-            if (r == 0)
-            {
-                return null;
-            }
-
-            int idx = DecodeTileIdTile(r);
-            if (idx >= m_params.MaxTiles)
-            {
-                return null;
-            }
-
-            var tile = m_tiles[idx];
-            int salt = DecodeTileIdSalt(r);
-            if (tile.Salt != salt)
-            {
-                return null;
-            }
-
-            return tile;
-        }
-        /// <summary>
-        /// Gets the tile reference
-        /// </summary>
-        /// <param name="tile">Tile</param>
-        /// <returns>Returns the tile reference</returns>
-        public int GetTileRef(CompressedTile tile)
-        {
-            if (tile == null)
-            {
-                return 0;
-            }
-
-            int idx = Array.IndexOf(m_tiles, tile);
-
-            return EncodeTileId(tile.Salt, idx);
-        }
 
         /// <summary>
         /// Gets the tile list
         /// </summary>
         /// <returns>Returns a tile list</returns>
-        public IEnumerable<CompressedTile> GetTiles()
+        public CompressedTile[] GetTiles()
         {
-            return m_tiles?.ToArray() ?? new CompressedTile[] { };
+            return [.. m_tiles];
         }
         /// <summary>
         /// Gets the tiles at the specified coordinates
@@ -162,12 +242,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="y">Y coordinate</param>
         /// <param name="maxTiles">Maximum tiles to return</param>
         /// <returns>Returns a list of tiles</returns>
-        public IEnumerable<CompressedTile> GetTilesAt(int x, int y, int maxTiles)
+        public CompressedTile[] GetTilesAt(int x, int y, int maxTiles = MAX_TILES)
         {
-            List<CompressedTile> tiles = new List<CompressedTile>();
+            List<CompressedTile> tiles = [];
 
             // Find tile based on hash.
-            int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
+            int h = Utils.ComputeTileHash(x, y, m_tileLutMask);
             var tile = m_posLookup[h];
             while (tile != null)
             {
@@ -184,7 +264,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 tile = tile.Next;
             }
 
-            return tiles.ToArray();
+            return [.. tiles];
         }
         /// <summary>
         /// Gets the tile at coordinates
@@ -196,7 +276,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public CompressedTile GetTileAt(int x, int y, int tlayer)
         {
             // Find tile based on hash.
-            int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
+            int h = Utils.ComputeTileHash(x, y, m_tileLutMask);
             var tile = m_posLookup[h];
             while (tile != null)
             {
@@ -210,6 +290,35 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return null;
         }
+        /// <summary>
+        /// Query tiles
+        /// </summary>
+        /// <param name="bounds">Bounding box</param>
+        /// <param name="maxResults">Maximum results</param>
+        /// <returns>Returns the compressed tiles into the bounding box</returns>
+        private IEnumerable<CompressedTile> GetTilesInBounds(BoundingBox bounds, int maxResults = MAX_TOUCHED_TILES)
+        {
+            float cs = m_params.CellSize;
+
+            int resultCount = 0;
+
+            foreach (var (tx, ty) in m_params.IterateTilesInBounds(bounds))
+            {
+                var tiles = GetTilesAt(tx, ty);
+
+                foreach (var tile in tiles)
+                {
+                    var tbounds = tile.Header.GetTightTileBounds(cs);
+
+                    if (Utils.OverlapBounds(bounds.Minimum, bounds.Maximum, tbounds.Minimum, tbounds.Maximum) && resultCount < maxResults)
+                    {
+                        resultCount++;
+
+                        yield return tile;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Adds a new tile to the tile cache
@@ -220,15 +329,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the new tile</returns>
         public CompressedTile AddTile(TileCacheData data, CompressedTileFlagTypes flags, bool failIfExists = true)
         {
-            // Make sure the data is in right format.
             var header = data.Header;
-            if (header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+
+            // Make sure the data is in right format.
+            if (!header.IsValid())
             {
-                throw new EngineException("DT_WRONG_MAGIC");
-            }
-            if (header.Version != DetourTileCache.DT_TILECACHE_VERSION)
-            {
-                throw new EngineException("DT_WRONG_VERSION");
+                throw new EngineException($"Wrong header {header.Magic}-{header.Version}");
             }
 
             // Make sure the location is free.
@@ -251,7 +357,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Insert tile into the position lut.
-            int h = DetourUtils.ComputeTileHash(header.TX, header.TY, m_tileLutMask);
+            int h = Utils.ComputeTileHash(header.TX, header.TY, m_tileLutMask);
             tile.Next = m_posLookup[h];
             m_posLookup[h] = tile;
 
@@ -262,13 +368,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return tile;
         }
+
+        /// <summary>
+        /// Removes all the tile layers in the coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        public Status RemoveTilesAt(int x, int y)
+        {
+            Status res = Status.DT_SUCCESS;
+
+            foreach (var t in GetTilesAt(x, y))
+            {
+                var pStatus = RemoveTile(t, out _);
+                if (!pStatus.HasFlag(Status.DT_SUCCESS))
+                {
+                    res |= pStatus;
+                }
+            }
+
+            return res;
+        }
         /// <summary>
         /// Removes a tile
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <param name="tlayer">Layer number</param>
-        public Status RemoveTile(int x, int y, int tlayer)
+        public Status RemoveTileAt(int x, int y, int tlayer)
         {
             var t = GetTileAt(x, y, tlayer);
             if (t != null)
@@ -283,12 +410,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="tile">Tile to remove</param>
         /// <param name="data">Layer data</param>
-        public Status RemoveTile(CompressedTile tile, out TileCacheLayerData data)
+        private Status RemoveTile(CompressedTile tile, out TileCacheLayerData data)
         {
             data = TileCacheLayerData.Empty;
 
             // Remove tile from hash lookup.
-            int h = DetourTileCache.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
+            int h = Utils.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
             CompressedTile prev = null;
             CompressedTile cur = m_posLookup[h];
             while (cur != null)
@@ -310,7 +437,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Reset tile.
-            if ((tile.Flags & CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA) != 0)
+            if (tile.Flags == CompressedTileFlagTypes.Free)
             {
                 // Owns data
                 tile.Data = TileCacheLayerData.Empty;
@@ -320,9 +447,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 data = tile.Data;
             }
 
-            tile.Header = new TileCacheLayerHeader();
-            tile.Data = new TileCacheLayerData();
-            tile.Flags = 0;
+            tile.Header = new();
+            tile.Data = new();
+            tile.Flags = CompressedTileFlagTypes.None;
 
             // Update salt, salt should never be zero.
             tile.Salt = (tile.Salt + 1) & ((1 << m_saltBits) - 1);
@@ -337,115 +464,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return Status.DT_SUCCESS;
         }
-        /// <summary>
-        /// Removes a tile by reference
-        /// </summary>
-        /// <param name="r">Tile reference</param>
-        /// <param name="data">Returns the layer data</param>
-        public Status RemoveTile(int r, out TileCacheLayerData data)
-        {
-            data = TileCacheLayerData.Empty;
-
-            if (r == 0)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            int tileIndex = DecodeTileIdTile(r);
-            int tileSalt = DecodeTileIdSalt(r);
-            if (tileIndex >= m_params.MaxTiles)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            var tile = m_tiles[tileIndex];
-            if (tile.Salt != tileSalt)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
-            return RemoveTile(tile, out data);
-        }
-        /// <summary>
-        /// Removes all the tile layers in the coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="y">Y coordinate</param>
-        public Status RemoveTiles(int x, int y)
-        {
-            Status res = Status.DT_SUCCESS;
-
-            var tiles = GetTilesAt(x, y, MAX_TILES);
-            foreach (var t in tiles)
-            {
-                var pStatus = RemoveTile(t, out _);
-                if (!pStatus.HasFlag(Status.DT_SUCCESS))
-                {
-                    res |= pStatus;
-                }
-            }
-
-            return res;
-        }
-
-        /// <summary>
-        /// Gets the maximum obstacle count
-        /// </summary>
-        /// <returns>Returns the maximum obstacle count</returns>
-        public int GetObstacleCount()
-        {
-            return m_params.MaxObstacles;
-        }
-        /// <summary>
-        /// Gets an obstacle by index
-        /// </summary>
-        /// <param name="i">Index</param>
-        /// <returns>Returns an obstacle</returns>
-        public TileCacheObstacle GetObstacle(int i)
-        {
-            return m_obstacles[i];
-        }
-        /// <summary>
-        /// Gets an obstacle by reference
-        /// </summary>
-        /// <param name="r">Reference</param>
-        /// <returns>Returns an obstacle</returns>
-        public TileCacheObstacle GetObstacleByRef(int r)
-        {
-            if (r == 0)
-            {
-                return null;
-            }
-
-            int idx = DecodeObstacleIdObstacle(r);
-            if (idx >= m_params.MaxObstacles)
-            {
-                return null;
-            }
-
-            var ob = m_obstacles[idx];
-            int salt = DecodeObstacleIdSalt(r);
-            if (ob.Salt != salt)
-            {
-                return null;
-            }
-
-            return ob;
-        }
-        /// <summary>
-        /// Gets the obstacle reference
-        /// </summary>
-        /// <param name="ob">Obstacle</param>
-        /// <returns>Returns the obstacle reference</returns>
-        public int GetObstacleRef(TileCacheObstacle ob)
-        {
-            if (ob == null)
-            {
-                return 0;
-            }
-
-            int idx = Array.IndexOf(m_obstacles, ob);
-
-            return EncodeObstacleId(ob.Salt, idx);
-        }
 
         /// <summary>
         /// Adds a new obstacle request
@@ -456,7 +474,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             result = 0;
 
-            if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
+            if (m_reqs.Count >= MAX_REQUESTS)
             {
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
@@ -474,17 +492,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             int salt = m_obstacles[ob].Salt;
-            m_obstacles[ob] = new TileCacheObstacle
-            {
-                Salt = salt,
-                State = ObstacleState.DT_OBSTACLE_PROCESSING,
-                Obstacle = obstacle,
-            };
+            m_obstacles[ob] = new(obstacle, salt, ObstacleState.DT_OBSTACLE_PROCESSING);
 
             var req = new ObstacleRequest
             {
                 Action = ObstacleRequestAction.REQUEST_ADD,
-                NRef = GetObstacleRef(m_obstacles[ob]),
+                NRef = EncodeObstacleId(salt, ob),
             };
             m_reqs.Add(req);
 
@@ -498,7 +511,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="r">Reference</param>
         public Status RemoveObstacle(int r)
         {
-            if (r == 0 || m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
+            if (r == 0 || m_reqs.Count >= MAX_REQUESTS)
             {
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
@@ -512,34 +525,49 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return Status.DT_SUCCESS;
         }
+        /// <summary>
+        /// Returns whether the tile cache is updating or not
+        /// </summary>
+        public bool Updating()
+        {
+            return (m_update.Count + m_reqs.Count) > 0;
+        }
 
         /// <summary>
         /// Updates the tile-cache
         /// </summary>
-        /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
-        public Status Update(out bool upToDate)
+        /// <param name="agent">Agent</param>
+        /// <param name="callback">Updating callback</param>
+        /// <param name="cacheUpdated">Returns true if the instance tile cahche is up to date (No requests to perform)</param>
+        public Status Update(GraphAgentType agent, out bool cacheUpdated)
         {
+            bool updating = Updating();
+
             if (m_update.Count == 0)
             {
                 // Process requests.
                 ProcessRequests();
             }
 
-            Status status = ProcessUpdates();
+            Status status = ProcessUpdates(agent);
 
-            upToDate = m_update.Count == 0 && m_reqs.Count == 0;
+            cacheUpdated = updating != Updating();
 
             return status;
         }
+        /// <summary>
+        /// Process requests
+        /// </summary>
         private void ProcessRequests()
         {
-            if (!m_reqs.Any())
+            if (m_reqs.Count == 0)
             {
                 return;
             }
 
-            // Copy requests
+            // Copy requests & obstacles
             var reqs = m_reqs.ToArray();
+            var obs = m_obstacles.ToArray();
             m_reqs.Clear();
 
             // Process requests.
@@ -550,7 +578,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     continue;
                 }
-                var ob = m_obstacles[idx];
+                var ob = obs[idx];
                 int salt = DecodeObstacleIdSalt(req.NRef);
                 if (ob.Salt != salt)
                 {
@@ -567,158 +595,102 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
         }
+        /// <summary>
+        /// Procees add obstable request
+        /// </summary>
+        /// <param name="ob">Obstacle</param>
         private void ProcessRequestAdd(TileCacheObstacle ob)
         {
             // Find touched tiles.
-            var bbox = ob.GetObstacleBounds();
+            var obBounds = ob.GetObstacleBounds();
+            var tiles = GetTilesInBounds(obBounds);
 
-            var tiles = QueryTiles(bbox, DetourTileCache.DT_MAX_TOUCHED_TILES);
-            ob.Touched.AddRange(tiles);
+            // Prepare to request the process of the obstacle.
+            ob.BeginRequest(tiles);
 
             // Add tiles to update list.
-            ob.Pending.Clear();
-            foreach (var touched in ob.Touched)
+            foreach (var touched in ob.GetTouched())
             {
-                if (m_update.Count < DetourTileCache.MAX_UPDATE)
+                if (m_update.Count >= MAX_UPDATE)
                 {
-                    if (!m_update.Contains(touched))
-                    {
-                        m_update.Add(touched);
-                    }
-                    ob.Pending.Add(touched);
+                    continue;
                 }
+
+                if (!m_update.Contains(touched))
+                {
+                    m_update.Add(touched);
+                }
+
+                ob.AddPendingTile(touched);
             }
         }
+        /// <summary>
+        /// Procees remove obstable request
+        /// </summary>
+        /// <param name="ob">Obstacle</param>
         private void ProcessRequestRemove(TileCacheObstacle ob)
         {
             // Prepare to remove obstacle.
-            ob.State = ObstacleState.DT_OBSTACLE_REMOVING;
+            ob.BeginRemove();
 
             // Add tiles to update list.
-            ob.Pending.Clear();
-            foreach (var touched in ob.Touched)
+            foreach (var touched in ob.GetTouched())
             {
-                if (m_update.Count < DetourTileCache.MAX_UPDATE)
+                if (m_update.Count >= MAX_UPDATE)
                 {
-                    if (!m_update.Contains(touched))
-                    {
-                        m_update.Add(touched);
-                    }
-                    ob.Pending.Add(touched);
+                    continue;
                 }
+
+                if (!m_update.Contains(touched))
+                {
+                    m_update.Add(touched);
+                }
+
+                ob.AddPendingTile(touched);
             }
         }
-        private Status ProcessUpdates()
+        /// <summary>
+        /// Process updates
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        private Status ProcessUpdates(GraphAgentType agent)
         {
+            // Process updates
+            if (m_update.Count == 0)
+            {
+                return Status.DT_SUCCESS;
+            }
+
             Status status = Status.DT_SUCCESS;
 
-            // Process updates
-            if (m_update.Count != 0)
+            // Build mesh
+            var r = m_update[0];
+            if (!BuildTile(r, agent))
             {
-                // Build mesh
-                var r = m_update[0];
-                if (!BuildTile(r))
+                status = Status.DT_FAILURE;
+            }
+
+            if (m_update.Count > 0)
+            {
+                m_update.RemoveAt(0);
+            }
+
+            // Update obstacle states.
+            var pendingObstacles = m_obstacles
+                .Where(ob => ob.IsPending())
+                .ToArray();
+
+            for (int i = 0; i < pendingObstacles.Length; ++i)
+            {
+                var ob = pendingObstacles[i];
+
+                if (ob.ProcessUpdate(r, m_nextFreeObstacle))
                 {
-                    status = Status.DT_FAILURE;
-                }
-
-                if (m_update.Count > 0)
-                {
-                    m_update.RemoveAt(0);
-                }
-
-                // Update obstacle states.
-                var pendingObstacles = m_obstacles
-                    .Where(ob => ob.State == ObstacleState.DT_OBSTACLE_PROCESSING || ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
-                    .ToArray();
-
-                for (int i = 0; i < pendingObstacles.Length; ++i)
-                {
-                    var ob = pendingObstacles[i];
-
-                    bool processed = ProcessObstacleUpdate(ob, r);
-                    if (processed)
-                    {
-                        // Return obstacle to free list.
-                        ob.Next = m_nextFreeObstacle;
-                        m_nextFreeObstacle = i;
-                    }
+                    m_nextFreeObstacle = i;
                 }
             }
 
             return status;
-        }
-        private bool ProcessObstacleUpdate(TileCacheObstacle ob, CompressedTile r)
-        {
-            // Remove handled tile from pending list.
-            ob.Pending.Remove(r);
-
-            // If all pending tiles processed, change state.
-            if (ob.Pending.Count == 0)
-            {
-                if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING)
-                {
-                    ob.State = ObstacleState.DT_OBSTACLE_PROCESSED;
-                }
-                else if (ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
-                {
-                    ob.State = ObstacleState.DT_OBSTACLE_EMPTY;
-                    // Update salt, salt should never be zero.
-                    ob.Salt = (ob.Salt + 1) & ((1 << 16) - 1);
-                    if (ob.Salt == 0)
-                    {
-                        ob.Salt++;
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        private IEnumerable<CompressedTile> QueryTiles(BoundingBox bbox, int maxResults)
-        {
-            List<CompressedTile> results = new List<CompressedTile>();
-
-            float tw = m_params.Width * m_params.CellSize;
-            float th = m_params.Height * m_params.CellSize;
-            int tx0 = (int)Math.Floor((bbox.Minimum.X - m_params.Origin.X) / tw);
-            int tx1 = (int)Math.Floor((bbox.Maximum.X - m_params.Origin.X) / tw);
-            int ty0 = (int)Math.Floor((bbox.Minimum.Z - m_params.Origin.Z) / th);
-            int ty1 = (int)Math.Floor((bbox.Maximum.Z - m_params.Origin.Z) / th);
-
-            for (int ty = ty0; ty <= ty1; ++ty)
-            {
-                for (int tx = tx0; tx <= tx1; ++tx)
-                {
-                    var tiles = GetTilesAt(tx, ty, MAX_TILES);
-
-                    foreach (var tile in tiles)
-                    {
-                        CalcTightTileBounds(tile.Header, out Vector3 tbmin, out Vector3 tbmax);
-
-                        if (DetourUtils.OverlapBounds(bbox.Minimum, bbox.Maximum, tbmin, tbmax) && results.Count < maxResults)
-                        {
-                            results.Add(tile);
-                        }
-                    }
-                }
-            }
-
-            return results.ToArray();
-        }
-        private void CalcTightTileBounds(TileCacheLayerHeader header, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = new Vector3();
-            bmax = new Vector3();
-
-            float cs = m_params.CellSize;
-            bmin.X = header.BBox.Minimum.X + header.MinX * cs;
-            bmin.Y = header.BBox.Minimum.Y;
-            bmin.Z = header.BBox.Minimum.Z + header.MinY * cs;
-            bmax.X = header.BBox.Minimum.X + (header.MaxX + 1) * cs;
-            bmax.Y = header.BBox.Maximum.Y;
-            bmax.Z = header.BBox.Minimum.Z + (header.MaxY + 1) * cs;
         }
 
         /// <summary>
@@ -726,32 +698,120 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
-        public bool BuildTilesAt(int x, int y)
+        /// <param name="agent">Agent</param>
+        private void BuildTilesAt(int x, int y, GraphAgentType agent)
         {
             // Get all tiles
             var tiles = GetTilesAt(x, y, 0);
-
-            bool res = true;
             foreach (var tile in tiles)
             {
-                if (!BuildTile(tile))
-                {
-                    res = false;
-                }
+                BuildTile(tile, agent);
+            }
+        }
+        /// <summary>
+        /// Builds the specified tile
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <param name="agent">Agent</param>
+        private bool BuildTile(CompressedTile tile, GraphAgentType agent)
+        {
+            // Decompress tile layer data.
+            TileCacheLayer tlayer = new(tile);
+
+            // Process obstacles
+            ProcessObstacles(ref tlayer, tile);
+
+            int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
+
+            // Build navmesh
+            if (!tlayer.BuildRegions(walkableClimbVx))
+            {
+                return false;
             }
 
-            return res;
-        }
-        private bool BuildTile(CompressedTile tile)
-        {
-            NavMeshTileBuildContext bc = new NavMeshTileBuildContext
+            // Build contour set
+            var tcset = tlayer.BuildContourSet(walkableClimbVx, m_params.MaxSimplificationError);
+
+            // Build polygon mesh
+            var tmesh = TileCachePolyMesh.Build(tcset, IndexedPolygon.DT_VERTS_PER_POLYGON);
+
+            // Early out if the mesh tile is empty.
+            if (tmesh.GetPolyCount() == 0)
             {
-                // Decompress tile layer data.
-                Layer = tile.Decompress(),
+                // Remove existing tile.
+                m_navMesh.RemoveTileAt(tile.Header);
+
+                return true;
+            }
+
+            tmesh.UpdatePolyFlags(agent.PathFilter);
+
+            var param = new NavMeshCreateParams
+            {
+                VertCount = tmesh.GetVertexCount(),
+                Verts = tmesh.GetVertices(),
+                PolyCount = tmesh.GetPolyCount(),
+                Polys = tmesh.GetPolygons(),
+                PolyAreas = tmesh.GetAreas(),
+                PolyFlags = tmesh.GetFlags(),
+                NVP = tmesh.NVP,
+                DetailMeshes = null,
+                DetailVerts = null,
+                DetailVertsCount = 0,
+                DetailTris = null,
+                DetailTriCount = 0,
+                WalkableHeight = m_params.WalkableHeight,
+                WalkableRadius = m_params.WalkableRadius,
+                WalkableClimb = m_params.WalkableClimb,
+                Bounds = tile.Header.Bounds,
+                CellSize = m_params.CellSize,
+                CellHeight = m_params.CellHeight,
+                BuildBvTree = false,
+
+                TileX = tile.Header.TX,
+                TileY = tile.Header.TY,
+                TileLayer = tile.Header.TLayer,
+
+                // Pass in off-mesh connections.
+                OffMeshConCount = m_geom.GetConnectionCount(),
+                OffMeshCon = m_geom.GetConnections(),
             };
 
+            // Remove existing tile.
+            m_navMesh.RemoveTileAt(tile.Header);
+
+            var navData = MeshData.CreateNavMeshData(param);
+            if (navData == null)
+            {
+                // Leave the location empty.
+                return true;
+            }
+
+            if (m_params.EnableDebugInfo)
+            {
+                navData.BuildData = new()
+                {
+                    Origin = tile.Header.Bounds.Minimum,
+                    CellSize = m_params.CellSize,
+                    CellHeight = m_params.CellHeight,
+                    TileCacheLayer = tlayer,
+                    TileCacheContourSet = tcset,
+                    TileCachePolyMesh = tmesh,
+                };
+            }
+
+            // Add new tile
+            return m_navMesh.AddTile(navData);
+        }
+        /// <summary>
+        /// Process obstacles
+        /// </summary>
+        /// <param name="tlayer">Layer</param>
+        /// <param name="tile">Tile</param>
+        private void ProcessObstacles(ref TileCacheLayer tlayer, CompressedTile tile)
+        {
             // Reset untouched obstacles
-            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && !o.Touched.Any());
+            var obs = m_obstacles.Where(o => o.IsUntouched());
             foreach (var ob in obs)
             {
                 ProcessRequestAdd(ob);
@@ -760,131 +820,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
-                m_obstacles[i].Rasterize(bc, tile, m_params.CellSize, m_params.CellHeight);
+                if (!m_obstacles[i].ContainsTouched(tile))
+                {
+                    continue;
+                }
+
+                m_obstacles[i].Rasterize(ref tlayer, tile.Header.Bounds.Minimum, m_params.CellSize, m_params.CellHeight);
             }
-
-            int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
-
-            // Build navmesh
-            if (!DetourTileCache.BuildTileCacheRegions(bc, walkableClimbVx))
-            {
-                return false;
-            }
-
-            if (!DetourTileCache.BuildTileCacheContours(bc, walkableClimbVx, m_params.MaxSimplificationError))
-            {
-                return false;
-            }
-
-            if (!DetourTileCache.BuildTileCachePolyMesh(bc))
-            {
-                return false;
-            }
-
-            // Early out if the mesh tile is empty.
-            if (bc.LMesh.NPolys == 0)
-            {
-                // Remove existing tile.
-                m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
-
-                return true;
-            }
-
-            var param = new NavMeshCreateParams
-            {
-                Verts = bc.LMesh.Verts,
-                VertCount = bc.LMesh.NVerts,
-                Polys = bc.LMesh.Polys,
-                PolyAreas = bc.LMesh.Areas,
-                PolyFlags = bc.LMesh.Flags,
-                PolyCount = bc.LMesh.NPolys,
-                Nvp = DetourUtils.DT_VERTS_PER_POLYGON,
-                DetailMeshes = null,
-                DetailVerts = null,
-                DetailVertsCount = 0,
-                DetailTris = null,
-                DetailTriCount = 0,
-                OffMeshCon = null,
-                OffMeshConCount = 0,
-                WalkableHeight = m_params.WalkableHeight,
-                WalkableRadius = m_params.WalkableRadius,
-                WalkableClimb = m_params.WalkableClimb,
-                BMin = tile.Header.BBox.Minimum,
-                BMax = tile.Header.BBox.Maximum,
-                CellSize = m_params.CellSize,
-                CellHeight = m_params.CellHeight,
-                BuildBvTree = false,
-
-                TileX = tile.Header.TX,
-                TileY = tile.Header.TY,
-                TileLayer = tile.Header.TLayer,
-            };
-
-            if (m_tmproc != null)
-            {
-                m_tmproc.Process(ref param, bc);
-            }
-
-            // Remove existing tile.
-            m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
-
-            MeshData navData = DetourUtils.CreateNavMeshData(param);
-            if (navData == null)
-            {
-                // Leave the location empty.
-                return true;
-            }
-
-            // Add new tile
-            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
-        }
-
-        /// <summary>
-        /// Encodes a tile id.
-        /// </summary>
-        private int EncodeTileId(int salt, int it)
-        {
-            return (salt << m_tileBits) | it;
-        }
-        /// <summary>
-        /// Decodes a tile salt.
-        /// </summary>
-        private int DecodeTileIdSalt(int r)
-        {
-
-            int saltMask = (1 << m_saltBits) - 1;
-            return ((r >> m_tileBits) & saltMask);
-        }
-        /// <summary>
-        /// Decodes a tile id.
-        /// </summary>
-        private int DecodeTileIdTile(int r)
-        {
-            int tileMask = (1 << m_tileBits) - 1;
-            return (r & tileMask);
-        }
-        /// <summary>
-        /// Encodes an obstacle id.
-        /// </summary>
-        private int EncodeObstacleId(int salt, int it)
-        {
-            return (salt << 16) | it;
-        }
-        /// <summary>
-        /// Decodes an obstacle salt.
-        /// </summary>
-        private int DecodeObstacleIdSalt(int r)
-        {
-            int saltMask = (1 << 16) - 1;
-            return ((r >> 16) & saltMask);
-        }
-        /// <summary>
-        /// Decodes an obstacle id.
-        /// </summary>
-        private int DecodeObstacleIdObstacle(int r)
-        {
-            int tileMask = (1 << 16) - 1;
-            return (r & tileMask);
         }
     }
 }

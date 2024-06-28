@@ -47,7 +47,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             /// <summary>
             /// Query filter
             /// </summary>
-            public QueryFilter Filter { get; set; }
+            public IGraphQueryFilter Filter { get; set; }
+
+            /// <inheritdoc/>
+            public readonly override string ToString()
+            {
+                return $"Poly({R}). {StartPos}=>{EndPos}. {Path}";
+            }
         };
 
         /// <summary>
@@ -107,9 +113,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             for (int i = 0; i < MAX_QUEUE; ++i)
             {
-                PathQuery q = m_queue[m_queueHead % MAX_QUEUE];
-
-                if (!UpdateHeadQuery(ref q, ref iterCount, MAX_KEEP_ALIVE))
+                if (!UpdateHeadQuery(ref m_queue[m_queueHead % MAX_QUEUE], ref iterCount, MAX_KEEP_ALIVE))
                 {
                     m_queueHead++;
 
@@ -156,7 +160,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Handle query start.
             if (q.Status == 0)
             {
-                q.Status = m_navquery.InitSlicedFindPath(q.StartRef, q.EndRef, q.StartPos, q.EndPos, q.Filter);
+                PathPoint start = new() { Ref = q.StartRef, Pos = q.StartPos };
+                PathPoint end = new() { Ref = q.EndRef, Pos = q.EndPos };
+                q.Status = m_navquery.InitSlicedFindPath(q.Filter, start, end);
             }
 
             // Handle query in progress.
@@ -187,7 +193,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="endPos">Ending position</param>
         /// <param name="filter">Query filter</param>
         /// <returns>Returns the path index</returns>
-        public int Request(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter)
+        public int Request(int startRef, int endRef, Vector3 startPos, Vector3 endPos, IGraphQueryFilter filter)
         {
             // Find empty slot
             int slot = -1;
@@ -211,17 +217,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_nextHandle++;
             }
 
-            PathQuery q = m_queue[slot];
-            q.R = r;
-            q.StartPos = startPos;
-            q.StartRef = startRef;
-            q.EndPos = endPos;
-            q.EndRef = endRef;
+            m_queue[slot].R = r;
+            m_queue[slot].StartPos = startPos;
+            m_queue[slot].StartRef = startRef;
+            m_queue[slot].EndPos = endPos;
+            m_queue[slot].EndRef = endRef;
 
-            q.Status = 0;
-            q.Path.Clear();
-            q.Filter = filter;
-            q.KeepAlive = 0;
+            m_queue[slot].Status = 0;
+            m_queue[slot].Path.Clear();
+            m_queue[slot].Filter = filter;
+            m_queue[slot].KeepAlive = 0;
 
             return r;
         }
@@ -255,21 +260,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             for (int i = 0; i < MAX_QUEUE; ++i)
             {
-                if (m_queue[i].R == r)
+                if (m_queue[i].R != r)
                 {
-                    PathQuery q = m_queue[i];
-
-                    Status details = q.Status & Status.DT_STATUS_DETAIL_MASK;
-
-                    // Free request for reuse.
-                    q.R = DT_PATHQ_INVALID;
-                    q.Status = 0;
-
-                    // Copy path
-                    path = q.Path.Copy(maxPath);
-
-                    return details | Status.DT_SUCCESS;
+                    continue;
                 }
+
+                var details = m_queue[i].Status & Status.DT_STATUS_DETAIL_MASK;
+
+                // Free request for reuse.
+                m_queue[i].R = DT_PATHQ_INVALID;
+                m_queue[i].Status = 0;
+
+                // Copy path
+                path = m_queue[i].Path.Copy(maxPath);
+
+                return details | Status.DT_SUCCESS;
             }
 
             return Status.DT_FAILURE;

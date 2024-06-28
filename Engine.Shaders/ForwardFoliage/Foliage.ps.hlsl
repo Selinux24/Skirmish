@@ -39,6 +39,23 @@ cbuffer cbPerMaterial : register(b5)
     uint PAD51;
 };
 
+cbuffer cbPerPatch : register(b6)
+{
+    float3 gPointOfView;
+    float PAD12;
+        
+    float3 gWindDirection;
+    float gWindStrength;
+
+    float gStartRadius;
+    float gEndRadius;
+    uint gInstances;
+    float PAD13;
+    
+    float3 gDelta;
+    float gWindEffect;
+};
+
 Texture2DArray<float> gShadowMapDir : register(t0);
 Texture2DArray<float> gShadowMapSpot : register(t1);
 TextureCubeArray<float> gShadowMapPoint : register(t2);
@@ -70,7 +87,7 @@ float4 main(PSFoliage input) : SV_Target
 
     float4 diffuseColor = gTextureArray.Sample(SamplerLinear, uvw);
 
-    float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
+    float distToEye = length(gPointOfView - input.positionWorld);
     float falloff = saturate(distToEye / input.size);
     clip(diffuseColor.a - max(0.01f, falloff));
 

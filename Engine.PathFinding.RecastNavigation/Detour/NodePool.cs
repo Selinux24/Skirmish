@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -8,13 +7,40 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class NodePool : IDisposable
     {
-        public int MaxNodes { get; set; }
-        public int NodeCount { get; set; }
+        /// <summary>
+        /// A value that indicates the entity does not references to anything.
+        /// </summary>
+        const int DT_NULL_IDX = -1;
+        /// <summary>
+        /// Parent node bits
+        /// </summary>
+        const int DT_NODE_PARENT_BITS = 24;
 
-        public Node[] Nodes { get; set; }
-        public int[] First { get; set; }
-        public int[] Next { get; set; }
-        public int HashSize { get; set; }
+        /// <summary>
+        /// Hash size
+        /// </summary>
+        private readonly int hashSize;
+        /// <summary>
+        /// Node count
+        /// </summary>
+        private int nodeCount;
+        /// <summary>
+        /// Node list
+        /// </summary>
+        private Node[] nodes;
+        /// <summary>
+        /// First list
+        /// </summary>
+        private int[] first;
+        /// <summary>
+        /// Next list
+        /// </summary>
+        private int[] next;
+
+        /// <summary>
+        /// Gets the maximum number of nodes in the pool
+        /// </summary>
+        public int MaxNodes { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -23,13 +49,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="hashSize">Hash size</param>
         public NodePool(int maxNodes, int hashSize)
         {
-            MaxNodes = maxNodes;
-            HashSize = hashSize;
+            if (maxNodes > (1 << DT_NODE_PARENT_BITS) - 1)
+            {
+                throw new ArgumentException("Invalid maximum nodes value.", nameof(maxNodes));
+            }
 
-            Nodes = new Node[MaxNodes];
-            Next = Helper.CreateArray(MaxNodes, DetourUtils.DT_NULL_IDX);
-            First = Helper.CreateArray(HashSize, DetourUtils.DT_NULL_IDX);
-            NodeCount = 0;
+            MaxNodes = maxNodes;
+            this.hashSize = hashSize;
+            nodeCount = 0;
+            nodes = new Node[maxNodes];
+            first = Helper.CreateArray(hashSize, DT_NULL_IDX);
+            next = Helper.CreateArray(maxNodes, DT_NULL_IDX);
         }
         /// <summary>
         /// Destructor
@@ -55,130 +85,169 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (disposing)
             {
-                this.Nodes = null;
-                this.Next = null;
-                this.First = null;
+                nodes = null;
+                first = null;
+                next = null;
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// From Thomas Wang, https://gist.github.com/badboy/6267743
+        /// </remarks>
+        static int HashRef(int a)
+        {
+            a += ~(a << 15);
+            a ^= a >> 10;
+            a += a << 3;
+            a ^= a >> 6;
+            a += ~(a << 11);
+            a ^= a >> 16;
+            return a;
+        }
+
+        /// <summary>
+        /// Clears the node pool
+        /// </summary>
         public void Clear()
         {
-            First = Helper.CreateArray(HashSize, DetourUtils.DT_NULL_IDX);
-            NodeCount = 0;
-        }
-        public Node GetNode(int id, int state)
-        {
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
-            int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            for (int i = 0; i < hashSize; i++)
             {
-                if (Nodes[i] != null && Nodes[i].Id == id && Nodes[i].State == state)
-                {
-                    return Nodes[i];
-                }
-                i = Next[i];
+                first[i] = DT_NULL_IDX;
+            }
+            nodeCount = 0;
+        }
+
+        /// <summary>
+        /// Gets the node by reference and state from the pool, and initialises a new node if not exists
+        /// </summary>
+        /// <param name="nodeRef">Node reference</param>
+        /// <param name="state">State</param>
+        public Node AllocateNode(int nodeRef, int state)
+        {
+            var node = FindNode(nodeRef, state);
+            if (node != null)
+            {
+                return node;
             }
 
-            if (NodeCount >= MaxNodes)
+            if (nodeCount >= MaxNodes)
             {
                 return null;
             }
 
-            i = NodeCount;
-            NodeCount++;
+            int i = nodeCount++;
 
             // Init node
-            Nodes[i] = new Node
+            nodes[i] = new()
             {
                 PIdx = 0,
                 Cost = 0,
                 Total = 0,
-                Id = id,
+                Ref = nodeRef,
                 State = state,
                 Flags = 0
             };
 
-            Next[i] = First[bucket];
-            First[bucket] = i;
+            int bucket = HashRef(nodeRef) & (hashSize - 1);
+            next[i] = first[bucket];
+            first[bucket] = i;
 
-            return Nodes[i];
+            return nodes[i];
         }
-        public Node FindNode(int id, int state)
+        /// <summary>
+        /// Finds the node by reference and state from the pool
+        /// </summary>
+        /// <param name="nodeRef">Node reference</param>
+        /// <param name="state">State</param>
+        public Node FindNode(int nodeRef, int state)
         {
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
-            int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            int bucket = HashRef(nodeRef) & (hashSize - 1);
+            int i = first[bucket];
+            while (i != DT_NULL_IDX)
             {
-                if (Nodes[i].Id == id && Nodes[i].State == state)
+                if (nodes[i]?.Ref == nodeRef && nodes[i]?.State == state)
                 {
-                    return Nodes[i];
+                    return nodes[i];
                 }
-                i = Next[i];
+                i = next[i];
             }
+
             return null;
         }
-        public int FindNodes(int id, int maxNodes, out Node[] nodes)
+        /// <summary>
+        /// Finds all the nodes with the specified reference
+        /// </summary>
+        /// <param name="nodeRef">Node reference</param>
+        /// <param name="maxNodes">Maximum number of results</param>
+        /// <returns>Returns the node list and the found node count</returns>
+        public (Node[] nodes, int n) FindNodes(int nodeRef, int maxNodes)
         {
-            nodes = new Node[maxNodes];
+            Node[] res = new Node[maxNodes];
 
             int n = 0;
-            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
-            int i = First[bucket];
-            while (i != DetourUtils.DT_NULL_IDX)
+            int bucket = HashRef(nodeRef) & (hashSize - 1);
+            int i = first[bucket];
+            while (i != DT_NULL_IDX)
             {
-                if (Nodes[i].Id == id)
+                if (nodes[i]?.Ref == nodeRef)
                 {
                     if (n >= maxNodes)
                     {
-                        return n;
+                        break;
                     }
-                    nodes[n++] = Nodes[i];
+                    res[n++] = nodes[i];
                 }
-                i = Next[i];
+                i = next[i];
             }
 
-            return n;
+            return (res, n);
         }
+
+        /// <summary>
+        /// Gets the node index in the pool
+        /// </summary>
+        /// <param name="node">Node</param>
         public int GetNodeIdx(Node node)
         {
             if (node == null) return 0;
 
-            return Array.IndexOf(Nodes, node) + 1;
+            return Array.IndexOf(nodes, node) + 1;
         }
+        /// <summary>
+        /// Gets the node by index from the pool
+        /// </summary>
+        /// <param name="idx">Node index</param>
         public Node GetNodeAtIdx(int idx)
         {
             if (idx == 0) return null;
-            return Nodes[idx - 1];
+
+            return nodes[idx - 1];
         }
 
-        public int GetMemUsed()
+        /// <summary>
+        ///  Returns true if the polygon reference is in the closed list. 
+        /// </summary>
+        /// <param name="r">The reference id of the polygon to check.</param>
+        /// <param name="maxNodes">Maximum number of results</param>
+        /// <returns>True if the polygon is in closed list.</returns>
+        public bool IsInClosedList(int r, int maxNodes)
         {
-            return
-                Marshal.SizeOf(this) +
-                Marshal.SizeOf(typeof(Node)) * MaxNodes +
-                Marshal.SizeOf(typeof(int)) * MaxNodes +
-                Marshal.SizeOf(typeof(int)) * HashSize;
-        }
+            var (nList, n) = FindNodes(r, maxNodes);
 
-        public int GetMaxNodes()
-        {
-            return MaxNodes;
-        }
-        public int GetHashSize()
-        {
-            return HashSize;
-        }
-        public int GetFirst(int bucket)
-        {
-            return First[bucket];
-        }
-        public int GetNext(int i)
-        {
-            return Next[i];
-        }
-        public int GetNodeCount()
-        {
-            return NodeCount;
+            for (int i = 0; i < n; i++)
+            {
+                if (nList[i].IsClosed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

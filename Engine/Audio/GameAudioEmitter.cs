@@ -4,7 +4,7 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio emitter
     /// </summary>
-    class GameAudioEmitter : GameAudioAgent, IGameAudioEmitter
+    public class GameAudioEmitter : GameAudioAgent, IGameAudioEmitter
     {
         /// <summary>
         /// Sound radius

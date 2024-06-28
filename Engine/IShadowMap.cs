@@ -1,9 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
+    using Engine.BuiltIn.Drawers;
     using Engine.Common;
 
     /// <summary>
@@ -12,36 +11,31 @@ namespace Engine
     public interface IShadowMap : IDisposable
     {
         /// <summary>
-        /// Deph map texture
+        /// Name
         /// </summary>
-        EngineShaderResourceView Texture { get; }
+        string Name { get; }
         /// <summary>
-        /// To shadow view*projection matrix
+        /// Light source
         /// </summary>
-        Matrix ToShadowMatrix { get; set; }
+        ISceneLight LightSource { get; set; }
         /// <summary>
-        /// Light position
+        /// Light cull index
         /// </summary>
-        Vector3 LightPosition { get; set; }
+        int CullIndex { get; set; }
         /// <summary>
-        /// From light view projection
+        /// Depth map texture
         /// </summary>
-        Matrix[] FromLightViewProjectionArray { get; set; }
+        EngineShaderResourceView DepthMapTexture { get; }
         /// <summary>
         /// Gets or sets the high resolution map flag (if available)
         /// </summary>
         bool HighResolutionMap { get; set; }
 
         /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
-        void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
-        /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="index">Array index</param>
-        void Bind(Graphics graphics, int index);
+        /// <param name="dc">Device context</param>
+        void Bind(IEngineDeviceContext dc);
         /// <summary>
         /// Gets the drawer to draw this shadow map
         /// </summary>
@@ -50,10 +44,5 @@ namespace Engine
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
         IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
-
-        /// <summary>
-        /// Update shadow map globals
-        /// </summary>
-        void UpdateGlobals();
     }
 }

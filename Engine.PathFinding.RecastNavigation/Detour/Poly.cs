@@ -9,37 +9,48 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     [Serializable]
     public class Poly
     {
-        public static Poly Create(IndexedPolygon src, SamplePolyFlagTypes flags, SamplePolyAreas area, int nvp)
+        /// <summary>
+        /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
+        /// </summary>
+        public int FirstLink { get; set; }
+        /// <summary>
+        /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
+        /// </summary>
+        public int[] Verts { get; set; } = new int[IndexedPolygon.DT_VERTS_PER_POLYGON];
+        /// <summary>
+        /// Packed data representing neighbor polygons references and flags for each edge.
+        /// </summary>
+        public int[] Neis { get; set; } = new int[IndexedPolygon.DT_VERTS_PER_POLYGON];
+        /// <summary>
+        /// The user defined polygon flags.
+        /// </summary>
+        public int Flags { get; set; }
+        /// <summary>
+        /// The number of vertices in the polygon.
+        /// </summary>
+        public int VertCount { get; set; }
+        /// <summary>
+        /// Polygon area
+        /// </summary>
+        public int Area { get; set; }
+        /// <summary>
+        /// Polygon type
+        /// </summary>
+        public PolyTypes Type { get; set; }
+
+        /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="start">Start reference</param>
+        /// <param name="end">End reference</param>
+        /// <param name="flags">Connection flags</param>
+        /// <param name="area">Area flags</param>
+        public static Poly CreateOffMesh(int start, int end, int flags, int area)
         {
-            int[] verts = new int[nvp];
-            int[] neis = new int[nvp];
-
-            Array.ConstrainedCopy(src.GetVertices(), 0, verts, 0, nvp);
-            Array.ConstrainedCopy(src.GetVertices(), nvp, neis, 0, nvp);
-
-            neis = neis.Select(n => DecodeNei(n)).ToArray();
-
-            int vertCount = Array.IndexOf(verts, -1);
-            vertCount = vertCount < 0 ? nvp : vertCount;
-
-            Poly p = new Poly
+            var p = new Poly
             {
                 Flags = flags,
                 Area = area,
-                Type = PolyTypes.Ground,
-                Verts = verts,
-                Neis = neis,
-                VertCount = vertCount,
-            };
-
-            return p;
-        }
-        public static Poly Create(int start, int end, GraphConnectionFlagTypes flags, GraphConnectionAreaTypes area)
-        {
-            Poly p = new Poly
-            {
-                Flags = (SamplePolyFlagTypes)flags,
-                Area = (SamplePolyAreas)area,
                 Type = PolyTypes.OffmeshConnection
             };
             p.Verts[0] = start;
@@ -48,70 +59,55 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return p;
         }
+        /// <summary>
+        /// Creates a polygon
+        /// </summary>
+        /// <param name="flags">Sample flags</param>
+        /// <param name="area">Sample area</param>
+        /// <param name="nvp">Maximum vertices per poligon</param>
+        public static Poly Create(IndexedPolygon polygon, int flags, int area, int nvp)
+        {
+            int[] verts = new int[nvp];
+            int[] neis = new int[nvp];
+
+            var polyVerts = polygon.GetVertices();
+            var polyAdjacency = polygon.GetAdjacency();
+
+            Array.ConstrainedCopy(polyVerts, 0, verts, 0, nvp);
+            Array.ConstrainedCopy(polyAdjacency, 0, neis, 0, nvp);
+
+            neis = neis.Select(DecodeNei).ToArray();
+
+            int vertCount = Array.IndexOf(verts, -1);
+            vertCount = vertCount < 0 ? nvp : vertCount;
+
+            return new Poly
+            {
+                Flags = flags,
+                Area = area,
+                Type = PolyTypes.Ground,
+                Verts = verts,
+                Neis = neis,
+                VertCount = vertCount,
+            };
+        }
+        /// <summary>
+        /// Decodes the neighbor index
+        /// </summary>
+        /// <param name="n">Neighbor index</param>
         private static int DecodeNei(int n)
         {
-            if ((n & 0x8000) != 0)
+            if (Edge.IsExternalLink(n))
             {
                 // Border or portal edge.
-                var dir = n & 0xf;
-                if (dir == 0xf) // Border
-                {
-                    return 0;
-                }
-                else if (dir == 0) // Portal x-
-                {
-                    return DetourUtils.DT_EXT_LINK | 4;
-                }
-                else if (dir == 1) // Portal z+
-                {
-                    return DetourUtils.DT_EXT_LINK | 2;
-                }
-                else if (dir == 2) // Portal x+
-                {
-                    return DetourUtils.DT_EXT_LINK;
-                }
-                else if (dir == 3) // Portal z-
-                {
-                    return DetourUtils.DT_EXT_LINK | 6;
-                }
+                return Edge.CalculateVertexPortalFlag(n);
             }
             else
             {
                 // Normal connection
                 return n + 1;
             }
-
-            return n;
         }
-
-        /// <summary>
-        /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
-        /// </summary>
-        public int FirstLink { get; set; }
-        /// <summary>
-        /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
-        /// </summary>
-        public int[] Verts { get; set; } = new int[DetourUtils.DT_VERTS_PER_POLYGON];
-        /// <summary>
-        /// Packed data representing neighbor polygons references and flags for each edge.
-        /// </summary>
-        public int[] Neis { get; set; } = new int[DetourUtils.DT_VERTS_PER_POLYGON];
-        /// <summary>
-        /// The user defined polygon flags.
-        /// </summary>
-        public SamplePolyFlagTypes Flags { get; set; }
-        /// <summary>
-        /// The number of vertices in the polygon.
-        /// </summary>
-        public int VertCount { get; set; }
-        /// <summary>
-        /// Polygon area
-        /// </summary>
-        public SamplePolyAreas Area { get; set; }
-        /// <summary>
-        /// Polygon type
-        /// </summary>
-        public PolyTypes Type { get; set; }
 
         /// <summary>
         /// Gets the neighbour direction
@@ -122,15 +118,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             return Neis[index] & 0xff;
         }
-
         /// <summary>
-        /// Gets the text representation of the polygon
+        /// Gets whether the neighbour is an external link or not
         /// </summary>
-        /// <returns>Returns the text representation of the polygon</returns>
+        /// <param name="nei">Neighbour index</param>
+        public bool NeighbourIsExternalLink(int nei)
+        {
+            return Edge.IsExternalLink(Neis[nei]);
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("FirstLink {0}; Flags {1}; Area: {2}; Type: {3}; Verts {4}; VertCount: {5}; Neis: {6}",
-                FirstLink, Flags, Area, Type, Verts, VertCount, Neis?.Join(","));
+            return $"FirstLink {FirstLink}; Flags {Flags}; Area: {Area}; Type: {Type}; Verts {Verts?.Take(VertCount).Join(",")}; Neis: {Neis?.Take(VertCount).Join(",")}";
         }
     }
 }

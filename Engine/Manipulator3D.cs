@@ -3,14 +3,14 @@ using System;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D : IManipulator, IHasGameState
+    public class Manipulator3D : IManipulator3D
     {
-        /// <summary>
-        /// State updated event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler Updated;
 
         /// <summary>
@@ -34,13 +34,19 @@ namespace Engine
         /// </summary>
         protected Vector3 position = Vector3.Zero;
 
-        /// <summary>
-        /// Parent manipulator
-        /// </summary>
-        public Manipulator3D Parent { get; set; }
-        /// <summary>
-        /// Gets Position component
-        /// </summary>
+        /// <inheritdoc/>
+        public Vector3 Forward { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Backward { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Left { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Right { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Up { get; private set; }
+        /// <inheritdoc/>
+        public Vector3 Down { get; private set; }
+        /// <inheritdoc/>
         public Vector3 Position
         {
             get
@@ -48,19 +54,7 @@ namespace Engine
                 return position;
             }
         }
-        /// <summary>
-        /// Gets Scaling component
-        /// </summary>
-        public Vector3 Scaling
-        {
-            get
-            {
-                return scaling;
-            }
-        }
-        /// <summary>
-        /// Rotation component
-        /// </summary>
+        /// <inheritdoc/>
         public Quaternion Rotation
         {
             get
@@ -68,62 +62,55 @@ namespace Engine
                 return rotation;
             }
         }
-        /// <summary>
-        /// Gets local transform of controller
-        /// </summary>
+        /// <inheritdoc/>
+        public Vector3 Scaling
+        {
+            get
+            {
+                return scaling;
+            }
+        }
+        /// <inheritdoc/>
+        public Vector3 Velocity { get; private set; }
+        /// <inheritdoc/>
         public Matrix LocalTransform
         {
             get
             {
-                return localTransform;
-            }
-        }
-        /// <summary>
-        /// Gets final transform of controller
-        /// </summary>
-        public Matrix FinalTransform
-        {
-            get
-            {
-                if (Parent != null)
+                if (transformUpdateNeeded)
                 {
-                    return localTransform * Parent.FinalTransform;
+                    UpdateLocalTransform();
                 }
 
                 return localTransform;
             }
         }
-        /// <summary>
-        /// Gets Forward vector
-        /// </summary>
-        public Vector3 Forward { get; private set; }
-        /// <summary>
-        /// Gets Backward vector
-        /// </summary>
-        public Vector3 Backward { get; private set; }
-        /// <summary>
-        /// Gets Left vector
-        /// </summary>
-        public Vector3 Left { get; private set; }
-        /// <summary>
-        /// Gets Right vector
-        /// </summary>
-        public Vector3 Right { get; private set; }
-        /// <summary>
-        /// Gets Up vector
-        /// </summary>
-        public Vector3 Up { get; private set; }
-        /// <summary>
-        /// Gets Down vector
-        /// </summary>
-        public Vector3 Down { get; private set; }
-        /// <summary>
-        /// Gets the velocity vector
-        /// </summary>
-        public Vector3 Velocity { get; private set; }
+        /// <inheritdoc/>
+        public Matrix GlobalTransform
+        {
+            get
+            {
+                if (transformUpdateNeeded)
+                {
+                    UpdateLocalTransform();
+                }
+
+                if (Parent != null)
+                {
+                    return localTransform * Parent.GlobalTransform;
+                }
+
+                return localTransform;
+            }
+        }
 
         /// <summary>
-        /// Contructor
+        /// Parent manipulator
+        /// </summary>
+        public IManipulator3D Parent { get; set; }
+
+        /// <summary>
+        /// Constructor
         /// </summary>
         public Manipulator3D()
         {
@@ -133,23 +120,18 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="parent">Parent manipulator</param>
-        public Manipulator3D(Manipulator3D parent) : this()
+        public Manipulator3D(IManipulator3D parent) : this()
         {
             Parent = parent;
         }
-        /// <summary>
-        /// Update internal state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public virtual void Update(GameTime gameTime)
+
+        /// <inheritdoc/>
+        public virtual void Update(IGameTime gameTime)
         {
             UpdateLocalTransform();
         }
-        /// <summary>
-        /// Update internal state
-        /// </summary>
-        /// <param name="force">If true, local transforms were forced to update</param>
-        public void UpdateInternals(bool force)
+        /// <inheritdoc/>
+        public virtual void UpdateInternals(bool force)
         {
             if (force) transformUpdateNeeded = true;
 
@@ -158,439 +140,385 @@ namespace Engine
         /// <summary>
         /// Update internal state
         /// </summary>
-        protected void UpdateLocalTransform()
+        private void UpdateLocalTransform()
         {
-            Vector3 prePos = localTransform.TranslationVector;
+            var prePos = localTransform.TranslationVector;
             Velocity = position - prePos;
 
-            if (transformUpdateNeeded)
+            if (!transformUpdateNeeded)
             {
-                Matrix sca = Matrix.Scaling(scaling);
-                Matrix rot = Matrix.RotationQuaternion(rotation);
-                Matrix tra = Matrix.Translation(position);
-
-                localTransform = sca * rot * tra;
-
-                Forward = rot.Forward;
-                Backward = rot.Backward;
-                Left = rot.Left;
-                Right = rot.Right;
-                Up = rot.Up;
-                Down = rot.Down;
-
-                transformUpdateNeeded = false;
-
-                if (Updated != null)
-                {
-                    Updated.Invoke(this, new EventArgs());
-                }
-
-                Counters.UpdatesPerFrame++;
-            }
-        }
-        /// <summary>
-        /// Sets the local transform decomposing position, scale and rotation
-        /// </summary>
-        /// <param name="newLocalTransform">New local transform</param>
-        protected void SetLocalTransform(Matrix newLocalTransform)
-        {
-            if (newLocalTransform.Decompose(out scaling, out rotation, out position))
-            {
-                transformUpdateNeeded = true;
-
-                UpdateLocalTransform();
-            }
-        }
-
-        /// <summary>
-        /// Increments position component d length along d vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        private void Move(Vector3 d)
-        {
-            if (d != Vector3.Zero)
-            {
-                position += d;
-
-                transformUpdateNeeded = true;
-            }
-        }
-        /// <summary>
-        /// Increments rotation component by axis
-        /// </summary>
-        /// <param name="yaw">Yaw (Y) amount (radians)</param>
-        /// <param name="pitch">Pitch (X) amount (radians)</param>
-        /// <param name="roll">Roll (Z) amount (radians)</param>
-        public void Rotate(float yaw, float pitch, float roll)
-        {
-            if (yaw != 0f || pitch != 0f || roll != 0f)
-            {
-                rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
-
-                transformUpdateNeeded = true;
-            }
-        }
-
-        /// <summary>
-        /// Increments position component d distance along forward vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveForward(GameTime gameTime, float d = 1f)
-        {
-            Move(Forward * d * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments position component d distance along backward vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveBackward(GameTime gameTime, float d = 1f)
-        {
-            Move(Backward * d * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments position component d distance along left vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveLeft(GameTime gameTime, float d = 1f)
-        {
-            Move(Left * -d * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments position component d distance along right vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveRight(GameTime gameTime, float d = 1f)
-        {
-            Move(Right * -d * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments position component d distance along up vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveUp(GameTime gameTime, float d = 1f)
-        {
-            Move(Up * d * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments position component d distance along down vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveDown(GameTime gameTime, float d = 1f)
-        {
-            Move(Down * d * gameTime.ElapsedSeconds);
-        }
-
-        /// <summary>
-        /// Increments rotation yaw (Y) to the left
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void YawLeft(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
-        }
-        /// <summary>
-        /// Increments rotation yaw (Y) to the right
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void YawRight(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(a * gameTime.ElapsedSeconds, 0, 0);
-        }
-        /// <summary>
-        /// Increments rotation pitch (X) up
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void PitchUp(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(0, a * gameTime.ElapsedSeconds, 0);
-        }
-        /// <summary>
-        /// Increments rotation pitch (X) down
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void PitchDown(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(0, -a * gameTime.ElapsedSeconds, 0);
-        }
-        /// <summary>
-        /// Increments rotation roll (Z) left
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void RollLeft(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(0, 0, -a * gameTime.ElapsedSeconds);
-        }
-        /// <summary>
-        /// Increments rotation roll (Z) right
-        /// </summary>
-        /// <param name="a">Amount (radians)</param>
-        public void RollRight(GameTime gameTime, float a = Helper.Radian)
-        {
-            Rotate(0, 0, a * gameTime.ElapsedSeconds);
-        }
-
-        /// <summary>
-        /// Clamped scale increment
-        /// </summary>
-        /// <param name="scale">Scale amount (percent 0 to x)</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        public void Scale(GameTime gameTime, float scale, Vector3? minSize = null, Vector3? maxSize = null)
-        {
-            Scale(gameTime, new Vector3(scale), minSize, maxSize);
-        }
-        /// <summary>
-        /// Clamped scale increment
-        /// </summary>
-        /// <param name="scaleX">X axis scale amount (percent 0 to x)</param>
-        /// <param name="scaleY">Y axis scale amount (percent 0 to x)</param>
-        /// <param name="scaleZ">Z axis scale amount (percent 0 to x)</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        public void Scale(GameTime gameTime, float scaleX, float scaleY, float scaleZ, Vector3? minSize = null, Vector3? maxSize = null)
-        {
-            Scale(gameTime, new Vector3(scaleX, scaleY, scaleZ), minSize, maxSize);
-        }
-        /// <summary>
-        /// Clamped scale increment
-        /// </summary>
-        /// <param name="scale">Scaling component</param>
-        /// <param name="minSize">Min scaling component</param>
-        /// <param name="maxSize">Max scaling component</param>
-        public void Scale(GameTime gameTime, Vector3 scale, Vector3? minSize = null, Vector3? maxSize = null)
-        {
-            Vector3 newScaling = scaling + (scale * gameTime.ElapsedSeconds);
-
-            if (maxSize.HasValue && newScaling.LengthSquared() > maxSize.Value.LengthSquared())
-            {
-                newScaling = maxSize.Value;
+                return;
             }
 
-            if (minSize.HasValue && newScaling.LengthSquared() < minSize.Value.LengthSquared())
+            var sca = Matrix.Scaling(scaling);
+            var rot = Matrix.RotationQuaternion(rotation);
+            var tra = Matrix.Translation(position);
+
+            localTransform = sca * rot * tra;
+
+            Forward = -rot.Forward;
+            Backward = -rot.Backward;
+            Left = rot.Left;
+            Right = rot.Right;
+            Up = rot.Up;
+            Down = rot.Down;
+
+            transformUpdateNeeded = false;
+
+            Updated?.Invoke(this, new());
+
+            FrameCounters.PickCounters.TransformUpdatesPerFrame++;
+        }
+        /// <inheritdoc/>
+        public virtual void Reset()
+        {
+            SetTransform(Matrix.Identity);
+        }
+
+        /// <inheritdoc/>
+        public void Move(IGameTime gameTime, Vector3 direction, float velocity = 1f)
+        {
+            float time = gameTime.ElapsedSeconds;
+
+            if (MathUtil.IsZero(time))
             {
-                newScaling = minSize.Value;
+                return;
             }
 
-            SetScale(newScaling);
-        }
-
-        /// <summary>
-        /// Sets position
-        /// </summary>
-        /// <param name="x">X component of position</param>
-        /// <param name="y">Y component of position</param>
-        /// <param name="z">Z component of position</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetPosition(float x, float y, float z, bool updateState = false)
-        {
-            SetPosition(new Vector3(x, y, z), updateState);
-        }
-        /// <summary>
-        /// Sets position
-        /// </summary>
-        /// <param name="position">Position component</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetPosition(Vector3 position, bool updateState = false)
-        {
-            if (this.position != position)
+            if (MathUtil.IsZero(velocity))
             {
-                this.position = position;
-
-                transformUpdateNeeded = true;
-
-                if (updateState) UpdateLocalTransform();
+                return;
             }
-        }
-        /// <summary>
-        /// Sets rotation
-        /// </summary>
-        /// <param name="yaw">Yaw (Y)</param>
-        /// <param name="pitch">Pitch (X)</param>
-        /// <param name="roll">Roll (Z)</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetRotation(float yaw, float pitch, float roll, bool updateState = false)
-        {
-            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll), updateState);
-        }
-        /// <summary>
-        /// Sets rotation
-        /// </summary>
-        /// <param name="rotation">Rotation component</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetRotation(Quaternion rotation, bool updateState = false)
-        {
-            if (this.rotation != rotation)
+
+            if (Vector3.NearEqual(direction, Vector3.Zero, Helper.ZeroToleranceVector))
             {
-                this.rotation = rotation;
-
-                transformUpdateNeeded = true;
-
-                if (updateState) UpdateLocalTransform();
+                return;
             }
+
+            var delta = Vector3.Normalize(direction) * velocity * time;
+
+            var newPosition = position + delta;
+
+            SetPosition(newPosition);
         }
-        /// <summary>
-        /// Sets scale
-        /// </summary>
-        /// <param name="scale">Scale amount (0 to x)</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetScale(float scale, bool updateState = false)
+        /// <inheritdoc/>
+        public void MoveForward(IGameTime gameTime, float velocity = 1f)
         {
-            SetScale(new Vector3(scale), updateState);
+            Move(gameTime, Forward, -velocity);
         }
-        /// <summary>
-        /// Sets scale
-        /// </summary>
-        /// <param name="scaleX">Scale along X axis</param>
-        /// <param name="scaleY">Scale along Y axis</param>
-        /// <param name="scaleZ">Scale along Z axis</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetScale(float scaleX, float scaleY, float scaleZ, bool updateState = false)
+        /// <inheritdoc/>
+        public void MoveBackward(IGameTime gameTime, float velocity = 1f)
         {
-            SetScale(new Vector3(scaleX, scaleY, scaleZ), updateState);
+            Move(gameTime, Backward, -velocity);
         }
-        /// <summary>
-        /// Sets scale
-        /// </summary>
-        /// <param name="scale">Scale vector</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetScale(Vector3 scale, bool updateState = false)
+        /// <inheritdoc/>
+        public void MoveLeft(IGameTime gameTime, float velocity = 1f)
         {
-            if (scaling != scale)
+            Move(gameTime, Left, -velocity);
+        }
+        /// <inheritdoc/>
+        public void MoveRight(IGameTime gameTime, float velocity = 1f)
+        {
+            Move(gameTime, Right, -velocity);
+        }
+        /// <inheritdoc/>
+        public void MoveUp(IGameTime gameTime, float velocity = 1f)
+        {
+            Move(gameTime, Up, velocity);
+        }
+        /// <inheritdoc/>
+        public void MoveDown(IGameTime gameTime, float velocity = 1f)
+        {
+            Move(gameTime, Down, velocity);
+        }
+
+        /// <inheritdoc/>
+        public void Rotate(IGameTime gameTime, float yaw, float pitch, float roll)
+        {
+            float time = gameTime.ElapsedSeconds;
+
+            if (MathUtil.IsZero(time))
             {
-                scaling = scale;
-
-                transformUpdateNeeded = true;
-
-                if (updateState) UpdateLocalTransform();
+                return;
             }
+
+            if (MathUtil.IsZero(yaw) && MathUtil.IsZero(pitch) && MathUtil.IsZero(roll))
+            {
+                return;
+            }
+
+            float deltaYaw = yaw * time;
+            float deltaPitch = pitch * time;
+            float deltaRoll = roll * time;
+
+            var newRotation = rotation * Quaternion.RotationYawPitchRoll(deltaYaw, deltaPitch, deltaRoll);
+
+            SetRotation(newRotation);
         }
-        /// <summary>
-        /// Sets transform matrix
-        /// </summary>
-        /// <param name="transform">Transform matrix</param>
+        /// <inheritdoc/>
+        public void YawLeft(IGameTime gameTime, float yaw = 1f)
+        {
+            Rotate(gameTime, -yaw, 0, 0);
+        }
+        /// <inheritdoc/>
+        public void YawRight(IGameTime gameTime, float yaw = 1f)
+        {
+            Rotate(gameTime, yaw, 0, 0);
+        }
+        /// <inheritdoc/>
+        public void PitchUp(IGameTime gameTime, float pitch = 1f)
+        {
+            Rotate(gameTime, 0, pitch, 0);
+        }
+        /// <inheritdoc/>
+        public void PitchDown(IGameTime gameTime, float pitch = 1f)
+        {
+            Rotate(gameTime, 0, -pitch, 0);
+        }
+        /// <inheritdoc/>
+        public void RollLeft(IGameTime gameTime, float roll = 1f)
+        {
+            Rotate(gameTime, 0, 0, -roll);
+        }
+        /// <inheritdoc/>
+        public void RollRight(IGameTime gameTime, float roll = 1f)
+        {
+            Rotate(gameTime, 0, 0, roll);
+        }
+
+        /// <inheritdoc/>
+        public void Scale(IGameTime gameTime, float scaling)
+        {
+            Scale(gameTime, new Vector3(scaling));
+        }
+        /// <inheritdoc/>
+        public void Scale(IGameTime gameTime, float scalingX, float scalingY, float scalingZ)
+        {
+            Scale(gameTime, new Vector3(scalingX, scalingY, scalingZ));
+        }
+        /// <inheritdoc/>
+        public void Scale(IGameTime gameTime, Vector3 scaling)
+        {
+            float time = gameTime.ElapsedSeconds;
+
+            if (MathUtil.IsZero(time))
+            {
+                return;
+            }
+
+            if (MathUtil.IsZero(scaling.X) && MathUtil.IsZero(scaling.Y) && MathUtil.IsZero(scaling.Z))
+            {
+                return;
+            }
+
+            var deltaScaling = scaling * time;
+
+            var newScale = this.scaling + deltaScaling;
+
+            SetScaling(newScale);
+        }
+
+        /// <inheritdoc/>
+        public void SetPosition(float x, float y, float z)
+        {
+            SetPosition(new Vector3(x, y, z));
+        }
+        /// <inheritdoc/>
+        public void SetPosition(Vector3 position)
+        {
+            if (this.position == position)
+            {
+                return;
+            }
+
+            this.position = position;
+
+            transformUpdateNeeded = true;
+
+            UpdateLocalTransform();
+        }
+
+        /// <inheritdoc/>
+        public void SetRotation(Vector3 rotationAxis, float rotationAngle)
+        {
+            SetRotation(Quaternion.RotationAxis(rotationAxis, rotationAngle));
+        }
+        /// <inheritdoc/>
+        public void SetRotation(float yaw, float pitch, float roll)
+        {
+            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll));
+        }
+        /// <inheritdoc/>
+        public void SetRotation(Quaternion rotation)
+        {
+            if (this.rotation == rotation)
+            {
+                return;
+            }
+
+            this.rotation = rotation;
+
+            transformUpdateNeeded = true;
+
+            UpdateLocalTransform();
+        }
+
+        /// <inheritdoc/>
+        public void SetScaling(float scaling)
+        {
+            SetScaling(new Vector3(scaling));
+        }
+        /// <inheritdoc/>
+        public void SetScaling(float scalingX, float scalingY, float scalingZ)
+        {
+            SetScaling(new Vector3(scalingX, scalingY, scalingZ));
+        }
+        /// <inheritdoc/>
+        public void SetScaling(Vector3 scaling)
+        {
+            if (this.scaling == scaling)
+            {
+                return;
+            }
+
+            this.scaling = scaling;
+
+            transformUpdateNeeded = true;
+
+            UpdateLocalTransform();
+        }
+
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scaling)
+        {
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scaling)
+        {
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scaling)
+        {
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scaling)
+        {
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Quaternion rotation, float scaling)
+        {
+            SetTransform(position, rotation, new Vector3(scaling, scaling, scaling));
+        }
+        /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scaling)
+        {
+            this.scaling = scaling;
+            this.rotation = rotation;
+            this.position = position;
+
+            transformUpdateNeeded = true;
+
+            UpdateLocalTransform();
+        }
+        /// <inheritdoc/>
         public void SetTransform(Matrix transform)
         {
-            SetLocalTransform(transform);
-        }
-        /// <summary>
-        /// Look at target
-        /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        public void LookAt(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
-        {
-            LookAt(target, Vector3.Up, axis, interpolationAmount, updateState);
-        }
-        /// <summary>
-        /// Look at target
-        /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="up">Up vector</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        public void LookAt(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
-        {
-            if (Parent != null)
+            if (!transform.Decompose(out var newScaling, out var newRotation, out var newPosition))
             {
-                //Set parameters to local space
-                var parentTransform = Matrix.Invert(Parent.FinalTransform);
-
-                target = Vector3.TransformCoordinate(target, parentTransform);
+                return;
             }
 
-            if (!Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
-            {
-                var newRotation = Helper.LookAt(position, target, up, axis);
+            scaling = newScaling;
+            rotation = newRotation;
+            position = newPosition;
 
-                if (interpolationAmount > 0)
-                {
-                    newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
-                }
+            transformUpdateNeeded = true;
 
-                SetRotation(newRotation, updateState);
-            }
+            UpdateLocalTransform();
         }
-        /// <summary>
-        /// Rotate to target
-        /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+
+        /// <inheritdoc/>
+        public void LookAt(Vector3 target)
         {
-            RotateTo(target, Vector3.Up, axis, interpolationAmount, updateState);
+            LookAt(target, Vector3.Up);
         }
-        /// <summary>
-        /// Rotate to target
-        /// </summary>
-        /// <param name="target">Target</param>
-        /// <param name="up">Up vector</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
+        /// <inheritdoc/>
+        public void LookAt(Vector3 target, Vector3 up)
         {
             if (Parent != null)
             {
                 //Set parameters to local space
-                var parentTransform = Matrix.Invert(Parent.FinalTransform);
+                var parentTransform = Matrix.Invert(Parent.GlobalTransform);
 
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (!Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
+            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
             {
-                var newRotation = Helper.LookAt(position, target, up, axis);
-
-                if (interpolationAmount > 0)
-                {
-                    newRotation = Helper.RotateTowards(rotation, newRotation, interpolationAmount);
-                }
-
-                SetRotation(newRotation, updateState);
+                return;
             }
+
+            var newRotation = Helper.LookAt(position, target, up, Axis.None);
+
+            SetRotation(newRotation);
         }
-        /// <summary>
-        /// Set model aligned to normal
-        /// </summary>
-        /// <param name="normal">Normal</param>
-        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        /// <param name="updateState">Update internal state</param>
-        public void SetNormal(Vector3 normal, float interpolationAmount = 0, bool updateState = false)
+
+        /// <inheritdoc/>
+        public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0)
         {
-            Quaternion newRotation;
-
-            float angle = Helper.Angle(Up, normal);
-            if (angle != 0)
+            RotateTo(target, Vector3.Up, axis, interpolationAmount);
+        }
+        /// <inheritdoc/>
+        public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0)
+        {
+            if (Parent != null)
             {
-                Vector3 axis = Vector3.Cross(Up, normal);
+                //Set parameters to local space
+                var parentTransform = Matrix.Invert(Parent.GlobalTransform);
 
-                newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
+                target = Vector3.TransformCoordinate(target, parentTransform);
             }
-            else
+
+            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
             {
-                newRotation = Quaternion.RotationAxis(Vector3.Left, 0f) * rotation;
+                return;
             }
+
+            var newRotation = Helper.LookAt(position, target, up, axis);
+
+            if (interpolationAmount > 0)
+            {
+                newRotation = Helper.RotateTowards(rotation, newRotation, interpolationAmount);
+            }
+
+            SetRotation(newRotation);
+        }
+
+        /// <inheritdoc/>
+        public void SetNormal(Vector3 normal, float interpolationAmount = 0)
+        {
+            float angle = Helper.AngleSigned(Up, normal);
+
+            var axis = MathUtil.IsZero(angle % MathUtil.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
+
+            var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 
             if (interpolationAmount > 0)
             {
                 newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
             }
 
-            SetRotation(newRotation, updateState);
+            SetRotation(newRotation);
         }
 
-        /// <summary>
-        /// Gets manipulator text representation
-        /// </summary>
-        /// <returns>Returns manipulator text description</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{FinalTransform.GetDescription()}";
+            return $"{GlobalTransform.GetDescription()}";
         }
 
         /// <inheritdoc/>
@@ -608,7 +536,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is Manipulator3DState manipulator3DState))
+            if (state is not Manipulator3DState manipulator3DState)
             {
                 return;
             }

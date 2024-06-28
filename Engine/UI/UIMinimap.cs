@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,7 +11,13 @@ namespace Engine.UI
     /// <summary>
     /// Minimap
     /// </summary>
-    public sealed class UIMinimap : Drawable<UIMinimapDescription>, IScreenFitted
+    /// <remarks>
+    /// Contructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIMinimap(Scene scene, string id, string name) : Drawable<UIMinimapDescription>(scene, id, name), IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
@@ -29,34 +36,23 @@ namespace Engine.UI
         /// </summary>
         private EngineShaderResourceView renderTexture;
         /// <summary>
-        /// Context to draw
+        /// Minimap camera
         /// </summary>
-        private DrawContext drawContext;
+        private Camera minimapCamera;
         /// <summary>
-        /// Minimap rendered area
+        /// Minimap lights
         /// </summary>
-        private BoundingBox minimapArea;
+        private SceneLights minimapLights;
+        /// <summary>
+        /// Drawables
+        /// </summary>
+        private readonly List<IDrawable> drawables = [];
 
-        /// <summary>
-        /// Reference to the objects that we render in the minimap
-        /// </summary>
-        public IDrawable[] Drawables { get; set; }
         /// <summary>
         /// Back color
         /// </summary>
         public Color BackColor { get; set; }
 
-        /// <summary>
-        /// Contructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIMinimap(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -82,14 +78,11 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIMinimapDescription description)
+        public override async Task ReadAssets(UIMinimapDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
-            Drawables = Description.Drawables;
             BackColor = Description.BackColor;
-
-            minimapArea = Description.MinimapArea;
 
             viewport = new Viewport(0, 0, Description.Width, Description.Height);
 
@@ -103,8 +96,46 @@ namespace Engine.UI
             renderTarget = rt.RenderTarget;
             renderTexture = rt.ShaderResource;
 
-            InitializeContext();
+            minimapCamera = Camera.CreateOrtho(Description.MinimapArea, 0.1f, minimapBox.Width, minimapBox.Height);
+
+            AddDrawables(Description.Drawables ?? Enumerable.Empty<IDrawable>());
+
+            minimapLights = SceneLights.CreateDefault(Scene);
+
+            SetMapArea(Description.MinimapArea);
         }
+
+        public void SetMapArea(BoundingBox minimapArea)
+        {
+            minimapCamera.SetOrtho(minimapArea, 0.1f, minimapBox.Width, minimapBox.Height);
+        }
+
+        public void AddDrawable(IDrawable drawable)
+        {
+            if (drawable == null)
+            {
+                return;
+            }
+
+            if (!drawables.Contains(drawable))
+            {
+                drawables.Add(drawable);
+            }
+        }
+
+        public void AddDrawables(IEnumerable<IDrawable> drawableList)
+        {
+            if (drawableList?.Any() != true)
+            {
+                return;
+            }
+
+            drawableList.ToList().ForEach(AddDrawable);
+        }
+
+        /// <summary>
+        /// Creates texture renderer
+        /// </summary>
         private async Task<UITextureRenderer> CreateRenderer()
         {
             var desc = UITextureRendererDescription.Default(Description.Left, Description.Top, Description.Width, Description.Height);
@@ -113,42 +144,6 @@ namespace Engine.UI
                 $"{Id}.TextureRenderer",
                 $"{Name}.TextureRenderer",
                 desc);
-        }
-
-        /// <summary>
-        /// Initialize terrain context
-        /// </summary>
-        private void InitializeContext()
-        {
-            float x = minimapArea.Maximum.X - minimapArea.Minimum.X;
-            float y = minimapArea.Maximum.Y - minimapArea.Minimum.Y;
-            float z = minimapArea.Maximum.Z - minimapArea.Minimum.Z;
-
-            float aspect = minimapBox.Height / minimapBox.Width;
-            float near = 0.1f;
-
-            Vector3 eyePosition = new Vector3(0, y + near, 0);
-            Vector3 eyeDirection = Vector3.Zero;
-
-            Matrix view = Matrix.LookAtLH(
-                eyePosition,
-                eyeDirection,
-                Vector3.UnitZ);
-
-            Matrix proj = Matrix.OrthoLH(
-                x / aspect,
-                z,
-                near,
-                y + near);
-
-            drawContext = new DrawContext()
-            {
-                DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
-                ViewProjection = view * proj,
-                EyePosition = eyePosition,
-                EyeDirection = eyeDirection,
-                Lights = SceneLights.CreateDefault(Scene),
-            };
         }
 
         /// <inheritdoc/>
@@ -160,40 +155,43 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
-            if (Drawables?.Any() != true)
+            if (drawables.Count == 0)
             {
-                return;
+                return false;
             }
 
-            drawContext.GameTime = context.GameTime;
+            var drawContext = context.Clone($"{Name ?? nameof(UIMinimap)}", DrawerModes.Forward | DrawerModes.OpaqueOnly);
+            drawContext.Camera = minimapCamera;
+            drawContext.Lights = minimapLights;
 
             var graphics = Game.Graphics;
+            var dc = drawContext.DeviceContext;
 
-            graphics.SetViewport(viewport);
+            dc.SetViewport(viewport);
 
-            graphics.SetRenderTargets(
+            dc.SetRenderTargets(
                 renderTarget, true, BackColor,
                 false);
 
-            foreach (var item in Drawables)
+            foreach (var item in drawables)
             {
                 item.Draw(drawContext);
             }
 
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(false, Color.Transparent);
+            dc.SetViewport(graphics.Viewport);
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
-            minimapBox.Draw(context);
+            bool drawn = minimapBox.Draw(drawContext);
 
-            base.Draw(context);
+            return base.Draw(drawContext) || drawn;
         }
 
         /// <summary>
@@ -205,11 +203,11 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override bool Cull(IIntersectionVolume volume, out float distance)
+        public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
-            drawContext.Lights.Cull(volume, drawContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
+            minimapLights.Cull(volume, Scene.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
 
-            return base.Cull(volume, out distance);
+            return base.Cull(cullIndex, volume, out distance);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Engine.Collada
         {
             get
             {
-                return Array.Find(this.Inputs, i => i.Semantic == semantic);
+                return Array.Find(Inputs, i => i.Semantic == semantic);
             }
         }
     }

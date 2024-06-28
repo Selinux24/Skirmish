@@ -1,16 +1,18 @@
-﻿using System;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     /// <summary>
-    /// Flags for addTile
+    /// AddTile types
     /// </summary>
-    [Flags]
     public enum CompressedTileFlagTypes
     {
         /// <summary>
-        /// Navmesh owns the tile memory and should free it.
+        /// DT_COMPRESSEDTILE_EMPTY_DATA
         /// </summary>
-        DT_COMPRESSEDTILE_FREE_DATA = 0x01,					
+        None = 0x00,
+        /// <summary>
+        /// DT_COMPRESSEDTILE_FREE_DATA. Navmesh owns the tile memory and should free it.
+        /// </summary>
+        Free = 0x01,					
     }
 }

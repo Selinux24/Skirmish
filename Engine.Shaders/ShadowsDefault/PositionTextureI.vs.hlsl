@@ -6,7 +6,7 @@ struct VSVertex
     row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
     uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
     uint instanceId : SV_INSTANCEID;
 };
 

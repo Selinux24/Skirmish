@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,20 +20,31 @@ namespace Engine
         /// One radian
         /// </summary>
         public const float Radian = 0.0174532924f;
+        /// <summary>
+        /// Zero tolerance vector
+        /// </summary>
+        public static readonly Vector3 ZeroToleranceVector = new(MathUtil.ZeroTolerance);
 
         #region Random
 
         /// <summary>
-        /// Random number generator
+        /// Default random generator
         /// </summary>
-        public static readonly Random RandomGenerator = new Random();
+        public static Random RandomGenerator { get; } = new();
+        /// <summary>
+        /// Gets a new random generator
+        /// </summary>
+        public static Random NewGenerator()
+        {
+            return new();
+        }
         /// <summary>
         /// Gets a new random generator
         /// </summary>
         /// <param name="seed">Seed</param>
-        public static Random SetRandomGeneratorSeed(int seed)
+        public static Random NewGenerator(int seed)
         {
-            return new Random(seed);
+            return new(seed);
         }
 
         #endregion
@@ -49,9 +59,7 @@ namespace Engine
         /// <param name="right">Right value</param>
         public static void Swap<T>(ref T left, ref T right)
         {
-            T temp = left;
-            left = right;
-            right = temp;
+            (right, left) = (left, right);
         }
         /// <summary>
         /// Converts the byte array to a structure
@@ -76,7 +84,7 @@ namespace Engine
         /// <returns>Returns a memory stream</returns>
         public static MemoryStream CopyToMemory(this Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
 
             stream.CopyTo(ms);
 
@@ -91,10 +99,8 @@ namespace Engine
         /// <returns>Returns a memory stream</returns>
         public static MemoryStream CopyToMemory(this string fileName)
         {
-            using (var stream = File.OpenRead(fileName))
-            {
-                return stream.CopyToMemory();
-            }
+            using var stream = File.OpenRead(fileName);
+            return stream.CopyToMemory();
         }
 
         #endregion
@@ -109,12 +115,9 @@ namespace Engine
         public static string GetMd5Sum(this byte[] buffer)
         {
             byte[] result = null;
-            using (MD5 md5 = new MD5CryptoServiceProvider())
-            {
-                result = md5.ComputeHash(buffer);
-            }
+            result = MD5.HashData(buffer);
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             Array.ForEach(result, r => sb.Append(r.ToString("X2")));
             return sb.ToString();
         }
@@ -304,12 +307,26 @@ namespace Engine
         #region Array Utils
 
         /// <summary>
+        /// Creates an array initialized with sequential numbers
+        /// </summary>
+        /// <param name="n">Number of total values in the array</param>
+        /// <param name="start">Start value</param>
+        public static int[] CreateSequentialArray(int n, int start = 0)
+        {
+            int[] res = new int[n];
+            for (int j = 0; j < n; ++j)
+            {
+                res[j] = start + j;
+            }
+            return res;
+        }
+        /// <summary>
         /// Generate an array initialized to defaultValue
         /// </summary>
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
-        public static T[] CreateArray<T>(int length, T defaultValue) where T : struct
+        public static T[] CreateArray<T>(int length, T defaultValue = default) where T : struct
         {
             T[] array = new T[length];
 
@@ -324,6 +341,20 @@ namespace Engine
         /// <param name="func">Function</param>
         /// <returns>Returns array</returns>
         public static T[] CreateArray<T>(int length, Func<T> func)
+        {
+            T[] array = new T[length];
+
+            InitializeArray(array, func);
+
+            return array;
+        }
+        /// <summary>
+        /// Generate an array initialized to function result
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="func">Function</param>
+        /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(int length, Func<int, T> func)
         {
             T[] array = new T[length];
 
@@ -358,6 +389,19 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Initializes the specified array with function result
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="arr">Array</param>
+        /// <param name="func">Function</param>
+        public static void InitializeArray<T>(this T[] arr, Func<int, T> func)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = func.Invoke(i);
+            }
+        }
+        /// <summary>
         /// Gets the maximum value of the collection 
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
@@ -369,11 +413,7 @@ namespace Engine
 
             for (int i = 0; i < array.Length; i++)
             {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) < 0)
+                if (i == 0 || res.CompareTo(array[i]) < 0)
                 {
                     res = array[i];
                 }
@@ -393,11 +433,7 @@ namespace Engine
 
             for (int i = 0; i < array.Length; i++)
             {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) > 0)
+                if (i == 0 || res.CompareTo(array[i]) > 0)
                 {
                     res = array[i];
                 }
@@ -432,7 +468,7 @@ namespace Engine
         /// <returns>Returns next pair</returns>
         public static int NextPair(this int num)
         {
-            return num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
+            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num + 1 : num;
         }
         /// <summary>
         /// Gets next odd of even number, if even
@@ -441,7 +477,7 @@ namespace Engine
         /// <returns>Returns next odd</returns>
         public static int NextOdd(this int num)
         {
-            return num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
+            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num : num + 1;
         }
         /// <summary>
         /// Calculates the next highest power of two.
@@ -478,12 +514,24 @@ namespace Engine
             return string.Join(separator, res);
         }
         /// <summary>
+        /// Removes the first item of the list
+        /// </summary>
+        /// <typeparam name="T">List type</typeparam>
+        /// <param name="list">The list</param>
+        /// <returns>Returns the removed item</returns>
+        public static T PopFirst<T>(this List<T> list)
+        {
+            T value = list[0];
+            list.RemoveAt(0);
+            return value;
+        }
+        /// <summary>
         /// Removes the last item of the list
         /// </summary>
         /// <typeparam name="T">List type</typeparam>
         /// <param name="list">The list</param>
         /// <returns>Returns the removed item</returns>
-        public static T Pop<T>(this List<T> list)
+        public static T PopLast<T>(this List<T> list)
         {
             int index = list.Count - 1;
             T value = list[index];
@@ -494,58 +542,56 @@ namespace Engine
         /// Compares two enumerable lists, element by element
         /// </summary>
         /// <typeparam name="T">Element type</typeparam>
-        /// <param name="enum1">First list</param>
-        /// <param name="enum2">Second list</param>
-        /// <returns>Returns true if both list are equal</returns>
-        public static bool ListIsEqual<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns>Returns true if both enumerables contains the same elements</returns>
+        public static bool CompareEnumerables<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
             if (enum1 == null && enum2 == null)
             {
                 return true;
             }
-            else if (enum1 != null && enum2 != null)
+
+            if (!(enum1 != null && enum2 != null))
             {
-                var list1 = enum1.ToList();
-                var list2 = enum2.ToList();
-
-                if (list1.Count == list2.Count)
-                {
-                    if (list1.Count > 0 && !IsEqual(list1, list2))
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            if (enum1.Count() != enum2.Count())
+            {
+                return false;
+            }
+
+            if (!CompareEnumerableElements(enum1, enum2))
+            {
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
-        /// Compares two lists
+        /// Compares two enumerables item by item
         /// </summary>
-        /// <typeparam name="T">Type of items in the list</typeparam>
-        /// <param name="list1">First list</param>
-        /// <param name="list2">Second list</param>
-        /// <returns>Returns false if the lists were not equal</returns>
-        private static bool IsEqual<T>(List<T> list1, List<T> list2)
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns>Returns true if both enumerables contains the same elements</returns>
+        private static bool CompareEnumerableElements<T>(IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
-            bool equatable = list1[0] is IEquatable<T>;
-
-            for (int i = 0; i < list1.Count; i++)
+            for (int i = 0; i < enum1.Count(); i++)
             {
-                bool equal;
+                var item1 = enum1.ElementAt(i);
+                var item2 = enum2.ElementAt(i);
 
-                if (equatable)
+                if (Equals(item1, default(T)) && Equals(item2, default(T)))
                 {
-                    equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
-                }
-                else
-                {
-                    equal = list1[i].Equals(list2[i]);
+                    continue;
                 }
 
-                if (!equal) return false;
+                if (item1?.Equals(item2) != true)
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -588,6 +634,50 @@ namespace Engine
             if (value2 > max) max = value2;
             if (value3 > max) max = value3;
         }
+        /// <summary>
+        /// Truncates the spefied array
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="array">Array</param>
+        /// <param name="count">Number of items</param>
+        public static T[] Truncate<T>(T[] array, int count)
+        {
+            if (array == null)
+            {
+                return [];
+            }
+
+            if (array.Length <= count)
+            {
+                //Copy array
+                return [.. array];
+            }
+
+            return array.Take(count).ToArray();
+        }
+
+        #endregion
+
+        #region Stacks
+
+        /// <summary>
+        /// Pushes an array of items to the top of the stack
+        /// </summary>
+        /// <typeparam name="T">Type of item</typeparam>
+        /// <param name="stack">Stack</param>
+        /// <param name="values">List of items</param>
+        public static void PushRange<T>(this Stack<T> stack, IEnumerable<T> values)
+        {
+            if (values?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var item in values)
+            {
+                stack.Push(item);
+            }
+        }
 
         #endregion
 
@@ -604,46 +694,6 @@ namespace Engine
             {
                 source.TryTake(out T _);
             }
-        }
-
-        #endregion
-
-        #region Strings
-
-        /// <summary>
-        /// Splits the text into a float array
-        /// </summary>
-        /// <param name="text">Text</param>
-        /// <returns>Returns a float array</returns>
-        public static float[] SplitFloats(this string text)
-        {
-            if (!string.IsNullOrEmpty(text))
-            {
-                var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                bool allOk = true;
-                float[] res = new float[bits.Length];
-
-                for (int i = 0; i < res.Length; i++)
-                {
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
-                    {
-                        res[i] = n;
-                    }
-                    else
-                    {
-                        allOk = false;
-                        break;
-                    }
-                }
-
-                if (allOk)
-                {
-                    return res;
-                }
-            }
-
-            return new float[] { };
         }
 
         #endregion
@@ -675,7 +725,7 @@ namespace Engine
             dot /= one.Length() * two.Length();
 
             //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)Math.Acos(dot);
+            return MathF.Acos(dot);
         }
         /// <summary>
         /// Gets the angle between two quaternions
@@ -687,7 +737,7 @@ namespace Engine
         {
             float dot = Quaternion.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
+            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f)) * 2f;
         }
         /// <summary>
         /// Gets the angle between two vectors
@@ -699,7 +749,7 @@ namespace Engine
         {
             float dot = Vector3.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f));
+            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f));
         }
         /// <summary>
         /// Gets the signed angle between two vectors
@@ -709,7 +759,7 @@ namespace Engine
         /// <returns>Returns the angle value in radians</returns>
         public static float AngleSigned(Vector2 one, Vector2 two)
         {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
+            return MathF.Atan2(Cross(one, two), Vector2.Dot(one, two));
         }
         /// <summary>
         /// Gets the signed angle between two vectors
@@ -721,7 +771,7 @@ namespace Engine
         {
             float dot = Vector3.Dot(one, two);
 
-            return (float)Math.Acos(Math.Min(dot, 1f));
+            return MathF.Acos(MathUtil.Clamp(dot, -1f, 1f));
         }
         /// <summary>
         /// Gets the angle between two vectors in the same plane
@@ -732,13 +782,13 @@ namespace Engine
         /// <returns>Returns the angle value in radians</returns>
         public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
-            Plane p = new Plane(planeNormal, 0);
+            var p = new Plane(planeNormal, 0);
 
             float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
-            float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
+            float angle = MathF.Acos(MathUtil.Clamp(dot, 0, 1));
 
-            Vector3 cross = Vector3.Cross(one, two);
+            var cross = Vector3.Cross(one, two);
 
             if (Vector3.Dot(p.Normal, cross) > 0)
             {
@@ -755,20 +805,20 @@ namespace Engine
         /// <param name="pitch">Pitch value</param>
         public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
-            yaw = (float)Math.Atan2(vec.X, vec.Y);
+            yaw = MathF.Atan2(vec.X, vec.Y);
 
             if (yaw < 0.0f)
             {
                 yaw += MathUtil.TwoPi;
             }
 
-            if (Math.Abs(vec.X) > Math.Abs(vec.Y))
+            if (MathF.Abs(vec.X) > MathF.Abs(vec.Y))
             {
-                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.X));
+                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.X));
             }
             else
             {
-                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.Y));
+                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.Y));
             }
 
             if (vec.Z < 0.0f)
@@ -803,7 +853,7 @@ namespace Engine
         /// <returns>The world Matrix</returns>
         public static Matrix CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
         {
-            Matrix result = new Matrix();
+            var result = new Matrix();
 
             Vector3.Normalize(ref forward, out Vector3 z);
             Vector3.Cross(ref forward, ref up, out Vector3 x);
@@ -829,7 +879,7 @@ namespace Engine
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis = Axis.None)
         {
-            if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
+            if (MathUtil.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target))))
             {
                 up = Vector3.Left;
             }
@@ -881,15 +931,30 @@ namespace Engine
         /// <returns>Gets the quaternion between from and to quaternions traveling maxDelta radians</returns>
         public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
         {
-            float angle = Helper.Angle(from, to);
-            if (angle == 0f)
+            float angle = Angle(from, to);
+            if (MathUtil.IsZero(angle))
             {
                 return to;
             }
 
-            float delta = Math.Min(1f, maxDelta / angle);
+            float delta = MathF.Min(1f, maxDelta / angle);
 
             return Quaternion.Slerp(from, to, delta);
+        }
+        /// <summary>
+        /// Creates a rotation from the direction vector from the up vector
+        /// </summary>
+        /// <param name="direction">Direction vector</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a rotation quaternion</returns>
+        public static Quaternion RotateFromDirection(Vector3 direction, Vector3 up)
+        {
+            var a = Vector3.Cross(direction, up);
+            var w = MathF.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
+            Quaternion q = new(a, w);
+            q.Normalize();
+
+            return q;
         }
         /// <summary>
         /// Gets the screen coordinates from the specified 3D point
@@ -980,23 +1045,23 @@ namespace Engine
         }
         public static Vector2Int[] GetVertices(this Rectangle rectangle)
         {
-            return new[]
-            {
-                new Vector2Int(rectangle.Left, rectangle.Top),
-                new Vector2Int(rectangle.Right, rectangle.Top),
-                new Vector2Int(rectangle.Right, rectangle.Bottom),
-                new Vector2Int(rectangle.Left, rectangle.Bottom),
-            };
+            return
+            [
+                new (rectangle.Left, rectangle.Top),
+                new (rectangle.Right, rectangle.Top),
+                new (rectangle.Right, rectangle.Bottom),
+                new (rectangle.Left, rectangle.Bottom),
+            ];
         }
         public static Vector2[] GetVertices(this RectangleF rectangle)
         {
-            return new[]
-            {
-                new Vector2(rectangle.Left, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Bottom),
-                new Vector2(rectangle.Left, rectangle.Bottom),
-            };
+            return
+            [
+                new (rectangle.Left, rectangle.Top),
+                new (rectangle.Right, rectangle.Top),
+                new (rectangle.Right, rectangle.Bottom),
+                new (rectangle.Left, rectangle.Bottom),
+            ];
         }
         public static RectangleF Scale(this RectangleF rectangle, float scale)
         {
@@ -1022,7 +1087,7 @@ namespace Engine
         /// <returns>Returns a bounding box containing all the boxes in the array</returns>
         public static BoundingBox MergeBoundingBox(IEnumerable<BoundingBox> boxes)
         {
-            BoundingBox fbbox = new BoundingBox();
+            var fbbox = new BoundingBox();
 
             if (boxes?.Any() != true)
             {
@@ -1052,6 +1117,39 @@ namespace Engine
             }
 
             return BoundingBox.Merge(sourceBox.Value, newBox);
+        }
+
+        #endregion
+
+        #region Colors
+
+        /// <summary>
+        /// Converts an integer value to Color4
+        /// </summary>
+        /// <param name="value">Integer value</param>
+        /// <param name="alpha">Alpha value from 0 to 255</param>
+        /// <returns>Returns the Color4 value</returns>
+        public static Color4 IntToCol(int value, int alpha)
+        {
+            int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;
+            int g = Bit(value, 1) + Bit(value, 4) * 2 + 1;
+            int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
+
+            return new Color4(
+                1 - r * 63.0f / 255.0f,
+                1 - g * 63.0f / 255.0f,
+                1 - b * 63.0f / 255.0f,
+                alpha / 255.0f);
+        }
+        /// <summary>
+        /// Bitwise secret wisdoms
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        private static int Bit(int a, int b)
+        {
+            return (a & (1 << b)) >> b;
         }
 
         #endregion
@@ -1096,9 +1194,9 @@ namespace Engine
         /// <returns>Return vector description</returns>
         public static string GetDescription(this Vector3 vector)
         {
-            vector.X = (float)Math.Round(vector.X, 3);
-            vector.Y = (float)Math.Round(vector.Y, 3);
-            vector.Z = (float)Math.Round(vector.Z, 3);
+            vector.X = MathF.Round(vector.X, 3);
+            vector.Y = MathF.Round(vector.Y, 3);
+            vector.Z = MathF.Round(vector.Z, 3);
 
             return string.Format("X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}", vector.X, vector.Y, vector.Z);
         }

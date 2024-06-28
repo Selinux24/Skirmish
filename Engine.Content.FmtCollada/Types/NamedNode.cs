@@ -11,16 +11,10 @@ namespace Engine.Collada.Types
         [XmlAttribute("name")]
         public string Name { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(this.Id) && !string.IsNullOrEmpty(this.Name))
-                return string.Format("Id: {0}; Name: {1};", this.Id, this.Name);
-            if (!string.IsNullOrEmpty(this.Id)) 
-                return string.Format("Id: {0};", this.Id);
-            if (!string.IsNullOrEmpty(this.Name)) 
-                return string.Format("Name: {0};", this.Name);
-
-            return "";
+            return $"{nameof(NamedNode)}; Id: {Id}; Name: {Name};";
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Engine.UI
         /// <param name="scrollMode">Scroll mode</param>
         public static UIScrollBarDescription Default(ScrollModes scrollMode = ScrollModes.Vertical)
         {
-            return new UIScrollBarDescription
+            return new()
             {
                 ScrollMode = scrollMode,
             };
@@ -27,7 +27,7 @@ namespace Engine.UI
         /// <param name="scrollMode">Scroll mode</param>
         public static UIScrollBarDescription Default(Color4 baseColor, Color4 markerColor, float markerSize, ScrollModes scrollMode = ScrollModes.Vertical)
         {
-            return new UIScrollBarDescription()
+            return new()
             {
                 BaseColor = baseColor,
                 MarkerColor = markerColor,

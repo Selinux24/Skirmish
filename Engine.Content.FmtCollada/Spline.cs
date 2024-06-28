@@ -17,7 +17,7 @@ namespace Engine.Collada
 
         public Spline()
         {
-            this.Closed = false;
+            Closed = false;
         }
     }
 

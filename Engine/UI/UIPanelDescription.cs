@@ -12,7 +12,10 @@ namespace Engine.UI
         /// </summary>
         public static UIPanelDescription Default()
         {
-            return new UIPanelDescription();
+            return new()
+            {
+                Background = SpriteDescription.Default(),
+            };
         }
         /// <summary>
         /// Gets the default panel description
@@ -20,7 +23,7 @@ namespace Engine.UI
         /// <param name="color">Tint color</param>
         public static UIPanelDescription Default(Color4 color)
         {
-            return new UIPanelDescription()
+            return new()
             {
                 Background = SpriteDescription.Default(color),
             };
@@ -31,7 +34,7 @@ namespace Engine.UI
         /// <param name="fileName">Texture file name for the background</param>
         public static UIPanelDescription Default(string fileName)
         {
-            return new UIPanelDescription()
+            return new()
             {
                 Background = SpriteDescription.Default(fileName),
             };
@@ -42,12 +45,13 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         public static UIPanelDescription Screen(Scene scene)
         {
-            return new UIPanelDescription
+            return new()
             {
                 Left = 0,
                 Top = 0,
                 Width = scene.Game.Form.RenderWidth,
                 Height = scene.Game.Form.RenderHeight,
+                Background = SpriteDescription.Default(),
             };
         }
         /// <summary>
@@ -57,13 +61,13 @@ namespace Engine.UI
         /// <param name="color">Tint color</param>
         public static UIPanelDescription Screen(Scene scene, Color4 color)
         {
-            return new UIPanelDescription
+            return new()
             {
-                Background = SpriteDescription.Default(color),
                 Left = 0,
                 Top = 0,
                 Width = scene.Game.Form.RenderWidth,
                 Height = scene.Game.Form.RenderHeight,
+                Background = SpriteDescription.Default(color),
             };
         }
         /// <summary>
@@ -73,13 +77,13 @@ namespace Engine.UI
         /// <param name="fileName">Texture file name for the background</param>
         public static UIPanelDescription Screen(Scene scene, string fileName)
         {
-            return new UIPanelDescription
+            return new()
             {
-                Background = SpriteDescription.Default(fileName),
                 Left = 0,
                 Top = 0,
                 Width = scene.Game.Form.RenderWidth,
                 Height = scene.Game.Form.RenderHeight,
+                Background = SpriteDescription.Default(fileName),
             };
         }
 

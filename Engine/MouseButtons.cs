@@ -2,32 +2,35 @@
 
 namespace Engine
 {
+    /// <summary>
+    /// Mouse buttons
+    /// </summary>
     [Flags]
     public enum MouseButtons
     {
         /// <summary>
-        /// None
+        ///  No mouse button was pressed.
         /// </summary>
-        None = System.Windows.Forms.MouseButtons.None,
+        None = 0x00000000,
         /// <summary>
-        /// Left mouse button
+        ///  The left mouse button was pressed.
         /// </summary>
-        Left = System.Windows.Forms.MouseButtons.Left,
+        Left = 0x00100000,
         /// <summary>
-        /// Right mouse button
+        ///  The right mouse button was pressed.
         /// </summary>
-        Right = System.Windows.Forms.MouseButtons.Right,
+        Right = 0x00200000,
         /// <summary>
-        /// Middle mouse button
+        ///  The middle mouse button was pressed.
         /// </summary>
-        Middle = System.Windows.Forms.MouseButtons.Middle,
+        Middle = 0x00400000,
         /// <summary>
-        /// XButton1
+        /// X button 1
         /// </summary>
-        XButton1 = System.Windows.Forms.MouseButtons.XButton1,
+        XButton1 = 0x00800000,
         /// <summary>
-        /// XButton2
+        /// X button 2
         /// </summary>
-        XButton2 = System.Windows.Forms.MouseButtons.XButton2,
+        XButton2 = 0x01000000,
     }
 }

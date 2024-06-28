@@ -89,5 +89,11 @@ namespace Engine.Collada
         {
             Type = EnumNodeType.Node;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return base.ToString() + $" Type: {Type}; Layer: {Layer};";
+        }
     }
 }

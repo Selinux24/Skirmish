@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.UI
 {
@@ -14,7 +15,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Spacing(0);
+                return new(0);
             }
         }
 
@@ -48,14 +49,14 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public bool Equals(Spacing other)
+        public readonly bool Equals(Spacing other)
         {
             return
-                other.Horizontal == Horizontal &&
-                other.Vertical == Vertical;
+                MathUtil.NearEqual(other.Horizontal, Horizontal) &&
+                MathUtil.NearEqual(other.Vertical, Vertical);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is Spacing spacing)
             {
@@ -65,15 +66,12 @@ namespace Engine.UI
             return false;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            unchecked
-            {
-                return (Horizontal.GetHashCode() * 397) ^ Vertical.GetHashCode();
-            }
+            return HashCode.Combine(Horizontal, Vertical);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Horizontal: {Horizontal}; Vertical: {Vertical};";
         }

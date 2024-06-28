@@ -11,6 +11,17 @@ namespace Engine
     /// </summary>
     public struct MaterialCookTorrance : IEquatable<MaterialCookTorrance>, IMaterial
     {
+        /// <inheritdoc/>
+        public static bool operator ==(MaterialCookTorrance left, MaterialCookTorrance right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(MaterialCookTorrance left, MaterialCookTorrance right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Default material
         /// </summary>
@@ -18,7 +29,7 @@ namespace Engine
         {
             get
             {
-                return new MaterialCookTorrance()
+                return new()
                 {
                     DiffuseColor = MaterialConstants.DiffuseColor,
                     EmissiveColor = MaterialConstants.EmissiveColor,
@@ -39,7 +50,7 @@ namespace Engine
         {
             MaterialCookTorranceContent content = builtInMaterial;
 
-            return new MaterialCookTorrance()
+            return new()
             {
                 DiffuseColor = content.DiffuseColor,
                 EmissiveColor = content.EmissiveColor,
@@ -75,15 +86,13 @@ namespace Engine
         /// Roughness
         /// </summary>
         public float Roughness { get; set; }
-        /// <summary>
-        /// Use transparency
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsTransparent { get; set; }
 
         /// <inheritdoc/>
         public BufferMaterials Convert()
         {
-            return new BufferMaterials
+            return new()
             {
                 Algorithm = (uint)SpecularAlgorithms.CookTorrance,
                 Block11 = 0,
@@ -99,7 +108,7 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public bool Equals(MaterialCookTorrance other)
+        public readonly bool Equals(MaterialCookTorrance other)
         {
             return
                 EmissiveColor == other.EmissiveColor &&
@@ -107,11 +116,21 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                Metallic == other.Metallic &&
-                Roughness == other.Roughness;
+                MathUtil.NearEqual(Metallic, other.Metallic) &&
+                MathUtil.NearEqual(Roughness, other.Roughness);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly bool Equals(object obj)
+        {
+            return obj is MaterialCookTorrance torrance && Equals(torrance);
+        }
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Metallic, Roughness);
+        }
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
             return $"Cook-Torrance. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Metallic: {Metallic}; Roughness: {Roughness};";
         }

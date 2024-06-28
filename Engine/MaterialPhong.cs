@@ -11,6 +11,17 @@ namespace Engine
     /// </summary>
     public struct MaterialPhong : IEquatable<MaterialPhong>, IMaterial
     {
+        /// <inheritdoc/>
+        public static bool operator ==(MaterialPhong left, MaterialPhong right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(MaterialPhong left, MaterialPhong right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Default material
         /// </summary>
@@ -18,7 +29,7 @@ namespace Engine
         {
             get
             {
-                return new MaterialPhong()
+                return new()
                 {
                     DiffuseColor = MaterialConstants.DiffuseColor,
                     EmissiveColor = MaterialConstants.EmissiveColor,
@@ -38,7 +49,7 @@ namespace Engine
         {
             MaterialPhongContent content = builtInMaterial;
 
-            return new MaterialPhong()
+            return new()
             {
                 DiffuseColor = content.DiffuseColor,
                 EmissiveColor = content.EmissiveColor,
@@ -66,18 +77,16 @@ namespace Engine
         /// </summary>
         public Color3 SpecularColor { get; set; }
         /// <summary>
-        /// Use transparency
-        /// </summary>
-        public bool IsTransparent { get; set; }
-        /// <summary>
         /// Shininess
         /// </summary>
         public float Shininess { get; set; }
+        /// <inheritdoc/>
+        public bool IsTransparent { get; set; }
 
         /// <inheritdoc/>
         public BufferMaterials Convert()
         {
-            return new BufferMaterials
+            return new()
             {
                 Algorithm = (uint)SpecularAlgorithms.Phong,
                 Block11 = 0,
@@ -93,7 +102,7 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public bool Equals(MaterialPhong other)
+        public readonly bool Equals(MaterialPhong other)
         {
             return
                 EmissiveColor == other.EmissiveColor &&
@@ -101,10 +110,20 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                Shininess == other.Shininess;
+                MathUtil.NearEqual(Shininess, other.Shininess);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly bool Equals(object obj)
+        {
+            return obj is MaterialPhong phong && Equals(phong);
+        }
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Shininess);
+        }
+        /// <inheritdoc/>
+        public override readonly string ToString()
         {
             return $"Phong. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";
         }

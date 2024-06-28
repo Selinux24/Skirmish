@@ -7,45 +7,30 @@ namespace Engine
     /// </summary>
     public abstract class SceneLight : ISceneLight
     {
-        /// <summary>
-        /// Light name
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; set; }
-        /// <summary>
-        /// Enables or disables the light
-        /// </summary>
+        /// <inheritdoc/>
         public bool Enabled { get; set; }
-        /// <summary>
-        /// Gets or sets whether the light casts shadow
-        /// </summary>
+        /// <inheritdoc/>
         public bool CastShadow { get; set; }
-        /// <summary>
-        /// Gets or sets whether the light is marked for shadow cast the next call
-        /// </summary>
+        /// <inheritdoc/>
         public bool CastShadowsMarked { get; set; } = false;
-        /// <summary>
-        /// Diffuse color
-        /// </summary>
+        /// <inheritdoc/>
         public Color3 DiffuseColor { get; set; }
-        /// <summary>
-        /// Specular color
-        /// </summary>
+        /// <inheritdoc/>
         public Color3 SpecularColor { get; set; }
-        /// <summary>
-        /// Free use variable
-        /// </summary>
-        public virtual object State { get; set; }
-        /// <summary>
-        /// Parent local transform matrix
-        /// </summary>
-        /// <summary>
-        /// Parent local transform matrix
-        /// </summary>
-        public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
-        /// <summary>
-        /// First shadow map index
-        /// </summary>
+        /// <inheritdoc/>
         public int ShadowMapIndex { get; set; } = 0;
+        /// <inheritdoc/>
+        public uint ShadowMapCount { get; set; }
+        /// <inheritdoc/>
+        public Matrix[] FromLightVP { get; set; }
+        /// <inheritdoc/>
+        public Vector3 Position { get; set; }
+        /// <inheritdoc/>
+        public virtual object State { get; set; }
+        /// <inheritdoc/>
+        public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
 
         /// <summary>
         /// Evaluates whether a light must be processed as a shadow casting light or not
@@ -105,42 +90,20 @@ namespace Engine
             SpecularColor = specular;
         }
 
-        /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
-        public virtual void ClearShadowParameters()
-        {
-            ShadowMapIndex = -1;
-        }
-        /// <summary>
-        /// Test the light shadow casting based on the viewer position
-        /// </summary>
-        /// <param name="environment">Game environment</param>
-        /// <param name="eyePosition">Viewer eye position</param>
-        /// <returns>Returns true if the light can cast shadows</returns>
-        /// <remarks>This method updates the light internal cast shadow flag</remarks>
-        public abstract bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
+        /// <inheritdoc/>
+        public abstract void ClearShadowParameters();
+        /// <inheritdoc/>
+        public abstract void SetShadowParameters(Camera camera, int assignedShadowMap);
+        /// <inheritdoc/>
+        public abstract ICullingVolume GetLightVolume();
 
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
+        /// <inheritdoc/>
         public abstract ISceneLight Clone();
 
-        /// <summary>
-        /// Gets the text representation of the light
-        /// </summary>
-        /// <returns>Returns the text representation of the light</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(Name))
-            {
-                return $"{Name}; Enabled: {Enabled}";
-            }
-            else
-            {
-                return $"{GetType()}; Enabled: {Enabled}";
-            }
+            return $"{Name ?? GetType().ToString()}; Enabled: {Enabled}";
         }
     }
 }

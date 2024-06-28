@@ -4,71 +4,27 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn.Components.Ground;
     using Engine.Collections.Generic;
     using Engine.Content;
 
     /// <summary>
     /// Ground description
     /// </summary>
-    public class GroundDescription : SceneObjectDescription
+    public abstract class GroundDescription : SceneObjectDescription
     {
-        /// <summary>
-        /// Gets a ground description from data
-        /// </summary>
-        /// <param name="heightmap">Height map</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="maximumHeight">Maximum height</param>
-        /// <param name="heightCurve">Height curve</param>
-        /// <param name="textures">Heighmap textures</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmap(NoiseMap heightmap, float cellSize, float maximumHeight, Curve heightCurve, HeightmapTexturesDescription textures, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Heightmap = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve, textures),
-            };
-        }
-        /// <summary>
-        /// Gets a ground description heightmap description
-        /// </summary>
-        /// <param name="description">Heightmap description</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmapDescription(HeightmapDescription description, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Heightmap = description,
-            };
-        }
-        /// <summary>
-        /// Gets a ground description from a file
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">File name</param>
-        /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromFile(string contentFolder, string fileName, int quadtreeDepth = 3)
-        {
-            return new GroundDescription()
-            {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
-                Content = ContentDescription.FromFile(contentFolder, fileName),
-            };
-        }
-
-        /// <summary>
-        /// Heightmap description
-        /// </summary>
-        public HeightmapDescription Heightmap { get; set; }
         /// <summary>
         /// Content
         /// </summary>
         public ContentDescription Content { get; set; }
         /// <summary>
+        /// Content list
+        /// </summary>
+        public IEnumerable<ContentDescription> ContentList { get; set; }
+        /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription Quadtree { get; set; }
+        public QuadtreeDescription Quadtree { get; set; } = QuadtreeDescription.Default(4);
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
@@ -77,27 +33,30 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public GroundDescription()
+        protected GroundDescription()
             : base()
         {
-            CastShadow = true;
+            BlendMode = BlendModes.Opaque;
+            CastShadow = ShadowCastingAlgorihtms.All;
         }
 
         /// <summary>
-        /// Reads a model content from description
+        /// Reads the content data from description
         /// </summary>
-        public async Task<ContentData> ReadModelContent()
+        public virtual async Task<IEnumerable<ContentData>> ReadContentData()
         {
             // Read model content
-            if (Heightmap != null)
+            if (Content != null)
             {
-                return await Heightmap.ReadModelContent();
+                return await Content.ReadContentData();
             }
-            else if (Content != null)
+            else if (ContentList?.Any() == true)
             {
-                var modelContent = await Content.ReadModelContent();
+                var tasks = ContentList.Select(c => c.ReadContentData());
 
-                return modelContent.FirstOrDefault();
+                var res = await Task.WhenAll(tasks);
+
+                return res.SelectMany(r => r);
             }
             else
             {
@@ -105,15 +64,22 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Reads the content library from description
+        /// </summary>
+        public virtual async Task<ContentLibrary> ReadContentLibrary()
+        {
+            return new(await ReadContentData());
+        }
+        /// <summary>
         /// Reads a quadtree from description
         /// </summary>
         /// <typeparam name="T">Quadtree item type</typeparam>
         /// <param name="items">Quadtree items</param>
-        public PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
+        public virtual PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
         {
             if (Quadtree != null)
             {
-                return new PickingQuadTree<T>(items, Quadtree);
+                return new(items, Quadtree.MaximumDepth);
             }
 
             return null;

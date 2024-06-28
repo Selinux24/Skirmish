@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Content;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -71,6 +71,6 @@ namespace Engine
         /// <summary>
         /// Components state
         /// </summary>
-        public IEnumerable<ISceneObjectState> Components { get; set; } = Enumerable.Empty<ISceneObjectState>();
+        public IEnumerable<ISceneObjectState> Components { get; set; } = [];
     }
 }

@@ -2,7 +2,7 @@
 namespace Engine
 {
     /// <summary>
-    /// Intesectable detection mode
+    /// Intersectable detection mode
     /// </summary>
     public enum IntersectDetectionMode
     {

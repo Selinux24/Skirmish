@@ -1,5 +1,4 @@
-﻿using System.Linq;
-
+﻿
 namespace Engine.Content
 {
     using Engine.Animation;
@@ -25,13 +24,13 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Keyframes?.Any() == true)
+            if ((Keyframes?.Length ?? 0) != 0)
             {
-                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()}; {JointName}";
+                return $"{JointName} - Start: {Keyframes[0]}; End: {Keyframes[^1]}; {TransformType}";
             }
             else
             {
-                return $"No animation; {JointName}";
+                return $"{JointName} - No animation";
             }
         }
     }

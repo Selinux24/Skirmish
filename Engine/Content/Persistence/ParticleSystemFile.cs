@@ -11,8 +11,7 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Particle type
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ParticleTypes ParticleType { get; set; } = ParticleTypes.None;
+        public int ParticleType { get; set; } = 0;
         /// <summary>
         /// Name
         /// </summary>

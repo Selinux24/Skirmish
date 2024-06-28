@@ -9,6 +9,14 @@ namespace Engine.Coroutines
     public class Coroutine : YieldInstruction
     {
         /// <summary>
+        /// Empty coroutine
+        /// </summary>
+        public static Coroutine Empty()
+        {
+            return new Coroutine(new EmptyCoroutine().Routine);
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="routine">Routine</param>

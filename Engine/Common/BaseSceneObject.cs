@@ -23,6 +23,10 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual Scene Scene { get; protected set; }
         /// <inheritdoc/>
+        public virtual SceneObjectUsages Usage { get; set; }
+        /// <inheritdoc/>
+        public virtual int Layer { get; set; }
+        /// <inheritdoc/>
         public virtual bool HasOwner { get { return Owner != null; } }
         /// <inheritdoc/>
         public virtual ISceneObject Owner { get; set; } = null;
@@ -48,19 +52,28 @@ namespace Engine.Common
             Id = id;
             Name = name ?? $"_noname_{id}";
             Scene = scene ?? throw new ArgumentNullException(nameof(scene), "The scene must be specified");
+            Usage = SceneObjectUsages.None;
+            Layer = 0;
             Game = scene.Game;
             Active = false;
         }
 
         /// <summary>
-        /// Initializes internal assets
+        /// Reads assets
         /// </summary>
         /// <param name="description">Scene object description</param>
-        public virtual async Task InitializeAssets(T description)
+        public virtual async Task ReadAssets(T description)
         {
             Description = description ?? throw new ArgumentNullException(nameof(description), "The description must be specified");
             Active = description.StartsActive;
 
+            await Task.CompletedTask;
+        }
+        /// <summary>
+        /// Initializes assets into graphics device
+        /// </summary>
+        public virtual async Task InitializeAssets()
+        {
             await Task.CompletedTask;
         }
 

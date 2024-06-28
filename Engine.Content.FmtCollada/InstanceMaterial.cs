@@ -21,9 +21,10 @@ namespace Engine.Collada
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("SId: {0}; Name: {1}; Symbol: {2}; Target: {3};", this.SId, this.Name, this.Symbol, this.Target);
+            return $"Semantic: {SId}; Source: {Name}; Offset: {Symbol}; Set: {Target}";
         }
     }
 
@@ -35,9 +36,10 @@ namespace Engine.Collada
         [XmlAttribute("target")]
         public string Target { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Semantic: {0}; Target: {1};", this.Semantic, this.Target);
+            return $"Semantic: {Semantic}; Target: {Target};";
         }
     }
 
@@ -51,9 +53,10 @@ namespace Engine.Collada
         [XmlAttribute("input_set")]
         public ulong InputSet { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Semantic: {0}; Input: {1}; Set: {2};", this.Semantic, this.InputSemantic, this.InputSet);
+            return $"Semantic: {Semantic}; Input: {InputSemantic}; Set: {InputSet};";
         }
     }
 }

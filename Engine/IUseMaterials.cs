@@ -23,6 +23,7 @@ namespace Engine
         /// </summary>
         /// <param name="meshMaterialName">Name of the mesh material to replace</param>
         /// <param name="material">Material</param>
-        void ReplaceMaterial(string meshMaterialName, IMeshMaterial material);
+        /// <returns>Returns true when the material was changed</returns>
+        bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material);
     }
 }

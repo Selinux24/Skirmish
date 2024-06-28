@@ -16,7 +16,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="manipulator">Manipulator to update</param>
-        void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator);
+        void UpdateManipulator(IGameTime gameTime, IManipulator3D manipulator);
 
         /// <summary>
         /// Sets the path to follow

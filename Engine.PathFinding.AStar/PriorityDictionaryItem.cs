@@ -24,16 +24,13 @@ namespace Engine.PathFinding.AStar
         /// <param name="priority">Priority</param>
         public PriorityDictionaryItem(TValue value, TPriority priority)
         {
-            this.Value = value;
-            this.Priority = priority;
+            Value = value;
+            Priority = priority;
         }
-        /// <summary>
-        /// Gets the text representation of the element
-        /// </summary>
-        /// <returns>Returns a string that represents the object</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Priority {0}; Value {1}", this.Priority, this.Value);
+            return $"Priority {Priority}; Value {Value}";
         }
     }
 }

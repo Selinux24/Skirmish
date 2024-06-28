@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.Content
 {
@@ -80,7 +79,7 @@ namespace Engine.Content
         public float Roughness { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(IDictionary<string, EngineShaderResourceView> textures)
+        public IMeshMaterial CreateMeshMaterial(MeshImageDataCollection textures)
         {
             return new MeshMaterial
             {
@@ -94,19 +93,19 @@ namespace Engine.Content
                     Roughness = Roughness,
                     IsTransparent = IsTransparent,
                 },
-                EmissionTexture = string.IsNullOrEmpty(EmissiveTexture) ? null : textures[EmissiveTexture],
-                AmbientTexture = string.IsNullOrEmpty(AmbientTexture) ? null : textures[AmbientTexture],
-                DiffuseTexture = string.IsNullOrEmpty(DiffuseTexture) ? null : textures[DiffuseTexture],
-                NormalMap = string.IsNullOrEmpty(NormalMapTexture) ? null : textures[NormalMapTexture],
+                EmissionTexture = textures?.GetImage(EmissiveTexture),
+                AmbientTexture = textures?.GetImage(AmbientTexture),
+                DiffuseTexture = textures?.GetImage(DiffuseTexture),
+                NormalMap = textures?.GetImage(NormalMapTexture),
             };
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            var emissive = EmissiveTexture ?? $"{EmissiveColor}";
-            var ambient = AmbientTexture ?? $"{AmbientColor}";
-            var diffuse = DiffuseTexture ?? $"{DiffuseColor}";
-            var specular = SpecularTexture ?? $"{SpecularColor}";
+            var emissive = string.IsNullOrWhiteSpace(EmissiveTexture) ? "[]" : $"[{EmissiveColor}]";
+            var ambient = string.IsNullOrWhiteSpace(AmbientTexture) ? "[]" : $"[{AmbientColor}]";
+            var diffuse = string.IsNullOrWhiteSpace(DiffuseTexture) ? "[]" : $"[{DiffuseColor}]";
+            var specular = string.IsNullOrWhiteSpace(NormalMapTexture) ? "[]" : $"[{SpecularColor}]";
 
             return $"Cook-Torrance. Emissive: {emissive}; Ambient: {ambient}; Diffuse: {diffuse}; Specular: {specular}; Metallic: {Metallic}; Roughness: {Roughness};";
         }

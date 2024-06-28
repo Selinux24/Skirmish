@@ -3,8 +3,6 @@ using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Represents the source data used to build an navigation mesh tile.
     /// </summary>
@@ -30,11 +28,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The user defined flags assigned to each polygon. [Size: #polyCount]
         /// </summary>
-        public SamplePolyFlagTypes[] PolyFlags { get; set; }
+        public int[] PolyFlags { get; set; }
         /// <summary>
         /// The user defined area ids assigned to each polygon. [Size: #polyCount]
         /// </summary>
-        public SamplePolyAreas[] PolyAreas { get; set; }
+        public int[] PolyAreas { get; set; }
         /// <summary>
         /// Number of polygons in the mesh. [Limit: >= 1]
         /// </summary>
@@ -42,7 +40,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Number maximum number of vertices per polygon. [Limit: >= 3]
         /// </summary>
-        public int Nvp { get; set; }
+        public int NVP { get; set; }
 
         #endregion
 
@@ -53,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The height detail sub-mesh data. [Size: 4 * #polyCount]
         /// </summary>
-        public PolyMeshDetailIndices[] DetailMeshes { get; set; }
+        public PolyMeshIndices[] DetailMeshes { get; set; }
         /// <summary>
         /// The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
         /// </summary>
@@ -111,13 +109,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int TileLayer { get; set; }
         /// <summary>
-        /// The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
+        /// The bounds of the tile. [Unit: wu]
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
 
         #endregion
 
@@ -157,7 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Find tight heigh bounds, used for culling out off-mesh start locations.
         /// </summary>
         /// <returns>Returns a bounding box</returns>
-        public BoundingBox FindBounds()
+        public readonly BoundingBox FindBounds()
         {
             float hmin = float.MaxValue;
             float hmax = float.MinValue;
@@ -167,8 +161,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < DetailVertsCount; ++i)
                 {
                     var h = DetailVerts[i].Y;
-                    hmin = Math.Min(hmin, h);
-                    hmax = Math.Max(hmax, h);
+                    hmin = MathF.Min(hmin, h);
+                    hmax = MathF.Max(hmax, h);
                 }
             }
             else
@@ -176,15 +170,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < VertCount; ++i)
                 {
                     var iv = Verts[i];
-                    float h = BMin.Y + iv.Y * CellHeight;
-                    hmin = Math.Min(hmin, h);
-                    hmax = Math.Max(hmax, h);
+                    float h = Bounds.Minimum.Y + iv.Y * CellHeight;
+                    hmin = MathF.Min(hmin, h);
+                    hmax = MathF.Max(hmax, h);
                 }
             }
             hmin -= WalkableClimb;
             hmax += WalkableClimb;
-            Vector3 bmin = BMin;
-            Vector3 bmax = BMax;
+            var bmin = Bounds.Minimum;
+            var bmax = Bounds.Maximum;
             bmin.Y = hmin;
             bmax.Y = hmax;
 

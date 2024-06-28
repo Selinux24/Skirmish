@@ -8,7 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public sealed class UIPanel : UIControl<UIPanelDescription>, IScrollable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIPanel(Scene scene, string id, string name) : UIControl<UIPanelDescription>(scene, id, name), IScrollable
     {
         /// <summary>
         /// Background
@@ -95,32 +101,35 @@ namespace Engine.UI
                 horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
             }
         }
-
         /// <summary>
-        /// Constructor
+        /// Gets the number of rows
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIPanel(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
+        public int Rows { get { return gridLayout.CurrentRows; } }
+        /// <summary>
+        /// Gets the number of columns
+        /// </summary>
+        public int Columns { get { return gridLayout.CurrentColumns; } }
+        /// <summary>
+        /// Gets the cell size
+        /// </summary>
+        public Vector2 CellSize { get { return gridLayout.CurrentCellSize; } }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIPanelDescription description)
+        public override async Task ReadAssets(UIPanelDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             if (Description.Background != null)
             {
                 background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
             }
 
             SetGridLayout(Description.GridLayout);
         }
+        /// <summary>
+        /// Creates the background sprite
+        /// </summary>
         private async Task<Sprite> CreateBackground()
         {
             return await Scene.CreateComponent<Sprite, SpriteDescription>(
@@ -132,10 +141,10 @@ namespace Engine.UI
         /// <inheritdoc/>
         protected override void UpdateInternalState()
         {
-            var childs = Children.Where(c => c != background).ToArray();
+            var childs = Children.Where(c => c != background);
             if (childs.Any())
             {
-                GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
+                gridLayout = GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
             }
 
             base.UpdateInternalState();
@@ -159,22 +168,14 @@ namespace Engine.UI
         /// </summary>
         public GridLayout GetGridLayout()
         {
-            return new GridLayout
-            {
-                FitType = gridLayout.FitType,
-                Rows = gridLayout.Rows,
-                Columns = gridLayout.Columns,
-                CellSize = gridLayout.CellSize,
-                FitX = gridLayout.FitX,
-                FitY = gridLayout.FitY,
-            };
+            return gridLayout;
         }
 
         /// <inheritdoc/>
         public void ScrollUp(float amount)
         {
             ScrollVerticalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Max(0, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Max(0f, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollDown(float amount)
@@ -182,7 +183,7 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumVerticalOffset();
 
             ScrollVerticalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollVerticalOffset = Math.Min(maxOffset, ScrollVerticalOffset);
+            ScrollVerticalOffset = MathF.Min(maxOffset, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollLeft(float amount)
@@ -190,13 +191,13 @@ namespace Engine.UI
             float maxOffset = this.GetMaximumHorizontalOffset();
 
             ScrollHorizontalOffset += amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Min(maxOffset, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Min(maxOffset, ScrollHorizontalOffset);
         }
         /// <inheritdoc/>
         public void ScrollRight(float amount)
         {
             ScrollHorizontalOffset -= amount * Game.GameTime.ElapsedSeconds;
-            ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
+            ScrollHorizontalOffset = MathF.Max(0f, ScrollHorizontalOffset);
         }
 
         /// <inheritdoc/>

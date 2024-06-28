@@ -18,7 +18,7 @@ namespace Engine
         /// <returns>Returns the new description</returns>
         public static SceneLightSpotDescription Create(Vector3 position, Vector3 direction, float fallOffAngle, float radius, float intensity)
         {
-            return new SceneLightSpotDescription
+            return new()
             {
                 Position = position,
                 Direction = direction,

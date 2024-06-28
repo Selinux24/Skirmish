@@ -8,6 +8,8 @@ namespace Engine.Content
     /// </summary>
     public interface IImageContent
     {
+        const int retryCount = 10;
+
         /// <summary>
         /// Name
         /// </summary>
@@ -17,6 +19,27 @@ namespace Engine.Content
         /// </summary>
         int Count { get; }
 
+        /// <summary>
+        /// Creates a mesh image
+        /// </summary>
+        /// <param name="resourceManager">Resource manager</param>
+        public IMeshImage CreateMeshImage(GameResourceManager resourceManager)
+        {
+            for (int i = 0; i < retryCount; i++)
+            {
+                var view = resourceManager.RequestResource(this);
+                if (view != null)
+                {
+                    return new MeshImage() { Resource = view };
+                }
+            }
+
+            string errorMessage = $"Texture cannot be requested: {this}";
+
+            Logger.WriteError(nameof(DrawingData), errorMessage);
+
+            throw new EngineException(errorMessage);
+        }
         /// <summary>
         /// Generates the resource view
         /// </summary>

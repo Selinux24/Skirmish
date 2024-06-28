@@ -9,16 +9,20 @@ namespace Engine.UI
     /// <summary>
     /// Font map text parser
     /// </summary>
-    public abstract class FontMapParser
+    public static class FontMapParser
     {
         /// <summary>
         /// Color pattern used for text parse
         /// </summary>
-        public const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:\.|\,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:\.|\,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:\.|\,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:\.|\,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:\.|\,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:\.|\,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:\.|\,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:\.|\,)\d+)?)|)";
+        private const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:\.|\,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:\.|\,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:\.|\,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:\.|\,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:\.|\,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:\.|\,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:\.|\,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:\.|\,)\d+)?)|)";
         /// <summary>
         /// Color validator
         /// </summary>
-        private static readonly Regex colorRegex = new Regex(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+        private static readonly Regex colorRegex = new(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+        /// <summary>
+        /// Separator pattern
+        /// </summary>
+        private static readonly string[] separatorPattern = [" "];
 
         /// <summary>
         /// Parses a sentence
@@ -31,12 +35,12 @@ namespace Engine.UI
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                return new FontMapParsedSentence();
+                return FontMapParsedSentence.Empty;
             }
 
-            List<string> sentenceParts = new List<string>();
-            List<Color4[]> colorParts = new List<Color4[]>();
-            List<Color4[]> shadowColorParts = new List<Color4[]>();
+            var sentenceParts = new List<string>();
+            var colorParts = new List<Color4[]>();
+            var shadowColorParts = new List<Color4[]>();
 
             //Find lines
             var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -53,7 +57,7 @@ namespace Engine.UI
 
                 ParseLine(line, defaultForeColor, defaultShadowColor, out string parsedLine, out var charColors, out var charShadowColors);
 
-                var parts = parsedLine.Split(new[] { " " }, StringSplitOptions.None);
+                var parts = parsedLine.Split(separatorPattern, StringSplitOptions.None);
 
                 for (int p = 0; p < parts.Length; p++)
                 {
@@ -76,8 +80,8 @@ namespace Engine.UI
                     }
 
                     sentenceParts.Add(" ");
-                    colorParts.Add(new Color4[] { Color.Transparent });
-                    shadowColorParts.Add(new Color4[] { Color.Transparent });
+                    colorParts.Add([Color.Transparent]);
+                    shadowColorParts.Add([Color.Transparent]);
                 }
 
                 if (lastLine)
@@ -86,16 +90,16 @@ namespace Engine.UI
                 }
 
                 sentenceParts.Add(Environment.NewLine);
-                colorParts.Add(new Color4[] { Color.Transparent });
-                shadowColorParts.Add(new Color4[] { Color.Transparent });
+                colorParts.Add([Color.Transparent]);
+                shadowColorParts.Add([Color.Transparent]);
             }
 
-            return new FontMapParsedSentence
+            return new()
             {
-                Text = string.Join(string.Empty, sentenceParts.ToArray()),
-                Words = sentenceParts.ToArray(),
-                Colors = colorParts.ToArray(),
-                ShadowColors = shadowColorParts.ToArray(),
+                Text = string.Join(string.Empty, sentenceParts),
+                Parts = [.. sentenceParts],
+                Colors = [.. colorParts],
+                ShadowColors = [.. shadowColorParts],
             };
         }
         /// <summary>
@@ -109,8 +113,8 @@ namespace Engine.UI
         /// <param name="shadowColors">Returns a shadow color by character list</param>
         private static void ParseLine(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string parsedString, out IEnumerable<Color4> foreColors, out IEnumerable<Color4> shadowColors)
         {
-            Dictionary<int, Color4> foreColorValues = new Dictionary<int, Color4>();
-            Dictionary<int, Color4> shadowColorValues = new Dictionary<int, Color4>();
+            var foreColorValues = new Dictionary<int, Color4>();
+            var shadowColorValues = new Dictionary<int, Color4>();
             int deletedSize = 0;
 
             parsedString = colorRegex.Replace(
@@ -133,22 +137,22 @@ namespace Engine.UI
                     return string.Empty;
                 });
 
-            List<Color4> foreColorsByChar = new List<Color4>();
-            List<Color4> shadowColorsByChar = new List<Color4>();
+            var foreColorsByChar = new List<Color4>();
+            var shadowColorsByChar = new List<Color4>();
 
             // Fill result
-            Color4 currentForeColor = defaultForeColor;
-            Color4 currentShadowColor = defaultShadowColor;
+            var currentForeColor = defaultForeColor;
+            var currentShadowColor = defaultShadowColor;
             for (int i = 0; i < parsedString.Length; i++)
             {
-                if (foreColorValues.ContainsKey(i))
+                if (foreColorValues.TryGetValue(i, out var foreColor))
                 {
-                    currentForeColor = foreColorValues[i];
+                    currentForeColor = foreColor;
                 }
 
-                if (shadowColorValues.ContainsKey(i))
+                if (shadowColorValues.TryGetValue(i, out var shadowColor))
                 {
-                    currentShadowColor = shadowColorValues[i];
+                    currentShadowColor = shadowColor;
                 }
 
                 foreColorsByChar.Add(currentForeColor);
@@ -169,8 +173,13 @@ namespace Engine.UI
             foreColor = null;
             shadowColor = null;
 
-            foreach (Group gr in match.Groups)
+            foreach (var group in match.Groups)
             {
+                if (group is not Group gr)
+                {
+                    continue;
+                }
+
                 if (gr.Name == "cA")
                 {
                     string vA = match.Groups["fA"].Value;
@@ -221,138 +230,6 @@ namespace Engine.UI
                     }
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Font map parser sentence
-    /// </summary>
-    public struct FontMapParsedSentence
-    {
-        /// <summary>
-        /// Creates a parsed sentencen result from sample
-        /// </summary>
-        /// <param name="sample">Text sample</param>
-        public static FontMapParsedSentence FromSample(string sample)
-        {
-            return new FontMapParsedSentence
-            {
-                Words = new[] { sample },
-                Colors = Enumerable.Empty<IEnumerable<Color4>>(),
-                ShadowColors = Enumerable.Empty<IEnumerable<Color4>>(),
-            };
-        }
-
-        /// <summary>
-        /// Parsed text
-        /// </summary>
-        public string Text { get; set; }
-        /// <summary>
-        /// Word list
-        /// </summary>
-        public IEnumerable<string> Words { get; set; }
-        /// <summary>
-        /// Colors by character of word list
-        /// </summary>
-        public IEnumerable<IEnumerable<Color4>> Colors { get; set; }
-        /// <summary>
-        /// Shadow colors by character of word list
-        /// </summary>
-        public IEnumerable<IEnumerable<Color4>> ShadowColors { get; set; }
-
-        /// <summary>
-        /// Gets the number of words in the sentence
-        /// </summary>
-        public int Count()
-        {
-            return Words?.Count() ?? 0;
-        }
-        /// <summary>
-        /// Gets the parsed word at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        public FontMapParsedWord GetWord(int index)
-        {
-            if (index < Count())
-            {
-                return new FontMapParsedWord
-                {
-                    Word = Words.ElementAt(index),
-                    Colors = Colors.ElementAtOrDefault(index)?.ToArray() ?? Enumerable.Empty<Color4>(),
-                    ShadowColors = ShadowColors.ElementAtOrDefault(index)?.ToArray() ?? Enumerable.Empty<Color4>(),
-                };
-            }
-
-            return new FontMapParsedWord();
-        }
-    }
-
-    /// <summary>
-    /// Font map parsed word
-    /// </summary>
-    public struct FontMapParsedWord
-    {
-        /// <summary>
-        /// Gets the space parsed word
-        /// </summary>
-        public static FontMapParsedWord Space
-        {
-            get
-            {
-                return new FontMapParsedWord
-                {
-                    Word = " ",
-                    Colors = Enumerable.Empty<Color4>(),
-                    ShadowColors = Enumerable.Empty<Color4>(),
-                };
-            }
-        }
-
-        /// <summary>
-        /// Word
-        /// </summary>
-        public string Word { get; set; }
-        /// <summary>
-        /// Colors by character of word
-        /// </summary>
-        public IEnumerable<Color4> Colors { get; set; }
-        /// <summary>
-        /// Shadow colors by character of word
-        /// </summary>
-        public IEnumerable<Color4> ShadowColors { get; set; }
-
-        /// <summary>
-        /// Gets the number of characters in the word
-        /// </summary>
-        public int Count()
-        {
-            return Word?.Length ?? 0;
-        }
-        /// <summary>
-        /// Gets the color of the character at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        public Color4 GetColor(int index)
-        {
-            if (index < Count())
-            {
-                return Colors.ElementAtOrDefault(index);
-            }
-
-            return Color.Transparent;
-        }
-        /// <summary>
-        /// Gets the shadow color of the character at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        public Color4 GetShadowColor(int index)
-        {
-            if (index < Count())
-            {
-                return ShadowColors.ElementAtOrDefault(index);
-            }
-
-            return Color.Transparent;
         }
     }
 }

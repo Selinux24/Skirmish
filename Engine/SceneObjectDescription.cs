@@ -15,9 +15,9 @@ namespace Engine
         /// </summary>
         public bool StartsVisible { get; set; } = true;
         /// <summary>
-        /// Gets or sets whether the object cast shadow
+        /// Gets or sets whether the object cast shadows or not
         /// </summary>
-        public bool CastShadow { get; set; } = false;
+        public ShadowCastingAlgorihtms CastShadow { get; set; } = ShadowCastingAlgorihtms.None;
         /// <summary>
         /// Can be renderer by the deferred renderer
         /// </summary>
@@ -29,10 +29,22 @@ namespace Engine
         /// <summary>
         /// Blend mode
         /// </summary>
-        public BlendModes BlendMode { get; set; } = BlendModes.Default;
+        public BlendModes BlendMode { get; set; } = BlendModes.Opaque;
         /// <summary>
-        /// Use spheric volume for culling by default
+        /// Culling volume by default
         /// </summary>
-        public bool SphericVolume { get; set; } = true;
+        public CullingVolumeTypes CullingVolumeType { get; set; } = CullingVolumeTypes.SphericVolume;
+        /// <summary>
+        /// Collider type
+        /// </summary>
+        public ColliderTypes ColliderType { get; set; } = ColliderTypes.None;
+        /// <summary>
+        /// Picking hull
+        /// </summary>
+        public PickingHullTypes PickingHull { get; set; } = PickingHullTypes.Default;
+        /// <summary>
+        /// Path finding hull
+        /// </summary>
+        public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.None;
     }
 }

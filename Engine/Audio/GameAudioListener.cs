@@ -4,7 +4,7 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio listener
     /// </summary>
-    class GameAudioListener : GameAudioAgent, IGameAudioListener
+    public class GameAudioListener : GameAudioAgent, IGameAudioListener
     {
         /// <summary>
         /// Cone

@@ -1,14 +1,22 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
-    /// Bounding cylinder
+    /// Axis aligned bounding cylinder
     /// </summary>
-    public struct BoundingCylinder : IEquatable<BoundingCylinder>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="center">Center position</param>
+    /// <param name="radius">Radius</param>
+    /// <param name="height">Height</param>
+    public struct BoundingCylinder(Vector3 center, float radius, float height) : IEquatable<BoundingCylinder>
     {
         /// <summary>
         /// Constructs a BoundingCylinder that fully contains the given points.
@@ -28,25 +36,25 @@ namespace Engine
 
             for (int i = 0; i < points.Count(); i++)
             {
-                var c = points.ElementAt(i);
+                var p = points.ElementAt(i);
 
-                if (c.X < minX) minX = c.X;
-                if (c.X > maxX) maxX = c.X;
+                if (p.X < minX) minX = p.X;
+                if (p.X > maxX) maxX = p.X;
 
-                if (c.Y < minY) minY = c.Y;
-                if (c.Y > maxY) maxY = c.Y;
+                if (p.Y < minY) minY = p.Y;
+                if (p.Y > maxY) maxY = p.Y;
 
-                if (c.Z < minZ) minZ = c.Z;
-                if (c.Z > maxZ) maxZ = c.Z;
+                if (p.Z < minZ) minZ = p.Z;
+                if (p.Z > maxZ) maxZ = p.Z;
             }
 
-            float height = maxY - minY;
-            float radius = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
+            float h = maxY - minY;
+            float r = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
 
-            //Find position
-            Vector3 position = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
+            //Find center
+            Vector3 c = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
 
-            return new BoundingCylinder(position, radius, height);
+            return new BoundingCylinder(c, r, h);
         }
         /// <summary>
         /// Constructs a BoundingCylinder that fully contains the given points
@@ -57,78 +65,88 @@ namespace Engine
         {
             result = FromPoints(points);
         }
-        /// <summary>
-        /// Constructs a BoundingCylinder that is as large as the total combined area of the two specified cylinders.
-        /// </summary>
-        /// <param name="value1">The first cylinder to merge</param>
-        /// <param name="value2">The second cylinder to merge</param>
-        /// <returns>The newly constructed bounding cylinder</returns>
-        public static BoundingCylinder Merge(BoundingCylinder value1, BoundingCylinder value2)
-        {
-            throw new NotImplementedException();
-        }
-        /// <summary>
-        /// Constructs a BoundingCylinder that is as large as the total combined area of the two specified cylinders.
-        /// </summary>
-        /// <param name="value1">The first cylinder to merge</param>
-        /// <param name="value2">The second cylinder to merge</param>
-        /// <param name="result">The newly constructed bounding cylinder</param>
-        public static void Merge(ref BoundingCylinder value1, ref BoundingCylinder value2, out BoundingCylinder result)
-        {
-            result = Merge(value1, value2);
-        }
 
-        /// <summary>
-        /// Position
-        /// </summary>
-        public Vector3 Position { get; set; }
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; set; }
+        public float Radius { get; set; } = radius;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; }
+        public float Height { get; set; } = height;
         /// <summary>
         /// Center
         /// </summary>
-        public Vector3 Center
+        public Vector3 Center { get; set; } = center;
+        /// <summary>
+        /// Base position
+        /// </summary>
+        public readonly Vector3 BasePosition
         {
             get
             {
-                return Position + new Vector3(0f, Height * 0.5f, 0f);
+                return new Vector3(Center.X, Center.Y - (Height * 0.5f), Center.Z);
+            }
+        }
+        /// <summary>
+        /// Cap position
+        /// </summary>
+        public readonly Vector3 CapPosition
+        {
+            get
+            {
+                return new Vector3(Center.X, Center.Y + (Height * 0.5f), Center.Z);
             }
         }
 
         /// <summary>
-        /// Constructor
+        /// Determines whether the current objects contains a point.
         /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
-        public BoundingCylinder(Vector3 position, float radius, float height)
+        /// <param name="point">The point to test.</param>
+        /// <returns>The type of containment the two objects have.</returns>
+        public readonly ContainmentType Contains(ref Vector3 point)
         {
-            Position = position;
-            Radius = radius;
-            Height = height;
-        }
+            // Find cylinder central axis
+            var p1 = BasePosition;
+            var p2 = CapPosition;
 
-        /// <summary>
-        /// Determines whether the current objects contains a point.
-        /// </summary>
-        /// <param name="point">The point to test.</param>
-        /// <returns>The type of containment the two objects have.</returns>
-        public ContainmentType Contains(ref Vector3 point)
-        {
-            throw new NotImplementedException();
+            // Find closest point of point in axis
+            var closest = Intersection.ClosestPointInRay(p1, p2, point, out float distance);
+            if (distance > Radius)
+            {
+                // Outside cylinder radius
+                return ContainmentType.Disjoint;
+            }
+
+            // Find distance from closest point in axis to the center
+            float hh = Height * 0.5f;
+            float distOnAxis = Vector3.Distance(Center, closest);
+            if (distOnAxis > hh)
+            {
+                // Outside cap and base distances
+                return ContainmentType.Disjoint;
+            }
+
+            if (MathUtil.NearEqual(distance, Radius))
+            {
+                // The point is into the cylinder radius, and between cap and base distances.
+                return ContainmentType.Intersects;
+            }
+
+            if (MathUtil.NearEqual(distOnAxis, hh))
+            {
+                // The point is in the cap or base.
+                return ContainmentType.Intersects;
+            }
+
+            return ContainmentType.Contains;
         }
         /// <summary>
         /// Determines whether the current objects contains a point.
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public ContainmentType Contains(Vector3 point)
+        public readonly ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
         }
@@ -136,33 +154,22 @@ namespace Engine
         /// <summary>
         /// Gets the cylinder vertices
         /// </summary>
-        /// <param name="segments">Vertical segments</param>
+        /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a point array of vertices</returns>
-        public IEnumerable<Vector3> GetVertices(int segments)
+        public readonly IEnumerable<Vector3> GetVertices(int sliceCount)
         {
-            List<Vector3> verts = new List<Vector3>();
+            var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, Center, Radius, Height, sliceCount);
 
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < segments; j++)
-                {
-                    float theta = (j / (float)segments) * 2 * (float)Math.PI;
-                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
-
-                    verts.Add(Position + new Vector3(Radius * st, Height * i, Radius * ct));
-                }
-            }
-
-            return verts.ToArray();
+            return geom.Vertices.ToArray();
         }
 
         /// <inheritdoc/>
         public static bool operator ==(BoundingCylinder left, BoundingCylinder right)
         {
             return
-                left.Position == right.Position &&
-                left.Radius == right.Radius &&
-                left.Height == right.Height;
+                left.Center == right.Center &&
+                MathUtil.NearEqual(left.Radius, right.Radius) &&
+                MathUtil.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
         public static bool operator !=(BoundingCylinder left, BoundingCylinder right)
@@ -170,12 +177,12 @@ namespace Engine
             return !(left == right);
         }
         /// <inheritdoc/>
-        public bool Equals(BoundingCylinder other)
+        public readonly bool Equals(BoundingCylinder other)
         {
             return this == other;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is BoundingCylinder cylinder)
             {
@@ -185,14 +192,14 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return Position.GetHashCode() ^ Radius.GetHashCode() ^ Height.GetHashCode();
+            return HashCode.Combine(Center, Radius, Height);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"Position: {Position}; Radius: {Radius}; Height: {Height};";
+            return $"Center: {Center}; Radius: {Radius}; Height: {Height};";
         }
     }
 }

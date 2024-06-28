@@ -1,19 +1,25 @@
 ﻿using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Collider helper class
     /// </summary>
-    class BoundsHelper
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="bounds">Initial bounds state</param>
+    class BoundsHelper(BoundsHelperInitialState bounds)
     {
         /// <summary>
-        /// Initial bounding sphere
+        /// Bounds
         /// </summary>
-        private BoundingSphere initialSphere;
+        private readonly BoundsHelperInitialState bounds = bounds;
+        /// <summary>
+        /// Bounds salt value
+        /// </summary>
+        private int boundsSalt = bounds.Salt;
+
         /// <summary>
         /// Transformed bounding sphere
         /// </summary>
@@ -21,11 +27,8 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding sphere flag
         /// </summary>
-        private bool updateBoundingSphere;
-        /// <summary>
-        /// Initial bounding box
-        /// </summary>
-        private BoundingBox initialBox;
+        private bool updateBoundingSphere = true;
+
         /// <summary>
         /// Transformed bounding box
         /// </summary>
@@ -33,7 +36,8 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateBoundingBox;
+        private bool updateBoundingBox = true;
+
         /// <summary>
         /// Transformed bounding box
         /// </summary>
@@ -41,61 +45,51 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateOrientedBox;
+        private bool updateOrientedBox = true;
 
-        /// <summary>
-        /// Initializes internal volumes
-        /// </summary>
-        /// <param name="points">Point list</param>
-        public void Initialize(IEnumerable<Vector3> points)
-        {
-            if (points.Any())
-            {
-                //Initialize the identity sphere
-                initialSphere = BoundingSphere.FromPoints(points.ToArray());
-
-                //Initialize the identity box
-                initialBox = BoundingBox.FromPoints(points.ToArray());
-            }
-            else
-            {
-                initialSphere = new BoundingSphere();
-
-                initialBox = new BoundingBox();
-            }
-
-            boundingSphere = initialSphere;
-            boundingBox = initialBox;
-            orientedBox = new OrientedBoundingBox(initialBox);
-
-            updateBoundingSphere = false;
-            updateBoundingBox = false;
-            updateOrientedBox = false;
-        }
         /// <summary>
         /// Invalidates the internal state
         /// </summary>
-        public void Invalidate()
+        /// <param name="manipulator">Manipulator</param>
+        public void Invalidate(ITransform manipulator)
         {
-            updateBoundingBox = true;
             updateBoundingSphere = true;
+            updateBoundingBox = true;
             updateOrientedBox = true;
+
+            GetBoundingSphere(manipulator);
+            GetBoundingBox(manipulator);
+        }
+        /// <summary>
+        /// Checks de initial bounds state value
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        private void CheckBoundsState(ITransform manipulator)
+        {
+            if (boundsSalt == bounds.Salt)
+            {
+                return;
+            }
+
+            //State changed, update internal state
+            boundsSalt = bounds.Salt;
+
+            Invalidate(manipulator);
         }
 
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere(Manipulator3D manipulator, bool refresh = false)
+        public BoundingSphere GetBoundingSphere(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState(manipulator);
+
             if (updateBoundingSphere || refresh)
             {
-                float maxScale = Math.Max(manipulator.Scaling.X, manipulator.Scaling.Y);
-                maxScale = Math.Max(maxScale, manipulator.Scaling.Z);
-
-                boundingSphere = new BoundingSphere(initialSphere.Center + manipulator.Position, initialSphere.Radius * maxScale);
+                boundingSphere = bounds.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateBoundingSphere = false;
             }
@@ -106,15 +100,15 @@ namespace Engine.Common
         /// Gets bounding box
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox(Manipulator3D manipulator, bool refresh = false)
+        public BoundingBox GetBoundingBox(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState(manipulator);
+
             if (updateBoundingBox || refresh)
             {
-                var obb = new OrientedBoundingBox(initialBox);
-                obb.Transform(manipulator.FinalTransform);
-                boundingBox = obb.GetBoundingBox();
+                boundingBox = GetOrientedBoundingBox(manipulator, refresh).GetBoundingBox();
 
                 updateBoundingBox = false;
             }
@@ -125,19 +119,90 @@ namespace Engine.Common
         /// Gets oriented bounding box
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox(Manipulator3D manipulator, bool refresh = false)
+        public OrientedBoundingBox GetOrientedBoundingBox(ITransform manipulator, bool refresh = false)
         {
+            CheckBoundsState(manipulator);
+
             if (updateOrientedBox || refresh)
             {
-                orientedBox = new OrientedBoundingBox(initialBox);
-                orientedBox.Transform(manipulator.FinalTransform);
+                orientedBox = new OrientedBoundingBox(bounds.BoundingBox);
+                orientedBox.Transform(manipulator?.GlobalTransform ?? Matrix.Identity);
 
                 updateOrientedBox = false;
             }
 
             return orientedBox;
+        }
+
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volumeType">Culling volume type</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool Cull(ITransform manipulator, CullingVolumeTypes volumeType, ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            return volumeType switch
+            {
+                CullingVolumeTypes.None => false,
+                CullingVolumeTypes.SphericVolume => CullBoundingSphere(manipulator, volume, out distance),
+                CullingVolumeTypes.BoxVolume => CullBoundingBox(manipulator, volume, out distance),
+                _ => false,
+            };
+        }
+        /// <summary>
+        /// Performs culling test against the spheric volume
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool CullBoundingSphere(ITransform manipulator, ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            var sphere = GetBoundingSphere(manipulator);
+            var contains = volume.Contains(sphere);
+
+            bool cull = contains == ContainmentType.Disjoint;
+            if (!cull)
+            {
+                var eyePosition = volume.Position;
+
+                distance = Vector3.DistanceSquared(manipulator?.Position ?? Vector3.Zero, eyePosition);
+            }
+
+            return cull;
+        }
+        /// <summary>
+        /// Performs culling test against the box volume
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool CullBoundingBox(ITransform manipulator, ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            var box = GetBoundingBox(manipulator);
+            var contains = volume.Contains(box);
+
+            bool cull = contains == ContainmentType.Disjoint;
+            if (!cull)
+            {
+                var eyePosition = volume.Position;
+
+                distance = Vector3.DistanceSquared(manipulator?.Position ?? Vector3.Zero, eyePosition);
+            }
+
+            return cull;
         }
     }
 }

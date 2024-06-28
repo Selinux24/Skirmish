@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -11,15 +10,15 @@ namespace Engine
         /// <summary>
         /// Directional lights
         /// </summary>
-        public IEnumerable<IGameState> DirectionalLights { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> DirectionalLights { get; set; } = [];
         /// <summary>
         /// Point lights
         /// </summary>
-        public IEnumerable<IGameState> PointLights { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> PointLights { get; set; } = [];
         /// <summary>
         /// Spot lights
         /// </summary>
-        public IEnumerable<IGameState> SpotLights { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> SpotLights { get; set; } = [];
         /// <summary>
         /// Hemispheric light
         /// </summary>

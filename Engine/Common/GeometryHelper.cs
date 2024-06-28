@@ -22,11 +22,11 @@ namespace Engine.Common
         /// <summary>
         /// Points cache
         /// </summary>
-        private IEnumerable<Vector3> positionCache = Enumerable.Empty<Vector3>();
+        private IEnumerable<Vector3> positionCache = [];
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private IEnumerable<Triangle> triangleCache = Enumerable.Empty<Triangle>();
+        private IEnumerable<Triangle> triangleCache = [];
 
         /// <summary>
         /// Invalidates internal state
@@ -43,9 +43,9 @@ namespace Engine.Common
         /// <param name="drawingData">Drawing data</param>
         /// <param name="controller">Animation controller</param>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or position list</returns>
-        public IEnumerable<Vector3> GetPoints(DrawingData drawingData, AnimationController controller, Manipulator3D manipulator, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
         {
             bool update = refresh || updatePoints;
 
@@ -57,20 +57,20 @@ namespace Engine.Common
 
             if (drawingData == null)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             if (controller != null && drawingData.SkinningData != null)
             {
                 positionCache = drawingData.GetPoints(
-                    manipulator.FinalTransform,
+                    manipulator.GlobalTransform,
                     controller.GetCurrentPose(),
                     update);
             }
             else
             {
                 positionCache = drawingData.GetPoints(
-                    manipulator.FinalTransform,
+                    manipulator.GlobalTransform,
                     update);
             }
 
@@ -85,9 +85,9 @@ namespace Engine.Common
         /// <param name="drawingData">Drawing data</param>
         /// <param name="controller">Animation controller</param>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, Manipulator3D manipulator, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
         {
             bool update = refresh || updateTriangles;
 
@@ -99,7 +99,7 @@ namespace Engine.Common
 
             if (drawingData == null)
             {
-                return Enumerable.Empty<Triangle>();
+                return [];
             }
 
             if (controller != null && drawingData.SkinningData != null)

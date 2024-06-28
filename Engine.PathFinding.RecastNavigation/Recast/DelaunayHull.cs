@@ -5,33 +5,188 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    class DelaunayHull
+    /// <summary>
+    /// Delaunay hull
+    /// </summary>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="maxEdges">Max edges</param>
+    class DelaunayHull(int maxEdges)
     {
-        private const float Tolerance = 0.001f;
+        /// <summary>
+        /// Unidefined
+        /// </summary>
+        const int EV_UNDEF = -1;
+        /// <summary>
+        /// Hull
+        /// </summary>
+        const int EV_HULL = -2;
 
-        private readonly int maxEdges;
-        private readonly List<Int4> edges = new List<Int4>();
+        /// <summary>
+        /// Delaunay edge
+        /// </summary>
+        /// <remarks>
+        /// Constructor
+        /// </remarks>
+        /// <param name="point0">First point index</param>
+        /// <param name="point1">Second point index</param>
+        /// <param name="face0">First face index</param>
+        /// <param name="face1">Second face index</param>
+        class DelaunayEdge(int point0, int point1, int face0, int face1)
+        {
+            /// <summary>
+            /// First point index
+            /// </summary>
+            public int Point0 { get; set; } = point0;
+            /// <summary>
+            /// Second point index
+            /// </summary>
+            public int Point1 { get; set; } = point1;
+            /// <summary>
+            /// First face index (triangle)
+            /// </summary>
+            public int Face0 { get; set; } = face0;
+            /// <summary>
+            /// Second face index (triangle)
+            /// </summary>
+            public int Face1 { get; set; } = face1;
+
+            /// <summary>
+            /// Updates the left face
+            /// </summary>
+            /// <param name="s">S point index</param>
+            /// <param name="t">T point index</param>
+            /// <param name="f">New face index</param>
+            public void UpdateLeftFace(int s, int t, int f)
+            {
+                if (Point0 == s && Point1 == t && Face0 == EV_UNDEF)
+                {
+                    Face0 = f;
+                }
+                else if (Point1 == s && Point0 == t && Face1 == EV_UNDEF)
+                {
+                    Face1 = f;
+                }
+            }
+            /// <summary>
+            /// Updates the specified triangle collection
+            /// </summary>
+            /// <param name="tris">Triangle collection</param>
+            public void UpdateTris(Int3[] tris)
+            {
+                if (Face1 >= 0)
+                {
+                    // Left face
+                    var t = tris[Face1];
+                    if (t.X == -1)
+                    {
+                        t.X = Point0;
+                        t.Y = Point1;
+                    }
+                    else if (t.X == Point1)
+                    {
+                        t.Z = Point0;
+                    }
+                    else if (t.Y == Point0)
+                    {
+                        t.Z = Point1;
+                    }
+                    tris[Face1] = t;
+                }
+
+                if (Face0 >= 0)
+                {
+                    // Right
+                    var t = tris[Face0];
+                    if (t.X == -1)
+                    {
+                        t.X = Point1;
+                        t.Y = Point0;
+                    }
+                    else if (t.X == Point0)
+                    {
+                        t.Z = Point1;
+                    }
+                    else if (t.Y == Point1)
+                    {
+                        t.Z = Point0;
+                    }
+                    tris[Face0] = t;
+                }
+            }
+            /// <summary>
+            /// Gets whether the specified point is the same than the current instance
+            /// </summary>
+            /// <param name="s">S point index</param>
+            /// <param name="t">T point index</param>
+            public bool IsSameEdge(int s, int t)
+            {
+                if ((Point0 == s && Point1 == t) || (Point0 == t && Point1 == s))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <inheritdoc/>
+            public override string ToString()
+            {
+                string f0 = Face0 switch
+                {
+                    EV_HULL => "hull",
+                    EV_UNDEF => "undefined",
+                    _ => $"{Face0}",
+                };
+
+                string f1 = Face1 switch
+                {
+                    EV_UNDEF => "undefined",
+                    _ => $"{Face1}",
+                };
+
+                return $"Point0={Point0}; Point1={Point1}; Face0={f0}; Face1={f1}";
+            }
+        }
+
+        /// <summary>
+        /// Maximum edges
+        /// </summary>
+        private readonly int maxEdges = maxEdges;
+        /// <summary>
+        /// Edge list
+        /// </summary>
+        private readonly List<DelaunayEdge> edges = [];
+        /// <summary>
+        /// Number of faces
+        /// </summary>
         private int faces;
 
-        public static DelaunayHull Build(IEnumerable<Vector3> pts, IEnumerable<int> hull)
+        /// <summary>
+        /// Builds a hull
+        /// </summary>
+        /// <param name="pts">Point list</param>
+        /// <param name="hull">Hull indices</param>
+        public static DelaunayHull Build(Vector3[] pts, int[] hull)
         {
-            int max = pts.Count() * 10;
-            DelaunayHull dhull = new DelaunayHull(max);
+            int max = pts.Length * 10;
+            var dhull = new DelaunayHull(max);
 
-            int nhull = hull.Count();
+            int nhull = hull.Length;
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
             {
-                dhull.AddEdge(hull.ElementAt(j), hull.ElementAt(i), (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
+                dhull.AddEdge(hull[j], hull[i], EV_HULL, EV_UNDEF);
             }
 
             int currentEdge = 0;
             while (currentEdge < dhull.edges.Count)
             {
-                if (dhull.edges[currentEdge][2] == (int)EdgeValues.EV_UNDEF)
+                if (dhull.edges[currentEdge].Face0 == EV_UNDEF)
                 {
                     dhull.CompleteFacet(pts, currentEdge);
                 }
-                if (dhull.edges[currentEdge][3] == (int)EdgeValues.EV_UNDEF)
+                if (dhull.edges[currentEdge].Face1 == EV_UNDEF)
                 {
                     dhull.CompleteFacet(pts, currentEdge);
                 }
@@ -40,129 +195,82 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dhull;
         }
-        private static IEnumerable<Int3> FilterTris(IEnumerable<Int3> triangles)
+        /// <summary>
+        /// Filter triangles
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the filtered list</returns>
+        private static Int3[] FilterTris(Int3[] triangles)
         {
-            Int3[] tris = triangles.ToArray();
-
-            for (int i = 0; i < tris.Length; ++i)
+            // Copy array
+            var tris = triangles.ToArray();
+            int i = 0;
+            while (i < tris.Length)
             {
                 var t = tris[i];
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
                     Logger.WriteWarning(nameof(DelaunayHull), $"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
-                    tris[i] = tris[tris.Length - 1];
+                    tris[i] = tris[^1];
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
                 }
+
+                i++;
             }
 
             return tris;
         }
-        private static Int4 UpdateLeftFace(Int4 edge, int s, int t, int f)
+        /// <summary>
+        /// Circum circle
+        /// </summary>
+        private static (Vector3 Center, float Radius) CircumCircle(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            var e = edge;
-
-            if (e[0] == s && e[1] == t && e[2] == (int)EdgeValues.EV_UNDEF)
-            {
-                e[2] = f;
-            }
-            else if (e[1] == s && e[0] == t && e[3] == (int)EdgeValues.EV_UNDEF)
-            {
-                e[3] = f;
-            }
-
-            return e;
-        }
-        private static void CircumCircle(Vector3 p1, Vector3 p2, Vector3 p3, out Vector3 center, out float radius)
-        {
-            float EPS = 1e-6f;
-
             // Calculate the circle relative to p1, to avoid some precision issues.
-            Vector3 v1 = new Vector3();
-            Vector3 v2 = Vector3.Subtract(p2, p1);
-            Vector3 v3 = Vector3.Subtract(p3, p1);
+            var v1 = Vector3.Zero;
+            var v2 = Vector3.Subtract(p2, p1);
+            var v3 = Vector3.Subtract(p3, p1);
 
-            float cp = RecastUtils.VCross2(v1, v2, v3);
-            if (Math.Abs(cp) > EPS)
+            float cp = Utils.VCross2D(v1, v2, v3);
+            if (MathF.Abs(cp) <= Utils.ZeroTolerance)
             {
-                float v1Sq = Vector2.Dot(v1.XZ(), v1.XZ());
-                float v2Sq = Vector2.Dot(v2.XZ(), v2.XZ());
-                float v3Sq = Vector2.Dot(v3.XZ(), v3.XZ());
-
-                center = Vector3.Zero;
-                center.X = (v1Sq * (v2.Z - v3.Z) + v2Sq * (v3.Z - v1.Z) + v3Sq * (v1.Z - v2.Z)) / (2 * cp);
-                center.Y = 0;
-                center.Z = (v1Sq * (v3.X - v2.X) + v2Sq * (v1.X - v3.X) + v3Sq * (v2.X - v1.X)) / (2 * cp);
-
-                radius = Vector2.Distance(center.XZ(), v1.XZ());
-                center = Vector3.Add(center, p1);
+                return (p1, 0);
             }
-            else
-            {
-                center = p1;
-                radius = 0;
-            }
+
+            float v1Sq = Vector2.Dot(v1.XZ(), v1.XZ());
+            float v2Sq = Vector2.Dot(v2.XZ(), v2.XZ());
+            float v3Sq = Vector2.Dot(v3.XZ(), v3.XZ());
+
+            float cX = (v1Sq * (v2.Z - v3.Z) + v2Sq * (v3.Z - v1.Z) + v3Sq * (v1.Z - v2.Z)) / (2 * cp);
+            float cZ = (v1Sq * (v3.X - v2.X) + v2Sq * (v1.X - v3.X) + v3Sq * (v2.X - v1.X)) / (2 * cp);
+            var center = new Vector3(cX, 0, cZ);
+
+            float radius = Utils.Distance2D(center, v1);
+            center = Vector3.Add(center, p1);
+
+            return (center, radius);
         }
 
-        public DelaunayHull(int maxEdges)
-        {
-            this.maxEdges = maxEdges;
-        }
-
-        public IEnumerable<Int4> GetEdges()
-        {
-            return edges.ToArray();
-        }
-        public IEnumerable<Int3> GetTris()
+        /// <summary>
+        /// Gets the triangle list
+        /// </summary>
+        public Int3[] GetTris()
         {
             Int3[] tris = Helper.CreateArray(faces, new Int3(-1, -1, -1));
 
             for (int i = 0; i < edges.Count; ++i)
             {
                 var e = edges[i];
-                if (e.W >= 0)
-                {
-                    // Left face
-                    var t = tris[e[3]];
-                    if (t.X == -1)
-                    {
-                        t.X = e[0];
-                        t.Y = e[1];
-                    }
-                    else if (t.X == e[1])
-                    {
-                        t.Z = e[0];
-                    }
-                    else if (t.Y == e[0])
-                    {
-                        t.Z = e[1];
-                    }
-                    tris[e[3]] = t;
-                }
-                if (e[2] >= 0)
-                {
-                    // Right
-                    var t = tris[e[2]];
-                    if (t.X == -1)
-                    {
-                        t.X = e[1];
-                        t.Y = e[0];
-                    }
-                    else if (t.X == e[0])
-                    {
-                        t.Z = e[1];
-                    }
-                    else if (t.Y == e[1])
-                    {
-                        t.Z = e[0];
-                    }
-                    tris[e[2]] = t;
-                }
+
+                e.UpdateTris(tris);
             }
 
             return FilterTris(tris);
         }
 
+        /// <summary>
+        /// Adds an edge
+        /// </summary>
         private void AddEdge(int s, int t, int l, int r)
         {
             if (edges.Count >= maxEdges)
@@ -173,26 +281,29 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Add edge if not already in the triangulation.
             int e = FindEdge(s, t);
-            if (e == (int)EdgeValues.EV_UNDEF)
+            if (e == EV_UNDEF)
             {
-                edges.Add(new Int4(s, t, l, r));
+                edges.Add(new(s, t, l, r));
             }
         }
-        private void CompleteFacet(IEnumerable<Vector3> pts, int e)
+        /// <summary>
+        /// Completes a facet
+        /// </summary>
+        /// <param name="pts">Point list</param>
+        /// <param name="e">Edge index</param>
+        private void CompleteFacet(Vector3[] pts, int e)
         {
-            var edge = edges[e];
-
             // Cache s and t.
             int s, t;
-            if (edge[2] == (int)EdgeValues.EV_UNDEF)
+            if (edges[e].Face0 == EV_UNDEF)
             {
-                s = edge[0];
-                t = edge[1];
+                s = edges[e].Point0;
+                t = edges[e].Point1;
             }
-            else if (edge[3] == (int)EdgeValues.EV_UNDEF)
+            else if (edges[e].Face1 == EV_UNDEF)
             {
-                s = edge[1];
-                t = edge[0];
+                s = edges[e].Point1;
+                t = edges[e].Point0;
             }
             else
             {
@@ -201,62 +312,61 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Find best point on left of edge.
-            int pt = FindBestPointOnLeft(s, t, pts);
-
-            pt = FindBestPointOnCircleFromPoint(s, t, pt, pts);
+            int pt = FindBestPointOnCircleFromPoint(s, t, pts);
 
             // Add new triangle or update edge info if s-t is on hull.
-            if (pt >= pts.Count())
+            if (pt >= pts.Length)
             {
-                edges[e] = UpdateLeftFace(edges[e], s, t, (int)EdgeValues.EV_HULL);
+                edges[e].UpdateLeftFace(s, t, EV_HULL);
 
                 return;
             }
 
             // Update face information of edge being completed.
-            edges[e] = UpdateLeftFace(edges[e], s, t, faces);
+            edges[e].UpdateLeftFace(s, t, faces);
 
             // Add new edge or update face info of old edge.
             e = FindEdge(pt, s);
-            if (e == (int)EdgeValues.EV_UNDEF)
+            if (e == EV_UNDEF)
             {
-                AddEdge(pt, s, faces, (int)EdgeValues.EV_UNDEF);
+                AddEdge(pt, s, faces, EV_UNDEF);
             }
             else
             {
-                edges[e] = UpdateLeftFace(edges[e], pt, s, faces);
+                edges[e].UpdateLeftFace(pt, s, faces);
             }
 
             // Add new edge or update face info of old edge.
             e = FindEdge(t, pt);
-            if (e == (int)EdgeValues.EV_UNDEF)
+            if (e == EV_UNDEF)
             {
-                AddEdge(t, pt, faces, (int)EdgeValues.EV_UNDEF);
+                AddEdge(t, pt, faces, EV_UNDEF);
             }
             else
             {
-                edges[e] = UpdateLeftFace(edges[e], t, pt, faces);
+                edges[e].UpdateLeftFace(t, pt, faces);
             }
 
             faces++;
         }
-        private int FindBestPointOnLeft(int s, int t, IEnumerable<Vector3> pts)
+        /// <summary>
+        /// Finds best point on cicle from point list
+        /// </summary>
+        private int FindBestPointOnCircleFromPoint(int s, int t, Vector3[] pts)
         {
-            return FindBestPointOnCircleFromPoint(s, t, pts.Count(), pts);
-        }
-        private int FindBestPointOnCircleFromPoint(int s, int t, int point, IEnumerable<Vector3> pts)
-        {
-            int pt = point;
+            const float EPS = 1e-5f;
+
+            int pt = pts.Length;
             Vector3 c = Vector3.Zero;
             float r = -1;
-            for (int u = 0; u < pts.Count(); ++u)
+            for (int u = 0; u < pts.Length; ++u)
             {
                 if (u == s || u == t)
                 {
                     continue;
                 }
 
-                if (RecastUtils.VCross2(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u)) <= float.Epsilon)
+                if (Utils.VCross2D(pts[s], pts[t], pts[u]) <= EPS)
                 {
                     continue;
                 }
@@ -265,21 +375,28 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     //Circle valid. Update
                     pt = u;
-                    CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
+                    var (center, radius) = CircumCircle(pts[s], pts[t], pts[u]);
+                    c = center;
+                    r = radius;
                 }
             }
 
             return pt;
         }
-        private bool PointOnCircleFromPoint(int s, int t, int u, IEnumerable<Vector3> pts, Vector3 c, float r)
+        /// <summary>
+        /// Point on circle from point
+        /// </summary>
+        private bool PointOnCircleFromPoint(int s, int t, int u, Vector3[] pts, Vector3 c, float r)
         {
+            const float Tolerance = 0.001f;
+
             if (r < 0)
             {
                 // The circle is not updated yet, do it now.
                 return true;
             }
 
-            float d = Vector2.Distance(c.XZ(), pts.ElementAt(u).XZ());
+            float d = Utils.Distance2D(c, pts[u]);
             if (d > r * (1 + Tolerance))
             {
                 // Outside current circumcircle, skip.
@@ -306,37 +423,44 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Edge is valid.
             return true;
         }
-        private bool OverlapEdges(int s, int t, IEnumerable<Vector3> pts)
+        /// <summary>
+        /// Overlap edges
+        /// </summary>
+        private bool OverlapEdges(int s, int t, Vector3[] pts)
         {
             for (int i = 0; i < edges.Count; ++i)
             {
-                int s0 = edges.ElementAt(i).X;
-                int t0 = edges.ElementAt(i).Y;
+                var e = edges[i];
+                int s0 = e.Point0;
+                int t0 = e.Point1;
+
                 // Same or connected edges do not overlap.
                 if (s0 == s || s0 == t || t0 == s || t0 == t)
                 {
                     continue;
                 }
-                if (RecastUtils.OverlapSegSeg2d(pts.ElementAt(s0), pts.ElementAt(t0), pts.ElementAt(s), pts.ElementAt(t)) != 0)
+
+                if (Utils.OverlapSegSeg2D(pts[s0], pts[t0], pts[s], pts[t]))
                 {
                     return true;
                 }
             }
             return false;
         }
+        /// <summary>
+        /// Finds edge
+        /// </summary>
         private int FindEdge(int s, int t)
         {
             for (int i = 0; i < edges.Count; i++)
             {
-                var e = edges.ElementAt(i);
-
-                if ((e.X == s && e.Y == t) || (e.X == t && e.Y == s))
+                if (edges[i].IsSameEdge(s, t))
                 {
                     return i;
                 }
             }
 
-            return (int)EdgeValues.EV_UNDEF;
+            return EV_UNDEF;
         }
     }
 }

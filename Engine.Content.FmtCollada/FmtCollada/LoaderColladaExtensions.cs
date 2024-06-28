@@ -123,7 +123,7 @@ namespace Engine.Content.FmtCollada
         {
             if (matrix.Values != null && matrix.Values.Length == 16)
             {
-                Matrix m = new Matrix()
+                var m = new Matrix()
                 {
                     M11 = matrix.Values[0],
                     M12 = matrix.Values[2],
@@ -163,7 +163,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="stride">Stride</param>
         public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
         {
-            List<T> n = new List<T>();
+            var n = new List<T>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
@@ -225,7 +225,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector2)}");
 
-                return new Vector2[] { };
+                return Array.Empty<Vector2>();
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -233,11 +233,11 @@ namespace Engine.Content.FmtCollada
             int s = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "S");
             int t = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "T");
 
-            List<Vector2> verts = new List<Vector2>();
+            var verts = new List<Vector2>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
-                Vector2 v = new Vector2(
+                var v = new Vector2(
                     source.FloatArray[i + s],
                     source.FloatArray[i + t]);
 
@@ -258,7 +258,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector3)}");
 
-                return new Vector3[] { };
+                return Array.Empty<Vector3>();
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -267,12 +267,12 @@ namespace Engine.Content.FmtCollada
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<Vector3> verts = new List<Vector3>();
+            var verts = new List<Vector3>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
                 //To left handed -> Z flipped to Y
-                Vector3 v = new Vector3(
+                var v = new Vector3(
                     source.FloatArray[i + x],
                     source.FloatArray[i + z],
                     source.FloatArray[i + y]);
@@ -294,7 +294,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector4)}");
 
-                return new Vector4[] { };
+                return Array.Empty<Vector4>();
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -304,12 +304,12 @@ namespace Engine.Content.FmtCollada
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<Vector4> verts = new List<Vector4>();
+            var verts = new List<Vector4>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
                 //To left handed -> Z flipped to Y
-                Vector4 v = new Vector4(
+                var v = new Vector4(
                     source.FloatArray[i + x],
                     source.FloatArray[i + z],
                     source.FloatArray[i + y],
@@ -332,7 +332,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color3)}");
 
-                return new Color3[] { };
+                return Array.Empty<Color3>();
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -341,12 +341,12 @@ namespace Engine.Content.FmtCollada
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<Color3> colors = new List<Color3>();
+            var colors = new List<Color3>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
                 //To left handed -> Z flipped to Y
-                Color3 v = new Color3(
+                var v = new Color3(
                     source.FloatArray[i + r],
                     source.FloatArray[i + g],
                     source.FloatArray[i + b]);
@@ -368,7 +368,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color4)}");
 
-                return new Color4[] { };
+                return Array.Empty<Color4>();
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -378,12 +378,12 @@ namespace Engine.Content.FmtCollada
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<Color4> colors = new List<Color4>();
+            var colors = new List<Color4>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
                 //To left handed -> Z flipped to Y
-                Color4 v = new Color4(
+                var v = new Color4(
                     source.FloatArray[i + r],
                     source.FloatArray[i + g],
                     source.FloatArray[i + b],
@@ -418,16 +418,16 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix)}");
 
-                return new Matrix[] { };
+                return Array.Empty<Matrix>();
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<Matrix> mats = new List<Matrix>();
+            var mats = new List<Matrix>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
-                Matrix m = new Matrix()
+                var m = new Matrix()
                 {
                     M11 = source.FloatArray[i + 0],
                     M12 = source.FloatArray[i + 8],

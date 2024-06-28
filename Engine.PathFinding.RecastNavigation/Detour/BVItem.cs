@@ -1,26 +1,16 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    /// <summary>
+    /// Bounding volume item.
+    /// </summary>
+    [Serializable]
     public struct BVItem
     {
-        public static readonly CompareX XComparer = new CompareX();
-        public static readonly CompareY YComparer = new CompareY();
-        public static readonly CompareZ ZComparer = new CompareZ();
-
-        public Int3 BMin { get; set; }
-        public Int3 BMax { get; set; }
-        public int I { get; set; }
-
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
-        {
-            return string.Format("Region Id: {0}; BMin: {1}; BMax: {2};", this.I, this.BMin, this.BMax);
-        }
+        #region Helper classes
 
         /// <summary>
         /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundingVolumeTreeNode"/>s on the X axis.
@@ -87,6 +77,120 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (x.I > y.I) return 1;
                 return 0;
             }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// X axis comparer
+        /// </summary>
+        public static readonly CompareX XComparer = new();
+        /// <summary>
+        /// Y axis comparer
+        /// </summary>
+        public static readonly CompareY YComparer = new();
+        /// <summary>
+        /// Z axis comparer
+        /// </summary>
+        public static readonly CompareZ ZComparer = new();
+
+        /// <summary>
+        /// Minimum bounds of the item's AABB. [(x, y, z)]
+        /// </summary>
+        public Int3 BMin { get; set; }
+        /// <summary>
+        /// Maximum bounds of the item's AABB. [(x, y, z)]
+        /// </summary>
+        public Int3 BMax { get; set; }
+        /// <summary>
+        /// The item's index. (Negative for escape sequence.)
+        /// </summary>
+        public int I { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public BVItem()
+        {
+
+        }
+
+        /// <summary>
+        /// Calculates detail bounds
+        /// </summary>
+        /// <param name="dm">Detail mesh</param>
+        /// <param name="detailVerts">Detail vertices</param>
+        public void CalcDetailBounds(PolyMeshIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
+        {
+            int vb = dm.VertBase;
+            int ndv = dm.VertCount;
+            var bbox = Utils.GetMinMaxBounds(detailVerts, vb, ndv);
+
+            // BV-tree uses cs for all dimensions
+            BMin = new Int3
+            {
+                X = MathUtil.Clamp((int)((bbox.Minimum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bbox.Minimum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bbox.Minimum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+            };
+
+            BMax = new Int3
+            {
+                X = MathUtil.Clamp((int)((bbox.Maximum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bbox.Maximum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bbox.Maximum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+            };
+        }
+        /// <summary>
+        /// Calculates polygon bounds
+        /// </summary>
+        /// <param name="p">Indexed polygon</param>
+        /// <param name="nvp">Number of vertices</param>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="ch">Cell height</param>
+        /// <param name="cs">Cell size</param>
+        public void CalcPolygonBounds(IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
+        {
+            int p0 = p.GetVertex(0);
+            var v0 = verts[p0];
+            var itBMin = v0;
+            var itBMax = v0;
+
+            for (int j = 1; j < nvp; ++j)
+            {
+                if (p.VertexIsNull(j))
+                {
+                    break;
+                }
+
+                int pj = p.GetVertex(j);
+
+                var vj = verts[pj];
+                var x = vj.X;
+                var y = vj.Y;
+                var z = vj.Z;
+
+                if (x < BMin.X) itBMin.X = x;
+                if (y < BMin.Y) itBMin.Y = y;
+                if (z < BMin.Z) itBMin.Z = z;
+
+                if (x > BMax.X) itBMax.X = x;
+                if (y > BMax.Y) itBMax.Y = y;
+                if (z > BMax.Z) itBMax.Z = z;
+            }
+
+            // Remap y
+            itBMin.Y = (int)MathF.Floor(BMin.Y * ch / cs);
+            itBMax.Y = (int)MathF.Ceiling(BMax.Y * ch / cs);
+
+            BMin = itBMin;
+            BMax = itBMax;
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"{nameof(BVItem)} Region Id: {I}; BMin: {BMin}; BMax: {BMax};";
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Engine.Common
         /// <summary>
         /// Empty
         /// </summary>
-        public static readonly MaterialShadowDrawInfo Empty = new MaterialShadowDrawInfo();
+        public static readonly MaterialShadowDrawInfo Empty = new();
 
         /// <summary>
         /// Material

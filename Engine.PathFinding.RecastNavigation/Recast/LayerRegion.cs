@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -116,7 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="v">Layer value</param>
         /// <returns>Returns true if the layer array contains the value</returns>
-        public bool ContainsLayer(int v)
+        public readonly bool ContainsLayer(int v)
         {
             return Layers?.Take(NLayers)?.Contains(v) ?? false;
         }
@@ -125,18 +126,46 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="v">Neighbour value</param>
         /// <returns>Returns true if the neighbour array contains the value</returns>
-        public bool ContainsNei(int v)
+        public readonly bool ContainsNei(int v)
         {
             return Neis?.Take(NNeis)?.Contains(v) ?? false;
         }
-
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Merges the specified region layers into current
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        /// <param name="reg">Layer region to merge in</param>
+        public bool Merge(LayerRegion reg)
         {
-            return string.Format("Id: {0}; Layers: {1}; Neighbors: {2}; Base: {3}", LayerId, NLayers, NNeis, IsBase);
+            for (int k = 0; k < reg.NLayers; ++k)
+            {
+                if (!AddUniqueLayer(reg.Layers[k]))
+                {
+                    return false;
+                }
+            }
+
+            YMin = Math.Min(YMin, reg.YMin);
+            YMax = Math.Max(YMax, reg.YMax);
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the height range between to layer regions
+        /// </summary>
+        /// <param name="reg1">Layer region 1</param>
+        /// <param name="reg2">Layer region 2</param>
+        public static int GetHeightRange(LayerRegion reg1, LayerRegion reg2)
+        {
+            // Skip if the height range would become too large.
+            int ymin = Math.Min(reg1.YMin, reg2.YMin);
+            int ymax = Math.Max(reg1.YMax, reg2.YMax);
+            return ymax - ymin;
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"Id: {LayerId}; Layers: {NLayers}; Neighbors: {NNeis}; Base: {IsBase}";
         }
     }
 }

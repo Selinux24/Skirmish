@@ -11,7 +11,15 @@ namespace Engine.Content
     /// <summary>
     /// Sub mesh content
     /// </summary>
-    public class SubMeshContent
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="topology">Submesh topology</param>
+    /// <param name="material">Material name</param>
+    /// <param name="isTextured">Is textured mesh</param>
+    /// <param name="isHull">Is hull mesh</param>
+    /// <param name="transform">Transform</param>
+    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
     {
         /// <summary>
         /// Global id counter
@@ -29,39 +37,39 @@ namespace Engine.Content
         /// <summary>
         /// Submesh id
         /// </summary>
-        public int Id { get; private set; }
+        public int Id { get; private set; } = GetNextId();
         /// <summary>
         /// Vertex Topology
         /// </summary>
-        public Topology Topology { get; set; }
+        public Topology Topology { get; set; } = topology;
         /// <summary>
         /// Vertex type
         /// </summary>
         public VertexTypes VertexType { get; private set; } = VertexTypes.Unknown;
         /// <summary>
-        /// Gets or sets wether the submesh has attached a textured material
+        /// Gets or sets whether the submesh has attached a textured material
         /// </summary>
-        public bool Textured { get; private set; } = false;
+        public bool Textured { get; private set; } = isTextured;
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexData[] Vertices { get; private set; } = new VertexData[] { };
+        public VertexData[] Vertices { get; private set; } = [];
         /// <summary>
         /// Indices
         /// </summary>
-        public uint[] Indices { get; private set; } = new uint[] { };
+        public uint[] Indices { get; private set; } = [];
         /// <summary>
         /// Material
         /// </summary>
-        public string Material { get; set; }
+        public string Material { get; set; } = material;
         /// <summary>
         /// Gets or sets whether the current submesh content is a hull mesh
         /// </summary>
-        public bool IsHull { get; set; }
+        public bool IsHull { get; set; } = isHull;
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; set; } = Matrix.Identity;
+        public Matrix Transform { get; private set; } = transform;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -71,74 +79,64 @@ namespace Engine.Content
         /// <returns>Returns true if the mesh array was optimized</returns>
         public static bool OptimizeMeshes(IEnumerable<SubMeshContent> meshArray, out SubMeshContent optimizedMesh)
         {
-            optimizedMesh = null;
+            if (meshArray?.Any() != true)
+            {
+                optimizedMesh = null;
 
-            int? count = meshArray?.Count();
+                return false;
+            }
 
-            if (count == 1)
+            if (meshArray.Count() == 1)
             {
                 optimizedMesh = meshArray.First();
+
+                return true;
             }
-            else if (count > 1)
+
+            if (meshArray.Select(m => (m.VertexType, m.Topology)).Distinct().Count() > 1)
             {
-                var firstMesh = meshArray.First();
+                optimizedMesh = null;
 
-                string material = firstMesh.Material;
-                Topology topology = firstMesh.Topology;
-                VertexTypes vertexType = firstMesh.VertexType;
-                bool isTextured = firstMesh.Textured;
+                return false;
+            }
 
-                List<VertexData> verts = new List<VertexData>();
-                List<uint> idx = new List<uint>();
+            var firstMesh = meshArray.First();
 
-                uint indexOffset = 0;
+            var meshTopology = firstMesh.Topology;
+            string meshMaterial = firstMesh.Material;
+            bool meshTextured = firstMesh.Textured;
 
-                foreach (var mesh in meshArray)
+            var verts = new List<VertexData>();
+            var idx = new List<uint>();
+
+            uint indexOffset = 0;
+
+            foreach (var mesh in meshArray)
+            {
+                if (!mesh.Transform.IsIdentity)
                 {
-                    if (mesh.VertexType != vertexType || mesh.Topology != topology)
-                    {
-                        optimizedMesh = null;
-
-                        return false;
-                    }
-
-                    if (mesh.Vertices.Length > 0)
-                    {
-                        verts.AddRange(mesh.Vertices);
-                    }
-
-                    if (mesh.Indices.Length > 0)
-                    {
-                        idx.AddRange(mesh.Indices.Select(i => i + indexOffset));
-                    }
-
-                    indexOffset = (uint)verts.Count;
+                    mesh.BakeTransform(mesh.Transform);
                 }
 
-                optimizedMesh = new SubMeshContent(topology, material, isTextured, false);
+                if (mesh.Vertices.Length > 0)
+                {
+                    verts.AddRange(mesh.Vertices);
+                }
 
-                optimizedMesh.SetVertices(verts);
-                optimizedMesh.SetIndices(idx);
+                if (mesh.Indices.Length > 0)
+                {
+                    idx.AddRange(mesh.Indices.Select(i => i + indexOffset));
+                }
+
+                indexOffset = (uint)verts.Count;
             }
 
+            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix.Identity);
+
+            optimizedMesh.SetVertices(verts);
+            optimizedMesh.SetIndices(idx);
+
             return true;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="topology">Submesh topology</param>
-        /// <param name="material">Material name</param>
-        /// <param name="isTextured">Is textured mesh</param>
-        /// <param name="isHull">Is hull mesh</param>
-        public SubMeshContent(Topology topology, string material, bool isTextured, bool isHull)
-        {
-            Id = GetNextId();
-
-            Topology = topology;
-            Material = material;
-            Textured = isTextured;
-            IsHull = isHull;
         }
 
         /// <summary>
@@ -147,14 +145,8 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
-            Vertices = new VertexData[] { };
-            VertexType = VertexTypes.Unknown;
-
-            if (vertices?.Any() == true)
-            {
-                Vertices = new List<VertexData>(vertices).ToArray();
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
-            }
+            Vertices = vertices?.ToArray() ?? [];
+            VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexData.GetVertexType(Vertices[0], Textured);
         }
         /// <summary>
         /// Sets the submesh index list
@@ -162,12 +154,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         public void SetIndices(IEnumerable<uint> indices)
         {
-            Indices = new uint[] { };
-
-            if (indices?.Any() == true)
-            {
-                Indices = new List<uint>(indices).ToArray();
-            }
+            Indices = indices?.ToArray() ?? [];
         }
         /// <summary>
         /// Sets whether the submesh is textured or not
@@ -177,7 +164,7 @@ namespace Engine.Content
         {
             Textured = isTextured;
 
-            if (Vertices?.Length > 0)
+            if (Vertices.Length > 0)
             {
                 VertexType = VertexData.GetVertexType(Vertices[0], Textured);
             }
@@ -188,61 +175,77 @@ namespace Engine.Content
         /// </summary>
         public void ComputeTangents()
         {
-            if (Vertices.Length > 0)
+            if (Vertices.Length == 0)
             {
-                if (Indices.Length > 0)
-                {
-                    for (int i = 0; i < Indices.Length; i += 3)
-                    {
-                        var v0 = Vertices[(int)Indices[i + 0]];
-                        var v1 = Vertices[(int)Indices[i + 1]];
-                        var v2 = Vertices[(int)Indices[i + 2]];
-
-                        var n = GeometryUtil.ComputeNormals(
-                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                        v0.Tangent = n.Tangent;
-                        v1.Tangent = n.Tangent;
-                        v2.Tangent = n.Tangent;
-
-                        v0.BiNormal = n.Binormal;
-                        v1.BiNormal = n.Binormal;
-                        v2.BiNormal = n.Binormal;
-
-                        Vertices[(int)Indices[i + 0]] = v0;
-                        Vertices[(int)Indices[i + 1]] = v1;
-                        Vertices[(int)Indices[i + 2]] = v2;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Vertices.Length; i += 3)
-                    {
-                        var v0 = Vertices[i + 0];
-                        var v1 = Vertices[i + 1];
-                        var v2 = Vertices[i + 2];
-
-                        var n = GeometryUtil.ComputeNormals(
-                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                        v0.Tangent = n.Tangent;
-                        v1.Tangent = n.Tangent;
-                        v2.Tangent = n.Tangent;
-
-                        v0.BiNormal = n.Binormal;
-                        v1.BiNormal = n.Binormal;
-                        v2.BiNormal = n.Binormal;
-
-                        Vertices[i + 0] = v0;
-                        Vertices[i + 1] = v1;
-                        Vertices[i + 2] = v2;
-                    }
-                }
-
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+                return;
             }
+
+            if (Indices.Length > 0)
+            {
+                for (int i = 0; i < Indices.Length; i += 3)
+                {
+                    var v0 = Vertices[(int)Indices[i + 0]];
+                    var v1 = Vertices[(int)Indices[i + 1]];
+                    var v2 = Vertices[(int)Indices[i + 2]];
+
+                    var n = GeometryUtil.ComputeNormals(
+                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
+
+                    v0.Tangent = n.Tangent;
+                    v1.Tangent = n.Tangent;
+                    v2.Tangent = n.Tangent;
+
+                    v0.BiNormal = n.Binormal;
+                    v1.BiNormal = n.Binormal;
+                    v2.BiNormal = n.Binormal;
+
+                    Vertices[(int)Indices[i + 0]] = v0;
+                    Vertices[(int)Indices[i + 1]] = v1;
+                    Vertices[(int)Indices[i + 2]] = v2;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Vertices.Length; i += 3)
+                {
+                    var v0 = Vertices[i + 0];
+                    var v1 = Vertices[i + 1];
+                    var v2 = Vertices[i + 2];
+
+                    var n = GeometryUtil.ComputeNormals(
+                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
+
+                    v0.Tangent = n.Tangent;
+                    v1.Tangent = n.Tangent;
+                    v2.Tangent = n.Tangent;
+
+                    v0.BiNormal = n.Binormal;
+                    v1.BiNormal = n.Binormal;
+                    v2.BiNormal = n.Binormal;
+
+                    Vertices[i + 0] = v0;
+                    Vertices[i + 1] = v1;
+                    Vertices[i + 2] = v2;
+                }
+            }
+
+            VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+        }
+
+        /// <summary>
+        /// Gets vertex data list
+        /// </summary>
+        /// <returns>Returns the vertex data list</returns>
+        public IEnumerable<VertexData> GetVertices()
+        {
+            if (Transform.IsIdentity)
+            {
+                return Vertices.AsReadOnly();
+            }
+
+            return VertexData.Transform(Vertices, Transform);
         }
         /// <summary>
         /// Gets triangle list
@@ -250,50 +253,59 @@ namespace Engine.Content
         /// <returns>Returns the triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            if (Topology == Topology.TriangleList)
-            {
-                List<Triangle> triangles = new List<Triangle>();
-
-                if (Indices.Length > 0)
-                {
-                    for (int i = 0; i < Indices.Length; i += 3)
-                    {
-                        triangles.Add(new Triangle(
-                            Vertices[(int)Indices[i + 0]].Position.Value,
-                            Vertices[(int)Indices[i + 1]].Position.Value,
-                            Vertices[(int)Indices[i + 2]].Position.Value));
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Vertices.Length; i += 3)
-                    {
-                        triangles.Add(new Triangle(
-                            Vertices[i + 0].Position.Value,
-                            Vertices[i + 1].Position.Value,
-                            Vertices[i + 2].Position.Value));
-                    }
-                }
-
-                return triangles.ToArray();
-            }
-            else
+            if (Topology != Topology.TriangleList)
             {
                 throw new InvalidOperationException($"Bad source topology for triangle list: {Topology}");
             }
+
+            var vertices = GetVertices().ToArray();
+
+            List<Triangle> triangles = [];
+
+            if (Indices.Length > 0)
+            {
+                for (int i = 0; i < Indices.Length; i += 3)
+                {
+                    triangles.Add(new(
+                        vertices[(int)Indices[i + 0]].Position.Value,
+                        vertices[(int)Indices[i + 1]].Position.Value,
+                        vertices[(int)Indices[i + 2]].Position.Value));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < vertices.Length; i += 3)
+                {
+                    triangles.Add(new(
+                        vertices[i + 0].Position.Value,
+                        vertices[i + 1].Position.Value,
+                        vertices[i + 2].Position.Value));
+                }
+            }
+
+            return triangles;
         }
         /// <summary>
-        /// Transforms the vertex data
+        /// Transforms the vertex data and resets de internal transform to identity
         /// </summary>
         /// <param name="transform">Transform to apply</param>
-        public void ApplyTransform(Matrix transform)
+        public void BakeTransform(Matrix transform)
         {
-            Transform = Matrix.Identity;
-
-            for (int i = 0; i < Vertices.Length; i++)
+            if (transform.IsIdentity)
             {
-                Vertices[i] = Vertices[i].Transform(transform);
+                return;
             }
+
+            Transform = Matrix.Identity;
+            Vertices = Vertices.Select(v => v.Transform(transform)).ToArray();
+        }
+        /// <summary>
+        /// Sets the specified transform matrix
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
+        public void SetTransform(Matrix transform)
+        {
+            Transform = transform;
         }
 
         /// <summary>
@@ -320,7 +332,7 @@ namespace Engine.Content
             else
             {
                 var vertices = await GeometryUtil.ConstraintVerticesAsync(constraint.Value, Vertices);
-                var indices = new uint[] { };
+                var indices = Array.Empty<uint>();
 
                 return (vertices, indices);
             }

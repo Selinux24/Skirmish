@@ -38,7 +38,7 @@ namespace Engine.PathFinding.AStar
 
                 if (newCap < Count)
                 {
-                    throw new ArgumentOutOfRangeException("value", "The new capacity is not enough for the elements currently in the queue");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The new capacity is not enough for the elements currently in the queue");
                 }
 
                 capacity = newCap;
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.AStar
             }
 
             // Create the new item
-            PriorityDictionaryItem<TValue, TPriority> newItem = new PriorityDictionaryItem<TValue, TPriority>(value, priority);
+            var newItem = new PriorityDictionaryItem<TValue, TPriority>(value, priority);
 
             int i = Count++;
 
@@ -216,7 +216,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if the element is in the queue. False in all other cases</returns>
         public bool Contains(TValue item)
         {
-            return items.Any(qItem => qItem.Value.Equals(item));
+            return Array.Exists(items, qItem => qItem.Value.Equals(item));
         }
         /// <summary>
         /// Copies the elements in a queue, starting from the specified index
@@ -225,10 +225,10 @@ namespace Engine.PathFinding.AStar
         /// <param name="arrayIndex">Index from which to start copying the elements</param>
         public void CopyTo(PriorityDictionaryItem<TValue, TPriority>[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException("array");
+            ArgumentNullException.ThrowIfNull(array);
+
             if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException("arrayIndex", "arrayIndex is less than 0");
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "arrayIndex is less than 0");
             if (array.Rank > 1)
                 throw new ArgumentException("the array is multidimensional");
             if (arrayIndex >= array.Length)

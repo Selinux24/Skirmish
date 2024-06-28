@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -40,7 +41,7 @@ namespace Engine.Common
             var vArray = vertices.ToArray();
             var uvArray = uvs.ToArray();
 
-            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
+            var res = new List<VertexPositionTexture>();
 
             for (int i = 0; i < vArray.Length; i++)
             {
@@ -48,6 +49,29 @@ namespace Engine.Common
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Converts a vertex data list to a vertex array
+        /// </summary>
+        /// <param name="vertices">Vertices list</param>
+        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new IVertexData[vArray.Length];
+
+            Parallel.For(0, vArray.Length, (index) =>
+            {
+                var v = vArray[index];
+
+                res[index] = new VertexPositionTexture
+                {
+                    Position = v.Position ?? Vector3.Zero,
+                    Texture = v.Texture ?? Vector2.Zero
+                };
+            });
+
+            return await Task.FromResult(res);
         }
 
         /// <summary>
@@ -61,7 +85,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType
+        public readonly VertexTypes VertexType
         {
             get
             {
@@ -74,7 +98,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns true if structure contains data for the specified channel</returns>
-        public bool HasChannel(VertexDataChannels channel)
+        public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Texture) return true;
@@ -86,7 +110,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns data for the specified channel</returns>
-        public T GetChannelValue<T>(VertexDataChannels channel)
+        public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
@@ -108,7 +132,7 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexPositionTexture));
         }
@@ -117,13 +141,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public InputElement[] GetInput(int slot)
+        public readonly InputElement[] GetInput(int slot)
         {
             return Input(slot);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Position: {Position}; Texture: {Texture};";
         }

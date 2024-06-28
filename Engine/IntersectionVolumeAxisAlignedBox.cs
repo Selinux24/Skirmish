@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Bounding box intersection volume
     /// </summary>
-    public struct IntersectionVolumeAxisAlignedBox : IIntersectionVolume
+    public struct IntersectionVolumeAxisAlignedBox : ICullingVolume
     {
         /// <summary>
         /// Bounding box
@@ -39,22 +39,22 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingSphere sphere)
+        public readonly ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.BoxContainsSphere(bbox, sphere);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingBox bbox)
+        public readonly ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.BoxContainsBox(this.bbox, bbox);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingFrustum frustum)
+        public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.BoxContainsFrustum(bbox, frustum);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.BoxContainsMesh(bbox, mesh);
         }

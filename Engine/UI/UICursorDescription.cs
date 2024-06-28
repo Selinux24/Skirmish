@@ -53,9 +53,9 @@ namespace Engine.UI
         /// <param name="baseColor">Base color</param>
         public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta, Color4 baseColor)
         {
-            return new UICursorDescription()
+            return new()
             {
-                Textures = new[] { texture },
+                Textures = [texture],
                 Width = width,
                 Height = height,
                 Delta = delta,
@@ -78,7 +78,7 @@ namespace Engine.UI
         /// </summary>
         public UICursorDescription() : base()
         {
-            EventsEnabled = false;
+
         }
     }
 }

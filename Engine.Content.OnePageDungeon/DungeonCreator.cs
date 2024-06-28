@@ -1,35 +1,44 @@
-﻿using SharpDX;
+﻿using Engine.Modular;
+using Engine.Modular.Persistence;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
-    using Engine.Modular;
-    using Engine.Modular.Persistence;
-
+    /// <summary>
+    /// Dungeon creator helper
+    /// </summary>
+    /// <remarks>
+    /// Creates an asset map from a one-page-dungeon file, suitable for de <see cref="ModularScenery"/> class
+    /// </remarks>
     public static class DungeonCreator
     {
+        /// <summary>
+        /// Rotation string list
+        /// </summary>
+        private static readonly string[] rotationStrings = [RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270];
+
+        /// <summary>
+        /// Creates an asset map
+        /// </summary>
+        /// <param name="dungeon">Dungeon file</param>
+        /// <param name="configuration">Dungeon asset configuration</param>
         public static AssetMap CreateAssets(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            AssetMap assets = new AssetMap
+            return new AssetMap
             {
-                MaintainTextureDirection = true
+                MaintainTextureDirection = configuration.MaintainTextureDirection,
+                Assets = CreateRooms(dungeon, configuration).ToArray(),
             };
-
-            List<Asset> assetList = new List<Asset>();
-
-            assetList.AddRange(CreateRooms(dungeon, configuration));
-
-            assets.Assets = assetList.ToArray();
-
-            return assets;
         }
-
+        /// <summary>
+        /// Gets the chamber tile list
+        /// </summary>
+        /// <param name="rect">Chamber rectangle</param>
         private static IEnumerable<Rectangle> GetRects(Rect rect)
         {
-            List<Rectangle> rectangles = new List<Rectangle>();
-
             for (int x = 0; x < rect.W; x++)
             {
                 for (int y = 0; y < rect.H; y++)
@@ -37,46 +46,46 @@ namespace Engine.Content.OnePageDungeon
                     int vx = (int)rect.X + x;
                     int vy = (int)rect.Y + y;
 
-                    Rectangle r = new Rectangle(vx, vy, 1, 1);
-
-                    rectangles.Add(r);
+                    yield return new Rectangle(vx, vy, 1, 1);
                 }
             }
-
-            return rectangles.ToArray();
         }
-
+        /// <summary>
+        /// Gets the dungeon's wall list
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
         private static IEnumerable<Wall> MarkWalls(Dungeon dungeon)
         {
-            List<Wall> walls = new List<Wall>();
-
-            List<Rectangle> cells = new List<Rectangle>();
-
-            foreach (var room in dungeon.Rects)
-            {
-                cells.AddRange(GetRects(room));
-            }
+            //Get all chamber block cells
+            var cells = dungeon.Rects.SelectMany(GetRects);
 
             foreach (var cell in cells)
             {
                 var inflatedCell = cell;
                 inflatedCell.Inflate(1, 1);
 
-                //Find neighborus
+                //Find neighbors
                 var neis = cells.Where(c => c != cell && inflatedCell.Intersects(c));
-                if (neis.Any())
+                if (!neis.Any())
                 {
-                    var cDirs = EvaluateDirection(cell, neis);
-                    if (cDirs != WallDirections.None)
-                    {
-                        walls.Add(new Wall() { Cell = cell, Dir = cDirs });
-                    }
+                    continue;
                 }
+
+                var cDirs = EvaluateDirection(cell, neis);
+                if (cDirs == WallDirections.None)
+                {
+                    continue;
+                }
+
+                yield return new Wall() { Cell = cell, Dir = cDirs };
             }
-
-            return walls.ToArray();
         }
-
+        /// <summary>
+        /// Evaluates the cell direction versus it's neighbors
+        /// </summary>
+        /// <param name="cell">Cell</param>
+        /// <param name="neis">Neighbor list</param>
+        /// <returns>Returns the wall directions enumeration</returns>
         private static WallDirections EvaluateDirection(Rectangle cell, IEnumerable<Rectangle> neis)
         {
             var ctl = cell.TopLeft();
@@ -113,38 +122,41 @@ namespace Engine.Content.OnePageDungeon
 
             return cDirs;
         }
-
+        /// <summary>
+        /// Creates the asset list for the dungeon's rooms
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<Asset> CreateRooms(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<Asset> assetList = new List<Asset>();
-
             var walls = MarkWalls(dungeon);
 
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                List<AssetReference> roomAssets = new List<AssetReference>();
+                List<AssetReference> roomAssets =
+                [
+                    .. CreateRoom(rect, walls, configuration),
+                    .. CreateColumns(rect, dungeon, configuration),
+                ];
 
-                roomAssets.AddRange(CreateRoom(rect, walls, configuration));
-                roomAssets.AddRange(CreateColumns(rect, dungeon, configuration));
-
-                Asset room = new Asset()
+                yield return new Asset
                 {
                     Name = $"{rectIndex++}",
+                    References = roomAssets,
+                    Connections = CreateConnections(rect, dungeon, configuration),
                 };
-
-                room.References = roomAssets.ToArray();
-                room.Connections = CreateConnections(rect, dungeon, configuration).ToArray();
-
-                assetList.Add(room);
             }
-
-            return assetList.ToArray();
         }
-
-        private static IEnumerable<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
+        /// <summary>
+        /// Creates a room
+        /// </summary>
+        /// <param name="rect">Room rectangle</param>
+        /// <param name="walls">Wall list</param>
+        /// <param name="configuration">Asset configuration</param>
+        private static List<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
         {
-            List<AssetReference> references = new List<AssetReference>();
+            List<AssetReference> references = [];
 
             for (int x = 0; x < rect.W; x++)
             {
@@ -152,106 +164,113 @@ namespace Engine.Content.OnePageDungeon
                 {
                     int ix = (int)rect.X + x;
                     int iy = (int)rect.Y + y;
-                    float vx = (rect.X + x) * configuration.PositionDelta;
-                    float vz = (rect.Y + y) * configuration.PositionDelta;
+                    float vx = (rect.X + x) * configuration.BlockSize;
+                    float vz = (rect.Y + y) * configuration.BlockSize;
+                    var position = new Vector3(-vx, 0, vz);
 
-                    AssetReference floor = new AssetReference()
-                    {
-                        AssetName = configuration.GetRandonFloor(),
-                        Type = ModularSceneryAssetTypes.Floor,
-                        Position = new Vector3(-vx, 0, vz),
-                    };
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, RotationQ.Identity));
 
-                    references.Add(floor);
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, RotationQ.Identity));
 
-                    AssetReference ceiling = new AssetReference()
-                    {
-                        AssetName = configuration.GetRandonCeiling(),
-                        Type = ModularSceneryAssetTypes.Ceiling,
-                        Position = new Vector3(-vx, 0, vz),
-                    };
-
-                    references.Add(ceiling);
-
-                    var cellWalls = walls.Where(w => w.Cell.X == ix && w.Cell.Y == iy);
-                    if (cellWalls.Any())
-                    {
-                        foreach (var cellWall in cellWalls)
-                        {
-                            references.AddRange(CreateWall(vx, vz, cellWall, configuration));
-                        }
-                    }
+                    var cellWalls = walls
+                        .Where(w => w.Cell.X == ix && w.Cell.Y == iy)
+                        .SelectMany(cellWall => CreateWall(vx, vz, cellWall, configuration));
+                    references.AddRange(cellWalls);
                 }
             }
 
-            return references.ToArray();
+            return references;
         }
-
-        private static IEnumerable<AssetReference> CreateWall(float vx, float vz, Wall cellWall, DungeonAssetConfiguration configuration)
+        /// <summary>
+        /// Creates an asset reference from the specified property
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <param name="assetType"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Position3 position, RotationQ rotation)
         {
-            List<AssetReference> references = new List<AssetReference>();
+            if (prop?.Assets?.Any() != true)
+            {
+                yield break;
+            }
+
+            foreach (var asset in prop.Assets)
+            {
+                yield return new AssetReference()
+                {
+                    AssetName = asset.Name,
+                    Type = assetType,
+                    Position = position + asset.Position,
+                    Rotation = rotation * asset.Rotation,
+                    Scale = asset.Scale,
+                    PathFinding = (Modular.PathFindingModes)asset.PathFinding,
+                };
+            }
+        }
+        /// <summary>
+        /// Creates a wall
+        /// </summary>
+        /// <param name="vx">X position</param>
+        /// <param name="vz">Z position</param>
+        /// <param name="cellWall">Wall</param>
+        /// <param name="configuration">Asset configuration</param>
+        private static List<AssetReference> CreateWall(float vx, float vz, Wall cellWall, DungeonAssetConfiguration configuration)
+        {
+            List<AssetReference> references = [];
+
+            float blockDelta = configuration.BlockSize * 0.5f;
 
             if (cellWall.Dir.HasFlag(WallDirections.N))
             {
-                AssetReference wall = new AssetReference()
-                {
-                    AssetName = configuration.GetRandonWall(),
-                    Type = ModularSceneryAssetTypes.Wall,
-                    Position = new Vector3(-vx, 0, vz - (configuration.PositionDelta * 0.5f)),
-                    Rotation = "Rot270",
-                };
+                var wall = configuration.GetRandonWall();
+                var position = new Position3(-vx, 0, vz - blockDelta);
+                var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
-                references.Add(wall);
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.S))
             {
-                AssetReference wall = new AssetReference()
-                {
-                    AssetName = configuration.GetRandonWall(),
-                    Type = ModularSceneryAssetTypes.Wall,
-                    Position = new Vector3(-vx, 0, vz + (configuration.PositionDelta * 0.5f)),
-                    Rotation = "Rot90",
-                };
+                var wall = configuration.GetRandonWall();
+                var position = new Position3(-vx, 0, vz + blockDelta);
+                var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
-                references.Add(wall);
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.E))
             {
-                AssetReference wall = new AssetReference()
-                {
-                    AssetName = configuration.GetRandonWall(),
-                    Type = ModularSceneryAssetTypes.Wall,
-                    Position = new Vector3(-vx - (configuration.PositionDelta * 0.5f), 0, vz),
-                };
+                var wall = configuration.GetRandonWall();
+                var position = new Position3(-vx - blockDelta, 0, vz);
+                var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
-                references.Add(wall);
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.W))
             {
-                AssetReference wall = new AssetReference()
-                {
-                    AssetName = configuration.GetRandonWall(),
-                    Type = ModularSceneryAssetTypes.Wall,
-                    Position = new Vector3(-vx + (configuration.PositionDelta * 0.5f), 0, vz),
-                    Rotation = "Rot180",
-                };
+                var wall = configuration.GetRandonWall();
+                var position = new Position3(-vx + blockDelta, 0, vz);
+                var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
-                references.Add(wall);
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
-            return references.ToArray();
+            return references;
         }
-
+        /// <summary>
+        /// Creates a room connection list
+        /// </summary>
+        /// <param name="rect">Room rectangle</param>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<AssetConnection> CreateConnections(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<AssetConnection> res = new List<AssetConnection>();
-
             var roomRect = rect.GetRectangle();
             roomRect.Inflate(1, 1);
 
+            // Finds the room neighbors
             var neis = dungeon.Rects.Where(r =>
             {
                 if (r == rect)
@@ -263,20 +282,23 @@ namespace Engine.Content.OnePageDungeon
                 return roomRect.Intersects(neiRect);
             });
 
-            if (neis.Any())
+            if (!neis.Any())
             {
-                foreach (var nei in neis)
-                {
-                    res.AddRange(CreateConnection(rect, nei, configuration));
-                }
+                return [];
             }
 
-            return res.ToArray();
+            // Create connection between the room and the neighbors
+            return neis.SelectMany(nei => CreateConnection(rect, nei, configuration));
         }
-
-        private static IEnumerable<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
+        /// <summary>
+        /// Creates a connection list between rooms
+        /// </summary>
+        /// <param name="one">Room rectangle one</param>
+        /// <param name="two">Room rectangle two</param>
+        /// <param name="configuration">Asset configuration</param>
+        private static List<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
         {
-            List<AssetConnection> connections = new List<AssetConnection>();
+            List<AssetConnection> connections = [];
 
             for (int x = 0; x < one.W; x++)
             {
@@ -289,16 +311,19 @@ namespace Engine.Content.OnePageDungeon
                 }
             }
 
-            return connections.ToArray();
+            return connections;
         }
-
+        /// <summary>
+        /// Creates a connection between the room rectangle and the area rectangle
+        /// </summary>
+        /// <param name="rect">Room rectangle</param>
+        /// <param name="two">Area</param>
+        /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<AssetConnection> CreateConnection(Rect rect, RectangleF two, DungeonAssetConfiguration configuration)
         {
-            List<AssetConnection> connections = new List<AssetConnection>();
-
-            float tvx = two.X * configuration.PositionDelta;
-            float tvz = two.Y * configuration.PositionDelta;
-            Vector3 tposition = new Vector3(-tvx, 0, tvz);
+            float tvx = two.X * configuration.BlockSize;
+            float tvz = two.Y * configuration.BlockSize;
+            var tposition = new Vector3(-tvx, 0, tvz);
 
             for (int x = 0; x < rect.W; x++)
             {
@@ -306,48 +331,49 @@ namespace Engine.Content.OnePageDungeon
                 {
                     int ix = (int)rect.X + x;
                     int iy = (int)rect.Y + y;
-                    float vx = (rect.X + x) * configuration.PositionDelta;
-                    float vz = (rect.Y + y) * configuration.PositionDelta;
-                    Vector3 position = new Vector3(-vx, 0, vz);
+                    float vx = (rect.X + x) * configuration.BlockSize;
+                    float vz = (rect.Y + y) * configuration.BlockSize;
+                    var position = new Vector3(-vx, 0, vz);
 
-                    RectangleF r1 = new RectangleF(ix, iy, 1, 1);
-                    RectangleF r2 = new RectangleF(ix, iy, 1, 1);
+                    var r1 = new RectangleF(ix, iy, 1, 1);
+                    var r2 = new RectangleF(ix, iy, 1, 1);
                     r1.Inflate(1, 0);
                     r2.Inflate(0, 1);
 
                     if (two.Intersects(r1))
                     {
                         //Connection
-                        connections.Add(new AssetConnection()
+                        yield return new AssetConnection()
                         {
                             Position = tposition,
                             Direction = -Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetConnectionTypes.Open,
-                        });
+                            Type = AssetConnectionTypes.Open,
+                        };
                     }
 
                     if (two.Intersects(r2))
                     {
                         //Connection
-                        connections.Add(new AssetConnection()
+                        yield return new AssetConnection()
                         {
                             Position = tposition,
                             Direction = Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetConnectionTypes.Open,
-                        });
+                            Type = AssetConnectionTypes.Open,
+                        };
                     }
                 }
             }
-
-            return connections.ToArray();
         }
-
+        /// <summary>
+        /// Creates a column
+        /// </summary>
+        /// <param name="rect">Room rectangle</param>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<AssetReference> CreateColumns(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<AssetReference> references = new List<AssetReference>();
-
             var roomRect = rect.GetRectangle();
-            float half = configuration.PositionDelta * 0.5f;
+            float half = configuration.BlockSize * 0.5f;
 
             foreach (var column in dungeon.Columns)
             {
@@ -356,34 +382,43 @@ namespace Engine.Content.OnePageDungeon
                     continue;
                 }
 
-                float vx = column.X * configuration.PositionDelta;
-                float vz = column.Y * configuration.PositionDelta;
+                float vx = column.X * configuration.BlockSize;
+                float vz = column.Y * configuration.BlockSize;
+                var position = new Position3(-vx + half, 0, vz - half);
 
-                AssetReference col = new AssetReference()
+                var dColumn = configuration.GetRandonColumn();
+
+                foreach (var asset in dColumn.Assets)
                 {
-                    AssetName = configuration.GetRandonColumn(),
-                    Type = ModularSceneryAssetTypes.None,
-                    Position = new Vector3(-vx + half, 0, vz - half),
-                };
-
-                references.Add(col);
+                    yield return new AssetReference()
+                    {
+                        AssetName = asset.Name,
+                        Type = AssetTypes.None,
+                        Position = position + asset.Position,
+                        Rotation = asset.Rotation,
+                        Scale = asset.Scale,
+                        PathFinding = (Modular.PathFindingModes)asset.PathFinding,
+                    };
+                }
             }
-
-            return references.ToArray();
         }
-
+        /// <summary>
+        /// Creates a level map
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         public static LevelMap CreateLevels(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            LevelMap levels = new LevelMap()
+            return new LevelMap
             {
-                Hulls = configuration.Hulls.ToArray(),
+                Levels = [CreateLevel(dungeon, configuration)]
             };
-
-            levels.Levels = new[] { CreateLevel(dungeon, configuration) };
-
-            return levels;
         }
-
+        /// <summary>
+        /// Creates a level
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         private static Level CreateLevel(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var maps = CreateMap(dungeon);
@@ -393,7 +428,7 @@ namespace Engine.Content.OnePageDungeon
             var startWall = walls.First(w => w.Cell.X == 0 && w.Cell.Y == 0);
             var dir = startWall.GetFirstOpenDirection();
 
-            Level level = new Level()
+            return new Level()
             {
                 Name = dungeon.Title,
                 StartPosition = Vector3.Zero,
@@ -401,109 +436,161 @@ namespace Engine.Content.OnePageDungeon
                 Map = maps.ToArray(),
                 Objects = objs.ToArray(),
             };
-
-            return level;
         }
-
+        /// <summary>
+        /// Creates an asset reference of the map
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
         private static IEnumerable<AssetReference> CreateMap(Dungeon dungeon)
         {
-            List<AssetReference> mapList = new List<AssetReference>();
-
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                AssetReference assetRef = new AssetReference()
+                yield return new AssetReference()
                 {
                     AssetName = $"{rectIndex++}",
                 };
-
-                mapList.Add(assetRef);
             }
-
-            return mapList.ToArray();
         }
-
+        /// <summary>
+        /// Creates the door list
+        /// </summary>
+        /// <param name="dungeon">Dungeon</param>
+        /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<ObjectReference> CreateDoors(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<ObjectReference> objs = new List<ObjectReference>();
-
             int index = 0;
             foreach (var door in dungeon.Doors)
             {
-                if (door.Type == (int)DoorTypes.None)
+                var doorType = door.GetDoorType();
+
+                if (doorType == DoorTypes.None)
                 {
                     continue;
                 }
 
-                var doorAssets = configuration.GetDoor((DoorTypes)door.Type);
-                if (!doorAssets.Any())
+                var dDoor = configuration.GetDoorByType(doorType);
+                if (dDoor == null)
                 {
                     break;
                 }
 
-                float vx = door.X * configuration.PositionDelta;
-                float vz = door.Y * configuration.PositionDelta;
-                Vector3 dir = new Vector3(door.Dir.X, 0, -door.Dir.Y);
-                string rot = EvaluateRotation(dir);
+                float vx = door.X * configuration.BlockSize;
+                float vz = door.Y * configuration.BlockSize;
+                var dir = new Position3(door.Dir.X, 0, -door.Dir.Y);
+                var pos = new Position3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
+                var rot = EvaluateRotation(dir, configuration.RotationDelta);
 
-                ObjectReference obj = new ObjectReference
+                if (dDoor.Door != null)
                 {
-                    AssetName = doorAssets.First(),
-                    Id = $"door_{index++}",
-                    Name = "door",
-                    Type = ModularSceneryObjectTypes.Door,
-                    Position = new Vector3(-vx, 0, vz) - (dir * (configuration.PositionDelta * 0.5f)),
-                    Rotation = rot,
-                    AnimationPlans = configuration.DoorAnimationPlans?.ToArray(),
-                    Actions = configuration.DoorActions?.ToArray(),
-                    States = configuration.DoorStates?.ToArray(),
-                };
-                objs.Add(obj);
-
-                foreach (var asset in doorAssets.Skip(1))
-                {
-                    ObjectReference obj2 = new ObjectReference
+                    yield return new ObjectReference
                     {
-                        AssetName = asset,
-                        Type = ModularSceneryObjectTypes.Default,
-                        Position = new Vector3(-vx, 0, vz) - (dir * (configuration.PositionDelta * 0.5f)),
-                        Rotation = rot,
+                        AssetName = dDoor.Door.Name,
+                        Id = $"door_{index++}",
+                        Name = "door",
+                        Type = ObjectTypes.Door,
+                        Position = pos + dDoor.Door.Position,
+                        Rotation = rot * dDoor.Door.Rotation,
+                        Scale = dDoor.Door.Scale,
+                        PathFinding = (Modular.PathFindingModes)dDoor.Door.PathFinding,
+                        AnimationPlans = configuration.DoorAnimationPlans?.ToArray(),
+                        Actions = configuration.DoorActions?.ToArray(),
+                        States = configuration.DoorStates?.ToArray(),
                     };
-                    objs.Add(obj2);
+                }
+
+                if (dDoor.Prop?.Assets?.Any() != true)
+                {
+                    continue;
+                }
+
+                foreach (var asset in dDoor.Prop.Assets)
+                {
+                    yield return new ObjectReference
+                    {
+                        AssetName = asset.Name,
+                        Type = ObjectTypes.Default,
+                        Position = pos + asset.Position,
+                        Rotation = rot * asset.Rotation,
+                        Scale = asset.Scale,
+                        PathFinding = (Modular.PathFindingModes)asset.PathFinding,
+                    };
                 }
             }
-
-            return objs.ToArray();
         }
-
-        private static string EvaluateRotation(Vector3 dir)
+        /// <summary>
+        /// Evaluates rotation from direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        private static RotationQ EvaluateRotation(Vector3 dir, int index)
         {
-            if (dir == Vector3.ForwardLH)
-            {
-                return "Rot90";
-            }
-            if (dir == Vector3.BackwardLH)
-            {
-                return "Rot270";
-            }
             if (dir == Vector3.Left)
+            {
+                return rotationStrings[index % 4];
+            }
+            else if (dir == Vector3.ForwardLH)
+            {
+                return rotationStrings[(1 + index) % 4];
+            }
+            else if (dir == Vector3.Right)
+            {
+                return rotationStrings[(2 + index) % 4];
+            }
+            else if (dir == Vector3.BackwardLH)
+            {
+                return rotationStrings[(3 + index) % 4];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        /// <summary>
+        /// Evaluates rotation from direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        private static RotationQ EvaluateRotation(WallDirections dir, int index)
+        {
+            if (dir.HasFlag(WallDirections.E))
+            {
+                return rotationStrings[index % 4];
+            }
+            else if (dir.HasFlag(WallDirections.S))
+            {
+                return rotationStrings[(1 + index) % 4];
+            }
+            else if (dir.HasFlag(WallDirections.W))
+            {
+                return rotationStrings[(2 + index) % 4];
+            }
+            else if (dir.HasFlag(WallDirections.N))
+            {
+                return rotationStrings[(3 + index) % 4];
+            }
+            else
             {
                 return "";
             }
-            if (dir == Vector3.Right)
-            {
-                return "Rot180";
-            }
-
-            return null;
         }
 
+        /// <summary>
+        /// Wall definition
+        /// </summary>
         struct Wall
         {
+            /// <summary>
+            /// Cell
+            /// </summary>
             public Rectangle Cell { get; set; }
+            /// <summary>
+            /// Wall direction
+            /// </summary>
             public WallDirections Dir { get; set; }
 
-            public Vector3 GetFirstOpenDirection()
+            /// <summary>
+            /// Get the first open direction
+            /// </summary>
+            public readonly Vector3 GetFirstOpenDirection()
             {
                 if (!Dir.HasFlag(WallDirections.N))
                 {
@@ -526,27 +613,36 @@ namespace Engine.Content.OnePageDungeon
             }
         }
 
+        /// <summary>
+        /// Wall directions flag
+        /// </summary>
         [Flags]
         enum WallDirections
         {
+            /// <summary>
+            /// None
+            /// </summary>
             None = 0,
+            /// <summary>
+            /// North
+            /// </summary>
             N = 1,
+            /// <summary>
+            /// South
+            /// </summary>
             S = 2,
+            /// <summary>
+            /// East
+            /// </summary>
             E = 4,
+            /// <summary>
+            /// West
+            /// </summary>
             W = 8,
+            /// <summary>
+            /// All directions
+            /// </summary>
             All = 15,
         }
-    }
-
-    public enum DoorTypes
-    {
-        None = 0,
-        Normal = 1,
-        Archway = 2,
-        Stairs = 3,
-        Portcullis = 4,
-        Special = 5,
-        Secret = 6,
-        Barred = 7,
     }
 }

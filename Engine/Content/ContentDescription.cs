@@ -115,20 +115,17 @@ namespace Engine.Content
         public ContentData ContentData { get; set; }
 
         /// <summary>
-        /// Reads the model content file
+        /// Reads the content data file
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<ContentData>> ReadModelContent()
+        public async Task<IEnumerable<ContentData>> ReadContentData()
         {
-            if (!string.IsNullOrEmpty(ContentFilename))
+            if (!string.IsNullOrWhiteSpace(ContentFilename))
             {
+                string directory = Path.Combine(ContentFolder ?? string.Empty, Path.GetDirectoryName(ContentFilename));
                 string fileName = Path.GetFileName(ContentFilename);
-                string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ContentFilename));
-                string resource = Path.Combine(directory, fileName);
-                var contentDesc = SerializationHelper.DeserializeFromFile<ContentDataFile>(resource);
 
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                return await loader.Load(directory, contentDesc);
+                return await ContentDataFile.ReadContentData(directory, fileName);
             }
             else if (ContentData != null)
             {

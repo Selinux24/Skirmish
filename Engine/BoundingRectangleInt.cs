@@ -51,7 +51,7 @@ namespace Engine
             return !(left == right);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             var objV = obj as BoundingRectangleInt?;
             if (objV != null)
@@ -62,19 +62,19 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public bool Equals(BoundingRectangleInt other)
+        public readonly bool Equals(BoundingRectangleInt other)
         {
             return 
                 Min == other.Min && 
                 Max == other.Max;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return Min.GetHashCode() ^ Max.GetHashCode();
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Min: {Min}; Max: {Max};";
         }

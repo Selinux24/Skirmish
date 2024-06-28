@@ -9,7 +9,7 @@ namespace Engine.Common
         /// <summary>
         /// Empty
         /// </summary>
-        public static readonly AnimationShadowDrawInfo Empty = new AnimationShadowDrawInfo();
+        public static readonly AnimationShadowDrawInfo Empty = new();
 
         /// <summary>
         /// First offset in the animation palette

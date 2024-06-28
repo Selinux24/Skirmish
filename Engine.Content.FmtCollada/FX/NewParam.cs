@@ -25,9 +25,10 @@ namespace Engine.Collada.FX
         [XmlElement("sampler2D", typeof(Sampler2D))]
         public Sampler2D Sampler2D { get; set; }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("SId: {0}; Semantic: {1};", this.SId, this.Semantic);
+            return $"Title: {SId}; {Semantic}";
         }
     }
 }

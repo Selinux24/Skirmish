@@ -1,42 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    public class BufferManagerInstances
+    /// <typeparam name="T">Data type</typeparam>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class BufferManagerInstances<T>(bool dynamic) : IEngineBufferDescriptor
+        where T : struct, IInstacingData
     {
         /// <summary>
         /// Instancing descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> instancingDescriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> instancingDescriptors = [];
 
-        /// <summary>
-        /// Dynamic buffer
-        /// </summary>
-        public readonly bool Dynamic;
-        /// <summary>
-        /// Instances
-        /// </summary>
-        public int Instances { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer index in the buffer manager list
-        /// </summary>
+        /// <inheritdoc/>
+        public bool Dynamic { get; private set; } = dynamic;
+        /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
-        public int BufferBindingIndex { get; set; } = -1;
-        /// <summary>
-        /// Allocated size into graphics device
-        /// </summary>
-        public int AllocatedSize { get; set; } = 0;
-        /// <summary>
-        /// Gets the size of the data to allocate
-        /// </summary>
+        /// <inheritdoc/>
+        public int AllocatedSize { get; private set; } = 0;
+        /// <inheritdoc/>
         public int ToAllocateSize
         {
             get
@@ -44,18 +31,13 @@ namespace Engine.Common
                 return Instances;
             }
         }
-        /// <summary>
-        /// Gets wether the internal buffer needs reallocation
-        /// </summary>
+        /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
-        /// <summary>
-        /// Gets wether the internal buffer is currently allocated in the graphic device
-        /// </summary>
-        public bool Allocated { get; set; } = false;
-        /// <summary>
-        /// Gets wether the current buffer is dirty
-        /// </summary>
-        /// <remarks>A buffer is dirty when needs reallocation or if it's not allocated at all</remarks>
+        /// <inheritdoc/>
+        public bool Allocated { get; private set; } = false;
+        /// <inheritdoc/>
+        public int Allocations { get; private set; } = 0;
+        /// <inheritdoc/>
         public bool Dirty
         {
             get
@@ -63,14 +45,14 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-
         /// <summary>
-        /// Constructor
+        /// Instances
         /// </summary>
-        public BufferManagerInstances(bool dynamic)
-        {
-            Dynamic = dynamic;
-        }
+        public int Instances { get; set; } = 0;
+        /// <summary>
+        /// Vertex buffer binding index in the manager list
+        /// </summary>
+        public int BufferBindingIndex { get; set; } = -1;
 
         /// <summary>
         /// Gets the buffer format stride
@@ -78,7 +60,7 @@ namespace Engine.Common
         /// <returns>Returns the buffer format stride in bytes</returns>
         public int GetStride()
         {
-            return default(VertexInstancingData).GetStride();
+            return default(T).GetStride();
         }
 
         /// <summary>
@@ -102,15 +84,7 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = instances;
 
-            Monitor.Enter(instancingDescriptors);
-            try
-            {
-                instancingDescriptors.Add(descriptor);
-            }
-            finally
-            {
-                Monitor.Exit(instancingDescriptors);
-            }
+            instancingDescriptors.Add(descriptor);
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -119,36 +93,58 @@ namespace Engine.Common
         /// <param name="instances">Number of instances</param>
         public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
         {
-            Monitor.Enter(instancingDescriptors);
-            try
-            {
-                //Remove descriptor
-                instancingDescriptors.Remove(descriptor);
+            //Remove descriptor
+            instancingDescriptors.Remove(descriptor);
 
-                if (instancingDescriptors.Any())
+            if (instancingDescriptors.Count != 0)
+            {
+                //Reallocate descriptor offsets
+                instancingDescriptors[0].BufferOffset = 0;
+                for (int i = 1; i < instancingDescriptors.Count; i++)
                 {
-                    //Reallocate descriptor offsets
-                    instancingDescriptors[0].BufferOffset = 0;
-                    for (int i = 1; i < instancingDescriptors.Count; i++)
-                    {
-                        var prev = instancingDescriptors[i - 1];
+                    var prev = instancingDescriptors[i - 1];
 
-                        instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-                    }
+                    instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
-            }
-            finally
-            {
-                Monitor.Exit(instancingDescriptors);
             }
 
             Instances -= instances;
         }
 
         /// <inheritdoc/>
+        public void Allocate()
+        {
+            AllocatedSize = Instances;
+            Allocated = true;
+            Allocations++;
+            ReallocationNeeded = false;
+        }
+        /// <inheritdoc/>
+        public IEngineBufferDescriptor Copy()
+        {
+            var d = new BufferManagerInstances<T>(Dynamic)
+            {
+                BufferIndex = BufferIndex,
+                AllocatedSize = 0,
+                ReallocationNeeded = true,
+                Allocated = false,
+                Allocations = Allocations,
+                Instances = Instances,
+                BufferBindingIndex = BufferBindingIndex
+            };
+
+            d.instancingDescriptors.AddRange(instancingDescriptors);
+
+            return d;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"[{typeof(VertexInstancingData)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            string strDynamic = Dynamic ? "[Dynamic]" : "";
+            string strInstances = Instances > 0 ? $" Instances: {Instances}" : "";
+
+            return $"[{typeof(T)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}{strInstances}";
         }
     }
 }

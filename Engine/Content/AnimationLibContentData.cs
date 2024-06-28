@@ -10,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Animation list
         /// </summary>
-        private readonly List<IDictionary<string, IEnumerable<AnimationContent>>> animationList = new List<IDictionary<string, IEnumerable<AnimationContent>>>();
+        private readonly List<IDictionary<string, IEnumerable<AnimationContent>>> animationList = new();
 
         /// <summary>
         /// Animation list

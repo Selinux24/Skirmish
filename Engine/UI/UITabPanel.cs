@@ -11,16 +11,22 @@ namespace Engine.UI
     /// <summary>
     /// Tab Panel
     /// </summary>
-    public sealed class UITabPanel : UIControl<UITabPanelDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UITabPanel(Scene scene, string id, string name) : UIControl<UITabPanelDescription>(scene, id, name)
     {
         /// <summary>
         /// Button list
         /// </summary>
-        private readonly List<UIButton> tabButtons = new List<UIButton>();
+        private readonly List<UIButton> tabButtons = [];
         /// <summary>
         /// Panel list
         /// </summary>
-        private readonly List<UIPanel> tabPanels = new List<UIPanel>();
+        private readonly List<UIPanel> tabPanels = [];
         /// <summary>
         /// Update layout flag
         /// </summary>
@@ -73,7 +79,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabButtons?.Count() ?? 0;
+                return tabButtons?.Count ?? 0;
             }
         }
         /// <summary>
@@ -87,7 +93,7 @@ namespace Engine.UI
             }
             set
             {
-                if (tabButtonsAreaSize == value)
+                if (MathUtil.NearEqual(tabButtonsAreaSize, value))
                 {
                     return;
                 }
@@ -245,7 +251,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabButtons.ToArray();
+                return [.. tabButtons];
             }
         }
         /// <summary>
@@ -255,7 +261,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabPanels.ToArray();
+                return [.. tabPanels];
             }
         }
         /// <inheritdoc/>
@@ -295,22 +301,10 @@ namespace Engine.UI
         /// </summary>
         public event UITabPanelEventHandler TabClick;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UITabPanel(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UITabPanelDescription description)
+        public override async Task ReadAssets(UITabPanelDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             tabButtonsAreaSize = Description.TabButtonsAreaSize;
             tabButtonsPadding = Description.TabButtonsPadding;
@@ -324,7 +318,7 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 Background = await CreateBackground();
-                AddChild(Background);
+                AddChild(Background, true);
             }
 
             if (Description.Tabs > 0)
@@ -340,8 +334,8 @@ namespace Engine.UI
                     var panel = await CreatePanel(panelDesc, i);
                     tabPanels.Add(panel);
 
-                    AddChild(button, false);
-                    AddChild(panel, false);
+                    AddChild(button);
+                    AddChild(panel);
                 }
 
                 SetSelectedTab(0);
@@ -474,7 +468,7 @@ namespace Engine.UI
             tabButtons[index] = button;
 
             RemoveChild(oldButton, true);
-            AddChild(button, false);
+            AddChild(button);
 
             updateLayout = true;
         }
@@ -494,7 +488,7 @@ namespace Engine.UI
             tabPanels[index] = panel;
 
             RemoveChild(oldPanel, true);
-            AddChild(panel, false);
+            AddChild(panel);
 
             updateLayout = true;
         }

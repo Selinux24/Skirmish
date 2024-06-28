@@ -5,12 +5,12 @@ namespace Engine.Audio
     /// <summary>
     /// Audio agent
     /// </summary>
-    class GameAudioAgent : IGameAudioAgent
+    public class GameAudioAgent : IGameAudioAgent
     {
         /// <summary>
         /// Agent transform
         /// </summary>
-        protected IManipulator agentTransform = null;
+        protected ITransform agentTransform = null;
 
         /// <summary>
         /// Forward vector
@@ -67,18 +67,18 @@ namespace Engine.Audio
         /// <param name="position">Fixed position</param>
         public void SetSource(Vector3 position)
         {
-            Manipulator3D source = new Manipulator3D();
+            var source = new Manipulator3D();
             source.SetPosition(position);
 
-            this.agentTransform = source;
+            agentTransform = source;
         }
         /// <summary>
         /// Sets the game audio agent source
         /// </summary>
         /// <param name="source">Manipulator instance</param>
-        public void SetSource(IManipulator source)
+        public void SetSource(ITransform source)
         {
-            this.agentTransform = source;
+            agentTransform = source;
         }
         /// <summary>
         /// Sets the game audio agent source
@@ -86,7 +86,7 @@ namespace Engine.Audio
         /// <param name="manipulator">Transformable instance</param>
         public void SetSource(ITransformable3D source)
         {
-            this.agentTransform = source?.Manipulator;
+            agentTransform = source?.Manipulator;
         }
     }
 }

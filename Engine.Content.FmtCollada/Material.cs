@@ -14,10 +14,5 @@ namespace Engine.Collada
         public InstanceEffect InstanceEffect { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
-
-        public override string ToString()
-        {
-            return "Material;";
-        }
     }
 }

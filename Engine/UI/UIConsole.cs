@@ -9,7 +9,13 @@ namespace Engine.UI
     /// <summary>
     /// Console
     /// </summary>
-    public sealed class UIConsole : UIControl<UIConsoleDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    public sealed class UIConsole(Scene scene, string id, string name) : UIControl<UIConsoleDescription>(scene, id, name)
     {
         /// <summary>
         /// Log lines
@@ -64,22 +70,10 @@ namespace Engine.UI
         /// </summary>
         public TimeSpan UpdateInterval { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public UIConsole(Scene scene, string id, string name) :
-            base(scene, id, name)
-        {
-
-        }
-
         /// <inheritdoc/>
-        public override async Task InitializeAssets(UIConsoleDescription description)
+        public override async Task ReadAssets(UIConsoleDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             logLinesSmall = Description.LogLinesSmall;
             logLinesBig = Description.LogLinesBig;
@@ -92,15 +86,15 @@ namespace Engine.UI
             if (Description.Background != null)
             {
                 var background = await CreateBackground();
-                AddChild(background);
+                AddChild(background, true);
 
                 textArea = await CreateText();
-                background.AddChild(textArea);
+                background.AddChild(textArea, true);
             }
             else
             {
                 textArea = await CreateText();
-                AddChild(textArea);
+                AddChild(textArea, true);
             }
         }
         private async Task<Sprite> CreateBackground()
@@ -135,7 +129,11 @@ namespace Engine.UI
             elapsedSinceLastUpdate += context.GameTime.ElapsedSeconds;
             if (elapsedSinceLastUpdate > UpdateInterval.TotalSeconds)
             {
-                textArea.Text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                string text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    textArea.Text = text;
+                }
             }
             elapsedSinceLastUpdate %= (float)UpdateInterval.TotalSeconds;
         }
@@ -145,28 +143,15 @@ namespace Engine.UI
         /// <param name="logEntry">Log entry</param>
         private string FormatLog(LogEntry logEntry)
         {
-            Color4 defColor = textArea.TextForeColor;
-
-            Color4 logColor;
-            switch (logEntry.LogLevel)
+            var defColor = textArea.TextForeColor;
+            var logColor = logEntry.LogLevel switch
             {
-                case LogLevel.Debug:
-                    logColor = Color.White;
-                    break;
-                case LogLevel.Information:
-                    logColor = Color.Blue;
-                    break;
-                case LogLevel.Warning:
-                    logColor = Color.Yellow;
-                    break;
-                case LogLevel.Error:
-                    logColor = Color.Red;
-                    break;
-                default:
-                    logColor = textArea.TextForeColor;
-                    break;
-            }
-
+                LogLevel.Debug => (Color4)Color.White,
+                LogLevel.Information => (Color4)Color.Blue,
+                LogLevel.Warning => (Color4)Color.Yellow,
+                LogLevel.Error => (Color4)Color.Red,
+                _ => textArea.TextForeColor,
+            };
             return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{Environment.NewLine}";
         }
         /// <summary>

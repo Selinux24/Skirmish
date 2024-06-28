@@ -1,23 +1,29 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Fonts;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Fonts;
     using Engine.Common;
 
     /// <summary>
     /// Text drawer
     /// </summary>
-    class TextDrawer : Drawable<TextDrawerDescription>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="scene">Scene</param>
+    /// <param name="id">Id</param>
+    /// <param name="name">Name</param>
+    /// <param name="maxTextLength">Maximum text length</param>
+    class TextDrawer(Scene scene, string id, string name, int maxTextLength) : Drawable<TextDrawerDescription>(scene, id, name)
     {
         /// <summary>
         /// Maximum text length
         /// </summary>
-        public const int MAXTEXTLENGTH = 1024 * 10;
+        private readonly int maxTextLength = maxTextLength;
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -32,17 +38,9 @@ namespace Engine.UI
         /// </summary>
         private int indexDrawCount = 0;
         /// <summary>
-        /// Vertices
+        /// Sentence descriptor
         /// </summary>
-        private VertexFont[] vertices;
-        /// <summary>
-        /// Indices
-        /// </summary>
-        private uint[] indices;
-        /// <summary>
-        /// Update buffers flag
-        /// </summary>
-        private bool updateBuffers = false;
+        private FontMapSentenceDescriptor sentenceDescriptor = FontMapSentenceDescriptor.Create(maxTextLength);
 
         /// <summary>
         /// Font map
@@ -80,7 +78,7 @@ namespace Engine.UI
         /// <summary>
         /// Font drawer
         /// </summary>
-        private readonly BuiltInFonts fontDrawer;
+        private readonly BuiltInFonts fontDrawer = BuiltInShaders.GetDrawer<BuiltInFonts>();
 
         /// <summary>
         /// Manipulator
@@ -91,10 +89,6 @@ namespace Engine.UI
         /// </summary>
         protected Manipulator2D ShadowManipulator { get; private set; }
 
-        /// <summary>
-        /// Font name
-        /// </summary>
-        public string Font = null;
         /// <summary>
         /// Gets or sets text to draw
         /// </summary>
@@ -112,11 +106,6 @@ namespace Engine.UI
                 }
 
                 text = value;
-
-                if (text?.Length > MAXTEXTLENGTH)
-                {
-                    text = text.Substring(0, MAXTEXTLENGTH);
-                }
 
                 updateInternals = true;
             }
@@ -242,24 +231,13 @@ namespace Engine.UI
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        /// <remarks>Defines an area outside wich all text is clipped</remarks>
+        /// <remarks>Defines an area outside which all text is clipped</remarks>
         public Rectangle? ClippingRectangle { get; set; } = null;
         /// <summary>
         /// Parent control
         /// </summary>
         public IUIControl Parent { get; set; } = null;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        public TextDrawer(Scene scene, string id, string name)
-            : base(scene, id, name)
-        {
-            fontDrawer = BuiltInShaders.GetDrawer<BuiltInFonts>();
-        }
         /// <summary>
         /// Destructor
         /// </summary>
@@ -282,35 +260,30 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task InitializeAssets(TextDrawerDescription description)
+        public override async Task ReadAssets(TextDrawerDescription description)
         {
-            await base.InitializeAssets(description);
+            await base.ReadAssets(description);
 
             Manipulator = new Manipulator2D(Game);
             ShadowManipulator = new Manipulator2D(Game);
-
-            Font = $"{Description.FontFamily} {Description.FontSize}";
 
             var generator = FontMapKeycodeGenerator.DefaultWithCustom(Description.CustomKeycodes);
 
             if (!string.IsNullOrWhiteSpace(Description.FontFileName) && !string.IsNullOrWhiteSpace(Description.ContentPath))
             {
-                fontMap = await FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
+                fontMap = FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
             }
-            else if (Description.FontMapping != null)
+            else if (!Description.FontMapping.IsEmpty)
             {
-                fontMap = await FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
+                fontMap = FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
             }
             else if (!string.IsNullOrWhiteSpace(Description.FontFamily))
             {
-                fontMap = await FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
+                fontMap = FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
             }
 
-            VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];
-            uint[] idx = new uint[MAXTEXTLENGTH * 6];
-
-            vertexBuffer = BufferManager.AddVertexData(Name, true, verts);
-            indexBuffer = BufferManager.AddIndexData(Name, true, idx);
+            vertexBuffer = BufferManager.AddVertexData(Name, true, sentenceDescriptor.Vertices);
+            indexBuffer = BufferManager.AddIndexData(Name, true, sentenceDescriptor.Indices);
 
             UseTextureColor = Description.UseTextureColor;
             FineSampling = Description.FineSampling;
@@ -340,15 +313,15 @@ namespace Engine.UI
 
             var renderArea = GetRenderArea();
 
-            Vector2 sca = Vector2.One * (Parent?.AbsoluteScale ?? 1f);
+            var sca = Vector2.One * (Parent?.AbsoluteScale ?? 1f);
             float rot = Parent?.AbsoluteRotation ?? 0f;
-            Vector2 pos = renderArea.Center;
+            var pos = renderArea.Center;
             pos.Y += baseLineThr;
 
             // Apply scroll if any
             pos = ApplyScroll(pos, renderArea);
 
-            Vector2? parentPos = Parent?.GetTransformationPivot();
+            var parentPos = Parent?.GetTransformationPivot();
 
             // Calculate new transforms
             Manipulator.SetScale(sca);
@@ -372,21 +345,23 @@ namespace Engine.UI
         /// <returns>Returns the transformed position</returns>
         private Vector2 ApplyScroll(Vector2 pos, RectangleF renderArea)
         {
-            if (Parent is IScrollable ta)
+            if (Parent is not IScrollable ta)
             {
-                if (ta.Scroll == ScrollModes.None)
-                {
-                    return pos;
-                }
-
-                ClippingRectangle = (Rectangle)renderArea;
-
-                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.ScrollHorizontalOffset : 0f;
-                pos.X = (int)pos.X;
-
-                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.ScrollVerticalOffset : 0f;
-                pos.Y = (int)pos.Y;
+                return pos;
             }
+
+            if (ta.Scroll == ScrollModes.None)
+            {
+                return pos;
+            }
+
+            ClippingRectangle = (Rectangle)renderArea;
+
+            pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.ScrollHorizontalOffset : 0f;
+            pos.X = (int)pos.X;
+
+            pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.ScrollVerticalOffset : 0f;
+            pos.Y = (int)pos.Y;
 
             return pos;
         }
@@ -399,37 +374,37 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                return;
+                return false;
             }
 
             if (fontMap == null)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode, true);
             if (!draw)
             {
-                return;
+                return false;
             }
 
-            WriteBuffers();
+            var dc = context.DeviceContext;
 
-            var bufferManager = BufferManager;
+            WriteBuffers(dc);
 
             var state = new BuiltInFontState
             {
@@ -440,9 +415,11 @@ namespace Engine.UI
                 FontTexture = fontMap.Texture,
                 ClippingRectangle = ClippingRectangle ?? Rectangle.Empty,
             };
-            fontDrawer.UpdateFont(state);
+            fontDrawer.UpdateFont(dc, state);
 
             int count = indexDrawCount;
+
+            bool drawn = false;
 
             if (ShadowColor != Color.Transparent)
             {
@@ -450,7 +427,7 @@ namespace Engine.UI
                 int offset = indexDrawCount / 2;
                 count = indexDrawCount / 2;
 
-                fontDrawer.UpdateText(ShadowManipulator.LocalTransform);
+                fontDrawer.UpdateText(dc, ShadowManipulator.LocalTransform);
 
                 var shOptions = new DrawOptions
                 {
@@ -460,10 +437,10 @@ namespace Engine.UI
                     Topology = Topology.TriangleList,
                     VertexBuffer = vertexBuffer,
                 };
-                fontDrawer.Draw(bufferManager, shOptions);
+                drawn = fontDrawer.Draw(context.DeviceContext, shOptions);
             }
 
-            fontDrawer.UpdateText(Manipulator.LocalTransform);
+            fontDrawer.UpdateText(dc, Manipulator.LocalTransform);
 
             var opOptions = new DrawOptions
             {
@@ -473,28 +450,22 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            fontDrawer.Draw(bufferManager, opOptions);
+            return fontDrawer.Draw(dc, opOptions) || drawn;
         }
         /// <summary>
         /// Writes text data into buffers
         /// </summary>
-        private void WriteBuffers()
+        /// <param name="dc">Device context</param>
+        private void WriteBuffers(IEngineDeviceContext dc)
         {
-            if (!updateBuffers)
-            {
-                return;
-            }
-
-            bool vertsWrited = BufferManager.WriteVertexBuffer(vertexBuffer, vertices);
-            bool idxWrited = BufferManager.WriteIndexBuffer(indexBuffer, indices);
+            bool vertsWrited = Game.WriteVertexBuffer(dc, vertexBuffer, sentenceDescriptor.Vertices.Take((int)sentenceDescriptor.VertexCount).ToArray());
+            bool idxWrited = Game.WriteIndexBuffer(dc, indexBuffer, sentenceDescriptor.Indices.Take((int)sentenceDescriptor.IndexCount).ToArray());
             if (!vertsWrited || !idxWrited)
             {
                 return;
             }
 
-            indexDrawCount = indices?.Length ?? 0;
-
-            updateBuffers = false;
+            indexDrawCount = (int)sentenceDescriptor.IndexCount;
         }
 
         /// <summary>
@@ -507,43 +478,31 @@ namespace Engine.UI
                 return;
             }
 
-            List<VertexFont> vList = new List<VertexFont>();
-            List<uint> iList = new List<uint>();
+            sentenceDescriptor.Clear();
 
             var parsed = FontMapParser.ParseSentence(text, textColor, shadowColor);
             ParsedText = parsed.Text;
 
             var renderArea = GetRenderArea();
 
-            var colorW = fontMap.MapSentence(
+            fontMap.MapSentence(
                 parsed,
                 false,
-                renderArea,
-                horizontalAlign,
-                verticalAlign);
+                renderArea.Width,
+                ref sentenceDescriptor);
 
-            TextSize = colorW.Size;
-
-            iList.AddRange(colorW.Indices);
-            vList.AddRange(colorW.Vertices);
+            TextSize = sentenceDescriptor.GetSize();
 
             if (ShadowColor != Color.Transparent)
             {
-                var colorS = fontMap.MapSentence(
+                fontMap.MapSentence(
                     parsed,
                     true,
-                    renderArea,
-                    horizontalAlign,
-                    verticalAlign);
-
-                colorS.Indices.ToList().ForEach((i) => { iList.Add(i + (uint)vList.Count); });
-                vList.AddRange(colorS.Vertices);
+                    renderArea.Width,
+                    ref sentenceDescriptor);
             }
 
-            vertices = vList.ToArray();
-            indices = iList.ToArray();
-
-            updateBuffers = true;
+            sentenceDescriptor.Adjust(renderArea, horizontalAlign, verticalAlign);
         }
         /// <summary>
         /// Gets the render area in absolute coordinates from screen origin
@@ -573,39 +532,28 @@ namespace Engine.UI
                 return Vector2.Zero;
             }
 
+            var desc = FontMapSentenceDescriptor.Create(maxTextLength);
+
             var parsed = FontMapParser.ParseSentence(text, ForeColor, ShadowColor);
 
             var renderArea = GetRenderArea();
 
-            var w = fontMap.MapSentence(
+            fontMap.MapSentence(
                 parsed,
                 false,
-                renderArea,
-                horizontalAlign,
-                verticalAlign);
+                renderArea.Width,
+                ref desc);
 
-            return w.Size;
+            desc.Adjust(renderArea, horizontalAlign, verticalAlign);
+
+            return desc.GetSize();
         }
         /// <summary>
         /// Gets the single line height
         /// </summary>
         public float GetLineHeight()
         {
-            if (fontMap == null)
-            {
-                return 0;
-            }
-
-            string sampleChar = $"{fontMap.GetSampleCharacter()}";
-
-            var w = fontMap.MapSentence(
-                FontMapParsedSentence.FromSample(sampleChar),
-                false,
-                Game.Form.RenderRectangle,
-                TextHorizontalAlign.Left,
-                TextVerticalAlign.Top);
-
-            return w.Size.Y;
+            return fontMap?.GetSpaceSize().Y ?? 0;
         }
 
         /// <inheritdoc/>

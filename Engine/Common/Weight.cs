@@ -20,7 +20,7 @@ namespace Engine.Common
         public float WeightValue { get; set; }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"VertexIndex: {VertexIndex}; Joint: {Joint}; Weight: {WeightValue};";
         }

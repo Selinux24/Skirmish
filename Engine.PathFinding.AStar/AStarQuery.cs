@@ -13,12 +13,12 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Constant for second diagonal distance method
         /// </summary>
-        private static readonly float ChebisevCnt = (float)Math.Sqrt(2) - 2f;
+        private static readonly float ChebisevCnt = MathF.Sqrt(2) - 2f;
 
         /// <summary>
         /// Cached paths
         /// </summary>
-        private static readonly List<PathCache> Cache = new List<PathCache>();
+        private static readonly List<PathCache> Cache = [];
 
         /// <summary>
         /// Gets the path from start to end
@@ -29,14 +29,11 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static IEnumerable<Vector3> FindPath(Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static IEnumerable<Vector3> FindPath(AgentType agent, Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
-            GridNode start = graph.FindNode(startPosition);
-            GridNode end = graph.FindNode(endPosition);
-
-            if (start == null || end == null)
+            if (graph.FindNode(agent, startPosition) is not GridNode start || graph.FindNode(agent, endPosition) is not GridNode end)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             var cachedPath = Cache.Find(p => p.Start == start && p.End == end);
@@ -48,9 +45,9 @@ namespace Engine.PathFinding.AStar
 
             //Calculate return path
             var path = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
-            if (!path.Any())
+            if (path.Length == 0)
             {
-                return Enumerable.Empty<Vector3>();
+                return [];
             }
 
             //Update queue
@@ -59,7 +56,7 @@ namespace Engine.PathFinding.AStar
             //Add path to cache
             Cache.Add(new PathCache()
             {
-                Path = path.ToArray(),
+                Path = path,
                 Start = start,
                 End = end,
             });
@@ -74,12 +71,12 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static IEnumerable<Vector3> CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        private static Vector3[] CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
-            PriorityDictionary<GridNode, float> openPathsQueue = new PriorityDictionary<GridNode, float>();
+            var openPathsQueue = new PriorityDictionary<GridNode, float>();
             //Data dictionary
-            Dictionary<GridNode, AStarQueryData> nodesData = new Dictionary<GridNode, AStarQueryData>();
+            var nodesData = new Dictionary<GridNode, AStarQueryData>();
 
             //Add first node
             openPathsQueue.Enqueue(start, 1);
@@ -95,34 +92,34 @@ namespace Engine.PathFinding.AStar
                 var currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
-                if (currentNodeData.State != GridNodeStates.Closed)
+                if (currentNodeData.State == GridNodeStates.Closed)
                 {
-                    //Set the node status Closed
-                    currentNodeData.State = GridNodeStates.Closed;
-
-                    //If the current node is the destination node has found the way
-                    if (currentNode == end)
-                    {
-                        currentNodeData.State = GridNodeStates.Closed;
-                        nodeFound = true;
-
-                        break;
-                    }
-                    else
-                    {
-                        //Process neigbors
-                        ProcessNeighbors(
-                            openPathsQueue, nodesData,
-                            currentNode, end,
-                            heuristicMethod, heuristicEstimateValue);
-                    }
+                    continue;
                 }
+
+                //Set the node status Closed
+                currentNodeData.State = GridNodeStates.Closed;
+
+                //If the current node is the destination node has found the way
+                if (currentNode == end)
+                {
+                    currentNodeData.State = GridNodeStates.Closed;
+                    nodeFound = true;
+
+                    break;
+                }
+
+                //Process neigbors
+                ProcessNeighbors(
+                    openPathsQueue, nodesData,
+                    currentNode, end,
+                    heuristicMethod, heuristicEstimateValue);
             }
 
             if (nodeFound)
             {
                 //We found a valid path
-                List<Vector3> solvedList = new List<Vector3>();
+                var solvedList = new List<Vector3>();
 
                 var node = end;
                 while (node != null)
@@ -132,12 +129,12 @@ namespace Engine.PathFinding.AStar
                     node = nodesData[node].NextNode;
                 }
 
-                return solvedList.ToArray();
+                return [.. solvedList];
             }
             else
             {
                 //If no result...
-                return new Vector3[] { };
+                return [];
             }
         }
         /// <summary>
@@ -151,18 +148,19 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         private static void ProcessNeighbors(PriorityDictionary<GridNode, float> openPathsQueue, Dictionary<GridNode, AStarQueryData> nodesData, GridNode currentNode, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
-            //Search every possible direction from the current node
-            for (int i = 1; i < currentNode.Connections.Length; i++)
+            var nodeConnections = currentNode?.GetNodeConnections();
+            if (nodeConnections?.Any() != true)
             {
-                var nextNode = currentNode[i];
-                if (nextNode == null)
-                {
-                    continue;
-                }
+                return;
+            }
 
-                if (!nodesData.ContainsKey(nextNode))
+            //Search every possible direction from the current node
+            foreach (var nextNode in nodeConnections)
+            {
+                if (!nodesData.TryGetValue(nextNode, out var nodeData))
                 {
-                    nodesData.Add(nextNode, new AStarQueryData());
+                    nodeData = new();
+                    nodesData.Add(nextNode, nodeData);
                 }
 
                 if (nextNode.State == GridNodeStates.Closed)
@@ -171,7 +169,7 @@ namespace Engine.PathFinding.AStar
                     continue;
                 }
 
-                var nextNodeData = nodesData[nextNode];
+                var nextNodeData = nodeData;
                 if (nextNodeData.State == GridNodeStates.Closed)
                 {
                     //Closed node
@@ -209,17 +207,17 @@ namespace Engine.PathFinding.AStar
         {
             if (heuristicMethod == HeuristicMethods.Euclidean)
             {
-                float dx = (end.X - start.X);
-                float dz = (end.Z - start.Z);
-                float h = (float)Math.Sqrt(dx * dx + dz * dz);
+                float dx = end.X - start.X;
+                float dz = end.Z - start.Z;
+                float h = MathF.Sqrt(dx * dx + dz * dz);
 
                 return h;
             }
 
             if (heuristicMethod == HeuristicMethods.Manhattan)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
                 float h = dx + dz;
 
                 return h;
@@ -227,18 +225,18 @@ namespace Engine.PathFinding.AStar
 
             if (heuristicMethod == HeuristicMethods.DiagonalDistance1)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
-                float h = Math.Max(dx, dz);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
+                float h = MathF.Max(dx, dz);
 
                 return h;
             }
 
             if (heuristicMethod == HeuristicMethods.DiagonalDistance2)
             {
-                float dx = Math.Abs(start.X - end.X);
-                float dz = Math.Abs(start.Z - end.Z);
-                float h = (dx + dz) + ChebisevCnt * Math.Min(dx, dz);
+                float dx = MathF.Abs(start.X - end.X);
+                float dz = MathF.Abs(start.Z - end.Z);
+                float h = dx + dz + ChebisevCnt * MathF.Min(dx, dz);
 
                 return h;
             }
@@ -248,12 +246,12 @@ namespace Engine.PathFinding.AStar
                 float dx = start.X - end.X;
                 float dy = start.Y - end.Y;
                 float dz = dx - dy;
-                float h = Math.Max(Math.Abs(dx), Math.Max(Math.Abs(dy), Math.Abs(dz)));
+                float h = MathF.Max(MathF.Abs(dx), MathF.Max(MathF.Abs(dy), MathF.Abs(dz)));
 
                 return h;
             }
 
-            throw new ArgumentException($"Calculation method {heuristicMethod} not valid.");
+            throw new ArgumentException($"Calculation method {heuristicMethod} not valid.", nameof(heuristicMethod));
         }
 
         /// <summary>

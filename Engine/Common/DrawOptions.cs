@@ -26,7 +26,7 @@ namespace Engine.Common
         /// <summary>
         /// Use indices
         /// </summary>
-        public bool Indexed
+        public readonly bool Indexed
         {
             get
             {
@@ -62,29 +62,29 @@ namespace Engine.Common
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public void Draw(Graphics graphics)
+        /// <param name="dc">Device context</param>
+        public readonly void Draw(IEngineDeviceContext dc)
         {
             if (Instanced)
             {
-                DrawInstanced(graphics);
+                DrawInstanced(dc);
             }
             else
             {
-                DrawSingle(graphics);
+                DrawSingle(dc);
             }
         }
         /// <summary>
         /// Draw single
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        private void DrawSingle(Graphics graphics)
+        /// <param name="dc">Device context</param>
+        private readonly void DrawSingle(IEngineDeviceContext dc)
         {
             if (Indexed)
             {
                 int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
-                graphics.DrawIndexed(
+                dc.DrawIndexed(
                     drawCount,
                     IndexBuffer.BufferOffset + IndexBufferOffset,
                     VertexBuffer.BufferOffset + VertexBufferOffset);
@@ -93,7 +93,7 @@ namespace Engine.Common
             {
                 int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
-                graphics.Draw(
+                dc.Draw(
                     drawCount,
                     VertexBuffer.BufferOffset + VertexBufferOffset);
             }
@@ -101,14 +101,14 @@ namespace Engine.Common
         /// <summary>
         /// Draw instanced
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        private void DrawInstanced(Graphics graphics)
+        /// <param name="dc">Device context</param>
+        private readonly void DrawInstanced(IEngineDeviceContext dc)
         {
             if (Indexed)
             {
                 int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
-                graphics.DrawIndexedInstanced(
+                dc.DrawIndexedInstanced(
                     drawCount,
                     InstanceCount,
                     IndexBuffer.BufferOffset + IndexBufferOffset,
@@ -118,7 +118,7 @@ namespace Engine.Common
             {
                 int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
-                graphics.DrawInstanced(
+                dc.DrawInstanced(
                     drawCount,
                     InstanceCount,
                     VertexBuffer.BufferOffset + VertexBufferOffset, StartInstanceLocation);

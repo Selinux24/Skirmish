@@ -27,19 +27,10 @@ namespace Engine.Helpers
         /// </summary>
         public int Elements;
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format(
-                "{0} --> Usage {1}; Binding {2}; Size {3}; Elements {4}", 
-                this.Name,
-                this.Usage,
-                this.Binding,
-                this.Size, 
-                this.Elements);
+            return $"{Name} --> Usage {Usage}; Binding {Binding}; Size {Size}; Elements {Elements}";
         }
     }
 }

@@ -4,20 +4,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Crowd settings
     /// </summary>
-    public class CrowdParameters
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="agent">Agent</param>
+    /// <param name="maxAgents">Max agents</param>
+    public class CrowdParameters(GraphAgentType agent, int maxAgents) : GroupSettings<GraphAgentType>(agent, maxAgents)
     {
-        /// <summary>
-        /// Agent type
-        /// </summary>
-        public Agent Agent { get; private set; }
-        /// <summary>
-        /// The maximum number of agents the crowd can manage.
-        /// </summary>
-        public int MaxAgents { get; set; }
         /// <summary>
         /// The maximum radius of any agent that will be added to the crowd.
         /// </summary>
-        public float MaxAgentRadius { get; set; }
+        public float MaxAgentRadius { get; set; } = agent?.Radius ?? 0f;
         /// <summary>
         /// Maximum path result
         /// </summary>
@@ -34,17 +31,5 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Collision resolve factor
         /// </summary>
         public float CollisionResolveFactor { get; set; } = 0.7f;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="maxAgents">Max agents</param>
-        public CrowdParameters(Agent agent, int maxAgents)
-        {
-            Agent = agent;
-            MaxAgentRadius = agent.Radius;
-            MaxAgents = maxAgents;
-        }
     }
 }

@@ -18,5 +18,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Index value
         /// </summary>
         public int I { get; set; } = -1;
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"X: {X}; Y: {Y}; Index: {I};";
+        }
     }
 }

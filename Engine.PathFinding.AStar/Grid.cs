@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,25 +10,28 @@ namespace Engine.PathFinding.AStar
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid : IGraph
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class Grid(GridGenerationSettings settings, PathFinderInput input) : IGraph
     {
-        private readonly List<GridNode> nodes = new List<GridNode>();
-
-        /// <inheritdoc/>
-        public event EventHandler Updating;
-        /// <inheritdoc/>
-        public event EventHandler Updated;
+        /// <summary>
+        /// Node list
+        /// </summary>
+        private readonly List<GridNode> nodes = [];
 
         /// <inheritdoc/>
         public bool Initialized { get; set; }
+        /// <inheritdoc/>
+        public bool EnableDebug { get; set; }
         /// <summary>
         /// Geometry input
         /// </summary>
-        public PathFinderInput Input { get; private set; }
+        public PathFinderInput Input { get; private set; } = input ?? throw new ArgumentNullException(nameof(input), "Must specify the path finder input helper.");
         /// <summary>
         /// Build settings
         /// </summary>
-        public GridGenerationSettings Settings { get; private set; }
+        public GridGenerationSettings Settings { get; private set; } = settings ?? throw new ArgumentNullException(nameof(settings), "Must specify the grid generation settings.");
         /// <summary>
         /// Graph node list
         /// </summary>
@@ -35,18 +39,110 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return nodes.ToArray();
+                return nodes.AsReadOnly();
             }
         }
 
         /// <summary>
-        /// Constructor
+        /// Creates a new grid
         /// </summary>
-        public Grid(GridGenerationSettings settings, PathFinderInput input)
+        /// <param name="settings">Settings</param>
+        /// <param name="input">Input</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="progressCallback">Optional progress callback</param>
+        /// <returns>Returns the new grid</returns>
+        public static Grid CreateGrid(PathFinderSettings settings, PathFinderInput input, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings), "Must specify the grid generation settings.");
-            Input = input ?? throw new ArgumentNullException(nameof(input), "Must specify the path finder input helper.");
+            var grid = new Grid(settings as GridGenerationSettings, input);
+
+            var bbox = GeometryUtil.CreateBoundingBox(triangles);
+
+            var dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
+
+            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.Settings.NodeSize;
+            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.Settings.NodeSize;
+
+            int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
+            int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
+
+            float total = bbox.Size.X * bbox.Size.X / grid.Settings.NodeSize;
+            int curr = 0;
+
+            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
+            {
+                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.Settings.NodeSize)
+                {
+                    GridCollisionInfo[] info;
+
+                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
+
+                    bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
+                    if (intersects)
+                    {
+                        info = new GridCollisionInfo[picks.Count()];
+
+                        for (int i = 0; i < picks.Count(); i++)
+                        {
+                            var pick = picks.ElementAt(i);
+
+                            info[i] = new GridCollisionInfo()
+                            {
+                                Point = pick.Position,
+                                Triangle = pick.Primitive,
+                                Distance = pick.Distance,
+                            };
+                        }
+                    }
+                    else
+                    {
+                        info = [];
+                    }
+
+                    dictionary.Add(new Vector2(x, z), info);
+
+                    progressCallback?.Invoke(++curr / total);
+                }
+            }
+
+            int gridNodeCount = (xSize - 1) * (zSize - 1);
+
+            GridCollisionInfo[][] collisionValues = new GridCollisionInfo[dictionary.Count][];
+            dictionary.Values.CopyTo(collisionValues, 0);
+
+            //Generate grid nodes
+            var nodeList = GridNode.GenerateGridNodes(gridNodeCount, xSize, zSize, grid.Settings.NodeSize, collisionValues);
+            grid.SetNodes(nodeList);
+            grid.Initialized = true;
+
+            return grid;
         }
+        /// <summary>
+        /// Fill node connections
+        /// </summary>
+        /// <param name="nodes">Grid nodes</param>
+        private static void FillConnections(IEnumerable<GridNode> nodes)
+        {
+            for (int i = 0; i < nodes.Count(); i++)
+            {
+                var nodeA = nodes.ElementAt(i);
+                if (nodeA.FullConnected)
+                {
+                    continue;
+                }
+
+                for (int n = i + 1; n < nodes.Count(); n++)
+                {
+                    var nodeB = nodes.ElementAt(n);
+                    if (nodeB.FullConnected)
+                    {
+                        continue;
+                    }
+
+                    nodeA.TryConnect(nodeB);
+                }
+            }
+        }
+
         /// <summary>
         /// Destructor
         /// </summary>
@@ -79,39 +175,54 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
-        /// Adds a new node
-        /// </summary>
-        /// <param name="node">Node</param>
-        public void Add(GridNode node)
-        {
-            nodes.Add(node);
-        }
-        /// <summary>
         /// Adds a list of nodes
         /// </summary>
-        /// <param name="nodes">Node list</param>
-        public void AddRange(IEnumerable<GridNode> nodes)
+        /// <param name="nodeList">Node list</param>
+        public void SetNodes(IEnumerable<GridNode> nodeList)
         {
-            if (nodes?.Any() != true)
+            nodes.Clear();
+
+            if (nodeList?.Any() != true)
             {
                 return;
             }
 
-            this.nodes.AddRange(nodes);
+            nodes.AddRange(nodeList);
+
+            FillConnections(nodes);
         }
-        /// <summary>
-        /// Gets node wich contains specified point
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public GridNode FindNode(Vector3 point)
+
+        /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
+        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
+        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
+        {
+            return nodes.Cast<IGraphNode>().ToArray();
+        }
+        /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, Vector3 point)
         {
             float minDistance = float.MaxValue;
-            GridNode bestNode = null;
+            IGraphNode bestNode = null;
 
             foreach (var node in nodes)
             {
-                if (node.Contains(point, out float distance) && distance < minDistance)
+                if (!node.Contains(point))
+                {
+                    continue;
+                }
+
+                float distance = Vector3.DistanceSquared(point, node.Center);
+
+                if (distance < minDistance)
                 {
                     minDistance = distance;
                     bestNode = node;
@@ -120,33 +231,20 @@ namespace Engine.PathFinding.AStar
 
             return bestNode;
         }
-
-        /// <inheritdoc/>
-        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
-        {
-            return nodes.Cast<IGraphNode>().ToArray();
-        }
         /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            return AStarQuery.FindPath(this, from, to);
+            return AStarQuery.FindPath(agent, this, from, to);
         }
         /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            IEnumerable<Vector3> result = null;
-
-            await Task.Run(() =>
-            {
-                result = AStarQuery.FindPath(this, from, to);
-            });
-
-            return result ?? Enumerable.Empty<Vector3>();
+            return await Task.Run(() => FindPath(agent, from, to));
         }
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
-            return nodes.Any(n => n.Contains(position));
+            return nodes.Exists(n => n.Contains(position));
         }
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
@@ -157,15 +255,19 @@ namespace Engine.PathFinding.AStar
 
             foreach (var node in nodes)
             {
-                if (node.Contains(position, out float distance))
+                if (!node.Contains(position))
                 {
-                    contains = true;
+                    continue;
+                }
 
-                    if (distance < nearestDistance)
-                    {
-                        nearestDistance = distance;
-                        nearest = node.Center;
-                    }
+                contains = true;
+
+                float distance = Vector3.DistanceSquared(position, node.Center);
+
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearest = node.Center;
                 }
             }
 
@@ -173,47 +275,47 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public bool CreateAt(Vector3 position)
+        public void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool CreateAt(BoundingBox bbox)
+        public void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool CreateAt(IEnumerable<Vector3> positions)
+        public void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(Vector3 position)
+        public void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(BoundingBox bbox)
+        public void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool UpdateAt(IEnumerable<Vector3> positions)
+        public void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(Vector3 position)
+        public void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(BoundingBox bbox)
+        public void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public bool RemoveAt(IEnumerable<Vector3> positions)
+        public void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
@@ -238,42 +340,22 @@ namespace Engine.PathFinding.AStar
         {
             throw new NotImplementedException();
         }
-
         /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent)
-        {
-            throw new NotImplementedException();
-        }
-        /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        public void Update(GameTime gameTime)
+        public void UpdateObstacles(Action<GraphUpdateStates> callback = null)
         {
             //Updates the internal state
         }
-        /// <summary>
-        /// Fires the updated event
-        /// </summary>
-        protected void FireUpdated()
+
+        /// <inheritdoc/>
+        public IGraphDebug GetDebugInfo(AgentType agent)
         {
-            Updated?.Invoke(this, new EventArgs());
-        }
-        /// <summary>
-        /// Fires the updating event
-        /// </summary>
-        protected void FireUpdating()
-        {
-            Updating?.Invoke(this, new EventArgs());
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Nodes {nodes.Count}; Side {Settings.NodeSize:0.00};";
+            return $"Nodes: {nodes.Count}; Size: {Settings.NodeSize:0.00};";
         }
     }
 }

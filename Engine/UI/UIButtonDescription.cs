@@ -12,7 +12,7 @@ namespace Engine.UI
         /// </summary>
         public static UIButtonDescription Default()
         {
-            return new UIButtonDescription();
+            return new();
         }
         /// <summary>
         /// Gets the default button description
@@ -20,12 +20,9 @@ namespace Engine.UI
         /// <param name="color">Button color</param>
         public static UIButtonDescription Default(Color4 color)
         {
-            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
-
-            return new UIButtonDescription()
+            return new()
             {
                 ColorReleased = color,
-                BlendMode = blendMode,
             };
         }
         /// <summary>
@@ -34,7 +31,7 @@ namespace Engine.UI
         /// <param name="textureFileName">Texture file name</param>
         public static UIButtonDescription Default(string textureFileName)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TextureReleased = textureFileName,
                 ColorReleased = Color4.White,
@@ -48,7 +45,7 @@ namespace Engine.UI
         /// <param name="textureRect">Texture rectangle</param>
         public static UIButtonDescription Default(string textureFileName, Vector4 textureRect)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = textureRect,
@@ -62,7 +59,7 @@ namespace Engine.UI
         /// <param name="font">Font description</param>
         public static UIButtonDescription Default(TextDrawerDescription font)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = font,
             };
@@ -74,13 +71,10 @@ namespace Engine.UI
         /// <param name="color">Button color</param>
         public static UIButtonDescription Default(TextDrawerDescription font, Color4 color)
         {
-            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
-
-            return new UIButtonDescription()
+            return new()
             {
                 Font = font,
                 ColorReleased = color,
-                BlendMode = blendMode,
             };
         }
         /// <summary>
@@ -90,7 +84,7 @@ namespace Engine.UI
         /// <param name="textureFileName">Texture file name</param>
         public static UIButtonDescription Default(TextDrawerDescription font, string textureFileName)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = font,
                 TextureReleased = textureFileName,
@@ -106,7 +100,7 @@ namespace Engine.UI
         /// <param name="textureRect">Texture rectangle</param>
         public static UIButtonDescription Default(TextDrawerDescription font, string textureFileName, Vector4 textureRect)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = font,
                 TextureReleased = textureFileName,
@@ -121,7 +115,7 @@ namespace Engine.UI
         /// </summary>
         public static UIButtonDescription DefaultTwoStateButton()
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
             };
@@ -133,17 +127,11 @@ namespace Engine.UI
         /// <param name="pressedColor">Pressed button color</param>
         public static UIButtonDescription DefaultTwoStateButton(Color4 releasedColor, Color4 pressedColor)
         {
-            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
-
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
-
                 ColorReleased = releasedColor,
-
                 ColorPressed = pressedColor,
-
-                BlendMode = blendMode,
             };
         }
         /// <summary>
@@ -151,18 +139,14 @@ namespace Engine.UI
         /// </summary>
         /// <param name="releasedTextureFileName">Released texture file name</param>
         /// <param name="pressedTextureFileName">Pressed texture file name</param>
-        /// <param name="caption">Caption description</param>
         public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, string pressedTextureFileName)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Width = 120,
                 Height = 50,
-
                 TwoStateButton = true,
-
                 TextureReleased = releasedTextureFileName,
-
                 TexturePressed = pressedTextureFileName,
             };
         }
@@ -174,14 +158,12 @@ namespace Engine.UI
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
         public static UIButtonDescription DefaultTwoStateButton(string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
-
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = releasedTextureRect,
                 ColorReleased = Color4.White,
-
                 TexturePressed = textureFileName,
                 TexturePressedUVMap = pressedTextureRect,
                 ColorPressed = Color4.White,
@@ -193,7 +175,7 @@ namespace Engine.UI
         /// <param name="font">Font description</param>
         public static UIButtonDescription DefaultTwoStateButton(TextDrawerDescription font)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = font,
@@ -207,18 +189,12 @@ namespace Engine.UI
         /// <param name="pressedColor">Pressed button color</param>
         public static UIButtonDescription DefaultTwoStateButton(TextDrawerDescription font, Color4 releasedColor, Color4 pressedColor)
         {
-            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
-
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = font,
-
                 ColorReleased = releasedColor,
-
                 ColorPressed = pressedColor,
-
-                BlendMode = blendMode,
             };
         }
         /// <summary>
@@ -229,16 +205,13 @@ namespace Engine.UI
         /// <param name="pressedTextureFileName">Pressed texture file name</param>
         public static UIButtonDescription DefaultTwoStateButton(TextDrawerDescription font, string releasedTextureFileName, string pressedTextureFileName)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Width = 120,
                 Height = 50,
-
                 TwoStateButton = true,
                 Font = font,
-
                 TextureReleased = releasedTextureFileName,
-
                 TexturePressed = pressedTextureFileName,
             };
         }
@@ -251,15 +224,13 @@ namespace Engine.UI
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
         public static UIButtonDescription DefaultTwoStateButton(TextDrawerDescription font, string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = font,
-
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = releasedTextureRect,
                 ColorReleased = Color4.White,
-
                 TexturePressed = textureFileName,
                 TexturePressedUVMap = pressedTextureRect,
                 ColorPressed = Color4.White,
@@ -274,7 +245,7 @@ namespace Engine.UI
         /// <param name="fineSampling">Fine sampling</param>
         public static UIButtonDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
             };
@@ -288,7 +259,7 @@ namespace Engine.UI
         /// <param name="fineSampling">Fine sampling</param>
         public static UIButtonDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
@@ -302,7 +273,7 @@ namespace Engine.UI
         /// <param name="lineAdjust">Line adjust</param>
         public static UIButtonDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
             };
@@ -316,7 +287,7 @@ namespace Engine.UI
         /// <param name="lineAdjust">Line adjust</param>
         public static UIButtonDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
@@ -329,7 +300,7 @@ namespace Engine.UI
         /// <param name="fontMapFileName">Font map file name</param>
         public static UIButtonDescription DefaultFromMap(string fontImageFileName, string fontMapFileName)
         {
-            return new UIButtonDescription
+            return new()
             {
                 Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
@@ -343,7 +314,7 @@ namespace Engine.UI
         /// <param name="fineSampling">Fine sampling</param>
         public static UIButtonDescription DefaultTwoStateButtonFromFamily(string fontFamilyName, int size, bool fineSampling = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
@@ -358,7 +329,7 @@ namespace Engine.UI
         /// <param name="fineSampling">Fine sampling</param>
         public static UIButtonDescription DefaultTwoStateButtonFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
@@ -373,7 +344,7 @@ namespace Engine.UI
         /// <param name="lineAdjust">Line adjust</param>
         public static UIButtonDescription DefaultTwoStateButtonFromFile(string fileName, int size, bool lineAdjust = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
@@ -388,7 +359,7 @@ namespace Engine.UI
         /// <param name="lineAdjust">Line adjust</param>
         public static UIButtonDescription DefaultTwoStateButtonFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
         {
-            return new UIButtonDescription()
+            return new()
             {
                 TwoStateButton = true,
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
@@ -402,7 +373,7 @@ namespace Engine.UI
         /// <param name="fontMapFileName">Font map file name</param>
         public static UIButtonDescription DefaultTwoStateButtonFromMap(string fontImageFileName, string fontMapFileName)
         {
-            return new UIButtonDescription
+            return new()
             {
                 TwoStateButton = true,
                 Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),

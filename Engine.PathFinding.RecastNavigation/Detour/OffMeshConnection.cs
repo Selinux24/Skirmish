@@ -32,7 +32,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <remarks>
         /// These are not the connection's user defined flags. Those are assigned via the connection's dtPoly definition. These are link flags used for internal purposes.
         /// </remarks>
-        public int Flags { get; set; }
+        public OffMeshConnectionDirections Direction { get; set; }
         /// <summary>
         /// End point side.
         /// </summary>
@@ -43,15 +43,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int UserId { get; set; }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Gets whether this off-mesh connection is bidirectional or not
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <returns></returns>
+        public bool IsBidirectional()
+        {
+            return Direction == OffMeshConnectionDirections.Bidirectional;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("start: {0}; end: {1}; rad: {2}; poly: {3}; flags: {4}; side: {5}; userId: {6};",
-                Start, End,
-                Rad, Poly,
-                Flags, Side, UserId);
+            return $"start: {Start}; end: {End}; rad: {Rad}; poly: {Poly}; direction: {Direction}; side: {Side}; userId: {UserId};";
         }
     }
 }

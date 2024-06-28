@@ -10,7 +10,7 @@ namespace Engine.Animation
     /// </summary>
     public class AnimationPlan
     {
-        private readonly List<AnimationPath> animationPaths = new List<AnimationPath>();
+        private readonly List<AnimationPath> animationPaths = [];
 
         /// <summary>
         /// Last item time
@@ -70,7 +70,7 @@ namespace Engine.Animation
         {
             get
             {
-                return Initialized && animationPaths.Any() && !AtEnd;
+                return Initialized && animationPaths.Count != 0 && !AtEnd;
             }
         }
 
@@ -82,7 +82,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan Create(string clipName, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.Add(clipName, timeDelta);
 
             return new AnimationPlan(path);
@@ -96,7 +96,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan CreateRepeat(string clipName, int repeats, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.AddRepeat(clipName, repeats, timeDelta);
 
             return new AnimationPlan(path);
@@ -109,7 +109,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan CreateLoop(string clipName, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.AddLoop(clipName, timeDelta);
 
             return new AnimationPlan(path);
@@ -119,6 +119,14 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         public AnimationPlan() : base()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="pathItemName">Animation path item name</param>
+        public AnimationPlan(string pathItemName) : this(new AnimationPath(pathItemName))
         {
 
         }
@@ -152,7 +160,7 @@ namespace Engine.Animation
         /// </summary>
         public bool Any()
         {
-            return animationPaths.Any();
+            return animationPaths.Count != 0;
         }
         /// <summary>
         /// Clears the plan
@@ -269,7 +277,7 @@ namespace Engine.Animation
         {
             if (skinningData == null)
             {
-                return Enumerable.Empty<Matrix>();
+                return [];
             }
 
             if (GetClipAndTime(out float time, out string clipName))
@@ -378,7 +386,7 @@ namespace Engine.Animation
         /// </summary>
         public void Reset()
         {
-            AtEnd = !animationPaths.Any();
+            AtEnd = animationPaths.Count == 0;
             CurrentPathIndex = 0;
             AnimationOffset = 0;
         }

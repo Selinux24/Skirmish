@@ -5,24 +5,31 @@ namespace Engine.Animation
     /// <summary>
     /// Animation path item
     /// </summary>
-    public class AnimationPathItem : IHasGameState
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Clip name</param>
+    /// <param name="loop">Loop</param>
+    /// <param name="repeats">Number of repeats</param>
+    /// <param name="delta">Time delta</param>
+    public class AnimationPathItem(string name, bool loop, int repeats, float delta) : IHasGameState
     {
         /// <summary>
         /// Clip name
         /// </summary>
-        public string ClipName { get; private set; }
+        public string ClipName { get; private set; } = name;
         /// <summary>
         /// Time delta
         /// </summary>
-        public float TimeDelta { get; private set; }
+        public float TimeDelta { get; private set; } = delta;
         /// <summary>
         /// Animation loops
         /// </summary>
-        public bool Loop { get; private set; }
+        public bool Loop { get; private set; } = loop;
         /// <summary>
         /// Number of iterations
         /// </summary>
-        public int Repeats { get; private set; }
+        public int Repeats { get; private set; } = repeats;
         /// <summary>
         /// Clip duration
         /// </summary>
@@ -37,21 +44,6 @@ namespace Engine.Animation
             {
                 return Duration * Math.Max(1, Repeats);
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Clip name</param>
-        /// <param name="loop">Loop</param>
-        /// <param name="repeats">Number of repeats</param>
-        /// <param name="delta">Time delta</param>
-        public AnimationPathItem(string name, bool loop, int repeats, float delta)
-        {
-            ClipName = name;
-            Loop = loop;
-            Repeats = repeats;
-            TimeDelta = delta;
         }
 
         /// <summary>
@@ -100,7 +92,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationPathItemState animationPathItemState))
+            if (state is not AnimationPathItemState animationPathItemState)
             {
                 return;
             }

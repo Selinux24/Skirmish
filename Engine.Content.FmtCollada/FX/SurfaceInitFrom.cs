@@ -17,9 +17,9 @@ namespace Engine.Collada.FX
 
         public SurfaceInitFrom()
         {
-            this.Mip = 0;
-            this.Slice = 0;
-            this.Face = EnumSurfaceFaces.PositiveX;
+            Mip = 0;
+            Slice = 0;
+            Face = EnumSurfaceFaces.PositiveX;
         }
     }
 }
