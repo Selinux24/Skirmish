@@ -884,7 +884,7 @@ namespace TerrainSamples.SceneRts
             var sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var posRnd = new Random(1);
+            var posRnd = Helper.NewGenerator(1);
 
             StartRocks(posRnd);
             StartTrees(posRnd);
