@@ -371,14 +371,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 asmax = AsMax;
             }
 
-            if (minh < -walkableClimb)
+            if (minh < -walkableClimb || (asmax - asmin) > walkableClimb)
             {
-                // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
-                span.Area = AreaTypes.RC_NULL_AREA;
-            }
-            else if ((asmax - asmin) > walkableClimb)
-            {
-                // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
+                // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb
+                // or if the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
                 span.Area = AreaTypes.RC_NULL_AREA;
             }
         }

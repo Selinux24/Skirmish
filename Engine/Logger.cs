@@ -236,7 +236,7 @@ namespace Engine
         /// </summary>
         public static bool HasErrors()
         {
-            return log.Any(l => l.LogLevel == LogLevel.Error);
+            return Array.Exists(log, l => l.LogLevel == LogLevel.Error);
         }
 
         /// <summary>
