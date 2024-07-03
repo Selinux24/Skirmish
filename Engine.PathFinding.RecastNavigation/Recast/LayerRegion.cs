@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -119,7 +118,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns true if the layer array contains the value</returns>
         public readonly bool ContainsLayer(int v)
         {
-            return Layers?.Take(NLayers)?.Contains(v) ?? false;
+            return Layers?.Take(NLayers).Contains(v) ?? false;
         }
         /// <summary>
         /// Gets whether the neighbour array has the value or not
@@ -128,7 +127,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns true if the neighbour array contains the value</returns>
         public readonly bool ContainsNei(int v)
         {
-            return Neis?.Take(NNeis)?.Contains(v) ?? false;
+            return Neis?.Take(NNeis).Contains(v) ?? false;
         }
         /// <summary>
         /// Merges the specified region layers into current
