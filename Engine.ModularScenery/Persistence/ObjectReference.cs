@@ -53,15 +53,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Animation plan list
         /// </summary>
-        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = Enumerable.Empty<ObjectAnimationPlan>();
+        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = [];
         /// <summary>
         /// Action list
         /// </summary>
-        public IEnumerable<ObjectAction> Actions { get; set; } = Enumerable.Empty<ObjectAction>();
+        public IEnumerable<ObjectAction> Actions { get; set; } = [];
         /// <summary>
         /// States list
         /// </summary>
-        public IEnumerable<ObjectState> States { get; set; } = Enumerable.Empty<ObjectState>();
+        public IEnumerable<ObjectState> States { get; set; } = [];
         /// <summary>
         /// Next level
         /// </summary>

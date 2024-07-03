@@ -9,29 +9,29 @@ namespace Engine.Audio
         /// <summary>
         /// Default linear curve
         /// </summary>
-        public static readonly GameAudioCurvePoint[] DefaultLinearCurve = new GameAudioCurvePoint[]
-        {
-            new GameAudioCurvePoint(){ Distance = 0.0f, DspSetting = 1.0f, },
-            new GameAudioCurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
+        public static readonly GameAudioCurvePoint[] DefaultLinearCurve =
+        [
+            new (){ Distance = 0.0f, DspSetting = 1.0f, },
+            new (){ Distance = 1.0f, DspSetting = 0.0f, },
+        ];
         /// <summary>
         /// Default emitter lfe curve
         /// </summary>
-        public static readonly GameAudioCurvePoint[] DefaultLfeCurve = new GameAudioCurvePoint[]
-        {
-            new GameAudioCurvePoint(){ Distance = 0.0f, DspSetting = 1.0f, },
-            new GameAudioCurvePoint(){ Distance = 0.25f, DspSetting = 0.0f, },
-            new GameAudioCurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
+        public static readonly GameAudioCurvePoint[] DefaultLfeCurve =
+        [
+            new (){ Distance = 0.0f, DspSetting = 1.0f, },
+            new (){ Distance = 0.25f, DspSetting = 0.0f, },
+            new (){ Distance = 1.0f, DspSetting = 0.0f, },
+        ];
         /// <summary>
         /// Default emitter reverb curve
         /// </summary>
-        public static readonly GameAudioCurvePoint[] DefaultReverbCurve = new GameAudioCurvePoint[]
-        {
-            new GameAudioCurvePoint(){ Distance = 0.0f, DspSetting = 0.5f, },
-            new GameAudioCurvePoint(){ Distance = 0.75f, DspSetting = 1.0f, },
-            new GameAudioCurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
+        public static readonly GameAudioCurvePoint[] DefaultReverbCurve =
+        [
+            new (){ Distance = 0.0f, DspSetting = 0.5f, },
+            new (){ Distance = 0.75f, DspSetting = 1.0f, },
+            new (){ Distance = 1.0f, DspSetting = 0.0f, },
+        ];
 
         /// <summary>
         /// Normalized distance. This must be within 0.0f to 1.0f.

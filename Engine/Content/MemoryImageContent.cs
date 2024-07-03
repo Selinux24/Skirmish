@@ -9,16 +9,21 @@ namespace Engine.Content
     /// <summary>
     /// Image content from memory
     /// </summary>
-    public sealed class MemoryImageContent : IImageContent, IEquatable<MemoryImageContent>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="stream">Memory stream</param>
+    /// <param name="cropRectangle">Crop rectangle</param>
+    public sealed class MemoryImageContent(MemoryStream stream, Rectangle? cropRectangle = null) : IImageContent, IEquatable<MemoryImageContent>
     {
         /// <summary>
         /// Image data in stream
         /// </summary>
-        private readonly MemoryStream stream;
+        private readonly MemoryStream stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle;
+        private readonly Rectangle cropRectangle = cropRectangle ?? Rectangle.Empty;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -28,17 +33,6 @@ namespace Engine.Content
             {
                 return 1;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <param name="cropRectangle">Crop rectangle</param>
-        public MemoryImageContent(MemoryStream stream, Rectangle? cropRectangle = null)
-        {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
         }
 
         /// <inheritdoc/>

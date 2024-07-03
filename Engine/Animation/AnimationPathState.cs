@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Animation
 {
@@ -31,6 +30,6 @@ namespace Engine.Animation
         /// <summary>
         /// Path items state
         /// </summary>
-        public IEnumerable<IGameState> PathItems { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> PathItems { get; set; } = [];
     }
 }

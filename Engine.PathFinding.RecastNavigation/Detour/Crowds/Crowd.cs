@@ -756,7 +756,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Put the old path infront of the old path.
             if (path.Length > 1)
             {
-                res.Merge(path, path.Length);
+                res.Merge(path);
             }
 
             // Check for partial path.

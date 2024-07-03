@@ -60,8 +60,8 @@ namespace Engine.Common
         /// <returns>Returns the packed material</returns>
         public readonly Vector4[] Pack()
         {
-            return new[]
-            {
+            return
+            [
                 new Vector4(Algorithm, Block11, Block12, Block13),
                 Block2,
                 Block3,
@@ -70,7 +70,7 @@ namespace Engine.Common
                 Emissive,
                 Ambient,
                 Specular,
-            };
+            ];
         }
 
         /// <summary>

@@ -8,36 +8,27 @@ namespace Engine.Physics.EPA
     /// <summary>
     /// Face helper
     /// </summary>
-    public struct Face
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public struct Face(GJKSupportPoint a, GJKSupportPoint b, GJKSupportPoint c)
     {
         /// <summary>
         /// Point A
         /// </summary>
-        public GJKSupportPoint A { get; set; }
+        public GJKSupportPoint A { get; set; } = a;
         /// <summary>
         /// Point B
         /// </summary>
-        public GJKSupportPoint B { get; set; }
+        public GJKSupportPoint B { get; set; } = b;
         /// <summary>
         /// Point C
         /// </summary>
-        public GJKSupportPoint C { get; set; }
+        public GJKSupportPoint C { get; set; } = c;
         /// <summary>
         /// Normal
         /// </summary>
-        public Vector3 Normal { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Face(GJKSupportPoint a, GJKSupportPoint b, GJKSupportPoint c)
-        {
-            A = a;
-            B = b;
-            C = c;
-
-            Normal = Vector3.Normalize(Vector3.Cross(b.Point - a.Point, c.Point - a.Point));
-        }
+        public Vector3 Normal { get; private set; } = Vector3.Normalize(Vector3.Cross(b.Point - a.Point, c.Point - a.Point));
 
         /// <summary>
         /// Reverse face

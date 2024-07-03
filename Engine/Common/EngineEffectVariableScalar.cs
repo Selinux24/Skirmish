@@ -6,21 +6,16 @@ namespace Engine.Common
     /// <summary>
     /// Scalar variable
     /// </summary>
-    public class EngineEffectVariableScalar
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Internal variable</param>
+    public class EngineEffectVariableScalar(EffectScalarVariable variable)
     {
         /// <summary>
         /// Effect scalar variable
         /// </summary>
-        private readonly EffectScalarVariable variable = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Internal variable</param>
-        public EngineEffectVariableScalar(EffectScalarVariable variable)
-        {
-            this.variable = variable;
-        }
+        private readonly EffectScalarVariable variable = variable;
 
         /// <summary>
         /// Gets a float value from the variable

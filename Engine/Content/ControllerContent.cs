@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace Engine.Content
@@ -26,11 +25,11 @@ namespace Engine.Content
         /// <summary>
         /// Inverse bind matrix list by joint name
         /// </summary>
-        public Dictionary<string, Matrix> InverseBindMatrix { get; set; } = new Dictionary<string, Matrix>();
+        public Dictionary<string, Matrix> InverseBindMatrix { get; set; } = [];
         /// <summary>
         /// Weight information by joint name
         /// </summary>
-        public Weight[] Weights { get; set; } = Array.Empty<Weight>();
+        public Weight[] Weights { get; set; } = [];
 
         /// <inheritdoc/>
         public override string ToString()

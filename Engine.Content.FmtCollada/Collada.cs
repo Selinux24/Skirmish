@@ -105,11 +105,11 @@ namespace Engine.Collada
                     res.Add(cnv);
                 }
 
-                return res.ToArray();
+                return [.. res];
             }
             else
             {
-                return Array.Empty<T>();
+                return [];
             }
         }
         internal static string ConvertToString<T>(T value)

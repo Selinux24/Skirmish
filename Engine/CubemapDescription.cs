@@ -79,7 +79,7 @@ namespace Engine
         /// <returns></returns>
         public static CubemapDescription Hemispheric(string texture, float radius)
         {
-            return Hemispheric(new[] { texture }, radius);
+            return Hemispheric([texture], radius);
         }
         /// <summary>
         /// Gets the default skydom description

@@ -20,10 +20,10 @@ namespace Engine.Common
         /// <returns></returns>
         public static InputElement[] Input(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-            };
+            return
+            [
+                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+            ];
         }
         /// <summary>
         /// Generates a vertex array from specified components
@@ -42,7 +42,7 @@ namespace Engine.Common
                 res.Add(new VertexPosition() { Position = vArray[i] });
             }
 
-            return res.ToArray();
+            return res;
         }
         /// <summary>
         /// Converts a vertex data list to a vertex array

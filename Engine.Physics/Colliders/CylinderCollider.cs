@@ -55,7 +55,7 @@ namespace Engine.Physics.Colliders
 
             if (!transform || !HasTransform)
             {
-                return new[] { bse, cap };
+                return [bse, cap];
             }
 
             var trn = RigidBody.Transform;
@@ -66,7 +66,7 @@ namespace Engine.Physics.Colliders
 
             if (MathUtil.IsZero(dir.Length()))
             {
-                return new[] { bse, cap };
+                return [bse, cap];
             }
 
             dir = Vector3.Normalize(Vector3.Cross(dir, cNorm)) * Radius;
@@ -75,7 +75,7 @@ namespace Engine.Physics.Colliders
             var cap1 = cap + dir;
             var cap2 = cap - dir;
 
-            return new[] { bse1, bse2, cap1, cap2 };
+            return [bse1, bse2, cap1, cap2];
         }
 
         /// <inheritdoc/>

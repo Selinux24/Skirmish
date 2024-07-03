@@ -9,21 +9,16 @@ namespace Engine.Common
     /// <summary>
     /// Effect variable
     /// </summary>
-    public class EngineEffectVariable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Internal effect variable</param>
+    public class EngineEffectVariable(EffectVariable variable)
     {
         /// <summary>
         /// Effect variable
         /// </summary>
-        private readonly EffectVariable variable = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Internal effect variable</param>
-        public EngineEffectVariable(EffectVariable variable)
-        {
-            this.variable = variable;
-        }
+        private readonly EffectVariable variable = variable;
 
         /// <summary>
         /// Gets a value of the specified type from the variable

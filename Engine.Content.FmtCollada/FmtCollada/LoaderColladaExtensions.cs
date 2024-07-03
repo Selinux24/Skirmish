@@ -175,7 +175,7 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return n.ToArray();
+            return [.. n];
         }
         /// <summary>
         /// Reads a float array from a source
@@ -225,7 +225,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector2)}");
 
-                return Array.Empty<Vector2>();
+                return [];
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -244,7 +244,7 @@ namespace Engine.Content.FmtCollada
                 verts.Add(v);
             }
 
-            return verts.ToArray();
+            return [.. verts];
         }
         /// <summary>
         /// Reads a Vector3 array from a source
@@ -258,7 +258,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector3)}");
 
-                return Array.Empty<Vector3>();
+                return [];
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -280,7 +280,7 @@ namespace Engine.Content.FmtCollada
                 verts.Add(v);
             }
 
-            return verts.ToArray();
+            return [.. verts];
         }
         /// <summary>
         /// Reads a Vector4 array from a source
@@ -294,7 +294,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector4)}");
 
-                return Array.Empty<Vector4>();
+                return [];
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -318,7 +318,7 @@ namespace Engine.Content.FmtCollada
                 verts.Add(v);
             }
 
-            return verts.ToArray();
+            return [.. verts];
         }
         /// <summary>
         /// Reads a Color3 array from a source
@@ -332,7 +332,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color3)}");
 
-                return Array.Empty<Color3>();
+                return [];
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -354,7 +354,7 @@ namespace Engine.Content.FmtCollada
                 colors.Add(v);
             }
 
-            return colors.ToArray();
+            return [.. colors];
         }
         /// <summary>
         /// Reads a Color4 array from a source
@@ -368,7 +368,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color4)}");
 
-                return Array.Empty<Color4>();
+                return [];
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -392,7 +392,7 @@ namespace Engine.Content.FmtCollada
                 colors.Add(v);
             }
 
-            return colors.ToArray();
+            return [.. colors];
         }
         /// <summary>
         /// Reads a Matrix array from a source
@@ -418,7 +418,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix)}");
 
-                return Array.Empty<Matrix>();
+                return [];
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -453,7 +453,7 @@ namespace Engine.Content.FmtCollada
                 mats.Add(m);
             }
 
-            return mats.ToArray();
+            return [.. mats];
         }
 
         /// <summary>

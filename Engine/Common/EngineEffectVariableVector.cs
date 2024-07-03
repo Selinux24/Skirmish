@@ -6,21 +6,16 @@ namespace Engine.Common
     /// <summary>
     /// Vector variable
     /// </summary>
-    public class EngineEffectVariableVector
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Effect variable</param>
+    public class EngineEffectVariableVector(EffectVectorVariable variable)
     {
         /// <summary>
         /// Effect vector variable
         /// </summary>
-        private readonly EffectVectorVariable variable = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Effect variable</param>
-        public EngineEffectVariableVector(EffectVectorVariable variable)
-        {
-            this.variable = variable;
-        }
+        private readonly EffectVectorVariable variable = variable;
 
         /// <summary>
         /// Gets a value of the specified type

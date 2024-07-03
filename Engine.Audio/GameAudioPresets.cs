@@ -14,7 +14,7 @@ namespace Engine.Audio
         /// Reverb effect preset list
         /// </summary>
         private static readonly ReverbParameters[] presetParams =
-        {
+        [
             (ReverbParameters)ReverbI3DL2Parameters.Presets.Default,
             (ReverbParameters)ReverbI3DL2Parameters.Presets.Generic,
             (ReverbParameters)ReverbI3DL2Parameters.Presets.PaddedCell,
@@ -45,7 +45,7 @@ namespace Engine.Audio
             (ReverbParameters)ReverbI3DL2Parameters.Presets.MediumHall,
             (ReverbParameters)ReverbI3DL2Parameters.Presets.LargeHall,
             (ReverbParameters)ReverbI3DL2Parameters.Presets.Plate,
-        };
+        ];
 
         /// <summary>
         /// Gets the number of game audio presets

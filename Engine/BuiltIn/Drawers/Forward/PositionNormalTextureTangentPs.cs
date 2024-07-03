@@ -107,11 +107,11 @@ namespace Engine.BuiltIn.Drawers.Forward
 
             dc.SetPixelShaderSamplers(0, ss);
 
-            ss = new[]
-            {
+            ss =
+            [
                 BuiltInShaders.GetSamplerComparisonLessEqualBorder(),
                 BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
-            };
+            ];
 
             dc.SetPixelShaderSamplers(10, ss);
         }

@@ -7,12 +7,16 @@ namespace Engine.Common
     /// <summary>
     /// Technique
     /// </summary>
-    public class EngineEffectTechnique
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="techinque">Internal technique</param>
+    public class EngineEffectTechnique(EffectTechnique techinque)
     {
         /// <summary>
         /// Effect technique
         /// </summary>
-        private readonly EffectTechnique techinque = null;
+        private readonly EffectTechnique techinque = techinque;
 
         /// <summary>
         /// Gets the effect pass count
@@ -23,15 +27,6 @@ namespace Engine.Common
             {
                 return techinque.Description.PassCount;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="techinque">Internal technique</param>
-        public EngineEffectTechnique(EffectTechnique techinque)
-        {
-            this.techinque = techinque;
         }
 
         /// <summary>

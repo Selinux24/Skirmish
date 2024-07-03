@@ -37,11 +37,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Assets map
         /// </summary>
-        public IEnumerable<AssetReference> Map { get; set; } = Enumerable.Empty<AssetReference>();
+        public IEnumerable<AssetReference> Map { get; set; } = [];
         /// <summary>
         /// Map objects
         /// </summary>
-        public IEnumerable<ObjectReference> Objects { get; set; } = Enumerable.Empty<ObjectReference>();
+        public IEnumerable<ObjectReference> Objects { get; set; } = [];
 
         /// <summary>
         /// Gets the next Id
@@ -58,7 +58,7 @@ namespace Engine.Modular.Persistence
         /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
         private static Dictionary<string, (int Count, PathFindingModes PathFinding)> GetInstanceCounters(Asset asset)
         {
-            Dictionary<string, (int, PathFindingModes)> res = new();
+            Dictionary<string, (int, PathFindingModes)> res = [];
 
             var assetNames = asset.References.Select(a => a.AssetName).Distinct();
 
@@ -171,7 +171,7 @@ namespace Engine.Modular.Persistence
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
         public Dictionary<string, InstanceInfo> GetMapInstanceCounters(IEnumerable<Asset> assets)
         {
-            Dictionary<string, InstanceInfo> res = new();
+            Dictionary<string, InstanceInfo> res = [];
 
             var vAssets = assets.ToArray();
 
@@ -229,7 +229,7 @@ namespace Engine.Modular.Persistence
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
         public Dictionary<string, InstanceInfo> GetObjectsInstanceCounters()
         {
-            Dictionary<string, InstanceInfo> res = new();
+            Dictionary<string, InstanceInfo> res = [];
 
             foreach (var item in Objects)
             {

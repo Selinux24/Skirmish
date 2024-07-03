@@ -60,7 +60,7 @@ namespace EngineTests
             Triangle t1 = new();
             Triangle t2 = new(p1, p2, p3);
             Triangle t3 = new(p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, p3.X, p3.Y, p3.Z);
-            Triangle t4 = new(new[] { p1, p2, p3 });
+            Triangle t4 = new([p1, p2, p3]);
 
             Assert.AreEqual(Vector3.Zero, t1.Point1);
             Assert.AreEqual(Vector3.Zero, t1.Point2);

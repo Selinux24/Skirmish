@@ -61,7 +61,7 @@ namespace EngineTests.Content
         [TestMethod()]
         public void RotationArrayTest()
         {
-            var res = new RotationQ(new float[] { 1, 2, 3, 4 });
+            var res = new RotationQ([1, 2, 3, 4]);
 
             Assert.AreEqual(new RotationQ(1, 2, 3, 4), res);
         }
@@ -69,9 +69,9 @@ namespace EngineTests.Content
         public void RotationBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new RotationQ(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ(new float[] { 1, 2, 3 }));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ(new float[] { 1, 2, 3, 4, 5 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void RotationComponentsTest()

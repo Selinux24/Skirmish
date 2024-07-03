@@ -4,11 +4,11 @@ namespace TerrainSamples.SceneGrid.Rules
 {
     using TerrainSamples.SceneGrid.Rules.Enum;
 
-    public class Team
+    public class Team(string name)
     {
-        private readonly List<Soldier> soldiers = new();
+        private readonly List<Soldier> soldiers = [];
 
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         public string Faction { get; set; }
         public TeamRoles Role { get; set; }
         public Soldier Leader
@@ -22,34 +22,19 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return soldiers.ToArray();
+                return [..soldiers];
             }
         }
 
-        public int AirStrikeProbability { get; set; }
-        public int AirStrikeRequests { get; set; }
-        public int AirStrikePenetration { get; set; }
-        public int AirStrikeDamage { get; set; }
-        public int OrdnanceProbability { get; set; }
-        public int OrdnanceRequests { get; set; }
-        public int OrdnancePenetration { get; set; }
-        public int OrdnanceDamage { get; set; }
-        public int ReinforcementProbability { get; set; }
-
-        public Team(string name)
-        {
-            Name = name;
-
-            AirStrikeProbability = 0;
-            AirStrikeRequests = 0;
-            AirStrikePenetration = 0;
-            AirStrikeDamage = 0;
-            OrdnanceProbability = 0;
-            OrdnanceRequests = 0;
-            OrdnancePenetration = 0;
-            OrdnanceDamage = 0;
-            ReinforcementProbability = 0;
-        }
+        public int AirStrikeProbability { get; set; } = 0;
+        public int AirStrikeRequests { get; set; } = 0;
+        public int AirStrikePenetration { get; set; } = 0;
+        public int AirStrikeDamage { get; set; } = 0;
+        public int OrdnanceProbability { get; set; } = 0;
+        public int OrdnanceRequests { get; set; } = 0;
+        public int OrdnancePenetration { get; set; } = 0;
+        public int OrdnanceDamage { get; set; } = 0;
+        public int ReinforcementProbability { get; set; } = 0;
 
         public void NextTurn()
         {

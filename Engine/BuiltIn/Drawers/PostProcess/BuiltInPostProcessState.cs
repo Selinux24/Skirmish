@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess
         /// <summary>
         /// Effect list
         /// </summary>
-        private readonly List<BuiltInPostProcessEffects> effects = new();
+        private readonly List<BuiltInPostProcessEffects> effects = [];
 
         /// <summary>
         /// Gets the effect list
@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess
         {
             get
             {
-                return effects.ToArray();
+                return [..effects];
             }
         }
 

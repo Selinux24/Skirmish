@@ -68,590 +68,554 @@ namespace Engine.PhysicsTests
         {
             get
             {
-                return new[]
-                {
+                return
+                [
                     //Un-rotated box - Bottom face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Identity,
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
+                            ]
                         }
-                    },
+                    ],
 
                     //X-axis 90º - Front face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
+                            ]
                         }
-                    },
+                    ],
 
                     //X-axis 180º - Top face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
+                            ]
                         }
-                    },
+                    ],
 
                     //X-axis 270º - Back face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
+                            ]
                         }
-                    },
+                    ],
 
                     //Z-axis 90º - Left face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom, Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom, Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 3 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 3 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 4 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 6 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 6 },
+                            ]
                         }
-                    },
+                    ],
 
                     //Z-axis -90º - Right face to plane
-                    new object[]
-                    {
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 3 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndBoxData
                         {
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
-                            Contacts = new HalfSpaceAndBoxContactData[]
-                            {
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
-                                new HalfSpaceAndBoxContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 6 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 4 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 4 },
+                            ]
                         }
-                    },
-                };
+                    ],
+                ];
             }
         }
 

@@ -36,7 +36,7 @@ namespace Engine.PhysicsTests
             var tri1 = new Triangle(p1, p2, p3);
             var tri2 = new Triangle(p3, p2, p4);
 
-            var ctri = new ConvexMeshCollider(new[] { tri1, tri2 });
+            var ctri = new ConvexMeshCollider([tri1, tri2]);
             var triBody = new RigidBody(new() { Mass = 2, InitialTransform = transform });
             ctri.Attach(triBody);
 
@@ -74,590 +74,548 @@ namespace Engine.PhysicsTests
         {
             get
             {
-                return new[]
-                {
+                return
+                [
                     //Un-rotated box - Bottom face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Over the plane",
                             BoxTransform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Bottom face perfect contact",
                             BoxTransform = Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Bottom face 0.1 penetration",
                             BoxTransform = Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0.1f },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0.1f },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.Identity,
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Top face perfect contact. Bottom face below the plane",
                             BoxTransform = Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Below the plane",
                             BoxTransform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Un-rotated box - Bottom face to plane. Far below the plane",
                             BoxTransform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
+                    ],
 
                     //X-axis 90º - Front face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Over the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Front face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Front face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Back face perfect contact. Front face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Far below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
+                    ],
 
                     //X-axis 180º - Top face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Over the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Top face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop  , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Top face to plane. Top face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 0.1f },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop, Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackRightTop , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackLeftTop  , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.FrontLeftTop , Penetration = 0.1f },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop  , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Bottom face perfect contact. Top face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Far below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
+                    ],
 
                     //X-axis 270º - Back face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Over the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Back face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Back face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop   , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackRightBottom, Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Front face perfect contact. Back face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Far below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
+                    ],
 
                     //Z-axis 90º - Left face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Over the plane",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Left face perfect contact",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom, Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Left face 0.1 penetration",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 0.1f },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.FrontLeftTop   , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.FrontLeftBottom, Penetration = 0.1f },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom, Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Right face perfect contact. Left face below the plane",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Below the plane",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Far below the plane",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
+                    ],
 
                     //Z-axis -90º - Right face to plane
-                    new object[]
-                    {
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Over the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Right face perfect contact",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Right face 0.1 penetration",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Left face perfect contact. Right face below the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
-                            Contacts = new BoxAndTriangleSoupContactData[]
-                            {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
-                            }
+                            Contacts =
+                            [
+                                new (){ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new (){ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new (){ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                            ]
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Below the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Far below the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
-                    },
-                };
+                    ],
+                ];
             }
         }
 

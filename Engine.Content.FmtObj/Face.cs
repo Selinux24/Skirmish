@@ -8,31 +8,24 @@ namespace Engine.Content.FmtObj
     /// <summary>
     /// Face
     /// </summary>
-    struct Face
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="items">Item list</param>
+    struct Face(uint[] items)
     {
         /// <summary>
         /// Position
         /// </summary>
-        public uint Position { get; set; }
+        public uint Position { get; set; } = items.Length > 0 ? items[0] : 0;
         /// <summary>
         /// Texture UV map
         /// </summary>
-        public uint UV { get; set; }
+        public uint UV { get; set; } = items.Length > 1 ? items[1] : 0;
         /// <summary>
         /// Normal
         /// </summary>
-        public uint Normal { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="items">Item list</param>
-        public Face(uint[] items)
-        {
-            Position = items.Length > 0 ? items[0] : 0;
-            UV = items.Length > 1 ? items[1] : 0;
-            Normal = items.Length > 2 ? items[2] : 0;
-        }
+        public uint Normal { get; set; } = items.Length > 2 ? items[2] : 0;
 
         /// <summary>
         /// Gets the position index

@@ -8,26 +8,20 @@ namespace Engine
     /// <summary>
     /// Sphere intersection volume
     /// </summary>
-    public struct IntersectionVolumeSphere : ICullingVolume
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="sphere">Sphere</param>
+    public struct IntersectionVolumeSphere(BoundingSphere sphere) : ICullingVolume
     {
         /// <summary>
         /// Bounding sphere
         /// </summary>
-        private readonly BoundingSphere sphere;
+        private readonly BoundingSphere sphere = sphere;
 
         /// <inheritdoc/>
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; private set; } = sphere.Center;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        public IntersectionVolumeSphere(BoundingSphere sphere)
-        {
-            this.sphere = sphere;
-
-            Position = sphere.Center;
-        }
         /// <summary>
         /// Constructor
         /// </summary>

@@ -64,62 +64,56 @@ namespace Engine.PhysicsTests
         {
             get
             {
-                return new[]
-                {
-                    new object[]
-                    {
+                return
+                [
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Up),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 0 },
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Identity,
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 1 },
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 2 },
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 3 },
                         }
-                    },
-                    new object[]
-                    {
+                    ],
+                    [
                         new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 6 },
                         }
-                    },
-                };
+                    ],
+                ];
             }
         }
 

@@ -12,12 +12,12 @@ namespace Engine.Collada.Types
 
         public BasicColor(float r, float g, float b)
         {
-            Values = new float[] { r, g, b };
+            Values = [r, g, b];
         }
 
         public BasicColor(float r, float g, float b, float a)
         {
-            Values = new float[] { r, g, b, a };
+            Values = [r, g, b, a];
         }
 
         /// <inheritdoc/>

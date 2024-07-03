@@ -41,11 +41,11 @@ namespace Engine.Windows
         /// <summary>
         /// Keys of last update
         /// </summary>
-        private readonly List<Keys> lastKeyboardKeys = new();
+        private readonly List<Keys> lastKeyboardKeys = [];
         /// <summary>
         /// Current keys
         /// </summary>
-        private readonly List<Keys> currentKeyboardKeys = new();
+        private readonly List<Keys> currentKeyboardKeys = [];
         /// <summary>
         /// Last strokes
         /// </summary>
@@ -385,7 +385,7 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public Keys[] GetJustPressedKeys()
         {
-            return currentKeyboardKeys.ToArray();
+            return [.. currentKeyboardKeys];
         }
         /// <inheritdoc/>
         public Keys[] GetJustReleasedKeys()

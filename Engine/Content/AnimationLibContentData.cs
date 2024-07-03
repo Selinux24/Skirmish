@@ -10,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Animation list
         /// </summary>
-        private readonly List<IDictionary<string, IEnumerable<AnimationContent>>> animationList = new();
+        private readonly List<IDictionary<string, IEnumerable<AnimationContent>>> animationList = [];
 
         /// <summary>
         /// Animation list
@@ -19,7 +19,7 @@ namespace Engine.Content
         {
             get
             {
-                return animationList.ToArray();
+                return [..animationList];
             }
         }
 

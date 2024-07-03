@@ -17,14 +17,14 @@ namespace Engine.Common
         /// <param name="slot">Slot</param>
         public static InputElement[] Input(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new InputElement("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new InputElement("START_TIME", 0, SharpDX.DXGI.Format.R32_Float, 32, slot, InputClassification.PerVertexData, 0),
-                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 36, slot, InputClassification.PerVertexData, 0),
-            };
+            return
+            [
+                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
+                new ("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
+                new ("START_TIME", 0, SharpDX.DXGI.Format.R32_Float, 32, slot, InputClassification.PerVertexData, 0),
+                new ("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 36, slot, InputClassification.PerVertexData, 0),
+            ];
         }
 
         /// <summary>

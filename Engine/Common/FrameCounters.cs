@@ -20,15 +20,15 @@ namespace Engine.Common
         /// <summary>
         /// Global data keys list
         /// </summary>
-        private static readonly List<string> gGlobalDataKeys = new();
+        private static readonly List<string> gGlobalDataKeys = [];
         /// <summary>
         /// Per frame data keys list
         /// </summary>
-        private static readonly List<string> gFrameDataKeys = new();
+        private static readonly List<string> gFrameDataKeys = [];
         /// <summary>
         /// Frame counters dictionary
         /// </summary>
-        private static readonly ConcurrentDictionary<int, PassCounters> counters = new();
+        private static readonly ConcurrentDictionary<int, PassCounters> counters = [];
         /// <summary>
         /// Summary string builder
         /// </summary>
@@ -245,7 +245,7 @@ namespace Engine.Common
 
             if (GetStatistics(key) is not ResourceStatus c)
             {
-                c = new ResourceStatus();
+                c = [];
                 SetStatistics(key, c, true);
             }
 
@@ -268,7 +268,7 @@ namespace Engine.Common
 
             if (GetStatistics(key) is not ResourceStatus c)
             {
-                c = new ResourceStatus();
+                c = [];
                 SetStatistics(key, c, true);
             }
 

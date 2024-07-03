@@ -27,7 +27,7 @@ namespace Engine.Modular
         /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
-        public IEnumerable<ItemAction> Actions { get; set; } = Enumerable.Empty<ItemAction>();
+        public IEnumerable<ItemAction> Actions { get; set; } = [];
 
         /// <inheritdoc/>
         public override string ToString()

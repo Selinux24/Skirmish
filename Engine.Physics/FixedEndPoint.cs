@@ -6,7 +6,10 @@ namespace Engine.Physics
     /// Fixed end-point
     /// </summary>
     /// <remarks>Used for connect a rigid body with a fixed world position</remarks>
-    public class FixedEndPoint : IContactEndPoint
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class FixedEndPoint(Vector3 positionWorld) : IContactEndPoint
     {
         /// <inheritdoc/>
         public IRigidBody Body { get => null; }
@@ -15,14 +18,6 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public Vector3 PositionLocal { get => PositionWorld; }
         /// <inheritdoc/>
-        public Vector3 PositionWorld { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public FixedEndPoint(Vector3 positionWorld)
-        {
-            PositionWorld = positionWorld;
-        }
+        public Vector3 PositionWorld { get; set; } = positionWorld;
     }
 }

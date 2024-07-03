@@ -7,21 +7,17 @@ namespace Engine.Common
     /// <summary>
     /// Effect
     /// </summary>
-    public class EngineEffect : IDisposable
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="effect">Effect</param>
+    public class EngineEffect(Effect effect) : IDisposable
     {
         /// <summary>
         /// Effect
         /// </summary>
-        private Effect effect = null;
+        private Effect effect = effect;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        public EngineEffect(Effect effect)
-        {
-            this.effect = effect;
-        }
         /// <summary>
         /// Destructor
         /// </summary>

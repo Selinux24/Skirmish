@@ -47,11 +47,11 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Asset definition file names
         /// </summary>
-        public IEnumerable<string> AssetFiles { get; set; } = Enumerable.Empty<string>();
+        public IEnumerable<string> AssetFiles { get; set; } = [];
         /// <summary>
         /// Asset definitions
         /// </summary>
-        public IEnumerable<ContentDataFile> Assets { get; set; } = Enumerable.Empty<ContentDataFile>();
+        public IEnumerable<ContentDataFile> Assets { get; set; } = [];
         /// <summary>
         /// Asset block size
         /// </summary>
@@ -73,23 +73,23 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Hull names - geometry used for navigation mapping and coarse collision detection
         /// </summary>
-        public IEnumerable<string> Hulls { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
+        public IEnumerable<string> Hulls { get; set; } = ["volume", "_volume", "_volume", "_volumes"];
         /// <summary>
         /// Floor names
         /// </summary>
-        public IEnumerable<DungeonProp> Floors { get; set; } = Enumerable.Empty<DungeonProp>();
+        public IEnumerable<DungeonProp> Floors { get; set; } = [];
         /// <summary>
         /// Wall names
         /// </summary>
-        public IEnumerable<DungeonProp> Walls { get; set; } = Enumerable.Empty<DungeonProp>();
+        public IEnumerable<DungeonProp> Walls { get; set; } = [];
         /// <summary>
         /// Ceiling names
         /// </summary>
-        public IEnumerable<DungeonProp> Ceilings { get; set; } = Enumerable.Empty<DungeonProp>();
+        public IEnumerable<DungeonProp> Ceilings { get; set; } = [];
         /// <summary>
         /// Column names
         /// </summary>
-        public IEnumerable<DungeonProp> Columns { get; set; } = Enumerable.Empty<DungeonProp>();
+        public IEnumerable<DungeonProp> Columns { get; set; } = [];
         /// <summary>
         /// Door names dictionary by door type
         /// </summary>
@@ -239,7 +239,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Asset list
         /// </summary>
-        public IEnumerable<DungeonAsset> Assets { get; set; } = Enumerable.Empty<DungeonAsset>();
+        public IEnumerable<DungeonAsset> Assets { get; set; } = [];
         /// <summary>
         /// Prop weight in the collection
         /// </summary>

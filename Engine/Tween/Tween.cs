@@ -6,9 +6,17 @@ namespace Engine.Tween
     /// A concrete implementation of a tween object.
     /// </summary>
     /// <typeparam name="T">The type to tween.</typeparam>
-    public class Tween<T> : ITween<T> where T : struct
+    /// <remarks>
+    /// Initializes a new Tween with a given lerp function.
+    /// </remarks>
+    /// <remarks>
+    /// C# generics are good but not good enough. We need a delegate to know how to
+    /// interpolate between the start and end values for the given type.
+    /// </remarks>
+    /// <param name="lerpFunc">The interpolation function for the tween type.</param>
+    public class Tween<T>(LerpFunc<T> lerpFunc) : ITween<T> where T : struct
     {
-        private readonly LerpFunc<T> lerpFunc;
+        private readonly LerpFunc<T> lerpFunc = lerpFunc;
         private ScaleFunc scaleFunc;
 
         /// <summary>
@@ -32,7 +40,7 @@ namespace Engine.Tween
         /// <summary>
         /// Gets the current state of the tween.
         /// </summary>
-        public TweenState State { get; private set; }
+        public TweenState State { get; private set; } = TweenState.Stopped;
         /// <summary>
         /// Gets the starting value of the tween.
         /// </summary>
@@ -45,20 +53,6 @@ namespace Engine.Tween
         /// Gets the current value of the tween.
         /// </summary>
         public T CurrentValue { get; private set; }
-
-        /// <summary>
-        /// Initializes a new Tween with a given lerp function.
-        /// </summary>
-        /// <remarks>
-        /// C# generics are good but not good enough. We need a delegate to know how to
-        /// interpolate between the start and end values for the given type.
-        /// </remarks>
-        /// <param name="lerpFunc">The interpolation function for the tween type.</param>
-        public Tween(LerpFunc<T> lerpFunc)
-        {
-            this.lerpFunc = lerpFunc;
-            State = TweenState.Stopped;
-        }
 
         /// <summary>
         /// Starts a tween.

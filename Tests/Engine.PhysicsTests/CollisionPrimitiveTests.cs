@@ -143,7 +143,7 @@ namespace Engine.PhysicsTests
             var t2 = new Triangle(Vector3.UnitX, -Vector3.UnitY, Vector3.UnitZ);
             var t3 = new Triangle(Vector3.UnitX, -Vector3.UnitY, -Vector3.UnitZ);
             var t4 = new Triangle(Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ);
-            Triangle[] allTris = new[] { t1, t2, t3, t4 };
+            Triangle[] allTris = [t1, t2, t3, t4];
             Triangle[] distinctTris = allTris.Distinct().ToArray();
             Vector3[] allPoints = allTris.SelectMany(t => t.GetVertices()).ToArray();
             Vector3[] distinctPoints = allPoints.Distinct().ToArray();
@@ -183,7 +183,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(Enumerable.Empty<Triangle>()));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider([]));
         }
 
         [TestMethod()]

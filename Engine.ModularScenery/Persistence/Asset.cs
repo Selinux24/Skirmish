@@ -21,11 +21,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Assets list
         /// </summary>
-        public IEnumerable<AssetReference> References { get; set; } = Enumerable.Empty<AssetReference>();
+        public IEnumerable<AssetReference> References { get; set; } = [];
         /// <summary>
         /// Connections list
         /// </summary>
-        public IEnumerable<AssetConnection> Connections { get; set; } = Enumerable.Empty<AssetConnection>();
+        public IEnumerable<AssetConnection> Connections { get; set; } = [];
 
         /// <summary>
         /// Gets the instance transforms dictionary
@@ -33,7 +33,7 @@ namespace Engine.Modular.Persistence
         /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
         public Dictionary<string, Matrix[]> GetInstanceTransforms()
         {
-            Dictionary<string, Matrix[]> res = new();
+            Dictionary<string, Matrix[]> res = [];
 
             var assetNames = References.Select(a => a.AssetName).Distinct();
 

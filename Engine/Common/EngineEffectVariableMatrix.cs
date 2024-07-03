@@ -7,21 +7,16 @@ namespace Engine.Common
     /// <summary>
     /// Matrix variable
     /// </summary>
-    public class EngineEffectVariableMatrix
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Internal effect variable</param>
+    public class EngineEffectVariableMatrix(EffectMatrixVariable variable)
     {
         /// <summary>
         /// Effect matrix variable
         /// </summary>
-        private readonly EffectMatrixVariable variable = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Internal effect variable</param>
-        public EngineEffectVariableMatrix(EffectMatrixVariable variable)
-        {
-            this.variable = variable;
-        }
+        private readonly EffectMatrixVariable variable = variable;
 
         /// <summary>
         /// Gets a matrix value

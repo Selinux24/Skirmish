@@ -12,7 +12,7 @@ namespace EngineTests.Content
     {
         static TestContext _testContext;
 
-        static readonly float[] matrixValues = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        static readonly float[] matrixValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -103,8 +103,8 @@ namespace EngineTests.Content
         public void MatrixBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new Matrix4X4(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
         }
 
         [TestMethod()]

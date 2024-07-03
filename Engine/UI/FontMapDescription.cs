@@ -77,7 +77,7 @@ namespace Engine.UI
         /// </summary>
         public readonly char[] GetKeys()
         {
-            return Map.Keys.ToArray();
+            return [..Map.Keys];
         }
     }
 }

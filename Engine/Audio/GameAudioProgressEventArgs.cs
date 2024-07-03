@@ -5,37 +5,29 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio progress event arguments class
     /// </summary>
-    public class GameAudioProgressEventArgs : GameAudioEventArgs
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="effect">Effect</param>
+    /// <param name="duration">Duration</param>
+    /// <param name="position">Current position</param>
+    public class GameAudioProgressEventArgs(IGameAudioEffect effect, TimeSpan duration, TimeSpan position) : GameAudioEventArgs(effect)
     {
         /// <summary>
         /// Total duration
         /// </summary>
-        public TimeSpan TotalDuration { get; }
+        public TimeSpan TotalDuration { get; } = duration;
         /// <summary>
         /// Position
         /// </summary>
-        public TimeSpan Position { get; }
+        public TimeSpan Position { get; } = position;
         /// <summary>
         /// Time to end
         /// </summary>
-        public TimeSpan TimeToEnd { get; }
+        public TimeSpan TimeToEnd { get; } = duration - position;
         /// <summary>
         /// Audio progress
         /// </summary>
-        public float Progress { get; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="position">Current position</param>
-        public GameAudioProgressEventArgs(IGameAudioEffect effect, TimeSpan duration, TimeSpan position) : base(effect)
-        {
-            TotalDuration = duration;
-            Position = position;
-            TimeToEnd = duration - position;
-            Progress = (float)(position.TotalSeconds / duration.TotalSeconds);
-        }
+        public float Progress { get; } = (float)(position.TotalSeconds / duration.TotalSeconds);
     }
 }

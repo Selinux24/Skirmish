@@ -1,9 +1,9 @@
 ﻿
 namespace TerrainSamples.SceneGrid.Rules
 {
-    public class Weapon
+    public class Weapon(string name)
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         public WeaponTypes WeaponType { get; set; }
         public int Range { get; set; }
         public int Damage { get; set; }
@@ -14,11 +14,6 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public int MaxStatePoints { get; set; }
         public int CurrentStatePoints { get; set; }
-
-        public Weapon(string name)
-        {
-            Name = name;
-        }
 
         public void Reload()
         {

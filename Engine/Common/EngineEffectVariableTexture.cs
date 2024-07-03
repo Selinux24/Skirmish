@@ -6,25 +6,20 @@ namespace Engine.Common
     /// <summary>
     /// Effect texture variable
     /// </summary>
-    public class EngineEffectVariableTexture
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Variable</param>
+    public class EngineEffectVariableTexture(EffectShaderResourceVariable variable)
     {
         /// <summary>
         /// Effect variable
         /// </summary>
-        private readonly EffectShaderResourceVariable variable = null;
+        private readonly EffectShaderResourceVariable variable = variable;
         /// <summary>
         /// Shader resource
         /// </summary>
         private EngineShaderResourceView resource = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Variable</param>
-        public EngineEffectVariableTexture(EffectShaderResourceVariable variable)
-        {
-            this.variable = variable;
-        }
 
         /// <summary>
         /// Sets the resource to the shader

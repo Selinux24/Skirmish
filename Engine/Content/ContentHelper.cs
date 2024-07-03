@@ -23,7 +23,7 @@ namespace Engine.Content
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                return Array.Empty<float>();
+                return [];
             }
 
             var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -49,7 +49,7 @@ namespace Engine.Content
                 return res;
             }
 
-            return Array.Empty<float>();
+            return [];
         }
 
         /// <summary>

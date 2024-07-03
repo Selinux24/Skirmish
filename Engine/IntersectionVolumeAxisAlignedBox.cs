@@ -8,26 +8,20 @@ namespace Engine
     /// <summary>
     /// Bounding box intersection volume
     /// </summary>
-    public struct IntersectionVolumeAxisAlignedBox : ICullingVolume
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="bbox">Axis aligned bounding box</param>
+    public struct IntersectionVolumeAxisAlignedBox(BoundingBox bbox) : ICullingVolume
     {
         /// <summary>
         /// Bounding box
         /// </summary>
-        private readonly BoundingBox bbox;
+        private readonly BoundingBox bbox = bbox;
 
         /// <inheritdoc/>
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; private set; } = bbox.GetCenter();
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="bbox">Axis aligned bounding box</param>
-        public IntersectionVolumeAxisAlignedBox(BoundingBox bbox)
-        {
-            this.bbox = bbox;
-
-            Position = bbox.GetCenter();
-        }
         /// <summary>
         /// Constructor
         /// </summary>

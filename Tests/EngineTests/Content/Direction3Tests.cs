@@ -100,7 +100,7 @@ namespace EngineTests.Content
         [TestMethod()]
         public void DirectionArrayTest()
         {
-            var res = new Direction3(new float[] { 1, 2, 3 });
+            var res = new Direction3([1, 2, 3]);
 
             Assert.AreEqual(new Direction3(1, 2, 3), res);
         }
@@ -108,8 +108,8 @@ namespace EngineTests.Content
         public void DirectionBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new Direction3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3(new float[] { 1, 2, 3, 4 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void DirectionComponentsTest()

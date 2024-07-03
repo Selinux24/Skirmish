@@ -58,7 +58,7 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ColorArrayTest()
         {
-            var res = new ColorRgba(new float[] { 1, 2, 3, 4 });
+            var res = new ColorRgba([1, 2, 3, 4]);
 
             Assert.AreEqual(new ColorRgba(1, 2, 3, 4), res);
         }
@@ -66,9 +66,9 @@ namespace EngineTests.Content
         public void ColorBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new ColorRgba(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(new float[] { 1, 2, 3 }));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(new float[] { 1, 2, 3, 4, 5 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void ColorComponentsTest()

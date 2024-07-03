@@ -6,21 +6,16 @@ namespace Engine.Common
     /// <summary>
     /// Effect sampler variable
     /// </summary>
-    public class EngineEffectVariableSampler
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="variable">Internal effect sampler variable</param>
+    public class EngineEffectVariableSampler(EffectSamplerVariable variable)
     {
         /// <summary>
         /// Effect sampler variable
         /// </summary>
-        private readonly EffectSamplerVariable variable = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="variable">Internal effect sampler variable</param>
-        public EngineEffectVariableSampler(EffectSamplerVariable variable)
-        {
-            this.variable = variable;
-        }
+        private readonly EffectSamplerVariable variable = variable;
 
         /// <summary>
         /// Gets a value of the specified type from the sampler variable

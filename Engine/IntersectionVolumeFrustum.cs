@@ -8,31 +8,24 @@ namespace Engine
     /// <summary>
     /// Frustum intersection volume
     /// </summary>
-    public struct IntersectionVolumeFrustum : ICullingVolume
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="frustum">Camera view frustum</param>
+    public struct IntersectionVolumeFrustum(BoundingFrustum frustum) : ICullingVolume
     {
         /// <summary>
         /// Internal volume
         /// </summary>
-        private readonly BoundingFrustum frustum;
+        private readonly BoundingFrustum frustum = frustum;
 
         /// <inheritdoc/>
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; private set; } = frustum.GetCameraParams().Position;
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; private set; }
+        public float Radius { get; private set; } = frustum.GetCameraParams().ZFar;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="frustum">Camera view frustum</param>
-        public IntersectionVolumeFrustum(BoundingFrustum frustum)
-        {
-            this.frustum = frustum;
-
-            Position = frustum.GetCameraParams().Position;
-            Radius = frustum.GetCameraParams().ZFar;
-        }
         /// <summary>
         /// Constructor
         /// </summary>

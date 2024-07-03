@@ -79,7 +79,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
 
             dc.SetPixelShaderResourceView(0, texture);
 
-            dc.SetPixelShaderSamplers(0, new[] { samplerPoint, samplerLinear });
+            dc.SetPixelShaderSamplers(0, [samplerPoint, samplerLinear]);
         }
     }
 }

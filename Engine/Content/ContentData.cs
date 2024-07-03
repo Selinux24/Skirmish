@@ -1284,7 +1284,7 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ContentData FilterMask(string mask)
         {
-            return FilterMask(new[] { mask });
+            return FilterMask([mask]);
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name mask list
@@ -1652,7 +1652,7 @@ namespace Engine.Content
         /// <returns>Returns the number of meshes setted</returns>
         public int SetHullMark(bool isHull, string mask)
         {
-            return SetHullMark(isHull, new[] { mask });
+            return SetHullMark(isHull, [mask]);
         }
         /// <summary>
         /// Marks hull flag for all the geometry filtered by the specified mask list

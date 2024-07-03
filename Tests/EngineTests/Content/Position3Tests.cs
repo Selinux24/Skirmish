@@ -43,7 +43,7 @@ namespace EngineTests.Content
         [TestMethod()]
         public void PositionArrayTest()
         {
-            var res = new Position3(new float[] { 1, 2, 3 });
+            var res = new Position3([1, 2, 3]);
 
             Assert.AreEqual(new Position3(1, 2, 3), res);
         }
@@ -51,8 +51,8 @@ namespace EngineTests.Content
         public void PositionBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new Position3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3(new float[] { 1, 2, 3, 4 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void PositionComponentsTest()

@@ -1,9 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Content;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Engine.Content;
 
 namespace EngineTests.Content
 {
@@ -55,7 +55,7 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ScaleArrayTest()
         {
-            var res = new Scale3(new float[] { 1, 2, 3 });
+            var res = new Scale3([1, 2, 3]);
 
             Assert.AreEqual(new Scale3(1, 2, 3), res);
         }
@@ -63,8 +63,8 @@ namespace EngineTests.Content
         public void ScaleBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new Scale3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3(Array.Empty<float>()));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3(new float[] { 1, 2, 3, 4 }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3([]));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void ScaleComponentsTest()

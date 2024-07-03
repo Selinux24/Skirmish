@@ -38,7 +38,7 @@ namespace Engine.UI
                     cList.Add(c);
                 }
 
-                return cList.ToArray();
+                return [..cList];
             }
         }
 
@@ -81,13 +81,13 @@ namespace Engine.UI
         {
             return new FontMapKeycodeGenerator
             {
-                Keys = customKeys ?? Enumerable.Empty<char>(),
+                Keys = customKeys ?? [],
             };
         }
 
         /// <summary>
         /// Keys
         /// </summary>
-        public IEnumerable<char> Keys { get; private set; } = Enumerable.Empty<char>();
+        public IEnumerable<char> Keys { get; private set; } = [];
     }
 }
