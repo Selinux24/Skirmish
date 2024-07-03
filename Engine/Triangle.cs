@@ -48,6 +48,20 @@ namespace Engine
         }
 
         /// <summary>
+        /// Generate a triangle list from geometry
+        /// </summary>
+        /// <param name="geometry">Geometry descriptot</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(GeometryDescriptor geometry)
+        {
+            if (geometry == null)
+            {
+                return [];
+            }
+
+            return ComputeTriangleList(geometry.Vertices, geometry.Indices);
+        }
+        /// <summary>
         /// Generate a triangle list from vertices
         /// </summary>
         /// <param name="vertices">Vertices</param>

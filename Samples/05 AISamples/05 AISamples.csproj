@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AISamples</RootNamespace>
+    <AssemblyName>AISamples</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SceneCodingWithRadu\Resources\dirt002.dds" />
+    <None Remove="SceneCodingWithRadu\Resources\normal001.dds" />
+    <None Remove="SceneStart\pointer.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="SceneCodingWithRadu\Resources\dirt002.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneCodingWithRadu\Resources\normal001.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\backGround.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\buttons.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\pointer.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
+    <ProjectReference Include="..\..\Engine.Windows\Engine.Windows.csproj" />
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -17,12 +17,6 @@ namespace BasicSamples
             tweener.TweenHide(ctrl, milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Roll(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
-        {
-            tweener.TweenRotate(ctrl, MathUtil.TwoPi, milliseconds, ScaleFuncs.Linear);
-            tweener.TweenScale(ctrl, 1, 0.5f, milliseconds, ScaleFuncs.QuinticEaseOut);
-        }
-
         public static void ShowRoll(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
         {
             tweener.TweenScaleUp(ctrl, milliseconds, ScaleFuncs.QuinticEaseOut);
