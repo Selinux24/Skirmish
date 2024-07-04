@@ -658,6 +658,7 @@ namespace Engine
                 Following.Update(gameTime);
                 nextPosition = Following.Position;
                 nextInterest = Following.Interest;
+                updateNeeded = true;
             }
 
             UpdateTranslations(gameTime);

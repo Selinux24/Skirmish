@@ -37,6 +37,15 @@ namespace AISamples.SceneCodingWithRadu
         private readonly Car car = new(0, 0, 10, 7, 20);
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
         private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
+        private readonly Color4 carSensorColor = Color.Yellow;
+
+        private readonly Road road = new(0, 15, 4);
+        private readonly Color4 roadColor = Color.DarkGray;
+        private readonly Color4 roadEdgeColor = Color.WhiteSmoke;
+
+        private bool followCar = false;
+        private readonly float followCarDistance = 100;
+        private readonly float followCarHeight = 50;
 
         public CodingWithRaduScene(Game game) : base(game)
         {
@@ -113,7 +122,8 @@ namespace AISamples.SceneCodingWithRadu
             lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "EdgeDrawer",
                 "EdgeDrawer",
-                desc);
+                desc,
+                LayerEffects - 1);
         }
         private async Task InitializeTriangleDrawer()
         {
@@ -125,7 +135,8 @@ namespace AISamples.SceneCodingWithRadu
             triangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "TriangleDrawer",
                 "TriangleDrawer",
-                desc);
+                desc,
+                LayerEffects + 1);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -140,11 +151,17 @@ namespace AISamples.SceneCodingWithRadu
                 Game.Exit();
             }
 
+            car.SetPosition(road.GetLaneCenter(road.LaneCount - 1));
+
             UpdateLayout();
 
             Camera.Goto(new Vector3(0, 120, -175));
             Camera.LookTo(Vector3.Zero);
             Camera.FarPlaneDistance = spaceSize * 1.5f;
+            Camera.MovementDelta = spaceSize * 0.2f;
+            Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
+
+            DrawRoad();
 
             gameReady = true;
         }
@@ -163,12 +180,33 @@ namespace AISamples.SceneCodingWithRadu
                 return;
             }
 
+            if (Game.Input.KeyJustReleased(Keys.F))
+            {
+                followCar = !followCar;
+            }
+
             UpdateInputCamera(gameTime);
             UpdateInputCar();
 
             UpdateCar(gameTime);
         }
         private void UpdateInputCamera(IGameTime gameTime)
+        {
+            if (!followCar)
+            {
+                Camera.Following = null;
+
+                UpdateInputCameraManual(gameTime);
+
+                return;
+            }
+
+            if (Camera.Following == null)
+            {
+                Camera.Following = new CarFollower(car, followCarDistance, followCarHeight);
+            }
+        }
+        private void UpdateInputCameraManual(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
@@ -224,12 +262,56 @@ namespace AISamples.SceneCodingWithRadu
         {
             car.Update(gameTime);
 
+            DrawCar();
+            DrawSensor();
+        }
+
+        private void DrawCar()
+        {
             var box = car.GetBox();
             var tris = Triangle.ComputeTriangleList(box);
             var lines = Line3D.CreateBox(box);
 
             triangleDrawer.SetPrimitives(carColor, tris);
             lineDrawer.SetPrimitives(carEdgeColor, lines);
+        }
+        private void DrawSensor()
+        {
+            var rays = car.Sensor.GetRays().Select(r =>
+            {
+                var p = r.Position;
+                p.Y += 0.5f;
+
+                return new Line3D(p, p + (r.Direction * r.MaxDistance));
+            });
+
+            lineDrawer.SetPrimitives(carSensorColor, rays);
+        }
+        private void DrawRoad()
+        {
+            triangleDrawer.Clear(roadColor);
+            lineDrawer.Clear(roadEdgeColor);
+
+            const float h = 0.2f;
+            var rectPoints = road.GetLanes().Select(r =>
+                new Vector3[] {
+                    new (r.Left, h, r.Top),
+                    new (r.Right, h, r.Top),
+                    new (r.Right, h, r.Bottom),
+                    new (r.Left, h, r.Bottom),
+                });
+
+            foreach (var rect in rectPoints)
+            {
+                var gTris = GeometryUtil.CreatePolygonTriangleList(rect, false);
+                var gLines = GeometryUtil.CreatePolygonLineList(rect);
+
+                var tris = Triangle.ComputeTriangleList(gTris);
+                var lines = Line3D.CreateFromVertices(gLines);
+
+                triangleDrawer.AddPrimitives(roadColor, tris);
+                lineDrawer.AddPrimitives(roadEdgeColor, lines);
+            }
         }
 
         public override void GameGraphicsResized()

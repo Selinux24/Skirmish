@@ -4,10 +4,11 @@ using System;
 
 namespace AISamples.SceneCodingWithRadu
 {
-    class Car(float x, float y, float width, float height, float depth)
+    class Car
     {
-        private float x = x;
-        private float y = y;
+        private float x;
+        private float y;
+        private readonly OrientedBoundingBox box;
 
         private float speed = 0;
         private readonly float acceleration = 0.2f;
@@ -17,10 +18,20 @@ namespace AISamples.SceneCodingWithRadu
 
         private float angle = 0;
         private readonly float rotationSpeed = 0.03f;
+        private Vector2 direction = Vector2.Zero;
 
         public CarControls Controls { get; } = new();
+        public Sensor Sensor { get; }
 
-        private readonly OrientedBoundingBox box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
+        public Car(float x, float y, float width, float height, float depth)
+        {
+            this.x = x;
+            this.y = y;
+
+            box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
+
+            Sensor = new(this, 5, 100);
+        }
 
         public OrientedBoundingBox GetBox()
         {
@@ -36,6 +47,8 @@ namespace AISamples.SceneCodingWithRadu
             float time = gameTime.ElapsedSeconds;
 
             Move(time);
+
+            Sensor.Update();
         }
 
         private void Move(float time)
@@ -67,18 +80,39 @@ namespace AISamples.SceneCodingWithRadu
                 speed = 0;
             }
 
-            int flip = speed != 0 ? MathF.Sign(speed) : 0;
             if (Controls.Left)
             {
-                angle -= rot * flip;
+                angle -= rot * MathF.Sign(speed);
             }
             if (Controls.Right)
             {
-                angle += rot * flip;
+                angle += rot * MathF.Sign(speed);
             }
 
-            x += MathF.Sin(angle) * speed;
-            y += MathF.Cos(angle) * speed;
+            direction = new Vector2(MathF.Sin(angle), MathF.Cos(angle));
+            x += direction.X * speed;
+            y += direction.Y * speed;
+        }
+
+        public Vector2 GetPosition()
+        {
+            return new(x, y);
+        }
+
+        public void SetPosition(Vector2 position)
+        {
+            x = position.X;
+            y = position.Y;
+        }
+
+        public float GetAngle()
+        {
+            return angle;
+        }
+
+        public Vector2 GetDirection()
+        {
+            return direction;
         }
     }
 }

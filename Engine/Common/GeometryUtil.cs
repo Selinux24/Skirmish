@@ -342,9 +342,9 @@ namespace Engine.Common
             float width = renderWidth;
             float height = renderHeight;
 
-            float left = ((width / 2) * -1);
+            float left = -width * 0.5f;
             float right = left + width;
-            float top = (height / 2);
+            float top = height * 0.5f;
             float bottom = top - height;
 
             vertices[0] = new Vector3(left, top, 0.0f);
@@ -2645,6 +2645,18 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateXZPlane(float sizeX, float sizeZ, float height)
         {
+            return CreateXZPlane(Vector3.Zero, sizeX, sizeZ, height);
+        }
+        /// <summary>
+        /// Creates a XZ plane
+        /// </summary>
+        /// <param name="center">Plane center</param>
+        /// <param name="sizeX">Plane X size</param>
+        /// <param name="sizeZ">Plane Z size</param>
+        /// <param name="height">Plane height</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZPlane(Vector3 center, float sizeX, float sizeZ, float height)
+        {
             Vector3[] vertices =
             [
                 new (-sizeX*0.5f, +height, -sizeZ*0.5f),
@@ -2652,6 +2664,14 @@ namespace Engine.Common
                 new (+sizeX*0.5f, +height, -sizeZ*0.5f),
                 new (+sizeX*0.5f, +height, +sizeZ*0.5f),
             ];
+
+            if (center != Vector3.Zero)
+            {
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = vertices[i] + center;
+                }
+            }
 
             Vector3[] normals =
             [
