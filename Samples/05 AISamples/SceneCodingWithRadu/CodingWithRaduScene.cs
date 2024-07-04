@@ -5,6 +5,8 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,8 +38,10 @@ namespace AISamples.SceneCodingWithRadu
 
         private readonly Car car = new(0, 0, 10, 7, 20);
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
+        private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
-        private readonly Color4 carSensorColor = Color.Yellow;
+        private readonly Color4 carSensorColor = Color.LightYellow;
+        private readonly Color4 carSensorContactColor = Color.OrangeRed;
 
         private readonly Road road = new(0, 15, 4);
         private readonly Color4 roadColor = Color.DarkGray;
@@ -260,7 +264,7 @@ namespace AISamples.SceneCodingWithRadu
 
         private void UpdateCar(IGameTime gameTime)
         {
-            car.Update(gameTime);
+            car.Update(gameTime, road);
 
             DrawCar();
             DrawSensor();
@@ -268,24 +272,53 @@ namespace AISamples.SceneCodingWithRadu
 
         private void DrawCar()
         {
+            triangleDrawer.Clear(carColor);
+            triangleDrawer.Clear(carDamagedColor);
+            lineDrawer.Clear(carEdgeColor);
+
             var box = car.GetBox();
             var tris = Triangle.ComputeTriangleList(box);
             var lines = Line3D.CreateBox(box);
 
-            triangleDrawer.SetPrimitives(carColor, tris);
-            lineDrawer.SetPrimitives(carEdgeColor, lines);
+            triangleDrawer.AddPrimitives(car.Damaged ? carDamagedColor : carColor, tris);
+            lineDrawer.AddPrimitives(carEdgeColor, lines);
         }
         private void DrawSensor()
         {
-            var rays = car.Sensor.GetRays().Select(r =>
+            lineDrawer.Clear(carSensorColor);
+            lineDrawer.Clear(carSensorContactColor);
+
+            var readings = car.Sensor.GetReadings();
+
+            var rayList = car.Sensor.GetRays().SelectMany(r => DrawSensorRay(r, readings))
+                .GroupBy(r => r.Item1)
+                .ToDictionary(
+                    keySelector => keySelector.Key,
+                    elementSelector => elementSelector.Select(r => r.Item2));
+
+            lineDrawer.AddPrimitives(rayList);
+        }
+        private IEnumerable<(Color4, Line3D)> DrawSensorRay(PickingRay r, SensorReading[] readings)
+        {
+            var p0 = r.Start;
+            p0.Y += 0.5f;
+            var p1 = p0 + (r.Direction * r.MaxDistance);
+
+            //Find readings for the ray
+            var rayReading = Array.Find(readings, rd => rd.Ray == r);
+            if (rayReading == null)
             {
-                var p = r.Position;
-                p.Y += 0.5f;
+                //No reading, draw the ray
+                yield return (carSensorColor, new Line3D(p0, p1));
 
-                return new Line3D(p, p + (r.Direction * r.MaxDistance));
-            });
+                yield break;
+            }
 
-            lineDrawer.SetPrimitives(carSensorColor, rays);
+            var pi = rayReading.Position;
+            pi.Y += 0.5f;
+
+            yield return (carSensorColor, new Line3D(p0, pi));
+            yield return (carSensorContactColor, new Line3D(pi, p1));
         }
         private void DrawRoad()
         {

@@ -499,7 +499,43 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Determines whether there is an intersection between a Ray and a BoundingBox
+        /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Segment"/>.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="segment">Segment</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSegment(PickingRay ray, Segment segment, out Vector3 point, out float distance)
+        {
+            Ray rRay1 = ray;
+            Ray rRay2 = new(segment.Point1, segment.Direction);
+
+            bool touch = Collision.RayIntersectsRay(ref rRay1, ref rRay2, out Vector3 p);
+            if (!touch)
+            {
+                point = Vector3.Zero;
+                distance = float.MaxValue;
+
+                return false;
+            }
+
+            float d = Vector3.Distance(ray.Start, p);
+            if (d > ray.RayLength)
+            {
+                point = Vector3.Zero;
+                distance = float.MaxValue;
+
+                return false;
+            }
+
+            point = p;
+            distance = d;
+
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="BoundingBox"/>.
         /// </summary>
         /// <param name="ray">The ray to test</param>
         /// <param name="box">The box to test</param>
@@ -509,7 +545,7 @@ namespace Engine.Common
             return RayIntersectsBox(ray, box, out _);
         }
         /// <summary>
-        /// Determines whether there is an intersection between a Ray and a BoundingBox
+        /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="BoundingBox"/>.
         /// </summary>
         /// <param name="ray">The ray to test</param>
         /// <param name="box">The box to test</param>
@@ -528,7 +564,7 @@ namespace Engine.Common
             return false;
         }
         /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Triangle"/>.
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="tri">Triangle</param>
@@ -544,7 +580,7 @@ namespace Engine.Common
             if (Collision.RayIntersectsTriangle(ref rRay, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
             {
                 point = collisionPoint;
-                distance = Vector3.Distance(collisionPoint, ray.Position);
+                distance = Vector3.Distance(collisionPoint, ray.Start);
                 if (distance > ray.MaxDistance)
                 {
                     return false;

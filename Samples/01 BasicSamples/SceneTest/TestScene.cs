@@ -831,7 +831,7 @@ namespace BasicSamples.SceneTest
                 float y = Helper.RandomGenerator.NextFloat(0, MathUtil.Pi / 16f);
                 float s = Helper.RandomGenerator.NextFloat(1.8f, 3.5f);
 
-                topDownRay.Position = new Vector3(px, 1000, pz);
+                topDownRay.Start = new Vector3(px, 1000, pz);
                 topDownRay.Direction = Vector3.Down;
                 scenery.PickFirst(topDownRay, out var treeIPos);
 

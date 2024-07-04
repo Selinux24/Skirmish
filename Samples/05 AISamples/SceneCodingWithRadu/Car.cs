@@ -9,6 +9,8 @@ namespace AISamples.SceneCodingWithRadu
         private float x;
         private float y;
         private readonly OrientedBoundingBox box;
+        private OrientedBoundingBox trnBox;
+        private readonly Vector2[] points = new Vector2[4];
 
         private float speed = 0;
         private readonly float acceleration = 0.2f;
@@ -21,7 +23,13 @@ namespace AISamples.SceneCodingWithRadu
         private Vector2 direction = Vector2.Zero;
 
         public CarControls Controls { get; } = new();
+        public bool Forward => !Damaged && Controls.Forward;
+        public bool Reverse => !Damaged && Controls.Reverse;
+        public bool Left => !Damaged && Controls.Left;
+        public bool Right => !Damaged && Controls.Right;
+
         public Sensor Sensor { get; }
+        public bool Damaged { get; private set; } = false;
 
         public Car(float x, float y, float width, float height, float depth)
         {
@@ -30,25 +38,42 @@ namespace AISamples.SceneCodingWithRadu
 
             box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
 
-            Sensor = new(this, 5, 100);
+            Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
         }
 
         public OrientedBoundingBox GetBox()
         {
             var trn = Matrix.RotationY(angle) * Matrix.Translation(x, 0, y);
 
-            var trnBox = box;
+            trnBox = box;
             trnBox.Transform(ref trn);
+
+            CreatePoints();
+
             return trnBox;
         }
+        private void CreatePoints()
+        {
+            var corners = trnBox.GetCorners();
 
-        public void Update(IGameTime gameTime)
+            points[0] = new(corners[4].X, corners[4].Z);
+            points[1] = new(corners[5].X, corners[5].Z);
+            points[2] = new(corners[6].X, corners[6].Z);
+            points[3] = new(corners[7].X, corners[7].Z);
+        }
+
+        public void Update(IGameTime gameTime, Road road)
         {
             float time = gameTime.ElapsedSeconds;
 
             Move(time);
 
-            Sensor.Update();
+            if (!Damaged)
+            {
+                Damaged = AssessDamage(road);
+            }
+
+            Sensor.Update(road);
         }
 
         private void Move(float time)
@@ -56,11 +81,11 @@ namespace AISamples.SceneCodingWithRadu
             float acc = acceleration * time * 100f;
             float rot = rotationSpeed * time * 100f;
 
-            if (Controls.Forward)
+            if (Forward)
             {
                 speed += acc;
             }
-            else if (Controls.Reverse)
+            else if (Reverse)
             {
                 speed -= acc;
             }
@@ -80,11 +105,11 @@ namespace AISamples.SceneCodingWithRadu
                 speed = 0;
             }
 
-            if (Controls.Left)
+            if (Left)
             {
                 angle -= rot * MathF.Sign(speed);
             }
-            if (Controls.Right)
+            if (Right)
             {
                 angle += rot * MathF.Sign(speed);
             }
@@ -94,22 +119,34 @@ namespace AISamples.SceneCodingWithRadu
             y += direction.Y * speed;
         }
 
+        private bool AssessDamage(Road road)
+        {
+            var roadBorders = road.GetBorders();
+
+            for (int i = 0; i < roadBorders.Length; i++)
+            {
+                if (Utils.Segment2DIntersectsPoly2D(roadBorders[i], points))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public Vector2 GetPosition()
         {
             return new(x, y);
         }
-
         public void SetPosition(Vector2 position)
         {
             x = position.X;
             y = position.Y;
         }
-
         public float GetAngle()
         {
             return angle;
         }
-
         public Vector2 GetDirection()
         {
             return direction;

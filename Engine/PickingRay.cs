@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -8,12 +9,16 @@ namespace Engine
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public struct PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams, float length)
+    public struct PickingRay(Vector3 start, Vector3 direction, PickingHullTypes rayPickingParams, float length) : IEquatable<PickingRay>
     {
         /// <summary>
-        /// Position
+        /// Start position
         /// </summary>
-        public Vector3 Position { get; set; } = position;
+        public Vector3 Start { get; set; } = start;
+        /// <summary>
+        /// End position
+        /// </summary>
+        public readonly Vector3 End { get { return Start + Direction * RayLength; } }
         /// <summary>
         /// Direction
         /// </summary>
@@ -46,6 +51,16 @@ namespace Engine
                 return RayLength <= 0 ? float.MaxValue : RayLength;
             }
         }
+        /// <summary>
+        /// Gets the ray segment
+        /// </summary>
+        public readonly Segment Segment
+        {
+            get
+            {
+                return new Segment(Start, End);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -71,16 +86,51 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction) : this(position, direction, PickingHullTypes.Default, float.MaxValue)
+        public PickingRay(Vector3 start, Vector3 direction) : this(start, direction, PickingHullTypes.Default, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams) : this(position, direction, rayPickingParams, float.MaxValue)
+        public PickingRay(Vector3 start, Vector3 direction, PickingHullTypes rayPickingParams) : this(start, direction, rayPickingParams, float.MaxValue)
         {
 
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public PickingRay(Segment segment) : this(segment.Point1, segment.Direction, PickingHullTypes.Default, segment.Length)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public PickingRay(Segment segment, PickingHullTypes rayPickingParams) : this(segment.Point1, segment.Direction, rayPickingParams, segment.Length)
+        {
+
+        }
+
+        /// <summary>
+        /// Compares two instances of <see cref="PickingRay"/> for equality.
+        /// </summary>
+        /// <param name="left">An instance of <see cref="PickingRay"/>.</param>
+        /// <param name="right">Another instance of <see cref="PickingRay"/>.</param>
+        /// <returns>A value indicating whether the two instances are equal.</returns>
+        public static bool operator ==(PickingRay left, PickingRay right)
+        {
+            return left.Equals(right);
+        }
+        /// <summary>
+        /// Compares two instances of <see cref="PickingRay"/> for inequality.
+        /// </summary>
+        /// <param name="left">An instance of <see cref="PickingRay"/>.</param>
+        /// <param name="right">Another instance of <see cref="PickingRay"/>.</param>
+        /// <returns>A value indicating whether the two instances are unequal.</returns>
+        public static bool operator !=(PickingRay left, PickingRay right)
+        {
+            return !(left == right);
         }
 
         /// <summary>
@@ -88,7 +138,7 @@ namespace Engine
         /// </summary>
         public static implicit operator Ray(PickingRay value)
         {
-            return new Ray(value.Position, value.Direction);
+            return new Ray(value.Start, value.Direction);
         }
         /// <summary>
         /// Implicit conversion between PickingRay and Ray
@@ -96,6 +146,32 @@ namespace Engine
         public static implicit operator PickingRay(Ray value)
         {
             return new PickingRay(value);
+        }
+
+        /// <inheritdoc/>
+        public override readonly bool Equals(object obj)
+        {
+            PickingRay? objV = obj as PickingRay?;
+            if (objV != null)
+            {
+                return Equals(objV);
+            }
+
+            return false;
+        }
+        /// <inheritdoc/>
+        public readonly bool Equals(PickingRay other)
+        {
+            return
+                Start == other.Start &&
+                Direction == other.Direction &&
+                RayLength == other.RayLength &&
+                RayPickingParams == other.RayPickingParams;
+        }
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Start, Direction, RayLength, RayPickingParams);
         }
     }
 }

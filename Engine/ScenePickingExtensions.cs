@@ -394,7 +394,7 @@ namespace Engine
             if (intersects && d <= ray.MaxDistance)
             {
                 distance = d;
-                position = ray.Position + (Vector3.Normalize(ray.Direction) * d);
+                position = ray.Start + (Vector3.Normalize(ray.Direction) * d);
 
                 return true;
             }

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine;
+using SharpDX;
 
 namespace AISamples.SceneCodingWithRadu
 {
@@ -13,7 +14,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float top = infinity;
         private readonly float bottom = -infinity;
 
-        private readonly RoadBorder[] borders = [];
+        private readonly Segment[] borders = [];
 
         public int LaneCount { get; }
 
@@ -29,22 +30,22 @@ namespace AISamples.SceneCodingWithRadu
             borders = CalculateBorders();
         }
 
-        private RoadBorder[] CalculateBorders()
+        private Segment[] CalculateBorders()
         {
-            Vector2 topLeft = new(left, top);
-            Vector2 topRight = new(right, top);
-            Vector2 bottomLeft = new(left, bottom);
-            Vector2 bottomRight = new(right, bottom);
+            Vector3 topLeft = new(left, 0, top);
+            Vector3 topRight = new(right, 0, top);
+            Vector3 bottomLeft = new(left, 0, bottom);
+            Vector3 bottomRight = new(right, 0, bottom);
 
             return
             [
-                new RoadBorder { A = topLeft, B = topRight },
-                new RoadBorder { A = topRight, B = bottomRight },
-                new RoadBorder { A = bottomRight, B = bottomLeft },
-                new RoadBorder { A = bottomLeft, B = topLeft }
+                new (){ Point1 = topLeft,     Point2 = topRight },
+                new (){ Point1 = topRight,    Point2 = bottomRight },
+                new (){ Point1 = bottomRight, Point2 = bottomLeft },
+                new (){ Point1 = bottomLeft,  Point2 = topLeft }
             ];
         }
-        public RoadBorder[] GetBorders()
+        public Segment[] GetBorders()
         {
             return [.. borders];
         }
@@ -66,11 +67,5 @@ namespace AISamples.SceneCodingWithRadu
 
             return new Vector2(left + laneWidth * 0.5f + laneIndex * laneWidth, 0f);
         }
-    }
-
-    class RoadBorder
-    {
-        public Vector2 A { get; set; }
-        public Vector2 B { get; set; }
     }
 }
