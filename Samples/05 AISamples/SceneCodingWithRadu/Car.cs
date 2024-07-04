@@ -14,15 +14,15 @@ namespace AISamples.SceneCodingWithRadu
 
         private float speed = 0;
         private readonly float acceleration = 0.2f;
-        private readonly float maxSpeed = 3;
-        private readonly float maxReverseSpeed = -1.5f;
+        private readonly float maxSpeed = 2;
+        private readonly float maxReverseSpeed = -1f;
         private readonly float friction = 0.05f;
 
         private float angle = 0;
         private readonly float rotationSpeed = 0.03f;
         private Vector2 direction = Vector2.Zero;
 
-        public CarControls Controls { get; } = new();
+        public CarControls Controls { get; }
         public bool Forward => !Damaged && Controls.Forward;
         public bool Reverse => !Damaged && Controls.Reverse;
         public bool Left => !Damaged && Controls.Left;
@@ -31,13 +31,13 @@ namespace AISamples.SceneCodingWithRadu
         public Sensor Sensor { get; }
         public bool Damaged { get; private set; } = false;
 
-        public Car(float x, float y, float width, float height, float depth)
+        public Car(float width, float height, float depth, ControlTypes controlType, float maxSpeed = 3)
         {
-            this.x = x;
-            this.y = y;
+            this.maxSpeed = maxSpeed;
 
             box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
 
+            Controls = new(controlType);
             Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
         }
 

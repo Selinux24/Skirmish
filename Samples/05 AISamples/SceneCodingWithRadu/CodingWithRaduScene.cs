@@ -36,12 +36,18 @@ namespace AISamples.SceneCodingWithRadu
 
         private bool gameReady = false;
 
-        private readonly Car car = new(0, 0, 10, 7, 20);
+        private readonly Car car = new(10, 7, 20, ControlTypes.Player);
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
         private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
         private readonly Color4 carSensorColor = Color.LightYellow;
         private readonly Color4 carSensorContactColor = Color.OrangeRed;
+        private readonly Car[] traffic =
+        [
+            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
+            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
+            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
+        ];
 
         private readonly Road road = new(0, 15, 4);
         private readonly Color4 roadColor = Color.DarkGray;
@@ -157,6 +163,16 @@ namespace AISamples.SceneCodingWithRadu
 
             car.SetPosition(road.GetLaneCenter(road.LaneCount - 1));
 
+            var lane0Pos = road.GetLaneCenter(0);
+            var lane1Pos = road.GetLaneCenter(1);
+            var lane2Pos = road.GetLaneCenter(2);
+            lane0Pos.Y = -125;
+            lane1Pos.Y = -150;
+            lane2Pos.Y = -100;
+            traffic[0].SetPosition(lane0Pos);
+            traffic[1].SetPosition(lane1Pos);
+            traffic[2].SetPosition(lane2Pos);
+
             UpdateLayout();
 
             Camera.Goto(new Vector3(0, 120, -175));
@@ -192,7 +208,9 @@ namespace AISamples.SceneCodingWithRadu
             UpdateInputCamera(gameTime);
             UpdateInputCar();
 
-            UpdateCar(gameTime);
+            BeginDrawCar();
+            UpdateCar(gameTime, car, true);
+            UpdateTraffic(gameTime);
         }
         private void UpdateInputCamera(IGameTime gameTime)
         {
@@ -262,35 +280,48 @@ namespace AISamples.SceneCodingWithRadu
             car.Controls.Right = Game.Input.KeyPressed(Keys.Right);
         }
 
-        private void UpdateCar(IGameTime gameTime)
+        private void UpdateCar(IGameTime gameTime, Car c, bool drawSensor)
         {
-            car.Update(gameTime, road);
+            c.Update(gameTime, road);
 
-            DrawCar();
-            DrawSensor();
+            DrawCar(c);
+
+            if (drawSensor)
+            {
+                DrawSensor(c);
+            }
+        }
+        private void UpdateTraffic(IGameTime gameTime)
+        {
+            foreach (var c in traffic)
+            {
+                UpdateCar(gameTime, c, false);
+            }
         }
 
-        private void DrawCar()
+        private void BeginDrawCar()
         {
             triangleDrawer.Clear(carColor);
             triangleDrawer.Clear(carDamagedColor);
             lineDrawer.Clear(carEdgeColor);
 
-            var box = car.GetBox();
+            lineDrawer.Clear(carSensorColor);
+            lineDrawer.Clear(carSensorContactColor);
+        }
+        private void DrawCar(Car c)
+        {
+            var box = c.GetBox();
             var tris = Triangle.ComputeTriangleList(box);
             var lines = Line3D.CreateBox(box);
 
-            triangleDrawer.AddPrimitives(car.Damaged ? carDamagedColor : carColor, tris);
+            triangleDrawer.AddPrimitives(c.Damaged ? carDamagedColor : carColor, tris);
             lineDrawer.AddPrimitives(carEdgeColor, lines);
         }
-        private void DrawSensor()
+        private void DrawSensor(Car c)
         {
-            lineDrawer.Clear(carSensorColor);
-            lineDrawer.Clear(carSensorContactColor);
+            var readings = c.Sensor.GetReadings();
 
-            var readings = car.Sensor.GetReadings();
-
-            var rayList = car.Sensor.GetRays().SelectMany(r => DrawSensorRay(r, readings))
+            var rayList = c.Sensor.GetRays().SelectMany(r => DrawSensorRay(r, readings))
                 .GroupBy(r => r.Item1)
                 .ToDictionary(
                     keySelector => keySelector.Key,

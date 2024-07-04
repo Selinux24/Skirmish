@@ -13,7 +13,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float raySpread = raySpread;
 
         private readonly PickingRay[] rays = new PickingRay[rayCount];
-        private readonly List<SensorReading> readings;
+        private readonly List<SensorReading> readings = [];
 
         public void Update(Road road)
         {

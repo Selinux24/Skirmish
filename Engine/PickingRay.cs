@@ -165,7 +165,7 @@ namespace Engine
             return
                 Start == other.Start &&
                 Direction == other.Direction &&
-                RayLength == other.RayLength &&
+                MathUtil.NearEqual(RayLength, other.RayLength) &&
                 RayPickingParams == other.RayPickingParams;
         }
         /// <inheritdoc/>

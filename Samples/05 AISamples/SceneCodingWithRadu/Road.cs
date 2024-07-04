@@ -14,7 +14,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float top = infinity;
         private readonly float bottom = -infinity;
 
-        private readonly Segment[] borders = [];
+        private readonly Segment[] borders;
 
         public int LaneCount { get; }
 

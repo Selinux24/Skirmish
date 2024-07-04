@@ -13,7 +13,7 @@ namespace AISamples.SceneCodingWithRadu
             var d = s2.Point2;
 
             float bot = (d.Z - c.Z) * (b.X - a.X) - (d.X - c.X) * (b.Z - a.Z);
-            if (bot == 0)
+            if (MathUtil.IsZero(bot))
             {
                 position = Vector3.Zero;
                 distance = float.MaxValue;
