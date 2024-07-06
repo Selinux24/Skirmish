@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AISamples.SceneCodingWithRadu
 {
@@ -15,16 +16,18 @@ namespace AISamples.SceneCodingWithRadu
         private readonly PickingRay[] rays = new PickingRay[rayCount];
         private readonly List<SensorReading> readings = [];
 
-        public void Update(Road road)
+        public void Update(Road road, Car[] traffic)
         {
             var roadBorders = road.GetBorders();
+            var carBorders = traffic.SelectMany(c => c.GetPolygon()).ToArray();
+            Segment[] segments = [.. roadBorders, .. carBorders];
 
             CastRays();
 
             readings.Clear();
             for (int i = 0; i < rayCount; i++)
             {
-                var reading = GetReading(rays[i], roadBorders);
+                var reading = GetReading(rays[i], segments);
                 if (reading != null)
                 {
                     readings.Add(reading);

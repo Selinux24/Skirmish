@@ -10,13 +10,13 @@ namespace AISamples.SceneCodingWithRadu
         private float y;
         private readonly OrientedBoundingBox box;
         private OrientedBoundingBox trnBox;
-        private readonly Vector2[] points = new Vector2[4];
+        private readonly Vector3[] points = new Vector3[4];
 
         private float speed = 0;
         private readonly float acceleration = 0.2f;
-        private readonly float maxSpeed = 2;
-        private readonly float maxReverseSpeed = -1f;
-        private readonly float friction = 0.05f;
+        private readonly float maxSpeed;
+        private readonly float maxReverseSpeed;
+        private readonly float friction = 0.1f;
 
         private float angle = 0;
         private readonly float rotationSpeed = 0.03f;
@@ -31,9 +31,10 @@ namespace AISamples.SceneCodingWithRadu
         public Sensor Sensor { get; }
         public bool Damaged { get; private set; } = false;
 
-        public Car(float width, float height, float depth, ControlTypes controlType, float maxSpeed = 3)
+        public Car(float width, float height, float depth, ControlTypes controlType, float maxSpeed = 3f, float maxReverseSpeed = -1.5f)
         {
             this.maxSpeed = maxSpeed;
+            this.maxReverseSpeed = maxReverseSpeed;
 
             box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
 
@@ -41,41 +42,43 @@ namespace AISamples.SceneCodingWithRadu
             Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
         }
 
-        public OrientedBoundingBox GetBox()
+        private void CreatePoints()
         {
             var trn = Matrix.RotationY(angle) * Matrix.Translation(x, 0, y);
 
             trnBox = box;
             trnBox.Transform(ref trn);
-
-            CreatePoints();
-
-            return trnBox;
-        }
-        private void CreatePoints()
-        {
             var corners = trnBox.GetCorners();
 
-            points[0] = new(corners[4].X, corners[4].Z);
-            points[1] = new(corners[5].X, corners[5].Z);
-            points[2] = new(corners[6].X, corners[6].Z);
-            points[3] = new(corners[7].X, corners[7].Z);
+            points[0] = new(corners[4].X, 0f, corners[4].Z);
+            points[1] = new(corners[5].X, 0f, corners[5].Z);
+            points[2] = new(corners[6].X, 0f, corners[6].Z);
+            points[3] = new(corners[7].X, 0f, corners[7].Z);
+        }
+        public Segment[] GetPolygon()
+        {
+            Segment[] segments = new Segment[points.Length];
+            for (int i = 0; i < points.Length; i++)
+            {
+                segments[i] = new Segment(points[i], points[(i + 1) % points.Length]);
+            }
+            return segments;
         }
 
-        public void Update(IGameTime gameTime, Road road)
+        public void Update(IGameTime gameTime, Road road, Car[] traffic)
         {
             float time = gameTime.ElapsedSeconds;
 
             Move(time);
+            CreatePoints();
 
             if (!Damaged)
             {
-                Damaged = AssessDamage(road);
+                Damaged = AssessDamage(road, traffic);
             }
 
-            Sensor.Update(road);
+            Sensor.Update(road, traffic);
         }
-
         private void Move(float time)
         {
             float acc = acceleration * time * 100f;
@@ -118,8 +121,7 @@ namespace AISamples.SceneCodingWithRadu
             x += direction.X * speed;
             y += direction.Y * speed;
         }
-
-        private bool AssessDamage(Road road)
+        private bool AssessDamage(Road road, Car[] traffic)
         {
             var roadBorders = road.GetBorders();
 
@@ -128,6 +130,21 @@ namespace AISamples.SceneCodingWithRadu
                 if (Utils.Segment2DIntersectsPoly2D(roadBorders[i], points))
                 {
                     return true;
+                }
+            }
+
+            for (int i = 0; i < traffic.Length; i++)
+            {
+                var cBorders = traffic[i].GetPolygon();
+
+                for (int t = 0; t < cBorders.Length; t++)
+                {
+                    if (Utils.Segment2DIntersectsPoly2D(cBorders[t], points))
+                    {
+                        traffic[i].Damaged = true;
+
+                        return true;
+                    }
                 }
             }
 
@@ -150,6 +167,10 @@ namespace AISamples.SceneCodingWithRadu
         public Vector2 GetDirection()
         {
             return direction;
+        }
+        public OrientedBoundingBox GetBox()
+        {
+            return trnBox;
         }
     }
 }

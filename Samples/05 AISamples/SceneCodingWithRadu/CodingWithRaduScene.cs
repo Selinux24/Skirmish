@@ -32,21 +32,23 @@ namespace AISamples.SceneCodingWithRadu
         private UITextArea runtimeText = null;
         private UITextArea info = null;
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private PrimitiveListDrawer<Line3D> sensorDrawer = null;
         private PrimitiveListDrawer<Triangle> triangleDrawer = null;
 
         private bool gameReady = false;
 
         private readonly Car car = new(10, 7, 20, ControlTypes.Player);
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
+        private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
         private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
-        private readonly Color4 carSensorColor = Color.LightYellow;
+        private readonly Color4 carSensorColor = Color.Yellow;
         private readonly Color4 carSensorContactColor = Color.OrangeRed;
         private readonly Car[] traffic =
         [
-            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
-            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
-            new(10, 7, 20, ControlTypes.Dummy, 1.5f),
+            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
+            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
+            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
         ];
 
         private readonly Road road = new(0, 15, 4);
@@ -79,6 +81,7 @@ namespace AISamples.SceneCodingWithRadu
                     InitializeTexts,
                     InitializeTerrain,
                     InitializeLineDrawer,
+                    InitializeSensorDrawer,
                     InitializeTriangleDrawer,
                 ],
                 InitializeComponentsCompleted);
@@ -134,6 +137,19 @@ namespace AISamples.SceneCodingWithRadu
                 "EdgeDrawer",
                 desc,
                 LayerEffects - 1);
+        }
+        private async Task InitializeSensorDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = false,
+            };
+            sensorDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "SensorDrawer",
+                "SensorDrawer",
+                desc,
+                LayerEffects + 2);
         }
         private async Task InitializeTriangleDrawer()
         {
@@ -209,7 +225,8 @@ namespace AISamples.SceneCodingWithRadu
             UpdateInputCar();
 
             BeginDrawCar();
-            UpdateCar(gameTime, car, true);
+            BeginDrawSensor();
+            UpdateCar(gameTime, car, traffic, carColor, true);
             UpdateTraffic(gameTime);
         }
         private void UpdateInputCamera(IGameTime gameTime)
@@ -280,11 +297,11 @@ namespace AISamples.SceneCodingWithRadu
             car.Controls.Right = Game.Input.KeyPressed(Keys.Right);
         }
 
-        private void UpdateCar(IGameTime gameTime, Car c, bool drawSensor)
+        private void UpdateCar(IGameTime gameTime, Car c, Car[] tr, Color4 color, bool drawSensor)
         {
-            c.Update(gameTime, road);
+            c.Update(gameTime, road, tr);
 
-            DrawCar(c);
+            DrawCar(c, color);
 
             if (drawSensor)
             {
@@ -295,27 +312,31 @@ namespace AISamples.SceneCodingWithRadu
         {
             foreach (var c in traffic)
             {
-                UpdateCar(gameTime, c, false);
+                UpdateCar(gameTime, c, [], carTrafficColor, false);
             }
         }
 
         private void BeginDrawCar()
         {
             triangleDrawer.Clear(carColor);
+            triangleDrawer.Clear(carTrafficColor);
             triangleDrawer.Clear(carDamagedColor);
             lineDrawer.Clear(carEdgeColor);
-
-            lineDrawer.Clear(carSensorColor);
-            lineDrawer.Clear(carSensorContactColor);
         }
-        private void DrawCar(Car c)
+        private void DrawCar(Car c, Color4 color)
         {
             var box = c.GetBox();
             var tris = Triangle.ComputeTriangleList(box);
             var lines = Line3D.CreateBox(box);
 
-            triangleDrawer.AddPrimitives(c.Damaged ? carDamagedColor : carColor, tris);
+            triangleDrawer.AddPrimitives(c.Damaged ? carDamagedColor : color, tris);
             lineDrawer.AddPrimitives(carEdgeColor, lines);
+        }
+        
+        private void BeginDrawSensor()
+        {
+            sensorDrawer.Clear(carSensorColor);
+            sensorDrawer.Clear(carSensorContactColor);
         }
         private void DrawSensor(Car c)
         {
@@ -327,7 +348,7 @@ namespace AISamples.SceneCodingWithRadu
                     keySelector => keySelector.Key,
                     elementSelector => elementSelector.Select(r => r.Item2));
 
-            lineDrawer.AddPrimitives(rayList);
+            sensorDrawer.AddPrimitives(rayList);
         }
         private IEnumerable<(Color4, Line3D)> DrawSensorRay(PickingRay r, SensorReading[] readings)
         {
@@ -351,6 +372,7 @@ namespace AISamples.SceneCodingWithRadu
             yield return (carSensorColor, new Line3D(p0, pi));
             yield return (carSensorContactColor, new Line3D(pi, p1));
         }
+      
         private void DrawRoad()
         {
             triangleDrawer.Clear(roadColor);

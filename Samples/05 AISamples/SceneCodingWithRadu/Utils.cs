@@ -43,12 +43,12 @@ namespace AISamples.SceneCodingWithRadu
             return true;
         }
 
-        public static bool Segment2DIntersectsPoly2D(Segment segment, Vector2[] points)
+        public static bool Segment2DIntersectsPoly2D(Segment segment, Vector3[] points)
         {
             for (int i = 0; i < points.Length; i++)
             {
-                var p0 = new Vector3(points[i].X, 0, points[i].Y);
-                var p1 = new Vector3(points[(i + 1) % points.Length].X, 0, points[(i + 1) % points.Length].Y);
+                var p0 = points[i];
+                var p1 = points[(i + 1) % points.Length];
 
                 if (Segment2DIntersectsSegment2D(segment, new(p0, p1), out _, out _))
                 {
