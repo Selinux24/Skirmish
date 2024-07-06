@@ -1,6 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 using System;
+using System.Linq;
 
 namespace AISamples.SceneCodingWithRadu
 {
@@ -19,7 +20,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float friction = 0.1f;
 
         private float angle = 0;
-        private readonly float rotationSpeed = 0.03f;
+        private readonly float rotationSpeed = 0.02f;
         private Vector2 direction = Vector2.Zero;
 
         public CarControls Controls { get; }
@@ -28,18 +29,25 @@ namespace AISamples.SceneCodingWithRadu
         public bool Left => !Damaged && Controls.Left;
         public bool Right => !Damaged && Controls.Right;
 
+        public CarControlTypes ControlType { get; }
         public Sensor Sensor { get; }
+        public NeuralNetwork Brain { get; }
         public bool Damaged { get; private set; } = false;
 
-        public Car(float width, float height, float depth, ControlTypes controlType, float maxSpeed = 3f, float maxReverseSpeed = -1.5f)
+        public Car(float width, float height, float depth, CarControlTypes controlType, float maxSpeed = 3f, float maxReverseSpeed = 1.5f)
         {
-            this.maxSpeed = maxSpeed;
-            this.maxReverseSpeed = maxReverseSpeed;
-
             box = new(new(width * -0.5f, 0, depth * -0.5f), new(width * 0.5f, height, depth * 0.5f));
+            ControlType = controlType;
+            this.maxSpeed = maxSpeed;
+            this.maxReverseSpeed = -MathF.Abs(maxReverseSpeed);
 
             Controls = new(controlType);
-            Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
+
+            if (controlType != CarControlTypes.Dummy)
+            {
+                Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
+                Brain = new([Sensor.GetRayCount(), 6, CarControls.GetInputCount()]);
+            }
         }
 
         private void CreatePoints()
@@ -77,7 +85,22 @@ namespace AISamples.SceneCodingWithRadu
                 Damaged = AssessDamage(road, traffic);
             }
 
+            if (Sensor == null)
+            {
+                return;
+            }
+
             Sensor.Update(road, traffic);
+
+            if (Brain == null)
+            {
+                return;
+            }
+
+            var offsets = Sensor.GetReadings().Select(r => r == null ? 0 : 1f - r.Distance).ToArray();
+            Brain.FeedForward(offsets);
+
+            Controls.SetControls(Brain.GetOutputs());
         }
         private void Move(float time)
         {
@@ -149,6 +172,19 @@ namespace AISamples.SceneCodingWithRadu
             }
 
             return false;
+        }
+
+        public void Reset()
+        {
+            Damaged = false;
+            trnBox = box;
+            speed = 0;
+            angle = 0;
+            direction = Vector2.Zero;
+
+            Controls.Reset();
+            Sensor?.Reset();
+            Brain?.Reset();
         }
 
         public Vector2 GetPosition()

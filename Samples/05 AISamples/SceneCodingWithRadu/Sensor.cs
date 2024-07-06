@@ -1,7 +1,6 @@
 ﻿using Engine;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AISamples.SceneCodingWithRadu
@@ -14,7 +13,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float raySpread = raySpread;
 
         private readonly PickingRay[] rays = new PickingRay[rayCount];
-        private readonly List<SensorReading> readings = [];
+        private readonly SensorReading[] readings = new SensorReading[rayCount];
 
         public void Update(Road road, Car[] traffic)
         {
@@ -24,17 +23,29 @@ namespace AISamples.SceneCodingWithRadu
 
             CastRays();
 
-            readings.Clear();
             for (int i = 0; i < rayCount; i++)
             {
-                var reading = GetReading(rays[i], segments);
-                if (reading != null)
-                {
-                    readings.Add(reading);
-                }
+                readings[i] = GetReading(rays[i], segments);
             }
         }
+        private void CastRays()
+        {
+            for (int i = 0; i < rayCount; i++)
+            {
+                // Calculate the angle of the ray
+                float amount = rayCount == 1 ? 0.5f : i / ((float)rayCount - 1);
+                float angle = MathUtil.Lerp(-raySpread * 0.5f, raySpread * 0.5f, amount);
+                angle -= car.GetAngle();
 
+                var start = car.GetPosition();
+                var end = new Vector2(
+                    start.X - MathF.Sin(angle) * rayLength,
+                    start.Y + MathF.Cos(angle) * rayLength);
+                var direction = Vector2.Normalize(end - start);
+
+                rays[i] = new PickingRay(new Vector3(start.X, 0f, start.Y), new Vector3(direction.X, 0f, direction.Y), PickingHullTypes.Default, rayLength);
+            }
+        }
         private static SensorReading GetReading(PickingRay ray, Segment[] segments)
         {
             bool found = false;
@@ -65,33 +76,25 @@ namespace AISamples.SceneCodingWithRadu
             return new(ray, minPosition, minDistance);
         }
 
-        public SensorReading[] GetReadings()
+        public void Reset()
         {
-            return [.. readings];
-        }
-
-        private void CastRays()
-        {
-            for (int i = 0; i < rayCount; i++)
+            for (int i = 0; i < readings.Length; i++)
             {
-                // Calculate the angle of the ray
-                float amount = rayCount == 1 ? 0.5f : i / ((float)rayCount - 1);
-                float angle = MathUtil.Lerp(-raySpread * 0.5f, raySpread * 0.5f, amount);
-                angle -= car.GetAngle();
-
-                var start = car.GetPosition();
-                var end = new Vector2(
-                    start.X - MathF.Sin(angle) * rayLength,
-                    start.Y + MathF.Cos(angle) * rayLength);
-                var direction = Vector2.Normalize(end - start);
-
-                rays[i] = new PickingRay(new Vector3(start.X, 0f, start.Y), new Vector3(direction.X, 0f, direction.Y), PickingHullTypes.Default, rayLength);
+                readings[i] = null;
             }
         }
 
+        public int GetRayCount()
+        {
+            return rayCount;
+        }
         public PickingRay[] GetRays()
         {
             return [.. rays];
+        }
+        public SensorReading[] GetReadings()
+        {
+            return [.. readings];
         }
     }
 }

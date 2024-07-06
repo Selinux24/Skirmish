@@ -31,33 +31,43 @@ namespace AISamples.SceneCodingWithRadu
         private UITextArea title = null;
         private UITextArea runtimeText = null;
         private UITextArea info = null;
+        private UITextArea brain = null;
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Line3D> sensorDrawer = null;
         private PrimitiveListDrawer<Triangle> triangleDrawer = null;
 
+        private const string titleText = "SELF-DRIVING CAR";
+        private const string infoText = "PRESS F1 FOR HELP";
+        private const string helpText = @"F1 - HELP
+F - TOGGLE FOLLOW CAR
+E - START SIMULATION
+R - RESET SIMULATION
+WASD - MOVE CAMERA
+SPACE - MOVE CAMERA UP
+C - MOVE CAMERA DOWN
+MOUSE - ROTATE CAMERA
+ESC - EXIT";
+        private bool showHelp = false;
+
         private bool gameReady = false;
 
-        private readonly Car car = new(10, 7, 20, ControlTypes.Player);
+        private Car car = null;
+        private Car[] traffic = [];
+        private Vector2[] trafficPositions = [];
+
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
         private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
         private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
         private readonly Color4 carSensorColor = Color.Yellow;
         private readonly Color4 carSensorContactColor = Color.OrangeRed;
-        private readonly Car[] traffic =
-        [
-            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
-            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
-            new(10, 7, 20, ControlTypes.Dummy, 0.5f),
-        ];
 
-        private readonly Road road = new(0, 15, 4);
+        private readonly Road road = new(0, 20, 3);
         private readonly Color4 roadColor = Color.DarkGray;
         private readonly Color4 roadEdgeColor = Color.WhiteSmoke;
 
-        private bool followCar = false;
-        private readonly float followCarDistance = 100;
-        private readonly float followCarHeight = 50;
+        private bool followCar = true;
+        private readonly CarFollower carFollower = new(100, 50);
 
         public CodingWithRaduScene(Game game) : base(game)
         {
@@ -78,6 +88,7 @@ namespace AISamples.SceneCodingWithRadu
         {
             var group = LoadResourceGroup.FromTasks(
                 [
+                    InitializeTitle,
                     InitializeTexts,
                     InitializeTerrain,
                     InitializeLineDrawer,
@@ -88,21 +99,26 @@ namespace AISamples.SceneCodingWithRadu
 
             LoadResources(group);
         }
-        private async Task InitializeTexts()
+        private async Task InitializeTitle()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Gill Sans MT, Arial", 18);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Gill Sans MT, Arial", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-
-            title.Text = "SELF-DRIVING CAR";
-            runtimeText.Text = "";
-            info.Text = "Press F1 for Help.";
+            title.Text = titleText;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
+        }
+        private async Task InitializeTexts()
+        {
+            var defaultFont11 = TextDrawerDescription.FromFamily("Gill Sans MT, Arial", 11);
+
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            brain = await AddComponentUI<UITextArea, UITextAreaDescription>("Brain", "Brain", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+
+            runtimeText.Text = "";
+            info.Text = infoText;
         }
         private async Task InitializeTerrain()
         {
@@ -177,18 +193,6 @@ namespace AISamples.SceneCodingWithRadu
                 Game.Exit();
             }
 
-            car.SetPosition(road.GetLaneCenter(road.LaneCount - 1));
-
-            var lane0Pos = road.GetLaneCenter(0);
-            var lane1Pos = road.GetLaneCenter(1);
-            var lane2Pos = road.GetLaneCenter(2);
-            lane0Pos.Y = -125;
-            lane1Pos.Y = -150;
-            lane2Pos.Y = -100;
-            traffic[0].SetPosition(lane0Pos);
-            traffic[1].SetPosition(lane1Pos);
-            traffic[2].SetPosition(lane2Pos);
-
             UpdateLayout();
 
             Camera.Goto(new Vector3(0, 120, -175));
@@ -198,6 +202,8 @@ namespace AISamples.SceneCodingWithRadu
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
 
             DrawRoad();
+
+            StartSimulation();
 
             gameReady = true;
         }
@@ -216,9 +222,22 @@ namespace AISamples.SceneCodingWithRadu
                 return;
             }
 
+            if (Game.Input.KeyJustReleased(Keys.F1))
+            {
+                ToggleHelp();
+            }
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 followCar = !followCar;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.E))
+            {
+                StartSimulation();
+            }
+            if (Game.Input.KeyJustReleased(Keys.R))
+            {
+                ResetSimulation();
             }
 
             UpdateInputCamera(gameTime);
@@ -226,9 +245,24 @@ namespace AISamples.SceneCodingWithRadu
 
             BeginDrawCar();
             BeginDrawSensor();
-            UpdateCar(gameTime, car, traffic, carColor, true);
+            UpdateCar(gameTime, car, traffic, carColor);
             UpdateTraffic(gameTime);
         }
+
+        private void ToggleHelp()
+        {
+            showHelp = !showHelp;
+
+            if (showHelp)
+            {
+                info.Text = helpText;
+            }
+            else
+            {
+                info.Text = infoText;
+            }
+        }
+
         private void UpdateInputCamera(IGameTime gameTime)
         {
             if (!followCar)
@@ -242,7 +276,7 @@ namespace AISamples.SceneCodingWithRadu
 
             if (Camera.Following == null)
             {
-                Camera.Following = new CarFollower(car, followCarDistance, followCarHeight);
+                Camera.Following = carFollower;
             }
         }
         private void UpdateInputCameraManual(IGameTime gameTime)
@@ -291,28 +325,38 @@ namespace AISamples.SceneCodingWithRadu
         }
         private void UpdateInputCar()
         {
+            if (car.ControlType != CarControlTypes.Player)
+            {
+                return;
+            }
+
             car.Controls.Forward = Game.Input.KeyPressed(Keys.Up);
             car.Controls.Reverse = Game.Input.KeyPressed(Keys.Down);
             car.Controls.Left = Game.Input.KeyPressed(Keys.Left);
             car.Controls.Right = Game.Input.KeyPressed(Keys.Right);
         }
 
-        private void UpdateCar(IGameTime gameTime, Car c, Car[] tr, Color4 color, bool drawSensor)
+        private void UpdateCar(IGameTime gameTime, Car c, Car[] tr, Color4 color)
         {
             c.Update(gameTime, road, tr);
 
             DrawCar(c, color);
 
-            if (drawSensor)
+            if (c.Sensor != null)
             {
                 DrawSensor(c);
+            }
+
+            if (c.Brain != null)
+            {
+                DrawBrain(c);
             }
         }
         private void UpdateTraffic(IGameTime gameTime)
         {
             foreach (var c in traffic)
             {
-                UpdateCar(gameTime, c, [], carTrafficColor, false);
+                UpdateCar(gameTime, c, [], carTrafficColor);
             }
         }
 
@@ -332,7 +376,7 @@ namespace AISamples.SceneCodingWithRadu
             triangleDrawer.AddPrimitives(c.Damaged ? carDamagedColor : color, tris);
             lineDrawer.AddPrimitives(carEdgeColor, lines);
         }
-        
+
         private void BeginDrawSensor()
         {
             sensorDrawer.Clear(carSensorColor);
@@ -340,15 +384,15 @@ namespace AISamples.SceneCodingWithRadu
         }
         private void DrawSensor(Car c)
         {
-            var readings = c.Sensor.GetReadings();
+            var readings = c.Sensor?.GetReadings() ?? [];
 
-            var rayList = c.Sensor.GetRays().SelectMany(r => DrawSensorRay(r, readings))
+            var rayList = c.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, readings))
                 .GroupBy(r => r.Item1)
                 .ToDictionary(
                     keySelector => keySelector.Key,
                     elementSelector => elementSelector.Select(r => r.Item2));
 
-            sensorDrawer.AddPrimitives(rayList);
+            sensorDrawer.AddPrimitives(rayList ?? []);
         }
         private IEnumerable<(Color4, Line3D)> DrawSensorRay(PickingRay r, SensorReading[] readings)
         {
@@ -357,7 +401,7 @@ namespace AISamples.SceneCodingWithRadu
             var p1 = p0 + (r.Direction * r.MaxDistance);
 
             //Find readings for the ray
-            var rayReading = Array.Find(readings, rd => rd.Ray == r);
+            var rayReading = Array.Find(readings, rd => rd?.Ray == r);
             if (rayReading == null)
             {
                 //No reading, draw the ray
@@ -372,7 +416,18 @@ namespace AISamples.SceneCodingWithRadu
             yield return (carSensorColor, new Line3D(p0, pi));
             yield return (carSensorContactColor, new Line3D(pi, p1));
         }
-      
+
+        private void DrawBrain(Car c)
+        {
+            var b = c.Brain;
+            if (b == null)
+            {
+                return;
+            }
+
+            brain.Text = c.Controls.ToString();
+        }
+
         private void DrawRoad()
         {
             triangleDrawer.Clear(roadColor);
@@ -410,10 +465,63 @@ namespace AISamples.SceneCodingWithRadu
         {
             title.SetPosition(Vector2.Zero);
             runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-            info.SetPosition(new Vector2(5, runtimeText.Top + runtimeText.Height + 3));
 
+            float panelBottom = runtimeText.Top + runtimeText.Height;
             panel.Width = Game.Form.RenderWidth;
-            panel.Height = info.Top + info.Height + 3;
+            panel.Height = panelBottom;
+
+            info.SetPosition(new Vector2(5, panelBottom + 3));
+
+            brain.TextVerticalAlign = TextVerticalAlign.Top;
+            brain.TextHorizontalAlign = TextHorizontalAlign.Right;
+            brain.SetPosition(0, panelBottom + 3);
+            brain.SetRectangle(new(0, 0, Game.Form.RenderWidth, Game.Form.RenderHeight - (panelBottom + 3)));
+        }
+
+        private void StartSimulation()
+        {
+            const float carWidth = 10;
+            const float carHeight = 7;
+            const float carDepth = 20;
+
+            car = new(carWidth, carHeight, carDepth, CarControlTypes.AI, 1, 0.5f);
+            carFollower.Car = car;
+
+            const int trafficCars = 3;
+            traffic = new Car[trafficCars];
+            trafficPositions = new Vector2[trafficCars];
+            for (int i = 0; i < traffic.Length; i++)
+            {
+                traffic[i] = new(carWidth, carHeight, carDepth, CarControlTypes.Dummy, 0.5f, 0.25f);
+
+                var lanePos = road.GetLaneCenter(i % traffic.Length);
+                lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carDepth * 3);
+
+                trafficPositions[i] = lanePos;
+            };
+
+            RelocateSimulationObjects();
+        }
+        private void ResetSimulation()
+        {
+            car.Reset();
+            for (int i = 0; i < traffic.Length; i++)
+            {
+                traffic[i].Reset();
+            }
+
+            RelocateSimulationObjects();
+        }
+        private void RelocateSimulationObjects()
+        {
+            var cLanePos = road.GetLaneCenter(road.LaneCount / 2);
+            cLanePos.Y = -200;
+            car.SetPosition(cLanePos);
+
+            for (int i = 0; i < traffic.Length; i++)
+            {
+                traffic[i].SetPosition(trafficPositions[i]);
+            };
         }
     }
 }
