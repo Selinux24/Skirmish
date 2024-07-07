@@ -42,6 +42,18 @@ namespace AISamples.SceneCodingWithRadu
             }
         }
 
+        public int GetLevelCount()
+        {
+            return levels.Length;
+        }
+        public Level[] GetLevels()
+        {
+            return [.. levels];
+        }
+        public Level GetLevel(int index)
+        {
+            return levels[index];
+        }
         public float[] GetOutputs()
         {
             return [.. outputs];

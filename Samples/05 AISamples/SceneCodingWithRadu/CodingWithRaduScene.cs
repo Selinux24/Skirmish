@@ -54,6 +54,7 @@ ESC - EXIT";
         private Car car = null;
         private Car[] traffic = [];
         private Vector2[] trafficPositions = [];
+        private Visualizer visualizer = null;
 
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
         private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
@@ -66,7 +67,7 @@ ESC - EXIT";
         private readonly Color4 roadColor = Color.DarkGray;
         private readonly Color4 roadEdgeColor = Color.WhiteSmoke;
 
-        private bool followCar = true;
+        private bool followCar = false;
         private readonly CarFollower carFollower = new(100, 50);
 
         public CodingWithRaduScene(Game game) : base(game)
@@ -94,6 +95,7 @@ ESC - EXIT";
                     InitializeLineDrawer,
                     InitializeSensorDrawer,
                     InitializeTriangleDrawer,
+                    InitializeVisualizerDrawer,
                 ],
                 InitializeComponentsCompleted);
 
@@ -180,6 +182,44 @@ ESC - EXIT";
                 desc,
                 LayerEffects + 1);
         }
+        private async Task InitializeVisualizerDrawer()
+        {
+            var descL = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+            };
+            var visualizerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "visualizerLineDrawer",
+                "visualizerLineDrawer",
+                descL);
+
+            var descT = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+            };
+            var visualizerTriangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "visualizerTriangleDrawer",
+                "visualizerTriangleDrawer",
+                descT);
+
+            var descO = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Opaque,
+            };
+            var visualizerOpaqueDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "visualizerOpaqueDrawer",
+                "visualizerOpaqueDrawer",
+                descO,
+                LayerEffects - 5);
+
+            visualizer = new(visualizerOpaqueDrawer, visualizerTriangleDrawer, visualizerLineDrawer);
+        }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -247,6 +287,8 @@ ESC - EXIT";
             BeginDrawSensor();
             UpdateCar(gameTime, car, traffic, carColor);
             UpdateTraffic(gameTime);
+
+            DrawNeuralNetwork();
         }
 
         private void ToggleHelp()
@@ -455,6 +497,17 @@ ESC - EXIT";
             }
         }
 
+        private void DrawNeuralNetwork()
+        {
+            var network = car.Brain;
+            if (network == null)
+            {
+                return;
+            }
+
+            visualizer.DrawNetwork(network, new(-100, 100), 25, 90, 120, 2);
+        }
+
         public override void GameGraphicsResized()
         {
             base.GameGraphicsResized();
@@ -498,7 +551,7 @@ ESC - EXIT";
                 lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carDepth * 3);
 
                 trafficPositions[i] = lanePos;
-            };
+            }
 
             RelocateSimulationObjects();
         }
@@ -521,7 +574,7 @@ ESC - EXIT";
             for (int i = 0; i < traffic.Length; i++)
             {
                 traffic[i].SetPosition(trafficPositions[i]);
-            };
+            }
         }
     }
 }

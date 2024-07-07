@@ -76,5 +76,42 @@ namespace AISamples.SceneCodingWithRadu
                 outputs[i] = 0f;
             }
         }
+
+        public int GetInputCount()
+        {
+            return inputs.Length;
+        }
+        public float[] GetInputs()
+        {
+            return [.. inputs];
+        }
+        public float GetInput(int index)
+        {
+            return inputs[index];
+        }
+        public int GetOutputCount()
+        {
+            return outputs.Length;
+        }
+        public float[] GetOutputs()
+        {
+            return [.. outputs];
+        }
+        public float GetOutput(int index)
+        {
+            return outputs[index];
+        }
+        public float[] GetBiases()
+        {
+            return [.. biases];
+        }
+        public float GetBias(int index)
+        {
+            return biases[index];
+        }
+        public float GetWeight(int i, int o)
+        {
+            return weights[i][o];
+        }
     }
 }

@@ -46,7 +46,7 @@ namespace AISamples.SceneCodingWithRadu
             if (controlType != CarControlTypes.Dummy)
             {
                 Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
-                Brain = new([Sensor.GetRayCount(), 6, CarControls.GetInputCount()]);
+                Brain = new([Sensor.GetRayCount(), 6, CarControls.InputCount]);
             }
         }
 

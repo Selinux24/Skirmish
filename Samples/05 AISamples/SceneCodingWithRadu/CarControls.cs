@@ -3,6 +3,8 @@ namespace AISamples.SceneCodingWithRadu
 {
     class CarControls
     {
+        public const int InputCount = 4;
+
         private readonly CarControlTypes controlType;
 
         public bool Forward { get; set; } = false;
@@ -54,11 +56,6 @@ namespace AISamples.SceneCodingWithRadu
                 default:
                     break;
             }
-        }
-
-        public static int GetInputCount()
-        {
-            return 4;
         }
 
         public override string ToString()

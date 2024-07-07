@@ -2460,7 +2460,19 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount)
         {
-            return CreateCircle(topology, Vector3.Zero, radius, stackCount);
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount, Vector3.Up);
+        }
+        /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount, Vector3 up)
+        {
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount, up);
         }
         /// <summary>
         /// Creates a circle
@@ -2472,12 +2484,25 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
         {
+            return CreateCircle(topology, center, radius, stackCount, Vector3.Up);
+        }
+        /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount, Vector3 up)
+        {
             ArgumentOutOfRangeException.ThrowIfLessThan(stackCount, 3);
 
             return topology switch
             {
-                Topology.TriangleList => CreateCircleTriangleList(center, radius, stackCount),
-                Topology.LineList => CreateCircleLineList(center, radius, stackCount),
+                Topology.TriangleList => CreateCircleTriangleList(center, radius, stackCount, up),
+                Topology.LineList => CreateCircleLineList(center, radius, stackCount, up),
                 _ => throw new NotImplementedException()
             };
         }
@@ -2487,7 +2512,8 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
-        private static Vector3[] CreateCircleVertices(Vector3 center, float radius, int stackCount)
+        /// <param name="up">Up vector</param>
+        private static Vector3[] CreateCircleVertices(Vector3 center, float radius, int stackCount, Vector3 up)
         {
             List<Vector3> verts = [];
 
@@ -2497,6 +2523,13 @@ namespace Engine.Common
                 float x = MathF.Cos(a) * radius;
                 float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
+
+                if (up != Vector3.Up)
+                {
+                    var axis = Vector3.Cross(up, Vector3.Up);
+
+                    v = Vector3.TransformNormal(v, Matrix.RotationAxis(axis, MathUtil.PiOverTwo));
+                }
 
                 verts.Add(v + center);
             }
@@ -2509,10 +2542,11 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCircleTriangleList(Vector3 center, float radius, int stackCount)
+        private static GeometryDescriptor CreateCircleTriangleList(Vector3 center, float radius, int stackCount, Vector3 up)
         {
-            var verts = CreateCircleVertices(center, radius, stackCount);
+            var verts = CreateCircleVertices(center, radius, stackCount, up);
 
             List<uint> indexList = [];
 
@@ -2535,10 +2569,11 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCircleLineList(Vector3 center, float radius, int stackCount)
+        private static GeometryDescriptor CreateCircleLineList(Vector3 center, float radius, int stackCount, Vector3 up)
         {
-            var verts = CreateCircleVertices(center, radius, stackCount);
+            var verts = CreateCircleVertices(center, radius, stackCount, up);
 
             List<uint> indexList = [];
 
