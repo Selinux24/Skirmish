@@ -22,7 +22,7 @@ namespace AISamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("AI Samples", WindowsEngineForm.ScreenSize * 0.8f);
+                using Game cl = new("AI Samples", WindowsEngineForm.ScreenSize * 0.3f);
 #else
                 using Game cl = new("AI Samples");
 #endif

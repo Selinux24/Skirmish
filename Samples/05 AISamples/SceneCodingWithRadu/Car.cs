@@ -73,7 +73,7 @@ namespace AISamples.SceneCodingWithRadu
             return segments;
         }
 
-        public void Update(IGameTime gameTime, Road road, Car[] traffic)
+        public void Update(IGameTime gameTime, Road road, Car[] traffic, bool damageTraffic)
         {
             float time = gameTime.ElapsedSeconds;
 
@@ -82,7 +82,7 @@ namespace AISamples.SceneCodingWithRadu
 
             if (!Damaged)
             {
-                Damaged = AssessDamage(road, traffic);
+                Damaged = AssessDamage(road, traffic, damageTraffic);
             }
 
             if (Sensor == null)
@@ -144,7 +144,7 @@ namespace AISamples.SceneCodingWithRadu
             x += direction.X * speed;
             y += direction.Y * speed;
         }
-        private bool AssessDamage(Road road, Car[] traffic)
+        private bool AssessDamage(Road road, Car[] traffic, bool damageTraffic)
         {
             var roadBorders = road.GetBorders();
 
@@ -164,7 +164,7 @@ namespace AISamples.SceneCodingWithRadu
                 {
                     if (Utils.Segment2DIntersectsPoly2D(cBorders[t], points))
                     {
-                        traffic[i].Damaged = true;
+                        if (damageTraffic) traffic[i].Damaged = true;
 
                         return true;
                     }

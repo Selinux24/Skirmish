@@ -20,6 +20,19 @@ namespace Engine.BuiltIn.Drawers
                 AnimationInterpolationAmount = 0f,
             };
         }
+        /// <summary>
+        /// Default state with local transform
+        /// </summary>
+        public static BuiltInDrawerMeshState SetLocal(Matrix local)
+        {
+            return new BuiltInDrawerMeshState
+            {
+                Local = local,
+                AnimationOffset1 = 0,
+                AnimationOffset2 = 0,
+                AnimationInterpolationAmount = 0f,
+            };
+        }
 
         /// <summary>
         /// Local transform

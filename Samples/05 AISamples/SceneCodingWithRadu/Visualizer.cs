@@ -16,7 +16,7 @@ namespace AISamples.SceneCodingWithRadu
         private readonly PrimitiveListDrawer<Triangle> triangleDrawer = triangleDrawer;
         private readonly PrimitiveListDrawer<Line3D> lineDrawer = lineDrawer;
 
-        public void DrawNetwork(NeuralNetwork network, Vector2 position, int margin, int totalWidth, int totalHeight, float nodeRadius)
+        public void DrawNetwork(NeuralNetwork network, Vector3 position, int margin, int totalWidth, int totalHeight, float nodeRadius)
         {
             opaqueDrawer.Clear();
             triangleDrawer.Clear();
@@ -29,7 +29,7 @@ namespace AISamples.SceneCodingWithRadu
             int width = totalWidth - bgMargin * 2;
             int height = totalHeight - bgMargin * 2;
 
-            DrawBackground(-left, -top, -width, -height);
+            DrawBackground(-left, -top, -width, -height, position.Z);
 
             left = margin + (int)position.X;
             top = margin - (int)position.Y;
@@ -42,22 +42,22 @@ namespace AISamples.SceneCodingWithRadu
             {
                 float levelTop = top + MathUtil.Lerp(height - levelHeight, 0, GetX(i, levels));
 
-                DrawLevel(network.GetLevel(i), nodeRadius, -left, (int)-levelTop, -width, -levelHeight);
+                DrawLevel(network.GetLevel(i), nodeRadius, -left, (int)-levelTop, -width, -levelHeight, position.Z);
             }
         }
 
-        private void DrawBackground(int left, int top, int width, int height)
+        private void DrawBackground(int left, int top, int width, int height, float depth)
         {
-            Vector3 p0 = new(left, top, 1.5f);
-            Vector3 p1 = new(left, top + height, 1.5f);
-            Vector3 p2 = new(left + width, top + height, 1.5f);
-            Vector3 p3 = new(left + width, top, 1.5f);
+            Vector3 p0 = new(left, top, 1.5f + depth);
+            Vector3 p1 = new(left, top + height, 1.5f + depth);
+            Vector3 p2 = new(left + width, top + height, 1.5f + depth);
+            Vector3 p3 = new(left + width, top, 1.5f + depth);
 
             var bgT = GeometryUtil.CreatePolygonTriangleList([p0, p1, p2, p3], false);
             opaqueDrawer.AddPrimitives(bColor, Triangle.ComputeTriangleList(bgT));
         }
 
-        private void DrawLevel(Level level, float nodeRadius, int left, int top, int width, int heigth)
+        private void DrawLevel(Level level, float nodeRadius, int left, int top, int width, int heigth, float depth)
         {
             int right = left + width;
             int bottom = top + heigth;
@@ -73,8 +73,8 @@ namespace AISamples.SceneCodingWithRadu
                 for (int o = 0; o < outputCount; o++)
                 {
                     var l = new Line3D(
-                        new(MathUtil.Lerp(left, right, GetX(i, inputCount)), bottom, 1),
-                        new(MathUtil.Lerp(left, right, GetX(o, outputCount)), top, 1));
+                        new(MathUtil.Lerp(left, right, GetX(i, inputCount)), bottom, 1 + depth),
+                        new(MathUtil.Lerp(left, right, GetX(o, outputCount)), top, 1 + depth));
 
                     float w = level.GetWeight(i, o);
                     lineDrawer.AddPrimitives(ColorFromValue(w), l);
@@ -86,7 +86,7 @@ namespace AISamples.SceneCodingWithRadu
                 float x = MathUtil.Lerp(left, right, GetX(i, inputCount));
 
                 float iv = level.GetInput(i);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f), tNodeRadius, stacks, Vector3.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(iv), Triangle.ComputeTriangleList(gT));
             }
 
@@ -95,11 +95,11 @@ namespace AISamples.SceneCodingWithRadu
                 float x = MathUtil.Lerp(left, right, GetX(o, outputCount));
 
                 float ov = level.GetOutput(o);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f), tNodeRadius, stacks, Vector3.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(ov), Triangle.ComputeTriangleList(gT));
 
                 float bv = level.GetBias(o);
-                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f), nodeRadius, stacks, Vector3.ForwardLH);
+                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3.ForwardLH);
                 lineDrawer.AddPrimitives(ColorFromValue(bv), Line3D.CreateFromVertices(gL));
             }
         }

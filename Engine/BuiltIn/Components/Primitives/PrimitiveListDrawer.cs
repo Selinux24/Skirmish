@@ -20,8 +20,10 @@ namespace Engine.BuiltIn.Components.Primitives
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    public sealed class PrimitiveListDrawer<T>(Scene scene, string id, string name) : Drawable<PrimitiveListDrawerDescription<T>>(scene, id, name) where T : IVertexList
+    public sealed class PrimitiveListDrawer<T>(Scene scene, string id, string name) : Drawable<PrimitiveListDrawerDescription<T>>(scene, id, name), ITransformable3D where T : IVertexList
     {
+        const string className = nameof(PrimitiveListDrawer<T>);
+
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -66,6 +68,8 @@ namespace Engine.BuiltIn.Components.Primitives
                 return true;
             }
         }
+        /// <inheritdoc/>
+        public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
 
         /// <summary>
         /// Destructor
@@ -249,6 +253,19 @@ namespace Engine.BuiltIn.Components.Primitives
         }
 
         /// <inheritdoc/>
+        public void SetManipulator(IManipulator3D manipulator)
+        {
+            if (manipulator == null)
+            {
+                Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
+
+                return;
+            }
+
+            Manipulator = manipulator;
+        }
+
+        /// <inheritdoc/>
         public override bool Draw(DrawContext context)
         {
             if (!Visible)
@@ -282,7 +299,7 @@ namespace Engine.BuiltIn.Components.Primitives
                 return false;
             }
 
-            drawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
+            drawer.UpdateMesh(dc, BuiltInDrawerMeshState.SetLocal(Manipulator.GlobalTransform));
             drawer.UpdateMaterial(dc, BuiltInDrawerMaterialState.Default());
 
             bool drawn = drawer.Draw(dc, new DrawOptions

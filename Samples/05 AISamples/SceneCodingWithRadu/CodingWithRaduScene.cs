@@ -32,9 +32,10 @@ namespace AISamples.SceneCodingWithRadu
         private UITextArea runtimeText = null;
         private UITextArea info = null;
         private UITextArea brain = null;
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Line3D> sensorDrawer = null;
-        private PrimitiveListDrawer<Triangle> triangleDrawer = null;
+        private PrimitiveListDrawer<Triangle> roadDrawer = null;
+        private PrimitiveListDrawer<Line3D> roadLaneDrawer = null;
+        private Model terrain = null;
         private ModelInstanced carModels = null;
         private ModelInstanced trafficModels = null;
 
@@ -62,7 +63,7 @@ ESC - EXIT";
         private const float carWidth = 10;
         private const float carHeight = 7;
         private const float carDepth = 20;
-        private const int maxCarInstances = 10;
+        private const int maxCarInstances = 1000;
         private const int maxTrafficInstances = 3;
 
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
@@ -73,7 +74,7 @@ ESC - EXIT";
 
         private readonly Road road = new(0, 20, 3, spaceSize * 0.5f);
         private readonly Color4 roadColor = Color.DarkGray;
-        private readonly Color4 roadEdgeColor = Color.WhiteSmoke;
+        private readonly Color4 roadLaneColor = Color.WhiteSmoke;
 
         private bool followCar = true;
         private readonly CarFollower carFollower = new(100, 50);
@@ -150,7 +151,7 @@ ESC - EXIT";
                 Content = ContentDescription.FromContentData(geo, mat),
             };
 
-            await AddComponentGround<Model, ModelDescription>("Terrain", "Terrain", desc);
+            terrain = await AddComponentGround<Model, ModelDescription>("Terrain", "Terrain", desc);
         }
         private async Task InitializeLineDrawer()
         {
@@ -159,9 +160,9 @@ ESC - EXIT";
                 Count = 20000,
                 DepthEnabled = true,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "EdgeDrawer",
-                "EdgeDrawer",
+            roadLaneDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "roadLaneDrawer",
+                "roadLaneDrawer",
                 desc,
                 LayerEffects - 1);
         }
@@ -185,9 +186,9 @@ ESC - EXIT";
                 Count = 20000,
                 DepthEnabled = true,
             };
-            triangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
-                "TriangleDrawer",
-                "TriangleDrawer",
+            roadDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "roadDrawer",
+                "roadDrawer",
                 desc,
                 LayerEffects + 1);
         }
@@ -326,6 +327,9 @@ ESC - EXIT";
             BeginDrawSensor();
             UpdateCars(gameTime);
             UpdateTraffic(gameTime);
+            UpdateRoad();
+
+            SelectBestCar();
 
             DrawNeuralNetwork(bestCar);
         }
@@ -426,12 +430,12 @@ ESC - EXIT";
         {
             for (int i = 0; i < cars.Length; i++)
             {
-                UpdateCar(gameTime, cars[i], carModels[i], traffic, carColor);
+                UpdateCar(gameTime, cars[i], carModels[i], traffic, false, carColor);
             }
         }
-        private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, Color4 color)
+        private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, bool damageTraffic, Color4 color)
         {
-            car.Update(gameTime, road, tr);
+            car.Update(gameTime, road, tr, damageTraffic);
 
             carModel.Manipulator.SetTransform(car.GetTransform());
             carModel.TintColor = car.Damaged ? carDamagedColor : color;
@@ -455,7 +459,7 @@ ESC - EXIT";
         {
             for (int i = 0; i < traffic.Length; i++)
             {
-                UpdateCar(gameTime, traffic[i], trafficModels[i], [], carTrafficColor);
+                UpdateCar(gameTime, traffic[i], trafficModels[i], [], false, carTrafficColor);
             }
         }
 
@@ -510,10 +514,30 @@ ESC - EXIT";
             brain.Text = car.Controls.ToString();
         }
 
+        private void UpdateRoad()
+        {
+            if (bestCar == null)
+            {
+                return;
+            }
+
+            if (road == null)
+            {
+                return;
+            }
+
+            float depth = bestCar.GetPosition().Y;
+
+            road.Update(depth);
+
+            roadDrawer.Manipulator.SetPosition(0, 0, depth);
+            roadLaneDrawer.Manipulator.SetPosition(0, 0, depth);
+            terrain.Manipulator.SetPosition(0, 0, depth);
+        }
         private void DrawRoad()
         {
-            triangleDrawer.Clear(roadColor);
-            lineDrawer.Clear(roadEdgeColor);
+            roadDrawer.Clear(roadColor);
+            roadLaneDrawer.Clear(roadLaneColor);
 
             const float h = 0.2f;
             var rectPoints = road.GetLanes().Select(r =>
@@ -532,8 +556,8 @@ ESC - EXIT";
                 var tris = Triangle.ComputeTriangleList(gTris);
                 var lines = Line3D.CreateFromVertices(gLines);
 
-                triangleDrawer.AddPrimitives(roadColor, tris);
-                lineDrawer.AddPrimitives(roadEdgeColor, lines);
+                roadDrawer.AddPrimitives(roadColor, tris);
+                roadLaneDrawer.AddPrimitives(roadLaneColor, lines);
             }
         }
 
@@ -545,7 +569,15 @@ ESC - EXIT";
                 return;
             }
 
-            visualizer.DrawNetwork(network, new(-100, 100), 25, 90, 120, 2);
+            float depth = car.GetPosition().Y;
+
+            visualizer.DrawNetwork(network, new(-100, 100, depth), 25, 90, 120, 2);
+        }
+
+        private void SelectBestCar()
+        {
+            bestCar = cars.OrderByDescending(x => x.GetPosition().Y).FirstOrDefault();
+            carFollower.Car = bestCar;
         }
 
         public override void GameGraphicsResized()

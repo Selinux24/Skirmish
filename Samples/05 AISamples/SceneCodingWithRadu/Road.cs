@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System;
 
 namespace AISamples.SceneCodingWithRadu
 {
@@ -27,15 +28,15 @@ namespace AISamples.SceneCodingWithRadu
 
             LaneCount = laneCount;
 
-            borders = CalculateBorders();
+            borders = CalculateBorders(0);
         }
 
-        private Segment[] CalculateBorders()
+        private Segment[] CalculateBorders(float y)
         {
-            Vector3 topLeft = new(left, 0, top);
-            Vector3 topRight = new(right, 0, top);
-            Vector3 bottomLeft = new(left, 0, bottom);
-            Vector3 bottomRight = new(right, 0, bottom);
+            Vector3 topLeft = new(left, 0, top + y);
+            Vector3 topRight = new(right, 0, top + y);
+            Vector3 bottomLeft = new(left, 0, bottom + y);
+            Vector3 bottomRight = new(right, 0, bottom + y);
 
             return
             [
@@ -45,11 +46,17 @@ namespace AISamples.SceneCodingWithRadu
                 new (){ Point1 = bottomLeft,  Point2 = topLeft }
             ];
         }
+
+        public void Update(float depth)
+        {
+            var newBorders = CalculateBorders(depth);
+            Array.Copy(newBorders, borders, borders.Length);
+        }
+
         public Segment[] GetBorders()
         {
             return [.. borders];
         }
-
         public RectangleF[] GetLanes()
         {
             RectangleF[] lanes = new RectangleF[LaneCount];
