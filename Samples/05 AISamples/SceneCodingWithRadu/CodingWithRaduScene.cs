@@ -23,7 +23,7 @@ namespace AISamples.SceneCodingWithRadu
     /// </remarks>
     class CodingWithRaduScene : Scene
     {
-        private const float spaceSize = 500f;
+        private const float spaceSize = 1000f;
         private const string resourceTerrainDiffuse = "SceneCodingWithRadu/resources/dirt002.dds";
         private const string resourceTerrainNormal = "SceneCodingWithRadu/resources/normal001.dds";
 
@@ -35,6 +35,8 @@ namespace AISamples.SceneCodingWithRadu
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Line3D> sensorDrawer = null;
         private PrimitiveListDrawer<Triangle> triangleDrawer = null;
+        private ModelInstanced carModels = null;
+        private ModelInstanced trafficModels = null;
 
         private const string titleText = "SELF-DRIVING CAR";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -51,23 +53,29 @@ ESC - EXIT";
 
         private bool gameReady = false;
 
-        private Car car = null;
+        private Car bestCar = null;
+        private Car[] cars = [];
         private Car[] traffic = [];
         private Vector2[] trafficPositions = [];
         private Visualizer visualizer = null;
 
+        private const float carWidth = 10;
+        private const float carHeight = 7;
+        private const float carDepth = 20;
+        private const int maxCarInstances = 10;
+        private const int maxTrafficInstances = 3;
+
         private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
         private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
         private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
-        private readonly Color4 carEdgeColor = new(0.2f, 0.2f, 1f, 1f);
         private readonly Color4 carSensorColor = Color.Yellow;
         private readonly Color4 carSensorContactColor = Color.OrangeRed;
 
-        private readonly Road road = new(0, 20, 3);
+        private readonly Road road = new(0, 20, 3, spaceSize * 0.5f);
         private readonly Color4 roadColor = Color.DarkGray;
         private readonly Color4 roadEdgeColor = Color.WhiteSmoke;
 
-        private bool followCar = false;
+        private bool followCar = true;
         private readonly CarFollower carFollower = new(100, 50);
 
         public CodingWithRaduScene(Game game) : base(game)
@@ -96,6 +104,7 @@ ESC - EXIT";
                     InitializeSensorDrawer,
                     InitializeTriangleDrawer,
                     InitializeVisualizerDrawer,
+                    InitializeCars,
                 ],
                 InitializeComponentsCompleted);
 
@@ -220,6 +229,34 @@ ESC - EXIT";
 
             visualizer = new(visualizerOpaqueDrawer, visualizerTriangleDrawer, visualizerLineDrawer);
         }
+        private async Task InitializeCars()
+        {
+            var geo = GeometryUtil.CreateBox(Topology.TriangleList, carWidth, carHeight, carDepth);
+
+            var cDesc = new ModelInstancedDescription()
+            {
+                Instances = maxCarInstances,
+                CastShadow = ShadowCastingAlgorihtms.All,
+                UseAnisotropicFiltering = true,
+                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo)),
+                StartsVisible = false,
+            };
+            carModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Cars", "Cars", cDesc);
+
+            var tDesc = new ModelInstancedDescription()
+            {
+                Instances = maxTrafficInstances,
+                CastShadow = ShadowCastingAlgorihtms.All,
+                UseAnisotropicFiltering = true,
+                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo)),
+                StartsVisible = false,
+            };
+            trafficModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Traffic", "Traffic", tDesc);
+
+            cars = new Car[maxCarInstances];
+            traffic = new Car[maxTrafficInstances];
+            trafficPositions = new Vector2[maxTrafficInstances];
+        }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -244,6 +281,9 @@ ESC - EXIT";
             DrawRoad();
 
             StartSimulation();
+
+            carModels.Visible = true;
+            trafficModels.Visible = true;
 
             gameReady = true;
         }
@@ -281,14 +321,13 @@ ESC - EXIT";
             }
 
             UpdateInputCamera(gameTime);
-            UpdateInputCar();
+            UpdateInputCar(bestCar);
 
-            BeginDrawCar();
             BeginDrawSensor();
-            UpdateCar(gameTime, car, traffic, carColor);
+            UpdateCars(gameTime);
             UpdateTraffic(gameTime);
 
-            DrawNeuralNetwork();
+            DrawNeuralNetwork(bestCar);
         }
 
         private void ToggleHelp()
@@ -365,8 +404,13 @@ ESC - EXIT";
                 Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateInputCar()
+        private void UpdateInputCar(Car car)
         {
+            if (car == null)
+            {
+                return;
+            }
+
             if (car.ControlType != CarControlTypes.Player)
             {
                 return;
@@ -378,45 +422,41 @@ ESC - EXIT";
             car.Controls.Right = Game.Input.KeyPressed(Keys.Right);
         }
 
-        private void UpdateCar(IGameTime gameTime, Car c, Car[] tr, Color4 color)
+        private void UpdateCars(IGameTime gameTime)
         {
-            c.Update(gameTime, road, tr);
-
-            DrawCar(c, color);
-
-            if (c.Sensor != null)
+            for (int i = 0; i < cars.Length; i++)
             {
-                DrawSensor(c);
+                UpdateCar(gameTime, cars[i], carModels[i], traffic, carColor);
+            }
+        }
+        private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, Color4 color)
+        {
+            car.Update(gameTime, road, tr);
+
+            carModel.Manipulator.SetTransform(car.GetTransform());
+            carModel.TintColor = car.Damaged ? carDamagedColor : color;
+
+            if (car != bestCar)
+            {
+                return;
             }
 
-            if (c.Brain != null)
+            if (car.Sensor != null)
             {
-                DrawBrain(c);
+                DrawSensor(car);
+            }
+
+            if (car.Brain != null)
+            {
+                DrawBrain(car);
             }
         }
         private void UpdateTraffic(IGameTime gameTime)
         {
-            foreach (var c in traffic)
+            for (int i = 0; i < traffic.Length; i++)
             {
-                UpdateCar(gameTime, c, [], carTrafficColor);
+                UpdateCar(gameTime, traffic[i], trafficModels[i], [], carTrafficColor);
             }
-        }
-
-        private void BeginDrawCar()
-        {
-            triangleDrawer.Clear(carColor);
-            triangleDrawer.Clear(carTrafficColor);
-            triangleDrawer.Clear(carDamagedColor);
-            lineDrawer.Clear(carEdgeColor);
-        }
-        private void DrawCar(Car c, Color4 color)
-        {
-            var box = c.GetBox();
-            var tris = Triangle.ComputeTriangleList(box);
-            var lines = Line3D.CreateBox(box);
-
-            triangleDrawer.AddPrimitives(c.Damaged ? carDamagedColor : color, tris);
-            lineDrawer.AddPrimitives(carEdgeColor, lines);
         }
 
         private void BeginDrawSensor()
@@ -424,11 +464,11 @@ ESC - EXIT";
             sensorDrawer.Clear(carSensorColor);
             sensorDrawer.Clear(carSensorContactColor);
         }
-        private void DrawSensor(Car c)
+        private void DrawSensor(Car car)
         {
-            var readings = c.Sensor?.GetReadings() ?? [];
+            var readings = car.Sensor?.GetReadings() ?? [];
 
-            var rayList = c.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, readings))
+            var rayList = car.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, readings))
                 .GroupBy(r => r.Item1)
                 .ToDictionary(
                     keySelector => keySelector.Key,
@@ -459,15 +499,15 @@ ESC - EXIT";
             yield return (carSensorContactColor, new Line3D(pi, p1));
         }
 
-        private void DrawBrain(Car c)
+        private void DrawBrain(Car car)
         {
-            var b = c.Brain;
+            var b = car.Brain;
             if (b == null)
             {
                 return;
             }
 
-            brain.Text = c.Controls.ToString();
+            brain.Text = car.Controls.ToString();
         }
 
         private void DrawRoad()
@@ -497,9 +537,9 @@ ESC - EXIT";
             }
         }
 
-        private void DrawNeuralNetwork()
+        private void DrawNeuralNetwork(Car car)
         {
-            var network = car.Brain;
+            var network = car?.Brain;
             if (network == null)
             {
                 return;
@@ -533,16 +573,12 @@ ESC - EXIT";
 
         private void StartSimulation()
         {
-            const float carWidth = 10;
-            const float carHeight = 7;
-            const float carDepth = 20;
+            for (int i = 0; i < cars.Length; i++)
+            {
+                cars[i] = new(carWidth, carHeight, carDepth, CarControlTypes.AI, 1, 0.5f);
+            }
+            carFollower.Car = bestCar = cars[0];
 
-            car = new(carWidth, carHeight, carDepth, CarControlTypes.AI, 1, 0.5f);
-            carFollower.Car = car;
-
-            const int trafficCars = 3;
-            traffic = new Car[trafficCars];
-            trafficPositions = new Vector2[trafficCars];
             for (int i = 0; i < traffic.Length; i++)
             {
                 traffic[i] = new(carWidth, carHeight, carDepth, CarControlTypes.Dummy, 0.5f, 0.25f);
@@ -557,7 +593,11 @@ ESC - EXIT";
         }
         private void ResetSimulation()
         {
-            car.Reset();
+            for (int i = 0; i < cars.Length; i++)
+            {
+                cars[i].Reset();
+            }
+
             for (int i = 0; i < traffic.Length; i++)
             {
                 traffic[i].Reset();
@@ -568,8 +608,12 @@ ESC - EXIT";
         private void RelocateSimulationObjects()
         {
             var cLanePos = road.GetLaneCenter(road.LaneCount / 2);
-            cLanePos.Y = -200;
-            car.SetPosition(cLanePos);
+            cLanePos.Y = -spaceSize * 0.5f + (carDepth * 2);
+
+            for (int i = 0; i < cars.Length; i++)
+            {
+                cars[i].SetPosition(cLanePos);
+            }
 
             for (int i = 0; i < traffic.Length; i++)
             {

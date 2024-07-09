@@ -9,21 +9,21 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float width;
         private readonly float left;
         private readonly float right;
-
-        const float infinity = 250;
-        private readonly float top = infinity;
-        private readonly float bottom = -infinity;
+        private readonly float top;
+        private readonly float bottom;
 
         private readonly Segment[] borders;
 
         public int LaneCount { get; }
 
-        public Road(float x, float laneWidth, int laneCount)
+        public Road(float x, float laneWidth, int laneCount, float infinity = 250)
         {
             this.laneWidth = laneWidth;
             width = laneWidth * laneCount;
             left = x - (laneWidth * laneCount * 0.5f);
             right = x + (laneWidth * laneCount * 0.5f);
+            top = infinity;
+            bottom = -infinity;
 
             LaneCount = laneCount;
 

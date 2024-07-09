@@ -208,5 +208,9 @@ namespace AISamples.SceneCodingWithRadu
         {
             return trnBox;
         }
+        public Matrix GetTransform()
+        {
+            return trnBox.Transformation;
+        }
     }
 }
