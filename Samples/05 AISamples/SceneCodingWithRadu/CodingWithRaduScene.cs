@@ -7,6 +7,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ namespace AISamples.SceneCodingWithRadu
         private const float spaceSize = 1000f;
         private const string resourceTerrainDiffuse = "SceneCodingWithRadu/resources/dirt002.dds";
         private const string resourceTerrainNormal = "SceneCodingWithRadu/resources/normal001.dds";
+        private const string bestCarFileName = "bestCar.json";
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -233,13 +235,15 @@ ESC - EXIT";
         private async Task InitializeCars()
         {
             var geo = GeometryUtil.CreateBox(Topology.TriangleList, carWidth, carHeight, carDepth);
+            var mat = MaterialPhongContent.Default;
+            mat.IsTransparent = true;
 
             var cDesc = new ModelInstancedDescription()
             {
                 Instances = maxCarInstances,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo)),
+                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo, mat)),
+                BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
             carModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Cars", "Cars", cDesc);
@@ -248,8 +252,8 @@ ESC - EXIT";
             {
                 Instances = maxTrafficInstances,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo)),
+                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo, mat)),
+                BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
             trafficModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Traffic", "Traffic", tDesc);
@@ -307,6 +311,14 @@ ESC - EXIT";
             {
                 ToggleHelp();
             }
+            if (Game.Input.KeyJustReleased(Keys.F5))
+            {
+                SaveBestCar();
+            }
+            if (Game.Input.KeyJustReleased(Keys.F6))
+            {
+                DeleteBestCar();
+            }
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 followCar = !followCar;
@@ -345,6 +357,17 @@ ESC - EXIT";
             else
             {
                 info.Text = infoText;
+            }
+        }
+        private void SaveBestCar()
+        {
+            bestCar.Brain.Save(bestCarFileName);
+        }
+        private static void DeleteBestCar()
+        {
+            if (File.Exists(bestCarFileName))
+            {
+                File.Delete(bestCarFileName);
             }
         }
 
@@ -435,12 +458,20 @@ ESC - EXIT";
         }
         private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, bool damageTraffic, Color4 color)
         {
+            if (car.Damaged)
+            {
+                return;
+            }
+
             car.Update(gameTime, road, tr, damageTraffic);
 
             carModel.Manipulator.SetTransform(car.GetTransform());
-            carModel.TintColor = car.Damaged ? carDamagedColor : color;
 
-            if (car != bestCar)
+            bool isBestCar = car == bestCar;
+            var carColor = isBestCar ? color : new Color4(color.ToVector3(), 0.5f);
+            carModel.TintColor = car.Damaged ? carDamagedColor : carColor;
+
+            if (!isBestCar)
             {
                 return;
             }
@@ -576,8 +607,16 @@ ESC - EXIT";
 
         private void SelectBestCar()
         {
-            bestCar = cars.OrderByDescending(x => x.GetPosition().Y).FirstOrDefault();
-            carFollower.Car = bestCar;
+            var c = cars
+                .Where(c => !c.Damaged)
+                .OrderByDescending(c => c.GetPosition().Y)
+                .FirstOrDefault();
+
+            if (c != null)
+            {
+                bestCar = c;
+                carFollower.Car = bestCar;
+            }
         }
 
         public override void GameGraphicsResized()
@@ -605,9 +644,24 @@ ESC - EXIT";
 
         private void StartSimulation()
         {
+            bool mutate = File.Exists(bestCarFileName);
+
             for (int i = 0; i < cars.Length; i++)
             {
                 cars[i] = new(carWidth, carHeight, carDepth, CarControlTypes.AI, 1, 0.5f);
+
+                if (!mutate)
+                {
+                    continue;
+                }
+
+                cars[i].Brain.Load(bestCarFileName);
+                if (i == 0)
+                {
+                    continue;
+                }
+
+                cars[i].Brain.Mutate(0.1f);
             }
             carFollower.Car = bestCar = cars[0];
 
@@ -640,7 +694,7 @@ ESC - EXIT";
         private void RelocateSimulationObjects()
         {
             var cLanePos = road.GetLaneCenter(road.LaneCount / 2);
-            cLanePos.Y = -spaceSize * 0.5f + (carDepth * 2);
+            cLanePos.Y = -(carDepth * 10);
 
             for (int i = 0; i < cars.Length; i++)
             {

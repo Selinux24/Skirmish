@@ -10,6 +10,13 @@ namespace AISamples.SceneCodingWithRadu
         private readonly float[] biases;
         private readonly float[][] weights;
 
+        private Level(float[] inputs, float[] outputs, float[] biases, float[][] weights)
+        {
+            this.inputs = inputs;
+            this.outputs = outputs;
+            this.biases = biases;
+            this.weights = weights;
+        }
         public Level(int inputCount, int outputCount)
         {
             inputs = new float[inputCount];
@@ -113,5 +120,44 @@ namespace AISamples.SceneCodingWithRadu
         {
             return weights[i][o];
         }
+
+        public LevelFile ToFile()
+        {
+            return new()
+            {
+                Inputs = [.. inputs],
+                Outputs = [.. outputs],
+                Biases = [.. biases],
+                Weights = [.. weights],
+            };
+        }
+        public static Level FromFile(LevelFile file)
+        {
+            return new(file.Inputs, file.Outputs, file.Biases, file.Weights);
+        }
+
+        public void Mutate(float amount)
+        {
+            for (int i = 0; i < biases.Length; i++)
+            {
+                biases[i] = MathUtil.Lerp(biases[i], Helper.RandomGenerator.NextFloat(-1, 1), amount);
+            }
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                for (int o = 0; o < weights[i].Length; o++)
+                {
+                    weights[i][o] = MathUtil.Lerp(weights[i][o], Helper.RandomGenerator.NextFloat(-1, 1), amount);
+                }
+            }
+        }
+    }
+
+    class LevelFile
+    {
+        public float[] Inputs { get; set; }
+        public float[] Outputs { get; set; }
+        public float[] Biases { get; set; }
+        public float[][] Weights { get; set; }
     }
 }

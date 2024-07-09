@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Engine;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace AISamples.SceneCodingWithRadu
 {
@@ -7,6 +10,11 @@ namespace AISamples.SceneCodingWithRadu
         private readonly Level[] levels;
         private readonly float[] outputs;
 
+        private NeuralNetwork(Level[] levels, float[] outputs)
+        {
+            this.levels = levels;
+            this.outputs = outputs;
+        }
         public NeuralNetwork(int[] neuronCounts)
         {
             levels = new Level[neuronCounts.Length - 1];
@@ -58,5 +66,45 @@ namespace AISamples.SceneCodingWithRadu
         {
             return [.. outputs];
         }
+
+        public void Save(string fileName)
+        {
+            var file = new NeuralNetworkFile()
+            {
+                Levels = levels.Select(l => l.ToFile()).ToArray(),
+                Outputs = [.. outputs]
+            };
+
+            SerializationHelper.SerializeJsonToFile(file, fileName);
+        }
+        public void Load(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                return;
+            }
+
+            var file = SerializationHelper.DeserializeJsonFromFile<NeuralNetworkFile>(fileName);
+
+            Level[] levelArray = file.Levels.Select(Level.FromFile).ToArray();
+            float[] outputArray = [.. file.Outputs];
+
+            Array.Copy(levelArray, levels, levelArray.Length);
+            Array.Copy(outputArray, outputs, outputArray.Length);
+        }
+
+        public void Mutate(float amount)
+        {
+            foreach (var level in levels)
+            {
+                level.Mutate(amount);
+            }
+        }
+    }
+
+    class NeuralNetworkFile
+    {
+        public LevelFile[] Levels { get; set; }
+        public float[] Outputs { get; set; }
     }
 }
