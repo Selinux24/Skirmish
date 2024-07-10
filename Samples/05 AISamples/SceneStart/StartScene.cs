@@ -20,7 +20,8 @@ namespace AISamples.SceneStart
         private UITextArea title = null;
 
         private UIButton[] sceneButtons;
-        private UIButton scenePhysicsButton = null;
+        private UIButton sceneSelfDrivingCarButton = null;
+        private UIButton sceneVirtualWorldButton = null;
         private UIButton exitButton = null;
 
         private readonly string resourcesFolder = "SceneStart";
@@ -117,14 +118,15 @@ namespace AISamples.SceneStart
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
-            startButtonDesc.Height = 65;
+            startButtonDesc.Height = 35;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = sceneButtonTextColor;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            scenePhysicsButton = await InitializeButton(nameof(scenePhysicsButton), "SELF-DRIVING CAR", startButtonDesc);
+            sceneSelfDrivingCarButton = await InitializeButton(nameof(sceneSelfDrivingCarButton), "SELF-DRIVING CAR", startButtonDesc);
+            sceneVirtualWorldButton = await InitializeButton(nameof(sceneVirtualWorldButton), "A VIRTUAL WORLD", startButtonDesc);
 
             #endregion
 
@@ -133,7 +135,7 @@ namespace AISamples.SceneStart
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
-            exitButtonDesc.Height = 65;
+            exitButtonDesc.Height = 35;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextForeColor = exitButtonTextColor;
@@ -150,7 +152,9 @@ namespace AISamples.SceneStart
 
             sceneButtons =
             [
-                scenePhysicsButton,
+                sceneSelfDrivingCarButton,
+                sceneVirtualWorldButton,
+                null,
                 exitButton,
             ];
         }
@@ -217,9 +221,14 @@ namespace AISamples.SceneStart
                         break;
                     }
 
-                    sceneButtons[i].Left = (formWidth / div * (col + 1)) - (butWidth / 2);
-                    sceneButtons[i].Top = formHeight / h * hv - (butHeight / 2) + (row * (butHeight + 10));
-                    i++;
+                    var button = sceneButtons[i++];
+                    if (button == null)
+                    {
+                        continue;
+                    }
+
+                    button.Left = (formWidth / div * (col + 1)) - (butWidth / 2);
+                    button.Top = formHeight / h * hv - (butHeight / 2) + (row * (butHeight + 10));
                 }
             }
         }
@@ -236,7 +245,8 @@ namespace AISamples.SceneStart
                 return;
             }
 
-            if (sender == scenePhysicsButton) Game.SetScene<SceneCWRSelfDrivingCar.SelfDrivingCarScene>();
+            if (sender == sceneSelfDrivingCarButton) Game.SetScene<SceneCWRSelfDrivingCar.SelfDrivingCarScene>();
+            if (sender == sceneVirtualWorldButton) Game.SetScene<SceneCWRVirtualWorld.VirtualWorldScene>();
         }
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
