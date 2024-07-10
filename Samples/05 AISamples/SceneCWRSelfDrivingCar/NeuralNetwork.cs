@@ -3,18 +3,13 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class NeuralNetwork
     {
         private readonly Level[] levels;
         private readonly float[] outputs;
 
-        private NeuralNetwork(Level[] levels, float[] outputs)
-        {
-            this.levels = levels;
-            this.outputs = outputs;
-        }
         public NeuralNetwork(int[] neuronCounts)
         {
             levels = new Level[neuronCounts.Length - 1];

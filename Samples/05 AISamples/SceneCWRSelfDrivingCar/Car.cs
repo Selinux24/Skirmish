@@ -3,7 +3,7 @@ using SharpDX;
 using System;
 using System.Linq;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class Car
     {

@@ -4,7 +4,7 @@ using Engine.Common;
 using SharpDX;
 using System;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class Visualizer(PrimitiveListDrawer<Triangle> opaqueDrawer, PrimitiveListDrawer<Triangle> triangleDrawer, PrimitiveListDrawer<Line3D> lineDrawer)
     {

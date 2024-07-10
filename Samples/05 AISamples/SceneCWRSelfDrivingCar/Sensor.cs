@@ -3,7 +3,7 @@ using SharpDX;
 using System;
 using System.Linq;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class Sensor(Car car, int rayCount, float rayLength, float raySpread = MathUtil.PiOverFour)
     {

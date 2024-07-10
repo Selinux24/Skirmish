@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     /// <summary>
     /// Coding with Radu scene
@@ -22,11 +22,11 @@ namespace AISamples.SceneCodingWithRadu
     /// https://github.com/gniziemazity/Self-driving-car
     /// https://radufromfinland.com/
     /// </remarks>
-    class CodingWithRaduScene : Scene
+    class SelfDrivingCarScene : Scene
     {
         private const float spaceSize = 1000f;
-        private const string resourceTerrainDiffuse = "SceneCodingWithRadu/resources/dirt002.dds";
-        private const string resourceTerrainNormal = "SceneCodingWithRadu/resources/normal001.dds";
+        private const string resourceTerrainDiffuse = "SceneCWRSelfDrivingCar/resources/dirt002.dds";
+        private const string resourceTerrainNormal = "SceneCWRSelfDrivingCar/resources/normal001.dds";
         private const string bestCarFileName = "bestCar.json";
 
         private Sprite panel = null;
@@ -65,10 +65,10 @@ ESC - EXIT";
         private const float carWidth = 10;
         private const float carHeight = 7;
         private const float carDepth = 20;
-        private const int maxCarInstances = 1000;
+        private const int maxCarInstances = 10;
         private const int maxTrafficInstances = 3;
 
-        private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 1f);
+        private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 0.2f);
         private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
         private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color4 carSensorColor = Color.Yellow;
@@ -81,7 +81,7 @@ ESC - EXIT";
         private bool followCar = true;
         private readonly CarFollower carFollower = new(100, 50);
 
-        public CodingWithRaduScene(Game game) : base(game)
+        public SelfDrivingCarScene(Game game) : base(game)
         {
             Game.VisibleMouse = true;
             Game.LockMouse = false;
@@ -468,8 +468,8 @@ ESC - EXIT";
             carModel.Manipulator.SetTransform(car.GetTransform());
 
             bool isBestCar = car == bestCar;
-            var carColor = isBestCar ? color : new Color4(color.ToVector3(), 0.5f);
-            carModel.TintColor = car.Damaged ? carDamagedColor : carColor;
+            var betColor = isBestCar ? new Color4(color.ToVector3(), 1f) : color;
+            carModel.TintColor = car.Damaged ? carDamagedColor : betColor;
 
             if (!isBestCar)
             {

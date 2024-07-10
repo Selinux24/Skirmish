@@ -1,7 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class Level
     {

@@ -195,7 +195,7 @@ namespace Engine
         private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
             where T : struct
         {
-            if (!game.ValidateWriteBuffer(dc, descriptor, data, bufferDescriptors, buffers, out var buffer))
+            if (!game.ValidateWriteBuffer(dc, descriptor, bufferDescriptors, buffers, out var buffer))
             {
                 return false;
             }
@@ -208,8 +208,6 @@ namespace Engine
             if (!dc.IsImmediateContext)
             {
                 Logger.WriteWarning(game, $"Invalid WriteNoOverwriteBuffer action into deferred dc: {dc}. WriteDiscardBuffer action performed instead.");
-
-                return dc.WriteDiscardBuffer(buffer, descriptor.BufferOffset, data);
             }
 
             return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
@@ -217,15 +215,12 @@ namespace Engine
         /// <summary>
         /// Validates write data parameters
         /// </summary>
-        /// <typeparam name="T">Type of data</typeparam>
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="data">Data to write</param>
         /// <param name="bufferDescriptors">Buffer descriptors</param>
         /// <param name="buffers">Buffer list</param>
         /// <param name="buffer">Returns the buffer to update</param>
-        private static bool ValidateWriteBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
-            where T : struct
+        private static bool ValidateWriteBuffer(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
         {
             buffer = null;
 
@@ -237,11 +232,6 @@ namespace Engine
             if (descriptor?.Ready != true)
             {
                 return false;
-            }
-
-            if (data.Length <= 0)
-            {
-                return true;
             }
 
             var bufferManager = game.BufferManager;

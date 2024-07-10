@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SceneCodingWithRadu\Resources\dirt002.dds" />
-    <None Remove="SceneCodingWithRadu\Resources\normal001.dds" />
+    <None Remove="SceneCWRSelfDrivingCar\Resources\dirt002.dds" />
+    <None Remove="SceneCWRSelfDrivingCar\Resources\normal001.dds" />
     <None Remove="SceneStart\pointer.png" />
   </ItemGroup>
 
@@ -25,10 +25,10 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="SceneCodingWithRadu\Resources\dirt002.dds">
+    <Content Include="SceneCWRSelfDrivingCar\Resources\dirt002.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneCodingWithRadu\Resources\normal001.dds">
+    <Content Include="SceneCWRSelfDrivingCar\Resources\normal001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\backGround.jpg">

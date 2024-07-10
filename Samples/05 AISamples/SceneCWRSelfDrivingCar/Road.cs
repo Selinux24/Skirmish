@@ -2,7 +2,7 @@
 using SharpDX;
 using System;
 
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class Road
     {

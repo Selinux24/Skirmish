@@ -1,5 +1,5 @@
 ﻿
-namespace AISamples.SceneCodingWithRadu
+namespace AISamples.SceneCWRSelfDrivingCar
 {
     class CarControls
     {

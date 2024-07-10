@@ -236,7 +236,7 @@ namespace AISamples.SceneStart
                 return;
             }
 
-            if (sender == scenePhysicsButton) Game.SetScene<SceneCodingWithRadu.CodingWithRaduScene>();
+            if (sender == scenePhysicsButton) Game.SetScene<SceneCWRSelfDrivingCar.SelfDrivingCarScene>();
         }
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
