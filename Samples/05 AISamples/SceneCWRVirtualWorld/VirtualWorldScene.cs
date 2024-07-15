@@ -1,6 +1,11 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.Common;
+using Engine.Content;
 using Engine.UI;
 using SharpDX;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld
@@ -17,12 +22,30 @@ namespace AISamples.SceneCWRVirtualWorld
     /// </remarks>
     class VirtualWorldScene : Scene
     {
+        private const int layerHUD = 99;
         private const float spaceSize = 1000f;
+        private const string resourcesFolder = "SceneCWRVirtualWorld";
 
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea runtimeText = null;
         private UITextArea info = null;
+
+        private UIButton[] editorButtons;
+        private UIButton editorAddRandomPointButton = null;
+        private UIButton editorAddRandomSegmentButton = null;
+        private UIButton editorRemoveRandomSegmentButton = null;
+        private UIButton editorRemoveRandomPointButton = null;
+        private UIButton editorClearButton = null;
+
+        private Model terrain = null;
+        private Editor editor = null;
+
+        private const string editorFont = "Gill Sans MT, Consolas";
+        private const int editorButtonWidth = 200;
+        private const int editorButtonHeight = 25;
+        private readonly Color editorButtonColor = Color.WhiteSmoke;
+        private readonly Color editorButtonTextColor = Color.Black;
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -35,6 +58,9 @@ ESC - EXIT";
         private bool showHelp = false;
 
         private bool gameReady = false;
+        private bool editorReady = false;
+
+        private readonly Graph graph = new([], []);
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -57,6 +83,9 @@ ESC - EXIT";
                 [
                     InitializeTitle,
                     InitializeTexts,
+                    InitializeEditorButtons,
+                    InitializeEditorDrawer,
+                    InitializeTerrain,
                 ],
                 InitializeComponentsCompleted);
 
@@ -82,6 +111,92 @@ ESC - EXIT";
             runtimeText.Text = "";
             info.Text = infoText;
         }
+        private async Task InitializeEditorButtons()
+        {
+            var buttonsFont = TextDrawerDescription.FromFamily(editorFont, 10, FontMapStyles.Regular, true);
+            buttonsFont.ContentPath = resourcesFolder;
+
+            var editorButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
+            editorButtonDesc.ContentPath = resourcesFolder;
+            editorButtonDesc.Width = editorButtonWidth;
+            editorButtonDesc.Height = editorButtonHeight;
+            editorButtonDesc.ColorReleased = new Color4(editorButtonColor.RGB(), 0.8f);
+            editorButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 0.9f);
+            editorButtonDesc.TextForeColor = editorButtonTextColor;
+            editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+
+            editorAddRandomPointButton = await InitializeButton(nameof(editorAddRandomPointButton), "ADD RANDOM POINT", editorButtonDesc);
+            editorAddRandomSegmentButton = await InitializeButton(nameof(editorAddRandomSegmentButton), "ADD RANDOM SEGMENT", editorButtonDesc);
+            editorRemoveRandomSegmentButton = await InitializeButton(nameof(editorRemoveRandomSegmentButton), "REMOVE RANDOM SEGMENT", editorButtonDesc);
+            editorRemoveRandomPointButton = await InitializeButton(nameof(editorRemoveRandomPointButton), "REMOVE RANDOM POINT", editorButtonDesc);
+            editorClearButton = await InitializeButton(nameof(editorClearButton), "CLEAR", editorButtonDesc);
+
+            editorButtons =
+            [
+                editorAddRandomPointButton,
+                editorAddRandomSegmentButton,
+                editorRemoveRandomSegmentButton,
+                editorRemoveRandomPointButton,
+                editorClearButton,
+            ];
+        }
+        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
+        {
+            var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, layerHUD);
+            button.MouseClick += SceneButtonClick;
+            button.Caption.Text = caption;
+
+            return button;
+        }
+        private async Task InitializeTerrain()
+        {
+            float l = spaceSize;
+            float h = 0f;
+
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+
+            var mat = MaterialBlinnPhongContent.Default;
+
+            var desc = new ModelDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.All,
+                UseAnisotropicFiltering = true,
+                Content = ContentDescription.FromContentData(geo, mat),
+            };
+
+            terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
+            terrain.TintColor = Color.MediumSpringGreen;
+        }
+        private async Task InitializeEditorDrawer()
+        {
+            var descT = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+            };
+            var editorTriangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "visualizerTriangleDrawer",
+                "visualizerTriangleDrawer",
+                descT,
+                LayerEffects + 2);
+
+            var descL = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+            };
+            var editorLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "visualizerLineDrawer",
+                "visualizerLineDrawer",
+                descL,
+                LayerEffects + 1);
+
+            editor = new(editorTriangleDrawer, editorLineDrawer);
+        }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -97,13 +212,16 @@ ESC - EXIT";
 
             UpdateLayout();
 
-            Camera.Goto(new Vector3(0, 120, -175));
+            float s = spaceSize * 0.6f;
+            Camera.Goto(new Vector3(0, s, -s));
             Camera.LookTo(Vector3.Zero);
             Camera.FarPlaneDistance = spaceSize * 1.5f;
             Camera.MovementDelta = spaceSize * 0.2f;
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
 
             gameReady = true;
+
+            OpenEditor();
         }
 
         public override void Update(IGameTime gameTime)
@@ -126,6 +244,8 @@ ESC - EXIT";
             }
 
             UpdateInputCamera(gameTime);
+
+            editor.DrawGraph(graph, 0.5f, 10, 5);
         }
 
         private void ToggleHelp()
@@ -203,6 +323,110 @@ ESC - EXIT";
             panel.Height = panelBottom;
 
             info.SetPosition(new Vector2(5, panelBottom + 3));
+
+            UpdateEditorLayout();
+        }
+        private void UpdateEditorLayout()
+        {
+            //Show the editor buttons centered at screen bottom
+            if (!editorReady)
+            {
+                return;
+            }
+
+            UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, 6);
+        }
+
+        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
+        {
+            if (!editorReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            if (sender == editorAddRandomPointButton) AddRandonPoint();
+            if (sender == editorAddRandomSegmentButton) AddRandomSegment();
+            if (sender == editorRemoveRandomSegmentButton) RemoveRandomSegment();
+            if (sender == editorRemoveRandomPointButton) RemoveRandomPoint();
+            if (sender == editorClearButton) graph.Clear();
+        }
+        private void AddRandonPoint()
+        {
+            float size = spaceSize * 0.3f;
+
+            var point = new Vector2(
+                 Helper.RandomGenerator.NextFloat(-size, size),
+                 Helper.RandomGenerator.NextFloat(-size, size));
+
+            graph.TryAddPoint(point);
+        }
+        private void AddRandomSegment()
+        {
+            int count = graph.GetPointCount();
+            if (count == 0)
+            {
+                return;
+            }
+
+            int index1 = Helper.RandomGenerator.Next(0, count);
+            int index2 = Helper.RandomGenerator.Next(0, count);
+            if (index1 == index2)
+            {
+                return;
+            }
+
+            graph.TryAddSegment(new(graph.GetPoint(index1), graph.GetPoint(index2)));
+        }
+        private void RemoveRandomSegment()
+        {
+            int count = graph.GetSegmentCount();
+            if (count == 0)
+            {
+                return;
+            }
+
+            int index = Helper.RandomGenerator.Next(0, count);
+            if (index < 0)
+            {
+                return;
+            }
+
+            graph.RemoveSegment(graph.GetSegment(index));
+        }
+        private void RemoveRandomPoint()
+        {
+            int count = graph.GetPointCount();
+            if (count == 0)
+            {
+                return;
+            }
+
+            int index = Helper.RandomGenerator.Next(0, count);
+            if (index < 0)
+            {
+                return;
+            }
+
+            graph.RemovePoint(graph.GetPoint(index));
+        }
+        private void OpenEditor()
+        {
+            editorReady = true;
+
+            foreach (var button in editorButtons)
+            {
+                if (button != null)
+                {
+                    button.Visible = true;
+                }
+            }
+
+            UpdateEditorLayout();
         }
     }
 }

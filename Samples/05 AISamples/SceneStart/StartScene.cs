@@ -197,40 +197,7 @@ namespace AISamples.SceneStart
             title.SetRectangle(rect);
             title.Anchor = Anchors.HorizontalCenter;
 
-            int numButtons = sceneButtons.Length;
-            int cols = 4;
-            int rowCount = (int)MathF.Ceiling(numButtons / (float)cols);
-            int div = cols + 1;
-
-            int h = 8;
-            int hv = h - 1;
-
-            float butWidth = exitButton.Width;
-            float butHeight = exitButton.Height;
-
-            int formWidth = Game.Form.RenderWidth;
-            int formHeight = Game.Form.RenderHeight;
-
-            int i = 0;
-            for (int row = 0; row < rowCount; row++)
-            {
-                for (int col = 0; col < cols; col++)
-                {
-                    if (i >= sceneButtons.Length)
-                    {
-                        break;
-                    }
-
-                    var button = sceneButtons[i++];
-                    if (button == null)
-                    {
-                        continue;
-                    }
-
-                    button.Left = (formWidth / div * (col + 1)) - (butWidth / 2);
-                    button.Top = formHeight / h * hv - (butHeight / 2) + (row * (butHeight + 10));
-                }
-            }
+            UIControlExtensions.LocateButtons(Game.Form, sceneButtons, exitButton.Width, exitButton.Height, 4);
         }
 
         private void SceneButtonClick(IUIControl sender, MouseEventArgs e)

@@ -319,6 +319,33 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Creates a line in the XZ-plane
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="p1XZ">Point 1 in the XZ-plane</param>
+        /// <param name="p2XZ">Point 2 in the XZ-plane</param>
+        /// <param name="stroke">Stroke size</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateLine2D(Topology topology, Vector2 p1XZ, Vector2 p2XZ, float stroke, float height = 0f)
+        {
+            var p1 = new Vector3(p1XZ.X, height, p1XZ.Y);
+            var p2 = new Vector3(p2XZ.X, height, p2XZ.Y);
+            var line = p1 - p2;
+
+            //As line is the rectangle bisector, get rectangle corners
+            var ext1 = Vector3.Normalize(new Vector3(-line.Z, 0, line.X)) * stroke;
+            var ext2 = Vector3.Normalize(new Vector3(line.Z, 0, -line.X)) * stroke;
+            var topLeft = p1 + ext1;
+            var topRight = p1 + ext2;
+            var bottomLeft = p2 + ext1;
+            var bottomRight = p2 + ext2;
+            Vector3[] corners = [topLeft, topRight, bottomRight, bottomLeft];
+
+            return CreatePolygon(topology, corners, false);
+        }
+
+        /// <summary>
         /// Creates a screen
         /// </summary>
         /// <param name="form">Form</param>
