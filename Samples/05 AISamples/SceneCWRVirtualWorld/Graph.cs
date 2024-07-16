@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
@@ -43,20 +44,14 @@ namespace AISamples.SceneCWRVirtualWorld
         }
 
         public int GetPointCount() => points.Count;
+        public int GetPointIndex(Vector2 point) => points.IndexOf(point);
         public Vector2 GetPoint(int index) => points[index];
         public Vector2[] GetPoints() => [.. points];
         public void RemovePoint(Vector2 point)
         {
             points.Remove(point);
 
-            for (int i = 0; i < segments.Count; i++)
-            {
-                if (segments[i].P1 == point || segments[i].P2 == point)
-                {
-                    segments.RemoveAt(i);
-                    i--;
-                }
-            }
+            segments.RemoveAll(s => s.P1 == point || s.P2 == point);
         }
 
         public bool TryAddSegment(Segment2 segment)
@@ -99,6 +94,44 @@ namespace AISamples.SceneCWRVirtualWorld
         {
             points.Clear();
             segments.Clear();
+        }
+
+        public Vector2? GetNearestPoint(Vector2 point, float threshold)
+        {
+            var thpoints = points.Where(p => Vector2.Distance(p, point) < threshold);
+            if (!thpoints.Any())
+            {
+                return null;
+            }
+
+            return thpoints.OrderBy(p => Vector2.Distance(p, point)).First();
+        }
+
+        public void UpdatePoint(int index, Vector2 point)
+        {
+            if (index < 0)
+            {
+                return;
+            }
+
+            var prev = points[index];
+            points[index] = point;
+
+            for (int s = 0; s < segments.Count; s++)
+            {
+                var seg = segments[s];
+
+                if (seg.P1 == prev)
+                {
+                    seg.P1 = point;
+                }
+                if (seg.P2 == prev)
+                {
+                    seg.P2 = point;
+                }
+
+                segments[s] = seg;
+            }
         }
     }
 }

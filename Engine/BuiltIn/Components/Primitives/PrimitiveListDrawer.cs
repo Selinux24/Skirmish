@@ -286,7 +286,7 @@ namespace Engine.BuiltIn.Components.Primitives
 
             var dc = context.DeviceContext;
 
-            WriteDataInBuffer(dc);
+            WriteDataInBuffer(dc, context.Camera.Position);
 
             if (drawCount <= 0)
             {
@@ -315,9 +315,9 @@ namespace Engine.BuiltIn.Components.Primitives
         /// Writes dictionary data in buffer
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void WriteDataInBuffer(IEngineDeviceContext dc)
+        public void WriteDataInBuffer(IEngineDeviceContext dc, Vector3 eyePosition)
         {
-            UpdateBufferData();
+            UpdateBufferData(eyePosition);
 
             if (!Game.WriteVertexBuffer(dc, vertexBuffer, [.. bufferData]))
             {
@@ -331,7 +331,7 @@ namespace Engine.BuiltIn.Components.Primitives
         /// <summary>
         /// Updates buffer data
         /// </summary>
-        private void UpdateBufferData()
+        private void UpdateBufferData(Vector3 eyePosition)
         {
             if (!dictionaryChanged)
             {
@@ -342,22 +342,23 @@ namespace Engine.BuiltIn.Components.Primitives
 
             var copy = dictionary.ToArray();
 
-            foreach (var item in copy)
-            {
-                var color = item.Key;
-                var primitives = item.Value;
+            //Sort each primitive list by distance to eye
+            var l = copy
+                .SelectMany(p => p.Value.Select(v => new { Color = p.Key, Vertices = v.GetVertices().ToArray() }))
+                .OrderByDescending(p => p.Vertices.Max(v => Vector3.Distance(v, eyePosition)));
 
-                for (int i = 0; i < primitives.Count; i++)
+            foreach (var item in l)
+            {
+                var color = item.Color;
+                var primitives = item.Vertices;
+
+                for (int i = 0; i < primitives.Length; i++)
                 {
-                    var vList = primitives[i].GetVertices();
-                    for (int v = 0; v < vList.Count(); v++)
+                    bufferData.Add(new()
                     {
-                        bufferData.Add(new VertexPositionColor()
-                        {
-                            Position = vList.ElementAt(v),
-                            Color = color
-                        });
-                    }
+                        Position = primitives[i],
+                        Color = color
+                    });
                 }
             }
         }

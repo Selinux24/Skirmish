@@ -1,6 +1,5 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
@@ -39,13 +38,15 @@ namespace AISamples.SceneCWRVirtualWorld
         private UIButton editorClearButton = null;
 
         private Model terrain = null;
-        private Editor editor = null;
 
         private const string editorFont = "Gill Sans MT, Consolas";
         private const int editorButtonWidth = 200;
         private const int editorButtonHeight = 25;
         private readonly Color editorButtonColor = Color.WhiteSmoke;
         private readonly Color editorButtonTextColor = Color.Black;
+        private const float graphPointRadius = 10f;
+        private const float graphLineRadius = 1f;
+        private const float graphSelectThreshold = 25f;
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -61,6 +62,7 @@ ESC - EXIT";
         private bool editorReady = false;
 
         private readonly Graph graph = new([], []);
+        private readonly Editor editor = new();
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -84,7 +86,7 @@ ESC - EXIT";
                     InitializeTitle,
                     InitializeTexts,
                     InitializeEditorButtons,
-                    InitializeEditorDrawer,
+                    InitializeEditor,
                     InitializeTerrain,
                 ],
                 InitializeComponentsCompleted);
@@ -169,33 +171,9 @@ ESC - EXIT";
             terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
             terrain.TintColor = Color.MediumSpringGreen;
         }
-        private async Task InitializeEditorDrawer()
+        private Task InitializeEditor()
         {
-            var descT = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Count = 20000,
-                DepthEnabled = true,
-                BlendMode = BlendModes.Alpha,
-            };
-            var editorTriangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
-                "visualizerTriangleDrawer",
-                "visualizerTriangleDrawer",
-                descT,
-                LayerEffects + 2);
-
-            var descL = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Count = 20000,
-                DepthEnabled = true,
-                BlendMode = BlendModes.Alpha,
-            };
-            var editorLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "visualizerLineDrawer",
-                "visualizerLineDrawer",
-                descL,
-                LayerEffects + 1);
-
-            editor = new(editorTriangleDrawer, editorLineDrawer);
+            return editor.InitializeEditorDrawer(this);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -245,7 +223,7 @@ ESC - EXIT";
 
             UpdateInputCamera(gameTime);
 
-            editor.DrawGraph(graph, 0.5f, 10, 5);
+            UpdateEditor(gameTime);
         }
 
         private void ToggleHelp()
@@ -305,6 +283,21 @@ ESC - EXIT";
             {
                 Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
             }
+        }
+
+        private void UpdateEditor(IGameTime gameTime)
+        {
+            if (!editorReady)
+            {
+                return;
+            }
+
+            if (TopMostControl == null)
+            {
+                editor.UpdateInputEditor(this, graph, gameTime, graphSelectThreshold);
+            }
+
+            editor.DrawGraph(graph, 0, graphPointRadius, graphLineRadius);
         }
 
         public override void GameGraphicsResized()
