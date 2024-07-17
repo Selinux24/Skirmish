@@ -31,16 +31,14 @@ namespace AISamples.SceneCWRVirtualWorld
         private UITextArea info = null;
 
         private UIButton[] editorButtons;
-        private UIButton editorAddRandomPointButton = null;
-        private UIButton editorAddRandomSegmentButton = null;
-        private UIButton editorRemoveRandomSegmentButton = null;
-        private UIButton editorRemoveRandomPointButton = null;
+        private UIButton editorLoadButton = null;
+        private UIButton editorSaveButton = null;
         private UIButton editorClearButton = null;
 
         private Model terrain = null;
 
         private const string editorFont = "Gill Sans MT, Consolas";
-        private const int editorButtonWidth = 200;
+        private const int editorButtonWidth = 150;
         private const int editorButtonHeight = 25;
         private readonly Color editorButtonColor = Color.WhiteSmoke;
         private readonly Color editorButtonTextColor = Color.Black;
@@ -128,19 +126,19 @@ ESC - EXIT";
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            editorAddRandomPointButton = await InitializeButton(nameof(editorAddRandomPointButton), "ADD RANDOM POINT", editorButtonDesc);
-            editorAddRandomSegmentButton = await InitializeButton(nameof(editorAddRandomSegmentButton), "ADD RANDOM SEGMENT", editorButtonDesc);
-            editorRemoveRandomSegmentButton = await InitializeButton(nameof(editorRemoveRandomSegmentButton), "REMOVE RANDOM SEGMENT", editorButtonDesc);
-            editorRemoveRandomPointButton = await InitializeButton(nameof(editorRemoveRandomPointButton), "REMOVE RANDOM POINT", editorButtonDesc);
+            editorLoadButton = await InitializeButton(nameof(editorLoadButton), "LOAD GRAPH", editorButtonDesc);
+            editorSaveButton = await InitializeButton(nameof(editorSaveButton), "SAVE GRAPH", editorButtonDesc);
             editorClearButton = await InitializeButton(nameof(editorClearButton), "CLEAR", editorButtonDesc);
 
             editorButtons =
             [
-                editorAddRandomPointButton,
-                editorAddRandomSegmentButton,
-                editorRemoveRandomSegmentButton,
-                editorRemoveRandomPointButton,
+                null,
+                editorLoadButton,
+                editorSaveButton,
+                null,
+                null,
                 editorClearButton,
+                null,
             ];
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
@@ -329,7 +327,7 @@ ESC - EXIT";
                 return;
             }
 
-            UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, 6);
+            UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, 7);
         }
 
         private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
@@ -344,70 +342,38 @@ ESC - EXIT";
                 return;
             }
 
-            if (sender == editorAddRandomPointButton) AddRandonPoint();
-            if (sender == editorAddRandomSegmentButton) AddRandomSegment();
-            if (sender == editorRemoveRandomSegmentButton) RemoveRandomSegment();
-            if (sender == editorRemoveRandomPointButton) RemoveRandomPoint();
+            if (sender == editorLoadButton) LoadGraph();
+            if (sender == editorSaveButton) SaveGraph();
             if (sender == editorClearButton) graph.Clear();
         }
-        private void AddRandonPoint()
+        private void LoadGraph()
         {
-            float size = spaceSize * 0.3f;
+            using System.Windows.Forms.OpenFileDialog dlg = new()
+            {
+                Filter = "Graph files (*.graph)|*.graph",
+                FilterIndex = 1,
+                RestoreDirectory = true,
+            };
 
-            var point = new Vector2(
-                 Helper.RandomGenerator.NextFloat(-size, size),
-                 Helper.RandomGenerator.NextFloat(-size, size));
-
-            graph.TryAddPoint(point);
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                graph.LoadFromFile(dlg.FileName);
+            }
         }
-        private void AddRandomSegment()
+        private void SaveGraph()
         {
-            int count = graph.GetPointCount();
-            if (count == 0)
+            using System.Windows.Forms.SaveFileDialog dlg = new()
             {
-                return;
-            }
+                FileName = "newgraph.graph",
+                Filter = "Graph files (*.graph)|*.graph",
+                FilterIndex = 1,
+                RestoreDirectory = true,
+            };
 
-            int index1 = Helper.RandomGenerator.Next(0, count);
-            int index2 = Helper.RandomGenerator.Next(0, count);
-            if (index1 == index2)
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                return;
+                graph.SaveToFile(dlg.FileName);
             }
-
-            graph.TryAddSegment(new(graph.GetPoint(index1), graph.GetPoint(index2)));
-        }
-        private void RemoveRandomSegment()
-        {
-            int count = graph.GetSegmentCount();
-            if (count == 0)
-            {
-                return;
-            }
-
-            int index = Helper.RandomGenerator.Next(0, count);
-            if (index < 0)
-            {
-                return;
-            }
-
-            graph.RemoveSegment(graph.GetSegment(index));
-        }
-        private void RemoveRandomPoint()
-        {
-            int count = graph.GetPointCount();
-            if (count == 0)
-            {
-                return;
-            }
-
-            int index = Helper.RandomGenerator.Next(0, count);
-            if (index < 0)
-            {
-                return;
-            }
-
-            graph.RemovePoint(graph.GetPoint(index));
         }
         private void OpenEditor()
         {

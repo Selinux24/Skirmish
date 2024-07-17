@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using Engine;
+using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -132,6 +134,22 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 segments[s] = seg;
             }
+        }
+
+        public void LoadFromFile(string fileName)
+        {
+            var graphFile = SerializationHelper.DeserializeJsonFromFile<GraphFile>(fileName);
+            var newGraph = GraphFile.FromGraphFile(graphFile);
+
+            Clear();
+
+            points.AddRange(newGraph.points);
+            segments.AddRange(newGraph.segments);
+        }
+        public void SaveToFile(string fileName)
+        {
+            var graphFile = GraphFile.FromGraph(this);
+            SerializationHelper.SerializeJsonToFile(graphFile, fileName);
         }
     }
 }
