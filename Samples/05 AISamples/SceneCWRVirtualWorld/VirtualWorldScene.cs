@@ -62,7 +62,7 @@ ESC - EXIT";
         private bool editorReady = false;
 
         private readonly Graph graph = new([], []);
-        private readonly Editor editor = new();
+        private Editor editor = null;
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -173,6 +173,8 @@ ESC - EXIT";
         }
         private Task InitializeEditor()
         {
+            editor = new(graph);
+
             return editor.InitializeEditorDrawer(this);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
@@ -294,10 +296,10 @@ ESC - EXIT";
 
             if (TopMostControl == null)
             {
-                editor.UpdateInputEditor(this, graph, gameTime, graphSelectThreshold);
+                editor.UpdateInputEditor(gameTime, graphSelectThreshold);
             }
 
-            editor.DrawGraph(graph, 0, graphPointRadius, graphLineRadius);
+            editor.DrawGraph(0, graphPointRadius, graphLineRadius);
         }
 
         public override void GameGraphicsResized()
