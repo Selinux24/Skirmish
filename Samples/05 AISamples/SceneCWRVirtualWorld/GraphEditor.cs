@@ -30,6 +30,18 @@ namespace AISamples.SceneCWRVirtualWorld
         private float dragTime = 0;
         private Vector2 mouse = Vector2.Zero;
 
+        public bool Visible
+        {
+            get
+            {
+                return graphDrawer.Visible;
+            }
+            set
+            {
+                graphDrawer.Visible = value;
+            }
+        }
+
         public async Task Initialize(Scene scene)
         {
             this.scene = scene;

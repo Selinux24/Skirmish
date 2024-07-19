@@ -33,6 +33,7 @@ namespace AISamples.SceneCWRVirtualWorld
         private UIButton[] editorButtons;
         private UIButton editorLoadButton = null;
         private UIButton editorSaveButton = null;
+        private UIButton editorToggleButton = null;
         private UIButton editorClearButton = null;
 
         private Model terrain = null;
@@ -55,6 +56,7 @@ ESC - EXIT";
 
         private bool gameReady = false;
         private bool editorReady = false;
+        private bool showEditor = true;
 
         private readonly Graph graph = new([], []);
         private World world = null;
@@ -127,17 +129,18 @@ ESC - EXIT";
 
             editorLoadButton = await InitializeButton(nameof(editorLoadButton), "LOAD GRAPH", editorButtonDesc);
             editorSaveButton = await InitializeButton(nameof(editorSaveButton), "SAVE GRAPH", editorButtonDesc);
+            editorToggleButton = await InitializeButton(nameof(editorToggleButton), "TOGGLE EDITOR", editorButtonDesc);
             editorClearButton = await InitializeButton(nameof(editorClearButton), "CLEAR", editorButtonDesc);
 
             editorButtons =
             [
-                null,
                 editorLoadButton,
                 editorSaveButton,
                 null,
+                editorToggleButton,
+                null,
                 null,
                 editorClearButton,
-                null,
             ];
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
@@ -302,6 +305,11 @@ ESC - EXIT";
                 return;
             }
 
+            if (!showEditor)
+            {
+                return;
+            }
+
             if (TopMostControl == null)
             {
                 editor.UpdateInputEditor(gameTime);
@@ -354,6 +362,7 @@ ESC - EXIT";
 
             if (sender == editorLoadButton) LoadGraph();
             if (sender == editorSaveButton) SaveGraph();
+            if (sender == editorToggleButton) ToggleEditor();
             if (sender == editorClearButton) graph.Clear();
         }
         private void LoadGraph()
@@ -398,6 +407,12 @@ ESC - EXIT";
             }
 
             UpdateEditorLayout();
+        }
+        private void ToggleEditor()
+        {
+            showEditor = !showEditor;
+
+            editor.Visible = showEditor;
         }
     }
 }

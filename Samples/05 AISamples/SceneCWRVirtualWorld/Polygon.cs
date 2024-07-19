@@ -27,26 +27,30 @@ namespace AISamples.SceneCWRVirtualWorld
             {
                 foreach (var segment in polygons[i].segments)
                 {
-                    bool keep = true;
-                    for (int j = 0; j < polygons.Length; j++)
-                    {
-                        if (i == j)
-                        {
-                            continue;
-                        }
-
-                        if (polygons[j].ContainsSegment(segment))
-                        {
-                            keep = false;
-                            break;
-                        }
-                    }
+                    bool keep = KeepSegment(i, segment, polygons);
                     if (keep)
                     {
                         yield return segment;
                     }
                 }
             }
+        }
+        private static bool KeepSegment(int polyIndex, Segment2 segment, Polygon[] polygons)
+        {
+            for (int j = 0; j < polygons.Length; j++)
+            {
+                if (polyIndex == j)
+                {
+                    continue;
+                }
+
+                if (polygons[j].ContainsSegment(segment))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         private static void Break(Polygon poly1, Polygon poly2)
         {
@@ -61,16 +65,18 @@ namespace AISamples.SceneCWRVirtualWorld
                         segs1[i].P1, segs1[i].P2,
                         segs2[j].P1, segs2[j].P2);
 
-                    if (exists && offset != 0 && offset != 1)
+                    if (!exists || MathUtil.IsZero(offset) || MathUtil.IsOne(offset))
                     {
-                        var aux = segs1[i].P2;
-                        segs1[i] = new Segment2(segs1[i].P1, point);
-                        segs1.Insert(i + 1, new Segment2(point, aux));
-
-                        aux = segs2[j].P2;
-                        segs2[j] = new Segment2(segs2[j].P1, point);
-                        segs2.Insert(j + 1, new Segment2(point, aux));
+                        continue;
                     }
+
+                    var aux = segs1[i].P2;
+                    segs1[i] = new Segment2(segs1[i].P1, point);
+                    segs1.Insert(i + 1, new Segment2(point, aux));
+
+                    aux = segs2[j].P2;
+                    segs2[j] = new Segment2(segs2[j].P1, point);
+                    segs2.Insert(j + 1, new Segment2(point, aux));
                 }
             }
         }
@@ -111,14 +117,16 @@ namespace AISamples.SceneCWRVirtualWorld
             var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
 
-            if (bottom != 0)
+            if (MathUtil.IsZero(bottom))
             {
-                float t = tTop / bottom;
-                float u = uTop / bottom;
-                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
-                {
-                    return (true, t, new(MathUtil.Lerp(s1p1.X, s1p2.X, t), MathUtil.Lerp(s1p1.Y, s1p2.Y, t)));
-                }
+                return (false, 0, Vector2.Zero);
+            }
+
+            float t = tTop / bottom;
+            float u = uTop / bottom;
+            if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+            {
+                return (true, t, new(MathUtil.Lerp(s1p1.X, s1p2.X, t), MathUtil.Lerp(s1p1.Y, s1p2.Y, t)));
             }
 
             return (false, 0, Vector2.Zero);

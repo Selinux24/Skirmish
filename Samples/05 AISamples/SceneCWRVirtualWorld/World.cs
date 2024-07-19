@@ -24,7 +24,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private PrimitiveListDrawer<Triangle> roadDrawer = null;
         private PrimitiveListDrawer<Triangle> roadMarksDrawer = null;
-        private Guid graphVersion = Guid.Empty;
+        private Guid graphVersion;
 
         public World(Graph graph, float height)
         {
