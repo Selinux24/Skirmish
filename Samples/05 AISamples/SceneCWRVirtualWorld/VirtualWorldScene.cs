@@ -37,14 +37,11 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private Model terrain = null;
 
-        private const string editorFont = "Gill Sans MT, Consolas";
+        private const string editorFont = "Consolas";
         private const int editorButtonWidth = 150;
         private const int editorButtonHeight = 25;
         private readonly Color editorButtonColor = Color.WhiteSmoke;
         private readonly Color editorButtonTextColor = Color.Black;
-        private const float graphPointRadius = 10f;
-        private const float graphLineRadius = 1f;
-        private const float graphSelectThreshold = 25f;
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -60,7 +57,8 @@ ESC - EXIT";
         private bool editorReady = false;
 
         private readonly Graph graph = new([], []);
-        private Editor editor = null;
+        private World world = null;
+        private GraphEditor editor = null;
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -85,6 +83,7 @@ ESC - EXIT";
                     InitializeTexts,
                     InitializeEditorButtons,
                     InitializeEditor,
+                    InitializeWorld,
                     InitializeTerrain,
                 ],
                 InitializeComponentsCompleted);
@@ -169,11 +168,17 @@ ESC - EXIT";
             terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
             terrain.TintColor = Color.MediumSpringGreen;
         }
+        private Task InitializeWorld()
+        {
+            world = new(graph, 0);
+
+            return world.Initialize(this);
+        }
         private Task InitializeEditor()
         {
-            editor = new(graph);
+            editor = new(graph, 0);
 
-            return editor.InitializeEditorDrawer(this);
+            return editor.Initialize(this);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -223,6 +228,7 @@ ESC - EXIT";
 
             UpdateInputCamera(gameTime);
 
+            UpdateWorld();
             UpdateEditor(gameTime);
         }
 
@@ -285,6 +291,10 @@ ESC - EXIT";
             }
         }
 
+        private void UpdateWorld()
+        {
+            world.Update();
+        }
         private void UpdateEditor(IGameTime gameTime)
         {
             if (!editorReady)
@@ -294,10 +304,10 @@ ESC - EXIT";
 
             if (TopMostControl == null)
             {
-                editor.UpdateInputEditor(gameTime, graphSelectThreshold);
+                editor.UpdateInputEditor(gameTime);
             }
 
-            editor.DrawGraph(0, graphPointRadius, graphLineRadius);
+            editor.Draw();
         }
 
         public override void GameGraphicsResized()

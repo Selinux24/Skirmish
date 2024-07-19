@@ -1,6 +1,7 @@
 ﻿using AISamples.SceneCWRVirtualWorld.Content;
 using Engine;
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,8 @@ namespace AISamples.SceneCWRVirtualWorld
     {
         private readonly List<Vector2> points = [];
         private readonly List<Segment2> segments = [];
+
+        public Guid Version { get; private set; } = Guid.NewGuid();
 
         public Graph(Vector2[] points, Segment2[] segments)
         {
@@ -31,6 +34,8 @@ namespace AISamples.SceneCWRVirtualWorld
         public void AddPoint(Vector2 point)
         {
             points.Add(point);
+
+            Version = Guid.NewGuid();
         }
         public bool ContainsPoint(Vector2 point)
         {
@@ -54,6 +59,8 @@ namespace AISamples.SceneCWRVirtualWorld
             points.Remove(point);
 
             segments.RemoveAll(s => s.P1 == point || s.P2 == point);
+     
+            Version = Guid.NewGuid();
         }
 
         public bool TryAddSegment(Segment2 segment)
@@ -70,6 +77,8 @@ namespace AISamples.SceneCWRVirtualWorld
         public void AddSegment(Segment2 segment)
         {
             segments.Add(segment);
+  
+            Version = Guid.NewGuid();
         }
         public bool ContainsSegment(Segment2 segment)
         {
@@ -90,12 +99,16 @@ namespace AISamples.SceneCWRVirtualWorld
         public void RemoveSegment(Segment2 segment)
         {
             segments.Remove(segment);
+      
+            Version = Guid.NewGuid();
         }
 
         public void Clear()
         {
             points.Clear();
             segments.Clear();
+      
+            Version = Guid.NewGuid();
         }
 
         public Vector2? GetNearestPoint(Vector2 point, float threshold)
@@ -134,6 +147,8 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 segments[s] = seg;
             }
+     
+            Version = Guid.NewGuid();
         }
 
         public void LoadFromFile(string fileName)
@@ -145,6 +160,8 @@ namespace AISamples.SceneCWRVirtualWorld
 
             points.AddRange(newGraph.points);
             segments.AddRange(newGraph.segments);
+     
+            Version = Guid.NewGuid();
         }
         public void SaveToFile(string fileName)
         {
