@@ -56,5 +56,24 @@ namespace AISamples.SceneCWRVirtualWorld
 
             return [.. dashes];
         }
+        public float DistanceToPoint(Vector2 point)
+        {
+            var proj = ProjectPoint(point);
+            if (proj.offset > 0 && proj.offset < 1)
+            {
+                return Vector2.Distance(point, proj.point);
+            }
+            float distToP1 = Vector2.Distance(point, P1);
+            float distToP2 = Vector2.Distance(point, P2);
+            return MathF.Min(distToP1, distToP2);
+        }
+        private (Vector2 point, float offset) ProjectPoint(Vector2 point)
+        {
+            var a = Vector2.Subtract(point, P1);
+            var b = Vector2.Subtract(P2, P1);
+            var normB = Vector2.Normalize(b);
+            float scaler = Vector2.Dot(a, normB);
+            return (P1 + scaler * normB, scaler / b.Length());
+        }
     }
 }

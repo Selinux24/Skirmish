@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace AISamples.SceneCWRVirtualWorld
@@ -90,13 +91,13 @@ namespace AISamples.SceneCWRVirtualWorld
                 }
             }
         }
-        private bool ContainsSegment(Segment2 segment)
+        public bool ContainsSegment(Segment2 segment)
         {
             var midPoint = Vector2.Lerp(segment.P1, segment.P2, 0.5f);
 
             return ContainsPoint(midPoint);
         }
-        private bool ContainsPoint(Vector2 point)
+        public bool ContainsPoint(Vector2 point)
         {
             var outerPoint = new Vector2(point.X - 1000, point.Y - 1000);
             int intersections = 0;
@@ -110,6 +111,31 @@ namespace AISamples.SceneCWRVirtualWorld
             }
             return intersections % 2 == 1;
         }
+        public bool IntersectsPolygonSegments(Polygon poly)
+        {
+            for (int i = 0; i < segments.Count; i++)
+            {
+                for (int j = 0; j < poly.segments.Count; j++)
+                {
+                    var intersection = GetIntersection(segments[i].P1, segments[i].P2, poly.segments[j].P1, poly.segments[j].P2);
+                    if (intersection.Exists)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        public float DistanceToPoint(Vector2 point)
+        {
+            float minDistance = float.MaxValue;
+            for (int i = 0; i < segments.Count; i++)
+            {
+                minDistance = MathF.Min(minDistance, segments[i].DistanceToPoint(point));
+            }
+            return minDistance;
+        }
 
         private static (bool Exists, float Offset, Vector2 Point) GetIntersection(Vector2 s1p1, Vector2 s1p2, Vector2 s2p1, Vector2 s2p2)
         {
@@ -117,16 +143,14 @@ namespace AISamples.SceneCWRVirtualWorld
             var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
 
-            if (MathUtil.IsZero(bottom))
+            if (MathF.Abs(bottom) > 0.001f)
             {
-                return (false, 0, Vector2.Zero);
-            }
-
-            float t = tTop / bottom;
-            float u = uTop / bottom;
-            if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
-            {
-                return (true, t, new(MathUtil.Lerp(s1p1.X, s1p2.X, t), MathUtil.Lerp(s1p1.Y, s1p2.Y, t)));
+                float t = tTop / bottom;
+                float u = uTop / bottom;
+                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                {
+                    return (true, t, new(MathUtil.Lerp(s1p1.X, s1p2.X, t), MathUtil.Lerp(s1p1.Y, s1p2.Y, t)));
+                }
             }
 
             return (false, 0, Vector2.Zero);
