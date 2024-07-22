@@ -8,15 +8,19 @@ namespace AISamples.SceneCWRVirtualWorld
     {
         private readonly Segment2 skeleton;
         private readonly Polygon polygon;
+        private readonly float width;
+        private readonly int roundness;
 
         public Envelope(Segment2 skeleton, float width, int roundness)
         {
             this.skeleton = skeleton;
+            this.width = width;
+            this.roundness = roundness;
 
-            polygon = GeneratePolygon(width, roundness);
+            polygon = GeneratePolygon();
         }
 
-        private Polygon GeneratePolygon(float width, int roundness)
+        private Polygon GeneratePolygon()
         {
             var p1 = skeleton.P1;
             var p2 = skeleton.P2;
@@ -45,6 +49,11 @@ namespace AISamples.SceneCWRVirtualWorld
             {
                 yield return Translate(p, angle + i, radius);
             }
+        }
+
+        public Envelope Scale(float scale)
+        {
+            return new(skeleton, width * scale, roundness);
         }
 
         public Polygon GetPolygon()

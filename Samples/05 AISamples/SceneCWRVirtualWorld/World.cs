@@ -17,9 +17,11 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private readonly Graph graph;
         private readonly float height;
+        private readonly List<Envelope> envelopes = [];
+
         private readonly float roadWidth = 30f;
         private readonly int roadRoundness = 16;
-        private readonly List<Envelope> envelopes = [];
+        private readonly List<Envelope> roadEnvelopes = [];
         private readonly List<Segment2> roadBorders = [];
 
         private PrimitiveListDrawer<Triangle> roadDrawer = null;
@@ -44,6 +46,9 @@ namespace AISamples.SceneCWRVirtualWorld
             {
                 envelopes.Add(new(segments[i], roadWidth, roadRoundness));
             }
+
+            roadEnvelopes.Clear();
+            roadEnvelopes.AddRange(envelopes.Select(e => e.Scale(1.2f)));
 
             roadBorders.Clear();
             roadBorders.AddRange(Polygon.Union(envelopes.Select(e => e.GetPolygon()).ToArray()));
@@ -88,11 +93,13 @@ namespace AISamples.SceneCWRVirtualWorld
             roadDrawer.Clear();
             roadMarksDrawer.Clear();
 
-            foreach (var envelope in envelopes)
+            // Draw road base
+            foreach (var roadEnvelope in roadEnvelopes)
             {
-                DrawEnvelope(envelope, height, roadColor, roadDrawer);
+                DrawEnvelope(roadEnvelope, height, roadColor, roadDrawer);
             }
 
+            // Draw road marks
             foreach (var segment in graph.GetSegments())
             {
                 var dashes = Segment2.Divide(segment, 5, 5);
@@ -103,9 +110,10 @@ namespace AISamples.SceneCWRVirtualWorld
                 }
             }
 
+            // Draw road borders
             foreach (var border in roadBorders)
             {
-                DrawEnvelope(new Envelope(border, 2, 1), height + hDelta, roadMarksColor, roadMarksDrawer);
+                DrawEnvelope(new Envelope(border, 2, 3), height + hDelta, roadMarksColor, roadMarksDrawer);
             }
         }
         private static void DrawEnvelope(Envelope envelope, float height, Color4 envColor, PrimitiveListDrawer<Triangle> drawer)
