@@ -126,6 +126,11 @@ namespace AISamples.SceneCWRVirtualWorld
                     {
                         return true;
                     }
+
+                    if (b.DistanceToPolygon(otherB) < buildingSpacing - 0.001f)
+                    {
+                        return true;
+                    }
                 }
 
                 return false;

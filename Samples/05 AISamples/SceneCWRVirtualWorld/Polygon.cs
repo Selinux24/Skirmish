@@ -136,15 +136,24 @@ namespace AISamples.SceneCWRVirtualWorld
             }
             return minDistance;
         }
+        public float DistanceToPolygon(Polygon poly)
+        {
+            float minDistance = float.MaxValue;
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                minDistance = MathF.Min(minDistance, poly.DistanceToPoint(Vertices[i]));
+            }
+            return minDistance;
+        }
 
         private static (bool Exists, float Offset, Vector2 Point) GetIntersection(Vector2 s1p1, Vector2 s1p2, Vector2 s2p1, Vector2 s2p2)
         {
-            var tTop = (s2p2.X - s2p1.X) * (s1p1.Y - s2p1.Y) - (s2p2.Y - s2p1.Y) * (s1p1.X - s2p1.X);
-            var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
-
-            if (MathF.Abs(bottom) > 0.001f)
+            if (!MathUtil.WithinEpsilon(0f, bottom, 0.01f))
             {
+                var tTop = (s2p2.X - s2p1.X) * (s1p1.Y - s2p1.Y) - (s2p2.Y - s2p1.Y) * (s1p1.X - s2p1.X);
+                var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);
+
                 float t = tTop / bottom;
                 float u = uTop / bottom;
                 if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
