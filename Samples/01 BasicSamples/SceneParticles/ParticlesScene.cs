@@ -39,7 +39,7 @@ namespace BasicSamples.SceneParticles
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = [];
         private ParticleManager pManager = null;
 
-        private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
+        private GeometryColorDrawer<Line3D> pManagerLineDrawer = null;
         private readonly List<Line3D> lines = [];
 
         private bool uiReady = false;
@@ -189,11 +189,11 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeParticleVolumeDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 20000,
             };
-            pManagerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            pManagerLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DebugParticleDrawer",
                 "DebugParticleDrawer",
                 desc);

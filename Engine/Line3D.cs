@@ -477,11 +477,8 @@ namespace Engine
         /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return
-            [
-                Point1,
-                Point2,
-            ];
+            yield return Point1;
+            yield return Point2;
         }
         /// <inheritdoc/>
         public readonly int GetStride()

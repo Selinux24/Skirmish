@@ -22,7 +22,7 @@ namespace PhysicsSamples.ScenePhysics
         private UITextArea title = null;
         private UITextArea runtimeText = null;
         private UITextArea info = null;
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
         private Joint joint;
         private Rod rod;
 
@@ -91,12 +91,12 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeLineDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 20000,
                 DepthEnabled = true,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "EdgeDrawer",
                 "EdgeDrawer",
                 desc);

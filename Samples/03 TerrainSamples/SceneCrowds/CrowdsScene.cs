@@ -50,8 +50,8 @@ namespace TerrainSamples.SceneCrowds
         private Model tree = null;
         private ModelInstanced trees = null;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
@@ -221,21 +221,21 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeDebug()
         {
-            var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 1000,
                 BlendMode = BlendModes.Alpha,
                 StartsVisible = true,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
 
-            var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var terrainGraphDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
                 BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
-            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
         }
         private void InitializeSceneComponentsCompleted(LoadResourcesResult res)
         {

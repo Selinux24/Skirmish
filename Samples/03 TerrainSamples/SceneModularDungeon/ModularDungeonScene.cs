@@ -73,7 +73,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = [];
 
-        private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
+        private GeometryColorDrawer<Triangle> selectedItemDrawer = null;
         private Item selectedItem = null;
 
         private ModelInstanced human = null;
@@ -348,13 +348,13 @@ namespace TerrainSamples.SceneModularDungeon
                 });
             };
 
-            var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var drawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
                 StartsVisible = false,
             };
-            selectedItemDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
+            selectedItemDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
         }
         private async Task InitializeMapTexture()
         {

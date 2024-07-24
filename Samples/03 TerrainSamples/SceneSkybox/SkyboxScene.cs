@@ -95,8 +95,8 @@ namespace TerrainSamples.SceneSkybox
         private Scenery lakeBottom = null;
         private Scenery ruins = null;
         private Water water = null;
-        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Line3D> volumesDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
 
         private readonly int mapSize = 256;
         private readonly float terrainSize = 512;
@@ -182,10 +182,10 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new GeometryColorDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new GeometryColorDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
         private void InitializeUICompleted(LoadResourcesResult res)

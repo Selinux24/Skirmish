@@ -28,7 +28,7 @@ namespace BasicSamples.SceneLights
         private ModelInstanced lightEmitters = null;
         private ModelInstanced lanterns = null;
 
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -186,7 +186,7 @@ namespace BasicSamples.SceneLights
         }
         private async Task InitializeVolumeDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 5000,
                 DepthEnabled = true,
@@ -194,7 +194,7 @@ namespace BasicSamples.SceneLights
                 StartsVisible = false,
             };
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
         }
         private async Task InitializeBufferDrawer()
         {

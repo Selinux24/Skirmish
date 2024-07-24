@@ -442,26 +442,18 @@ namespace Engine.Common
         {
             return Transform(this, transform);
         }
-        /// <summary>
-        /// Gets the vertex list stride
-        /// </summary>
-        /// <returns>Returns the list stride</returns>
-        public readonly int GetStride()
-        {
-            return 1;
-        }
-        /// <summary>
-        /// Gets the vertex list
-        /// </summary>
-        /// <returns>Returns a vertex list</returns>
+
+        /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
             return [Position.Value];
         }
-        /// <summary>
-        /// Gets the vertex list topology
-        /// </summary>
-        /// <returns>Returns the list topology</returns>
+        /// <inheritdoc/>
+        public readonly int GetStride()
+        {
+            return 1;
+        }
+        /// <inheritdoc/>
         public readonly Topology GetTopology()
         {
             return Topology.PointList;

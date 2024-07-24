@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+using Engine;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using SharpDX;
@@ -17,17 +18,18 @@ namespace AISamples.SceneCWRVirtualWorld
         private static readonly Color4 treeColor = new(0.3f, 1f, 0.3f, 0.5f);
         private const float hDelta = 0.1f;
 
-        private readonly Graph graph;
+        public Graph Graph { get; }
+
         private readonly float height;
         private Guid graphVersion;
         private readonly List<Envelope> envelopes = [];
 
-        private readonly float roadWidth = 30f;
+        public float RoadWidth { get; } = 30f;
         private readonly int roadRoundness = 16;
         private readonly List<Envelope> roadEnvelopes = [];
         private readonly List<Segment2> roadBorders = [];
-        private PrimitiveListDrawer<Triangle> roadDrawer = null;
-        private PrimitiveListDrawer<Triangle> roadMarksDrawer = null;
+        private GeometryColorDrawer<Triangle> roadDrawer = null;
+        private GeometryColorDrawer<Triangle> roadMarksDrawer = null;
 
         private readonly float buildingWidth = 100f;
         private readonly float buildingMinLenth = 100f;
@@ -36,14 +38,16 @@ namespace AISamples.SceneCWRVirtualWorld
         private readonly List<Segment2> buildingGuides = [];
         private readonly List<Segment2> buildingSupports = [];
         private readonly List<Polygon> buildingBases = [];
-        private PrimitiveListDrawer<Triangle> buildingDrawer = null;
+        private GeometryColorDrawer<Triangle> buildingDrawer = null;
 
         private readonly List<Vector2> trees = [];
         private readonly float treeRadius = 30;
 
+        private readonly List<Segment2> laneGuides = [];
+
         public World(Graph graph, float height)
         {
-            this.graph = graph;
+            Graph = graph;
             this.height = height;
 
             graphVersion = graph.Version;
@@ -52,13 +56,15 @@ namespace AISamples.SceneCWRVirtualWorld
         }
         private void Generate()
         {
-            var segments = graph.GetSegments();
+            var segments = Graph.GetSegments();
 
             GenerateRoads(segments);
 
             GenerateBuildings(segments);
 
             GenerateTrees(segments);
+
+            GenerateLaneGuides(segments);
         }
         private void GenerateRoads(Segment2[] segments)
         {
@@ -66,7 +72,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             for (int i = 0; i < segments.Length; i++)
             {
-                envelopes.Add(new(segments[i], roadWidth, roadRoundness));
+                envelopes.Add(new(segments[i], RoadWidth, roadRoundness));
             }
 
             roadEnvelopes.Clear();
@@ -78,10 +84,10 @@ namespace AISamples.SceneCWRVirtualWorld
         private void GenerateBuildings(Segment2[] segments)
         {
             buildingEnvelopes.Clear();
+
+            float width = RoadWidth + buildingWidth + buildingSpacing * 2;
             for (int i = 0; i < segments.Length; i++)
             {
-                var width = roadWidth + buildingWidth + buildingSpacing * 2;
-
                 buildingEnvelopes.Add(new(segments[i], width, roadRoundness));
             }
 
@@ -190,6 +196,23 @@ namespace AISamples.SceneCWRVirtualWorld
                 treeCount++;
             }
         }
+        private void GenerateLaneGuides(Segment2[] segments)
+        {
+            laneGuides.Clear();
+
+            if (segments.Length == 0)
+            {
+                return;
+            }
+
+            Envelope[] tmpEnvelopes = new Envelope[segments.Length];
+            for (int i = 0; i < segments.Length; i++)
+            {
+                tmpEnvelopes[i] = new(segments[i], RoadWidth * 0.5f, roadRoundness);
+            }
+
+            laneGuides.AddRange(Polygon.Union(tmpEnvelopes.Select(e => e.GetPolygon()).ToArray()));
+        }
         private RectangleF GetWorldSize()
         {
             Vector2[] points =
@@ -213,25 +236,25 @@ namespace AISamples.SceneCWRVirtualWorld
 
         public async Task Initialize(Scene scene)
         {
-            var descT = new PrimitiveListDrawerDescription<Triangle>()
+            var descT = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
 
-            buildingDrawer = await scene.AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            buildingDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(buildingDrawer),
                 nameof(buildingDrawer),
                 descT,
                 Scene.LayerEffects - 1);
 
-            roadDrawer = await scene.AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            roadDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(roadDrawer),
                 nameof(roadDrawer),
                 descT);
 
-            roadMarksDrawer = await scene.AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            roadMarksDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(roadMarksDrawer),
                 nameof(roadMarksDrawer),
                 descT,
@@ -240,12 +263,12 @@ namespace AISamples.SceneCWRVirtualWorld
 
         public void Update()
         {
-            if (graphVersion == graph.Version)
+            if (graphVersion == Graph.Version)
             {
                 return;
             }
 
-            graphVersion = graph.Version;
+            graphVersion = Graph.Version;
 
             Generate();
 
@@ -276,9 +299,9 @@ namespace AISamples.SceneCWRVirtualWorld
             }
 
             // Draw road marks
-            foreach (var segment in graph.GetSegments())
+            foreach (var segment in Graph.GetSegments())
             {
-                var dashes = Segment2.Divide(segment, 5, 5);
+                var dashes = Utils.Divide(segment, 5, 5);
 
                 foreach (var dash in dashes)
                 {
@@ -292,7 +315,7 @@ namespace AISamples.SceneCWRVirtualWorld
                 DrawEnvelope(new Envelope(border, 2, 3), height + hDelta, roadMarksColor, roadMarksDrawer);
             }
         }
-        private static void DrawEnvelope(Envelope envelope, float height, Color4 color, PrimitiveListDrawer<Triangle> drawer)
+        private static void DrawEnvelope(Envelope envelope, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
         {
             var vertices = envelope
                 .GetPolygonVertices()
@@ -301,7 +324,7 @@ namespace AISamples.SceneCWRVirtualWorld
             var t = GeometryUtil.CreatePolygonTriangleList(vertices, true);
             drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
         }
-        private static void DrawPolygon(Polygon polygon, float height, Color4 color, PrimitiveListDrawer<Triangle> drawer)
+        private static void DrawPolygon(Polygon polygon, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
         {
             var vertices = polygon
                 .Vertices
@@ -310,12 +333,17 @@ namespace AISamples.SceneCWRVirtualWorld
             var t = GeometryUtil.CreatePolygonTriangleList(vertices, true);
             drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
         }
-        private static void DrawCircle(Vector2 point, float radius, float height, Color4 color, PrimitiveListDrawer<Triangle> drawer)
+        private static void DrawCircle(Vector2 point, float radius, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
         {
             var v = new Vector3(point.X, height, point.Y);
 
             var t = GeometryUtil.CreateCircle(Topology.TriangleList, v, radius, 32);
             drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
+        }
+
+        public Segment2[] GetLaneGuides()
+        {
+            return [.. laneGuides];
         }
     }
 }

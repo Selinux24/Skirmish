@@ -34,7 +34,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = [];
         private readonly Vector3 soldierInitPosition = new(0, 0, 5);
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Triangle> itemTris = null;
         private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.25f);
 
         private IControllerPath soldierPath;
@@ -185,10 +185,10 @@ namespace IntermediateSamples.SceneSmoothTransitions
         }
         private async Task InitializeDebug()
         {
-            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugItemTris",
                 "DebugItemTris",
-                new PrimitiveListDrawerDescription<Triangle>() { Count = 100000, Color = itemTrisColor, BlendMode = BlendModes.Alpha });
+                new GeometryColorDrawerDescription<Triangle>() { Count = 100000, Color = itemTrisColor, BlendMode = BlendModes.Alpha });
 
             itemTris.Visible = false;
         }

@@ -39,7 +39,7 @@ namespace PhysicsSamples.ScenePhysics
             Light.Enabled = PhysicsObject.RigidBody.IsAwake;
         }
 
-        public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)
+        public void SetLines(GeometryColorDrawer<Line3D> lineDrawer)
         {
             lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
         }

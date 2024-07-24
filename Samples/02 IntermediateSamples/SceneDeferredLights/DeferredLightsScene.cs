@@ -78,7 +78,7 @@ F7 to F10: Toggle object visibility.";
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
 
         private bool onlyModels = true;
 
@@ -258,12 +258,12 @@ F7 to F10: Toggle object visibility.";
         }
         private async Task InitializeDebug()
         {
-            var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 1000,
                 StartsVisible = false,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
         }
         private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
         {

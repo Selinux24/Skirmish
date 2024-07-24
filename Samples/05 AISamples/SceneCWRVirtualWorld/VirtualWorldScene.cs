@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using AISamples.SceneCWRVirtualWorld.Editors;
+using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.Common;
 using Engine.Content;
@@ -33,7 +34,8 @@ namespace AISamples.SceneCWRVirtualWorld
         private UIButton[] editorButtons;
         private UIButton editorLoadButton = null;
         private UIButton editorSaveButton = null;
-        private UIButton editorToggleButton = null;
+        private UIButton editorGraphToggleButton = null;
+        private UIButton editorStopsToggleButton = null;
         private UIButton editorClearButton = null;
 
         private Model terrain = null;
@@ -56,11 +58,13 @@ ESC - EXIT";
 
         private bool gameReady = false;
         private bool editorReady = false;
-        private bool showEditor = true;
+        private EditorModes editorMode = EditorModes.None;
+        private IEditor currentEditor = null;
 
         private readonly Graph graph = new([], []);
-        private World world = null;
-        private GraphEditor editor = null;
+        private readonly World world = null;
+        private readonly GraphEditor graphEditor = null;
+        private readonly StopsEditor stopsEditor = null;
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -68,6 +72,10 @@ ESC - EXIT";
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+
+            world = new(graph, 0);
+            graphEditor = new(world, 0);
+            stopsEditor = new(world, 0);
         }
 
         public override void Initialize()
@@ -84,9 +92,10 @@ ESC - EXIT";
                     InitializeTitle,
                     InitializeTexts,
                     InitializeEditorButtons,
-                    InitializeEditor,
-                    InitializeWorld,
                     InitializeTerrain,
+                    InitializeWorld,
+                    InitializeGraphEditor,
+                    InitializeStopsEditor,
                 ],
                 InitializeComponentsCompleted);
 
@@ -129,7 +138,8 @@ ESC - EXIT";
 
             editorLoadButton = await InitializeButton(nameof(editorLoadButton), "LOAD GRAPH", editorButtonDesc);
             editorSaveButton = await InitializeButton(nameof(editorSaveButton), "SAVE GRAPH", editorButtonDesc);
-            editorToggleButton = await InitializeButton(nameof(editorToggleButton), "TOGGLE EDITOR", editorButtonDesc);
+            editorGraphToggleButton = await InitializeButton(nameof(editorGraphToggleButton), "GRAPH EDITOR", editorButtonDesc);
+            editorStopsToggleButton = await InitializeButton(nameof(editorStopsToggleButton), "STOPS EDITOR", editorButtonDesc);
             editorClearButton = await InitializeButton(nameof(editorClearButton), "CLEAR", editorButtonDesc);
 
             editorButtons =
@@ -137,8 +147,8 @@ ESC - EXIT";
                 editorLoadButton,
                 editorSaveButton,
                 null,
-                editorToggleButton,
-                null,
+                editorGraphToggleButton,
+                editorStopsToggleButton,
                 null,
                 editorClearButton,
             ];
@@ -173,15 +183,15 @@ ESC - EXIT";
         }
         private Task InitializeWorld()
         {
-            world = new(graph, 0);
-
             return world.Initialize(this);
         }
-        private Task InitializeEditor()
+        private Task InitializeGraphEditor()
         {
-            editor = new(graph, 0);
-
-            return editor.Initialize(this);
+            return graphEditor.Initialize(this);
+        }
+        private Task InitializeStopsEditor()
+        {
+            return stopsEditor.Initialize(this);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -305,17 +315,17 @@ ESC - EXIT";
                 return;
             }
 
-            if (!showEditor)
+            if (editorMode == EditorModes.None)
             {
                 return;
             }
 
             if (TopMostControl == null)
             {
-                editor.UpdateInputEditor(gameTime);
+                currentEditor.UpdateInputEditor(gameTime);
             }
 
-            editor.Draw();
+            currentEditor.Draw();
         }
 
         public override void GameGraphicsResized()
@@ -362,7 +372,8 @@ ESC - EXIT";
 
             if (sender == editorLoadButton) LoadGraph();
             if (sender == editorSaveButton) SaveGraph();
-            if (sender == editorToggleButton) ToggleEditor();
+            if (sender == editorGraphToggleButton) SetEditor(EditorModes.Graph);
+            if (sender == editorStopsToggleButton) SetEditor(EditorModes.Stops);
             if (sender == editorClearButton) graph.Clear();
         }
         private void LoadGraph()
@@ -408,11 +419,44 @@ ESC - EXIT";
 
             UpdateEditorLayout();
         }
-        private void ToggleEditor()
+        private void SetEditor(EditorModes mode)
         {
-            showEditor = !showEditor;
+            DisableAllEditors();
 
-            editor.Visible = showEditor;
+            if (mode == EditorModes.None)
+            {
+                editorMode = EditorModes.None;
+                currentEditor = null;
+
+                return;
+            }
+
+            if (editorMode != EditorModes.None && editorMode == mode)
+            {
+                editorMode = EditorModes.None;
+                currentEditor = null;
+
+                return;
+            }
+
+            editorMode = mode;
+
+            switch (editorMode)
+            {
+                case EditorModes.Graph:
+                    currentEditor = graphEditor;
+                    break;
+                case EditorModes.Stops:
+                    currentEditor = stopsEditor;
+                    break;
+            }
+
+            currentEditor.Visible = true;
+        }
+        private void DisableAllEditors()
+        {
+            graphEditor.Visible = false;
+            stopsEditor.Visible = false;
         }
     }
 }

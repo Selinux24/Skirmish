@@ -34,9 +34,9 @@ namespace AISamples.SceneCWRSelfDrivingCar
         private UITextArea runtimeText = null;
         private UITextArea info = null;
         private UITextArea brain = null;
-        private PrimitiveListDrawer<Line3D> sensorDrawer = null;
-        private PrimitiveListDrawer<Triangle> roadDrawer = null;
-        private PrimitiveListDrawer<Line3D> roadLaneDrawer = null;
+        private GeometryColorDrawer<Line3D> sensorDrawer = null;
+        private GeometryColorDrawer<Triangle> roadDrawer = null;
+        private GeometryColorDrawer<Line3D> roadLaneDrawer = null;
         private Model terrain = null;
         private ModelInstanced carModels = null;
         private ModelInstanced trafficModels = null;
@@ -157,12 +157,12 @@ ESC - EXIT";
         }
         private async Task InitializeLineDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 20000,
                 DepthEnabled = true,
             };
-            roadLaneDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            roadLaneDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "roadLaneDrawer",
                 "roadLaneDrawer",
                 desc,
@@ -170,12 +170,12 @@ ESC - EXIT";
         }
         private async Task InitializeSensorDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 20000,
                 DepthEnabled = false,
             };
-            sensorDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            sensorDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "SensorDrawer",
                 "SensorDrawer",
                 desc,
@@ -183,12 +183,12 @@ ESC - EXIT";
         }
         private async Task InitializeTriangleDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
             };
-            roadDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            roadDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "roadDrawer",
                 "roadDrawer",
                 desc,
@@ -196,35 +196,35 @@ ESC - EXIT";
         }
         private async Task InitializeVisualizerDrawer()
         {
-            var descL = new PrimitiveListDrawerDescription<Line3D>()
+            var descL = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 20000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            var visualizerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            var visualizerLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "visualizerLineDrawer",
                 "visualizerLineDrawer",
                 descL);
 
-            var descT = new PrimitiveListDrawerDescription<Triangle>()
+            var descT = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            var visualizerTriangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            var visualizerTriangleDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "visualizerTriangleDrawer",
                 "visualizerTriangleDrawer",
                 descT);
 
-            var descO = new PrimitiveListDrawerDescription<Triangle>()
+            var descO = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
             };
-            var visualizerOpaqueDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            var visualizerOpaqueDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "visualizerOpaqueDrawer",
                 "visualizerOpaqueDrawer",
                 descO,

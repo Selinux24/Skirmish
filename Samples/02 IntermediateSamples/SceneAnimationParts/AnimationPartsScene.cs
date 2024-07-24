@@ -23,8 +23,8 @@ namespace IntermediateSamples.SceneAnimationParts
         private UIPanel backPanel = null;
         private UIConsole console = null;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
         private readonly Color sphTrisColor = new(Color.Red.ToColor3(), 0.25f);
         private readonly Color sphLinesColor = new(Color.Red.ToColor3(), 1f);
         private readonly Color boxTrisColor = new(Color.Green.ToColor3(), 0.25f);
@@ -162,16 +162,16 @@ namespace IntermediateSamples.SceneAnimationParts
         }
         private async Task InitializeDebug()
         {
-            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugItemTris",
                 "DebugItemTris",
-                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, BlendMode = BlendModes.Alpha });
+                new GeometryColorDrawerDescription<Triangle>() { Count = 5000, BlendMode = BlendModes.Alpha });
             itemTris.Visible = false;
 
-            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DebugItemLines",
                 "DebugItemLines",
-                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
+                new GeometryColorDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
             itemLines.Visible = false;
         }
         private void StartEnvironment()

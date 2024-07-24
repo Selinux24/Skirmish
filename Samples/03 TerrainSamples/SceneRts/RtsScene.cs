@@ -147,13 +147,13 @@ namespace TerrainSamples.SceneRts
         private readonly Color4 hAxisColor = Color.YellowGreen;
         private readonly Color4 wAxisColor = Color.White;
 
-        private PrimitiveListDrawer<Line3D> staticObjLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> movingObjLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
-        private PrimitiveListDrawer<Line3D> curveLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> terrainLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> terrainPointDrawer = null;
-        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Line3D> staticObjLineDrawer = null;
+        private GeometryColorDrawer<Line3D> movingObjLineDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Line3D> curveLineDrawer = null;
+        private GeometryColorDrawer<Line3D> terrainLineDrawer = null;
+        private GeometryColorDrawer<Line3D> terrainPointDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
@@ -378,10 +378,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Lights Volume
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Lights",
                 "++DEBUG++ Lights",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 5000,
                     StartsVisible = false,
@@ -391,10 +391,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Path finding Graph
 
-            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "++DEBUG++ Path finding Graph",
                 "++DEBUG++ Path finding Graph",
-                new PrimitiveListDrawerDescription<Triangle>()
+                new GeometryColorDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
                     StartsVisible = false,
@@ -404,10 +404,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Picking test
 
-            terrainPointDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            terrainPointDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Picking test",
                 "++DEBUG++ Picking test",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = MaxPickingTest,
                     StartsVisible = false,
@@ -417,10 +417,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Trajectory
 
-            curveLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            curveLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Trajectory",
                 "++DEBUG++ Trajectory",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 20000,
                     StartsVisible = false,
@@ -430,10 +430,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Helicopter manipulator
 
-            movingObjLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            movingObjLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Helicopter manipulator",
                 "++DEBUG++ Helicopter manipulator",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 1000,
                     StartsVisible = false,
@@ -443,10 +443,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG static volumes
 
-            staticObjLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            staticObjLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Static Volumes",
                 "++DEBUG++ Static Volumes",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 20000,
                     StartsVisible = false,
@@ -456,10 +456,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Ground position test
 
-            terrainLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            terrainLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Ground position test",
                 "++DEBUG++ Ground position test",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 10000,
                     StartsVisible = false,

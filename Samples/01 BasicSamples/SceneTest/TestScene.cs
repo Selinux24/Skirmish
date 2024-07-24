@@ -93,7 +93,7 @@ namespace BasicSamples.SceneTest
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
-        private PrimitiveListDrawer<Line3D> volumeDrawer = null;
+        private GeometryColorDrawer<Line3D> volumeDrawer = null;
         private bool drawLightDrawVolumes = false;
         private bool drawLightCullVolumes = false;
         private bool drawModelCullVolumes = false;
@@ -729,14 +729,14 @@ namespace BasicSamples.SceneTest
             var cubeTris = Triangle.ComputeTriangleList(bbox);
             cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
-            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = cubeTris.ToArray(),
                 Color = Color.Red,
                 BlendMode = BlendModes.Alpha,
             };
 
-            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "TestCube",
                 "Test Cube",
                 desc);
@@ -792,21 +792,21 @@ namespace BasicSamples.SceneTest
                 markers.AddRange(Triangle.Transform(cubeTris, Matrix.Translation(positions[i])));
             }
 
-            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. markers],
                 Color = new(Color.Yellow.ToColor3(), 0.3333f),
                 BlendMode = BlendModes.Alpha,
             };
-            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugPM",
                 "Marker Cubes",
                 desc);
         }
         private async Task InitializeDebug()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>() { Count = 20000 };
-            volumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            var desc = new GeometryColorDrawerDescription<Line3D>() { Count = 20000 };
+            volumeDrawer = await AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DebugVolumes",
                 "DebugLightsVolumeDrawer",
                 desc);

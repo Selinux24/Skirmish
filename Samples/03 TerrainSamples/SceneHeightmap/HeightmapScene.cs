@@ -104,10 +104,10 @@ namespace TerrainSamples.SceneHeightmap
         private UITextArea help = null;
         private UITextArea help2 = null;
 
-        private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
-        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Triangle> bboxesTriDrawer = null;
+        private GeometryColorDrawer<Line3D> bboxesDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
 
         private SkyScattering skydom = null;
 
@@ -142,8 +142,8 @@ namespace TerrainSamples.SceneHeightmap
         private ModelInstanced trees2 = null;
 
         private Model soldier = null;
-        private PrimitiveListDrawer<Triangle> soldierTris = null;
-        private PrimitiveListDrawer<Line3D> soldierLines = null;
+        private GeometryColorDrawer<Triangle> soldierTris = null;
+        private GeometryColorDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
         private Color4 soldierColorDEBUG = new(Color.Orange.ToColor3(), 0.6f);
 
@@ -158,7 +158,7 @@ namespace TerrainSamples.SceneHeightmap
         private bool drawLightsDEBUG = false;
         private bool drawLightsVolumesDEBUG = false;
 
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
 
         private readonly GraphAgentType agent = new()
@@ -554,27 +554,27 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeDebugAssets()
         {
-            bboxesDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            bboxesDrawer = await AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ bounding boxes",
                 "DEBUG++ bounding boxes",
                 new() { Count = 50000, StartsVisible = false, }, LayerUI - 1);
 
-            bboxesTriDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            bboxesTriDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ bounding boxes faces",
                 "DEBUG++ bounding boxes faces",
                 new() { Count = 1000, DepthEnabled = true, StartsVisible = false, }, LayerUI - 1);
 
-            lightsDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ Lights",
                 "DEBUG++ Lights",
                 new() { Count = 50000, StartsVisible = false, DepthEnabled = true }, LayerEffects + 1);
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ Light Volumes",
                 "DEBUG++ Light Volumes",
                 new() { Count = 50000, StartsVisible = false, }, LayerEffects + 1);
 
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ Graph",
                 "DEBUG++ Graph",
                 new() { Count = 50000, }, LayerEffects + 1);
@@ -1766,13 +1766,13 @@ namespace TerrainSamples.SceneHeightmap
 
             if (soldierTris == null)
             {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+                var desc = new GeometryColorDrawerDescription<Triangle>()
                 {
                     DepthEnabled = false,
                     Primitives = tris.ToArray(),
                     Color = soldierColorDEBUG
                 };
-                var t = AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
+                var t = AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
                 soldierTris = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else
@@ -1793,12 +1793,12 @@ namespace TerrainSamples.SceneHeightmap
 
             if (soldierLines == null)
             {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+                var desc = new GeometryColorDrawerDescription<Line3D>()
                 {
                     Primitives = lines.ToArray(),
                     Color = soldierColorDEBUG
                 };
-                var t = AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
+                var t = AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
                 soldierLines = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else

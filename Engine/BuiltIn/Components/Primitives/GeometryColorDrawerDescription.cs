@@ -4,9 +4,9 @@ using SharpDX;
 namespace Engine.BuiltIn.Components.Primitives
 {
     /// <summary>
-    /// Primitive drawer description
+    /// Geometry color drawer description
     /// </summary>
-    public class PrimitiveListDrawerDescription<T> : BaseModelDescription where T : IVertexList
+    public class GeometryColorDrawerDescription<T> : BaseModelDescription where T : IVertexList
     {
         /// <summary>
         /// Maximum triangle count
@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Components.Primitives
         /// <summary>
         /// Constructor
         /// </summary>
-        public PrimitiveListDrawerDescription()
+        public GeometryColorDrawerDescription()
             : base()
         {
             DeferredEnabled = false;

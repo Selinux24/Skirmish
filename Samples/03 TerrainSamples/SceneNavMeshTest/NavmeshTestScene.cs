@@ -66,8 +66,8 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private PrimitiveListDrawer<Triangle> triangleDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Triangle> triangleDrawer = null;
 
         private Model inputGeometry = null;
         private Model debugGeometry = null;
@@ -474,21 +474,21 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeDebugDrawers()
         {
-            var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var markDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 100000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            triangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
+            triangleDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
 
-            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var volumesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 100000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc, LayerEffects + 1);
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc, LayerEffects + 1);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult resUi)
         {

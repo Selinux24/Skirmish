@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AISamples.SceneCWRVirtualWorld
+namespace AISamples.SceneCWRVirtualWorld.Primitives
 {
     class Polygon
     {

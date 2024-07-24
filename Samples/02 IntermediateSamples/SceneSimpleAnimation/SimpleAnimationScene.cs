@@ -63,8 +63,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
         private ModelInstanced doors;
         private ModelInstanced jails;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
         private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.6f);
         private readonly Color itemLinesColor = new(Color.Red.ToColor3(), 1f);
         private bool showItemDEBUG = false;
@@ -476,12 +476,12 @@ namespace IntermediateSamples.SceneSimpleAnimation
             const string dbItemTrisString = "DebugItemTris";
             const string dbItemLinesString = "DebugItemLines";
 
-            itemTris = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 dbItemTrisString,
                 dbItemTrisString,
                 new() { Count = 5000, Color = itemTrisColor, DepthEnabled = false });
 
-            itemLines = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 dbItemLinesString,
                 dbItemLinesString,
                 new() { Count = 1000, Color = itemLinesColor, DepthEnabled = false });

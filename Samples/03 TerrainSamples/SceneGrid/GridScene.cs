@@ -76,7 +76,7 @@ namespace TerrainSamples.SceneGrid
         private readonly float soldierRunSpeed = 9f;
         private readonly float soldierAssaultSpeed = 6f;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
         private readonly Color4 bsphColor = new(Color.LightYellow.ToColor3(), 0.25f);
         private readonly Color4 frstColor = new(Color.Yellow.ToColor3(), 1f);
         private readonly int bsphSlices = 50;
@@ -372,9 +372,9 @@ namespace TerrainSamples.SceneGrid
         }
         private async Task InitializeDebug()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>() { Count = 5000, StartsVisible = false };
+            var desc = new GeometryColorDrawerDescription<Line3D>() { Count = 5000, StartsVisible = false };
 
-            lineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLineDrawer", "DebugLineDrawer", desc);
+            lineDrawer = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugLineDrawer", "DebugLineDrawer", desc);
         }
         private void InitializeResourcesCompleted(LoadResourcesResult res)
         {

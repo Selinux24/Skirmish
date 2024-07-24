@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AISamples.SceneCWRVirtualWorld
+namespace AISamples.SceneCWRVirtualWorld.Primitives
 {
     class Envelope
     {
@@ -26,7 +26,7 @@ namespace AISamples.SceneCWRVirtualWorld
             var p2 = skeleton.P2;
 
             float radius = width * 0.5f;
-            float alpha = MathF.Atan2(p1.Y - p2.Y, p1.X - p2.X);
+            float alpha = Utils.Angle(p1.Y - p2.Y, p1.X - p2.X);
             float alpha_cw = alpha + MathF.PI * 0.5f;
             float alpha_ccw = alpha - MathF.PI * 0.5f;
 
@@ -36,18 +36,12 @@ namespace AISamples.SceneCWRVirtualWorld
 
             return new Polygon([.. curve1, .. curve2]);
         }
-        private static Vector2 Translate(Vector2 p, float angle, float radius)
-        {
-            return new Vector2(
-                p.X + MathF.Cos(angle) * radius,
-                p.Y + MathF.Sin(angle) * radius);
-        }
         private static IEnumerable<Vector2> ComputeCurve(Vector2 p, float from, float to, float angle, float radius, float step)
         {
             float eps = step * 0.5f;
             for (float i = from; i <= to + eps; i += step)
             {
-                yield return Translate(p, angle + i, radius);
+                yield return Utils.Translate(p, angle + i, radius);
             }
         }
 

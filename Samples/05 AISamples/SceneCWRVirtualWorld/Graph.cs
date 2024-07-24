@@ -1,4 +1,5 @@
 ﻿using AISamples.SceneCWRVirtualWorld.Content;
+using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using SharpDX;
 using System;
@@ -59,7 +60,7 @@ namespace AISamples.SceneCWRVirtualWorld
             points.Remove(point);
 
             segments.RemoveAll(s => s.P1 == point || s.P2 == point);
-     
+
             Version = Guid.NewGuid();
         }
 
@@ -77,7 +78,7 @@ namespace AISamples.SceneCWRVirtualWorld
         public void AddSegment(Segment2 segment)
         {
             segments.Add(segment);
-  
+
             Version = Guid.NewGuid();
         }
         public bool ContainsSegment(Segment2 segment)
@@ -99,7 +100,7 @@ namespace AISamples.SceneCWRVirtualWorld
         public void RemoveSegment(Segment2 segment)
         {
             segments.Remove(segment);
-      
+
             Version = Guid.NewGuid();
         }
 
@@ -107,19 +108,8 @@ namespace AISamples.SceneCWRVirtualWorld
         {
             points.Clear();
             segments.Clear();
-      
+
             Version = Guid.NewGuid();
-        }
-
-        public Vector2? GetNearestPoint(Vector2 point, float threshold)
-        {
-            var thpoints = points.Where(p => Vector2.Distance(p, point) < threshold);
-            if (!thpoints.Any())
-            {
-                return null;
-            }
-
-            return thpoints.OrderBy(p => Vector2.Distance(p, point)).First();
         }
 
         public void UpdatePoint(int index, Vector2 point)
@@ -147,7 +137,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 segments[s] = seg;
             }
-     
+
             Version = Guid.NewGuid();
         }
 
@@ -160,7 +150,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             points.AddRange(newGraph.points);
             segments.AddRange(newGraph.segments);
-     
+
             Version = Guid.NewGuid();
         }
         public void SaveToFile(string fileName)

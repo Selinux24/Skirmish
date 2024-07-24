@@ -1,21 +1,22 @@
-﻿using Engine;
+﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+using Engine;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using SharpDX;
 using System.Threading.Tasks;
 
-namespace AISamples.SceneCWRVirtualWorld
+namespace AISamples.SceneCWRVirtualWorld.Editors
 {
-    class GraphEditor(Graph graph, float height)
+    class GraphEditor(World world, float height) : IEditor
     {
         private static readonly Color4 graphColor = new(0f, 0f, 0f, 0.5f);
         private static readonly Color4 highlightColor = new(1f, 1f, 0f, 0.33f);
         private const float editorPointRadius = 10f;
         private const float hDelta = 0.1f;
 
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
 
-        private readonly Graph graph = graph;
+        private readonly Graph graph = world.Graph;
         private readonly float height = height;
         private readonly float pointRadius = editorPointRadius;
         private readonly float lineThickness = editorPointRadius * 0.1f;
@@ -29,16 +30,30 @@ namespace AISamples.SceneCWRVirtualWorld
         private int draggingPointIndex = -1;
         private float dragTime = 0;
         private Vector2 mouse = Vector2.Zero;
+        private bool visible = true;
 
         public bool Visible
         {
             get
             {
-                return graphDrawer.Visible;
+                return visible;
             }
             set
             {
-                graphDrawer.Visible = value;
+                if (visible != value) visible = value;
+
+                SetVisible();
+            }
+        }
+        private void SetVisible()
+        {
+            graphDrawer.Visible = visible;
+
+            if (!visible)
+            {
+                selected = null;
+                hovered = null;
+                dragging = false;
             }
         }
 
@@ -46,19 +61,20 @@ namespace AISamples.SceneCWRVirtualWorld
         {
             this.scene = scene;
 
-            var descT = new PrimitiveListDrawerDescription<Triangle>()
+            var descT = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
 
-            graphDrawer = await scene.AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            graphDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(graphDrawer),
                 nameof(graphDrawer),
                 descT,
                 Scene.LayerEffects + 1);
         }
+
         public void UpdateInputEditor(IGameTime gameTime)
         {
             var pRay = scene.GetPickingRay(PickingHullTypes.Geometry);
@@ -92,6 +108,79 @@ namespace AISamples.SceneCWRVirtualWorld
             }
 
             UpdateHovered(p, threshold, gameTime.TotalSeconds - dragTime);
+        }
+        private void AddPoint(Vector2 point)
+        {
+            if (dragging)
+            {
+                return;
+            }
+
+            if (hovered.HasValue)
+            {
+                AddPointAndSegment(hovered.Value);
+
+                draggingPointIndex = graph.GetPointIndex(hovered.Value);
+                dragging = true;
+
+                return;
+            }
+
+            graph.AddPoint(point);
+            AddPointAndSegment(point);
+            hovered = point;
+        }
+        private void AddPointAndSegment(Vector2 point)
+        {
+            if (selected.HasValue)
+            {
+                graph.TryAddSegment(new(selected.Value, point));
+            }
+            selected = point;
+        }
+        private void RemovePoint()
+        {
+            if (selected.HasValue)
+            {
+                selected = null;
+                return;
+            }
+
+            if (!hovered.HasValue)
+            {
+                selected = null;
+                return;
+            }
+
+            graph.RemovePoint(hovered.Value);
+
+            hovered = null;
+        }
+        private void UpdateHovered(Vector2 point, float threshold, float dragTime)
+        {
+            mouse = point;
+
+            if (dragging && dragTime > 0.2f)
+            {
+                graph.UpdatePoint(draggingPointIndex, point);
+                hovered = point;
+                selected = point;
+
+                drawHovered = true;
+
+                return;
+            }
+
+            hovered = Utils.GetNearestPoint(point, graph.GetPoints(), threshold);
+            if (hovered.HasValue && selected != hovered)
+            {
+                drawHovered = true;
+            }
+        }
+        private void StopDragging()
+        {
+            draggingPointIndex = -1;
+            dragging = false;
         }
 
         public void Draw()
@@ -131,80 +220,6 @@ namespace AISamples.SceneCWRVirtualWorld
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, segment.P1, segment.P2, lineThickness, height + hDelta);
             graphDrawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));
-        }
-
-        public void AddPoint(Vector2 point)
-        {
-            if (dragging)
-            {
-                return;
-            }
-
-            if (hovered.HasValue)
-            {
-                AddPointAndSegment(hovered.Value);
-
-                draggingPointIndex = graph.GetPointIndex(hovered.Value);
-                dragging = true;
-
-                return;
-            }
-
-            graph.AddPoint(point);
-            AddPointAndSegment(point);
-            hovered = point;
-        }
-        private void AddPointAndSegment(Vector2 point)
-        {
-            if (selected.HasValue)
-            {
-                graph.TryAddSegment(new(selected.Value, point));
-            }
-            selected = point;
-        }
-        public void RemovePoint()
-        {
-            if (selected.HasValue)
-            {
-                selected = null;
-                return;
-            }
-
-            if (!hovered.HasValue)
-            {
-                selected = null;
-                return;
-            }
-
-            graph.RemovePoint(hovered.Value);
-
-            hovered = null;
-        }
-        public void UpdateHovered(Vector2 point, float threshold, float dragTime)
-        {
-            mouse = point;
-
-            if (dragging && dragTime > 0.2f)
-            {
-                graph.UpdatePoint(draggingPointIndex, point);
-                hovered = point;
-                selected = point;
-
-                drawHovered = true;
-
-                return;
-            }
-
-            hovered = graph.GetNearestPoint(point, threshold);
-            if (hovered.HasValue && selected != hovered)
-            {
-                drawHovered = true;
-            }
-        }
-        public void StopDragging()
-        {
-            draggingPointIndex = -1;
-            dragging = false;
         }
     }
 }

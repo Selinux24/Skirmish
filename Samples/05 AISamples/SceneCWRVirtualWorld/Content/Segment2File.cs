@@ -1,4 +1,6 @@
 ﻿
+using AISamples.SceneCWRVirtualWorld.Primitives;
+
 namespace AISamples.SceneCWRVirtualWorld.Content
 {
     struct Segment2File

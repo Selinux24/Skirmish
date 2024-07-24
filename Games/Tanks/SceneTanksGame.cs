@@ -133,7 +133,7 @@ namespace Tanks
 
         private DecalDrawer decalDrawer;
 
-        private PrimitiveListDrawer<Line3D> boundsDrawer;
+        private GeometryColorDrawer<Line3D> boundsDrawer;
 
         private readonly string loadGroupSceneObjects = "Asset initializing";
 
@@ -669,14 +669,14 @@ namespace Tanks
         }
         private async Task InitializeDebugDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 100000,
                 CastShadow = ShadowCastingAlgorihtms.None,
                 StartsVisible = false,
             };
 
-            boundsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
+            boundsDrawer = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
         }
 
         private async Task LoadAssetsCompleted(LoadResourcesResult res)

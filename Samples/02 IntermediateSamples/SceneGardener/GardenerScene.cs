@@ -56,8 +56,8 @@ TAB - Change control between Camera and Agent
 
         private Model map = null;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
         private readonly Color gbLinesColor = new(Color.Cyan.ToColor3(), 0.5f);
         private readonly Color grTrisColor = new(Color.Blue.ToColor3(), 0.15f);
         private readonly Color grLinesColor = new(Color.Blue.ToColor3(), 0.5f);
@@ -287,12 +287,12 @@ TAB - Change control between Camera and Agent
             const string itemTrisName = nameof(itemTris);
             const string itemLinesName = nameof(itemLines);
 
-            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 itemTrisName,
                 itemTrisName,
                 new() { Count = 5000, BlendMode = BlendModes.Alpha, StartsVisible = false });
 
-            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 itemLinesName,
                 itemLinesName,
                 new() { Count = 1000, BlendMode = BlendModes.Alpha, StartsVisible = false });

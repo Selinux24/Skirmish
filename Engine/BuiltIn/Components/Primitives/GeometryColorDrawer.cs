@@ -11,18 +11,18 @@ namespace Engine.BuiltIn.Components.Primitives
     using Engine.Common;
 
     /// <summary>
-    /// Primitive list drawer
+    /// Geometry color list drawer
     /// </summary>
-    /// <typeparam name="T">Primitive list type</typeparam>
+    /// <typeparam name="T">Geometry color list type</typeparam>
     /// <remarks>
     /// Constructor
     /// </remarks>
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    public sealed class PrimitiveListDrawer<T>(Scene scene, string id, string name) : Drawable<PrimitiveListDrawerDescription<T>>(scene, id, name), ITransformable3D where T : IVertexList
+    public sealed class GeometryColorDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryColorDrawerDescription<T>>(scene, id, name), ITransformable3D where T : IVertexList
     {
-        const string className = nameof(PrimitiveListDrawer<T>);
+        const string className = nameof(GeometryColorDrawer<T>);
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -74,7 +74,7 @@ namespace Engine.BuiltIn.Components.Primitives
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PrimitiveListDrawer()
+        ~GeometryColorDrawer()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -90,7 +90,7 @@ namespace Engine.BuiltIn.Components.Primitives
         }
 
         /// <inheritdoc/>
-        public override async Task ReadAssets(PrimitiveListDrawerDescription<T> description)
+        public override async Task ReadAssets(GeometryColorDrawerDescription<T> description)
         {
             await base.ReadAssets(description);
 

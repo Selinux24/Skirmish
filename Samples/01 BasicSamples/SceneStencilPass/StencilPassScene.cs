@@ -25,7 +25,7 @@ namespace BasicSamples.SceneStencilPass
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
 
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -127,13 +127,13 @@ namespace BasicSamples.SceneStencilPass
         }
         private async Task InitializeLightsDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 5000,
                 BlendMode = BlendModes.Alpha
             };
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
         private void StartLights()
         {

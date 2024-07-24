@@ -6,15 +6,15 @@ using System;
 
 namespace AISamples.SceneCWRSelfDrivingCar
 {
-    class Visualizer(PrimitiveListDrawer<Triangle> opaqueDrawer, PrimitiveListDrawer<Triangle> triangleDrawer, PrimitiveListDrawer<Line3D> lineDrawer)
+    class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
     {
         private static readonly Color4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
         private static readonly Color4 wPositiveColor = Color.Yellow;
         private static readonly Color4 wNegativeColor = Color.Blue;
 
-        private readonly PrimitiveListDrawer<Triangle> opaqueDrawer = opaqueDrawer;
-        private readonly PrimitiveListDrawer<Triangle> triangleDrawer = triangleDrawer;
-        private readonly PrimitiveListDrawer<Line3D> lineDrawer = lineDrawer;
+        private readonly GeometryColorDrawer<Triangle> opaqueDrawer = opaqueDrawer;
+        private readonly GeometryColorDrawer<Triangle> triangleDrawer = triangleDrawer;
+        private readonly GeometryColorDrawer<Line3D> lineDrawer = lineDrawer;
 
         public void DrawNetwork(NeuralNetwork network, Vector3 position, int margin, int totalWidth, int totalHeight, float nodeRadius)
         {
