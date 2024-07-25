@@ -20,7 +20,6 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private readonly float threshold = editorPointRadius * 3;
 
         private Scene scene = null;
-        private Segment2? hovered = null;
         private Stop intent = null;
         private bool visible = true;
 
@@ -43,7 +42,6 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
             if (!visible)
             {
-                hovered = null;
                 intent = null;
             }
         }
@@ -82,7 +80,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         {
             intent = null;
 
-            hovered = Utils.GetNearestSegment(point, world.GetLaneGuides(), threshold);
+            var hovered = Utils.GetNearestSegment(point, world.GetLaneGuides(), threshold);
             if (!hovered.HasValue)
             {
                 return;

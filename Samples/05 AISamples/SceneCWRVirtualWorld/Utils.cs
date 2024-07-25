@@ -8,14 +8,9 @@ namespace AISamples.SceneCWRVirtualWorld
 {
     static class Utils
     {
-        public static float Angle(Vector2 direction)
+        public static float Angle(float y, float x)
         {
-            return Angle(direction.X, direction.Y);
-        }
-
-        public static float Angle(float x, float y)
-        {
-            return MathF.Atan2(x, y);
+            return MathF.Atan2(y, x);
         }
 
         public static Vector2 Translate(Vector2 p, float angle, float radius)
