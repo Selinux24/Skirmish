@@ -1,14 +1,13 @@
-﻿using System.Collections.Concurrent;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Primitives
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Geometry drawer
     /// </summary>

@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Fonts drawer
     /// </summary>

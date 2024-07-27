@@ -1,4 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using Engine.Content.Persistence;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +10,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Model content
     /// </summary>
@@ -32,39 +31,6 @@ namespace Engine.Content
         /// Mesh string
         /// </summary>
         private const string MeshString = "-mesh";
-
-        /// <summary>
-        /// Skinning information
-        /// </summary>
-        struct SkinningInfo
-        {
-            /// <summary>
-            /// Bind shape matrix
-            /// </summary>
-            public Matrix BindShapeMatrix { get; set; }
-            /// <summary>
-            /// Weight list
-            /// </summary>
-            public IEnumerable<Weight> Weights { get; set; }
-            /// <summary>
-            /// Bone names
-            /// </summary>
-            public IEnumerable<string> BoneNames { get; set; }
-        }
-        /// <summary>
-        /// Mesh information
-        /// </summary>
-        struct MeshInfo
-        {
-            /// <summary>
-            /// Created mesh
-            /// </summary>
-            public Mesh Mesh { get; set; }
-            /// <summary>
-            /// Material name
-            /// </summary>
-            public string MaterialName { get; set; }
-        }
 
         /// <summary>
         /// Light dictionary
@@ -986,11 +952,9 @@ namespace Engine.Content
             foreach (var subMesh in submeshes)
             {
                 var geometry = subMesh.Value;
+                var meshMaterial = materials.FirstOrDefault(m => m.Name == subMesh.Key).Content;
 
-                //Get vertex type
-                var vertexType = GetVertexType(geometry.VertexType, isSkinned, loadNormalMaps, materials, subMesh.Key);
-
-                var meshInfo = await CreateMesh(meshName, geometry, vertexType, constraint, skinningInfo);
+                var meshInfo = await VertexTypesHelper.CreateMesh(meshName, geometry, isSkinned, loadNormalMaps, meshMaterial, constraint, skinningInfo);
                 if (meshInfo == null)
                 {
                     continue;
@@ -1003,106 +967,6 @@ namespace Engine.Content
             }
 
             return meshes;
-        }
-        /// <summary>
-        /// Get vertex type from geometry
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="isSkinned">Sets whether the current geometry has skinning data or not</param>
-        /// <param name="loadNormalMaps">Load normal maps flag</param>
-        /// <param name="materials">Material dictionary</param>
-        /// <param name="material">Material name</param>
-        /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, IEnumerable<(string Name, IMaterialContent Content)> materials, string material)
-        {
-            var res = vertexType;
-            if (isSkinned)
-            {
-                //Get skinned equivalent
-                res = VertexData.GetSkinnedEquivalent(res);
-            }
-
-            if (!loadNormalMaps)
-            {
-                return res;
-            }
-
-            if (VertexData.IsTextured(res) && !VertexData.IsTangent(res))
-            {
-                var meshMaterial = materials
-                    .Where(m => m.Name == material)
-                    .Select(m => m.Content)
-                    .FirstOrDefault();
-
-                if (meshMaterial?.NormalMapTexture != null)
-                {
-                    //Get tangent equivalent
-                    res = VertexData.GetTangentEquivalent(res);
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Creates a mesh
-        /// </summary>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="geometry">Submesh content</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="constraint">Geometry constraint</param>
-        /// <param name="skinningInfo">Skinning information</param>
-        private static async Task<MeshInfo?> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
-        {
-            //Process the vertex data
-            var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
-            var vertices = vertexData.vertices;
-            var indices = vertexData.indices;
-
-            IEnumerable<IVertexData> vertexList;
-            if (skinningInfo.HasValue)
-            {
-                if (!skinningInfo.Value.BindShapeMatrix.IsIdentity)
-                {
-                    vertices = VertexData.Transform(vertices, skinningInfo.Value.BindShapeMatrix);
-                }
-
-                //Convert the vertex data to final mesh data
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    skinningInfo.Value.Weights,
-                    skinningInfo.Value.BoneNames);
-            }
-            else
-            {
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    [],
-                    []);
-            }
-
-            if (!vertexList.Any())
-            {
-                return null;
-            }
-
-            //Create the mesh
-            var nMesh = new Mesh(
-                meshName,
-                geometry.Topology,
-                geometry.Transform,
-                vertexList,
-                indices);
-
-            //Material name
-            string materialName = string.IsNullOrEmpty(geometry.Material) ? NoMaterial : geometry.Material;
-
-            return new MeshInfo()
-            {
-                Mesh = nMesh,
-                MaterialName = materialName,
-            };
         }
 
         /// <summary>
@@ -1734,5 +1598,38 @@ namespace Engine.Content
         {
             animationDefinition = animation;
         }
+    }
+
+    /// <summary>
+    /// Skinning information
+    /// </summary>
+    public struct SkinningInfo
+    {
+        /// <summary>
+        /// Bind shape matrix
+        /// </summary>
+        public Matrix BindShapeMatrix { get; set; }
+        /// <summary>
+        /// Weight list
+        /// </summary>
+        public IEnumerable<Weight> Weights { get; set; }
+        /// <summary>
+        /// Bone names
+        /// </summary>
+        public IEnumerable<string> BoneNames { get; set; }
+    }
+    /// <summary>
+    /// Mesh information
+    /// </summary>
+    public struct MeshInfo
+    {
+        /// <summary>
+        /// Created mesh
+        /// </summary>
+        public Mesh Mesh { get; set; }
+        /// <summary>
+        /// Material name
+        /// </summary>
+        public string MaterialName { get; set; }
     }
 }

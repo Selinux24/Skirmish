@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Engine
+namespace Engine.BuiltIn.Components.ShadowMapping
 {
     /// <summary>
     /// Cascade shadow map matrix set
@@ -296,7 +296,7 @@ namespace Engine
         {
             shadowMapSize = mapSize;
 
-            if (Helper.CompareEnumerables(shadowCascades, cascades))
+            if (shadowCascades.CompareEnumerables(cascades))
             {
                 return;
             }

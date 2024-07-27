@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position normal color vertex shader
     /// </summary>
-    public class PositionNormalColorSkinnedVs : IBuiltInShader<EngineVertexShader>
+    public class PositionNormalColorSkinnedVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

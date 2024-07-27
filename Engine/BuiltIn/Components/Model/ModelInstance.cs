@@ -1,13 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Animation;
-    using Engine.Common;
-
     /// <summary>
     /// Model instance
     /// </summary>

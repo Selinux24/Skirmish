@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Fonts pixel shader
     /// </summary>
-    public class FontsPs : IBuiltInShader<EnginePixelShader>
+    public class FontsPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per font constant buffer

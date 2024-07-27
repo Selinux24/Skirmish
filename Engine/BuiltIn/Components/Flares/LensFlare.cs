@@ -1,12 +1,11 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.UI;
+using SharpDX;
 using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Flares
 {
-    using Engine.Common;
-    using Engine.UI;
-
     /// <summary>
     /// Lens flare
     /// </summary>

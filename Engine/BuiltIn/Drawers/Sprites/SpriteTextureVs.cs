@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Tetxure sprite vertex shader
     /// </summary>
-    public class SpriteTextureVs : IBuiltInShader<EngineVertexShader>
+    public class SpriteTextureVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per sprite constant buffer

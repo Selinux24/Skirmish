@@ -1,14 +1,13 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.SkyScattering;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.SkyScattering;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Scattered sky
     /// </summary>

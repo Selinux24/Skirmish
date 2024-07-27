@@ -5,13 +5,12 @@ using SharpDX;
 using SharpDX.DXGI;
 using System.Collections.Generic;
 using System.Linq;
+using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.Common;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred renderer class
     /// </summary>

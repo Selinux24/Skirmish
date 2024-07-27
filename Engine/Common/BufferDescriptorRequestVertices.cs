@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Engine.BuiltIn.Primitives;
 
 namespace Engine.Common
 {
@@ -60,7 +59,7 @@ namespace Engine.Common
 
             BufferManagerVertices descriptor;
 
-            VertexTypes vType = Data.First().VertexType;
+            var vType = Data.First().VertexType;
             bool instanced = InstancingDescriptor != null;
 
             Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{Id}]");

@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Cubemap vertex shader
     /// </summary>
-    public class CubemapVs : IBuiltInShader<EngineVertexShader>
+    public class CubemapVs : IShader<EngineVertexShader>
     {
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }

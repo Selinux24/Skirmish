@@ -6,7 +6,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess
     /// <summary>
     /// Built-in post process drawer state
     /// </summary>
-    public class BuiltInPostProcessState
+    public class BuiltInPostProcessState : IPostProcessState
     {
         /// <summary>
         /// Max active effects
@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess
         {
             get
             {
-                return [..effects];
+                return [.. effects];
             }
         }
 

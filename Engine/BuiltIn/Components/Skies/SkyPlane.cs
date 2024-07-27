@@ -1,15 +1,14 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Clouds;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Clouds;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Sky plane
     /// </summary>

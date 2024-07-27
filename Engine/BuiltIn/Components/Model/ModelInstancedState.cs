@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using System.Collections.Generic;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Common;
-
     /// <summary>
     /// Instanced model state
     /// </summary>

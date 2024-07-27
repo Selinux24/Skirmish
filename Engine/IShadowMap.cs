@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using System;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Shadow map interface
     /// </summary>
@@ -44,6 +42,6 @@ namespace Engine
         /// <param name="instanced">Use instancing data</param>
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
-        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
+        IDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
     }
 }

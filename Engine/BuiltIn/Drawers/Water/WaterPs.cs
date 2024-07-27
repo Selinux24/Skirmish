@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Water
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Water pixel shader
     /// </summary>
-    public class WaterPs : IBuiltInShader<EnginePixelShader>
+    public class WaterPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per water constant buffer

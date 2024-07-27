@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Collections.Generic;
+using Engine.Content;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.Collections.Generic;
-    using Engine.Content;
-
     /// <summary>
     /// Ground description
     /// </summary>

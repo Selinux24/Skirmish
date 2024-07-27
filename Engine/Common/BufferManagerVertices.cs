@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.BuiltIn.Primitives;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Primitives;
     using SharpDX.Direct3D11;
 
     /// <summary>

@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Collections.Generic;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-
     /// <summary>
     /// Map grid
     /// </summary>
@@ -150,7 +148,7 @@ namespace Engine.BuiltIn.Components.Ground
             var nodes = res.drawingQuadTree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var data = await VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
+                var data = await VertexTypesHelper.Convert(VertexTypes.Terrain, node.Items, null, null);
 
                 res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
             }
@@ -362,7 +360,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// </summary>
         /// <param name="context">Draw context</param>
         /// <param name="drawer">Drawer</param>
-        public bool DrawShadows(DrawContextShadows context, IBuiltInDrawer drawer)
+        public bool DrawShadows(DrawContextShadows context, IDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
@@ -379,7 +377,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// </summary>
         /// <param name="context">Draw context</param>
         /// <param name="drawer">Drawer</param>
-        public bool Draw(DrawContext context, IBuiltInDrawer drawer)
+        public bool Draw(DrawContext context, IDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
@@ -397,7 +395,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Drawer</param>
         /// <param name="nodeList">Node list</param>
-        private static bool DrawNodeList(IEngineDeviceContext dc, IBuiltInDrawer drawer, TerrainGridNode[] nodeList)
+        private static bool DrawNodeList(IEngineDeviceContext dc, IDrawer drawer, TerrainGridNode[] nodeList)
         {
             int instanceCount = 0;
             int primitiveCount = 0;

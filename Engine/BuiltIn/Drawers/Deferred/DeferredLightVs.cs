@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred light vertex shader
     /// </summary>
-    public class DeferredLightVs : IBuiltInShader<EngineVertexShader>
+    public class DeferredLightVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Light constant buffer

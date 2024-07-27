@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position instanced vertex shader
     /// </summary>
-    public class PositionVsI : IBuiltInShader<EngineVertexShader>
+    public class PositionVsI : IShader<EngineVertexShader>
     {
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }

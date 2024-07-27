@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.Drawers.Forward
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <returns>Returns the drawing effect</returns>
-        public static IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced)
+        public static IDrawer GetDrawer(VertexTypes vertexType, bool instanced)
         {
             if (instanced)
             {
@@ -25,7 +25,7 @@ namespace Engine.BuiltIn.Drawers.Forward
         /// Gets a single drawer
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
-        private static IBuiltInDrawer GetDrawerSingle(VertexTypes vertexType)
+        private static IDrawer GetDrawerSingle(VertexTypes vertexType)
         {
             return vertexType switch
             {
@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.Drawers.Forward
         /// Gets a instanced drawer
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
-        private static IBuiltInDrawer GetDrawerInstanced(VertexTypes vertexType)
+        private static IDrawer GetDrawerInstanced(VertexTypes vertexType)
         {
             return vertexType switch
             {

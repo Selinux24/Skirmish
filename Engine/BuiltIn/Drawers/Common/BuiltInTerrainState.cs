@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.Common;
-
     /// <summary>
     /// Effect sky scatter state
     /// </summary>

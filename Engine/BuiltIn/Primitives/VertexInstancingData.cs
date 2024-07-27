@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Primitives
 {
-    using Engine;
     using SharpDX.Direct3D11;
 
     /// <summary>

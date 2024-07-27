@@ -1,5 +1,4 @@
-﻿
-using Engine.BuiltIn.Components.Cubemap;
+﻿using Engine.BuiltIn.Components.Cubemap;
 
 namespace Engine.BuiltIn.Components.Skies
 {

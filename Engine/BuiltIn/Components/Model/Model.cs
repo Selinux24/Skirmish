@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.BuiltIn.Drawers;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Animation;
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Basic Model
     /// </summary>

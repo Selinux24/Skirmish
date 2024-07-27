@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred composer pixel shader
     /// </summary>
-    public class DeferredComposerPs : IBuiltInShader<EnginePixelShader>
+    public class DeferredComposerPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Deferred buffer

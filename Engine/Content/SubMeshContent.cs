@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Sub mesh content
     /// </summary>
@@ -147,7 +146,7 @@ namespace Engine.Content
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
             Vertices = vertices?.ToArray() ?? [];
-            VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexData.GetVertexType(Vertices[0], Textured);
+            VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexTypesHelper.GetVertexType(Vertices[0], Textured);
         }
         /// <summary>
         /// Sets the submesh index list
@@ -167,7 +166,7 @@ namespace Engine.Content
 
             if (Vertices.Length > 0)
             {
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+                VertexType = VertexTypesHelper.GetVertexType(Vertices[0], Textured);
             }
         }
 
@@ -232,7 +231,7 @@ namespace Engine.Content
                 }
             }
 
-            VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+            VertexType = VertexTypesHelper.GetVertexType(Vertices[0], Textured);
         }
 
         /// <summary>
@@ -316,7 +315,7 @@ namespace Engine.Content
         /// <param name="constraint">Constraint</param>
         public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint)
         {
-            if (VertexData.IsTangent(vertexType))
+            if (VertexTypesHelper.IsTangent(vertexType))
             {
                 ComputeTangents();
             }

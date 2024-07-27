@@ -1,31 +1,29 @@
-﻿
-namespace Engine.BuiltIn.Drawers
-{
-    using Engine.Common;
+﻿using Engine.Common;
 
+namespace Engine
+{
     /// <summary>
-    /// Built-in drawer interface
+    /// Drawer interface
     /// </summary>
-    public interface IBuiltInDrawer
+    public interface IDrawer
     {
         /// <summary>
         /// Updates drawer casting light
         /// </summary>
         /// <param name="context">Context</param>
         void UpdateCastingLight(DrawContextShadows context);
-
         /// <summary>
         /// Updates drawer mesh state
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state);
+        void UpdateMesh(IEngineDeviceContext dc, IDrawerMeshState state);
         /// <summary>
         /// Updates drawer material state
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state);
+        void UpdateMaterial(IEngineDeviceContext dc, IDrawerMaterialState state);
 
         /// <summary>
         /// Draws the specified meshes

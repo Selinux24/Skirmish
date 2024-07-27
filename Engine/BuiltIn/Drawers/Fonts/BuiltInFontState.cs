@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.Common;
-
     /// <summary>
     /// Font drawer state
     /// </summary>

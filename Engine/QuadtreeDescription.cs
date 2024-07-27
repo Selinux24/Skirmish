@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.BuiltIn.Components.Ground
+namespace Engine
 {
     /// <summary>
     /// Quadtree description

@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Height map
     /// </summary>

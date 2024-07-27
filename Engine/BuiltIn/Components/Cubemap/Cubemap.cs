@@ -1,16 +1,15 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Cubemap;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Cubemap;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Cube-map drawer
     /// </summary>

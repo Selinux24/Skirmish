@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Content.Persistence;
+using SharpDX;
 using System;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Particle emitter
     /// </summary>

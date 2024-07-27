@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Sky scattering drawer
     /// </summary>

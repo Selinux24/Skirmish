@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Components.Cubemap
 {
-    using Engine.Common;
-
     /// <summary>
     /// Cubemap state
     /// </summary>

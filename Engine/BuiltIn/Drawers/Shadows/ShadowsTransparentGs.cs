@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Point geometry shader
     /// </summary>
-    public class ShadowsTransparentGs : IBuiltInShader<EngineGeometryShader>
+    public class ShadowsTransparentGs : IShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per light constant buffer

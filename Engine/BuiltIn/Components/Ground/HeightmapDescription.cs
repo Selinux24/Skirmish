@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Heightmap description
     /// </summary>

@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Content;
+using Engine.Content.Persistence;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using SharpDX;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Content;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Particle system description
     /// </summary>

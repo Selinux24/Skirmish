@@ -1,15 +1,13 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Spot light drawer
     /// </summary>
-    public class BuiltInLightSpot : BuiltInDrawer
+    public class BuiltInLightSpot : BuiltInDrawer, ILightSpotDrawer
     {
         /// <summary>
         /// Per light data structure

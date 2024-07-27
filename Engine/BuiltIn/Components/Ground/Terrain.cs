@@ -1,4 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Common;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,13 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Common;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Terrain class
     /// </summary>
@@ -242,7 +241,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// Gets the terrain drawer, based on the drawing context
         /// </summary>
         /// <param name="context">Drawing context</param>
-        private IBuiltInDrawer GetDrawer(DrawContext context)
+        private IDrawer GetDrawer(DrawContext context)
         {
             if (context.DrawerMode.HasFlag(DrawerModes.Forward))
             {

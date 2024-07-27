@@ -1,15 +1,14 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Shadows;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine
+namespace Engine.BuiltIn.Components.ShadowMapping
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Shadows;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Shadow map
     /// </summary>
@@ -95,9 +94,9 @@ namespace Engine
                 true);
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
+        public IDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
-            if (useTextureAlpha && VertexData.IsTextured(vertexType))
+            if (useTextureAlpha && VertexTypesHelper.IsTextured(vertexType))
             {
                 return GetTransparentDrawer(vertexType, instanced);
             }
@@ -111,9 +110,9 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private static IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
+        private static IDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
         {
-            bool skinned = VertexData.IsSkinned(vertexType);
+            bool skinned = VertexTypesHelper.IsSkinned(vertexType);
 
             if (instanced)
             {
@@ -143,9 +142,9 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private static IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
+        private static IDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
         {
-            bool skinned = VertexData.IsSkinned(vertexType);
+            bool skinned = VertexTypesHelper.IsSkinned(vertexType);
 
             if (instanced)
             {

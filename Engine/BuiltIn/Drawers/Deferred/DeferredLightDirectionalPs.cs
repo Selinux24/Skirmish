@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred directional light pixel shader
     /// </summary>
-    public class DeferredLightDirectionalPs : IBuiltInShader<EnginePixelShader>
+    public class DeferredLightDirectionalPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Light constant buffer

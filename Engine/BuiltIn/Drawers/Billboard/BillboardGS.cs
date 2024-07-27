@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Billboard
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Billboards geometry shader
     /// </summary>
-    public class BillboardGS : IBuiltInShader<EngineGeometryShader>
+    public class BillboardGS : IShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per billboard constant buffer

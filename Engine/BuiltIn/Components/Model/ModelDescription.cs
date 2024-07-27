@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Common;
-
     /// <summary>
     /// Model description
     /// </summary>

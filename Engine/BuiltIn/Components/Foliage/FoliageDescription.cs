@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers.Foliage;
+using SharpDX;
 using System;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Drawers.Foliage;
-
     /// <summary>
     /// Foliage description
     /// </summary>

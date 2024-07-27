@@ -1,10 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skymap drawer
     /// </summary>

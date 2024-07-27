@@ -1,8 +1,8 @@
-﻿
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
+
 namespace Engine
 {
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>

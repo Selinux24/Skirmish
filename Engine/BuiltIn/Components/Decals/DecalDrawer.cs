@@ -1,15 +1,14 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Decals;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Decals;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Decal drawer class
     /// </summary>

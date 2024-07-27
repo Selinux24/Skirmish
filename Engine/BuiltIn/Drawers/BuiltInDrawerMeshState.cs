@@ -5,7 +5,7 @@ namespace Engine.BuiltIn.Drawers
     /// <summary>
     /// Drawer mesh state
     /// </summary>
-    public struct BuiltInDrawerMeshState
+    public struct BuiltInDrawerMeshState : IDrawerMeshState
     {
         /// <summary>
         /// Default state
@@ -34,9 +34,7 @@ namespace Engine.BuiltIn.Drawers
             };
         }
 
-        /// <summary>
-        /// Local transform
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix Local { get; set; }
         /// <summary>
         /// First offset in the animation palette

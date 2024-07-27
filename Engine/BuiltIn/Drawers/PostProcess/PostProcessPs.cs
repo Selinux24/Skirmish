@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.PostProcess
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Post-process pixel shader
     /// </summary>
-    public class PostProcessPs : IBuiltInShader<EnginePixelShader>
+    public class PostProcessPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per pass constant buffer

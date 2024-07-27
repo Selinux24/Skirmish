@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Forward
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position normal texture tangent pixel shader
     /// </summary>
-    public class PositionNormalTextureTangentPs : IBuiltInShader<EnginePixelShader>
+    public class PositionNormalTextureTangentPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Diffuse map resource view

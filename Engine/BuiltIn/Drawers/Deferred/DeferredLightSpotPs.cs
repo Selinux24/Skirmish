@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred spot light pixel shader
     /// </summary>
-    public class DeferredLightSpotPs : IBuiltInShader<EnginePixelShader>
+    public class DeferredLightSpotPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Light constant buffer

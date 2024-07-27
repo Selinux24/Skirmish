@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Engine.BuiltIn.Components.ShadowMapping;
+using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.PostProcess;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.PostProcess;
-
     /// <summary>
     /// Base scene renderer
     /// </summary>
@@ -88,7 +88,7 @@ namespace Engine.Common
             /// <summary>
             /// Effect list
             /// </summary>
-            public IEnumerable<(BuiltInPostProcessEffects Effect, int TargetIndex)> Effects;
+            public IEnumerable<(int Effect, int TargetIndex)> Effects;
         }
 
         /// <summary>
@@ -145,15 +145,15 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing objects drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerObjects = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerObjects = null;
         /// <summary>
         /// Post-processing UI drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerUI = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerUI = null;
         /// <summary>
         /// Post-processing results drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerFinal = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerFinal = null;
         /// <summary>
         /// Scene objects target
         /// </summary>
@@ -447,9 +447,9 @@ namespace Engine.Common
 
             postProcessingTarget0 = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
             postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
-            processingDrawerObjects = new PostProcessingDrawer(scene.Game);
-            processingDrawerUI = new PostProcessingDrawer(scene.Game);
-            processingDrawerFinal = new PostProcessingDrawer(scene.Game);
+            processingDrawerObjects = new BuiltInPostProcessingDrawer(scene.Game);
+            processingDrawerUI = new BuiltInPostProcessingDrawer(scene.Game);
+            processingDrawerFinal = new BuiltInPostProcessingDrawer(scene.Game);
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
@@ -1396,7 +1396,7 @@ namespace Engine.Common
             SetTarget(dc, renderTarget);
 
             //Draw the result
-            processingDrawer.Draw(dc, source, BuiltInPostProcessEffects.None, state.State);
+            processingDrawer.Draw(dc, source, 0, state.State);
         }
         /// <summary>
         /// Toggles post-processing render targets
@@ -1642,37 +1642,37 @@ namespace Engine.Common
 
             if (PostProcessingObjectsEffects.Ready)
             {
-                var effects = PostProcessingObjectsEffects.GetEffects();
+                var effects = PostProcessingObjectsEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingObjectsEffects,
                     RenderPass = RenderPass.Objects,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
 
             if (PostProcessingUIEffects.Ready)
             {
-                var effects = PostProcessingUIEffects.GetEffects();
+                var effects = PostProcessingUIEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingUIEffects,
                     RenderPass = RenderPass.UI,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
 
             if (PostProcessingFinalEffects.Ready)
             {
-                var effects = PostProcessingFinalEffects.GetEffects();
+                var effects = PostProcessingFinalEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingFinalEffects,
                     RenderPass = RenderPass.Final,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
         }
@@ -1774,7 +1774,7 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
-            processingDrawerFinal.Draw(dc, texture, BuiltInPostProcessEffects.None, null);
+            processingDrawerFinal.Draw(dc, texture, 0, null);
         }
 
         /// <summary>

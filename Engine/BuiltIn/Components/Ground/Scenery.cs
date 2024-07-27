@@ -1,4 +1,11 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Drawers.Forward;
+using Engine.BuiltIn.Primitives;
+using Engine.Collections.Generic;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,14 +15,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.BuiltIn.Drawers.Forward;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Terrain model
     /// </summary>
@@ -194,7 +193,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(IEngineDeviceContext dc, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(IEngineDeviceContext dc, IDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
 
@@ -216,7 +215,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="mode">Drawing mode</param>
             /// <param name="vertexType">Vertex type</param>
             /// <returns>Returns the drawing effect</returns>
-            private static IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
+            private static IDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
             {
                 if (mode.HasFlag(DrawerModes.Forward))
                 {

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.Common;
+using System;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.Common;
-
     /// <summary>
     /// Scene renderer interface
     /// </summary>

@@ -1,15 +1,12 @@
-﻿
-namespace Engine
-{
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
 
+namespace Engine.BuiltIn.Drawers.PostProcess
+{
     /// <summary>
     /// Post-processing drawer class
     /// </summary>
-    public class PostProcessingDrawer : IPostProcessingDrawer
+    public class BuiltInPostProcessingDrawer : IPostProcessingDrawer<BuiltInPostProcessState>
     {
         /// <summary>
         /// Game instance
@@ -35,7 +32,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PostProcessingDrawer(Game game)
+        public BuiltInPostProcessingDrawer(Game game)
         {
             this.game = game;
 
@@ -56,15 +53,15 @@ namespace Engine
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
 
-            bufferManager.CreateBuffers(nameof(PostProcessingDrawer));
+            bufferManager.CreateBuffers(nameof(BuiltInPostProcessingDrawer));
         }
 
         /// <inheritdoc/>
-        public void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect, BuiltInPostProcessState state)
+        public void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, int effect, BuiltInPostProcessState state)
         {
             builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
             if (state != null) builtInPostProcess.UpdatePass(dc, state);
-            builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
+            builtInPostProcess.UpdateEffect(dc, sourceTexture, (BuiltInPostProcessEffects)effect);
 
             builtInPostProcess.Draw(dc, new DrawOptions
             {
@@ -95,7 +92,7 @@ namespace Engine
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{nameof(PostProcessingDrawer)}";
+            return $"{nameof(BuiltInPostProcessingDrawer)}";
         }
     }
 }

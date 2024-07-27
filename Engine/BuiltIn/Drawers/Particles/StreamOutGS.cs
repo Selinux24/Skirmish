@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Stream-out GPU particles geometry shader
     /// </summary>
-    public class StreamOutGS : IBuiltInShader<EngineGeometryShader>
+    public class StreamOutGS : IShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per stream out pass constant buffer

@@ -1,12 +1,11 @@
-﻿
-namespace Engine.BuiltIn.Drawers
-{
-    using Engine.Common;
+﻿using Engine.Common;
 
+namespace Engine
+{
     /// <summary>
-    /// Built-in shader interface
+    /// Shader interface
     /// </summary>
-    public interface IBuiltInShader<out T> where T : IEngineShader
+    public interface IShader<out T> where T : IEngineShader
     {
         /// <summary>
         /// Shader

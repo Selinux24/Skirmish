@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Collections.Generic;
+using Engine.Common;
+using System.Collections.Generic;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.Collections.Generic;
-    using Engine.Common;
-
     /// <summary>
     /// Map grid node
     /// </summary>

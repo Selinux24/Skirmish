@@ -1,4 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Foliage;
+using Engine.Collections;
+using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,12 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Foliage;
-    using Engine.Collections;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Foliage class helper
     /// </summary>

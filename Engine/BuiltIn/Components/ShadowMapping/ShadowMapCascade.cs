@@ -1,5 +1,5 @@
 ﻿
-namespace Engine
+namespace Engine.BuiltIn.Components.ShadowMapping
 {
     /// <summary>
     /// Cascaded shadow map

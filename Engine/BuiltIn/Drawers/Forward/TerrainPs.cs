@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Forward
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Terrain pixel shader
     /// </summary>
-    public class TerrainPs : IBuiltInShader<EnginePixelShader>
+    public class TerrainPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per terrain constant buffer

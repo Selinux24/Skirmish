@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Sky scatering pixel shader
     /// </summary>
-    public class SkyScatteringPs : IBuiltInShader<EnginePixelShader>
+    public class SkyScatteringPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per object constant buffer

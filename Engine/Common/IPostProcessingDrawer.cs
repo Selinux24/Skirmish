@@ -1,12 +1,10 @@
 ﻿
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Drawers.PostProcess;
-
     /// <summary>
     /// Post-processing drawer interface
     /// </summary>
-    public interface IPostProcessingDrawer
+    public interface IPostProcessingDrawer<T> where T : IPostProcessState
     {
         /// <summary>
         /// Draws the resulting light composition
@@ -15,7 +13,7 @@ namespace Engine.Common
         /// <param name="sourceTexture">Source texture</param>
         /// <param name="effect">Effect</param>
         /// <param name="state">State</param>
-        void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect, BuiltInPostProcessState state);
+        void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, int effect, T state);
         /// <summary>
         /// Combines the effect with the target source
         /// </summary>

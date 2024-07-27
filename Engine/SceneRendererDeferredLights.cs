@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Light drawer for deferred renderer
     /// </summary>
@@ -302,7 +301,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="geometry">Geometry</param>
         /// <param name="drawer">Drawer</param>
-        private void DrawSingleLight(IEngineDeviceContext dc, LightGeometry geometry, IBuiltInDrawer drawer)
+        private void DrawSingleLight(IEngineDeviceContext dc, LightGeometry geometry, IDrawer drawer)
         {
             drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, geometry.IndexCount, geometry.Offset);
         }
@@ -319,7 +318,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawDirectional(IEngineDeviceContext dc, BuiltInLightDirectional drawer)
+        public void DrawDirectional(IEngineDeviceContext dc, IDrawer drawer)
         {
             drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
         }
@@ -337,7 +336,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawPoint(IEngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
+        public void DrawPoint(IEngineDeviceContext dc, IDrawer stencilDrawer, IDrawer drawer)
         {
             var geometry = pointLightGeometry;
 
@@ -364,7 +363,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawSpot(IEngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
+        public void DrawSpot(IEngineDeviceContext dc, IDrawer stencilDrawer, IDrawer drawer)
         {
             var geometry = spotLightGeometry;
 
@@ -390,7 +389,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Effect</param>
-        public void DrawResult(IEngineDeviceContext dc, BuiltInComposer drawer)
+        public void DrawResult(IEngineDeviceContext dc, IDrawer drawer)
         {
             drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
         }

@@ -5,7 +5,7 @@ namespace Engine.BuiltIn.Drawers
     /// <summary>
     /// Drawer material state
     /// </summary>
-    public struct BuiltInDrawerMaterialState
+    public struct BuiltInDrawerMaterialState : IDrawerMaterialState
     {
         /// <summary>
         /// Default state
@@ -21,9 +21,7 @@ namespace Engine.BuiltIn.Drawers
             };
         }
 
-        /// <summary>
-        /// Material
-        /// </summary>
+        /// <inheritdoc/>
         public IMeshMaterial Material { get; set; }
         /// <summary>
         /// Use anisotropic filtering

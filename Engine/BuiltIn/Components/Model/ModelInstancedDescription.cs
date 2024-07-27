@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Common;
-
     /// <summary>
     /// Instanced model description
     /// </summary>

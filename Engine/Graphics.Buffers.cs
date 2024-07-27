@@ -1,12 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>

@@ -1,10 +1,8 @@
-﻿
+﻿using Engine.BuiltIn.Drawers.Common;
+using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Common;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position-texture instanced drawer
     /// </summary>

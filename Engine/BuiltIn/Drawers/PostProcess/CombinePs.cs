@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.PostProcess
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Combine pixel shader
     /// </summary>
-    public class CombinePs : IBuiltInShader<EnginePixelShader>
+    public class CombinePs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Texture 1 resource view

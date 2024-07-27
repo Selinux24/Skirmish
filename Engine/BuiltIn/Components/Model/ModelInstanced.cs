@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,10 +11,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Primitives;
-    using Engine.Common;
-
     /// <summary>
     /// Instaced model
     /// </summary>

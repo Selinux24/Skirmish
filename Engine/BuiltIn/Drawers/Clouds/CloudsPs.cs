@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Clouds pixel shader
     /// </summary>
-    public class CloudsPs : IBuiltInShader<EnginePixelShader>
+    public class CloudsPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per cloud constant buffer

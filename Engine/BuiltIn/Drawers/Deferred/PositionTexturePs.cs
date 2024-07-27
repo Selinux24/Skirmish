@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position texture pixel shader
     /// </summary>
-    public class PositionTexturePs : IBuiltInShader<EnginePixelShader>
+    public class PositionTexturePs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Diffuse map resource view
