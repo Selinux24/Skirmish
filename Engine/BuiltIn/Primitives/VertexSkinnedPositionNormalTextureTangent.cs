@@ -5,15 +5,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Engine.Common
+namespace Engine.BuiltIn.Primitives
 {
+    using Engine;
+    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>
-    /// Position normal texure and tangent vertex format
+    /// Skinned position normal texture and tangent vertex format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPositionNormalTextureTangent : IVertexData
+    public struct VertexSkinnedPositionNormalTextureTangent : IVertexData
     {
         /// <summary>
         /// Defined input colection
@@ -28,49 +30,19 @@ namespace Engine.Common
                 new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
                 new ("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, InputClassification.PerVertexData, 0),
+                new ("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 44, slot, InputClassification.PerVertexData, 0),
+                new ("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 56, slot, InputClassification.PerVertexData, 0 ),
             ];
-        }
-        /// <summary>
-        /// Generates a vertex array from specified components
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="normals">Normals</param>
-        /// <param name="tangents">Tangents</param>
-        /// <param name="uvs">UV coordinates</param>
-        /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalTextureTangent> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector2> uvs, IEnumerable<Vector3> tangents)
-        {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
-            if (vertices.Count() != tangents.Count()) throw new ArgumentException("Vertices and tangents must have the same length");
-
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-            var tArray = tangents.ToArray();
-            var uvArray = uvs.ToArray();
-
-            VertexPositionNormalTextureTangent[] res = new VertexPositionNormalTextureTangent[vArray.Length];
-
-            for (int i = 0; i < vArray.Length; i++)
-            {
-                res[i] = new VertexPositionNormalTextureTangent()
-                {
-                    Position = vArray[i],
-                    Normal = nArray[i],
-                    Tangent = tArray[i],
-                    Texture = uvArray[i]
-                };
-            }
-
-            return res;
         }
         /// <summary>
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
         {
             var vArray = vertices.ToArray();
+            var vWeights = weights.ToArray();
+            var vBones = skinBoneNames.ToArray();
 
             var res = new IVertexData[vArray.Length];
 
@@ -78,12 +50,36 @@ namespace Engine.Common
             {
                 var v = vArray[index];
 
-                res[index] = new VertexPositionNormalTextureTangent
+                var p = v.Position ?? Vector3.Zero;
+                var n = v.Normal ?? Vector3.Zero;
+                var t = v.Texture ?? Vector2.Zero;
+                var tn = v.Tangent ?? Vector3.UnitX;
+
+                var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
+                int vwCount = vw?.Length ?? 0;
+
+                var wg0 = vwCount > 0 ? vw[0].WeightValue : 0f;
+                var wg1 = vwCount > 1 ? vw[1].WeightValue : 0f;
+                var wg2 = vwCount > 2 ? vw[2].WeightValue : 0f;
+
+                var bn0 = vwCount > 0 ? Math.Max(0, Array.IndexOf(vBones, vw[0].Joint)) : 0;
+                var bn1 = vwCount > 1 ? Math.Max(0, Array.IndexOf(vBones, vw[1].Joint)) : 0;
+                var bn2 = vwCount > 2 ? Math.Max(0, Array.IndexOf(vBones, vw[2].Joint)) : 0;
+                var bn3 = vwCount > 3 ? Math.Max(0, Array.IndexOf(vBones, vw[3].Joint)) : 0;
+
+                res[index] = new VertexSkinnedPositionNormalTextureTangent
                 {
-                    Position = v.Position ?? Vector3.Zero,
-                    Normal = v.Normal ?? Vector3.Zero,
-                    Texture = v.Texture ?? Vector2.Zero,
-                    Tangent = v.Tangent ?? Vector3.UnitX,
+                    Position = p,
+                    Normal = n,
+                    Texture = t,
+                    Tangent = tn,
+                    Weight1 = wg0,
+                    Weight2 = wg1,
+                    Weight3 = wg2,
+                    BoneIndex1 = (byte)bn0,
+                    BoneIndex2 = (byte)bn1,
+                    BoneIndex3 = (byte)bn2,
+                    BoneIndex4 = (byte)bn3,
                 };
             });
 
@@ -99,7 +95,7 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Normal;
         /// <summary>
-        /// Texture UV
+        /// Texture
         /// </summary>
         public Vector2 Texture;
         /// <summary>
@@ -107,13 +103,41 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Tangent;
         /// <summary>
+        /// Weight 1
+        /// </summary>
+        public float Weight1;
+        /// <summary>
+        /// Weight 2
+        /// </summary>
+        public float Weight2;
+        /// <summary>
+        /// Weight 3
+        /// </summary>
+        public float Weight3;
+        /// <summary>
+        /// Bone 1
+        /// </summary>
+        public byte BoneIndex1;
+        /// <summary>
+        /// Bone 2
+        /// </summary>
+        public byte BoneIndex2;
+        /// <summary>
+        /// Bone 3
+        /// </summary>
+        public byte BoneIndex3;
+        /// <summary>
+        /// Bone 4
+        /// </summary>
+        public byte BoneIndex4;
+        /// <summary>
         /// Vertex type
         /// </summary>
         public readonly VertexTypes VertexType
         {
             get
             {
-                return VertexTypes.PositionNormalTextureTangent;
+                return VertexTypes.PositionNormalTextureTangentSkinned;
             }
         }
 
@@ -128,6 +152,8 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Normal) return true;
             else if (channel == VertexDataChannels.Texture) return true;
             else if (channel == VertexDataChannels.Tangent) return true;
+            else if (channel == VertexDataChannels.Weights) return true;
+            else if (channel == VertexDataChannels.BoneIndices) return true;
             else return false;
         }
         /// <summary>
@@ -142,6 +168,8 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Normal) return (T)(object)Normal;
             else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
             else if (channel == VertexDataChannels.Tangent) return (T)(object)Tangent;
+            else if (channel == VertexDataChannels.Weights) return (T)(object)(new[] { Weight1, Weight2, Weight3, 1.0f - Weight1 - Weight2 - Weight3 });
+            else if (channel == VertexDataChannels.BoneIndices) return (T)(object)(new[] { BoneIndex1, BoneIndex2, BoneIndex3, BoneIndex4 });
             else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
@@ -156,6 +184,23 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
             else if (channel == VertexDataChannels.Tangent) Tangent = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Weights)
+            {
+                float[] weights = (float[])(object)value;
+
+                Weight1 = weights[0];
+                Weight2 = weights[1];
+                Weight3 = weights[2];
+            }
+            else if (channel == VertexDataChannels.BoneIndices)
+            {
+                byte[] boneIndices = (byte[])(object)value;
+
+                BoneIndex1 = boneIndices[0];
+                BoneIndex2 = boneIndices[1];
+                BoneIndex3 = boneIndices[2];
+                BoneIndex4 = boneIndices[3];
+            }
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
@@ -164,7 +209,7 @@ namespace Engine.Common
         /// </summary>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexPositionNormalTextureTangent));
+            return Marshal.SizeOf(typeof(VertexSkinnedPositionNormalTextureTangent));
         }
         /// <summary>
         /// Get input elements
@@ -179,7 +224,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Position: {Position}; Normal: {Normal}; Texture: {Texture}; Tangent: {Tangent};";
+            return $"Skinned; Position: {Position}; Normal: {Normal}; Texture: {Texture}; Tangent: {Tangent};";
         }
-    };
+    }
 }

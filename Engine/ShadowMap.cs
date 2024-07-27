@@ -7,6 +7,7 @@ namespace Engine
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Shadows;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

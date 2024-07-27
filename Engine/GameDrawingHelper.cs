@@ -192,7 +192,7 @@ namespace Engine
         /// <param name="bufferDescriptors">Buffer descriptors</param>
         /// <param name="buffers">Buffer list</param>
         /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
+        private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
             where T : struct
         {
             if (!game.ValidateWriteBuffer(dc, descriptor, bufferDescriptors, buffers, out var buffer))
@@ -220,7 +220,7 @@ namespace Engine
         /// <param name="bufferDescriptors">Buffer descriptors</param>
         /// <param name="buffers">Buffer list</param>
         /// <param name="buffer">Returns the buffer to update</param>
-        private static bool ValidateWriteBuffer(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, IEngineBufferDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
+        private static bool ValidateWriteBuffer(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, IEngineDescriptor[] bufferDescriptors, EngineBuffer[] buffers, out EngineBuffer buffer)
         {
             buffer = null;
 

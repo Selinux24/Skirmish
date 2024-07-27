@@ -1,5 +1,5 @@
 ﻿
-namespace Engine
+namespace Engine.BuiltIn.Components.Cubemap
 {
     /// <summary>
     /// Cube map geometry enumeration

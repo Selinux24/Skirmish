@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
+    using Engine.BuiltIn.Primitives;
     using SharpDX.Direct3D11;
 
     /// <summary>

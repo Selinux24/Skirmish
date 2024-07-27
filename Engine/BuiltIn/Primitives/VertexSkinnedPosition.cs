@@ -5,15 +5,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Engine.Common
+namespace Engine.BuiltIn.Primitives
 {
+    using Engine;
+    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>
-    /// Skinned position texture vertex format
+    /// Skinned position vertex format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexSkinnedPositionTexture : IVertexData
+    public struct VertexSkinnedPosition : IVertexData
     {
         /// <summary>
         /// Defined input colection
@@ -24,10 +26,9 @@ namespace Engine.Common
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new ("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 20, slot, InputClassification.PerVertexData, 0),
-                new ("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 32, slot, InputClassification.PerVertexData, 0 ),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
+                new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 24, slot, InputClassification.PerVertexData, 0 ),
             ];
         }
         /// <summary>
@@ -47,7 +48,6 @@ namespace Engine.Common
                 var v = vArray[index];
 
                 var p = v.Position ?? Vector3.Zero;
-                var t = v.Texture ?? Vector2.Zero;
 
                 var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
                 int vwCount = vw?.Length ?? 0;
@@ -61,10 +61,9 @@ namespace Engine.Common
                 var bn2 = vwCount > 2 ? Math.Max(0, Array.IndexOf(vBones, vw[2].Joint)) : 0;
                 var bn3 = vwCount > 3 ? Math.Max(0, Array.IndexOf(vBones, vw[3].Joint)) : 0;
 
-                res[index] = new VertexSkinnedPositionTexture
+                res[index] = new VertexSkinnedPosition
                 {
                     Position = p,
-                    Texture = t,
                     Weight1 = wg0,
                     Weight2 = wg1,
                     Weight3 = wg2,
@@ -82,10 +81,6 @@ namespace Engine.Common
         /// Position
         /// </summary>
         public Vector3 Position;
-        /// <summary>
-        /// Texture
-        /// </summary>
-        public Vector2 Texture;
         /// <summary>
         /// Weight 1
         /// </summary>
@@ -121,7 +116,7 @@ namespace Engine.Common
         {
             get
             {
-                return VertexTypes.PositionTextureSkinned;
+                return VertexTypes.PositionSkinned;
             }
         }
 
@@ -133,7 +128,6 @@ namespace Engine.Common
         public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
-            else if (channel == VertexDataChannels.Texture) return true;
             else if (channel == VertexDataChannels.Weights) return true;
             else if (channel == VertexDataChannels.BoneIndices) return true;
             else return false;
@@ -147,8 +141,7 @@ namespace Engine.Common
         public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
-            else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
-            else if (channel == VertexDataChannels.Weights) return (T)(object)(new[] { Weight1, Weight2, Weight3, (1.0f - Weight1 - Weight2 - Weight3) });
+            else if (channel == VertexDataChannels.Weights) return (T)(object)(new[] { Weight1, Weight2, Weight3, 1.0f - Weight1 - Weight2 - Weight3 });
             else if (channel == VertexDataChannels.BoneIndices) return (T)(object)(new[] { BoneIndex1, BoneIndex2, BoneIndex3, BoneIndex4 });
             else throw new EngineException($"Channel data not found: {channel}");
         }
@@ -161,7 +154,6 @@ namespace Engine.Common
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
             else if (channel == VertexDataChannels.Weights)
             {
                 float[] weights = (float[])(object)value;
@@ -187,7 +179,7 @@ namespace Engine.Common
         /// </summary>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexSkinnedPositionTexture));
+            return Marshal.SizeOf(typeof(VertexSkinnedPosition));
         }
         /// <summary>
         /// Get input elements
@@ -202,7 +194,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Skinned; Position: {Position}; Texture: {Texture};";
+            return $"Skinned; Position: {Position};";
         }
-    }
+    };
 }

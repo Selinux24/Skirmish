@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.BuiltIn.Primitives;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +69,7 @@ namespace Engine.Common
         /// <summary>
         /// Instancing buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerInstances<VertexInstancingData>> instancingBufferDescriptors = [];
+        private readonly List<IEngineInstancingBufferDescriptor> instancingBufferDescriptors = [];
 
         /// <summary>
         /// Input layouts by vertex shaders
@@ -305,21 +306,15 @@ namespace Engine.Common
         /// <summary>
         /// Creates an instancing buffer
         /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
         /// <param name="graphics">Graphics</param>
         /// <param name="name">Buffer name</param>
+        /// <param name="instances">Instances</param>
+        /// <param name="stride">Instancing data stride in bytes</param>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        /// <param name="instancingData">Instancing data</param>
         /// <returns>Returns the new buffer</returns>
-        private static EngineBuffer CreateInstancingBuffer<T>(Graphics graphics, string name, bool dynamic, IEnumerable<T> instancingData)
-            where T : struct, IInstacingData
+        private static EngineBuffer CreateInstancingBuffer(Graphics graphics, string name, int instances, int stride, bool dynamic)
         {
-            if (instancingData?.Any() != true)
-            {
-                return null;
-            }
-
-            return graphics.CreateVertexBuffer(name, instancingData, dynamic);
+            return graphics.CreateVertexBuffer(name, instances * stride, dynamic);
         }
 
         /// <summary>
@@ -341,8 +336,6 @@ namespace Engine.Common
 
             foreach (var descriptor in dirtyList)
             {
-                var data = new VertexInstancingData[descriptor.Instances];
-
                 if (descriptor.Allocated)
                 {
                     //Reserve current buffer
@@ -350,7 +343,7 @@ namespace Engine.Common
 
                     //Recreate the buffer and binding
                     string name = GetInstancingBufferName(descriptor);
-                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
+                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Instances, descriptor.GetStride(), descriptor.Dynamic);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = new(buffer, descriptor.GetStride(), 0);
@@ -366,7 +359,7 @@ namespace Engine.Common
 
                     //Create the buffer and binding
                     string name = GetInstancingBufferName(descriptor);
-                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
+                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Instances, descriptor.GetStride(), descriptor.Dynamic);
 
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(new(buffer, descriptor.GetStride(), 0));
@@ -497,7 +490,7 @@ namespace Engine.Common
         /// Gets a buffer name for the specified descriptor
         /// </summary>
         /// <param name="descriptor">Descriptor</param>
-        private static string GetInstancingBufferName(BufferManagerInstances<VertexInstancingData> descriptor)
+        private static string GetInstancingBufferName(IEngineDescriptor descriptor)
         {
             return $"InstancingBuffer_v{descriptor.Allocations}.{descriptor.BufferIndex}.{(descriptor.Dynamic ? DynamicString : StaticString)}";
         }
@@ -543,14 +536,13 @@ namespace Engine.Common
 
             for (int i = 0; i < instancingBufferDescriptors.Count; i++)
             {
-                var newDescriptor = (BufferManagerInstances<VertexInstancingData>)instancingBufferDescriptors[i].Copy();
+                var newDescriptor = instancingBufferDescriptors[i].Copy();
 
                 bm.instancingBufferDescriptors.Add(newDescriptor);
 
                 //Create the buffer and binding
-                var data = new VertexInstancingData[newDescriptor.Instances];
                 string name = GetInstancingBufferName(newDescriptor);
-                var buffer = CreateInstancingBuffer(game.Graphics, name, newDescriptor.Dynamic, data);
+                var buffer = CreateInstancingBuffer(game.Graphics, name, newDescriptor.Instances, newDescriptor.GetStride(), newDescriptor.Dynamic);
 
                 tmpVBufferList[newDescriptor.BufferIndex] = buffer;
                 tmpVBufferBindingsList[newDescriptor.BufferBindingIndex] = new(buffer, newDescriptor.GetStride(), 0);
@@ -664,9 +656,9 @@ namespace Engine.Common
         /// <summary>
         /// Gets instancing buffer descriptors
         /// </summary>
-        public IEngineBufferDescriptor[] GetInstancingBufferDescriptors()
+        public IEngineInstancingBufferDescriptor[] GetInstancingBufferDescriptors()
         {
-            return instancingBufferDescriptors.OfType<IEngineBufferDescriptor>().ToArray();
+            return instancingBufferDescriptors.OfType<IEngineInstancingBufferDescriptor>().ToArray();
         }
         /// <summary>
         /// Gets vertex buffer descriptors
@@ -721,9 +713,9 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="dynamic">Add to dynamic buffers</param>
         /// <param name="instances">Number of instances</param>
-        public BufferDescriptor AddInstancingData(string id, bool dynamic, int instances)
+        public BufferDescriptor AddInstancingData<T>(string id, bool dynamic, int instances) where T : struct, IInstacingData
         {
-            var request = new BufferDescriptorRequestInstancing
+            var request = new BufferDescriptorRequestInstancing<T>
             {
                 Id = id,
                 Dynamic = dynamic,
@@ -804,14 +796,14 @@ namespace Engine.Common
         /// Removes instancing data from buffer manager
         /// </summary>
         /// <param name="descriptor">Buffer descriptor</param>
-        public void RemoveInstancingData(BufferDescriptor descriptor)
+        public void RemoveInstancingData<T>(BufferDescriptor descriptor) where T : struct, IInstacingData
         {
             if (descriptor == null)
             {
                 return;
             }
 
-            var request = new BufferDescriptorRequestInstancing
+            var request = new BufferDescriptorRequestInstancing<T>
             {
                 Id = descriptor.Id,
                 Descriptor = descriptor,
@@ -866,7 +858,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Instancing buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        public int AddInstancingBufferDescription(BufferManagerInstances<VertexInstancingData> description)
+        public int AddInstancingBufferDescription<T>(BufferManagerInstances<T> description) where T : struct, IInstacingData
         {
             int index = instancingBufferDescriptors.Count;
 
@@ -888,9 +880,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        public BufferManagerInstances<VertexInstancingData> GetInstancingBufferDescription(int index)
+        public BufferManagerInstances<T> GetInstancingBufferDescription<T>(int index) where T : struct, IInstacingData
         {
-            return instancingBufferDescriptors[index];
+            return instancingBufferDescriptors[index] as BufferManagerInstances<T>;
         }
 
         /// <summary>

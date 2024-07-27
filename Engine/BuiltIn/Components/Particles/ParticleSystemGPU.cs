@@ -5,6 +5,7 @@ namespace Engine.BuiltIn.Components.Particles
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Particles;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
     using Engine.Content;
 

@@ -4,6 +4,7 @@ namespace Engine.BuiltIn.Components.Water
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Water;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Engine.BuiltIn.Components.Ground
 {
     using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Primitives;
     using Engine.Collections.Generic;
     using Engine.Common;
 

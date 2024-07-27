@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Engine.UI
 {
-    using Engine.Common;
+    using Engine.BuiltIn.Primitives;
 
     /// <summary>
     /// Sentence descriptor

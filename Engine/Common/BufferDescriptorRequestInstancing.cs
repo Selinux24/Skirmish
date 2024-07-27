@@ -4,7 +4,7 @@ namespace Engine.Common
     /// <summary>
     /// Instace buffer descriptor request
     /// </summary>
-    class BufferDescriptorRequestInstancing : IBufferDescriptorRequest
+    class BufferDescriptorRequestInstancing<T> : IBufferDescriptorRequest where T : struct, IInstacingData
     {
         /// <inheritdoc/>
         public string Id { get; set; }
@@ -45,19 +45,19 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         private void Add(BufferManager bufferManager)
         {
-            BufferManagerInstances<VertexInstancingData> descriptor;
+            BufferManagerInstances<T> descriptor;
 
-            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Id}]");
+            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(T)} [{Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerInstances<VertexInstancingData>(Dynamic);
+                descriptor = new BufferManagerInstances<T>(Dynamic);
                 slot = bufferManager.AddInstancingBufferDescription(descriptor);
             }
             else
             {
-                descriptor = bufferManager.GetInstancingBufferDescription(slot);
+                descriptor = bufferManager.GetInstancingBufferDescription<T>(slot);
                 descriptor.ReallocationNeeded = true;
             }
 
@@ -71,9 +71,9 @@ namespace Engine.Common
         {
             if (Descriptor?.Ready == true)
             {
-                var descriptor = bufferManager.GetInstancingBufferDescription(Descriptor.BufferDescriptionIndex);
+                var descriptor = bufferManager.GetInstancingBufferDescription<T>(Descriptor.BufferDescriptionIndex);
 
-                Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Descriptor.Id}]");
+                Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(T)} [{Descriptor.Id}]");
 
                 descriptor.RemoveDescriptor(Descriptor, Instances);
                 descriptor.ReallocationNeeded = true;

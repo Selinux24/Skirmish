@@ -9,6 +9,7 @@ namespace Engine.BuiltIn.Components.Ground
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Common;
     using Engine.BuiltIn.Drawers.Deferred;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
     using Engine.Content;
 

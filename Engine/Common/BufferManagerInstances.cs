@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public class BufferManagerInstances<T>(bool dynamic) : IEngineBufferDescriptor
+    public class BufferManagerInstances<T>(bool dynamic) : IEngineInstancingBufferDescriptor
         where T : struct, IInstacingData
     {
         /// <summary>
@@ -45,19 +45,12 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-        /// <summary>
-        /// Instances
-        /// </summary>
+        /// <inheritdoc/>
         public int Instances { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
+        /// <inheritdoc/>
         public int BufferBindingIndex { get; set; } = -1;
 
-        /// <summary>
-        /// Gets the buffer format stride
-        /// </summary>
-        /// <returns>Returns the buffer format stride in bytes</returns>
+        /// <inheritdoc/>
         public int GetStride()
         {
             return default(T).GetStride();
@@ -119,8 +112,9 @@ namespace Engine.Common
             Allocations++;
             ReallocationNeeded = false;
         }
+
         /// <inheritdoc/>
-        public IEngineBufferDescriptor Copy()
+        public IEngineInstancingBufferDescriptor Copy()
         {
             var d = new BufferManagerInstances<T>(Dynamic)
             {

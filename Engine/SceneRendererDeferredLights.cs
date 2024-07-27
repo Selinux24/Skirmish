@@ -6,6 +6,7 @@ namespace Engine
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Deferred;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

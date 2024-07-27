@@ -6,6 +6,7 @@ namespace Engine.BuiltIn.Components.Skies
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.SkyScattering;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

@@ -1,5 +1,4 @@
-﻿
-namespace Engine.Common
+﻿namespace Engine.BuiltIn.Primitives
 {
     /// <summary>
     /// Vertext types enumeration

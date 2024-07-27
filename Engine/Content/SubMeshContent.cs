@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Content
 {
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

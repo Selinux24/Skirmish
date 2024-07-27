@@ -1,28 +1,72 @@
-﻿using System.Runtime.InteropServices;
+﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
-namespace Engine.Common
+namespace Engine.BuiltIn.Primitives
 {
-    using SharpDX;
+    using Engine;
+    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>
-    /// Billboard vertex format
+    /// Position vertex format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexBillboard : IVertexData
+    public struct VertexPosition : IVertexData
     {
         /// <summary>
         /// Defined input colection
         /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <returns>Returns input elements</returns>
+        /// <returns></returns>
         public static InputElement[] Input(int slot)
         {
             return
             [
                 new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new ("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, InputClassification.PerVertexData, 0),
             ];
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="uvs">Uv texture coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPosition> Generate(IEnumerable<Vector3> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new List<VertexPosition>();
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res.Add(new VertexPosition() { Position = vArray[i] });
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Converts a vertex data list to a vertex array
+        /// </summary>
+        /// <param name="vertices">Vertices list</param>
+        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new IVertexData[vArray.Length];
+
+            Parallel.For(0, vArray.Length, (index) =>
+            {
+                var v = vArray[index];
+
+                res[index] = new VertexPosition
+                {
+                    Position = v.Position ?? Vector3.Zero,
+                };
+            });
+
+            return await Task.FromResult(res);
         }
 
         /// <summary>
@@ -30,17 +74,13 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Position;
         /// <summary>
-        /// Sprite size
-        /// </summary>
-        public Vector2 Size;
-        /// <summary>
         /// Vertex type
         /// </summary>
         public readonly VertexTypes VertexType
         {
             get
             {
-                return VertexTypes.Billboard;
+                return VertexTypes.Position;
             }
         }
 
@@ -52,7 +92,6 @@ namespace Engine.Common
         public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
-            else if (channel == VertexDataChannels.Size) return true;
             else return false;
         }
         /// <summary>
@@ -64,8 +103,7 @@ namespace Engine.Common
         public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
-            else if (channel == VertexDataChannels.Size) return (T)(object)Size;
-            else throw new EngineException($"Channel data not found: {channel};");
+            else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
         /// Sets the channer value
@@ -76,7 +114,6 @@ namespace Engine.Common
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Size) Size = (Vector2)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
@@ -85,7 +122,7 @@ namespace Engine.Common
         /// </summary>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexBillboard));
+            return Marshal.SizeOf(typeof(VertexPosition));
         }
         /// <summary>
         /// Get input elements
@@ -100,7 +137,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Position: {Position}; Size: {Size};";
+            return $"Position: {Position};";
         }
     };
 }

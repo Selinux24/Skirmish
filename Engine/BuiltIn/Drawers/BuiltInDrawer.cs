@@ -1,7 +1,10 @@
-﻿
+﻿using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Drawers.Forward;
+using Engine.BuiltIn.Primitives;
+using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers
 {
-    using Engine.Common;
     using Format = SharpDX.DXGI.Format;
 
     /// <summary>
@@ -460,6 +463,27 @@ namespace Engine.BuiltIn.Drawers
             }
 
             dc.SetGeometryShaderStreamOutputTargets(null);
+        }
+
+        /// <summary>
+        /// Gets the drawing effect for the current instance
+        /// </summary>
+        /// <param name="mode">Drawing mode</param>
+        /// <param name="vertexType">Vertex type</param>
+        /// <returns>Returns the drawing effect</returns>
+        public static IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType, bool instanced)
+        {
+            if (mode.HasFlag(DrawerModes.Forward))
+            {
+                return ForwardDrawerManager.GetDrawer(vertexType, instanced);
+            }
+
+            if (mode.HasFlag(DrawerModes.Deferred))
+            {
+                return DeferredDrawerManager.GetDrawer(vertexType, instanced);
+            }
+
+            return null;
         }
     }
 }

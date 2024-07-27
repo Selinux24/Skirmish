@@ -8,6 +8,7 @@ namespace Engine.BuiltIn.Components.Primitives
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Forward;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>

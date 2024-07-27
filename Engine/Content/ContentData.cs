@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Engine.Content
 {
     using Engine.Animation;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
     using Engine.Content.Persistence;
 

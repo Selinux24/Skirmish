@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace Engine.BuiltIn.Components.Models
 {
     using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
 
     /// <summary>
@@ -152,7 +153,7 @@ namespace Engine.BuiltIn.Components.Models
         {
             if (disposing)
             {
-                BufferManager.RemoveInstancingData(InstancingBuffer);
+                BufferManager.RemoveInstancingData<VertexInstancingData>(InstancingBuffer);
                 InstancingBuffer = null;
             }
 
@@ -182,7 +183,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public override async Task InitializeAssets()
         {
-            InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, Description.Instances);
+            InstancingBuffer = BufferManager.AddInstancingData<VertexInstancingData>($"{Name}.Instances", true, Description.Instances);
 
             foreach (var drawable in GetDrawingDataCollection())
             {
@@ -493,7 +494,7 @@ namespace Engine.BuiltIn.Components.Models
                     continue;
                 }
 
-                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, true);
+                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh.VertextType, true);
                 if (drawer == null)
                 {
                     continue;

@@ -281,7 +281,7 @@ namespace Engine.BuiltIn.Components.Models
                     continue;
                 }
 
-                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, false);
+                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh.VertextType, false);
                 if (drawer == null)
                 {
                     continue;

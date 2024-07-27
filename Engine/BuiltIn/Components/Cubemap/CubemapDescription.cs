@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine
+namespace Engine.BuiltIn.Components.Cubemap
 {
     /// <summary>
     /// Cube-map description

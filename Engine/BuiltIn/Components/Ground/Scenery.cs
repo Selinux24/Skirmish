@@ -11,6 +11,7 @@ namespace Engine.BuiltIn.Components.Ground
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Deferred;
     using Engine.BuiltIn.Drawers.Forward;
+    using Engine.BuiltIn.Primitives;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;

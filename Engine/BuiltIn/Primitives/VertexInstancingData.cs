@@ -2,8 +2,9 @@
 using SharpDX.DXGI;
 using System.Runtime.InteropServices;
 
-namespace Engine.Common
+namespace Engine.BuiltIn.Primitives
 {
+    using Engine;
     using SharpDX.Direct3D11;
 
     /// <summary>

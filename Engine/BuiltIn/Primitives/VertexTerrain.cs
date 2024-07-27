@@ -1,19 +1,20 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Engine.Common
+namespace Engine.BuiltIn.Primitives
 {
+    using Engine;
+    using Engine.Common;
     using SharpDX.Direct3D11;
 
     /// <summary>
-    /// Position normal color vertex format
+    /// Terrain vertex format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPositionNormalColor : IVertexData
+    public struct VertexTerrain : IVertexData
     {
         /// <summary>
         /// Defined input colection
@@ -26,56 +27,10 @@ namespace Engine.Common
             [
                 new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
                 new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, InputClassification.PerVertexData, 0),
+                new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
+                new ("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, InputClassification.PerVertexData, 0),
+                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, slot, InputClassification.PerVertexData, 0),
             ];
-        }
-        /// <summary>
-        /// Generates a vertex array from specified components
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="normals">Normals</param>
-        /// <param name="color">Color for all vertices</param>
-        /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Color4 color)
-        {
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
-
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-
-            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
-
-            for (int i = 0; i < vArray.Length; i++)
-            {
-                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = color };
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Generates a vertex array from specified components
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="normals">Normals</param>
-        /// <param name="colors">Colors</param>
-        /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Color4> colors)
-        {
-            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
-
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-            var cArray = colors.ToArray();
-
-            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
-
-            for (int i = 0; i < vArray.Length; i++)
-            {
-                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = cArray[i] };
-            }
-
-            return res;
         }
         /// <summary>
         /// Converts a vertex data list to a vertex array
@@ -91,10 +46,12 @@ namespace Engine.Common
             {
                 var v = vArray[index];
 
-                res[index] = new VertexPositionNormalColor
+                res[index] = new VertexTerrain
                 {
                     Position = v.Position ?? Vector3.Zero,
                     Normal = v.Normal ?? Vector3.Zero,
+                    Texture = v.Texture ?? Vector2.Zero,
+                    Tangent = v.Tangent ?? Vector3.UnitX,
                     Color = v.Color ?? Color4.White,
                 };
             });
@@ -111,6 +68,14 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Normal;
         /// <summary>
+        /// Texture UV
+        /// </summary>
+        public Vector2 Texture;
+        /// <summary>
+        /// Tangent
+        /// </summary>
+        public Vector3 Tangent;
+        /// <summary>
         /// Color
         /// </summary>
         public Color4 Color;
@@ -121,7 +86,7 @@ namespace Engine.Common
         {
             get
             {
-                return VertexTypes.PositionNormalColor;
+                return VertexTypes.Terrain;
             }
         }
 
@@ -134,6 +99,8 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Normal) return true;
+            else if (channel == VertexDataChannels.Texture) return true;
+            else if (channel == VertexDataChannels.Tangent) return true;
             else if (channel == VertexDataChannels.Color) return true;
             else return false;
         }
@@ -147,6 +114,8 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else if (channel == VertexDataChannels.Normal) return (T)(object)Normal;
+            else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
+            else if (channel == VertexDataChannels.Tangent) return (T)(object)Tangent;
             else if (channel == VertexDataChannels.Color) return (T)(object)Color;
             else throw new EngineException($"Channel data not found: {channel}");
         }
@@ -160,6 +129,8 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
+            else if (channel == VertexDataChannels.Tangent) Tangent = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
@@ -169,7 +140,7 @@ namespace Engine.Common
         /// </summary>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexPositionNormalColor));
+            return Marshal.SizeOf(typeof(VertexTerrain));
         }
         /// <summary>
         /// Get input elements
@@ -184,7 +155,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Position: {Position} Normal: {Normal}; Color: {Color};";
+            return $"Position: {Position}; Normal: {Normal}; Texture: {Texture}; Tangent: {Tangent};";
         }
     };
 }

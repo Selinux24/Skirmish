@@ -6,6 +6,7 @@ namespace Engine.BuiltIn.Components.Decals
 {
     using Engine.BuiltIn.Drawers;
     using Engine.BuiltIn.Drawers.Decals;
+    using Engine.BuiltIn.Primitives;
     using Engine.Common;
     using Engine.Content;
 
