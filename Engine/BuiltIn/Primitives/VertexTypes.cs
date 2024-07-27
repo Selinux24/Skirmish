@@ -357,13 +357,10 @@ namespace Engine.BuiltIn.Primitives
                 return res;
             }
 
-            if (IsTextured(res) && !IsTangent(res))
+            if (IsTextured(res) && !IsTangent(res) && material?.NormalMapTexture != null)
             {
-                if (material?.NormalMapTexture != null)
-                {
-                    //Get tangent equivalent
-                    res = GetTangentEquivalent(res);
-                }
+                //Get tangent equivalent
+                res = GetTangentEquivalent(res);
             }
 
             return res;

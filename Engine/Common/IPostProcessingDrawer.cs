@@ -4,7 +4,7 @@ namespace Engine.Common
     /// <summary>
     /// Post-processing drawer interface
     /// </summary>
-    public interface IPostProcessingDrawer<T> where T : IPostProcessState
+    public interface IPostProcessingDrawer<in T> where T : IPostProcessState
     {
         /// <summary>
         /// Draws the resulting light composition
