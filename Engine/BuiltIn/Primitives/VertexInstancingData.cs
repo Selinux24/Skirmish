@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using SharpDX.DXGI;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Primitives
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Instancing data
     /// </summary>
@@ -78,20 +77,20 @@ namespace Engine.BuiltIn.Primitives
         /// <summary>
         /// Defined input colection
         /// </summary>
-        public static InputElement[] Input(int slot)
+        public static EngineInputElement[] Input(int slot)
         {
             return
             [
-                new InputElement(LocalTransformString, 0, Format.R32G32B32A32_Float, 0, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(LocalTransformString, 1, Format.R32G32B32A32_Float, 16, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(LocalTransformString, 2, Format.R32G32B32A32_Float, 32, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(LocalTransformString, 3, Format.R32G32B32A32_Float, 48, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(TintColorString, 0, Format.R32G32B32A32_Float, 64, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(TextureIndexString, 0, Format.R32_UInt, 80, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(MaterialIndexString, 0, Format.R32_UInt, 84, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(AnimationOffsetString, 0, Format.R32_UInt, 88, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(AnimationOffsetBString, 0, Format.R32_UInt, 92, slot, InputClassification.PerInstanceData, 1),
-                new InputElement(AnimationInterpolationString, 0, Format.R32_Float, 96, slot, InputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 0, Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 1, Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 2, Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 3, Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TintColorString, 0, Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TextureIndexString, 0, Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
+                new (MaterialIndexString, 0, Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetString, 0, Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetBString, 0, Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationInterpolationString, 0, Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
             ];
         }
 

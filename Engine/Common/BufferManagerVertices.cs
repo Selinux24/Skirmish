@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Vertex buffer description
     /// </summary>
@@ -21,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Input element list
         /// </summary>
-        private readonly List<InputElement> input = [];
+        private readonly List<EngineInputElement> input = [];
         /// <summary>
         /// Vertex descriptor list
         /// </summary>
@@ -70,7 +68,7 @@ namespace Engine.Common
         /// <summary>
         /// Input elements
         /// </summary>
-        public IEnumerable<InputElement> Input { get { return [.. input]; } }
+        public IEnumerable<EngineInputElement> Input { get { return [.. input]; } }
         /// <summary>
         /// Vertex buffer binding index in the manager list
         /// </summary>
@@ -121,7 +119,7 @@ namespace Engine.Common
         /// <param name="instancingSlot">Instancing buffer slot</param>
         public void SetInstancingInputs(int instancingSlot)
         {
-            input.RemoveAll(i => i.Classification == InputClassification.PerInstanceData);
+            input.RemoveAll(i => i.Classification == EngineInputClassification.PerInstanceData);
 
             var instancingInputs = VertexInstancingData.Input(instancingSlot);
 

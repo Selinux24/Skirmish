@@ -5,8 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Helpers.DDS
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// DDS Header
     /// </summary>
@@ -38,22 +36,22 @@ namespace Engine.Helpers.DDS
             header10 = null;
             offset = 0;
 
-            if (data.Length < (sizeof(uint) + DdsHeader.StructSize))
+            if (data.Length < (sizeof(uint) + StructSize))
             {
                 return false;
             }
 
             // First is magic number
             int dwMagicNumber = BitConverter.ToInt32(data, 0);
-            if (dwMagicNumber != DdsHeader.DDSMagic)
+            if (dwMagicNumber != DDSMagic)
             {
                 return false;
             }
 
-            header = data.ToStructure<DdsHeader>(4, DdsHeader.StructSize);
+            header = data.ToStructure<DdsHeader>(4, StructSize);
 
             // Verify header to validate DDS file
-            if (header.Size != DdsHeader.StructSize ||
+            if (header.Size != StructSize ||
                 header.PixelFormat.Size != DdsPixelFormat.StructSize)
             {
                 return false;
@@ -62,7 +60,7 @@ namespace Engine.Helpers.DDS
             // Check for DX10 extension
             if (header.PixelFormat.IsDX10())
             {
-                var h10Offset = 4 + DdsHeader.StructSize + DdsHeaderDX10.StructSize;
+                var h10Offset = 4 + StructSize + DdsHeaderDX10.StructSize;
 
                 // Must be long enough for both headers and magic value
                 if (data.Length < h10Offset)
@@ -76,7 +74,7 @@ namespace Engine.Helpers.DDS
             }
             else
             {
-                offset = 4 + DdsHeader.StructSize;
+                offset = 4 + StructSize;
             }
 
             return true;
@@ -120,7 +118,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        public static bool ValidateTexture(DdsHeader header, DdsHeaderDX10? header10, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        public static bool ValidateTexture(DdsHeader header, DdsHeaderDX10? header10, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
         {
             if (header10.HasValue)
             {
@@ -141,10 +139,10 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
-            resDim = ResourceDimension.Unknown;
+            resDim = TextureDimension.Unknown;
             arraySize = 1;
             isCubeMap = false;
 
@@ -156,7 +154,7 @@ namespace Engine.Helpers.DDS
 
             if (header.Flags.HasFlag(DdsFlagTypes.Depth))
             {
-                resDim = ResourceDimension.Texture3D;
+                resDim = TextureDimension.Texture3D;
             }
             else
             {
@@ -173,7 +171,7 @@ namespace Engine.Helpers.DDS
                 }
 
                 depth = 1;
-                resDim = ResourceDimension.Texture2D;
+                resDim = TextureDimension.Texture2D;
             }
 
             return true;
@@ -189,11 +187,11 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DdsHeaderDX10 header, DdsFlagTypes flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeaderDX10 header, DdsFlagTypes flags, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
             format = Format.Unknown;
-            resDim = ResourceDimension.Unknown;
+            resDim = TextureDimension.Unknown;
             isCubeMap = false;
 
             arraySize = header.ArraySize;
@@ -216,12 +214,13 @@ namespace Engine.Helpers.DDS
 
             switch (header.Dimension)
             {
-                case ResourceDimension.Texture1D:
+                case TextureDimension.Texture1D:
                     depth = 1;
                     break;
 
-                case ResourceDimension.Texture2D:
-                    if (header.MiscFlag.HasFlag(ResourceOptionFlags.TextureCube))
+                case TextureDimension.Texture2D:
+                    // ResourceOptionFlags enum TextureCube: 4
+                    if ((header.MiscFlag & 4) == 4)
                     {
                         arraySize *= 6;
                         isCubeMap = true;
@@ -229,7 +228,7 @@ namespace Engine.Helpers.DDS
                     depth = 1;
                     break;
 
-                case ResourceDimension.Texture3D:
+                case TextureDimension.Texture3D:
                     if (!flags.HasFlag(DdsFlagTypes.Depth))
                     {
                         return false;

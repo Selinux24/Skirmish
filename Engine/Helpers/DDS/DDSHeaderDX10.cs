@@ -1,9 +1,8 @@
-﻿using SharpDX.DXGI;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.Helpers.DDS
 {
-    using SharpDX.Direct3D11;
+    using SharpDX.DXGI;
 
     /// <summary>
     /// DDS Header DXT10
@@ -23,11 +22,11 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Identifies the type of resource
         /// </summary>
-        public ResourceDimension Dimension;
+        public TextureDimension Dimension;
         /// <summary>
         /// Identifies other, less common options for resources
         /// </summary>
-        public ResourceOptionFlags MiscFlag;
+        public int MiscFlag;
         /// <summary>
         /// The number of elements in the array.
         /// </summary>

@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Primitives
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Terrain vertex format
     /// </summary>
@@ -20,15 +18,15 @@ namespace Engine.BuiltIn.Primitives
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static InputElement[] Input(int slot)
+        public static EngineInputElement[] Input(int slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new ("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, InputClassification.PerVertexData, 0),
-                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, slot, InputClassification.PerVertexData, 0),
+                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
+                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
         /// <summary>
@@ -146,7 +144,7 @@ namespace Engine.BuiltIn.Primitives
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public readonly InputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(int slot)
         {
             return Input(slot);
         }

@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Primitives
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Decal data buffer
     /// </summary>
@@ -16,15 +14,15 @@ namespace Engine.BuiltIn.Primitives
         /// Defined input colection
         /// </summary>
         /// <param name="slot">Slot</param>
-        public static InputElement[] Input(int slot)
+        public static EngineInputElement[] Input(int slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new ("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new ("START_TIME", 0, SharpDX.DXGI.Format.R32_Float, 32, slot, InputClassification.PerVertexData, 0),
-                new ("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 36, slot, InputClassification.PerVertexData, 0),
+                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("START_TIME", 0, SharpDX.DXGI.Format.R32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
+                new ("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 36, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 
@@ -104,7 +102,7 @@ namespace Engine.BuiltIn.Primitives
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public readonly InputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(int slot)
         {
             return Input(slot);
         }

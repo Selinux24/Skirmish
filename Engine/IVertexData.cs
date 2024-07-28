@@ -3,8 +3,6 @@ using Engine.Common;
 
 namespace Engine
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Vertex data
     /// </summary>
@@ -39,6 +37,6 @@ namespace Engine
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        InputElement[] GetInput(int slot);
+        EngineInputElement[] GetInput(int slot);
     }
 }

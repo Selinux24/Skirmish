@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Engine
 {
-    using Engine.Common;
     using SharpDX.D3DCompiler;
     using SharpDX.Direct3D11;
 
@@ -20,9 +20,11 @@ namespace Engine
         /// <param name="bytes">Code bytes</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        private EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
+        private EngineInputLayout CreateInputLayout(string name, byte[] bytes, EngineInputElement[] elements)
         {
-            return new(name, new(device, bytes, elements));
+            var inputElements = elements.Select(e => new InputElement(e.SemanticName, e.SemanticIndex, e.Format, e.AlignedByteOffset, e.Slot, (InputClassification)e.Classification, e.InstanceDataStepRate)).ToArray();
+
+            return new(name, new(device, bytes, inputElements));
         }
         /// <summary>
         /// Creates a new Input Layout for a vertext data type
@@ -50,7 +52,7 @@ namespace Engine
         {
             var inputElements = instanced ?
                 vertices.Input.ToArray() :
-                vertices.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
+                vertices.Input.Where(i => i.Classification == EngineInputClassification.PerVertexData).ToArray();
 
             return CreateInputLayout(name, bytes, inputElements);
         }
