@@ -28,7 +28,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="text">Text</param>
-        public static UITextAreaDescription Default(TextDrawerDescription font, string text = null)
+        public static UITextAreaDescription Default(Engine.UI.FontDescription font, string text = null)
         {
             return new()
             {
@@ -48,7 +48,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+                Font = FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
 
@@ -63,7 +63,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
+                Font = FontDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
 
@@ -76,7 +76,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
+                Font = FontDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
 
@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public TextDrawerDescription Font { get; set; } = UIConfiguration.Font;
+        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text

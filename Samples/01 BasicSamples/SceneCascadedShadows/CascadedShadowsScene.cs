@@ -97,9 +97,9 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUIText()
         {
-            var defaultFont20 = TextDrawerDescription.FromFamily(fontFamilyName, 20);
-            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamilyName, 14);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamilyName, 12);
+            var defaultFont20 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 20);
+            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont12 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 12);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -169,7 +169,7 @@ namespace BasicSamples.SceneCascadedShadows
             bufferDrawer2.TextureIndex = 1;
             bufferDrawer3.TextureIndex = 2;
 
-            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
 
             var captionDesc = new UITextAreaDescription
             {

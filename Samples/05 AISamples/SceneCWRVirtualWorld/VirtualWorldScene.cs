@@ -104,7 +104,7 @@ ESC - EXIT";
         }
         private async Task InitializeTitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Gill Sans MT, Arial", 18);
+            var defaultFont18 = FontDescription.FromFamily("Gill Sans MT, Arial", 18);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = titleText;
@@ -114,7 +114,7 @@ ESC - EXIT";
         }
         private async Task InitializeTexts()
         {
-            var defaultFont11 = TextDrawerDescription.FromFamily("Gill Sans MT, Arial", 11);
+            var defaultFont11 = FontDescription.FromFamily("Gill Sans MT, Arial", 11);
 
             runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
             info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -124,7 +124,7 @@ ESC - EXIT";
         }
         private async Task InitializeEditorButtons()
         {
-            var buttonsFont = TextDrawerDescription.FromFamily(editorFont, 10, FontMapStyles.Regular, true);
+            var buttonsFont = FontDescription.FromFamily(editorFont, 10, FontMapStyles.Regular, true);
             buttonsFont.ContentPath = resourcesFolder;
 
             var editorButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);

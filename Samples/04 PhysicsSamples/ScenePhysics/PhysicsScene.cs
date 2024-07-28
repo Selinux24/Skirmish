@@ -76,8 +76,8 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11);
+            var defaultFont18 = FontDescription.FromFamily("Arial", 18);
+            var defaultFont11 = FontDescription.FromFamily("Arial", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });

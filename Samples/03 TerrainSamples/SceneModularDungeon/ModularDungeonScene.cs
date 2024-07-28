@@ -323,7 +323,7 @@ namespace TerrainSamples.SceneModularDungeon
             pvLevelsDesc.StartsVisible = false;
             pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", pvLevelsDesc);
 
-            var messagesFont = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48);
+            var messagesFont = FontDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48);
             var messagesDesc = UITextAreaDescription.Default(messagesFont);
             messagesDesc.StartsVisible = false;
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Messages", messagesDesc, LayerUI + 1);

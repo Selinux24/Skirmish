@@ -165,8 +165,8 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeTextComponents()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 

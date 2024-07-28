@@ -1,11 +1,12 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Fonts;
 using Engine.Common;
+using Engine.UI;
 using SharpDX;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.UI
+namespace Engine.BuiltIn.UI
 {
     /// <summary>
     /// Text drawer
@@ -17,7 +18,7 @@ namespace Engine.UI
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
     /// <param name="maxTextLength">Maximum text length</param>
-    class TextDrawer(Scene scene, string id, string name, int maxTextLength) : Drawable<TextDrawerDescription>(scene, id, name)
+    class TextDrawer(Scene scene, string id, string name, int maxTextLength) : Drawable<Engine.UI.FontDescription>(scene, id, name)
     {
         /// <summary>
         /// Maximum text length
@@ -259,7 +260,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override async Task ReadAssets(TextDrawerDescription description)
+        public override async Task ReadAssets(Engine.UI.FontDescription description)
         {
             await base.ReadAssets(description);
 

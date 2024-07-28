@@ -80,8 +80,8 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeUI()
         {
-            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
+            var defaultFont20 = Engine.UI.FontDescription.FromFamily("Arial", 20);
+            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {

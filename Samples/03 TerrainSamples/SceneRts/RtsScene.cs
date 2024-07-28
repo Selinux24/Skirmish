@@ -229,9 +229,9 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var defaultFont18 = TextDrawerDescription.FromFamily(fontFamily, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
-            var defaultFont10 = TextDrawerDescription.FromFamily(fontFamily, 10);
+            var defaultFont18 = FontDescription.FromFamily(fontFamily, 18);
+            var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
+            var defaultFont10 = FontDescription.FromFamily(fontFamily, 10);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });

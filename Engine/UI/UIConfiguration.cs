@@ -38,21 +38,21 @@ namespace Engine.UI
         /// <summary>
         /// Default Font
         /// </summary>
-        public static TextDrawerDescription Font
+        public static FontDescription Font
         {
             get
             {
-                return TextDrawerDescription.Default();
+                return FontDescription.Default();
             }
         }
         /// <summary>
         /// Monospaced font
         /// </summary>
-        public static TextDrawerDescription MonospacedFont
+        public static FontDescription MonospacedFont
         {
             get
             {
-                return TextDrawerDescription.FromFamily("Lucida Console");
+                return FontDescription.FromFamily("Lucida Console");
             }
         }
 

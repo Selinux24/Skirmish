@@ -72,7 +72,7 @@ namespace IntermediateSamples.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, true);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
@@ -90,7 +90,7 @@ namespace IntermediateSamples.SceneStart
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(3));
 
-            var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 24, true);
+            var buttonFont = FontDescription.FromFamily(buttonFonts, 24, true);
 
             var highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);

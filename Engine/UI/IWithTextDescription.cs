@@ -10,7 +10,7 @@ namespace Engine.UI
         /// <summary>
         /// Font description
         /// </summary>
-        TextDrawerDescription Font { get; set; }
+        FontDescription Font { get; set; }
 
         /// <summary>
         /// Text

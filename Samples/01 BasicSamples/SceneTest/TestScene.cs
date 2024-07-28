@@ -146,8 +146,8 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
+            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Tahoma", 10);
             defaultFont18.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
@@ -175,7 +175,7 @@ namespace BasicSamples.SceneTest
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             }, LayerUI - 1);
 
-            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
+            var buttonFont = Engine.UI.FontDescription.FromFamily("Lucida Console", 12);
 
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, "SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
             buttonDesc.Width = 100;
@@ -208,7 +208,7 @@ namespace BasicSamples.SceneTest
                 Height = Game.Form.RenderHeight,
             }, LayerUI + 1);
 
-            var pbFont = TextDrawerDescription.FromFamily("Consolas", 18);
+            var pbFont = Engine.UI.FontDescription.FromFamily("Consolas", 18);
 
             var pbDesc = UIProgressBarDescription.Default(pbFont, new Color(0, 0, 0, 0.5f), Color.Green);
             pbDesc.Top = Game.Form.RenderHeight - 60;

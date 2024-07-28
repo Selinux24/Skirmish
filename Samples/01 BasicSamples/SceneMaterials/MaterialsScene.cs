@@ -100,8 +100,8 @@ namespace BasicSamples.SceneMaterials
             };
             backpanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
-            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
+            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Arial", 18);
+            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {

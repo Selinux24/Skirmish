@@ -138,9 +138,9 @@ namespace TerrainSamples.ScenePerlinNoise
             Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
             Color4 pColor = Color.DeepSkyBlue;
 
-            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16);
-            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
+            var defaultFont16 = FontDescription.FromFamily(fontFamily, 16);
+            var defaultFont14 = FontDescription.FromFamily(fontFamily, 14);
+            var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
 
             var defaultText16 = UITextAreaDescription.Default(defaultFont16);
             var defaultText14 = UITextAreaDescription.Default(defaultFont14);
@@ -161,7 +161,7 @@ namespace TerrainSamples.ScenePerlinNoise
             txtHelpSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpSeed", "HelpSeed", defaultText12);
             txtSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtSeed", "Seed", defaultText14);
 
-            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12);
+            var pbFont = FontDescription.FromFamily(fontFamily, 12);
 
             var pbDescription = UIProgressBarDescription.Default(pbFont);
 

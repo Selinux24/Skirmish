@@ -98,7 +98,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeProgressbar()
         {
-            var defaultFont = TextDrawerDescription.FromFile(fontFamilyString, 10, true);
+            var defaultFont = Engine.UI.FontDescription.FromFile(fontFamilyString, 10, true);
             defaultFont.ContentPath = resourcesFolder;
 
             var desc = UIProgressBarDescription.Default(defaultFont, new Color(0, 0, 0, 0.5f), Color.Green);
@@ -174,7 +174,7 @@ namespace BasicSamples.SceneUI
             };
             staticPan = await AddComponentUI<UIPanel, UIPanelDescription>("StaticPanel", "StaticPanel", desc);
 
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 18, true);
+            var font = Engine.UI.FontDescription.FromFile(fontFamilyString, 18, true);
             font.ContentPath = resourcesFolder;
 
             var descText = new UITextAreaDescription()
@@ -229,7 +229,7 @@ namespace BasicSamples.SceneUI
             var releasedRect = new Vector4(w0, 0, w1, 1f);
             var pressedRect = new Vector4(w2, 0, w3, 1f);
 
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
+            var font = Engine.UI.FontDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, "buttons.png", releasedRect, pressedRect);
@@ -245,7 +245,7 @@ namespace BasicSamples.SceneUI
             var butClose = await CreateComponent<UIButton, UIButtonDescription>("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", descButClose);
             butClose.MouseDoubleClick += ButDoubleClose_Click;
 
-            var maraFont = TextDrawerDescription.FromMap("MaraFont.png", "MaraFont.txt");
+            var maraFont = Engine.UI.FontDescription.FromMap("MaraFont.png", "MaraFont.txt");
             maraFont.ContentPath = resourcesFolder;
 
             var descText = UITextAreaDescription.Default();
@@ -269,7 +269,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeButtonTest()
         {
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
+            var font = Engine.UI.FontDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);
@@ -301,7 +301,7 @@ namespace BasicSamples.SceneUI
 
             var panel = await AddComponentUI<UIPanel, UIPanelDescription>("scrollPanel", "Panel", panelDesc, LayerUI + 1);
 
-            var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
+            var areaFont = Engine.UI.FontDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
             areaDesc.MaxTextLength = 1024;
             areaDesc.Scroll = ScrollModes.Vertical;

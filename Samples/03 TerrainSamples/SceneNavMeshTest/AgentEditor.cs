@@ -26,7 +26,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         /// <param name="fontTitle">Title font</param>
         /// <param name="font">Font</param>
-        public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
+        public async Task Initialize(FontDescription fontTitle, FontDescription font)
         {
             height = await InitializePropertySlider(ObjectName, "Height", font, 0.1f, 5f, 0.1f, dMask);
             radius = await InitializePropertySlider(ObjectName, "Radius", font, 0f, 5f, 0.1f, dMask);

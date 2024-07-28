@@ -182,13 +182,13 @@ namespace TerrainSamples.SceneGrid
         }
         private async Task InitializeText()
         {
-            var titleFont = TextDrawerDescription.FromFile(titleFontFileName, fontSize * 3, true);
+            var titleFont = FontDescription.FromFile(titleFontFileName, fontSize * 3, true);
             titleFont.ContentPath = resourcesFonts;
-            var gameFont = TextDrawerDescription.FromFile(fontFileName, (int)(fontSize * 1.25f));
+            var gameFont = FontDescription.FromFile(fontFileName, (int)(fontSize * 1.25f));
             gameFont.ContentPath = resourcesFonts;
-            var textFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
+            var textFont = FontDescription.FromFile(fontFileName, fontSize);
             textFont.ContentPath = resourcesFonts;
-            var buttonsFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
+            var buttonsFont = FontDescription.FromFile(fontFileName, fontSize);
             buttonsFont.ContentPath = resourcesFonts;
 
             txtTitle = await AddComponentUI<UITextArea, UITextAreaDescription>("txtTitle", "txtTitle", UITextAreaDescription.Default(titleFont), LayerUI + 1);

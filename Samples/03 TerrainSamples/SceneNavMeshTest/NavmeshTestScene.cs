@@ -176,8 +176,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -221,7 +221,7 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeDebugButtons()
         {
-            var btnFont = TextDrawerDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Regular);
+            var btnFont = FontDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Regular);
             btnFont.ContentPath = resourcesUIFolder;
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
@@ -404,8 +404,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeAgentEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -427,8 +427,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavMeshEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -450,8 +450,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeGroupEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 

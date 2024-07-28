@@ -66,9 +66,9 @@ namespace IntermediateSamples.SceneTransforms
         }
         private async Task InitializeUITitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
-            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
+            var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });

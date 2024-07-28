@@ -86,7 +86,7 @@ namespace PhysicsSamples.SceneStart
         {
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
             titleFont.ContentPath = resourcesFolder;
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
@@ -105,7 +105,7 @@ namespace PhysicsSamples.SceneStart
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
             buttonsFont.ContentPath = resourcesFolder;
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);

@@ -40,7 +40,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         /// <param name="fontTitle">Title font</param>
         /// <param name="font">Font</param>
-        public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
+        public async Task Initialize(FontDescription fontTitle, FontDescription font)
         {
             buildMode = await InitializePropertyCheckboxGroup(ObjectName, "Build Mode", font, Enum.GetValues<BuildModes>());
             cellSize = await InitializePropertySlider(ObjectName, "Cell Size", font, 0.1f, 1f, 0.01f, cMask);

@@ -309,7 +309,7 @@ namespace Tanks
             descPan.BlendMode = BlendModes.OpaqueTransparent;
             dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
-            var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
+            var font = FontDescription.FromFile(fontFilename, 20, true);
 
             Color4 releasedColor = new((Color.DarkGray * 0.6666f).ToColor3(), 1f);
             Color4 pressedColor = new((Color.DarkGray * 0.7777f).ToColor3(), 1f);

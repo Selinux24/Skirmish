@@ -66,7 +66,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default checkbox description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UICheckboxDescription Default(TextDrawerDescription font)
+        public static UICheckboxDescription Default(Engine.UI.FontDescription font)
         {
             return new()
             {
@@ -79,7 +79,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="colorOn">State on color</param>
         /// <param name="colorOff">State off color</param>
-        public static UICheckboxDescription Default(TextDrawerDescription font, Color4 colorOn, Color4 colorOff)
+        public static UICheckboxDescription Default(Engine.UI.FontDescription font, Color4 colorOn, Color4 colorOff)
         {
             return new()
             {
@@ -94,7 +94,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="stateOnTextureFileName">State on texture file name</param>
         /// <param name="stateOffTextureFileName">State off texture file name</param>
-        public static UICheckboxDescription Default(TextDrawerDescription font, string stateOnTextureFileName, string stateOffTextureFileName)
+        public static UICheckboxDescription Default(Engine.UI.FontDescription font, string stateOnTextureFileName, string stateOffTextureFileName)
         {
             return new()
             {
@@ -113,7 +113,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="stateOnTextureRect">State on texture rectangle</param>
         /// <param name="stateOffTextureFileName">State off texture file name</param>
         /// <param name="stateOffTextureRect">State off texture rectangle</param>
-        public static UICheckboxDescription Default(TextDrawerDescription font, string stateOnTextureFileName, Vector4 stateOnTextureRect, string stateOffTextureFileName, Vector4 stateOffTextureRect)
+        public static UICheckboxDescription Default(Engine.UI.FontDescription font, string stateOnTextureFileName, Vector4 stateOnTextureRect, string stateOffTextureFileName, Vector4 stateOffTextureRect)
         {
             return new()
             {
@@ -130,7 +130,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public TextDrawerDescription Font { get; set; } = UIConfiguration.Font;
+        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text

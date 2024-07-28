@@ -59,8 +59,8 @@ namespace BasicSamples.SceneNormalMap
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = Engine.UI.FontDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 

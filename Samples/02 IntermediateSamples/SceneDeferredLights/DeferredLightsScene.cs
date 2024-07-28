@@ -128,9 +128,9 @@ F7 to F10: Toggle object visibility.";
         }
         private async Task InitializeUIComponents()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
+            var defaultFont10 = FontDescription.FromFamily("Tahoma", 10);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;

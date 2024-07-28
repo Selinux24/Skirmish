@@ -38,7 +38,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         /// <param name="fontTitle">Title font</param>
         /// <param name="font">Font</param>
-        public async Task Initialize(TextDrawerDescription fontTitle, TextDrawerDescription font)
+        public async Task Initialize(FontDescription fontTitle, FontDescription font)
         {
             maxAcceleration = await InitializePropertySlider(ObjectName, "Max Acceleration", font, 0f, 10f, 0.01f, cMask);
             maxSpeed = await InitializePropertySlider(ObjectName, "Max Speed", font, 0f, 10f, 0.01f, cMask);

@@ -109,7 +109,7 @@ namespace TerrainSamples.SceneStart
         {
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
             titleFont.ContentPath = resourceFontsFolder;
             titleFont.CustomKeycodes = ['✌'];
 
@@ -130,7 +130,7 @@ namespace TerrainSamples.SceneStart
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
             buttonsFont.ContentPath = resourceFontsFolder;
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, resourceControlsFile, new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
@@ -218,11 +218,11 @@ namespace TerrainSamples.SceneStart
             backIndex = tabButtons.Count;
             tabButtons.Add("Back");
 
-            var largeFont = TextDrawerDescription.FromFile(largeControlsFont, 72);
+            var largeFont = FontDescription.FromFile(largeControlsFont, 72);
             largeFont.ContentPath = resourceFontsFolder;
-            var mediumFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            var mediumFont = FontDescription.FromFile(mediumControlsFont, 12);
             mediumFont.ContentPath = resourceFontsFolder;
-            var mediumClickFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            var mediumClickFont = FontDescription.FromFile(mediumControlsFont, 12);
             mediumClickFont.ContentPath = resourceFontsFolder;
 
             var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);

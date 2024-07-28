@@ -84,7 +84,7 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = Engine.UI.FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
@@ -105,7 +105,7 @@ namespace BasicSamples.SceneStart
             buttonPanel.Spacing = 40;
             buttonPanel.EventsEnabled = true;
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = Engine.UI.FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);

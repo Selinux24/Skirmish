@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default progress bar description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIProgressBarDescription Default(TextDrawerDescription font)
+        public static UIProgressBarDescription Default(Engine.UI.FontDescription font)
         {
             return new()
             {
@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(TextDrawerDescription font, Color4 baseColor, Color4 progressColor)
+        public static UIProgressBarDescription Default(Engine.UI.FontDescription font, Color4 baseColor, Color4 progressColor)
         {
             return new()
             {
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+                Font = Engine.UI.FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
 
@@ -81,7 +81,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
+                Font = FontDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
 
@@ -94,7 +94,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
+                Font = FontDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
 
@@ -106,7 +106,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public TextDrawerDescription Font { get; set; } = UIConfiguration.Font;
+        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
