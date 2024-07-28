@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.BuiltIn.Primitives;
+
 namespace Engine.UI
 {
-    using Engine.BuiltIn.Primitives;
-
     /// <summary>
     /// Word descriptor
     /// </summary>

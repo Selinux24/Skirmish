@@ -1,13 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Fonts;
+using Engine.Common;
+using SharpDX;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Fonts;
-    using Engine.Common;
-
     /// <summary>
     /// Text drawer
     /// </summary>

@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,9 +9,6 @@ using System.Linq;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Font map
     /// </summary>

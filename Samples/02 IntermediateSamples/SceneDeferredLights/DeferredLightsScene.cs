@@ -6,6 +6,7 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;

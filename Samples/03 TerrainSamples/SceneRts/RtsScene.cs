@@ -2,10 +2,13 @@
 using Engine.Animation;
 using Engine.BuiltIn.Components.Flares;
 using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
 using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
@@ -18,17 +21,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.SceneRts.AI;
+using TerrainSamples.SceneRts.AI.Agents;
+using TerrainSamples.SceneRts.Controllers;
+using TerrainSamples.SceneRts.Emitters;
+using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneRts
 {
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Skies;
-    using TerrainSamples.SceneRts.AI;
-    using TerrainSamples.SceneRts.AI.Agents;
-    using TerrainSamples.SceneRts.Controllers;
-    using TerrainSamples.SceneRts.Emitters;
-    using TerrainSamples.SceneStart;
-
     public class RtsScene : WalkableScene
     {
         private const string resourceTarjetFile = "Common/UI/Cursor/target.png";

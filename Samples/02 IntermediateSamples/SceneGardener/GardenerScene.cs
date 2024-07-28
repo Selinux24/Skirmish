@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.BuiltIn.Components.Foliage;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;

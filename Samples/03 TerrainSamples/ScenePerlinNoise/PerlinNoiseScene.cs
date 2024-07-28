@@ -1,16 +1,16 @@
 ﻿using Engine;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.UI;
 using SharpDX;
 using System;
 using System.Threading.Tasks;
+using TerrainSamples.SceneStart;
 using DialogResult = System.Windows.Forms.DialogResult;
 using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
-    using TerrainSamples.SceneStart;
-
     class PerlinNoiseScene : Scene
     {
         readonly string fontFamily = "Microsoft Sans Serif";

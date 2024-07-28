@@ -5,6 +5,7 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Tween;

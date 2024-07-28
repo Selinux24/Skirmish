@@ -7,6 +7,7 @@ using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Components.Water;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;

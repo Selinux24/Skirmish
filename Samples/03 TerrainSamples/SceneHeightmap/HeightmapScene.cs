@@ -7,6 +7,7 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-
     /// <summary>
     /// User interface control
     /// </summary>
@@ -667,7 +666,7 @@ namespace Engine.UI
 
             if (anchor.HasFlag(Anchors.VerticalCenter))
             {
-                top = areaRect.Center.Y - (Height * 0.5f);
+                top = areaRect.Center.Y - Height * 0.5f;
             }
 
             if (anchor.HasFlag(Anchors.Top))
@@ -682,7 +681,7 @@ namespace Engine.UI
 
             if (anchor.HasFlag(Anchors.HorizontalCenter))
             {
-                left = areaRect.Center.X - (Width * 0.5f);
+                left = areaRect.Center.X - Width * 0.5f;
             }
 
             if (anchor.HasFlag(Anchors.Left))

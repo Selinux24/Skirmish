@@ -1,4 +1,21 @@
-﻿using SharpDX;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Content.FmtObj;
+using Engine.Content.OnePageDungeon;
+using Engine.Content.Persistence;
+using Engine.Modular;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,23 +24,6 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneModularDungeon
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Primitives;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Content.FmtObj;
-    using Engine.Content.OnePageDungeon;
-    using Engine.Content.Persistence;
-    using Engine.Modular;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-
     public class ModularDungeonScene : WalkableScene
     {
         private const float maxDistance = 35;

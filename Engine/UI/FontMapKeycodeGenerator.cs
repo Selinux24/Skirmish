@@ -38,7 +38,7 @@ namespace Engine.UI
                     cList.Add(c);
                 }
 
-                return [..cList];
+                return [.. cList];
             }
         }
 

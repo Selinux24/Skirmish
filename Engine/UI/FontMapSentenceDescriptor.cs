@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Primitives;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 
 namespace Engine.UI
 {
-    using Engine.BuiltIn.Primitives;
-
     /// <summary>
     /// Sentence descriptor
     /// </summary>
@@ -194,7 +193,7 @@ namespace Engine.UI
             }
             else if (horizontalAlign == TextHorizontalAlign.Right)
             {
-                diffX = (maxWidth * 0.5f) - lineWidth;
+                diffX = maxWidth * 0.5f - lineWidth;
             }
             else
             {
@@ -218,7 +217,7 @@ namespace Engine.UI
             }
             else if (verticalAlign == TextVerticalAlign.Bottom)
             {
-                diffY = (maxHeight * 0.5f) - columnHeight;
+                diffY = maxHeight * 0.5f - columnHeight;
             }
             else
             {

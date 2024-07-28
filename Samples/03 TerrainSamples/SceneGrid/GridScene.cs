@@ -1,7 +1,9 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -12,13 +14,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.SceneGrid.Rules;
+using TerrainSamples.SceneGrid.Rules.Enum;
 
 namespace TerrainSamples.SceneGrid
 {
-    using Engine.BuiltIn.Components.Ground;
-    using TerrainSamples.SceneGrid.Rules;
-    using TerrainSamples.SceneGrid.Rules.Enum;
-
     public class GridScene : WalkableScene
     {
         private const string resourcesLocalUI = "SceneGrid/Resources";
