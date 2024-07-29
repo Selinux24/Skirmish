@@ -72,7 +72,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 nameof(graphDrawer),
                 nameof(graphDrawer),
                 descT,
-                Scene.LayerEffects + 1);
+                Scene.LayerEffects + 3);
         }
 
         public void UpdateInputEditor(IGameTime gameTime)

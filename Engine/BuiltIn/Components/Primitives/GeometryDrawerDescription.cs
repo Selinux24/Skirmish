@@ -1,5 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Content;
+using SharpDX;
 
 namespace Engine.BuiltIn.Components.Primitives
 {
@@ -21,9 +22,21 @@ namespace Engine.BuiltIn.Components.Primitives
         /// </summary>
         public Topology Topology { get; set; }
         /// <summary>
-        /// Mesh image data collection
+        /// Tint color
         /// </summary>
-        public (string Name, IImageContent Content)[] Textures { get; set; } = [];
+        public Color4 TintColor { get; set; } = Color4.White;
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        public uint TextureIndex { get; set; } = 0;
+        /// <summary>
+        /// Use anisotropic filtering
+        /// </summary>
+        public bool UseAnisotropic { get; set; } = false;
+        /// <summary>
+        /// Image collection
+        /// </summary>
+        public (string Name, string ResourcePath)[] Images { get; set; } = [];
         /// <summary>
         /// Material content
         /// </summary>
@@ -37,22 +50,6 @@ namespace Engine.BuiltIn.Components.Primitives
         {
             DeferredEnabled = true;
             DepthEnabled = true;
-        }
-
-        /// <summary>
-        /// Reads the material data
-        /// </summary>
-        public IMeshMaterial ReadMaterial()
-        {
-            var textures = Textures ?? [];
-
-            MeshImageDataCollection values = new();
-            foreach (var texture in textures)
-            {
-                values.SetValue(texture.Name, MeshImageData.FromContent(texture.Content));
-            }
-
-            return Material?.CreateMeshMaterial(values);
         }
     }
 }

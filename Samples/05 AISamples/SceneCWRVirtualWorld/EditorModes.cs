@@ -6,5 +6,7 @@ namespace AISamples.SceneCWRVirtualWorld
         None,
         Graph,
         Stops,
+        Crossings,
+        Start,
     }
 }

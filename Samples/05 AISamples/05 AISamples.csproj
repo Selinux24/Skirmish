@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\Resources\Stop.png" />
+    <None Remove="Common\Resources\Markings.png" />
     <None Remove="SceneCWRSelfDrivingCar\Resources\dirt002.dds" />
     <None Remove="SceneCWRSelfDrivingCar\Resources\normal001.dds" />
     <None Remove="SceneStart\pointer.png" />
@@ -26,7 +26,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="Common\Resources\Stop.png">
+    <Content Include="Common\Resources\Markings.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneCWRSelfDrivingCar\Resources\dirt002.dds">

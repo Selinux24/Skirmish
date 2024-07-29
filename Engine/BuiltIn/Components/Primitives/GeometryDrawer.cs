@@ -1,6 +1,8 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Primitives;
 using Engine.Common;
+using Engine.Content;
+using SharpDX;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace Engine.BuiltIn.Components.Primitives
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    public sealed class GeometryDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryDrawerDescription<T>>(scene, id, name), ITransformable3D where T : struct, IVertexData
+    public sealed class GeometryDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryDrawerDescription<T>>(scene, id, name), ITransformable3D, IUseMaterials where T : struct, IVertexData
     {
         const string className = nameof(GeometryDrawer<T>);
 
@@ -69,6 +71,22 @@ namespace Engine.BuiltIn.Components.Primitives
         }
         /// <inheritdoc/>
         public IManipulator3D Manipulator { get; private set; } = new Manipulator3D();
+        /// <summary>
+        /// Gets the vertex count
+        /// </summary>
+        public int Count { get => vertexCount; }
+        /// <summary>
+        /// Tint color
+        /// </summary>
+        public Color4 TintColor { get; set; } = Color4.White;
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        public uint TextureIndex { get; set; } = 0;
+        /// <summary>
+        /// Use anisotropic filtering
+        /// </summary>
+        public bool UseAnisotropic { get; set; } = false;
 
         /// <summary>
         /// Destructor
@@ -99,7 +117,11 @@ namespace Engine.BuiltIn.Components.Primitives
             }
 
             topology = description.Topology;
-            material = description.ReadMaterial();
+            TintColor = description.TintColor;
+            TextureIndex = description.TextureIndex;
+            UseAnisotropic = description.UseAnisotropic;
+
+            ReadMaterial(description);
 
             var primitives = description.Vertices ?? [];
 
@@ -122,6 +144,38 @@ namespace Engine.BuiltIn.Components.Primitives
             }
 
             InitializeBuffers(Name, count);
+        }
+        /// <summary>
+        /// Reads the drawer configured material
+        /// </summary>
+        /// <param name="description">Description</param>
+        private void ReadMaterial(GeometryDrawerDescription<T> description)
+        {
+            if (description.Material == null)
+            {
+                return;
+            }
+
+            //Read material images
+            var images = description.Images ?? [];
+            MeshImageDataCollection textures = new();
+            foreach (var image in images)
+            {
+                textures.SetValue(image.Name, MeshImageData.FromContent(new FileImageContent(image.ResourcePath)));
+            }
+
+            //Initialize textures
+            var resourceManager = Game.ResourceManager;
+            foreach (var texture in textures.GetValues())
+            {
+                texture.RequestResource(resourceManager);
+            }
+
+            //Initialize materials
+            var materialData = MeshMaterialData.FromContent(description.Material);
+            materialData.AssignTextures(textures);
+
+            material = materialData.Material;
         }
 
         /// <summary>
@@ -241,11 +295,20 @@ namespace Engine.BuiltIn.Components.Primitives
                 return false;
             }
 
-            drawer.UpdateMesh(dc, BuiltInDrawerMeshState.SetLocal(Manipulator.GlobalTransform));
-            drawer.UpdateMaterial(dc, new BuiltInDrawerMaterialState()
+            var meshState = new BuiltInDrawerMeshState
             {
+                Local = Manipulator.GlobalTransform
+            };
+            drawer.UpdateMesh(dc, meshState);
+
+            var materialState = new BuiltInDrawerMaterialState
+            {
+                TintColor = TintColor,
                 Material = material,
-            });
+                TextureIndex = TextureIndex,
+                UseAnisotropic = UseAnisotropic,
+            };
+            drawer.UpdateMaterial(dc, materialState);
 
             bool drawn = drawer.Draw(dc, new DrawOptions
             {
@@ -269,14 +332,37 @@ namespace Engine.BuiltIn.Components.Primitives
 
             var copy = bag.ToArray();
 
-            if (!Game.WriteVertexBuffer(dc, vertexBuffer, copy))
+            if (copy.Length == 0)
             {
+                vertexCount = 0;
+                bagChanged = false;
+
                 return;
             }
 
-            vertexCount = copy.Length;
+            if (Game.WriteVertexBuffer(dc, vertexBuffer, copy))
+            {
+                vertexCount = copy.Length;
+                bagChanged = false;
+            }
+        }
 
-            bagChanged = false;
+        /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            yield return material;
+        }
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            return material;
+        }
+        /// <inheritdoc/>
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            this.material = material;
+
+            return true;
         }
     }
 }

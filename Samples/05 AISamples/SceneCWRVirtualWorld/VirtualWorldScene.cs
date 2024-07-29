@@ -37,6 +37,8 @@ namespace AISamples.SceneCWRVirtualWorld
         private UIButton editorSaveButton = null;
         private UIButton editorGraphToggleButton = null;
         private UIButton editorStopsToggleButton = null;
+        private UIButton editorCrossingToggleButton = null;
+        private UIButton editorStartsToggleButton = null;
         private UIButton editorClearButton = null;
 
         private Model terrain = null;
@@ -66,6 +68,8 @@ ESC - EXIT";
         private readonly World world = null;
         private readonly GraphEditor graphEditor = null;
         private readonly StopsEditor stopsEditor = null;
+        private readonly CrossingsEditor crossingsEditor = null;
+        private readonly StartsEditor startEditor = null;
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -77,6 +81,8 @@ ESC - EXIT";
             world = new(graph, 0);
             graphEditor = new(world, 0);
             stopsEditor = new(world, 0);
+            crossingsEditor = new(world, 0);
+            startEditor = new(world, 0);
         }
 
         public override void Initialize()
@@ -97,6 +103,8 @@ ESC - EXIT";
                     InitializeWorld,
                     InitializeGraphEditor,
                     InitializeStopsEditor,
+                    InitializeCrossingsEditor,
+                    InitializeStartsEditor,
                 ],
                 InitializeComponentsCompleted);
 
@@ -131,8 +139,8 @@ ESC - EXIT";
             editorButtonDesc.ContentPath = resourcesFolder;
             editorButtonDesc.Width = editorButtonWidth;
             editorButtonDesc.Height = editorButtonHeight;
-            editorButtonDesc.ColorReleased = new Color4(editorButtonColor.RGB(), 0.8f);
-            editorButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 0.9f);
+            editorButtonDesc.ColorReleased = editorButtonColor;
+            editorButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 1f);
             editorButtonDesc.TextForeColor = editorButtonTextColor;
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -141,16 +149,18 @@ ESC - EXIT";
             editorSaveButton = await InitializeButton(nameof(editorSaveButton), "SAVE GRAPH", editorButtonDesc);
             editorGraphToggleButton = await InitializeButton(nameof(editorGraphToggleButton), "GRAPH EDITOR", editorButtonDesc);
             editorStopsToggleButton = await InitializeButton(nameof(editorStopsToggleButton), "STOPS EDITOR", editorButtonDesc);
+            editorCrossingToggleButton = await InitializeButton(nameof(editorCrossingToggleButton), "CROSSING EDITOR", editorButtonDesc);
+            editorStartsToggleButton = await InitializeButton(nameof(editorStartsToggleButton), "START EDITOR", editorButtonDesc);
             editorClearButton = await InitializeButton(nameof(editorClearButton), "CLEAR", editorButtonDesc);
 
             editorButtons =
             [
                 editorLoadButton,
                 editorSaveButton,
-                null,
                 editorGraphToggleButton,
                 editorStopsToggleButton,
-                null,
+                editorCrossingToggleButton,
+                editorStartsToggleButton,
                 editorClearButton,
             ];
         }
@@ -193,6 +203,14 @@ ESC - EXIT";
         private Task InitializeStopsEditor()
         {
             return stopsEditor.Initialize(this);
+        }
+        private Task InitializeCrossingsEditor()
+        {
+            return crossingsEditor.Initialize(this);
+        }
+        private Task InitializeStartsEditor()
+        {
+            return startEditor.Initialize(this);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -375,7 +393,9 @@ ESC - EXIT";
             if (sender == editorSaveButton) SaveGraph();
             if (sender == editorGraphToggleButton) SetEditor(EditorModes.Graph);
             if (sender == editorStopsToggleButton) SetEditor(EditorModes.Stops);
-            if (sender == editorClearButton) graph.Clear();
+            if (sender == editorCrossingToggleButton) SetEditor(EditorModes.Crossings);
+            if (sender == editorStartsToggleButton) SetEditor(EditorModes.Start);
+            if (sender == editorClearButton) world.Clear();
         }
         private void LoadGraph()
         {
@@ -450,6 +470,12 @@ ESC - EXIT";
                 case EditorModes.Stops:
                     currentEditor = stopsEditor;
                     break;
+                case EditorModes.Crossings:
+                    currentEditor = crossingsEditor;
+                    break;
+                case EditorModes.Start:
+                    currentEditor = startEditor;
+                    break;
             }
 
             currentEditor.Visible = true;
@@ -458,6 +484,8 @@ ESC - EXIT";
         {
             graphEditor.Visible = false;
             stopsEditor.Visible = false;
+            crossingsEditor.Visible = false;
+            startEditor.Visible = false;
         }
     }
 }

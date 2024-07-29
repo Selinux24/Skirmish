@@ -20,6 +20,13 @@ namespace AISamples.SceneCWRVirtualWorld
                 p.Y + MathF.Sin(angle) * radius);
         }
 
+        public static Vector3[] ScaleFromCenter(Vector3[] points, float factor)
+        {
+            var center = points.Aggregate((a, b) => a + b) / points.Length;
+
+            return points.Select(p => center + (p - center) * factor).ToArray();
+        }
+
         public static Segment2[] Divide(Segment2 segment, float dashSize, float gapSize)
         {
             var length = segment.Length;

@@ -20,6 +20,11 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
             }
         }
 
+        public Segment2[] GetSegments()
+        {
+            return [.. segments];
+        }
+
         public static IEnumerable<Segment2> Union(Polygon[] polygons)
         {
             Break(polygons);

@@ -79,7 +79,7 @@ namespace Engine.BuiltIn.Drawers.Forward
                 BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
             };
 
-            dc.SetPixelShaderSamplers(10, ss);
+            dc.SetPixelShaderSamplers(0, ss);
         }
     }
 }

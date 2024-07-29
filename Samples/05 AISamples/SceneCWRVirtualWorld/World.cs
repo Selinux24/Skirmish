@@ -1,7 +1,10 @@
-﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+﻿using AISamples.SceneCWRVirtualWorld.Markings;
+using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Primitives;
 using Engine.Common;
+using Engine.Content;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -44,6 +47,9 @@ namespace AISamples.SceneCWRVirtualWorld
         private readonly float treeRadius = 30;
 
         private readonly List<Segment2> laneGuides = [];
+
+        private GeometryDrawer<VertexPositionTexture> markingsDrawer = null;
+        private readonly List<Marking> markings = [];
 
         public World(Graph graph, float height)
         {
@@ -247,22 +253,52 @@ namespace AISamples.SceneCWRVirtualWorld
                 nameof(buildingDrawer),
                 nameof(buildingDrawer),
                 descT,
-                Scene.LayerEffects - 1);
+                Scene.LayerEffects);
 
             roadDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(roadDrawer),
                 nameof(roadDrawer),
-                descT);
+                descT,
+                Scene.LayerEffects + 1);
 
             roadMarksDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(roadMarksDrawer),
                 nameof(roadMarksDrawer),
                 descT,
-                Scene.LayerEffects + 1);
+                Scene.LayerEffects + 2);
+
+
+            (string, string)[] images =
+            [
+                ("diffuse", Constants.MarkingsTexture),
+            ];
+
+            var stopMaterial = MaterialBlinnPhongContent.Default;
+            stopMaterial.DiffuseTexture = "diffuse";
+            stopMaterial.IsTransparent = true;
+
+            var descS = new GeometryDrawerDescription<VertexPositionTexture>()
+            {
+                Count = 20000,
+                DepthEnabled = false,
+                BlendMode = BlendModes.Transparent,
+                Topology = Topology.TriangleList,
+                Images = images,
+                Material = stopMaterial,
+                TintColor = roadMarksColor,
+            };
+
+            markingsDrawer = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
+                nameof(markingsDrawer),
+                nameof(markingsDrawer),
+                descS,
+                Scene.LayerEffects + 3);
         }
 
         public void Update()
         {
+            DrawMarkings();
+
             if (graphVersion == Graph.Version)
             {
                 return;
@@ -272,9 +308,18 @@ namespace AISamples.SceneCWRVirtualWorld
 
             Generate();
 
-            Draw();
+            DrawGraph();
         }
-        private void Draw()
+        private void DrawMarkings()
+        {
+            markingsDrawer.Clear();
+
+            foreach (var marking in markings)
+            {
+                markingsDrawer.AddPrimitives(marking.Draw(height));
+            }
+        }
+        private void DrawGraph()
         {
             buildingDrawer.Clear();
             roadDrawer.Clear();
@@ -344,6 +389,48 @@ namespace AISamples.SceneCWRVirtualWorld
         public Segment2[] GetLaneGuides()
         {
             return [.. laneGuides];
+        }
+
+        public void AddMarking(Marking marking)
+        {
+            if (marking == null)
+            {
+                return;
+            }
+
+            if (markings.Contains(marking))
+            {
+                return;
+            }
+
+            markings.Add(marking);
+        }
+        public Marking GetMarkingAtPoint(Vector2 point)
+        {
+            foreach (var marking in markings)
+            {
+                if (marking.ContainsPoint(point))
+                {
+                    return marking;
+                }
+            }
+
+            return null;
+        }
+        public void RemoveMarking(Marking marking)
+        {
+            if (marking == null)
+            {
+                return;
+            }
+
+            markings.Remove(marking);
+        }
+
+        public void Clear()
+        {
+            Graph.Clear();
+            markings.Clear();
         }
     }
 }

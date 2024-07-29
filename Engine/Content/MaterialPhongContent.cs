@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Material content
     /// </summary>
