@@ -5,8 +5,12 @@ namespace AISamples.SceneCWRVirtualWorld
     {
         None,
         Graph,
-        Stops,
-        Crossings,
         Start,
+        Target,
+        Stops,
+        Yields,
+        Lights,
+        Crossings,
+        Parkings,
     }
 }

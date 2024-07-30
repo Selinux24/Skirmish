@@ -496,29 +496,26 @@ namespace TerrainSamples.SceneGrid.Rules
             CurrentArea = area;
         }
 
-        public void UseItemForMovementPhase(Item item, int points)
+        public void UseItem(Phase phase, Item item, int points)
         {
-            item.Use();
+            if(phase == Phase.Movement)
+            {
+                item.Use();
 
-            ConsumeMovingCapacity(points);
-        }
-        public void UseItemForShootingPhase(Item item, int points)
-        {
-            item.Use();
+                ConsumeMovingCapacity(points);
+            }
+            else if (phase == Phase.Shooting)
+            {
+                item.Use();
 
-            ConsumeActionPoints(points);
-        }
-        public void UseItemForMeleePhase(Item item)
-        {
-            ConsumeActionPoints(0);
+                ConsumeActionPoints(points);
+            }
+            else
+            {
+                ConsumeActionPoints(0);
 
-            item.Use();
-        }
-        public void UseItemForMoralePhase(Item item)
-        {
-            ConsumeActionPoints(0);
-
-            item.Use();
+                item.Use();
+            }
         }
 
         public void HitTest(Weapon weapon)

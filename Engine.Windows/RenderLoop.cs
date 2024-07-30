@@ -46,6 +46,7 @@ namespace Engine.Windows
         private Control control;
         private bool isControlAlive;
         private bool switchControl;
+        private readonly object lockObject = new();
 
         /// <summary>
         /// Gets or sets the control to associate with the current render loop.
@@ -162,13 +163,15 @@ namespace Engine.Windows
         public bool NextFrame()
         {
             // Setup new control
-            // TODO this is not completely thread-safe. We should use a lock to handle this correctly
-            if (switchControl && control != null)
+            lock (lockObject)
             {
-                controlHandle = control.Handle;
-                control.Disposed += ControlDisposed;
-                isControlAlive = true;
-                switchControl = false;
+                if (switchControl && control != null)
+                {
+                    controlHandle = control.Handle;
+                    control.Disposed += ControlDisposed;
+                    isControlAlive = true;
+                    switchControl = false;
+                }
             }
 
             if (!isControlAlive)

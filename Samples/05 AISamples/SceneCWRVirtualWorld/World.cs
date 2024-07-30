@@ -48,7 +48,8 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private readonly List<Segment2> laneGuides = [];
 
-        private GeometryDrawer<VertexPositionTexture> markingsDrawer = null;
+        private GeometryDrawer<VertexPositionTexture> markingsDrawer2d = null;
+        private GeometryDrawer<VertexPositionTexture> markingsDrawer3d = null;
         private readonly List<Marking> markings = [];
 
         public World(Graph graph, float height)
@@ -273,26 +274,47 @@ namespace AISamples.SceneCWRVirtualWorld
                 ("diffuse", Constants.MarkingsTexture),
             ];
 
-            var stopMaterial = MaterialBlinnPhongContent.Default;
-            stopMaterial.DiffuseTexture = "diffuse";
-            stopMaterial.IsTransparent = true;
+            var material2d = MaterialBlinnPhongContent.Default;
+            material2d.DiffuseTexture = "diffuse";
+            material2d.IsTransparent = true;
 
-            var descS = new GeometryDrawerDescription<VertexPositionTexture>()
+            var descS2d = new GeometryDrawerDescription<VertexPositionTexture>()
             {
                 Count = 20000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Transparent,
                 Topology = Topology.TriangleList,
                 Images = images,
-                Material = stopMaterial,
+                Material = material2d,
                 TintColor = roadMarksColor,
             };
 
-            markingsDrawer = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
-                nameof(markingsDrawer),
-                nameof(markingsDrawer),
-                descS,
+            markingsDrawer2d = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
+                nameof(markingsDrawer2d),
+                nameof(markingsDrawer2d),
+                descS2d,
                 Scene.LayerEffects + 3);
+
+            var material3d = MaterialBlinnPhongContent.Default;
+            material3d.DiffuseTexture = "diffuse";
+            material3d.IsTransparent = true;
+
+            var descS3d = new GeometryDrawerDescription<VertexPositionTexture>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Alpha,
+                Topology = Topology.TriangleList,
+                Images = images,
+                Material = material3d,
+                TintColor = Color4.White,
+            };
+
+            markingsDrawer3d = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
+                nameof(markingsDrawer3d),
+                nameof(markingsDrawer3d),
+                descS3d,
+                Scene.LayerEffects + 4);
         }
 
         public void Update()
@@ -312,11 +334,20 @@ namespace AISamples.SceneCWRVirtualWorld
         }
         private void DrawMarkings()
         {
-            markingsDrawer.Clear();
+            markingsDrawer2d.Clear();
+            markingsDrawer3d.Clear();
 
             foreach (var marking in markings)
             {
-                markingsDrawer.AddPrimitives(marking.Draw(height));
+                var vlist = marking.Draw(height);
+                if (marking.Is3D)
+                {
+                    markingsDrawer3d.AddPrimitives(vlist);
+                }
+                else
+                {
+                    markingsDrawer2d.AddPrimitives(vlist);
+                }
             }
         }
         private void DrawGraph()
@@ -407,15 +438,7 @@ namespace AISamples.SceneCWRVirtualWorld
         }
         public Marking GetMarkingAtPoint(Vector2 point)
         {
-            foreach (var marking in markings)
-            {
-                if (marking.ContainsPoint(point))
-                {
-                    return marking;
-                }
-            }
-
-            return null;
+            return markings.FirstOrDefault(m => m.ContainsPoint(point));
         }
         public void RemoveMarking(Marking marking)
         {

@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
-    abstract class MarkingEditor(string name, World world, float height) : IEditor
+    abstract class MarkingEditor(string name, World world, float height, bool is3d = false) : IEditor
     {
         private const float editorPointRadius = 10f;
 
         private readonly string name = name;
+        private readonly bool is3d = is3d;
         private readonly float threshold = editorPointRadius * 3;
         private GeometryDrawer<VertexPositionTexture> markingIntentDrawer = null;
         private Scene scene = null;
@@ -62,7 +63,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
             var descS = new GeometryDrawerDescription<VertexPositionTexture>()
             {
                 Count = 20000,
-                DepthEnabled = false,
+                DepthEnabled = is3d,
                 BlendMode = BlendModes.Alpha,
                 Topology = Topology.TriangleList,
                 Images = images,

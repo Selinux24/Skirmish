@@ -4,7 +4,7 @@ using SharpDX;
 
 namespace AISamples.SceneCWRVirtualWorld.Markings
 {
-    class Stop(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height)
+    class Yield(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height)
     {
         public Segment2 GetBorder()
         {
@@ -14,7 +14,7 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
         protected override VertexPositionTexture[] CreateMarking(float height)
         {
             var support = GetSupport();
-            var uvs = Constants.StopUVs;
+            var uvs = Constants.YieldUVs;
 
             return CreateQuadFromSupport(Width, height, support, uvs, 0.66f);
         }
