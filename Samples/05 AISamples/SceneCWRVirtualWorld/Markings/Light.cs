@@ -1,4 +1,5 @@
-﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Primitives;
 using Engine.Common;
@@ -43,11 +44,11 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
 
             return
             [
-                .. Convert(baseCyl, Constants.Black),
-                .. Convert(topCyl, Constants.Black),
-                .. Convert(sph1, Constants.White),
-                .. Convert(sph2, Constants.White),
-                .. Convert(sph3, Constants.White),
+                .. Convert(sph1, Constants.Red),
+                .. Convert(sph2, Constants.Yellow),
+                .. Convert(sph3, Constants.Green),
+                .. Convert(baseCyl, Constants.Gray),
+                .. Convert(topCyl, Constants.DarkGreen),
             ];
         }
         private static IEnumerable<VertexPositionTexture> Convert(GeometryDescriptor g, Vector2 uv)

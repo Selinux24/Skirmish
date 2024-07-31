@@ -1,4 +1,5 @@
-﻿using Engine.BuiltIn.Primitives;
+﻿using AISamples.Common;
+using Engine.BuiltIn.Primitives;
 using SharpDX;
 
 namespace AISamples.SceneCWRVirtualWorld.Markings

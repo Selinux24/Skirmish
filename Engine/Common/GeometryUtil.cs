@@ -681,8 +681,8 @@ namespace Engine.Common
             for (int index = 1; index <= sliceCount; ++index)
             {
                 indexList.Add(0);
-                indexList.Add(index + 1);
                 indexList.Add(index);
+                indexList.Add(index + 1);
             }
 
             int baseIndex = 1;
@@ -692,12 +692,12 @@ namespace Engine.Common
                 for (int sl = 0; sl < sliceCount; ++sl)
                 {
                     indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
                     indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
 
                     indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
                     indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
                 }
             }
 
@@ -708,8 +708,8 @@ namespace Engine.Common
             for (int index = 0; index < sliceCount; ++index)
             {
                 indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index);
                 indexList.Add(baseIndex + index + 1);
+                indexList.Add(baseIndex + index);
             }
 
             return new GeometryDescriptor()
@@ -2238,17 +2238,17 @@ namespace Engine.Common
                 [
                     // Base circle
                     cBase,
-                    p1Base,
                     p0Base,
+                    p1Base,
                     
                     // Cap circle
                     cCap,
-                    p0Cap,
                     p1Cap,
+                    p0Cap,
 
                     // Side
-                    p0Base, p1Base, p0Cap,
-                    p1Base, p1Cap, p0Cap,
+                    p0Base, p0Cap, p1Base,
+                    p1Base, p0Cap, p1Cap,
                 ]);
             }
 

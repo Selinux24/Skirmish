@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace AISamples
+namespace AISamples.Common
 {
     static class Constants
     {
@@ -42,6 +42,11 @@ namespace AISamples
 
         public static readonly Vector2 Black = new(1500f / Width, 180f / Height);
         public static readonly Vector2 White = new(150f / Width, 50f / Height);
+        public static readonly Vector2 DarkGreen = new(45f / Width, 1260f / Height);
+        public static readonly Vector2 Gray = new(110f / Width, 1260f / Height);
+        public static readonly Vector2 Red = new(80f / Width, 1340f / Height);
+        public static readonly Vector2 Yellow = new(80f / Width, 1420f / Height);
+        public static readonly Vector2 Green = new(80f / Width, 1495f / Height);
 
         public static readonly Vector2[] CrossingUVs = [new(CrossingLeft, CrossingBottom), new(CrossingLeft, CrossingTop), new(CrossingRight, CrossingTop), new(CrossingRight, CrossingBottom)];
         public static readonly Vector2[] ParkingUVs = [new(ParkingRight, ParkingBottom), new(ParkingRight, ParkingTop), new(ParkingLeft, ParkingTop), new(ParkingLeft, ParkingBottom)];

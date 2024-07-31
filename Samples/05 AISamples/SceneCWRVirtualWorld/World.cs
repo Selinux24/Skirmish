@@ -1,4 +1,5 @@
-﻿using AISamples.SceneCWRVirtualWorld.Markings;
+﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Markings;
 using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Components.Primitives;
@@ -22,9 +23,11 @@ namespace AISamples.SceneCWRVirtualWorld
         private const float hDelta = 0.1f;
 
         public Graph Graph { get; }
+        public Guid Version { get; private set; } = Guid.NewGuid();
 
         private readonly float height;
         private Guid graphVersion;
+        private bool worldChanged = false;
         private readonly List<Envelope> envelopes = [];
 
         public float RoadWidth { get; } = 30f;
@@ -319,18 +322,22 @@ namespace AISamples.SceneCWRVirtualWorld
 
         public void Update()
         {
-            DrawMarkings();
-
-            if (graphVersion == Graph.Version)
+            if (worldChanged)
             {
-                return;
+                worldChanged = false;
+
+                DrawMarkings();
             }
 
-            graphVersion = Graph.Version;
+            if (graphVersion != Graph.Version)
+            {
+                graphVersion = Graph.Version;
+                Version = Guid.NewGuid();
 
-            Generate();
+                Generate();
 
-            DrawGraph();
+                DrawGraph();
+            }
         }
         private void DrawMarkings()
         {
@@ -435,10 +442,13 @@ namespace AISamples.SceneCWRVirtualWorld
             }
 
             markings.Add(marking);
+
+            worldChanged = true;
+            Version = Guid.NewGuid();
         }
         public Marking GetMarkingAtPoint(Vector2 point)
         {
-            return markings.FirstOrDefault(m => m.ContainsPoint(point));
+            return markings.Find(m => m.ContainsPoint(point));
         }
         public void RemoveMarking(Marking marking)
         {
@@ -448,12 +458,18 @@ namespace AISamples.SceneCWRVirtualWorld
             }
 
             markings.Remove(marking);
+
+            worldChanged = true;
+            Version = Guid.NewGuid();
         }
 
         public void Clear()
         {
             Graph.Clear();
             markings.Clear();
+
+            worldChanged = true;
+            Version = Guid.NewGuid();
         }
     }
 }

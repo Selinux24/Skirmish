@@ -62,7 +62,7 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
             var tris = Triangle.ComputeTriangleList(t);
 
             Vector3[] allPoints = tris.SelectMany(t => new Vector3[] { t.Point3, t.Point2, t.Point1 }).ToArray();
-            if (scale != 1)
+            if (!MathUtil.IsOne(scale))
             {
                 allPoints = Utils.ScaleFromCenter(allPoints, scale);
             }

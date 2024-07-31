@@ -1,4 +1,5 @@
-﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine.BuiltIn.Primitives;
 using SharpDX;
 

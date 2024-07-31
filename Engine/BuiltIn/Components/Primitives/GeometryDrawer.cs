@@ -280,9 +280,7 @@ namespace Engine.BuiltIn.Components.Primitives
                 return false;
             }
 
-            var dc = context.DeviceContext;
-
-            WriteDataInBuffer(dc);
+            WriteDataInBuffer();
 
             if (vertexCount <= 0)
             {
@@ -294,6 +292,8 @@ namespace Engine.BuiltIn.Components.Primitives
             {
                 return false;
             }
+
+            var dc = context.DeviceContext;
 
             var meshState = new BuiltInDrawerMeshState
             {
@@ -322,8 +322,7 @@ namespace Engine.BuiltIn.Components.Primitives
         /// <summary>
         /// Writes dictionary data in buffer
         /// </summary>
-        /// <param name="dc">Device context</param>
-        public void WriteDataInBuffer(IEngineDeviceContext dc)
+        public void WriteDataInBuffer()
         {
             if (!bagChanged)
             {
@@ -340,7 +339,7 @@ namespace Engine.BuiltIn.Components.Primitives
                 return;
             }
 
-            if (Game.WriteVertexBuffer(dc, vertexBuffer, copy))
+            if (Game.WriteVertexBuffer(Game.Graphics.ImmediateContext, vertexBuffer, copy, false))
             {
                 vertexCount = copy.Length;
                 bagChanged = false;
