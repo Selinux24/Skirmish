@@ -1,5 +1,6 @@
 ﻿using AISamples.Common;
 using AISamples.SceneCWRVirtualWorld.Primitives;
+using Engine;
 using Engine.BuiltIn.Primitives;
 using SharpDX;
 
@@ -20,6 +21,11 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
             var uvs = Constants.ParkingUVs;
 
             return CreateQuadFromSupport(Width, height, support, uvs, 1f);
+        }
+
+        public override bool Update(IGameTime gameTime)
+        {
+            return false;
         }
     }
 }

@@ -50,6 +50,8 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
             return polygon.ContainsPoint(point);
         }
 
+        public abstract bool Update(IGameTime gameTime);
+
         public IEnumerable<VertexPositionTexture> Draw(float height)
         {
             return CreateMarking(height);

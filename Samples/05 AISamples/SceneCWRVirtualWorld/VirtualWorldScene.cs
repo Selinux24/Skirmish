@@ -248,7 +248,7 @@ ESC - EXIT";
 
             UpdateInputCamera(gameTime);
 
-            UpdateWorld();
+            UpdateWorld(gameTime);
 
             if (!toolsReady)
             {
@@ -322,9 +322,9 @@ ESC - EXIT";
             }
         }
 
-        private void UpdateWorld()
+        private void UpdateWorld(IGameTime gameTime)
         {
-            world.Update();
+            world.Update(gameTime);
         }
 
         public override void GameGraphicsResized()

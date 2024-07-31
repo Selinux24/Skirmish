@@ -12,6 +12,9 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
     class Light(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height, true)
     {
         public LightState LightState { get; set; } = LightState.None;
+        public float RedDuration { get; set; } = 15;
+        public float YellowDuration { get; set; } = 2;
+        public float GreenDuration { get; set; } = 38;
 
         public Segment2 GetBorder()
         {
@@ -32,9 +35,9 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
             const float topR = 1f;
             var topCenter = new Vector3(p.X, height + baseH + (topH * 0.5f), p.Y);
             const float sphR = 0.5f;
-            var sphCenter1 = new Vector3(p.X, height + baseH + (topH * 0.2f), p.Y) + (dir * topR);
+            var sphCenter1 = new Vector3(p.X, height + baseH + (topH * 0.8f), p.Y) + (dir * topR);
             var sphCenter2 = new Vector3(p.X, height + baseH + (topH * 0.5f), p.Y) + (dir * topR);
-            var sphCenter3 = new Vector3(p.X, height + baseH + (topH * 0.8f), p.Y) + (dir * topR);
+            var sphCenter3 = new Vector3(p.X, height + baseH + (topH * 0.2f), p.Y) + (dir * topR);
 
             var baseCyl = GeometryUtil.CreateCylinder(Topology.TriangleList, baseCenter, baseR, baseH, 16);
             var topCyl = GeometryUtil.CreateCylinder(Topology.TriangleList, topCenter, topR, topH, 16);
@@ -44,25 +47,53 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
 
             return
             [
-                .. Convert(sph1, Constants.Red),
-                .. Convert(sph2, Constants.Yellow),
-                .. Convert(sph3, Constants.Green),
                 .. Convert(baseCyl, Constants.Gray),
                 .. Convert(topCyl, Constants.DarkGreen),
+                .. Convert(sph1, LightState == LightState.Red ? Constants.Red : Constants.Gray),
+                .. Convert(sph2, LightState == LightState.Yellow ? Constants.Yellow : Constants.Gray),
+                .. Convert(sph3, LightState == LightState.Green ? Constants.Green : Constants.Gray),
             ];
         }
         private static IEnumerable<VertexPositionTexture> Convert(GeometryDescriptor g, Vector2 uv)
         {
-            for (int i = 0; i < g.Indices.Count(); i++)
+            // Reverse for now
+            var indices = GeometryUtil.ChangeCoordinate(g.Indices).ToArray();
+            var vertices = g.Vertices.ToArray();
+
+            for (int i = 0; i < indices.Length; i++)
             {
-                int index = (int)g.Indices.ElementAt(i);
+                int index = (int)indices[i];
 
                 yield return new()
                 {
-                    Position = g.Vertices.ElementAt(index),
+                    Position = vertices[index],
                     Texture = uv,
                 };
             }
+        }
+
+        public override bool Update(IGameTime gameTime)
+        {
+            float totalInterval = RedDuration + YellowDuration + GreenDuration;
+            float totalTime = gameTime.TotalSeconds;
+
+            float t = totalTime % totalInterval;
+
+            var prev = LightState;
+            if (t < RedDuration)
+            {
+                LightState = LightState.Red;
+            }
+            else if (t < RedDuration + YellowDuration)
+            {
+                LightState = LightState.Yellow;
+            }
+            else
+            {
+                LightState = LightState.Green;
+            }
+
+            return prev != LightState;
         }
     }
 

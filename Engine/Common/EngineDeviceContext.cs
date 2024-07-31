@@ -32,8 +32,8 @@ namespace Engine.Common
             {
                 Update(slot, buffer);
 
-                var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
-                shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
+                var buffers = GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+                shaderStage.SetConstantBuffers(0, buffers.Length, buffers);
                 DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
@@ -41,14 +41,14 @@ namespace Engine.Common
             {
                 Update(startSlot, bufferList);
 
-                var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
-                shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
+                var buffers = GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+                shaderStage.SetConstantBuffers(0, buffers.Length, buffers);
                 DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                shaderStage.SetConstantBuffers(StartSlot, nullBuffers.Length - StartSlot, nullBuffers);
+                shaderStage.SetConstantBuffers(0, nullBuffers.Length, nullBuffers);
                 DeviceContext.frameCounters.ConstantBufferClears++;
 
                 Clear();
@@ -68,8 +68,8 @@ namespace Engine.Common
             {
                 Update(slot, resourceView);
 
-                var resources = Resources.Select(r => r?.GetResource()).ToArray();
-                shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
+                var resources = GetResources().Select(r => r?.GetResource()).ToArray();
+                shaderStage.SetShaderResources(0, resources.Length, resources);
                 DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
@@ -77,14 +77,14 @@ namespace Engine.Common
             {
                 Update(startSlot, resourceList);
 
-                var resources = Resources.Select(r => r?.GetResource()).ToArray();
-                shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
+                var resources = GetResources().Select(r => r?.GetResource()).ToArray();
+                shaderStage.SetShaderResources(0, resources.Length, resources);
                 DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                shaderStage.SetShaderResources(StartSlot, nullSrv.Length - StartSlot, nullSrv);
+                shaderStage.SetShaderResources(0, nullSrv.Length, nullSrv);
                 DeviceContext.frameCounters.ShaderResourceClears++;
 
                 Clear();
@@ -104,8 +104,8 @@ namespace Engine.Common
             {
                 Update(slot, samplerState);
 
-                var resources = Resources.Select(r => r?.GetSamplerState()).ToArray();
-                shaderStage.SetSamplers(StartSlot, resources.Length, resources);
+                var resources = GetResources().Select(r => r?.GetSamplerState()).ToArray();
+                shaderStage.SetSamplers(0, resources.Length, resources);
                 DeviceContext.frameCounters.SamplerSets++;
             }
 
@@ -113,14 +113,14 @@ namespace Engine.Common
             {
                 Update(startSlot, samplerList);
 
-                var samplers = Resources.Select(r => r?.GetSamplerState()).ToArray();
-                shaderStage.SetSamplers(StartSlot, samplers.Length, samplers);
+                var samplers = GetResources().Select(r => r?.GetSamplerState()).ToArray();
+                shaderStage.SetSamplers(0, samplers.Length, samplers);
                 DeviceContext.frameCounters.SamplerSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                shaderStage.SetSamplers(StartSlot, nullSamplers.Length - StartSlot, nullSamplers);
+                shaderStage.SetSamplers(0, nullSamplers.Length, nullSamplers);
                 DeviceContext.frameCounters.SamplerClears++;
 
                 Clear();

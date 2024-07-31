@@ -320,8 +320,13 @@ namespace AISamples.SceneCWRVirtualWorld
                 Scene.LayerEffects + 4);
         }
 
-        public void Update()
+        public void Update(IGameTime gameTime)
         {
+            foreach (var marking in markings)
+            {
+                worldChanged = marking.Update(gameTime) || worldChanged;
+            }
+
             if (worldChanged)
             {
                 worldChanged = false;

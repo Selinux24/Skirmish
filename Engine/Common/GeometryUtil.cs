@@ -499,10 +499,11 @@ namespace Engine.Common
         /// <param name="sphereList">Sphere list</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSpheres(Topology topology, IEnumerable<BoundingSphere> sphereList, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSpheres(Topology topology, IEnumerable<BoundingSphere> sphereList, int sliceCount, int stackCount, bool ccw = true)
         {
-            var gList = sphereList.Select(s => CreateSphere(topology, s, sliceCount, stackCount));
+            var gList = sphereList.Select(s => CreateSphere(topology, s, sliceCount, stackCount, ccw));
 
             return new GeometryDescriptor(gList);
         }
@@ -513,10 +514,11 @@ namespace Engine.Common
         /// <param name="sphere">Sphere</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, BoundingSphere sphere, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, BoundingSphere sphere, int sliceCount, int stackCount, bool ccw = true)
         {
-            return CreateSphere(topology, sphere.Center, sphere.Radius, sliceCount, stackCount);
+            return CreateSphere(topology, sphere.Center, sphere.Radius, sliceCount, stackCount, ccw);
         }
         /// <summary>
         /// Creates a sphere
@@ -525,10 +527,11 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, float radius, int sliceCount, int stackCount, bool ccw = true)
         {
-            return CreateSphere(topology, Vector3.Zero, radius, sliceCount, stackCount);
+            return CreateSphere(topology, Vector3.Zero, radius, sliceCount, stackCount, ccw);
         }
         /// <summary>
         /// Creates a sphere
@@ -538,12 +541,13 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount, bool ccw = true)
         {
             return topology switch
             {
-                Topology.TriangleList => CreateSphereTriangleList(center, radius, sliceCount, stackCount),
+                Topology.TriangleList => CreateSphereTriangleList(center, radius, sliceCount, stackCount, ccw),
                 Topology.LineList => CreateSphereLineList(center, radius, sliceCount, stackCount),
                 _ => throw new NotImplementedException()
             };
@@ -555,6 +559,7 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         private static Vector3[] CreateSphereVertices(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = [];
@@ -597,6 +602,7 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         private static (Vector3[] Vertices, Vector3[] Normals, Vector3[] Tangents, Vector3[] Binormals, Vector2[] Uvs) CreateSphereVerticesExt(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = [];
@@ -668,8 +674,9 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateSphereTriangleList(Vector3 center, float radius, int sliceCount, int stackCount)
+        private static GeometryDescriptor CreateSphereTriangleList(Vector3 center, float radius, int sliceCount, int stackCount, bool ccw)
         {
             var (vertices, normals, tangents, binormals, uvs) = CreateSphereVerticesExt(center, radius, sliceCount, stackCount);
 
@@ -680,9 +687,13 @@ namespace Engine.Common
 
             for (int index = 1; index <= sliceCount; ++index)
             {
-                indexList.Add(0);
-                indexList.Add(index);
-                indexList.Add(index + 1);
+                int i0 = 0;
+                int i1 = index;
+                int i2 = index + 1;
+
+                int[] ids = ccw ? [i0, i2, i1] : [i0, i1, i2];
+
+                indexList.AddRange(ids);
             }
 
             int baseIndex = 1;
@@ -691,13 +702,16 @@ namespace Engine.Common
             {
                 for (int sl = 0; sl < sliceCount; ++sl)
                 {
-                    indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    int i0 = baseIndex + st * ringVertexCount + sl;
+                    int i1 = baseIndex + (st + 1) * ringVertexCount + sl;
+                    int i2 = baseIndex + st * ringVertexCount + sl + 1;
+                    int i3 = i1;
+                    int i4 = baseIndex + (st + 1) * ringVertexCount + sl + 1;
+                    int i5 = i2;
 
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    int[] ids = ccw ? [i0, i2, i1, i3, i5, i4] : [i0, i1, i2, i3, i4, i5];
+
+                    indexList.AddRange(ids);
                 }
             }
 
@@ -707,9 +721,13 @@ namespace Engine.Common
 
             for (int index = 0; index < sliceCount; ++index)
             {
-                indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index + 1);
-                indexList.Add(baseIndex + index);
+                int i0 = southPoleIndex;
+                int i1 = baseIndex + index + 1;
+                int i2 = baseIndex + index;
+
+                int[] ids = ccw ? [i0, i2, i1] : [i0, i1, i2];
+
+                indexList.AddRange(ids);
             }
 
             return new GeometryDescriptor()
@@ -2238,17 +2256,17 @@ namespace Engine.Common
                 [
                     // Base circle
                     cBase,
-                    p0Base,
                     p1Base,
+                    p0Base,
                     
                     // Cap circle
                     cCap,
-                    p1Cap,
                     p0Cap,
+                    p1Cap,
 
                     // Side
-                    p0Base, p0Cap, p1Base,
-                    p1Base, p0Cap, p1Cap,
+                    p0Base, p1Base, p0Cap,
+                    p1Base, p1Cap, p0Cap,
                 ]);
             }
 
