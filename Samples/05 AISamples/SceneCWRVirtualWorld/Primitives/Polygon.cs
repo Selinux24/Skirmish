@@ -1,25 +1,51 @@
-﻿using SharpDX;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AISamples.SceneCWRVirtualWorld.Primitives
 {
     class Polygon
     {
+        private readonly Vector2[] vertices = [];
         private readonly List<Segment2> segments = [];
-
-        public Vector2[] Vertices { get; private set; }
 
         public Polygon(Vector2[] vertices)
         {
-            Vertices = vertices;
+            this.vertices = vertices;
 
             for (int i = 0; i < vertices.Length; i++)
             {
                 segments.Add(new Segment2(vertices[i], vertices[(i + 1) % vertices.Length]));
             }
         }
+        private Polygon(Vector2[] vertices, List<Segment2> segments)
+        {
+            this.vertices = vertices;
+            this.segments = segments;
+        }
 
+        public static PolygonFile FromPolygon(Polygon polygon)
+        {
+            return new()
+            {
+                Vertices = polygon.vertices.Select(Vector2File.FromVector2).ToArray(),
+                Segments = polygon.segments.Select(Segment2.FromSegment).ToArray(),
+            };
+        }
+        public static Polygon FromPolygonFile(PolygonFile polygon)
+        {
+            var vertices = polygon.Vertices.Select(Vector2File.FromVector2File).ToArray();
+            var segments = polygon.Segments.Select(Segment2.FromSegmentFile).ToList();
+
+            return new(vertices, segments);
+        }
+
+        public Vector2[] GetVertices()
+        {
+            return [.. vertices];
+        }
         public Segment2[] GetSegments()
         {
             return [.. segments];
@@ -144,9 +170,9 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
         public float DistanceToPolygon(Polygon poly)
         {
             float minDistance = float.MaxValue;
-            for (int i = 0; i < Vertices.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                minDistance = MathF.Min(minDistance, poly.DistanceToPoint(Vertices[i]));
+                minDistance = MathF.Min(minDistance, poly.DistanceToPoint(vertices[i]));
             }
             return minDistance;
         }
@@ -168,6 +194,19 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
             }
 
             return (false, 0, Vector2.Zero);
+        }
+
+        public Vector3[] Extrude(float baseHeight, float height)
+        {
+            var points = new Vector3[vertices.Length * 2];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                points[i] = new(vertices[i].X, baseHeight, vertices[i].Y);
+                points[i + vertices.Length] = new(vertices[i].X, baseHeight + height, vertices[i].Y);
+            }
+
+            return points;
         }
     }
 }

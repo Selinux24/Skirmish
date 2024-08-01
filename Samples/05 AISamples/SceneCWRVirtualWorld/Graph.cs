@@ -1,6 +1,5 @@
 ﻿using AISamples.SceneCWRVirtualWorld.Content;
 using AISamples.SceneCWRVirtualWorld.Primitives;
-using Engine;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -19,6 +18,25 @@ namespace AISamples.SceneCWRVirtualWorld
         {
             this.points.AddRange(points);
             this.segments.AddRange(segments);
+        }
+
+        public static GraphFile FromGraph(Graph graph)
+        {
+            var points = graph.GetPoints().Select(Vector2File.FromVector2).ToArray();
+            var segments = graph.GetSegments().Select(Segment2.FromSegment).ToArray();
+
+            return new()
+            {
+                Points = points,
+                Segments = segments,
+            };
+        }
+        public static Graph FromGraphFile(GraphFile graph)
+        {
+            var points = graph.Points.Select(Vector2File.FromVector2File).ToArray();
+            var segments = graph.Segments.Select(Segment2.FromSegmentFile).ToArray();
+
+            return new(points, segments);
         }
 
         public bool TryAddPoint(Vector2 point)
@@ -139,24 +157,6 @@ namespace AISamples.SceneCWRVirtualWorld
             }
 
             Version = Guid.NewGuid();
-        }
-
-        public void LoadFromFile(string fileName)
-        {
-            var graphFile = SerializationHelper.DeserializeJsonFromFile<GraphFile>(fileName);
-            var newGraph = GraphFile.FromGraphFile(graphFile);
-
-            Clear();
-
-            points.AddRange(newGraph.points);
-            segments.AddRange(newGraph.segments);
-
-            Version = Guid.NewGuid();
-        }
-        public void SaveToFile(string fileName)
-        {
-            var graphFile = GraphFile.FromGraph(this);
-            SerializationHelper.SerializeJsonToFile(graphFile, fileName);
         }
     }
 }

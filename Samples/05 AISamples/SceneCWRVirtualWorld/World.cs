@@ -1,7 +1,10 @@
 ﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Content;
+using AISamples.SceneCWRVirtualWorld.Items;
 using AISamples.SceneCWRVirtualWorld.Markings;
 using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
+using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Primitives;
 using Engine.Common;
@@ -14,23 +17,20 @@ using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
-    class World
+    class World(Graph graph, float height)
     {
         private static readonly Color4 roadColor = new(0.6f, 0.6f, 0.6f, 1f);
         private static readonly Color4 roadMarksColor = new(0.9f, 0.9f, 0.9f, 1f);
-        private static readonly Color4 buildingColor = new(0.3f, 0.3f, 1f, 0.5f);
-        private static readonly Color4 treeColor = new(0.3f, 1f, 0.3f, 0.5f);
+        private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
 
-        public Graph Graph { get; }
-        public Guid Version { get; private set; } = Guid.NewGuid();
-
-        private readonly float height;
-        private Guid graphVersion;
+        private float height = height;
+        private Graph graph = graph;
+        private Guid graphVersion = graph.Version;
         private bool worldChanged = false;
+
         private readonly List<Envelope> envelopes = [];
 
-        public float RoadWidth { get; } = 30f;
         private readonly int roadRoundness = 16;
         private readonly List<Envelope> roadEnvelopes = [];
         private readonly List<Segment2> roadBorders = [];
@@ -40,33 +40,94 @@ namespace AISamples.SceneCWRVirtualWorld
         private readonly float buildingWidth = 100f;
         private readonly float buildingMinLenth = 100f;
         private readonly float buildingSpacing = 25f;
-        private readonly List<Envelope> buildingEnvelopes = [];
-        private readonly List<Segment2> buildingGuides = [];
-        private readonly List<Segment2> buildingSupports = [];
-        private readonly List<Polygon> buildingBases = [];
-        private GeometryColorDrawer<Triangle> buildingDrawer = null;
+        private readonly float buildingHeight = 50f;
+        private readonly List<Building> buildings = [];
+        private GeometryDrawer<VertexPositionTexture> buildingDrawer = null;
 
-        private readonly List<Vector2> trees = [];
+        private readonly float treeScale = 0.333f;
         private readonly float treeRadius = 30;
+        private readonly float treeHeight = 100;
+        private readonly List<Tree> trees = [];
+        private ModelInstanced treesDrawer = null;
 
         private readonly List<Segment2> laneGuides = [];
-
+        private readonly List<Marking> markings = [];
         private GeometryDrawer<VertexPositionTexture> markingsDrawer2d = null;
         private GeometryDrawer<VertexPositionTexture> markingsDrawer3d = null;
-        private readonly List<Marking> markings = [];
 
-        public World(Graph graph, float height)
+        public Graph Graph { get => graph; }
+        public Guid Version { get; private set; } = Guid.NewGuid();
+        public float RoadWidth { get; } = 30f;
+
+        public static WorldFile FromWorld(World world)
         {
-            Graph = graph;
+            var graph = Graph.FromGraph(world.graph);
+            var height = world.height;
+            var envelopes = world.envelopes.Select(Envelope.FromEnvelope).ToArray();
+            var roadEnvelopes = world.roadEnvelopes.Select(Envelope.FromEnvelope).ToArray();
+            var roadBorders = world.roadBorders.Select(Segment2.FromSegment).ToArray();
+            var buildings = world.buildings.Select(Building.FromBuilding).ToArray();
+            var trees = world.trees.Select(Tree.FromTree).ToArray();
+            var laneGuides = world.GetLaneGuides().Select(Segment2.FromSegment).ToArray();
+            var markings = world.markings.Select(m => m.FromMarking()).ToArray();
+            var version = world.Version;
+
+            return new()
+            {
+                Graph = graph,
+                Height = height,
+
+                Envelopes = envelopes,
+                RoadEnvelopes = roadEnvelopes,
+                RoadBorders = roadBorders,
+                Buildings = buildings,
+                Trees = trees,
+                LaneGuides = laneGuides,
+                Markings = markings,
+
+                Version = version,
+            };
+        }
+        public void LoadFromWorldFile(WorldFile file)
+        {
+            var graph = Graph.FromGraphFile(file.Graph);
+            var height = file.Height;
+            var envelopes = file.Envelopes.Select(Envelope.FromEnvelopeFile).ToList();
+            var roadEnvelopes = file.RoadEnvelopes.Select(Envelope.FromEnvelopeFile).ToList();
+            var roadBorders = file.RoadBorders.Select(Segment2.FromSegmentFile).ToList();
+            var buildings = file.Buildings.Select(Building.FromBuildingFile).ToList();
+            var trees = file.Trees.Select(Tree.FromTreeFile).ToList();
+            var laneGuides = file.LaneGuides.Select(Segment2.FromSegmentFile).ToList();
+            var markings = file.Markings.Select(m => m.FromMarkingFile()).ToList();
+            var version = file.Version;
+
+            this.graph = graph;
             this.height = height;
 
-            graphVersion = graph.Version;
+            this.envelopes.Clear();
+            this.roadEnvelopes.Clear();
+            this.roadBorders.Clear();
+            this.buildings.Clear();
+            this.trees.Clear();
+            this.laneGuides.Clear();
+            this.markings.Clear();
 
-            Generate();
+            this.envelopes.AddRange(envelopes);
+            this.roadEnvelopes.AddRange(roadEnvelopes);
+            this.roadBorders.AddRange(roadBorders);
+            this.buildings.AddRange(buildings);
+            this.trees.AddRange(trees);
+            this.laneGuides.AddRange(laneGuides);
+            this.markings.AddRange(markings);
+
+            Version = version;
+
+            worldChanged = true;
         }
-        private void Generate()
+
+        public void Generate()
         {
-            var segments = Graph.GetSegments();
+            var segments = graph.GetSegments();
 
             GenerateRoads(segments);
 
@@ -93,19 +154,18 @@ namespace AISamples.SceneCWRVirtualWorld
         }
         private void GenerateBuildings(Segment2[] segments)
         {
-            buildingEnvelopes.Clear();
-
+            List<Envelope> buildingEnvelopes = [];
             float width = RoadWidth + buildingWidth + buildingSpacing * 2;
             for (int i = 0; i < segments.Length; i++)
             {
                 buildingEnvelopes.Add(new(segments[i], width, roadRoundness));
             }
 
-            buildingGuides.Clear();
+            List<Segment2> buildingGuides = [];
             buildingGuides.AddRange(Polygon.Union(buildingEnvelopes.Select(e => e.GetPolygon()).ToArray()));
             buildingGuides.RemoveAll(e => e.Length < buildingMinLenth);
 
-            buildingSupports.Clear();
+            List<Segment2> buildingSupports = [];
             foreach (var guide in buildingGuides)
             {
                 float len = guide.Length + buildingSpacing;
@@ -125,7 +185,7 @@ namespace AISamples.SceneCWRVirtualWorld
                 }
             }
 
-            buildingBases.Clear();
+            List<Polygon> buildingBases = [];
             var bases = buildingSupports.Select(seg => new Envelope(seg, buildingWidth, 1).GetPolygon());
             buildingBases.AddRange(bases);
 
@@ -151,6 +211,9 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 return false;
             });
+
+            buildings.Clear();
+            buildings.AddRange(buildingBases.Select(b => new Building(b, buildingHeight)));
         }
         private void GenerateTrees(Segment2[] segments)
         {
@@ -165,7 +228,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             Polygon[] illegalPolys =
             [
-                .. buildingBases,
+                .. buildings.Select(b => b.Polygon),
                 .. envelopes.Select(e => e.GetPolygon())
             ];
 
@@ -190,7 +253,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 if (keep)
                 {
-                    keep = !trees.Exists(t => Vector2.Distance(t, p) < treeRadius * 2);
+                    keep = !trees.Exists(t => t.DistanceToPoint(p) < treeRadius * 2);
                 }
 
                 if (keep)
@@ -200,7 +263,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
                 if (keep)
                 {
-                    trees.Add(p);
+                    trees.Add(new(new(p.X, height, p.Y), treeRadius, treeHeight));
                     treeCount = 0;
                 }
                 treeCount++;
@@ -228,7 +291,7 @@ namespace AISamples.SceneCWRVirtualWorld
             Vector2[] points =
             [
                 .. roadBorders.SelectMany(b => new Vector2[] { b.P1, b.P2 }),
-                .. buildingBases.SelectMany(b => b.Vertices)
+                .. buildings.SelectMany(b => b.Polygon.GetVertices())
             ];
 
             Vector2 min = new(float.MaxValue);
@@ -249,15 +312,9 @@ namespace AISamples.SceneCWRVirtualWorld
             var descT = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
-                DepthEnabled = false,
+                DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-
-            buildingDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
-                nameof(buildingDrawer),
-                nameof(buildingDrawer),
-                descT,
-                Scene.LayerEffects);
 
             roadDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 nameof(roadDrawer),
@@ -271,11 +328,46 @@ namespace AISamples.SceneCWRVirtualWorld
                 descT,
                 Scene.LayerEffects + 2);
 
+            var tDesc = new ModelInstancedDescription()
+            {
+                Content = ContentDescription.FromFile(Constants.TreesResourcesFolder, Constants.TreesModel),
+                Instances = 1000,
+                Optimize = true,
+                PickingHull = PickingHullTypes.None,
+                CastShadow = ShadowCastingAlgorihtms.None,
+                StartsVisible = false,
+            };
+
+            treesDrawer = await scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
+                nameof(treesDrawer),
+                nameof(treesDrawer),
+                tDesc,
+                SceneObjectUsages.Agent);
 
             (string, string)[] images =
             [
                 ("diffuse", Constants.MarkingsTexture),
             ];
+
+            var materialB = MaterialBlinnPhongContent.Default;
+            materialB.DiffuseTexture = "diffuse";
+            materialB.IsTransparent = false;
+
+            var descB = new GeometryDrawerDescription<VertexPositionTexture>()
+            {
+                Count = 100000,
+                DepthEnabled = true,
+                BlendMode = BlendModes.Opaque,
+                Topology = Topology.TriangleList,
+                Images = images,
+                Material = materialB,
+                TintColor = Color.White,
+            };
+
+            buildingDrawer = await scene.AddComponentGround<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
+                nameof(buildingDrawer),
+                nameof(buildingDrawer),
+                descB);
 
             var material2d = MaterialBlinnPhongContent.Default;
             material2d.DiffuseTexture = "diffuse";
@@ -283,8 +375,8 @@ namespace AISamples.SceneCWRVirtualWorld
 
             var descS2d = new GeometryDrawerDescription<VertexPositionTexture>()
             {
-                Count = 20000,
-                DepthEnabled = false,
+                Count = 100000,
+                DepthEnabled = true,
                 BlendMode = BlendModes.Transparent,
                 Topology = Topology.TriangleList,
                 Images = images,
@@ -304,7 +396,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             var descS3d = new GeometryDrawerDescription<VertexPositionTexture>()
             {
-                Count = 20000,
+                Count = 100000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
                 Topology = Topology.TriangleList,
@@ -334,9 +426,9 @@ namespace AISamples.SceneCWRVirtualWorld
                 DrawMarkings();
             }
 
-            if (graphVersion != Graph.Version)
+            if (graphVersion != graph.Version)
             {
-                graphVersion = Graph.Version;
+                graphVersion = graph.Version;
                 Version = Guid.NewGuid();
 
                 Generate();
@@ -351,7 +443,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             foreach (var marking in markings)
             {
-                var vlist = marking.Draw(height);
+                var vlist = marking.Draw(height + hLayer + hDelta);
                 if (marking.Is3D)
                 {
                     markingsDrawer3d.AddPrimitives(vlist);
@@ -369,38 +461,35 @@ namespace AISamples.SceneCWRVirtualWorld
             roadMarksDrawer.Clear();
 
             // Draw building areas
-            foreach (var support in buildingBases)
+            foreach (var building in buildings)
             {
-                DrawPolygon(support, height, buildingColor, buildingDrawer);
+                DrawBuilding(building, height, buildingDrawer);
             }
 
             // Draw trees
-            foreach (var tree in trees)
-            {
-                DrawCircle(tree, treeRadius, height, treeColor, buildingDrawer);
-            }
+            DrawTrees(trees, treeScale, treesDrawer);
 
             // Draw road base
             foreach (var roadEnvelope in roadEnvelopes)
             {
-                DrawEnvelope(roadEnvelope, height, roadColor, roadDrawer);
+                DrawEnvelope(roadEnvelope, height + hLayer, roadColor, roadDrawer);
             }
 
             // Draw road marks
-            foreach (var segment in Graph.GetSegments())
+            foreach (var segment in graph.GetSegments())
             {
                 var dashes = Utils.Divide(segment, 5, 5);
 
                 foreach (var dash in dashes)
                 {
-                    DrawEnvelope(new Envelope(dash, 2, 1), height + hDelta, roadMarksColor, roadMarksDrawer);
+                    DrawEnvelope(new Envelope(dash, 2, 1), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
                 }
             }
 
             // Draw road borders
             foreach (var border in roadBorders)
             {
-                DrawEnvelope(new Envelope(border, 2, 3), height + hDelta, roadMarksColor, roadMarksDrawer);
+                DrawEnvelope(new Envelope(border, 2, 3), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
             }
         }
         private static void DrawEnvelope(Envelope envelope, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
@@ -412,21 +501,34 @@ namespace AISamples.SceneCWRVirtualWorld
             var t = GeometryUtil.CreatePolygonTriangleList(vertices, true);
             drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
         }
-        private static void DrawPolygon(Polygon polygon, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
+        private static void DrawTrees(IEnumerable<Tree> trees, float baseScale, ModelInstanced drawer)
         {
-            var vertices = polygon
-                .Vertices
-                .Select(v => new Vector3(v.X, height, v.Y));
+            for (int i = 0; i < drawer.InstanceCount; i++)
+            {
+                var tree = trees.ElementAtOrDefault(i);
+                if (tree == null)
+                {
+                    drawer[i].Manipulator.SetTransform(Matrix.Identity);
+                    drawer[i].Visible = false;
+                    continue;
+                }
 
-            var t = GeometryUtil.CreatePolygonTriangleList(vertices, true);
-            drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
+                var scale = Matrix.Scaling(tree.Radius * baseScale);
+                var rot = Matrix.RotationY(i * 0.1f);
+                var translation = Matrix.Translation(tree.Position);
+                var transform = scale * rot * translation;
+
+                drawer[i].Manipulator.SetTransform(transform);
+                drawer[i].Visible = true;
+            }
+
+            drawer.Visible = trees.Any();
         }
-        private static void DrawCircle(Vector2 point, float radius, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
+        private static void DrawBuilding(Building building, float height, GeometryDrawer<VertexPositionTexture> drawer)
         {
-            var v = new Vector3(point.X, height, point.Y);
+            var vlist = building.CreateBuilding(height);
 
-            var t = GeometryUtil.CreateCircle(Topology.TriangleList, v, radius, 32);
-            drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(vlist);
         }
 
         public Segment2[] GetLaneGuides()
@@ -470,7 +572,13 @@ namespace AISamples.SceneCWRVirtualWorld
 
         public void Clear()
         {
-            Graph.Clear();
+            graph.Clear();
+            envelopes.Clear();
+            roadEnvelopes.Clear();
+            roadBorders.Clear();
+            buildings.Clear();
+            trees.Clear();
+            laneGuides.Clear();
             markings.Clear();
 
             worldChanged = true;

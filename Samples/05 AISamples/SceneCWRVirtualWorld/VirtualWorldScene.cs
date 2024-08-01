@@ -1,4 +1,5 @@
-﻿using AISamples.SceneCWRVirtualWorld.Editors;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using AISamples.SceneCWRVirtualWorld.Editors;
 using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
@@ -69,6 +70,8 @@ ESC - EXIT";
             GameEnvironment.Background = Color.Black;
 
             world = new(graph, 0);
+            world.Generate();
+
             tools = new(this, world);
             tools.AddEditor<GraphEditor>(EditorModes.Graph, 0);
             tools.AddEditor<StartsEditor>(EditorModes.Start, 0);
@@ -139,8 +142,8 @@ ESC - EXIT";
 
             List<UIButton> buttons = [];
 
-            buttons.Add(await InitializeButton("editorLoadButton", "LOAD GRAPH", editorButtonDesc, LoadGraph));
-            buttons.Add(await InitializeButton("editorSaveButton", "SAVE GRAPH", editorButtonDesc, SaveGraph));
+            buttons.Add(await InitializeButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorld));
+            buttons.Add(await InitializeButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorld));
             buttons.Add(null);
             foreach (var mode in tools.GetModes())
             {
@@ -313,12 +316,12 @@ ESC - EXIT";
 
             if (Game.Input.KeyPressed(Keys.C))
             {
-                Camera.MoveDown(gameTime, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3.Down, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.Space))
             {
-                Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3.Up, Game.Input.ShiftPressed);
             }
         }
 
@@ -357,33 +360,35 @@ ESC - EXIT";
             UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, editorButtons.Length);
         }
 
-        private void LoadGraph()
+        private void LoadWorld()
         {
             using System.Windows.Forms.OpenFileDialog dlg = new()
             {
-                Filter = "Graph files (*.graph)|*.graph",
+                Filter = "World files (*.world)|*.world",
                 FilterIndex = 1,
                 RestoreDirectory = true,
             };
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                graph.LoadFromFile(dlg.FileName);
+                var worldFile = SerializationHelper.DeserializeJsonFromFile<WorldFile>(dlg.FileName);
+                world.LoadFromWorldFile(worldFile);
             }
         }
-        private void SaveGraph()
+        private void SaveWorld()
         {
             using System.Windows.Forms.SaveFileDialog dlg = new()
             {
-                FileName = "newgraph.graph",
-                Filter = "Graph files (*.graph)|*.graph",
+                FileName = "newworld.world",
+                Filter = "World files (*.world)|*.world",
                 FilterIndex = 1,
                 RestoreDirectory = true,
             };
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                graph.SaveToFile(dlg.FileName);
+                var worldFile = World.FromWorld(world);
+                SerializationHelper.SerializeJsonToFile(worldFile, dlg.FileName);
             }
         }
         private void OpenEditor()

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +19,33 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
             this.roundness = roundness;
 
             polygon = GeneratePolygon();
+        }
+        private Envelope(Segment2 skeleton, float width, int roundness, Polygon polygon)
+        {
+            this.skeleton = skeleton;
+            this.width = width;
+            this.roundness = roundness;
+            this.polygon = polygon;
+        }
+
+        public static EnvelopeFile FromEnvelope(Envelope envelope)
+        {
+            return new()
+            {
+                Skeleton = Segment2.FromSegment(envelope.skeleton),
+                Width = envelope.width,
+                Roundness = envelope.roundness,
+                Polygon = Polygon.FromPolygon(envelope.polygon)
+            };
+        }
+        public static Envelope FromEnvelopeFile(EnvelopeFile envelope)
+        {
+            var skeleton = Segment2.FromSegmentFile(envelope.Skeleton);
+            var width = envelope.Width;
+            var roundness = envelope.Roundness;
+            var polygon = Polygon.FromPolygonFile(envelope.Polygon);
+
+            return new(skeleton, width, roundness, polygon);
         }
 
         private Polygon GeneratePolygon()
@@ -56,7 +84,7 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
         }
         public Vector2[] GetPolygonVertices()
         {
-            return polygon.Vertices;
+            return polygon.GetVertices();
         }
     }
 }

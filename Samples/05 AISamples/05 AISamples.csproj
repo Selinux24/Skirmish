@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <None Remove="Common\Resources\Markings.png" />
+    <None Remove="Common\Resources\Tree\Tree1.dae" />
+    <None Remove="Common\Resources\Tree\tree1.json" />
     <None Remove="SceneCWRSelfDrivingCar\Resources\dirt002.dds" />
     <None Remove="SceneCWRSelfDrivingCar\Resources\normal001.dds" />
     <None Remove="SceneStart\pointer.png" />
@@ -27,6 +29,12 @@
   
   <ItemGroup>
     <Content Include="Common\Resources\Markings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Resources\Tree\Tree1.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Resources\Tree\tree1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneCWRSelfDrivingCar\Resources\dirt002.dds">

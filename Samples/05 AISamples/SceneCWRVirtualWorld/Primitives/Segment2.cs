@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using SharpDX;
 using System;
 
 namespace AISamples.SceneCWRVirtualWorld.Primitives
@@ -9,6 +10,19 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
         public Vector2 P2 { get; set; } = p2;
         public readonly float Length => Vector2.Distance(P1, P2);
         public readonly Vector2 Direction => Vector2.Normalize(P2 - P1);
+
+        public static Segment2File FromSegment(Segment2 segment)
+        {
+            return new()
+            {
+                P1 = Vector2File.FromVector2(segment.P1),
+                P2 = Vector2File.FromVector2(segment.P2),
+            };
+        }
+        public static Segment2 FromSegmentFile(Segment2File segment)
+        {
+            return new(Vector2File.FromVector2File(segment.P1), Vector2File.FromVector2File(segment.P2));
+        }
 
         public readonly float DistanceToPoint(Vector2 point)
         {

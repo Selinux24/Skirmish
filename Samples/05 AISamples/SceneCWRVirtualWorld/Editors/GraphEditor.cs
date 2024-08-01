@@ -12,11 +12,12 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private static readonly Color4 graphColor = new(0f, 0f, 0f, 0.5f);
         private static readonly Color4 highlightColor = new(1f, 1f, 0f, 0.33f);
         private const float editorPointRadius = 10f;
+        private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
 
         private GeometryColorDrawer<Triangle> graphDrawer = null;
 
-        private readonly Graph graph = world.Graph;
+        private readonly World world = world;
         private readonly float height = height;
         private readonly float pointRadius = editorPointRadius;
         private readonly float lineThickness = editorPointRadius * 0.1f;
@@ -120,13 +121,13 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
             {
                 AddPointAndSegment(hovered.Value);
 
-                draggingPointIndex = graph.GetPointIndex(hovered.Value);
+                draggingPointIndex = world.Graph.GetPointIndex(hovered.Value);
                 dragging = true;
 
                 return;
             }
 
-            graph.AddPoint(point);
+            world.Graph.AddPoint(point);
             AddPointAndSegment(point);
             hovered = point;
         }
@@ -134,7 +135,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         {
             if (selected.HasValue)
             {
-                graph.TryAddSegment(new(selected.Value, point));
+                world.Graph.TryAddSegment(new(selected.Value, point));
             }
             selected = point;
         }
@@ -152,7 +153,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 return;
             }
 
-            graph.RemovePoint(hovered.Value);
+            world.Graph.RemovePoint(hovered.Value);
 
             hovered = null;
         }
@@ -162,7 +163,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
             if (dragging && dragTime > 0.2f)
             {
-                graph.UpdatePoint(draggingPointIndex, point);
+                world.Graph.UpdatePoint(draggingPointIndex, point);
                 hovered = point;
                 selected = point;
 
@@ -171,7 +172,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 return;
             }
 
-            hovered = Utils.GetNearestPoint(point, graph.GetPoints(), threshold);
+            hovered = Utils.GetNearestPoint(point, world.Graph.GetPoints(), threshold);
             if (hovered.HasValue && selected != hovered)
             {
                 drawHovered = true;
@@ -187,27 +188,27 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         {
             graphDrawer.Clear();
 
-            foreach (var point in graph.GetPoints())
+            foreach (var point in world.Graph.GetPoints())
             {
-                DrawPoint(point, height, pointRadius, graphColor);
+                DrawPoint(point, height + hLayer, pointRadius, graphColor);
             }
 
-            foreach (var segment in graph.GetSegments())
+            foreach (var segment in world.Graph.GetSegments())
             {
-                DrawSegment(segment, height, lineThickness, graphColor);
+                DrawSegment(segment, height + hLayer, lineThickness, graphColor);
             }
 
             if (drawHovered && hovered.HasValue)
             {
-                DrawPoint(hovered.Value, height + 1, pointRadius * 0.4f, highlightColor);
+                DrawPoint(hovered.Value, height + hLayer + 1, pointRadius * 0.4f, highlightColor);
             }
             drawHovered = false;
 
             if (selected.HasValue)
             {
-                DrawPoint(selected.Value, height + 1, pointRadius * 0.6f, highlightColor);
+                DrawPoint(selected.Value, height + hLayer + 1, pointRadius * 0.6f, highlightColor);
 
-                DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height, lineThickness, graphColor);
+                DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height + hLayer, lineThickness, graphColor);
             }
         }
         private void DrawPoint(Vector2 point, float height, float strokeSize, Color4 tColor)

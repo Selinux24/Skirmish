@@ -1,4 +1,5 @@
-﻿using AISamples.SceneCWRVirtualWorld.Primitives;
+﻿using AISamples.SceneCWRVirtualWorld.Content;
+using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Primitives;
 using Engine.Common;
@@ -35,6 +36,8 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
 
             polygon = new Envelope(support, width, 0).GetPolygon();
         }
+
+        public abstract IMarkingFile FromMarking();
 
         public Segment2 GetSupport()
         {

@@ -1,4 +1,5 @@
 ﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Content;
 using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Primitives;
@@ -8,6 +9,19 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
 {
     class Stop(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height)
     {
+        public override IMarkingFile FromMarking()
+        {
+            return new StopFile
+            {
+                Type = nameof(Stop),
+                Position = Vector2File.FromVector2(Position),
+                Direction = Vector2File.FromVector2(Direction),
+                Width = Width,
+                Height = Height,
+                Is3D = Is3D
+            };
+        }
+
         public Segment2 GetBorder()
         {
             return GetPolygon().GetSegments()[2];

@@ -1,4 +1,5 @@
 ﻿using AISamples.Common;
+using AISamples.SceneCWRVirtualWorld.Content;
 using AISamples.SceneCWRVirtualWorld.Primitives;
 using Engine;
 using Engine.BuiltIn.Primitives;
@@ -15,6 +16,23 @@ namespace AISamples.SceneCWRVirtualWorld.Markings
         public float RedDuration { get; set; } = 15;
         public float YellowDuration { get; set; } = 2;
         public float GreenDuration { get; set; } = 38;
+
+        public override IMarkingFile FromMarking()
+        {
+            return new LightFile
+            {
+                Type = nameof(Light),
+                Position = Vector2File.FromVector2(Position),
+                Direction = Vector2File.FromVector2(Direction),
+                Width = Width,
+                Height = Height,
+                Is3D = Is3D,
+                LightState = LightState,
+                RedDuration = RedDuration,
+                YellowDuration = YellowDuration,
+                GreenDuration = GreenDuration,
+            };
+        }
 
         public Segment2 GetBorder()
         {

@@ -1,9 +1,9 @@
 ﻿
 namespace AISamples.SceneCWRVirtualWorld.Content
 {
-    struct GraphFile
+    struct PolygonFile
     {
-        public Vector2File[] Points { get; set; }
+        public Vector2File[] Vertices { get; set; }
         public Segment2File[] Segments { get; set; }
     }
 }
