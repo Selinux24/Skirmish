@@ -8,13 +8,14 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
 {
     class Polygon
     {
-        private readonly Vector2[] vertices = [];
-        private readonly List<Segment2> segments = [];
+        private readonly Vector2[] vertices;
+        private readonly List<Segment2> segments;
 
         public Polygon(Vector2[] vertices)
         {
             this.vertices = vertices;
 
+            segments = [];
             for (int i = 0; i < vertices.Length; i++)
             {
                 segments.Add(new Segment2(vertices[i], vertices[(i + 1) % vertices.Length]));
@@ -22,8 +23,8 @@ namespace AISamples.SceneCWRVirtualWorld.Primitives
         }
         private Polygon(Vector2[] vertices, List<Segment2> segments)
         {
-            this.vertices = vertices;
-            this.segments = segments;
+            this.vertices = vertices ?? [];
+            this.segments = segments ?? [];
         }
 
         public static PolygonFile FromPolygon(Polygon polygon)

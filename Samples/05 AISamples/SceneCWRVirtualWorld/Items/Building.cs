@@ -31,7 +31,7 @@ namespace AISamples.SceneCWRVirtualWorld.Items
             return new(polygon, height);
         }
 
-        public IEnumerable<VertexPositionTexture> CreateBuilding(float baseHeight)
+        public IEnumerable<VertexPositionNormalTexture> CreateBuilding(float baseHeight)
         {
             Vector2[] baseVertices = Polygon.GetVertices();
             Vector3[] points = Polygon.Extrude(baseHeight, Height);
@@ -43,13 +43,23 @@ namespace AISamples.SceneCWRVirtualWorld.Items
             int vertexCount = baseVertices.Length;
             for (int i = 0; i < vertexCount; i++)
             {
-                yield return new VertexPositionTexture() { Position = points[i], Texture = uvW };
-                yield return new VertexPositionTexture() { Position = points[(i + 1) % vertexCount], Texture = uvW };
-                yield return new VertexPositionTexture() { Position = points[i + vertexCount], Texture = uvW };
+                var p0 = points[i];
+                var p1 = points[(i + 1) % vertexCount];
+                var p2 = points[i + vertexCount];
+                var n0 = Vector3.Normalize(Vector3.Cross(p2 - p0, p1 - p0));
 
-                yield return new VertexPositionTexture() { Position = points[(i + 1) % vertexCount], Texture = uvW };
-                yield return new VertexPositionTexture() { Position = points[(i + 1) % vertexCount + vertexCount], Texture = uvW };
-                yield return new VertexPositionTexture() { Position = points[i + vertexCount], Texture = uvW };
+                yield return new() { Position = p0, Normal = n0, Texture = uvW };
+                yield return new() { Position = p1, Normal = n0, Texture = uvW };
+                yield return new() { Position = p2, Normal = n0, Texture = uvW };
+
+                var p3 = points[(i + 1) % vertexCount];
+                var p4 = points[(i + 1) % vertexCount + vertexCount];
+                var p5 = points[i + vertexCount];
+                var n1 = Vector3.Normalize(Vector3.Cross(p5 - p3, p4 - p3));
+
+                yield return new() { Position = p3, Normal = n1, Texture = uvW };
+                yield return new() { Position = p4, Normal = n1, Texture = uvW };
+                yield return new() { Position = p5, Normal = n1, Texture = uvW };
             }
 
             var ceiling = GeometryUtil.CreatePolygon(Topology.TriangleList, points.Skip(vertexCount), false);
@@ -58,7 +68,7 @@ namespace AISamples.SceneCWRVirtualWorld.Items
                 int index = (int)ceiling.Indices.ElementAt(i);
                 var p = ceiling.Vertices.ElementAt(index);
 
-                yield return new VertexPositionTexture() { Position = p, Texture = uvC };
+                yield return new() { Position = p, Normal = Vector3.Up, Texture = uvC };
             }
         }
     }
