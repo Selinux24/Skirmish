@@ -1,5 +1,6 @@
-﻿using AISamples.SceneCWRVirtualWorld.Markings;
-using AISamples.SceneCWRVirtualWorld.Primitives;
+﻿using AISamples.Common;
+using AISamples.Common.Markings;
+using AISamples.Common.Primitives;
 using SharpDX;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors

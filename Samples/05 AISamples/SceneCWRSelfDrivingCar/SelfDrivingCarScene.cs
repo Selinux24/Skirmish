@@ -1,4 +1,6 @@
-﻿using Engine;
+﻿using AISamples.Common;
+using AISamples.Common.Agents;
+using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.UI;
@@ -80,7 +82,7 @@ ESC - EXIT";
         private readonly Color4 roadLaneColor = Color.WhiteSmoke;
 
         private bool followCar = true;
-        private readonly CarFollower carFollower = new(100, 50);
+        private readonly AgentFollower carFollower = new(100, 50);
 
         public SelfDrivingCarScene(Game game) : base(game)
         {
@@ -439,7 +441,7 @@ ESC - EXIT";
                 return;
             }
 
-            if (car.ControlType != CarControlTypes.Player)
+            if (car.ControlType != AgentControlTypes.Player)
             {
                 return;
             }
@@ -464,7 +466,7 @@ ESC - EXIT";
                 return;
             }
 
-            car.Update(gameTime, road, tr, damageTraffic);
+            car.Update(gameTime, road.GetBorders(), tr, damageTraffic);
 
             carModel.Manipulator.SetTransform(car.GetTransform());
 
@@ -649,7 +651,7 @@ ESC - EXIT";
 
             for (int i = 0; i < cars.Length; i++)
             {
-                cars[i] = new(carWidth, carHeight, carDepth, CarControlTypes.AI, 1, 0.5f);
+                cars[i] = new(carWidth, carHeight, carDepth, AgentControlTypes.AI, 1, 0.5f);
 
                 if (!mutate)
                 {
@@ -668,7 +670,7 @@ ESC - EXIT";
 
             for (int i = 0; i < traffic.Length; i++)
             {
-                traffic[i] = new(carWidth, carHeight, carDepth, CarControlTypes.Dummy, 0.5f, 0.25f);
+                traffic[i] = new(carWidth, carHeight, carDepth, AgentControlTypes.Dummy, 0.5f, 0.25f);
 
                 var lanePos = road.GetLaneCenter(i % traffic.Length);
                 lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carDepth * 3);
