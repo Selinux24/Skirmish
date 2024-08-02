@@ -1,5 +1,5 @@
 ﻿using AISamples.Common.Agents;
-using Engine;
+using AISamples.Common.Primitives;
 using SharpDX;
 using System;
 using System.Linq;
@@ -13,13 +13,13 @@ namespace AISamples.Common
         private readonly float rayLength = rayLength;
         private readonly float raySpread = raySpread;
 
-        private readonly PickingRay[] rays = new PickingRay[rayCount];
+        private readonly Segment2[] rays = new Segment2[rayCount];
         private readonly SensorReading[] readings = new SensorReading[rayCount];
 
-        public void Update(Segment[] roadBorders, Car[] traffic)
+        public void Update(Segment2[] roadBorders, Car[] traffic)
         {
             var carBorders = traffic.SelectMany(c => c.GetPolygon()).ToArray();
-            Segment[] segments = [.. roadBorders, .. carBorders];
+            Segment2[] segments = [.. roadBorders, .. carBorders];
 
             CastRays();
 
@@ -41,19 +41,18 @@ namespace AISamples.Common
                 var end = new Vector2(
                     start.X - MathF.Sin(angle) * rayLength,
                     start.Y + MathF.Cos(angle) * rayLength);
-                var direction = Vector2.Normalize(end - start);
 
-                rays[i] = new PickingRay(new Vector3(start.X, 0f, start.Y), new Vector3(direction.X, 0f, direction.Y), PickingHullTypes.Default, rayLength);
+                rays[i] = new(start, end);
             }
         }
-        private static SensorReading GetReading(PickingRay ray, Segment[] segments)
+        private static SensorReading GetReading(Segment2 raySegment, Segment2[] segments)
         {
             bool found = false;
             float minDistance = float.MaxValue;
             Vector3 minPosition = Vector3.Zero;
             for (int b = 0; b < segments.Length; b++)
             {
-                bool touch = Utils.Segment2DIntersectsSegment2D(ray.Segment, segments[b], out Vector3 p, out float d);
+                bool touch = Utils.SegmentIntersectsSegment(raySegment, segments[b], out Vector3 p, out float d);
                 if (!touch)
                 {
                     continue;
@@ -73,7 +72,7 @@ namespace AISamples.Common
                 return null;
             }
 
-            return new(ray, minPosition, minDistance);
+            return new(raySegment, minPosition, minDistance);
         }
 
         public void Reset()
@@ -88,7 +87,7 @@ namespace AISamples.Common
         {
             return rayCount;
         }
-        public PickingRay[] GetRays()
+        public Segment2[] GetRays()
         {
             return [.. rays];
         }

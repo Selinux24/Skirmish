@@ -1,4 +1,4 @@
-﻿using Engine;
+﻿using AISamples.Common.Primitives;
 using SharpDX;
 using System;
 
@@ -13,7 +13,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
         private readonly float top;
         private readonly float bottom;
 
-        private readonly Segment[] borders;
+        private readonly Segment2[] borders;
 
         public int LaneCount { get; }
 
@@ -31,19 +31,19 @@ namespace AISamples.SceneCWRSelfDrivingCar
             borders = CalculateBorders(0);
         }
 
-        private Segment[] CalculateBorders(float y)
+        private Segment2[] CalculateBorders(float y)
         {
-            Vector3 topLeft = new(left, 0, top + y);
-            Vector3 topRight = new(right, 0, top + y);
-            Vector3 bottomLeft = new(left, 0, bottom + y);
-            Vector3 bottomRight = new(right, 0, bottom + y);
+            Vector2 topLeft = new(left, top + y);
+            Vector2 topRight = new(right, top + y);
+            Vector2 bottomLeft = new(left, bottom + y);
+            Vector2 bottomRight = new(right, bottom + y);
 
             return
             [
-                new (){ Point1 = topLeft,     Point2 = topRight },
-                new (){ Point1 = topRight,    Point2 = bottomRight },
-                new (){ Point1 = bottomRight, Point2 = bottomLeft },
-                new (){ Point1 = bottomLeft,  Point2 = topLeft }
+                new (){ P1 = topLeft,     P2 = topRight },
+                new (){ P1 = topRight,    P2 = bottomRight },
+                new (){ P1 = bottomRight, P2 = bottomLeft },
+                new (){ P1 = bottomLeft,  P2 = topLeft }
             ];
         }
 
@@ -53,7 +53,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
             Array.Copy(newBorders, borders, borders.Length);
         }
 
-        public Segment[] GetBorders()
+        public Segment2[] GetBorders()
         {
             return [.. borders];
         }

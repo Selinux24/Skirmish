@@ -1,22 +1,21 @@
 ﻿using AISamples.Common.Primitives;
-using Engine;
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace AISamples.Common
 {
     static class Utils
     {
-        public static bool Segment2DIntersectsSegment2D(Segment s1, Segment s2, out Vector3 position, out float distance)
+        public static bool SegmentIntersectsSegment(Segment2 s1, Segment2 s2, out Vector3 position, out float distance)
         {
-            var a = s1.Point1;
-            var b = s1.Point2;
-            var c = s2.Point1;
-            var d = s2.Point2;
+            var a = s1.P1;
+            var b = s1.P2;
+            var c = s2.P1;
+            var d = s2.P2;
 
-            float bot = (d.Z - c.Z) * (b.X - a.X) - (d.X - c.X) * (b.Z - a.Z);
+            float bot = (d.Y - c.Y) * (b.X - a.X) - (d.X - c.X) * (b.Y - a.Y);
             if (MathUtil.IsZero(bot))
             {
                 position = Vector3.Zero;
@@ -24,7 +23,7 @@ namespace AISamples.Common
                 return false;
             }
 
-            float tTop = (d.X - c.X) * (a.Z - c.Z) - (d.Z - c.Z) * (a.X - c.X);
+            float tTop = (d.X - c.X) * (a.Y - c.Y) - (d.Y - c.Y) * (a.X - c.X);
             float t = tTop / bot;
             if (t < 0 || t > 1)
             {
@@ -33,7 +32,7 @@ namespace AISamples.Common
                 return false;
             }
 
-            float uTop = (c.Z - a.Z) * (a.X - b.X) - (c.X - a.X) * (a.Z - b.Z);
+            float uTop = (c.Y - a.Y) * (a.X - b.X) - (c.X - a.X) * (a.Y - b.Y);
             float u = uTop / bot;
             if (u < 0 || u > 1)
             {
@@ -42,19 +41,19 @@ namespace AISamples.Common
                 return false;
             }
 
-            position = new Vector3(MathUtil.Lerp(a.X, b.X, t), 0f, MathUtil.Lerp(a.Z, b.Z, t));
+            position = new Vector3(MathUtil.Lerp(a.X, b.X, t), 0f, MathUtil.Lerp(a.Y, b.Y, t));
             distance = t;
             return true;
         }
 
-        public static bool Segment2DIntersectsPoly2D(Segment segment, Vector3[] points)
+        public static bool SegmentIntersectsPoly(Segment2 segment, Vector2[] points)
         {
             for (int i = 0; i < points.Length; i++)
             {
                 var p0 = points[i];
                 var p1 = points[(i + 1) % points.Length];
 
-                if (Segment2DIntersectsSegment2D(segment, new(p0, p1), out _, out _))
+                if (SegmentIntersectsSegment(segment, new(p0, p1), out _, out _))
                 {
                     return true;
                 }
@@ -62,7 +61,7 @@ namespace AISamples.Common
 
             return false;
         }
-      
+
         public static float Angle(float y, float x)
         {
             return MathF.Atan2(y, x);

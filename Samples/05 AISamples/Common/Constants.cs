@@ -8,6 +8,8 @@ namespace AISamples.Common
         public const string MarkingsTexture = CommonResourcesFolder + "markings.png";
         public const string TreesResourcesFolder = CommonResourcesFolder + "Tree/";
         public const string TreesModel = "Tree1.json";
+        public const string TrafficResourcesFolder = CommonResourcesFolder + "Traffic/";
+        public const string TaxiModel = "Taxi.json";
 
         const float Width = 2000f;
         const float Height = 1600f;

@@ -1,5 +1,6 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Agents;
+using AISamples.Common.Primitives;
 using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Primitives;
@@ -67,7 +68,7 @@ ESC - EXIT";
 
         private const float carWidth = 10;
         private const float carHeight = 7;
-        private const float carDepth = 20;
+        private const float carLength = 20;
         private const int maxCarInstances = 10;
         private const int maxTrafficInstances = 3;
 
@@ -237,7 +238,7 @@ ESC - EXIT";
         }
         private async Task InitializeCars()
         {
-            var geo = GeometryUtil.CreateBox(Topology.TriangleList, carWidth, carHeight, carDepth);
+            var geo = GeometryUtil.CreateBox(Topology.TriangleList, carWidth, carHeight, carLength);
             var mat = MaterialPhongContent.Default;
             mat.IsTransparent = true;
 
@@ -481,7 +482,7 @@ ESC - EXIT";
 
             if (car.Sensor != null)
             {
-                DrawSensor(car);
+                DrawSensor(car, 0);
             }
 
             if (car.Brain != null)
@@ -502,11 +503,11 @@ ESC - EXIT";
             sensorDrawer.Clear(carSensorColor);
             sensorDrawer.Clear(carSensorContactColor);
         }
-        private void DrawSensor(Car car)
+        private void DrawSensor(Car car, float height)
         {
             var readings = car.Sensor?.GetReadings() ?? [];
 
-            var rayList = car.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, readings))
+            var rayList = car.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, height, readings))
                 .GroupBy(r => r.Item1)
                 .ToDictionary(
                     keySelector => keySelector.Key,
@@ -514,11 +515,10 @@ ESC - EXIT";
 
             sensorDrawer.AddPrimitives(rayList ?? []);
         }
-        private IEnumerable<(Color4, Line3D)> DrawSensorRay(PickingRay r, SensorReading[] readings)
+        private IEnumerable<(Color4, Line3D)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
         {
-            var p0 = r.Start;
-            p0.Y += 0.5f;
-            var p1 = p0 + (r.Direction * r.MaxDistance);
+            var p0 = new Vector3(r.P1.X, height + 0.5f, r.P1.Y);
+            var p1 = new Vector3(r.P2.X, height + 0.5f, r.P2.Y);
 
             //Find readings for the ray
             var rayReading = Array.Find(readings, rd => rd?.Ray == r);
@@ -651,7 +651,7 @@ ESC - EXIT";
 
             for (int i = 0; i < cars.Length; i++)
             {
-                cars[i] = new(carWidth, carHeight, carDepth, AgentControlTypes.AI, 1, 0.5f);
+                cars[i] = new(carWidth, carHeight, carLength, AgentControlTypes.AI, 1, 0.5f);
 
                 if (!mutate)
                 {
@@ -670,10 +670,10 @@ ESC - EXIT";
 
             for (int i = 0; i < traffic.Length; i++)
             {
-                traffic[i] = new(carWidth, carHeight, carDepth, AgentControlTypes.Dummy, 0.5f, 0.25f);
+                traffic[i] = new(carWidth, carHeight, carLength, AgentControlTypes.Dummy, 0.5f, 0.25f);
 
                 var lanePos = road.GetLaneCenter(i % traffic.Length);
-                lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carDepth * 3);
+                lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carLength * 3);
 
                 trafficPositions[i] = lanePos;
             }
@@ -697,7 +697,7 @@ ESC - EXIT";
         private void RelocateSimulationObjects()
         {
             var cLanePos = road.GetLaneCenter(road.LaneCount / 2);
-            cLanePos.Y = -(carDepth * 10);
+            cLanePos.Y = -(carLength * 10);
 
             for (int i = 0; i < cars.Length; i++)
             {

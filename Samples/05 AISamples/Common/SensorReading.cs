@@ -1,7 +1,7 @@
-﻿using Engine;
+﻿using AISamples.Common.Primitives;
 using SharpDX;
 
 namespace AISamples.Common
 {
-    public record SensorReading(PickingRay Ray, Vector3 Position, float Distance) { }
+    record SensorReading(Segment2 Ray, Vector3 Position, float Distance) { }
 }

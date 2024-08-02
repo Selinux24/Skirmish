@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using AISamples.Common.Primitives;
+using Engine;
 using SharpDX;
 using System;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace AISamples.Common.Agents
         private float angle = 0;
         private readonly float rotationSpeed = 0.02f;
         private Vector2 direction = Vector2.Zero;
+
+        private float scale = 1f;
 
         public AgentControls Controls { get; }
         public bool Forward => !Damaged && Controls.Forward;
@@ -63,17 +66,17 @@ namespace AISamples.Common.Agents
             points[2] = new(corners[6].X, 0f, corners[6].Z);
             points[3] = new(corners[7].X, 0f, corners[7].Z);
         }
-        public Segment[] GetPolygon()
+        public Segment2[] GetPolygon()
         {
-            Segment[] segments = new Segment[points.Length];
+            Segment2[] segments = new Segment2[points.Length];
             for (int i = 0; i < points.Length; i++)
             {
-                segments[i] = new Segment(points[i], points[(i + 1) % points.Length]);
+                segments[i] = new Segment2(points[i].XZ(), points[(i + 1) % points.Length].XZ());
             }
             return segments;
         }
 
-        public void Update(IGameTime gameTime, Segment[] roadBorders, Car[] traffic, bool damageTraffic)
+        public void Update(IGameTime gameTime, Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {
             float time = gameTime.ElapsedSeconds;
 
@@ -144,11 +147,13 @@ namespace AISamples.Common.Agents
             x += direction.X * speed;
             y += direction.Y * speed;
         }
-        private bool AssessDamage(Segment[] roadBorders, Car[] traffic, bool damageTraffic)
+        private bool AssessDamage(Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {
+            var points2d = points.Select(p => p.XZ()).ToArray();
+
             for (int i = 0; i < roadBorders.Length; i++)
             {
-                if (Utils.Segment2DIntersectsPoly2D(roadBorders[i], points))
+                if (Utils.SegmentIntersectsPoly(roadBorders[i], points2d))
                 {
                     return true;
                 }
@@ -160,7 +165,7 @@ namespace AISamples.Common.Agents
 
                 for (int t = 0; t < cBorders.Length; t++)
                 {
-                    if (Utils.Segment2DIntersectsPoly2D(cBorders[t], points))
+                    if (Utils.SegmentIntersectsPoly(cBorders[t], points2d))
                     {
                         if (damageTraffic) traffic[i].Damaged = true;
 
@@ -194,6 +199,14 @@ namespace AISamples.Common.Agents
             x = position.X;
             y = position.Y;
         }
+        public void SetDirection(Vector2 direction)
+        {
+            angle = Utils.Angle(direction.Y, direction.X) - MathUtil.PiOverTwo;
+        }
+        public void SetScale(float scale)
+        {
+            this.scale = scale;
+        }
         public float GetAngle()
         {
             return angle;
@@ -208,7 +221,7 @@ namespace AISamples.Common.Agents
         }
         public Matrix GetTransform()
         {
-            return trnBox.Transformation;
+            return Matrix.Scaling(scale) * trnBox.Transformation;
         }
     }
 }

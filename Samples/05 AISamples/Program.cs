@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
+using Engine.Content.FmtObj;
 using Engine.Windows;
 using System;
 
@@ -28,6 +29,7 @@ namespace AISamples
 #endif
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderObj>();
 
                 cl.SetScene<SceneStart.StartScene>();
 

@@ -1,4 +1,5 @@
 ﻿using AISamples.Common;
+using AISamples.Common.Agents;
 using AISamples.Common.Persistence;
 using AISamples.SceneCWRVirtualWorld.Editors;
 using Engine;
@@ -30,6 +31,7 @@ namespace AISamples.SceneCWRVirtualWorld
         private const int layerHUD = 99;
         private const float spaceSize = 1500f;
         private const string resourcesFolder = "SceneCWRVirtualWorld";
+        private const string bestCarFileName = "bestCar.json";
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -50,6 +52,7 @@ namespace AISamples.SceneCWRVirtualWorld
         private const string infoText = "PRESS F1 FOR HELP";
         private const string helpText = @"F1 - CLOSE THIS HELP
 F2 - TOGGLE TOOLS
+F5 - ADDS A CAR TO THE WORLD
 WASD - MOVE CAMERA
 SPACE - MOVE CAMERA UP
 C - MOVE CAMERA DOWN
@@ -64,6 +67,14 @@ ESC - EXIT";
         private readonly Graph graph = new([], []);
         private readonly World world;
         private readonly Tools tools;
+
+        private const float carWidth = 8;
+        private const float carHeight = 6;
+        private const float carLength = 15;
+        private const int maxCarInstances = 10;
+        private readonly Car bestCar = new(carWidth, carHeight, carLength, AgentControlTypes.Player, 1, 0.2f);
+        private float carScale = 1f;
+        private ModelInstanced carDrawer = null;
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -101,10 +112,11 @@ ESC - EXIT";
                 [
                     InitializeTitle,
                     InitializeTexts,
-                    InitializeEditorButtons,
+                    InitializeToolsButtons,
                     InitializeTerrain,
                     InitializeWorld,
                     InitializeTools,
+                    InitializeCar,
                 ],
                 InitializeComponentsCompleted);
 
@@ -130,7 +142,7 @@ ESC - EXIT";
             runtimeText.Text = "";
             info.Text = infoText;
         }
-        private async Task InitializeEditorButtons()
+        private async Task InitializeToolsButtons()
         {
             var buttonsFont = FontDescription.FromFamily(editorFont, 10, FontMapStyles.Regular, true);
             buttonsFont.ContentPath = resourcesFolder;
@@ -208,6 +220,26 @@ ESC - EXIT";
         {
             return tools.Initialize();
         }
+        private async Task InitializeCar()
+        {
+            var cDesc = new ModelInstancedDescription()
+            {
+                Instances = maxCarInstances,
+                CastShadow = ShadowCastingAlgorihtms.All,
+                Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
+                BlendMode = BlendModes.OpaqueAlpha,
+                StartsVisible = true,
+            };
+
+            carDrawer = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
+                nameof(carDrawer),
+                nameof(carDrawer),
+                cDesc);
+
+            var bbox = carDrawer[0].GetBoundingBox();
+
+            carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
+        }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -258,6 +290,11 @@ ESC - EXIT";
             if (Game.Input.KeyJustReleased(Keys.F2))
             {
                 ToggleTools();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F5))
+            {
+                ResetCars();
             }
 
             UpdateInputCamera(gameTime);
@@ -325,7 +362,7 @@ ESC - EXIT";
         }
         private void UpdateWorld(IGameTime gameTime)
         {
-            world.Update(gameTime);
+            world.Update(gameTime, carDrawer);
         }
         private void ToggleTools()
         {
@@ -364,6 +401,24 @@ ESC - EXIT";
             }
 
             tools.Draw();
+        }
+        private void ResetCars()
+        {
+            if (!world.Populated)
+            {
+                return;
+            }
+
+            bestCar.Reset();
+            bestCar.Brain.Load(bestCarFileName);
+
+            (Vector2 start, Vector2 dir) = world.GetStart();
+            bestCar.SetPosition(start);
+            bestCar.SetDirection(dir);
+
+            bestCar.SetScale(carScale);
+
+            world.AddCar(bestCar, true);
         }
 
         public override void GameGraphicsResized()

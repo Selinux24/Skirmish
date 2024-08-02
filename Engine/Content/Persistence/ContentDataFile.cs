@@ -44,8 +44,9 @@ namespace Engine.Content.Persistence
         public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, ContentDataFile contentData)
         {
             var loader = GameResourceManager.GetLoaderForFile(contentData.ModelFileName);
-
-            return await loader.Load(contentFolder ?? string.Empty, contentData);
+            return loader == null
+                ? throw new EngineException($"No loader found for file '{contentData.ModelFileName}'")
+                : await loader.Load(contentFolder ?? string.Empty, contentData);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using AISamples.Common.Items;
+﻿using AISamples.Common.Agents;
+using AISamples.Common.Items;
 using AISamples.Common.Markings;
 using AISamples.Common.Persistence;
 using AISamples.Common.Primitives;
@@ -56,9 +57,13 @@ namespace AISamples.Common
         private GeometryDrawer<VertexPositionTexture> markingsDrawer2d = null;
         private GeometryDrawer<VertexPositionTexture> markingsDrawer3d = null;
 
+        private Car bestCar = null;
+        private readonly List<Car> cars = [];
+
         public Graph Graph { get => graph; }
         public Guid Version { get; private set; } = Guid.NewGuid();
         public float RoadWidth { get; } = 30f;
+        public bool Populated { get => graph.GetSegments().Length > 0; }
 
         public static WorldFile FromWorld(World world)
         {
@@ -394,8 +399,10 @@ namespace AISamples.Common
                 Scene.LayerEffects + 4);
         }
 
-        public void Update(IGameTime gameTime)
+        public void Update(IGameTime gameTime, ModelInstanced carDrawer)
         {
+            UpdateCars(gameTime, carDrawer);
+
             foreach (var marking in markings)
             {
                 worldChanged = marking.Update(gameTime) || worldChanged;
@@ -416,6 +423,29 @@ namespace AISamples.Common
                 Generate();
 
                 DrawGraph();
+            }
+        }
+        private void UpdateCars(IGameTime gameTime, ModelInstanced carDrawer)
+        {
+            int maxCarCount = carDrawer.InstanceCount;
+            var road = roadBorders.ToArray();
+
+            for (int i = 0; i < maxCarCount; i++)
+            {
+                if (i >= cars.Count)
+                {
+                    carDrawer[i].Manipulator.SetTransform(Matrix.Translation(Vector3.One * 10000000f));
+                    carDrawer[i].TintColor = Color.Black;
+
+                    continue;
+                }
+
+                var car = cars[i];
+
+                car.Update(gameTime, road, [], false);
+
+                carDrawer[i].Manipulator.SetTransform(car.GetTransform());
+                carDrawer[i].TintColor = car == bestCar ? Color.Yellow : Color.White;
             }
         }
         private void DrawMarkings()
@@ -551,6 +581,39 @@ namespace AISamples.Common
             worldChanged = true;
             Version = Guid.NewGuid();
         }
+        public (Vector2 start, Vector2 dir) GetStart()
+        {
+            var fStart = markings.OfType<Start>().FirstOrDefault();
+            if (fStart == null)
+            {
+                return (Vector2.Zero, Vector2.UnitY);
+            }
+
+            return (fStart.Position, fStart.Direction);
+        }
+
+        public void AddCar(Car car, bool isBestCar = false)
+        {
+            if (cars.Contains(car))
+            {
+                return;
+            }
+
+            if (isBestCar)
+            {
+                bestCar = car;
+            }
+
+            cars.Add(car);
+        }
+        public void RemoveCar(Car car)
+        {
+            cars.Remove(car);
+        }
+        public Car GetBestCar()
+        {
+            return bestCar;
+        }
 
         public void Clear()
         {
@@ -562,6 +625,8 @@ namespace AISamples.Common
             trees.Clear();
             laneGuides.Clear();
             markings.Clear();
+
+            cars.Clear();
 
             worldChanged = true;
             Version = Guid.NewGuid();
