@@ -41,7 +41,8 @@ namespace AISamples.SceneCWRVirtualWorld
         private readonly float buildingWidth = 100f;
         private readonly float buildingMinLenth = 100f;
         private readonly float buildingSpacing = 25f;
-        private readonly float buildingHeight = 50f;
+        private readonly float buildingHeightMin = 50f;
+        private readonly float buildingHeightMax = 80f;
         private readonly List<Building> buildings = [];
         private GeometryDrawer<VertexPositionNormalTexture> buildingDrawer = null;
 
@@ -100,8 +101,11 @@ namespace AISamples.SceneCWRVirtualWorld
             markings.AddRange(file.Markings.Select(m => m.FromMarkingFile()));
 
             Version = file.Version;
+            graphVersion = graph.Version;
 
-            worldChanged = true;
+            DrawMarkings();
+            DrawGraph();
+            worldChanged = false;
         }
 
         public void Generate()
@@ -192,7 +196,7 @@ namespace AISamples.SceneCWRVirtualWorld
             });
 
             buildings.Clear();
-            buildings.AddRange(buildingBases.Select(b => new Building(b, buildingHeight)));
+            buildings.AddRange(buildingBases.Select(b => new Building(b, Helper.RandomGenerator.NextFloat(buildingHeightMin, buildingHeightMax))));
         }
         private void GenerateTrees(Segment2[] segments)
         {

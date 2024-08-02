@@ -10,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public static Color3 AmbientColor { get; } = new Color3(0.2f, 0.2f, 0.2f);
+        public static Color3 AmbientColor { get; } = new Color3(0.5f, 0.5f, 0.5f);
         /// <summary>
         /// Diffuse color
         /// </summary>

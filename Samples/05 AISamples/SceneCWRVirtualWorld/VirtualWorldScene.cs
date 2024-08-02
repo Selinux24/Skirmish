@@ -27,7 +27,7 @@ namespace AISamples.SceneCWRVirtualWorld
     class VirtualWorldScene : Scene
     {
         private const int layerHUD = 99;
-        private const float spaceSize = 1000f;
+        private const float spaceSize = 1500f;
         private const string resourcesFolder = "SceneCWRVirtualWorld";
 
         private Sprite panel = null;
@@ -47,7 +47,8 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
-        private const string helpText = @"F1 - HELP
+        private const string helpText = @"F1 - CLOSE THIS HELP
+F2 - TOGGLE TOOLS
 WASD - MOVE CAMERA
 SPACE - MOVE CAMERA UP
 C - MOVE CAMERA DOWN
@@ -57,6 +58,7 @@ ESC - EXIT";
 
         private bool gameReady = false;
         private bool toolsReady = false;
+        private bool toolsVisible = false;
 
         private readonly Graph graph = new([], []);
         private readonly World world;
@@ -67,7 +69,9 @@ ESC - EXIT";
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.CornflowerBlue;
+
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color3.White, Color3.Black, true));
 
             world = new(graph, 0);
             world.Generate();
@@ -193,15 +197,15 @@ ESC - EXIT";
             };
 
             terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
-            terrain.TintColor = Color.MediumSpringGreen;
+            terrain.TintColor = Color.GreenYellow;
         }
         private Task InitializeWorld()
         {
             return world.Initialize(this);
         }
-        private async Task InitializeTools()
+        private Task InitializeTools()
         {
-            await tools.Initialize();
+            return tools.Initialize();
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -226,8 +230,9 @@ ESC - EXIT";
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
 
             gameReady = true;
+            toolsReady = true;
 
-            OpenEditor();
+            ToggleTools();
         }
 
         public override void Update(IGameTime gameTime)
@@ -249,23 +254,17 @@ ESC - EXIT";
                 ToggleHelp();
             }
 
+            if (Game.Input.KeyJustReleased(Keys.F2))
+            {
+                ToggleTools();
+            }
+
             UpdateInputCamera(gameTime);
 
             UpdateWorld(gameTime);
 
-            if (!toolsReady)
-            {
-                return;
-            }
-
-            if (TopMostControl == null)
-            {
-                tools.Update(gameTime);
-            }
-
-            tools.Draw();
+            UpdateTools(gameTime);
         }
-
         private void ToggleHelp()
         {
             showHelp = !showHelp;
@@ -279,7 +278,6 @@ ESC - EXIT";
                 info.Text = infoText;
             }
         }
-
         private void UpdateInputCamera(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -324,10 +322,47 @@ ESC - EXIT";
                 Camera.Move(gameTime, Vector3.Up, Game.Input.ShiftPressed);
             }
         }
-
         private void UpdateWorld(IGameTime gameTime)
         {
             world.Update(gameTime);
+        }
+        private void ToggleTools()
+        {
+            if (!toolsReady)
+            {
+                return;
+            }
+
+            toolsVisible = !toolsVisible;
+
+            foreach (var button in editorButtons)
+            {
+                if (button != null)
+                {
+                    button.Visible = toolsVisible;
+                }
+            }
+
+            UpdateToolsLayout();
+        }
+        private void UpdateTools(IGameTime gameTime)
+        {
+            if (!toolsReady)
+            {
+                return;
+            }
+
+            if (!toolsVisible)
+            {
+                return;
+            }
+
+            if (TopMostControl == null)
+            {
+                tools.Update(gameTime);
+            }
+
+            tools.Draw();
         }
 
         public override void GameGraphicsResized()
@@ -347,9 +382,9 @@ ESC - EXIT";
 
             info.SetPosition(new Vector2(5, panelBottom + 3));
 
-            UpdateEditorLayout();
+            UpdateToolsLayout();
         }
-        private void UpdateEditorLayout()
+        private void UpdateToolsLayout()
         {
             //Show the editor buttons centered at screen bottom
             if (!toolsReady)
@@ -390,20 +425,6 @@ ESC - EXIT";
                 var worldFile = World.FromWorld(world);
                 SerializationHelper.SerializeJsonToFile(worldFile, dlg.FileName);
             }
-        }
-        private void OpenEditor()
-        {
-            toolsReady = true;
-
-            foreach (var button in editorButtons)
-            {
-                if (button != null)
-                {
-                    button.Visible = true;
-                }
-            }
-
-            UpdateEditorLayout();
         }
     }
 }

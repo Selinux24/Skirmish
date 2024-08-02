@@ -40,7 +40,7 @@ namespace AISamples.Common
         const float TargetLeft = 1699f / Width;
         const float TargetTop = 30f / Height;
         const float TargetRight = 1972f / Width;
-        const float TargetBottom = 303f / Height;
+        const float TargetBottom = 586f / Height;
 
         public static readonly Vector2 Black = new(1500f / Width, 180f / Height);
         public static readonly Vector2 White = new(150f / Width, 50f / Height);
