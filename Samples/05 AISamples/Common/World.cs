@@ -57,8 +57,10 @@ namespace AISamples.Common
         private GeometryDrawer<VertexPositionTexture> markingsDrawer2d = null;
         private GeometryDrawer<VertexPositionTexture> markingsDrawer3d = null;
 
-        private Car bestCar = null;
         private readonly List<Car> cars = [];
+        private Car bestCar = null;
+        private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
+        private readonly Color4 carColor = new Color(252, 222, 200, 255);
 
         public Graph Graph { get => graph; }
         public Guid Version { get; private set; } = Guid.NewGuid();
@@ -432,7 +434,7 @@ namespace AISamples.Common
 
             for (int i = 0; i < maxCarCount; i++)
             {
-                if (i >= cars.Count)
+                if (i >= cars.Count || cars[i].Damaged)
                 {
                     carDrawer[i].Manipulator.SetTransform(Matrix.Translation(Vector3.One * 10000000f));
                     carDrawer[i].TintColor = Color.Black;
@@ -444,9 +446,11 @@ namespace AISamples.Common
 
                 car.Update(gameTime, road, [], false);
 
-                carDrawer[i].Manipulator.SetTransform(car.GetTransform());
-                carDrawer[i].TintColor = car == bestCar ? Color.Yellow : Color.White;
+                carDrawer[i].Manipulator.SetTransform(car.GetTransform(height + hLayer));
+                carDrawer[i].TintColor = car == bestCar ? bestCarColor : carColor;
             }
+
+            bestCar = cars.MaxBy(c => c.FittnessValue);
         }
         private void DrawMarkings()
         {
@@ -592,16 +596,11 @@ namespace AISamples.Common
             return (fStart.Position, fStart.Direction);
         }
 
-        public void AddCar(Car car, bool isBestCar = false)
+        public void AddCar(Car car)
         {
             if (cars.Contains(car))
             {
                 return;
-            }
-
-            if (isBestCar)
-            {
-                bestCar = car;
             }
 
             cars.Add(car);
@@ -626,10 +625,16 @@ namespace AISamples.Common
             laneGuides.Clear();
             markings.Clear();
 
-            cars.Clear();
+            ClearTraffic();
 
             worldChanged = true;
             Version = Guid.NewGuid();
+        }
+        public void ClearTraffic()
+        {
+            cars.Clear();
+
+            bestCar = null;
         }
     }
 }

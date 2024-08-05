@@ -42,6 +42,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
         private GeometryColorDrawer<Triangle> roadDrawer = null;
         private GeometryColorDrawer<Line3D> roadLaneDrawer = null;
         private Model terrain = null;
+        private float carScale = 1f;
         private ModelInstanced carModels = null;
         private ModelInstanced trafficModels = null;
 
@@ -91,6 +92,8 @@ ESC - EXIT";
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color3.White, Color3.Black, true));
         }
 
         public override void Initialize()
@@ -238,29 +241,34 @@ ESC - EXIT";
         }
         private async Task InitializeCars()
         {
-            var geo = GeometryUtil.CreateBox(Topology.TriangleList, carWidth, carHeight, carLength);
-            var mat = MaterialPhongContent.Default;
-            mat.IsTransparent = true;
-
             var cDesc = new ModelInstancedDescription()
             {
                 Instances = maxCarInstances,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo, mat)),
-                BlendMode = BlendModes.Alpha,
+                Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
+                BlendMode = BlendModes.OpaqueAlpha,
                 StartsVisible = false,
             };
-            carModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Cars", "Cars", cDesc);
+            carModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
+                nameof(carModels),
+                nameof(carModels), 
+                cDesc);
 
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = maxTrafficInstances,
                 CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromContentData(ContentData.GenerateTriangleList(geo, mat)),
-                BlendMode = BlendModes.Alpha,
+                Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
+                BlendMode = BlendModes.OpaqueAlpha,
                 StartsVisible = false,
             };
-            trafficModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Traffic", "Traffic", tDesc);
+            trafficModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
+                nameof(trafficModels),
+                nameof(trafficModels),
+                tDesc);
+
+            var bbox = carModels[0].GetBoundingBox();
+            carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
 
             cars = new Car[maxCarInstances];
             traffic = new Car[maxTrafficInstances];
@@ -618,7 +626,7 @@ ESC - EXIT";
             if (c != null)
             {
                 bestCar = c;
-                carFollower.Car = bestCar;
+                carFollower.Car = () => bestCar;
             }
         }
 
@@ -652,6 +660,7 @@ ESC - EXIT";
             for (int i = 0; i < cars.Length; i++)
             {
                 cars[i] = new(carWidth, carHeight, carLength, AgentControlTypes.AI, 1, 0.5f);
+                cars[i].SetScale(carScale);
 
                 if (!mutate)
                 {
@@ -666,11 +675,13 @@ ESC - EXIT";
 
                 cars[i].Brain.Mutate(0.1f);
             }
-            carFollower.Car = bestCar = cars[0];
+            bestCar = cars[0];
+            carFollower.Car = () => bestCar;
 
             for (int i = 0; i < traffic.Length; i++)
             {
                 traffic[i] = new(carWidth, carHeight, carLength, AgentControlTypes.Dummy, 0.5f, 0.25f);
+                traffic[i].SetScale(carScale);
 
                 var lanePos = road.GetLaneCenter(i % traffic.Length);
                 lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carLength * 3);

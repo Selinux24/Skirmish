@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System;
 
 namespace AISamples.Common.Agents
 {
@@ -8,20 +9,21 @@ namespace AISamples.Common.Agents
         private readonly float distance = distance;
         private readonly float height = height;
 
-        public Car Car { get; set; }
+        public Func<Car> Car { get; set; }
         public Vector3 Position { get; private set; }
         public Vector3 Interest { get; private set; }
         public float Velocity { get; set; }
 
         public void Update(IGameTime gameTime)
         {
-            if (Car == null)
+            var car = Car?.Invoke();
+            if (car == null)
             {
                 return;
             }
 
-            var p = Car.GetPosition();
-            var d = -Car.GetDirection();
+            var p = car.GetPosition();
+            var d = -car.GetDirection();
 
             var d3 = new Vector3(d.X, 0f, d.Y) * distance;
             d3.Y = height;

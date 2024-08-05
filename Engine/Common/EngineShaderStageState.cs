@@ -28,6 +28,11 @@ namespace Engine.Common
         /// </summary>
         public IEnumerable<T> GetResources()
         {
+            if(resources.Count == 0)
+            {
+                return [];
+            }
+
             int maxSlot = resources.Keys.Max();
 
             T[] values = new T[maxSlot + 1];

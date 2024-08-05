@@ -36,6 +36,7 @@ namespace AISamples.Common.Agents
         public Sensor Sensor { get; }
         public NeuralNetwork Brain { get; }
         public bool Damaged { get; private set; } = false;
+        public float FittnessValue { get; set; } = 0;
 
         public Car(float width, float height, float depth, AgentControlTypes controlType, float maxSpeed = 3f, float maxReverseSpeed = 1.5f)
         {
@@ -143,9 +144,10 @@ namespace AISamples.Common.Agents
                 angle += rot * MathF.Sign(speed);
             }
 
-            direction = new Vector2(MathF.Sin(angle), MathF.Cos(angle));
-            x += direction.X * speed;
-            y += direction.Y * speed;
+            direction = new Vector2(MathF.Sin(angle), MathF.Cos(angle)) * speed;
+            x += direction.X;
+            y += direction.Y;
+            FittnessValue += direction.LengthSquared();
         }
         private bool AssessDamage(Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {
@@ -219,9 +221,11 @@ namespace AISamples.Common.Agents
         {
             return trnBox;
         }
-        public Matrix GetTransform()
+        public Matrix GetTransform(float height = 0)
         {
-            return Matrix.Scaling(scale) * trnBox.Transformation;
+            var trn = Matrix.RotationY(angle) * Matrix.Translation(x, height, y);
+
+            return Matrix.Scaling(scale) * trn;
         }
     }
 }

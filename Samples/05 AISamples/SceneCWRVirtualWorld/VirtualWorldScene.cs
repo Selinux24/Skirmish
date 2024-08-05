@@ -57,6 +57,7 @@ WASD - MOVE CAMERA
 SPACE - MOVE CAMERA UP
 C - MOVE CAMERA DOWN
 MOUSE - ROTATE CAMERA
+F - TOGGLE CAR FOLLOWING
 ESC - EXIT";
         private bool showHelp = false;
 
@@ -71,10 +72,15 @@ ESC - EXIT";
         private const float carWidth = 8;
         private const float carHeight = 6;
         private const float carLength = 15;
-        private const int maxCarInstances = 10;
-        private readonly Car bestCar = new(carWidth, carHeight, carLength, AgentControlTypes.Player, 1, 0.2f);
+        private const float carMaxSpeed = 1f;
+        private const float carMaxReverseSpeed = 0.2f;
+        private const int maxCarInstances = 100;
+        private const float carMutationDelta = 0.2f;
         private float carScale = 1f;
         private ModelInstanced carDrawer = null;
+
+        private bool followCar = false;
+        private readonly AgentFollower carFollower = new(100, 50);
 
         public VirtualWorldScene(Game game) : base(game)
         {
@@ -237,7 +243,6 @@ ESC - EXIT";
                 cDesc);
 
             var bbox = carDrawer[0].GetBoundingBox();
-
             carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
@@ -292,10 +297,7 @@ ESC - EXIT";
                 ToggleTools();
             }
 
-            if (Game.Input.KeyJustReleased(Keys.F5))
-            {
-                ResetCars();
-            }
+            UpdateInputCars();
 
             UpdateInputCamera(gameTime);
 
@@ -317,6 +319,22 @@ ESC - EXIT";
             }
         }
         private void UpdateInputCamera(IGameTime gameTime)
+        {
+            if (!followCar)
+            {
+                Camera.Following = null;
+
+                UpdateInputCameraManual(gameTime);
+
+                return;
+            }
+
+            if (Camera.Following == null)
+            {
+                Camera.Following = carFollower;
+            }
+        }
+        private void UpdateInputCameraManual(IGameTime gameTime)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
@@ -402,23 +420,75 @@ ESC - EXIT";
 
             tools.Draw();
         }
-        private void ResetCars()
+        private void UpdateInputCars()
+        {
+            if (Game.Input.KeyJustReleased(Keys.F5))
+            {
+                AddCar(false);
+            }
+            if (Game.Input.KeyJustReleased(Keys.F6))
+            {
+                AddCar(true);
+            }
+            if (Game.Input.KeyJustReleased(Keys.F7))
+            {
+                AddCars(maxCarInstances);
+            }
+            if (Game.Input.KeyJustReleased(Keys.F8))
+            {
+                SaveBestCar();
+            }
+            if (Game.Input.KeyJustReleased(Keys.F))
+            {
+                ToggleFollow();
+            }
+        }
+        private void AddCars(int count)
+        {
+            world.ClearTraffic();
+
+            for (int i = 0; i < count; i++)
+            {
+                AddCar(i != 0);
+            }
+        }
+        private void AddCar(bool mutate)
         {
             if (!world.Populated)
             {
                 return;
             }
 
-            bestCar.Reset();
-            bestCar.Brain.Load(bestCarFileName);
+            var car = new Car(carWidth, carHeight, carLength, AgentControlTypes.AI, carMaxSpeed, carMaxReverseSpeed);
+            car.Brain.Load(bestCarFileName);
+            if (mutate)
+            {
+                car.Brain.Mutate(carMutationDelta);
+            }
 
             (Vector2 start, Vector2 dir) = world.GetStart();
-            bestCar.SetPosition(start);
-            bestCar.SetDirection(dir);
+            car.SetPosition(start);
+            car.SetDirection(dir);
 
-            bestCar.SetScale(carScale);
+            car.SetScale(carScale);
 
-            world.AddCar(bestCar, true);
+            world.AddCar(car);
+
+            carFollower.Car = world.GetBestCar;
+        }
+        private void ToggleFollow()
+        {
+            followCar = !followCar;
+        }
+        private void SaveBestCar()
+        {
+            var bestCar = world.GetBestCar();
+            if (bestCar == null)
+            {
+                return;
+            }
+
+            bestCar.Brain.Save(bestCarFileName);
         }
 
         public override void GameGraphicsResized()
