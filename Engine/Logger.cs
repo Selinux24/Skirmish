@@ -214,17 +214,19 @@ namespace Engine
                 return;
             }
 
-            log[logIndex] = log[logIndex] ?? new LogEntry();
-            log[logIndex].EventDate = DateTime.Now;
-            log[logIndex].CallerTypeName = callerTypeName;
-            log[logIndex].LogLevel = logLevel;
-            log[logIndex].Text = text;
-            log[logIndex].Exception = ex;
+            var logEntry = log[logIndex] ?? new LogEntry();
+            logEntry.EventDate = DateTime.Now;
+            logEntry.CallerTypeName = callerTypeName;
+            logEntry.LogLevel = logLevel;
+            logEntry.Text = text;
+            logEntry.Exception = ex;
+
+            log[logIndex] = logEntry;
 
             if (logLevel >= ConsoleLogLevel)
             {
                 // Console logger
-                Console.Write(DefaultFormatter(log[logIndex]));
+                Console.Write(DefaultFormatter(logEntry));
             }
 
             logIndex++;
@@ -236,7 +238,7 @@ namespace Engine
         /// </summary>
         public static bool HasErrors()
         {
-            return Array.Exists(log, l => l.LogLevel == LogLevel.Error);
+            return Array.Exists(log, l => l?.LogLevel == LogLevel.Error);
         }
 
         /// <summary>
