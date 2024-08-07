@@ -4,6 +4,7 @@ using Engine;
 using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
@@ -17,6 +18,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private const float hDelta = 0.1f;
 
         private GeometryColorDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> graphHighlightsDrawer = null;
 
         private readonly World world = world;
         private readonly float height = height;
@@ -33,6 +35,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private float dragTime = 0;
         private Vector2 mouse = Vector2.Zero;
         private bool visible = true;
+        private Guid graphVersion = world.Graph.Version;
 
         public bool Visible
         {
@@ -50,6 +53,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private void SetVisible()
         {
             graphDrawer.Visible = visible;
+            graphHighlightsDrawer.Visible = visible;
 
             if (!visible)
             {
@@ -65,7 +69,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
             var descT = new GeometryColorDrawerDescription<Triangle>()
             {
-                Count = 20000,
+                Count = 100000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
@@ -75,6 +79,12 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 nameof(graphDrawer),
                 descT,
                 Scene.LayerEffects + 3);
+
+            graphHighlightsDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+                nameof(graphHighlightsDrawer),
+                nameof(graphHighlightsDrawer),
+                descT,
+                Scene.LayerEffects + 4);
         }
 
         public void UpdateInputEditor(IGameTime gameTime)
@@ -187,41 +197,48 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
         public void Draw()
         {
-            graphDrawer.Clear();
-
-            foreach (var point in world.Graph.GetPoints())
+            if (graphVersion != world.Graph.Version)
             {
-                DrawPoint(point, height + hLayer, pointRadius, graphColor);
+                graphDrawer.Clear();
+
+                foreach (var point in world.Graph.GetPoints())
+                {
+                    DrawPoint(point, height + hLayer, pointRadius, graphDrawer, graphColor);
+                }
+
+                foreach (var segment in world.Graph.GetSegments())
+                {
+                    DrawSegment(segment, height + hLayer, lineThickness, graphDrawer, graphColor);
+                }
+
+                graphVersion = world.Graph.Version;
             }
 
-            foreach (var segment in world.Graph.GetSegments())
-            {
-                DrawSegment(segment, height + hLayer, lineThickness, graphColor);
-            }
+            graphHighlightsDrawer.Clear();
 
             if (drawHovered && hovered.HasValue)
             {
-                DrawPoint(hovered.Value, height + hLayer + 1, pointRadius * 0.4f, highlightColor);
+                DrawPoint(hovered.Value, height + hLayer + 1, pointRadius * 0.4f, graphHighlightsDrawer, highlightColor);
             }
             drawHovered = false;
 
             if (selected.HasValue)
             {
-                DrawPoint(selected.Value, height + hLayer + 1, pointRadius * 0.6f, highlightColor);
+                DrawPoint(selected.Value, height + hLayer + 1, pointRadius * 0.6f, graphHighlightsDrawer, highlightColor);
 
-                DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height + hLayer, lineThickness, graphColor);
+                DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height + hLayer, lineThickness, graphHighlightsDrawer, graphColor);
             }
         }
-        private void DrawPoint(Vector2 point, float height, float strokeSize, Color4 tColor)
+        private static void DrawPoint(Vector2 point, float height, float strokeSize, GeometryColorDrawer<Triangle> drawer, Color4 tColor)
         {
             var tp = new Vector3(point.X, height + hDelta, point.Y);
             var t = GeometryUtil.CreateCircle(Topology.TriangleList, tp, strokeSize, 32);
-            graphDrawer.AddPrimitives(tColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(tColor, Triangle.ComputeTriangleList(t));
         }
-        private void DrawSegment(Segment2 segment, float height, float lineThickness, Color4 lineColor)
+        private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Triangle> drawer, Color4 lineColor)
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, segment.P1, segment.P2, lineThickness, height + hDelta);
-            graphDrawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));
         }
     }
 }

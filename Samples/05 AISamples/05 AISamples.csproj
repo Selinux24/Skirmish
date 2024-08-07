@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Common\Resources\dirt002.dds" />
     <None Remove="Common\Resources\Markings.png" />
+    <None Remove="Common\Resources\normal001.dds" />
     <None Remove="Common\Resources\Traffic\taxi.json" />
     <None Remove="Common\Resources\Traffic\taxi.mtl" />
     <None Remove="Common\Resources\Traffic\taxi.obj" />
@@ -31,7 +33,13 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Content Include="Common\Resources\dirt002.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Common\Resources\Markings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\Resources\normal001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Common\Resources\Traffic\taxi.mtl">

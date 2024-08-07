@@ -4,10 +4,11 @@ using System;
 
 namespace AISamples.Common.Primitives
 {
-    struct Segment2(Vector2 p1, Vector2 p2) : IEquatable<Segment2>
+    struct Segment2(Vector2 p1, Vector2 p2, bool oneWay = false) : IEquatable<Segment2>
     {
         public Vector2 P1 { get; set; } = p1;
         public Vector2 P2 { get; set; } = p2;
+        public bool OneWay { get; set; } = oneWay;
         public readonly float Length => Vector2.Distance(P1, P2);
         public readonly Vector2 Direction => Vector2.Normalize(P2 - P1);
 

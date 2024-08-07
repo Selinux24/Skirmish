@@ -12,6 +12,7 @@ namespace AISamples.Common.Agents
         private float y;
         private readonly OrientedBoundingBox box;
         private OrientedBoundingBox trnBox;
+        private readonly float radius;
         private readonly Vector3[] points = new Vector3[4];
 
         private float speed = 0;
@@ -44,6 +45,7 @@ namespace AISamples.Common.Agents
             ControlType = controlType;
             this.maxSpeed = maxSpeed;
             this.maxReverseSpeed = -MathF.Abs(maxReverseSpeed);
+            radius = MathF.Max(maxSpeed, maxReverseSpeed) + MathF.Max(width, depth);
 
             Controls = new(controlType);
 
@@ -84,9 +86,11 @@ namespace AISamples.Common.Agents
             Move(time);
             CreatePoints();
 
+
             if (!Damaged)
             {
-                Damaged = AssessDamage(roadBorders, traffic, damageTraffic);
+                var damageBorders = Array.FindAll(roadBorders, b => b.DistanceToPoint(new(x, y)) <= radius);
+                Damaged = AssessDamage(damageBorders, traffic, damageTraffic);
             }
 
             if (Sensor == null)
@@ -94,7 +98,9 @@ namespace AISamples.Common.Agents
                 return;
             }
 
-            Sensor.Update(roadBorders, traffic);
+            var rayLength = Sensor.GetRayLength();
+            var closeBorders = Array.FindAll(roadBorders, b => b.DistanceToPoint(new(x, y)) <= rayLength);
+            Sensor.Update(closeBorders, traffic);
 
             if (Brain == null)
             {
@@ -203,7 +209,7 @@ namespace AISamples.Common.Agents
         }
         public void SetDirection(Vector2 direction)
         {
-            angle = Utils.Angle(direction.Y, direction.X) - MathUtil.PiOverTwo;
+            angle = -Utils.Angle(direction.Y, direction.X) + MathUtil.PiOverTwo;
         }
         public void SetScale(float scale)
         {

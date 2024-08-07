@@ -5,6 +5,8 @@ namespace AISamples.Common
     static class Constants
     {
         public const string CommonResourcesFolder = "Common/Resources/";
+        public const string TerrainDiffuseTexture = CommonResourcesFolder + "dirt002.dds";
+        public const string TerrainNormalMapTexture = CommonResourcesFolder + "normal001.dds";
         public const string MarkingsTexture = CommonResourcesFolder + "markings.png";
         public const string TreesResourcesFolder = CommonResourcesFolder + "Tree/";
         public const string TreesModel = "Tree1.json";

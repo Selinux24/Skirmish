@@ -113,6 +113,13 @@ namespace AISamples.Common
             DrawGraph();
             worldChanged = false;
         }
+        public void GenerateFromGraph(Graph graph)
+        {
+            this.graph = graph;
+            graphVersion = graph.Version;
+
+            Generate();
+        }
 
         public void Generate()
         {
@@ -300,9 +307,9 @@ namespace AISamples.Common
         {
             var descT = new GeometryColorDrawerDescription<Triangle>()
             {
-                Count = 20000,
+                Count = 500000,
                 DepthEnabled = true,
-                BlendMode = BlendModes.Alpha,
+                BlendMode = BlendModes.Opaque,
             };
 
             roadDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
@@ -344,7 +351,7 @@ namespace AISamples.Common
 
             var descB = new GeometryDrawerDescription<VertexPositionNormalTexture>()
             {
-                Count = 100000,
+                Count = 500000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
                 Topology = Topology.TriangleList,
@@ -364,7 +371,7 @@ namespace AISamples.Common
 
             var descS2d = new GeometryDrawerDescription<VertexPositionTexture>()
             {
-                Count = 100000,
+                Count = 500000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Transparent,
                 Topology = Topology.TriangleList,
@@ -385,9 +392,9 @@ namespace AISamples.Common
 
             var descS3d = new GeometryDrawerDescription<VertexPositionTexture>()
             {
-                Count = 100000,
+                Count = 500000,
                 DepthEnabled = true,
-                BlendMode = BlendModes.Alpha,
+                BlendMode = BlendModes.Opaque,
                 Topology = Topology.TriangleList,
                 Images = images,
                 Material = material3d,
@@ -436,8 +443,11 @@ namespace AISamples.Common
             {
                 if (i >= cars.Count || cars[i].Damaged)
                 {
-                    carDrawer[i].Manipulator.SetTransform(Matrix.Translation(Vector3.One * 10000000f));
-                    carDrawer[i].TintColor = Color.Black;
+                    if (carDrawer[i].TintColor != Color.Black)
+                    {
+                        carDrawer[i].Manipulator.SetTransform(Matrix.Translation(Vector3.One * 10000000f));
+                        carDrawer[i].TintColor = Color.Black;
+                    }
 
                     continue;
                 }
@@ -450,7 +460,9 @@ namespace AISamples.Common
                 carDrawer[i].TintColor = car == bestCar ? bestCarColor : carColor;
             }
 
-            bestCar = cars.MaxBy(c => c.FittnessValue);
+            bestCar = cars.Where(c => c.Damaged == false).MaxBy(c => c.FittnessValue);
+
+            carDrawer.Visible = cars.Count > 0;
         }
         private void DrawMarkings()
         {
@@ -494,8 +506,14 @@ namespace AISamples.Common
             // Draw road marks
             foreach (var segment in graph.GetSegments())
             {
-                var dashes = Utils.Divide(segment, 5, 5);
+                if (segment.OneWay)
+                {
+                    DrawEnvelope(new Envelope(segment, 2, 1), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
 
+                    continue;
+                }
+
+                var dashes = Utils.Divide(segment, 5, 5);
                 foreach (var dash in dashes)
                 {
                     DrawEnvelope(new Envelope(dash, 2, 1), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
@@ -592,6 +610,18 @@ namespace AISamples.Common
             {
                 return (Vector2.Zero, Vector2.UnitY);
             }
+
+            return (fStart.Position, fStart.Direction);
+        }
+        public (Vector2 start, Vector2 dir) GetRandomStart()
+        {
+            var fStartList = markings.OfType<Start>();
+            if (!fStartList.Any())
+            {
+                return (Vector2.Zero, Vector2.UnitY);
+            }
+
+            var fStart = fStartList.ElementAt(Helper.RandomGenerator.Next(0, fStartList.Count() - 1));
 
             return (fStart.Position, fStart.Direction);
         }

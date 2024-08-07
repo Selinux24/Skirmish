@@ -29,7 +29,7 @@ namespace AISamples.SceneCWRVirtualWorld
     class VirtualWorldScene : Scene
     {
         private const int layerHUD = 99;
-        private const float spaceSize = 1500f;
+        private const float spaceSize = 150000f;
         private const string resourcesFolder = "SceneCWRVirtualWorld";
         private const string bestCarFileName = "bestCar.json";
 
@@ -165,6 +165,7 @@ ESC - EXIT";
 
             List<UIButton> buttons = [];
 
+            buttons.Add(await InitializeButton("editorLoadOSMButton", "LOAD OSM", editorButtonDesc, LoadFromOpenStreetMap));
             buttons.Add(await InitializeButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorld));
             buttons.Add(await InitializeButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorld));
             buttons.Add(null);
@@ -201,18 +202,24 @@ ESC - EXIT";
         private async Task InitializeTerrain()
         {
             float l = spaceSize;
+            int p = 100;
             float h = 0f;
+            float imgScale = 500f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreateXZGrid(l, l, p, p, h, imgScale);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
+            mat.DiffuseTexture = Constants.TerrainDiffuseTexture;
+            mat.NormalMapTexture = Constants.TerrainNormalMapTexture;
+            mat.IsTransparent = false;
 
             var desc = new ModelDescription()
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(geo, mat),
+                StartsVisible = false,
             };
 
             terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
@@ -234,7 +241,7 @@ ESC - EXIT";
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
                 BlendMode = BlendModes.OpaqueAlpha,
-                StartsVisible = true,
+                StartsVisible = false,
             };
 
             carDrawer = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
@@ -256,21 +263,33 @@ ESC - EXIT";
                 }
 
                 Game.Exit();
+
+                return;
             }
 
             UpdateLayout();
 
-            float s = spaceSize * 0.6f;
-            Camera.Goto(new Vector3(0, s, -s));
-            Camera.LookTo(Vector3.Zero);
-            Camera.FarPlaneDistance = spaceSize * 1.5f;
-            Camera.MovementDelta = spaceSize * 0.2f;
+            float sp = MathF.Min(1500f, spaceSize);
+            Camera.FarPlaneDistance = sp * 1.5f;
+            Camera.MovementDelta = sp * 0.2f;
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
+            MoveCameraTo(Vector3.Zero);
+
+            Lights.EnableFog(sp, Camera.FarPlaneDistance, GameEnvironment.Background);
 
             gameReady = true;
             toolsReady = true;
 
+            terrain.Visible = true;
+
             ToggleTools();
+        }
+        private void MoveCameraTo(Vector3 position)
+        {
+            float sp = MathF.Min(1500f, spaceSize);
+            float s = sp * 0.1f;
+            Camera.Goto(new Vector3(0, s, s) + position);
+            Camera.LookTo(position);
         }
 
         public override void Update(IGameTime gameTime)
@@ -534,6 +553,8 @@ ESC - EXIT";
             {
                 var worldFile = SerializationHelper.DeserializeJsonFromFile<WorldFile>(dlg.FileName);
                 world.LoadFromWorldFile(worldFile);
+                var (start, _) = world.GetStart();
+                MoveCameraTo(new Vector3(start.X, 0, start.Y));
             }
         }
         private void SaveWorld()
@@ -550,6 +571,23 @@ ESC - EXIT";
             {
                 var worldFile = World.FromWorld(world);
                 SerializationHelper.SerializeJsonToFile(worldFile, dlg.FileName);
+            }
+        }
+        private void LoadFromOpenStreetMap()
+        {
+            using System.Windows.Forms.OpenFileDialog dlg = new()
+            {
+                Filter = "Open Street Map data (*.json)|*.json",
+                FilterIndex = 1,
+                RestoreDirectory = true,
+            };
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var graph = Osm.ParseRoads(dlg.FileName, world.RoadWidth / 3f);
+                world.GenerateFromGraph(graph);
+                var (start, _) = world.GetStart();
+                MoveCameraTo(new Vector3(start.X, 0, start.Y));
             }
         }
     }

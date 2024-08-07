@@ -67,6 +67,11 @@ namespace AISamples.Common
             return MathF.Atan2(y, x);
         }
 
+        public static float InvLerp(float a, float b, float value)
+        {
+            return (value - a) / (b - a);
+        }
+
         public static Vector2 Translate(Vector2 p, float angle, float radius)
         {
             return new Vector2(

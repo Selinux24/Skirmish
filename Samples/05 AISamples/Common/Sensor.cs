@@ -87,6 +87,10 @@ namespace AISamples.Common
         {
             return rayCount;
         }
+        public float GetRayLength()
+        {
+            return rayLength;
+        }
         public Segment2[] GetRays()
         {
             return [.. rays];

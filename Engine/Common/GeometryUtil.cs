@@ -2725,7 +2725,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateXZPlane(float sizeX, float sizeZ, float height)
         {
-            return CreateXZPlane(Vector3.Zero, sizeX, sizeZ, height);
+            return CreateXZPlane(new Vector3(0, height, 0), sizeX, sizeZ);
         }
         /// <summary>
         /// Creates a XZ plane
@@ -2733,24 +2733,20 @@ namespace Engine.Common
         /// <param name="center">Plane center</param>
         /// <param name="sizeX">Plane X size</param>
         /// <param name="sizeZ">Plane Z size</param>
-        /// <param name="height">Plane height</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateXZPlane(Vector3 center, float sizeX, float sizeZ, float height)
+        public static GeometryDescriptor CreateXZPlane(Vector3 center, float sizeX, float sizeZ)
         {
             Vector3[] vertices =
             [
-                new (-sizeX*0.5f, +height, -sizeZ*0.5f),
-                new (-sizeX*0.5f, +height, +sizeZ*0.5f),
-                new (+sizeX*0.5f, +height, -sizeZ*0.5f),
-                new (+sizeX*0.5f, +height, +sizeZ*0.5f),
+                new (-sizeX*0.5f, 0f, -sizeZ*0.5f),
+                new (-sizeX*0.5f, 0f, +sizeZ*0.5f),
+                new (+sizeX*0.5f, 0f, -sizeZ*0.5f),
+                new (+sizeX*0.5f, 0f, +sizeZ*0.5f),
             ];
 
             if (center != Vector3.Zero)
             {
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = vertices[i] + center;
-                }
+                vertices = vertices.Select(v => v + center).ToArray();
             }
 
             Vector3[] normals =
@@ -2915,6 +2911,109 @@ namespace Engine.Common
                 Vertices = vertices,
                 Uvs = uvs,
                 Indices = [.. indexList],
+            };
+        }
+
+        /// <summary>
+        /// Creates a XZ grid
+        /// </summary>
+        /// <param name="sizeX">Grid X size</param>
+        /// <param name="sizeZ">Grid Z size</param>
+        /// <param name="partitionsX">Number of partitions in X</param>
+        /// <param name="partitionsZ">Number of partitions in Z</param>
+        /// <param name="height">Grid height</param>
+        /// <param name="uvScale">Uv scale</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZGrid(float sizeX, float sizeZ, int partitionsX, int partitionsZ, float height = 0, float uvScale = 1f)
+        {
+            return CreateXZGrid(new(0, height, 0), sizeX, sizeZ, partitionsX, partitionsZ, uvScale);
+        }
+        /// <summary>
+        /// Creates a XZ grid
+        /// </summary>
+        /// <param name="center">Grid center</param>
+        /// <param name="sizeX">Grid X size</param>
+        /// <param name="sizeZ">Grid Z size</param>
+        /// <param name="partitionsX">Number of partitions in X</param>
+        /// <param name="partitionsZ">Number of partitions in Z</param>
+        /// <param name="uvScale">Uv scale</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZGrid(Vector3 center, float sizeX, float sizeZ, int partitionsX, int partitionsZ, float uvScale = 1f)
+        {
+            List<Vector3> vertices = [];
+            List<Vector3> normals = [];
+            List<Vector2> uvs = [];
+            List<uint> indices = [];
+
+            uint index = 0;
+
+            for (int z = 0; z < partitionsZ; z++)
+            {
+                float sz = z / (float)partitionsZ;
+                float z0 = -sizeZ * 0.5f + (sizeZ * sz) + center.Z;
+                float z1 = -sizeZ * 0.5f + (sizeZ * (sz + 1.0f / partitionsZ)) + center.Z;
+
+                for (int x = 0; x < partitionsX; x++)
+                {
+                    float sx = x / (float)partitionsX;
+                    float x0 = -sizeX * 0.5f + (sizeX * sx) + center.X;
+                    float x1 = -sizeX * 0.5f + (sizeX * (sx + 1.0f / partitionsX)) + center.X;
+
+                    //Calculate points of the current grid
+                    Vector3 v0 = new(x0, center.Y, z0);
+                    Vector3 v1 = new(x1, center.Y, z0);
+                    Vector3 v2 = new(x0, center.Y, z1);
+                    Vector3 v3 = new(x1, center.Y, z1);
+
+                    vertices.AddRange(
+                    [
+                        v0,
+                        v1,
+                        v2,
+                        v3,
+                    ]);
+
+                    normals.AddRange(
+                    [
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                    ]);
+
+                    //Interpolate uv values of the node
+                    Vector2 uv0 = new(sx, sz);
+                    Vector2 uv1 = new(sx + 1.0f / partitionsX, sz);
+                    Vector2 uv2 = new(sx, sz + 1.0f / partitionsZ);
+                    Vector2 uv3 = new(sx + 1.0f / partitionsX, sz + 1.0f / partitionsZ);
+
+                    uvs.AddRange(
+                    [
+                        uv0 * uvScale,
+                        uv1 * uvScale,
+                        uv2 * uvScale,
+                        uv3 * uvScale,
+                    ]);
+
+                    uint i0 = index++;
+                    uint i1 = index++;
+                    uint i2 = index++;
+                    uint i3 = index++;
+
+                    indices.AddRange(
+                    [
+                        i0, i2, i1,
+                        i3, i1, i2,
+                    ]);
+                }
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Normals = normals,
+                Uvs = uvs,
+                Indices = indices,
             };
         }
 

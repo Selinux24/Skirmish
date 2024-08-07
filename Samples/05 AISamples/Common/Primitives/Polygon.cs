@@ -1,4 +1,5 @@
 ﻿using AISamples.Common.Persistence;
+using Engine;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -56,17 +57,26 @@ namespace AISamples.Common.Primitives
         {
             Break(polygons);
 
-            for (int i = 0; i < polygons.Length; i++)
-            {
-                foreach (var segment in polygons[i].segments)
+            var segments = polygons
+                .AsParallel()
+                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                .SelectMany((p, i) =>
                 {
-                    bool keep = KeepSegment(i, segment, polygons);
-                    if (keep)
+                    List<Segment2> segments = [];
+
+                    foreach (var segment in p.segments)
                     {
-                        yield return segment;
+                        bool keep = KeepSegment(i, segment, polygons);
+                        if (keep)
+                        {
+                            segments.Add(segment);
+                        }
                     }
-                }
-            }
+
+                    return segments;
+                });
+
+            return segments.ToArray();
         }
         private static bool KeepSegment(int polyIndex, Segment2 segment, Polygon[] polygons)
         {
