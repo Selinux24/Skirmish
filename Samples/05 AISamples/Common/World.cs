@@ -460,7 +460,7 @@ namespace AISamples.Common
                 carDrawer[i].TintColor = car == bestCar ? bestCarColor : carColor;
             }
 
-            bestCar = cars.Where(c => c.Damaged == false).MaxBy(c => c.FittnessValue);
+            bestCar = cars.Where(c => !c.Damaged).MaxBy(c => c.FittnessValue);
 
             carDrawer.Visible = cars.Count > 0;
         }

@@ -584,8 +584,8 @@ ESC - EXIT";
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                var graph = Osm.ParseRoads(dlg.FileName, world.RoadWidth / 3f);
-                world.GenerateFromGraph(graph);
+                var osmGraph = Osm.ParseRoads(dlg.FileName, 10f);
+                world.GenerateFromGraph(osmGraph);
                 var (start, _) = world.GetStart();
                 MoveCameraTo(new Vector3(start.X, 0, start.Y));
             }

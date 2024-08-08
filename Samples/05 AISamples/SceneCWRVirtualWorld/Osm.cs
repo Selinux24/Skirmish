@@ -18,7 +18,7 @@ namespace AISamples.SceneCWRVirtualWorld
         /// <summary>
         /// Element list
         /// </summary>
-        public OsmNode[] Elements;
+        public OsmNode[] Elements { get; set; }
     }
 
     /// <summary>
@@ -29,27 +29,27 @@ namespace AISamples.SceneCWRVirtualWorld
         /// <summary>
         /// Node type
         /// </summary>
-        public string Type;
+        public string Type { get; set; }
         /// <summary>
         /// Node id
         /// </summary>
-        public long Id;
+        public long Id { get; set; }
         /// <summary>
         /// Latitude value
         /// </summary>
-        public float Lat;
+        public float Lat { get; set; }
         /// <summary>
         /// Longitud value
         /// </summary>
-        public float Lon;
+        public float Lon { get; set; }
         /// <summary>
         /// Node id list
         /// </summary>
-        public long[] Nodes;
+        public long[] Nodes { get; set; }
         /// <summary>
         /// Tags
         /// </summary>
-        public OsmTags Tags;
+        public OsmTags Tags { get; set; }
     }
 
     /// <summary>
@@ -60,11 +60,11 @@ namespace AISamples.SceneCWRVirtualWorld
         /// <summary>
         /// Number of lanes
         /// </summary>
-        public string Lanes;
+        public string Lanes { get; set; }
         /// <summary>
         /// One way street
         /// </summary>
-        public string OneWay;
+        public string OneWay { get; set; }
     }
 
     /// <summary>

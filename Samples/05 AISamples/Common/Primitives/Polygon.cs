@@ -57,26 +57,25 @@ namespace AISamples.Common.Primitives
         {
             Break(polygons);
 
-            var segments = polygons
+            return polygons
                 .AsParallel()
                 .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                 .SelectMany((p, i) =>
                 {
-                    List<Segment2> segments = [];
+                    List<Segment2> res = [];
 
                     foreach (var segment in p.segments)
                     {
                         bool keep = KeepSegment(i, segment, polygons);
                         if (keep)
                         {
-                            segments.Add(segment);
+                            res.Add(segment);
                         }
                     }
 
-                    return segments;
-                });
-
-            return segments.ToArray();
+                    return res;
+                })
+                .ToArray();
         }
         private static bool KeepSegment(int polyIndex, Segment2 segment, Polygon[] polygons)
         {
