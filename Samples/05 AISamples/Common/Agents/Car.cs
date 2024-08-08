@@ -27,6 +27,9 @@ namespace AISamples.Common.Agents
 
         private float scale = 1f;
 
+        private int stuckedFrames = 0;
+        private const int maxStuckedFrames = 600;
+
         public AgentControls Controls { get; }
         public bool Forward => !Damaged && Controls.Forward;
         public bool Reverse => !Damaged && Controls.Reverse;
@@ -37,6 +40,7 @@ namespace AISamples.Common.Agents
         public Sensor Sensor { get; }
         public NeuralNetwork Brain { get; }
         public bool Damaged { get; private set; } = false;
+        public bool Stucked { get; private set; } = false;
         public float FittnessValue { get; set; } = 0;
 
         public Car(float width, float height, float depth, AgentControlTypes controlType, float maxSpeed = 3f, float maxReverseSpeed = 1.5f)
@@ -85,7 +89,6 @@ namespace AISamples.Common.Agents
 
             Move(time);
             CreatePoints();
-
 
             if (!Damaged)
             {
@@ -154,6 +157,17 @@ namespace AISamples.Common.Agents
             x += direction.X;
             y += direction.Y;
             FittnessValue += direction.LengthSquared();
+
+            if (Forward == Reverse)
+            {
+                stuckedFrames++;
+            }
+            else
+            {
+                stuckedFrames = 0;
+            }
+
+            Stucked = stuckedFrames >= maxStuckedFrames;
         }
         private bool AssessDamage(Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {

@@ -63,6 +63,7 @@ namespace AISamples.Common
         private const float carLength = 15;
         private const float carMaxSpeed = 1f;
         private const float carMaxReverseSpeed = 0.2f;
+        private float carScale = 1f;
         private Car bestCar = null;
         private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
         private readonly Color4 carColor = new Color(252, 222, 200, 255);
@@ -458,6 +459,9 @@ namespace AISamples.Common
                 nameof(carDrawer),
                 cDesc);
 
+            var bbox = carDrawer[0].GetBoundingBox();
+            carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
+
             var sDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 1000,
@@ -529,7 +533,9 @@ namespace AISamples.Common
                 carDrawer[i].TintColor = car == bestCar ? bestCarColor : carColor;
             }
 
-            bestCar = cars.Where(c => !c.Damaged).MaxBy(c => c.FittnessValue);
+            cars.RemoveAll(c => c == null || c.Damaged || c.Stucked);
+
+            bestCar = cars.MaxBy(c => c.FittnessValue);
 
             carDrawer.Visible = cars.Count > 0;
 
@@ -750,11 +756,8 @@ namespace AISamples.Common
 
         public Car CreateCar(AgentControlTypes controlType, string brainFile, bool mutate = false, float mutationDelta = 0.1f)
         {
-            Car car = new(carWidth, carHeight, carLength, AgentControlTypes.AI, carMaxSpeed, carMaxReverseSpeed);
+            Car car = new(carWidth, carHeight, carLength, controlType, carMaxSpeed, carMaxReverseSpeed);
 
-            var bbox = carDrawer[0].GetBoundingBox();
-            float scale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
-            car.SetScale(scale);
 
             car.Brain.Load(brainFile);
             if (mutate)
@@ -765,6 +768,7 @@ namespace AISamples.Common
             (Vector2 start, Vector2 dir) = GetStart();
             car.SetPosition(start);
             car.SetDirection(dir);
+            car.SetScale(carScale);
 
             AddCar(car);
 

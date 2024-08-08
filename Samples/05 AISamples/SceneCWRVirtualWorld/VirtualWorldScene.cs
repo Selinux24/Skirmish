@@ -53,11 +53,17 @@ namespace AISamples.SceneCWRVirtualWorld
         private const string helpText = @"F1 - CLOSE THIS HELP
 F2 - TOGGLE TOOLS
 F5 - ADDS A CAR TO THE WORLD
+F6 - ADDS A MUTATED CAR
+F7 - ADDS N CARS PRESERVING FIRST BRAIN
+F8 - SAVE BEST CAR BRAIN
+F - TOGGLE BEST CAR FOLLOWING
+R - REMOVE BEST CAR
+
 WASD - MOVE CAMERA
 SPACE - MOVE CAMERA UP
 C - MOVE CAMERA DOWN
 MOUSE - ROTATE CAMERA
-F - TOGGLE CAR FOLLOWING
+
 ESC - EXIT";
         private bool showHelp = false;
 
@@ -93,7 +99,7 @@ ESC - EXIT";
             tools.AddEditor<LightsEditor>(EditorModes.Lights, 0);
             tools.AddEditor<CrossingsEditor>(EditorModes.Crossings, 0);
             tools.AddEditor<ParkingsEditor>(EditorModes.Parkings, 0);
-      
+
             carFollower.Car = world.GetBestCar;
         }
 
@@ -311,7 +317,7 @@ ESC - EXIT";
         }
         private void UpdateInputCamera(IGameTime gameTime)
         {
-            if (!followCar)
+            if (!followCar || world.GetBestCar() == null)
             {
                 Camera.Following = null;
 
@@ -433,6 +439,10 @@ ESC - EXIT";
             {
                 ToggleFollow();
             }
+            if (Game.Input.KeyJustReleased(Keys.R))
+            {
+                RemoveBestCar();
+            }
         }
         private void AddCars(int count)
         {
@@ -465,6 +475,14 @@ ESC - EXIT";
             }
 
             bestCar.Brain.Save(bestCarFileName);
+        }
+        private void RemoveBestCar()
+        {
+            var bestCar = world.GetBestCar();
+            if (bestCar != null)
+            {
+                world.RemoveCar(bestCar);
+            }
         }
 
         public override void GameGraphicsResized()

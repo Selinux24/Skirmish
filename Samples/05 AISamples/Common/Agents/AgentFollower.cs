@@ -8,6 +8,7 @@ namespace AISamples.Common.Agents
     {
         private readonly float distance = distance;
         private readonly float height = height;
+        private Car lastCar = null;
 
         public Func<Car> Car { get; set; }
         public Vector3 Position { get; private set; }
@@ -19,6 +20,9 @@ namespace AISamples.Common.Agents
             var car = Car?.Invoke();
             if (car == null)
             {
+                //Clears the last car
+                lastCar = car;
+
                 return;
             }
 
@@ -29,7 +33,19 @@ namespace AISamples.Common.Agents
             d3.Y = height;
 
             Interest = new Vector3(p.X, 0f, p.Y);
-            Position = Vector3.Lerp(Position, Interest + d3, 0.1f);
+
+            if (lastCar != car)
+            {
+                lastCar = car;
+
+                //Move camera to the new car
+                Position = Interest + d3;
+            }
+            else
+            {
+                //Interpolates the camera position
+                Position = Vector3.Lerp(Position, Interest + d3, 0.1f);
+            }
         }
     }
 }
