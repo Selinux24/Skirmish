@@ -2150,17 +2150,20 @@ namespace Engine.Common
         /// Creates a cylinder
         /// </summary>
         /// <param name="topology">Topology</param>
-        /// <param name="center">Center position</param>
+        /// <param name="center">Geometric center position</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 center, float radius, float height, int sliceCount)
         {
+            var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
+            var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
+
             return topology switch
             {
-                Topology.TriangleList => CreateCylinderTriangleList(center, radius, height, sliceCount),
-                Topology.LineList => CreateCylinderLineList(center, radius, height, sliceCount),
+                Topology.TriangleList => CreateCylinderTriangleList(bsePosition, capPosition, radius, sliceCount),
+                Topology.LineList => CreateCylinderLineList(bsePosition, capPosition, radius, sliceCount),
                 _ => throw new NotImplementedException()
             };
         }
@@ -2176,45 +2179,60 @@ namespace Engine.Common
             return CreateCylinder(topology, cylinder.Center, cylinder.Radius, cylinder.Height, sliceCount);
         }
         /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
+        {
+            return topology switch
+            {
+                Topology.TriangleList => CreateCylinderTriangleList(baseCenter, topCenter, radius, sliceCount),
+                Topology.LineList => CreateCylinderLineList(baseCenter, topCenter, radius, sliceCount),
+                _ => throw new NotImplementedException()
+            };
+        }
+        /// <summary>
         /// Creates the cylinder vertices
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top center</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
-        /// <returns></returns>
-        private static Vector3[] CreateCylinderVertices(Vector3 center, float radius, float height, int sliceCount)
+        private static Vector3[] CreateCylinderVertices(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
+            float height = Vector3.Distance(baseCenter, topCenter);
+            var trn = GetInversetAxisTransform(baseCenter, topCenter);
+
             List<Vector3> verts = [];
-
-            var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
-            var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
-
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
                     float theta = j / (float)sliceCount * 2 * MathUtil.Pi;
                     float st = MathF.Sin(theta), ct = MathF.Cos(theta);
-
-                    verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
+                    var v = new Vector3(radius * st, height * i, radius * ct);
+                    verts.Add(Vector3.TransformCoordinate(v, trn));
                 }
             }
-            verts.AddRange([bsePosition, capPosition]);
+            verts.AddRange([baseCenter, topCenter]);
 
             return [.. verts];
         }
         /// <summary>
         /// Creates the cylinder vertices with lighting
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
-        /// <returns></returns>
-        private static (Vector3[] Vertices, Vector3[] Normals) CreateCylinderVerticesExt(Vector3 center, float radius, float height, int sliceCount)
+        private static (Vector3[] Vertices, Vector3[] Normals) CreateCylinderVerticesExt(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var verts = CreateCylinderVertices(center, radius, height, sliceCount);
+            var verts = CreateCylinderVertices(baseCenter, topCenter, radius, sliceCount);
 
             List<Vector3> norms = [];
 
@@ -2230,14 +2248,14 @@ namespace Engine.Common
         /// <summary>
         /// Creates a triangle list cylinder
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCylinderTriangleList(Vector3 center, float radius, float height, int sliceCount)
+        private static GeometryDescriptor CreateCylinderTriangleList(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var (vertices, normals) = CreateCylinderVerticesExt(center, radius, height, sliceCount);
+            var (vertices, normals) = CreateCylinderVerticesExt(baseCenter, topCenter, radius, sliceCount);
 
             int cBase = vertices.Length - 2;
             int cCap = vertices.Length - 1;
@@ -2280,14 +2298,14 @@ namespace Engine.Common
         /// <summary>
         /// Creates a line list cylinder
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCylinderLineList(Vector3 center, float radius, float height, int sliceCount)
+        private static GeometryDescriptor CreateCylinderLineList(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var vertices = CreateCylinderVertices(center, radius, height, sliceCount);
+            var vertices = CreateCylinderVertices(baseCenter, topCenter, radius, sliceCount);
 
             List<int> indexList = [];
 
@@ -3260,6 +3278,35 @@ namespace Engine.Common
                 return (tvertices, tindices);
             },
             TaskCreationOptions.LongRunning);
+        }
+
+        /// <summary>
+        /// Gets the inverse axis transform of the specified base and top points, to put the base at the origin and the top on the Y axis
+        /// </summary>
+        /// <param name="vBase">Axis base</param>
+        /// <param name="vTop">Axis top</param>
+        private static Matrix GetInversetAxisTransform(Vector3 vBase, Vector3 vTop)
+        {
+            //Rotate vTop from vBase, to put vTop on vBase's Y axis
+
+            //Find direction vector between vBase and vTop
+            var dir = Vector3.Normalize(vTop - vBase);
+
+            //Find angle between dir and up vector
+            float angle = MathF.Acos(Vector3.Dot(dir, Vector3.Up));
+
+            Matrix matrix = Matrix.Translation(-vBase);
+            if (!MathUtil.IsZero(angle))
+            {
+                //Find rotation axis
+                var axis = Vector3.Cross(dir, Vector3.Up);
+                axis = Vector3.Normalize(axis);
+
+                //Create rotation matrix
+                matrix *= Matrix.RotationAxis(axis, angle);
+            }
+
+            return Matrix.Invert(matrix);
         }
     }
 }

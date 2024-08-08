@@ -58,9 +58,21 @@ namespace AISamples.Common
         private GeometryDrawer<VertexPositionTexture> markingsDrawer3d = null;
 
         private readonly List<Car> cars = [];
+        private const float carWidth = 8;
+        private const float carHeight = 6;
+        private const float carLength = 15;
+        private const float carMaxSpeed = 1f;
+        private const float carMaxReverseSpeed = 0.2f;
         private Car bestCar = null;
         private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
         private readonly Color4 carColor = new Color(252, 222, 200, 255);
+
+        public const int MaxCarInstances = 100;
+        private ModelInstanced carDrawer = null;
+
+        private readonly Color4 carSensorColor = Color.YellowGreen;
+        private readonly Color4 carSensorContactColor = Color.OrangeRed;
+        private GeometryColorDrawer<Triangle> carSensorDrawer = null;
 
         public Graph Graph { get => graph; }
         public Guid Version { get; private set; } = Guid.NewGuid();
@@ -303,7 +315,19 @@ namespace AISamples.Common
             return new RectangleF(min.X, min.Y, max.X - min.X, max.Y - min.Y);
         }
 
-        public async Task Initialize(Scene scene)
+        public IEnumerable<Task> Initialize(Scene scene)
+        {
+            yield return InitializeRoadDrawers(scene);
+
+            yield return InitializeTrees(scene);
+
+            yield return InitializeBuildings(scene);
+
+            yield return InitializeMarkings(scene);
+
+            yield return InitializeCars(scene);
+        }
+        private async Task InitializeRoadDrawers(Scene scene)
         {
             var descT = new GeometryColorDrawerDescription<Triangle>()
             {
@@ -323,7 +347,9 @@ namespace AISamples.Common
                 nameof(roadMarksDrawer),
                 descT,
                 Scene.LayerEffects + 2);
-
+        }
+        private async Task InitializeTrees(Scene scene)
+        {
             var tDesc = new ModelInstancedDescription()
             {
                 Content = ContentDescription.FromFile(Constants.TreesResourcesFolder, Constants.TreesModel),
@@ -339,7 +365,9 @@ namespace AISamples.Common
                 nameof(treesDrawer),
                 tDesc,
                 SceneObjectUsages.Agent);
-
+        }
+        private async Task InitializeBuildings(Scene scene)
+        {
             (string, string)[] images =
             [
                 (matDiffuseName, Constants.MarkingsTexture),
@@ -364,6 +392,13 @@ namespace AISamples.Common
                 nameof(buildingDrawer),
                 nameof(buildingDrawer),
                 descB);
+        }
+        private async Task InitializeMarkings(Scene scene)
+        {
+            (string, string)[] images =
+            [
+                (matDiffuseName, Constants.MarkingsTexture),
+            ];
 
             var material2d = MaterialBlinnPhongContent.Default;
             material2d.DiffuseTexture = matDiffuseName;
@@ -407,10 +442,39 @@ namespace AISamples.Common
                 descS3d,
                 Scene.LayerEffects + 4);
         }
-
-        public void Update(IGameTime gameTime, ModelInstanced carDrawer)
+        private async Task InitializeCars(Scene scene)
         {
-            UpdateCars(gameTime, carDrawer);
+            var cDesc = new ModelInstancedDescription()
+            {
+                Instances = MaxCarInstances,
+                CastShadow = ShadowCastingAlgorihtms.All,
+                Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
+                BlendMode = BlendModes.OpaqueAlpha,
+                StartsVisible = false,
+            };
+
+            carDrawer = await scene.AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
+                nameof(carDrawer),
+                nameof(carDrawer),
+                cDesc);
+
+            var sDesc = new GeometryColorDrawerDescription<Triangle>()
+            {
+                Count = 1000,
+                BlendMode = BlendModes.Opaque,
+                DepthEnabled = true,
+                StartsVisible = false,
+            };
+
+            carSensorDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+                nameof(carSensorDrawer),
+                nameof(carSensorDrawer),
+                sDesc);
+        }
+
+        public void Update(IGameTime gameTime)
+        {
+            UpdateCars(gameTime);
 
             foreach (var marking in markings)
             {
@@ -434,7 +498,7 @@ namespace AISamples.Common
                 DrawGraph();
             }
         }
-        private void UpdateCars(IGameTime gameTime, ModelInstanced carDrawer)
+        private void UpdateCars(IGameTime gameTime)
         {
             int maxCarCount = carDrawer.InstanceCount;
             var road = roadBorders.ToArray();
@@ -454,6 +518,11 @@ namespace AISamples.Common
 
                 var car = cars[i];
 
+                if (car.ControlType != AgentControlTypes.AI)
+                {
+                    continue;
+                }
+
                 car.Update(gameTime, road, [], false);
 
                 carDrawer[i].Manipulator.SetTransform(car.GetTransform(height + hLayer));
@@ -463,6 +532,59 @@ namespace AISamples.Common
             bestCar = cars.Where(c => !c.Damaged).MaxBy(c => c.FittnessValue);
 
             carDrawer.Visible = cars.Count > 0;
+
+            DrawCarSensors();
+        }
+        private void DrawCarSensors()
+        {
+            carSensorDrawer.Clear(carSensorColor);
+            carSensorDrawer.Clear(carSensorContactColor);
+
+            if (bestCar == null)
+            {
+                carSensorDrawer.Visible = false;
+
+                return;
+            }
+
+            float sensorHeight = height + carHeight * 0.5f;
+            var readings = bestCar.Sensor?.GetReadings() ?? [];
+
+            var rayList = bestCar.Sensor?.GetRays().SelectMany(r => DrawSensorRay(r, sensorHeight, readings))
+                .GroupBy(r => r.Item1)
+                .ToDictionary(
+                    keySelector => keySelector.Key,
+                    elementSelector => elementSelector.Select(r => r.Item2));
+
+            carSensorDrawer.AddPrimitives(rayList ?? []);
+
+            carSensorDrawer.Visible = true;
+        }
+        private IEnumerable<(Color4, Triangle)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
+        {
+            var p0 = new Vector3(r.P1.X, height, r.P1.Y);
+            var p1 = new Vector3(r.P2.X, height, r.P2.Y);
+
+            //Find readings for the ray
+            var rayReading = Array.Find(readings, rd => rd?.Ray == r);
+            if (rayReading == null)
+            {
+                //No reading, draw the ray
+                var tris = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, p1, 0.3f, 16));
+                return tris.Select(t => (carSensorColor, t));
+            }
+
+            var pi = rayReading.Position;
+            pi.Y = height;
+
+            var tris1 = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, pi, 0.3f, 16));
+            var tris2 = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, pi, p1, 0.3f, 16));
+
+            return
+            [
+                ..tris1.Select(t => (carSensorColor, t)),
+                ..tris2.Select(t => (carSensorContactColor, t)),
+            ];
         }
         private void DrawMarkings()
         {
@@ -626,6 +748,28 @@ namespace AISamples.Common
             return (fStart.Position, fStart.Direction);
         }
 
+        public Car CreateCar(AgentControlTypes controlType, string brainFile, bool mutate = false, float mutationDelta = 0.1f)
+        {
+            Car car = new(carWidth, carHeight, carLength, AgentControlTypes.AI, carMaxSpeed, carMaxReverseSpeed);
+
+            var bbox = carDrawer[0].GetBoundingBox();
+            float scale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
+            car.SetScale(scale);
+
+            car.Brain.Load(brainFile);
+            if (mutate)
+            {
+                car.Brain.Mutate(mutationDelta);
+            }
+
+            (Vector2 start, Vector2 dir) = GetStart();
+            car.SetPosition(start);
+            car.SetDirection(dir);
+
+            AddCar(car);
+
+            return car;
+        }
         public void AddCar(Car car)
         {
             if (cars.Contains(car))

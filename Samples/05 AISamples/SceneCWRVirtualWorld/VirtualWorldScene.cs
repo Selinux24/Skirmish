@@ -69,16 +69,6 @@ ESC - EXIT";
         private readonly World world;
         private readonly Tools tools;
 
-        private const float carWidth = 8;
-        private const float carHeight = 6;
-        private const float carLength = 15;
-        private const float carMaxSpeed = 1f;
-        private const float carMaxReverseSpeed = 0.2f;
-        private const int maxCarInstances = 100;
-        private const float carMutationDelta = 0.2f;
-        private float carScale = 1f;
-        private ModelInstanced carDrawer = null;
-
         private bool followCar = false;
         private readonly AgentFollower carFollower = new(100, 50);
 
@@ -103,6 +93,8 @@ ESC - EXIT";
             tools.AddEditor<LightsEditor>(EditorModes.Lights, 0);
             tools.AddEditor<CrossingsEditor>(EditorModes.Crossings, 0);
             tools.AddEditor<ParkingsEditor>(EditorModes.Parkings, 0);
+      
+            carFollower.Car = world.GetBestCar;
         }
 
         public override void Initialize()
@@ -122,7 +114,6 @@ ESC - EXIT";
                     InitializeTerrain,
                     InitializeWorld,
                     InitializeTools,
-                    InitializeCar,
                 ],
                 InitializeComponentsCompleted);
 
@@ -227,30 +218,11 @@ ESC - EXIT";
         }
         private Task InitializeWorld()
         {
-            return world.Initialize(this);
+            return Task.WhenAll(world.Initialize(this));
         }
         private Task InitializeTools()
         {
             return tools.Initialize();
-        }
-        private async Task InitializeCar()
-        {
-            var cDesc = new ModelInstancedDescription()
-            {
-                Instances = maxCarInstances,
-                CastShadow = ShadowCastingAlgorihtms.All,
-                Content = ContentDescription.FromFile(Constants.TrafficResourcesFolder, Constants.TaxiModel),
-                BlendMode = BlendModes.OpaqueAlpha,
-                StartsVisible = false,
-            };
-
-            carDrawer = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
-                nameof(carDrawer),
-                nameof(carDrawer),
-                cDesc);
-
-            var bbox = carDrawer[0].GetBoundingBox();
-            carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -399,7 +371,7 @@ ESC - EXIT";
         }
         private void UpdateWorld(IGameTime gameTime)
         {
-            world.Update(gameTime, carDrawer);
+            world.Update(gameTime);
         }
         private void ToggleTools()
         {
@@ -451,7 +423,7 @@ ESC - EXIT";
             }
             if (Game.Input.KeyJustReleased(Keys.F7))
             {
-                AddCars(maxCarInstances);
+                AddCars(World.MaxCarInstances);
             }
             if (Game.Input.KeyJustReleased(Keys.F8))
             {
@@ -478,22 +450,7 @@ ESC - EXIT";
                 return;
             }
 
-            var car = new Car(carWidth, carHeight, carLength, AgentControlTypes.AI, carMaxSpeed, carMaxReverseSpeed);
-            car.Brain.Load(bestCarFileName);
-            if (mutate)
-            {
-                car.Brain.Mutate(carMutationDelta);
-            }
-
-            (Vector2 start, Vector2 dir) = world.GetStart();
-            car.SetPosition(start);
-            car.SetDirection(dir);
-
-            car.SetScale(carScale);
-
-            world.AddCar(car);
-
-            carFollower.Car = world.GetBestCar;
+            world.CreateCar(AgentControlTypes.AI, bestCarFileName, mutate);
         }
         private void ToggleFollow()
         {
