@@ -10,21 +10,34 @@ namespace Engine.Common
     public interface IMesh : IDisposable
     {
         /// <summary>
+        /// Static id counter
+        /// </summary>
+        private static int ID = 0;
+        /// <summary>
+        /// Gets the next Id
+        /// </summary>
+        /// <returns>Returns the next Id</returns>
+        public static int GetNextId()
+        {
+            return ++ID;
+        }
+
+        /// <summary>
         /// Topology
         /// </summary>
         Topology Topology { get; }
         /// <summary>
         /// Transform
         /// </summary>
-        Matrix Transform { get; set; }
+        Matrix Transform { get; }
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        BufferDescriptor VertexBuffer { get; set; }
+        BufferDescriptor VertexBuffer { get; }
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        BufferDescriptor IndexBuffer { get; set; }
+        BufferDescriptor IndexBuffer { get; }
         /// <summary>
         /// Gets whether the internal state of the mesh is ready from drawing
         /// </summary>

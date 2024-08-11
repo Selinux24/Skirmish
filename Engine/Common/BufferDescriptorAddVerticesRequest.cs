@@ -52,7 +52,7 @@ namespace Engine.Common
                 return;
             }
 
-            BufferManagerVertices<T> descriptor;
+            BufferManagerVertices<T> verticesDesc;
 
             bool instanced = instancingDescriptor != null;
 
@@ -61,22 +61,22 @@ namespace Engine.Common
             int slot = bufferManager.FindVertexBufferDescription<T>(Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerVertices<T>(Dynamic);
-                slot = bufferManager.AddVertexBufferDescription(descriptor);
+                verticesDesc = new BufferManagerVertices<T>(Dynamic);
+                slot = bufferManager.AddVertexBufferDescription(verticesDesc);
             }
             else
             {
-                descriptor = bufferManager.GetVertexBufferDescription(slot) as BufferManagerVertices<T>;
-                descriptor.ReallocationNeeded = true;
+                verticesDesc = bufferManager.GetVertexBufferDescription(slot) as BufferManagerVertices<T>;
+                verticesDesc.ReallocationNeeded = true;
             }
 
-            if (instancingDescriptor != null)
+            if (instanced)
             {
                 //Additive only
-                descriptor.InstancingDescriptor = instancingDescriptor;
+                verticesDesc.InstancingDescriptor = instancingDescriptor;
             }
 
-            descriptor.AddDescriptor(this.descriptor, Id, slot, data);
+            verticesDesc.AddDescriptor(descriptor, Id, slot, data);
 
             Processed = ProcessedStages.Processed;
         }

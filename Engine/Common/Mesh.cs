@@ -20,19 +20,6 @@ namespace Engine.Common
         where T : struct, IVertexData
     {
         /// <summary>
-        /// Static id counter
-        /// </summary>
-        private static int ID = 0;
-        /// <summary>
-        /// Gets the next Id
-        /// </summary>
-        /// <returns>Returns the next Id</returns>
-        private static int GetNextId()
-        {
-            return ++ID;
-        }
-
-        /// <summary>
         /// Vertices cache
         /// </summary>
         private readonly IEnumerable<T> vertices = vertices ?? [];
@@ -52,25 +39,23 @@ namespace Engine.Common
         /// <summary>
         /// Mesh id
         /// </summary>
-        public int Id { get; set; } = GetNextId();
+        public int Id { get; } = IMesh.GetNextId();
         /// <summary>
         /// Indexed model
         /// </summary>
-        public bool Indexed { get; set; } = indices?.Any() == true;
-
+        public bool Indexed { get; } = indices?.Any() == true;
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; private set; } = name;
+        public string Name { get; } = name;
         /// <inheritdoc/>
-        public Topology Topology { get; private set; } = topology;
+        public Topology Topology { get; } = topology;
         /// <inheritdoc/>
-        public Matrix Transform { get; set; } = transform;
-
+        public Matrix Transform { get; } = transform;
         /// <inheritdoc/>
-        public BufferDescriptor VertexBuffer { get; set; } = null;
+        public BufferDescriptor VertexBuffer { get; private set; } = null;
         /// <inheritdoc/>
-        public BufferDescriptor IndexBuffer { get; set; } = null;
+        public BufferDescriptor IndexBuffer { get; private set; } = null;
         /// <inheritdoc/>
         public bool Ready
         {
@@ -288,15 +273,15 @@ namespace Engine.Common
         /// <inheritdoc/>
         public IVertexData GetVertexType()
         {
-            return vertices?.FirstOrDefault();
+            return default(T);
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
             return Indexed ?
-                $"Id: {Id}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
-                $"Id: {Id}; Vertices: {vertices.Count()}";
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}";
         }
     }
 }
