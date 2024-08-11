@@ -30,7 +30,7 @@ namespace AISamples.Common.Items
             return new(polygon, height);
         }
 
-        public IEnumerable<VertexPositionNormalTexture> CreateBuilding(float baseHeight)
+        public IEnumerable<VertexPositionNormalTexture> DrawBuilding(float baseHeight)
         {
             Vector2[] baseVertices = Polygon.GetVertices();
             Vector3[] points = Polygon.Extrude(baseHeight, Height);

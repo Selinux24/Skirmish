@@ -1,5 +1,4 @@
-﻿using Engine.BuiltIn.Primitives;
-using Engine.Common;
+﻿using Engine.Common;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,40 +13,6 @@ namespace Engine
     /// </summary>
     public sealed partial class Graphics
     {
-        /// <summary>
-        /// Creates a vertex buffer
-        /// </summary>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Vertex data collection</param>
-        /// <param name="dynamic">Dynamic or Inmutable</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateVertexBuffer(string name, IEnumerable<IVertexData> data, bool dynamic)
-        {
-            var vertexType = data.First().VertexType;
-
-            return vertexType switch
-            {
-                VertexTypes.Billboard => CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic),
-                VertexTypes.Decal => CreateVertexBuffer(name, data.OfType<VertexDecal>(), dynamic),
-                VertexTypes.CPUParticle => CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic),
-                VertexTypes.GPUParticle => CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic),
-                VertexTypes.Font => CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic),
-                VertexTypes.Terrain => CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic),
-                VertexTypes.Position => CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic),
-                VertexTypes.PositionColor => CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic),
-                VertexTypes.PositionTexture => CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic),
-                VertexTypes.PositionNormalColor => CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic),
-                VertexTypes.PositionNormalTexture => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic),
-                VertexTypes.PositionNormalTextureTangent => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic),
-                VertexTypes.PositionSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic),
-                VertexTypes.PositionColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic),
-                VertexTypes.PositionTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic),
-                VertexTypes.PositionNormalColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic),
-                VertexTypes.PositionNormalTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic),
-                VertexTypes.PositionNormalTextureTangentSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic),
-                _ => throw new EngineException($"Unknown vertex type: {vertexType}"),
-            };
-        }
         /// <summary>
         /// Creates a vertex buffer
         /// </summary>
@@ -193,6 +158,11 @@ namespace Engine
         /// <returns>Returns created buffer</returns>
         public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
+            if (sizeInBytes == 0)
+            {
+                return null;
+            }
+
             FrameCounters.RegBuffer(name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
             var description = new BufferDescription()
@@ -218,9 +188,12 @@ namespace Engine
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
         public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
-            where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+            if (sizeInBytes == 0)
+            {
+                return null;
+            }
 
             FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 
@@ -249,12 +222,19 @@ namespace Engine
         public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
             where T : struct
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
+            T[] dataArray = data?.ToArray() ?? [];
+            int length = dataArray.Length;
+            if (length == 0)
+            {
+                return null;
+            }
 
-            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, data.Count());
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 
             using var dstr = new DataStream(sizeInBytes, true, true);
-            dstr.WriteRange(data.ToArray());
+            dstr.WriteRange(dataArray);
             dstr.Position = 0;
 
             var description = new BufferDescription()

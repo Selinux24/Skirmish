@@ -311,11 +311,11 @@ namespace Engine.Content
         /// <summary>
         /// Process the vertex data
         /// </summary>
-        /// <param name="vertexType">Vertext type</param>
+        /// <param name="computeTangents">Compute tangent space</param>
         /// <param name="constraint">Constraint</param>
-        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint)
+        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(bool computeTangents, BoundingBox? constraint)
         {
-            if (VertexTypesHelper.IsTangent(vertexType))
+            if (computeTangents)
             {
                 ComputeTangents();
             }

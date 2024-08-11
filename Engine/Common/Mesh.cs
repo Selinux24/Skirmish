@@ -1,5 +1,4 @@
-﻿using Engine.BuiltIn.Primitives;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,8 @@ namespace Engine.Common
     /// <param name="transform">World transform</param>
     /// <param name="vertices">Vertices</param>
     /// <param name="indices">Indices</param>
-    public class Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices) : IDisposable
+    public class Mesh<T>(string name, Topology topology, Matrix transform, IEnumerable<T> vertices, IEnumerable<uint> indices) : IMesh
+        where T : struct, IVertexData
     {
         /// <summary>
         /// Static id counter
@@ -35,7 +35,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertices cache
         /// </summary>
-        private readonly IEnumerable<IVertexData> vertices = vertices ?? [];
+        private readonly IEnumerable<T> vertices = vertices ?? [];
         /// <summary>
         /// Indices cache
         /// </summary>
@@ -62,30 +62,16 @@ namespace Engine.Common
         /// Name
         /// </summary>
         public string Name { get; private set; } = name;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public VertexTypes VertextType { get; private set; } = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-        /// <summary>
-        /// Topology
-        /// </summary>
+        /// <inheritdoc/>
         public Topology Topology { get; private set; } = topology;
-        /// <summary>
-        /// Transform
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix Transform { get; set; } = transform;
 
-        /// <summary>
-        /// Vertex buffer descriptor
-        /// </summary>
+        /// <inheritdoc/>
         public BufferDescriptor VertexBuffer { get; set; } = null;
-        /// <summary>
-        /// Index buffer descriptor
-        /// </summary>
+        /// <inheritdoc/>
         public BufferDescriptor IndexBuffer { get; set; } = null;
-        /// <summary>
-        /// Gets whether the internal state of the mesh is ready from drawing
-        /// </summary>
+        /// <inheritdoc/>
         public bool Ready
         {
             get
@@ -93,9 +79,7 @@ namespace Engine.Common
                 return (VertexBuffer?.Ready ?? false) && (IndexBuffer?.Ready ?? true);
             }
         }
-        /// <summary>
-        /// Gets the primitive count of the mesh
-        /// </summary>
+        /// <inheritdoc/>
         public int Count
         {
             get
@@ -118,9 +102,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -135,13 +117,7 @@ namespace Engine.Common
 
         }
 
-        /// <summary>
-        /// Initializes a mesh
-        /// </summary>
-        /// <param name="name">Owner name</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <inheritdoc/>
         public void Initialize(string name, BufferManager bufferManager, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             try
@@ -168,10 +144,7 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="dc">Device context</param>
+        /// <inheritdoc/>
         public virtual void Draw(IEngineDeviceContext dc)
         {
             if (Indexed)
@@ -183,12 +156,7 @@ namespace Engine.Common
 
             dc.Draw(VertexBuffer);
         }
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
+        /// <inheritdoc/>
         public virtual void Draw(IEngineDeviceContext dc, int instanceCount, int startInstanceLocation)
         {
             if (Indexed)
@@ -201,11 +169,7 @@ namespace Engine.Common
             dc.DrawInstanced(instanceCount, startInstanceLocation, VertexBuffer);
         }
 
-        /// <summary>
-        /// Gets point list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or position list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
             if (!refresh && positionCache != null)
@@ -238,12 +202,7 @@ namespace Engine.Common
 
             return positionCache.ToArray();
         }
-        /// <summary>
-        /// Gets point list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="boneTransforms">Bone transforms</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or position list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (!refresh && positionCache != null)
@@ -275,11 +234,7 @@ namespace Engine.Common
 
             return positionCache.ToArray();
         }
-        /// <summary>
-        /// Gets triangle list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or triangle list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
             if (!refresh && triangleCache != null)
@@ -304,12 +259,7 @@ namespace Engine.Common
 
             return triangleCache.ToArray();
         }
-        /// <summary>
-        /// Gets triangle list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="boneTransforms">Bone transforms</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or triangle list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (!refresh && triangleCache != null)
@@ -333,6 +283,12 @@ namespace Engine.Common
             }
 
             return triangleCache.ToArray();
+        }
+
+        /// <inheritdoc/>
+        public IVertexData GetVertexType()
+        {
+            return vertices?.FirstOrDefault();
         }
 
         /// <inheritdoc/>

@@ -33,13 +33,13 @@ namespace Engine.BuiltIn.Primitives
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
+        public static async Task<IEnumerable<VertexSkinnedPositionTexture>> Convert(IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
         {
             var vArray = vertices.ToArray();
             var vWeights = weights.ToArray();
             var vBones = skinBoneNames.ToArray();
 
-            var res = new IVertexData[vArray.Length];
+            var res = new VertexSkinnedPositionTexture[vArray.Length];
 
             Parallel.For(0, vArray.Length, (index) =>
             {
@@ -113,16 +113,6 @@ namespace Engine.BuiltIn.Primitives
         /// Bone 4
         /// </summary>
         public byte BoneIndex4;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.PositionTextureSkinned;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

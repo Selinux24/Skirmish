@@ -9,19 +9,19 @@ namespace Engine.Common
         /// <summary>
         /// Requester Id
         /// </summary>
-        string Id { get; set; }
+        string Id { get; }
         /// <summary>
         /// Gets wheter the destination buffer is dynamic or not
         /// </summary>
-        bool Dynamic { get; set; }
+        bool Dynamic { get; }
         /// <summary>
         /// Request action
         /// </summary>
-        BufferDescriptorRequestActions Action { get; set; }
+        BufferDescriptorRequestActions Action { get; }
         /// <summary>
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
-        ProcessedStages Processed { get; set; }
+        ProcessedStages Processed { get; }
 
         /// <summary>
         /// Updates the buffer descriptor

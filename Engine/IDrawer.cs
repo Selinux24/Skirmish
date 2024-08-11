@@ -32,7 +32,7 @@ namespace Engine
         /// <param name="meshes">Mesh list</param>
         /// <param name="instances">Number of instances</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        bool Draw(IEngineDeviceContext dc, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0);
+        bool Draw(IEngineDeviceContext dc, IMesh[] meshes, int instances = 0, int startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>

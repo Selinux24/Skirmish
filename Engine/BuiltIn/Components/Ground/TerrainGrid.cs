@@ -148,7 +148,7 @@ namespace Engine.BuiltIn.Components.Ground
             var nodes = res.drawingQuadTree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var data = await VertexTypesHelper.Convert(VertexTypes.Terrain, node.Items, null, null);
+                var data = await VertexTerrain.Convert(node.Items);
 
                 res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
             }

@@ -209,7 +209,7 @@ namespace Engine.BuiltIn.Components.Models
 
                 var localTransform = GetPartTransformByName(meshName);
 
-                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, meshMaterial.Material.IsTransparent);
+                var drawer = context.ShadowMap?.GetDrawer(mesh, false, meshMaterial.Material.IsTransparent);
                 if (drawer == null)
                 {
                     continue;
@@ -280,7 +280,7 @@ namespace Engine.BuiltIn.Components.Models
                     continue;
                 }
 
-                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh.VertextType, false);
+                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh, false);
                 if (drawer == null)
                 {
                     continue;

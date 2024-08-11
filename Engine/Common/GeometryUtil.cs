@@ -2691,23 +2691,12 @@ namespace Engine.Common
         /// <param name="vertices">Polygon vertices</param>
         /// <param name="ccw">Assume CCW triangle sort for normals</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw)
+        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw = true)
         {
-            int count = vertices.Count();
-
-            List<uint> indexList = [];
-
-            for (int i = 2; i < count; i++)
-            {
-                indexList.Add(0);
-                indexList.Add(ccw ? (uint)i : (uint)i - 1);
-                indexList.Add(ccw ? (uint)i - 1 : (uint)i);
-            }
-
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = CreateIndexesForTriangleList(vertices.Count(), ccw),
             };
         }
         /// <summary>
@@ -2717,21 +2706,45 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreatePolygonLineList(IEnumerable<Vector3> vertices)
         {
-            int count = vertices.Count();
-
-            List<uint> indexList = [];
-
-            for (int i = 0; i < count; i++)
-            {
-                indexList.Add((uint)i);
-                indexList.Add((uint)((i + 1) % count));
-            }
-
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = CreateIndexesForLineList(vertices.Count()),
             };
+        }
+        /// <summary>
+        /// Creates the index array for triangle list
+        /// </summary>
+        /// <param name="vertexCount">Vertex count</param>
+        /// <param name="ccw">Assume CCW triangle sort for normals</param>
+        public static uint[] CreateIndexesForTriangleList(int vertexCount, bool ccw = true)
+        {
+            List<uint> indexList = [];
+
+            for (int i = 2; i < vertexCount; i++)
+            {
+                indexList.Add(0);
+                indexList.Add(ccw ? (uint)i : (uint)i - 1);
+                indexList.Add(ccw ? (uint)i - 1 : (uint)i);
+            }
+
+            return [.. indexList];
+        }
+        /// <summary>
+        /// Creates the index array for line list
+        /// </summary>
+        /// <param name="vertexCount">Vertex count</param>
+        public static uint[] CreateIndexesForLineList(int vertexCount)
+        {
+            List<uint> indexList = [];
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                indexList.Add((uint)i);
+                indexList.Add((uint)((i + 1) % vertexCount));
+            }
+
+            return [.. indexList];
         }
 
         /// <summary>

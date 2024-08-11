@@ -945,7 +945,6 @@ namespace Engine.Content
 
             var materials = GetMaterialContent();
             var skinningInfo = loadAnimation ? GetSkinningInfo(meshName) : null;
-            var isSkinned = skinningInfo.HasValue;
 
             MeshByMaterialCollection meshes = new();
 
@@ -954,7 +953,7 @@ namespace Engine.Content
                 var geometry = subMesh.Value;
                 var meshMaterial = materials.FirstOrDefault(m => m.Name == subMesh.Key).Content;
 
-                var meshInfo = await VertexTypesHelper.CreateMesh(meshName, geometry, isSkinned, loadNormalMaps, meshMaterial, constraint, skinningInfo);
+                var meshInfo = await VertexTypesHelper.CreateMesh(meshName, geometry, loadNormalMaps, meshMaterial, skinningInfo, constraint);
                 if (meshInfo == null)
                 {
                     continue;
@@ -1626,7 +1625,7 @@ namespace Engine.Content
         /// <summary>
         /// Created mesh
         /// </summary>
-        public Mesh Mesh { get; set; }
+        public IMesh Mesh { get; set; }
         /// <summary>
         /// Material name
         /// </summary>

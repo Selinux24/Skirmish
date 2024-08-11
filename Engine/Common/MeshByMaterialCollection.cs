@@ -4,7 +4,7 @@ namespace Engine.Common
     /// <summary>
     /// Mesh by material collection
     /// </summary>
-    public class MeshByMaterialCollection : DrawingDataCollection<Mesh>
+    public class MeshByMaterialCollection : DrawingDataCollection<IMesh>
     {
         /// <summary>
         /// Initializes the mesh list

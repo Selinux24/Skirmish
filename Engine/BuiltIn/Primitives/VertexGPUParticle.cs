@@ -52,16 +52,6 @@ namespace Engine.BuiltIn.Primitives
         /// Total emission time
         /// </summary>
         public float EmissionTime;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.GPUParticle;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

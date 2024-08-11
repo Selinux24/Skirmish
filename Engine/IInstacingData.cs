@@ -1,4 +1,5 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine
 {
     /// <summary>
@@ -6,6 +7,9 @@ namespace Engine
     /// </summary>
     public interface IInstacingData : IBufferData
     {
-
+        /// <summary>
+        /// Gets the input element colection
+        /// </summary>
+        EngineInputElement[] GetInput(int slot);
     }
 }

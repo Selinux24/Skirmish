@@ -2,7 +2,6 @@
 using Engine.Content;
 using SharpDX;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Primitives
@@ -245,85 +244,45 @@ namespace Engine.BuiltIn.Primitives
         }
 
         /// <summary>
-        /// Converts helpers to vertices
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="vertices">Helpers</param>
-        /// <param name="weights">Weight information</param>
-        /// <returns>Returns generated vertices</returns>
-        public static async Task<IEnumerable<IVertexData>> Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
-        {
-            return vertexType switch
-            {
-                VertexTypes.Position => await VertexPosition.Convert(vertices),
-                VertexTypes.PositionColor => await VertexPositionColor.Convert(vertices),
-                VertexTypes.PositionNormalColor => await VertexPositionNormalColor.Convert(vertices),
-                VertexTypes.PositionTexture => await VertexPositionTexture.Convert(vertices),
-                VertexTypes.PositionNormalTexture => await VertexPositionNormalTexture.Convert(vertices),
-                VertexTypes.PositionNormalTextureTangent => await VertexPositionNormalTextureTangent.Convert(vertices),
-                VertexTypes.PositionSkinned => await VertexSkinnedPosition.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionColorSkinned => await VertexSkinnedPositionColor.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalColorSkinned => await VertexSkinnedPositionNormalColor.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionTextureSkinned => await VertexSkinnedPositionTexture.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalTextureSkinned => await VertexSkinnedPositionNormalTexture.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalTextureTangentSkinned => await VertexSkinnedPositionNormalTextureTangent.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.Terrain => await VertexTerrain.Convert(vertices),
-                _ => throw new EngineException($"Unknown vertex type: {vertexType}")
-            };
-        }
-
-        /// <summary>
-        /// Creates a mesh
+        /// Creates a mesh information structure from a submesh content
         /// </summary>
         /// <param name="meshName">Mesh name</param>
         /// <param name="geometry">Submesh content</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="constraint">Geometry constraint</param>
+        /// <param name="loadNormalMaps">Conaints normal map information</param>
+        /// <param name="material">Material</param>
         /// <param name="skinningInfo">Skinning information</param>
-        public static async Task<MeshInfo?> CreateMesh(string meshName, SubMeshContent geometry, bool isSkinned, bool loadNormalMaps, IMaterialContent material, BoundingBox? constraint, SkinningInfo? skinningInfo)
+        /// <param name="constraint">Geometry constraint</param>
+        public static async Task<MeshInfo?> CreateMesh(string meshName, SubMeshContent geometry, bool loadNormalMaps, IMaterialContent material, SkinningInfo? skinningInfo, BoundingBox? constraint)
         {
-            var vertexType = GetVertexType(geometry, isSkinned, loadNormalMaps, material);
+            var vertexType = GetVertexType(geometry, skinningInfo.HasValue, loadNormalMaps, material);
 
             //Process the vertex data
-            var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
+            bool computeTangents = IsTangent(vertexType);
+            var vertexData = await geometry.ProcessVertexData(computeTangents, constraint);
             var vertices = vertexData.vertices;
             var indices = vertexData.indices;
+            IEnumerable<Weight> weights = [];
+            IEnumerable<string> bones = [];
 
-            IEnumerable<IVertexData> vertexList;
             if (skinningInfo.HasValue)
             {
-                if (!skinningInfo.Value.BindShapeMatrix.IsIdentity)
+                var bindShapeMatrix = skinningInfo.Value.BindShapeMatrix;
+                if (!bindShapeMatrix.IsIdentity)
                 {
-                    vertices = VertexData.Transform(vertices, skinningInfo.Value.BindShapeMatrix);
+                    vertices = VertexData.Transform(vertices, bindShapeMatrix);
                 }
 
-                //Convert the vertex data to final mesh data
-                vertexList = await Convert(
-                    vertexType,
-                    vertices,
-                    skinningInfo.Value.Weights,
-                    skinningInfo.Value.BoneNames);
-            }
-            else
-            {
-                vertexList = await Convert(
-                    vertexType,
-                    vertices,
-                    [],
-                    []);
+                weights = skinningInfo.Value.Weights;
+                bones = skinningInfo.Value.BoneNames;
             }
 
-            if (!vertexList.Any())
-            {
-                return null;
-            }
-
-            //Create the mesh
-            var nMesh = new Mesh(
+            var nMesh = await CreateMesh(
+                vertexType,
                 meshName,
-                geometry.Topology,
-                geometry.Transform,
-                vertexList,
+                geometry,
+                vertices,
+                weights,
+                bones,
                 indices);
 
             //Material name
@@ -364,6 +323,56 @@ namespace Engine.BuiltIn.Primitives
             }
 
             return res;
+        }
+        /// <summary>
+        /// Creates a mesh from the specified vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="geometry">Submesh conente</param>
+        /// <param name="vertices">Vertex data</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="skinBoneNames">Skin bone names</param>
+        /// <param name="indices">Indices</param>
+        /// <returns>Returns the generated mesh</returns>
+        private static async Task<IMesh> CreateMesh(VertexTypes vertexType, string meshName, SubMeshContent geometry, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames, IEnumerable<uint> indices)
+        {
+            return vertexType switch
+            {
+                VertexTypes.Position => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPosition.Convert(vertices), indices),
+                VertexTypes.PositionColor => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPositionColor.Convert(vertices), indices),
+                VertexTypes.PositionNormalColor => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPositionNormalColor.Convert(vertices), indices),
+                VertexTypes.PositionTexture => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPositionTexture.Convert(vertices), indices),
+                VertexTypes.PositionNormalTexture => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPositionNormalTexture.Convert(vertices), indices),
+                VertexTypes.PositionNormalTextureTangent => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexPositionNormalTextureTangent.Convert(vertices), indices),
+                VertexTypes.PositionSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPosition.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.PositionColorSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPositionColor.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.PositionNormalColorSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPositionNormalColor.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.PositionTextureSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPositionTexture.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.PositionNormalTextureSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPositionNormalTexture.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.PositionNormalTextureTangentSkinned => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexSkinnedPositionNormalTextureTangent.Convert(vertices, weights, skinBoneNames), indices),
+                VertexTypes.Terrain => CreateMesh(meshName, geometry.Topology, geometry.Transform, await VertexTerrain.Convert(vertices), indices),
+                _ => throw new EngineException($"Unknown vertex type: {vertexType}")
+            };
+        }
+        /// <summary>
+        /// Creates a typed mesh
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="topology">Topology</param>
+        /// <param name="transform">Transform</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        private static Mesh<T> CreateMesh<T>(string meshName, Topology topology, Matrix transform, IEnumerable<T> vertices, IEnumerable<uint> indices)
+            where T : struct, IVertexData
+        {
+            return new Mesh<T>(
+                meshName,
+                topology,
+                transform,
+                vertices,
+                indices);
         }
     }
 }

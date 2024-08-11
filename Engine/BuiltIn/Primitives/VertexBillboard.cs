@@ -32,16 +32,6 @@ namespace Engine.BuiltIn.Primitives
         /// Sprite size
         /// </summary>
         public Vector2 Size;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.Billboard;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

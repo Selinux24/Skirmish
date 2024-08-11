@@ -81,16 +81,6 @@ namespace Engine.BuiltIn.Primitives
         /// Color
         /// </summary>
         public Color4 Color;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.Font;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

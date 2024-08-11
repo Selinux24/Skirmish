@@ -248,9 +248,15 @@ ESC - EXIT";
             UpdateLayout();
 
             float sp = MathF.Min(1500f, spaceSize);
-            Camera.FarPlaneDistance = sp * 1.5f;
+            float far = sp * 1.5f;
+            Camera.FarPlaneDistance = far;
             Camera.MovementDelta = sp * 0.2f;
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
+
+            GameEnvironment.ShadowDistanceHigh = far * 0.1f;
+            GameEnvironment.ShadowDistanceMedium = far * 0.2f;
+            GameEnvironment.ShadowDistanceLow = far * 0.9f;
+
             MoveCameraTo(Vector3.Zero);
 
             Lights.EnableFog(sp, Camera.FarPlaneDistance, GameEnvironment.Background);

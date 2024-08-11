@@ -74,10 +74,8 @@ namespace Engine.BuiltIn.Primitives
 
         }
 
-        /// <summary>
-        /// Defined input colection
-        /// </summary>
-        public static EngineInputElement[] Input(int slot)
+        /// <inheritdoc/>
+        public readonly EngineInputElement[] GetInput(int slot)
         {
             return
             [

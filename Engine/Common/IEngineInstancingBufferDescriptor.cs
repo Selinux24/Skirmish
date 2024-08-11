@@ -16,10 +16,10 @@ namespace Engine.Common
         int BufferBindingIndex { get; set; }
 
         /// <summary>
-        /// Gets the buffer format stride
+        /// Gets the input element collection
         /// </summary>
-        /// <returns>Returns the buffer format stride in bytes</returns>
-        int GetStride();
+        /// <returns></returns>
+        EngineInputElement[] GetInput();
 
         /// <summary>
         /// Copies the descriptor

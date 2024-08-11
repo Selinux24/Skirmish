@@ -35,8 +35,8 @@ namespace AISamples.Common
         private readonly int roadRoundness = 16;
         private readonly List<Envelope> roadEnvelopes = [];
         private readonly List<Segment2> roadBorders = [];
-        private GeometryColorDrawer<Triangle> roadDrawer = null;
-        private GeometryColorDrawer<Triangle> roadMarksDrawer = null;
+        private GeometryDrawer<VertexPositionNormalColor> roadDrawer = null;
+        private GeometryDrawer<VertexPositionNormalColor> roadMarksDrawer = null;
 
         private readonly float buildingWidth = 100f;
         private readonly float buildingMinLenth = 100f;
@@ -68,7 +68,7 @@ namespace AISamples.Common
         private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
         private readonly Color4 carColor = new Color(252, 222, 200, 255);
 
-        public const int MaxCarInstances = 100;
+        public const int MaxCarInstances = 500;
         private ModelInstanced carDrawer = null;
 
         private readonly Color4 carSensorColor = Color.YellowGreen;
@@ -330,20 +330,22 @@ namespace AISamples.Common
         }
         private async Task InitializeRoadDrawers(Scene scene)
         {
-            var descT = new GeometryColorDrawerDescription<Triangle>()
+            var descT = new GeometryDrawerDescription<VertexPositionNormalColor>()
             {
                 Count = 500000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
+                Topology = Topology.TriangleList,
+                CastShadow = ShadowCastingAlgorihtms.All,
             };
 
-            roadDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+            roadDrawer = await scene.AddComponentEffect<GeometryDrawer<VertexPositionNormalColor>, GeometryDrawerDescription<VertexPositionNormalColor>>(
                 nameof(roadDrawer),
                 nameof(roadDrawer),
                 descT,
                 Scene.LayerEffects + 1);
 
-            roadMarksDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+            roadMarksDrawer = await scene.AddComponentEffect<GeometryDrawer<VertexPositionNormalColor>, GeometryDrawerDescription<VertexPositionNormalColor>>(
                 nameof(roadMarksDrawer),
                 nameof(roadMarksDrawer),
                 descT,
@@ -357,7 +359,7 @@ namespace AISamples.Common
                 Instances = 1000,
                 Optimize = true,
                 PickingHull = PickingHullTypes.None,
-                CastShadow = ShadowCastingAlgorihtms.None,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 StartsVisible = false,
             };
 
@@ -384,6 +386,7 @@ namespace AISamples.Common
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
                 Topology = Topology.TriangleList,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = materialB,
                 TintColor = Color.White,
@@ -411,6 +414,7 @@ namespace AISamples.Common
                 DepthEnabled = true,
                 BlendMode = BlendModes.Transparent,
                 Topology = Topology.TriangleList,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = material2d,
                 TintColor = roadMarksColor,
@@ -432,6 +436,7 @@ namespace AISamples.Common
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
                 Topology = Topology.TriangleList,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = material3d,
                 TintColor = Color4.White,
@@ -654,14 +659,23 @@ namespace AISamples.Common
                 DrawEnvelope(new Envelope(border, 2, 3), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
             }
         }
-        private static void DrawEnvelope(Envelope envelope, float height, Color4 color, GeometryColorDrawer<Triangle> drawer)
+        private static void DrawEnvelope(Envelope envelope, float height, Color4 color, GeometryDrawer<VertexPositionNormalColor> drawer)
         {
             var vertices = envelope
                 .GetPolygonVertices()
-                .Select(v => new Vector3(v.X, height, v.Y));
+                .Select(v => new VertexPositionNormalColor()
+                {
+                    Position = new(v.X, height, v.Y),
+                    Normal = Vector3.UnitY,
+                    Color = color,
+                })
+                .ToArray();
 
-            var t = GeometryUtil.CreatePolygonTriangleList(vertices, true);
-            drawer.AddPrimitives(color, Triangle.ComputeTriangleList(t));
+            var indices = GeometryUtil.CreateIndexesForTriangleList(vertices.Length, false);
+
+            var tList = indices.Select(i => vertices[i]);
+
+            drawer.AddPrimitives(tList);
         }
         private static void DrawTrees(IEnumerable<Tree> trees, float baseScale, ModelInstanced drawer)
         {
@@ -688,7 +702,7 @@ namespace AISamples.Common
         }
         private static void DrawBuilding(Building building, float height, GeometryDrawer<VertexPositionNormalTexture> drawer)
         {
-            var vlist = building.CreateBuilding(height);
+            var vlist = building.DrawBuilding(height);
 
             drawer.AddPrimitives(vlist);
         }
@@ -757,7 +771,6 @@ namespace AISamples.Common
         public Car CreateCar(AgentControlTypes controlType, string brainFile, bool mutate = false, float mutationDelta = 0.1f)
         {
             Car car = new(carWidth, carHeight, carLength, controlType, carMaxSpeed, carMaxReverseSpeed);
-
 
             car.Brain.Load(brainFile);
             if (mutate)

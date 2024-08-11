@@ -1,6 +1,5 @@
 ﻿using Engine.BuiltIn.Drawers.Deferred;
 using Engine.BuiltIn.Drawers.Forward;
-using Engine.BuiltIn.Primitives;
 using Engine.Common;
 
 namespace Engine.BuiltIn.Drawers
@@ -323,7 +322,7 @@ namespace Engine.BuiltIn.Drawers
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, Mesh[] meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(IEngineDeviceContext dc, IMesh[] meshes, int instances = 0, int startInstanceLocation = 0)
         {
             if (meshes.Length <= 0)
             {
@@ -490,21 +489,43 @@ namespace Engine.BuiltIn.Drawers
         }
 
         /// <summary>
-        /// Gets the drawing effect for the current instance
+        /// Gets the drawing effect for the specified mesh
         /// </summary>
-        /// <param name="mode">Drawing mode</param>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns the drawing effect</returns>
-        public static IDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType, bool instanced)
+        /// <param name="mode"></param>
+        /// <param name="mesh"></param>
+        /// <param name="instanced"></param>
+        /// <returns></returns>
+        public static IDrawer GetDrawer(DrawerModes mode, IMesh mesh, bool instanced)
         {
             if (mode.HasFlag(DrawerModes.Forward))
             {
-                return ForwardDrawerManager.GetDrawer(vertexType, instanced);
+                return ForwardDrawerManager.GetDrawer(mesh, instanced);
             }
 
             if (mode.HasFlag(DrawerModes.Deferred))
             {
-                return DeferredDrawerManager.GetDrawer(vertexType, instanced);
+                return DeferredDrawerManager.GetDrawer(mesh, instanced);
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the drawing effect for the specified vertex data type
+        /// </summary>
+        /// <typeparam name="T">Vertex data type</typeparam>
+        /// <param name="mode">Drawing mode</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <returns>Returns the drawing effect</returns>
+        public static IDrawer GetDrawer<T>(DrawerModes mode, bool instanced) where T : struct, IVertexData
+        {
+            if (mode.HasFlag(DrawerModes.Forward))
+            {
+                return ForwardDrawerManager.GetDrawer<T>(instanced);
+            }
+
+            if (mode.HasFlag(DrawerModes.Deferred))
+            {
+                return DeferredDrawerManager.GetDrawer<T>(instanced);
             }
 
             return null;

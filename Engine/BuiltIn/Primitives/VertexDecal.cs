@@ -46,16 +46,6 @@ namespace Engine.BuiltIn.Primitives
         /// Maximum age
         /// </summary>
         public float MaxAge;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.Decal;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

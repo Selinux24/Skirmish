@@ -262,7 +262,7 @@ namespace Engine.Common
         /// <summary>
         /// Iterates the materials list
         /// </summary>
-        public IEnumerable<(string MaterialName, IMeshMaterial MeshMaterial, string MeshName, Mesh Mesh)> IterateMaterials()
+        public IEnumerable<(string MaterialName, IMeshMaterial MeshMaterial, string MeshName, IMesh Mesh)> IterateMaterials()
         {
             foreach ((var meshName, var meshValue) in meshes)
             {
@@ -288,7 +288,7 @@ namespace Engine.Common
         /// <summary>
         /// Iterates the mesh list
         /// </summary>
-        private IEnumerable<(string MaterialName, Mesh Mesh)> IterateMeshes()
+        private IEnumerable<(string MaterialName, IMesh Mesh)> IterateMeshes()
         {
             foreach (var meshMaterial in meshes.Values)
             {
@@ -428,7 +428,7 @@ namespace Engine.Common
         /// Gets a list of meshes by mesh name
         /// </summary>
         /// <param name="name">Name</param>
-        public IEnumerable<Mesh> GetMeshesByName(string name)
+        public IEnumerable<IMesh> GetMeshesByName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -449,7 +449,7 @@ namespace Engine.Common
         /// Gets the first mesh by mesh name
         /// </summary>
         /// <param name="name">Name</param>
-        public Mesh GetMeshByName(string name)
+        public IMesh GetMeshByName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

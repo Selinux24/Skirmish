@@ -1,4 +1,5 @@
 ﻿using Engine.BuiltIn.Primitives;
+using Engine.Common;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
@@ -8,58 +9,72 @@ namespace Engine.BuiltIn.Drawers.Deferred
     public static class DeferredDrawerManager
     {
         /// <summary>
-        /// Gets the drawing effect for the current instance
+        /// Gets the drawing effect for the specified mesh
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
+        /// <param name="mesh">Mesh</param>
+        /// <param name="instanced">Use instancing data</param>
         /// <returns>Returns the drawing effect</returns>
-        public static IDrawer GetDrawer(VertexTypes vertexType, bool instanced)
+        public static IDrawer GetDrawer(IMesh mesh, bool instanced)
+        {
+            var instance = mesh.GetVertexType();
+            if (instance == null)
+            {
+                return null;
+            }
+
+            return GetDrawer(instance, instanced);
+        }
+        /// <summary>
+        /// Gets the drawing effect for the specified vertex data type
+        /// </summary>
+        /// <typeparam name="T">Vertex data type</typeparam>
+        /// <param name="instanced">Use instancing data</param>
+        /// <returns>Returns the drawing effect</returns>
+        public static IDrawer GetDrawer<T>(bool instanced) where T : struct, IVertexData
+        {
+            return GetDrawer(default(T), instanced);
+        }
+
+        private static IDrawer GetDrawer<T>(T instance, bool instanced) where T : IVertexData
         {
             if (instanced)
             {
-                return GetDrawerInstanced(vertexType);
+                return GetDrawerInstanced(instance);
             }
 
-            return GetDrawerSingle(vertexType);
+            return GetDrawerSingle(instance);
         }
-        /// <summary>
-        /// Gets a single drawer
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        private static IDrawer GetDrawerSingle(VertexTypes vertexType)
+        private static IDrawer GetDrawerSingle<T>(T instance) where T : IVertexData
         {
-            return vertexType switch
+            return instance switch
             {
-                VertexTypes.PositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColor>(),
-                VertexTypes.PositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTexture>(),
-                VertexTypes.PositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColor>(),
-                VertexTypes.PositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTexture>(),
-                VertexTypes.PositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangent>(),
-                VertexTypes.PositionColorSkinned => BuiltInShaders.GetDrawer<BuiltInPositionColorSkinned>(),
-                VertexTypes.PositionTextureSkinned => BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinned>(),
-                VertexTypes.PositionNormalColorSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinned>(),
-                VertexTypes.PositionNormalTextureSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinned>(),
-                VertexTypes.PositionNormalTextureTangentSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinned>(),
+                VertexPositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColor>(),
+                VertexPositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTexture>(),
+                VertexPositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColor>(),
+                VertexPositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTexture>(),
+                VertexPositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangent>(),
+                VertexSkinnedPositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColorSkinned>(),
+                VertexSkinnedPositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinned>(),
+                VertexSkinnedPositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinned>(),
+                VertexSkinnedPositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinned>(),
+                VertexSkinnedPositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinned>(),
                 _ => null,
             };
         }
-        /// <summary>
-        /// Gets a instanced drawer
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        private static IDrawer GetDrawerInstanced(VertexTypes vertexType)
+        private static IDrawer GetDrawerInstanced<T>(T instance) where T : IVertexData
         {
-            return vertexType switch
+            return instance switch
             {
-                VertexTypes.PositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColorInstanced>(),
-                VertexTypes.PositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTextureInstanced>(),
-                VertexTypes.PositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorInstanced>(),
-                VertexTypes.PositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureInstanced>(),
-                VertexTypes.PositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentInstanced>(),
-                VertexTypes.PositionColorSkinned => BuiltInShaders.GetDrawer<BuiltInPositionColorSkinnedInstanced>(),
-                VertexTypes.PositionTextureSkinned => BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinnedInstanced>(),
-                VertexTypes.PositionNormalColorSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinnedInstanced>(),
-                VertexTypes.PositionNormalTextureSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinnedInstanced>(),
-                VertexTypes.PositionNormalTextureTangentSkinned => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinnedInstanced>(),
+                VertexPositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColorInstanced>(),
+                VertexPositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTextureInstanced>(),
+                VertexPositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorInstanced>(),
+                VertexPositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureInstanced>(),
+                VertexPositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentInstanced>(),
+                VertexSkinnedPositionColor => BuiltInShaders.GetDrawer<BuiltInPositionColorSkinnedInstanced>(),
+                VertexSkinnedPositionTexture => BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinnedInstanced>(),
+                VertexSkinnedPositionNormalColor => BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinnedInstanced>(),
+                VertexSkinnedPositionNormalTexture => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinnedInstanced>(),
+                VertexSkinnedPositionNormalTextureTangent => BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinnedInstanced>(),
                 _ => null,
             };
         }

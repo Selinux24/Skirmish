@@ -41,16 +41,6 @@ namespace Engine.BuiltIn.Primitives
         /// Particle maximum age
         /// </summary>
         public float MaxAge;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.CPUParticle;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

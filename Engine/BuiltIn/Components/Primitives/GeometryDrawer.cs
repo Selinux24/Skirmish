@@ -1,5 +1,4 @@
 ﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Primitives;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
@@ -28,10 +27,6 @@ namespace Engine.BuiltIn.Components.Primitives
         /// Triangle dictionary by color
         /// </summary>
         private readonly ConcurrentBag<T> bag = [];
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        private readonly VertexTypes vertexType = default(T).VertexType;
 
         /// <summary>
         /// Topology
@@ -264,18 +259,7 @@ namespace Engine.BuiltIn.Components.Primitives
         /// <inheritdoc/>
         public override bool Draw(DrawContext context)
         {
-            if (!Visible)
-            {
-                return false;
-            }
-
             if (!BuffersReady)
-            {
-                return false;
-            }
-
-            bool draw = context.ValidateDraw(BlendMode);
-            if (!draw)
             {
                 return false;
             }
@@ -287,37 +271,59 @@ namespace Engine.BuiltIn.Components.Primitives
                 return false;
             }
 
-            var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, vertexType, false);
+            if (!Visible)
+            {
+                return false;
+            }
+
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return false;
+            }
+
+            var drawer = BuiltInDrawer.GetDrawer<T>(context.DrawerMode, false);
             if (drawer == null)
             {
                 return false;
             }
 
             var dc = context.DeviceContext;
+            drawer.UpdateMesh(dc, PrepareMeshState());
+            drawer.UpdateMaterial(dc, PrepareMaterialState());
 
-            var meshState = new BuiltInDrawerMeshState
+            return drawer.Draw(dc, PrepareDrawOptions());
+        }
+        /// <inheritdoc/>
+        public override bool DrawShadows(DrawContextShadows context)
+        {
+            if (!BuffersReady)
             {
-                Local = Manipulator.GlobalTransform
-            };
-            drawer.UpdateMesh(dc, meshState);
+                return false;
+            }
 
-            var materialState = new BuiltInDrawerMaterialState
+            if (vertexCount <= 0)
             {
-                TintColor = TintColor,
-                Material = material,
-                TextureIndex = TextureIndex,
-                UseAnisotropic = UseAnisotropic,
-            };
-            drawer.UpdateMaterial(dc, materialState);
+                return false;
+            }
 
-            bool drawn = drawer.Draw(dc, new DrawOptions
+            if (!Visible)
             {
-                VertexBuffer = vertexBuffer,
-                VertexDrawCount = vertexCount,
-                Topology = topology,
-            });
+                return false;
+            }
 
-            return drawn;
+            var drawer = context.ShadowMap?.GetDrawer<T>(false, material.Material.IsTransparent);
+            if (drawer == null)
+            {
+                return false;
+            }
+
+            var dc = context.DeviceContext;
+            drawer.UpdateCastingLight(context);
+            drawer.UpdateMesh(dc, PrepareMeshState());
+            drawer.UpdateMaterial(dc, PrepareMaterialState());
+
+            return drawer.Draw(dc, PrepareDrawOptions());
         }
         /// <summary>
         /// Writes dictionary data in buffer
@@ -344,6 +350,41 @@ namespace Engine.BuiltIn.Components.Primitives
                 vertexCount = copy.Length;
                 bagChanged = false;
             }
+        }
+        /// <summary>
+        /// Prepares the drawer mesh state
+        /// </summary>
+        private BuiltInDrawerMeshState PrepareMeshState()
+        {
+            return new()
+            {
+                Local = Manipulator.GlobalTransform
+            };
+        }
+        /// <summary>
+        /// Prepares the drawer material state
+        /// </summary>
+        private BuiltInDrawerMaterialState PrepareMaterialState()
+        {
+            return new()
+            {
+                TintColor = TintColor,
+                Material = material,
+                TextureIndex = TextureIndex,
+                UseAnisotropic = UseAnisotropic,
+            };
+        }
+        /// <summary>
+        /// Prepares the draw options
+        /// </summary>
+        private DrawOptions PrepareDrawOptions()
+        {
+            return new()
+            {
+                VertexBuffer = vertexBuffer,
+                VertexDrawCount = vertexCount,
+                Topology = topology,
+            };
         }
 
         /// <inheritdoc/>

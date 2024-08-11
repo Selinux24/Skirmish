@@ -194,7 +194,7 @@ namespace Engine.BuiltIn.Components.Ground
                 return false;
             }
 
-            var shadowDrawer = context.ShadowMap?.GetDrawer(VertexTypes.Terrain, false, false);
+            var shadowDrawer = context.ShadowMap?.GetDrawer<VertexTerrain>(false, false);
             if (shadowDrawer == null)
             {
                 return false;

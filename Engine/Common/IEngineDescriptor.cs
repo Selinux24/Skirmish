@@ -24,10 +24,6 @@ namespace Engine.Common
         /// </summary>
         int AllocatedSize { get; }
         /// <summary>
-        /// Gets the size of the data to allocate
-        /// </summary>
-        int ToAllocateSize { get; }
-        /// <summary>
         /// Gets whether the internal buffer needs reallocation
         /// </summary>
         bool ReallocationNeeded { get; }
@@ -41,8 +37,31 @@ namespace Engine.Common
         int Allocations { get; }
 
         /// <summary>
+        /// Gets the buffer format stride
+        /// </summary>
+        /// <returns>Returns the buffer format stride in bytes</returns>
+        int GetStride();
+        /// <summary>
+        /// Gets the complete data size in bytes
+        /// </summary>
+        int SizeInBytes();
+
+        /// <summary>
+        /// Removes a buffer descriptor from the internal list
+        /// </summary>
+        /// <param name="descriptor">Buffer descriptor to remove</param>
+        void RemoveDescriptor(BufferDescriptor descriptor);
+
+        /// <summary>
         /// Updates the allocated buffer size
         /// </summary>
         void Allocate();
+        /// <summary>
+        /// Creates the graphics buffer
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Buffer name</param>
+        /// <returns>Returns a engine buffer</returns>
+        EngineBuffer CreateBuffer(Graphics graphics, string name);
     }
 }

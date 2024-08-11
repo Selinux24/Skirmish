@@ -139,16 +139,18 @@ namespace AISamples.Common
 
         public void Mutate(float amount)
         {
+            var rnd = Helper.NewGenerator();
+
             for (int i = 0; i < biases.Length; i++)
             {
-                biases[i] = MathUtil.Lerp(biases[i], Helper.RandomGenerator.NextFloat(-1, 1), amount);
+                biases[i] = MathUtil.Lerp(biases[i], rnd.NextFloat(-1, 1), amount);
             }
 
             for (int i = 0; i < weights.Length; i++)
             {
                 for (int o = 0; o < weights[i].Length; o++)
                 {
-                    weights[i][o] = MathUtil.Lerp(weights[i][o], Helper.RandomGenerator.NextFloat(-1, 1), amount);
+                    weights[i][o] = MathUtil.Lerp(weights[i][o], rnd.NextFloat(-1, 1), amount);
                 }
             }
         }

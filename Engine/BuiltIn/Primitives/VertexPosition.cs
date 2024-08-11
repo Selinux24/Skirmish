@@ -47,11 +47,11 @@ namespace Engine.BuiltIn.Primitives
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<IEnumerable<VertexPosition>> Convert(IEnumerable<VertexData> vertices)
         {
             var vArray = vertices.ToArray();
 
-            var res = new IVertexData[vArray.Length];
+            var res = new VertexPosition[vArray.Length];
 
             Parallel.For(0, vArray.Length, (index) =>
             {
@@ -70,16 +70,6 @@ namespace Engine.BuiltIn.Primitives
         /// Position
         /// </summary>
         public Vector3 Position;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes VertexType
-        {
-            get
-            {
-                return VertexTypes.Position;
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel

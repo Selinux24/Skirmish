@@ -1,5 +1,4 @@
-﻿using Engine.BuiltIn.Primitives;
-using Engine.Common;
+﻿using Engine.Common;
 
 namespace Engine
 {
@@ -8,10 +7,6 @@ namespace Engine
     /// </summary>
     public interface IVertexData : IBufferData
     {
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        VertexTypes VertexType { get; }
         /// <summary>
         /// Gets if structure contains data for the specified channel
         /// </summary>

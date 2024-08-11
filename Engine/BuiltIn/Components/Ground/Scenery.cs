@@ -1,7 +1,4 @@
 ﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Deferred;
-using Engine.BuiltIn.Drawers.Forward;
-using Engine.BuiltIn.Primitives;
 using Engine.Collections.Generic;
 using Engine.Common;
 using Engine.Content;
@@ -138,7 +135,7 @@ namespace Engine.BuiltIn.Components.Ground
                     var meshMaterial = matData.MeshMaterial;
                     var mesh = matData.Mesh;
 
-                    var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, meshMaterial.Material.IsTransparent);
+                    var sceneryDrawer = context.ShadowMap.GetDrawer(mesh, false, meshMaterial.Material.IsTransparent);
                     if (sceneryDrawer == null)
                     {
                         continue;
@@ -172,7 +169,7 @@ namespace Engine.BuiltIn.Components.Ground
                         continue;
                     }
 
-                    var sceneryDrawer = GetDrawer(context.DrawerMode, mesh.VertextType);
+                    var sceneryDrawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh, false);
                     if (sceneryDrawer == null)
                     {
                         continue;
@@ -193,7 +190,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(IEngineDeviceContext dc, IDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(IEngineDeviceContext dc, IDrawer sceneryDrawer, IMesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
 
@@ -207,27 +204,6 @@ namespace Engine.BuiltIn.Components.Ground
                 sceneryDrawer.UpdateMaterial(dc, materialState);
 
                 return sceneryDrawer.Draw(dc, [mesh]);
-            }
-
-            /// <summary>
-            /// Gets the drawing effect for the current instance
-            /// </summary>
-            /// <param name="mode">Drawing mode</param>
-            /// <param name="vertexType">Vertex type</param>
-            /// <returns>Returns the drawing effect</returns>
-            private static IDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
-            {
-                if (mode.HasFlag(DrawerModes.Forward))
-                {
-                    return ForwardDrawerManager.GetDrawer(vertexType, false);
-                }
-
-                if (mode.HasFlag(DrawerModes.Deferred))
-                {
-                    return DeferredDrawerManager.GetDrawer(vertexType, false);
-                }
-
-                return null;
             }
 
             /// <summary>

@@ -20,7 +20,7 @@ namespace Engine
         /// <param name="bytes">Code bytes</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        private EngineInputLayout CreateInputLayout(string name, byte[] bytes, EngineInputElement[] elements)
+        public EngineInputLayout CreateInputLayout(string name, byte[] bytes, EngineInputElement[] elements)
         {
             var inputElements = elements.Select(e => new InputElement(e.SemanticName, e.SemanticIndex, e.Format, e.AlignedByteOffset, e.Slot, (InputClassification)e.Classification, e.InstanceDataStepRate)).ToArray();
 
@@ -37,22 +37,6 @@ namespace Engine
         public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, int bufferSlot) where T : struct, IVertexData
         {
             var inputElements = default(T).GetInput(bufferSlot);
-
-            return CreateInputLayout(name, bytes, inputElements);
-        }
-        /// <summary>
-        /// Creates a new Input Layout for a <see cref="BufferManagerVertices"/> instance
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Code bytes</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="instanced">Create a instanced layout</param>
-        /// <returns>Returns a new Input Layout</returns>
-        public EngineInputLayout CreateInputLayout(string name, byte[] bytes, BufferManagerVertices vertices, bool instanced)
-        {
-            var inputElements = instanced ?
-                vertices.Input.ToArray() :
-                vertices.Input.Where(i => i.Classification == EngineInputClassification.PerVertexData).ToArray();
 
             return CreateInputLayout(name, bytes, inputElements);
         }

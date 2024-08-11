@@ -152,7 +152,7 @@ namespace Engine.BuiltIn.Components.Models
         {
             if (disposing)
             {
-                BufferManager.RemoveInstancingData<VertexInstancingData>(InstancingBuffer);
+                BufferManager.RemoveInstancingData(InstancingBuffer);
                 InstancingBuffer = null;
             }
 
@@ -356,7 +356,7 @@ namespace Engine.BuiltIn.Components.Models
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, true, meshMaterial.Material.IsTransparent);
+                var drawer = context.ShadowMap?.GetDrawer(mesh, true, meshMaterial.Material.IsTransparent);
                 if (drawer == null)
                 {
                     continue;
@@ -493,7 +493,7 @@ namespace Engine.BuiltIn.Components.Models
                     continue;
                 }
 
-                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh.VertextType, true);
+                var drawer = BuiltInDrawer.GetDrawer(context.DrawerMode, mesh, true);
                 if (drawer == null)
                 {
                     continue;
