@@ -1,7 +1,7 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Primitives;
 using Engine;
-using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.Common;
 using SharpDX;
 using System;

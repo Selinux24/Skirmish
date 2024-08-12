@@ -1,7 +1,7 @@
 ﻿using Engine.Common;
 using SharpDX;
 
-namespace Engine.BuiltIn.Components.Primitives
+namespace Engine.BuiltIn.Components.Geometry
 {
     /// <summary>
     /// Geometry color drawer description

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.BuiltIn.Components.Primitives
+namespace Engine.BuiltIn.Components.Geometry
 {
     /// <summary>
     /// Geometry drawer

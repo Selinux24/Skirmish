@@ -12,7 +12,8 @@ namespace Engine.UI
     /// <summary>
     /// Font map
     /// </summary>
-    public class FontMap : IDisposable
+    public class FontMap<T> : IDisposable
+        where T : struct, IVertexData
     {
         /// <summary>
         /// Sample character
@@ -33,30 +34,30 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
+        public static FontMap<T> FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
         {
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
             {
-                Logger.WriteWarning(nameof(FontMap), $"Font resource not found: {fontFileName}");
+                Logger.WriteWarning(nameof(FontMap<T>), $"Font resource not found: {fontFileName}");
                 return null;
             }
 
             var fileName = fileNames.First();
             var fontName = Game.Fonts.GetFromFileFontName(fileName);
 
-            var fMap = FontMapCache.Get(fontName, size, style);
+            var fMap = FontMapCache<T>.Get(fontName, size, style);
             if (fMap != null)
             {
                 return fMap;
             }
 
             var fontDesc = Game.Fonts.FromFile(generator, FontMapProcessParameters.Default, fileName, size, style);
-            fMap = new FontMap(fontDesc);
+            fMap = new FontMap<T>(fontDesc);
             fMap.Initialize(game);
 
             //Add map to the font cache
-            FontMapCache.Add(fMap);
+            FontMapCache<T>.Add(fMap);
 
             return fMap;
         }
@@ -67,17 +68,17 @@ namespace Engine.UI
         /// <param name="contentPath">Content path</param>
         /// <param name="fontMapping">Font mapping</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap FromMap(Game game, string contentPath, FontMapping fontMapping)
+        public static FontMap<T> FromMap(Game game, string contentPath, FontMapping fontMapping)
         {
             string fontName = Path.Combine(contentPath, fontMapping.ImageFile);
 
-            var fMap = FontMapCache.Get(fontName);
+            var fMap = FontMapCache<T>.Get(fontName);
             if (fMap != null)
             {
                 return fMap;
             }
 
-            fMap = new FontMap
+            fMap = new FontMap<T>
             {
                 FontName = fontName,
                 Texture = game.ResourceManager.RequestResource(fontName, false)
@@ -134,28 +135,28 @@ namespace Engine.UI
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
         /// <remarks>The font family must exists in the FontFamily.Families collection</remarks>
-        public static FontMap FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamilies, float size, FontMapStyles style)
+        public static FontMap<T> FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamilies, float size, FontMapStyles style)
         {
             var fontFamily = Game.Fonts.FindFonts(fontFamilies);
             if (string.IsNullOrEmpty(fontFamily))
             {
-                Logger.WriteWarning(nameof(FontMap), $"Font familiy not found in the graphic context: {fontFamilies}");
+                Logger.WriteWarning(nameof(FontMap<T>), $"Font familiy not found in the graphic context: {fontFamilies}");
 
                 return null;
             }
 
-            var fMap = FontMapCache.Get(fontFamily, size, style);
+            var fMap = FontMapCache<T>.Get(fontFamily, size, style);
             if (fMap != null)
             {
                 return fMap;
             }
 
             var fontDesc = Game.Fonts.FromFamilyName(generator, FontMapProcessParameters.Default, fontFamily, size, style);
-            fMap = new FontMap(fontDesc);
+            fMap = new FontMap<T>(fontDesc);
             fMap.Initialize(game);
 
             //Add map to the font cache
-            FontMapCache.Add(fMap);
+            FontMapCache<T>.Add(fMap);
 
             return fMap;
         }
@@ -178,12 +179,12 @@ namespace Engine.UI
 
             if (!float.TryParse(xValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
             {
-                Logger.WriteWarning(nameof(FontMap), $"Bad coordinate descriptor for X value. Single spected: {xValue}");
+                Logger.WriteWarning(nameof(FontMap<T>), $"Bad coordinate descriptor for X value. Single spected: {xValue}");
             }
 
             if (!float.TryParse(yValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
             {
-                Logger.WriteWarning(nameof(FontMap), $"Bad coordinate descriptor for Y value. Single spected: {yValue}");
+                Logger.WriteWarning(nameof(FontMap<T>), $"Bad coordinate descriptor for Y value. Single spected: {yValue}");
             }
 
             return new Vector2(x, y);
@@ -315,7 +316,7 @@ namespace Engine.UI
         {
             bool firstPart = true;
             var tmpPos = Vector2.Zero;
-            var desc = FontMapSentenceDescriptor.OneCharDescriptor;
+            var desc = FontMapSentenceDescriptor<T>.OneCharDescriptor;
             desc.Clear();
             MapPart(FontMapParsedPart.Space, false, float.MaxValue, ref firstPart, ref tmpPos, ref desc, out float height);
 
@@ -329,7 +330,7 @@ namespace Engine.UI
         {
             bool firstPart = true;
             var tmpPos = Vector2.Zero;
-            var desc = FontMapSentenceDescriptor.OneCharDescriptor;
+            var desc = FontMapSentenceDescriptor<T>.OneCharDescriptor;
             desc.Clear();
             MapPart(FontMapParsedPart.FromChar(GetSampleCharacter()), false, float.MaxValue, ref firstPart, ref tmpPos, ref desc, out float height);
 
@@ -365,7 +366,7 @@ namespace Engine.UI
             FontMapParsedSentence sentenceDesc,
             bool processShadows,
             float width,
-            ref FontMapSentenceDescriptor desc)
+            ref FontMapSentenceDescriptor<T> desc)
         {
             if (sentenceDesc.Count() <= 0)
             {
@@ -424,7 +425,7 @@ namespace Engine.UI
             float width,
             ref bool firstPartInLine,
             ref Vector2 pos,
-            ref FontMapSentenceDescriptor desc,
+            ref FontMapSentenceDescriptor<T> desc,
             out float height)
         {
             height = 0;
@@ -472,7 +473,9 @@ namespace Engine.UI
                 var diff = new Vector3(prevPos.X, height, 0);
                 for (int index = prevIndex; index < desc.VertexCount; index++)
                 {
-                    desc.Vertices[index].Position -= diff;
+                    var position = desc.Vertices[index].GetChannelValue<Vector3>(VertexDataChannels.Position);
+                    position -= diff;
+                    desc.Vertices[index].SetChannelValue(VertexDataChannels.Position, position);
                 }
             }
 
@@ -490,7 +493,7 @@ namespace Engine.UI
             FontMapChar chr,
             Color4 color,
             ref Vector2 pos,
-            ref FontMapSentenceDescriptor desc)
+            ref FontMapSentenceDescriptor<T> desc)
         {
             //Creates the texture UVMap
             var uv = GeometryUtil.CreateUVMap(

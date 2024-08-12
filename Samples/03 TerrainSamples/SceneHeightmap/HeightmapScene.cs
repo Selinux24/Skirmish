@@ -2,10 +2,10 @@
 using Engine.Animation;
 using Engine.BuiltIn.Components.Flares;
 using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.UI;
 using Engine.Common;

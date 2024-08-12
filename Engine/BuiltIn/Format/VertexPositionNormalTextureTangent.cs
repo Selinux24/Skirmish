@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Engine.BuiltIn.Primitives
+namespace Engine.BuiltIn.Format
 {
     /// <summary>
     /// Position normal texure and tangent vertex format
@@ -106,11 +106,7 @@ namespace Engine.BuiltIn.Primitives
         /// </summary>
         public Vector3 Tangent;
 
-        /// <summary>
-        /// Gets if structure contains data for the specified channel
-        /// </summary>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns true if structure contains data for the specified channel</returns>
+        /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
@@ -119,12 +115,7 @@ namespace Engine.BuiltIn.Primitives
             else if (channel == VertexDataChannels.Tangent) return true;
             else return false;
         }
-        /// <summary>
-        /// Gets data channel value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns data for the specified channel</returns>
+        /// <inheritdoc/>
         public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
@@ -133,12 +124,7 @@ namespace Engine.BuiltIn.Primitives
             else if (channel == VertexDataChannels.Tangent) return (T)(object)Tangent;
             else throw new EngineException($"Channel data not found: {channel}");
         }
-        /// <summary>
-        /// Sets the channer value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Channel</param>
-        /// <param name="value">Value</param>
+        /// <inheritdoc/>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
@@ -148,18 +134,12 @@ namespace Engine.BuiltIn.Primitives
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexPositionNormalTextureTangent));
         }
-        /// <summary>
-        /// Get input elements
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <returns>Returns input elements</returns>
+        /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)
         {
             return Input(slot);
@@ -170,5 +150,5 @@ namespace Engine.BuiltIn.Primitives
         {
             return $"Position: {Position}; Normal: {Normal}; Texture: {Texture}; Tangent: {Tangent};";
         }
-    };
+    }
 }

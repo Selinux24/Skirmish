@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.BuiltIn.Format;
 using Engine.UI;
 using Engine.Windows;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,11 +28,11 @@ namespace EngineTests.UI
         static readonly int p5Size = p5.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
         static Game game;
-        static FontMap font;
+        static FontMap<VertexFont> font;
 
         const string fontImgResource = "Font.png";
         const string fontMapResource = "Font.txt";
-        static FontMap fontMapped;
+        static FontMap<VertexFont> fontMapped;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -48,7 +49,7 @@ namespace EngineTests.UI
 
             game = new Game("Unit testing game");
 
-            font = FontMap.FromFamily(game, FontMapKeycodeGenerator.Default(), "Arial", 10, FontMapStyles.Regular);
+            font = FontMap<VertexFont>.FromFamily(game, FontMapKeycodeGenerator.Default(), "Arial", 10, FontMapStyles.Regular);
 
             var fontMapping = new FontMapping()
             {
@@ -56,7 +57,7 @@ namespace EngineTests.UI
                 MapFile = fontMapResource,
             };
 
-            fontMapped = FontMap.FromMap(game, "resources", fontMapping);
+            fontMapped = FontMap<VertexFont>.FromMap(game, "resources", fontMapping);
         }
 
         [TestMethod()]
@@ -68,7 +69,7 @@ namespace EngineTests.UI
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
 
-            var desc = FontMapSentenceDescriptor.Create(100);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(100);
 
             font.MapSentence(sentence, false, 1000, ref desc);
 
@@ -86,7 +87,7 @@ I'm the next line";
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
 
-            var desc = FontMapSentenceDescriptor.Create(100);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(100);
 
             font.MapSentence(sentence, false, 1000, ref desc);
 
@@ -112,7 +113,7 @@ I'm the next line";
             int height = (int)font.GetSpaceSize().Y;
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
-            var desc = FontMapSentenceDescriptor.Create(5000);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(5000);
             font.MapSentence(sentence, false, float.MaxValue, ref desc);
 
             Assert.AreEqual(sampleSize * 4, (int)desc.VertexCount);
@@ -147,7 +148,7 @@ I'm the next line";
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
-            var desc = FontMapSentenceDescriptor.Create(5000);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(5000);
             font.MapSentence(sentence, false, 500, ref desc);
 
             Assert.AreEqual(sampleSize * 4, (int)desc.VertexCount);
@@ -178,7 +179,7 @@ I'm the next line";
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
-            var desc = FontMapSentenceDescriptor.Create(15);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(15);
             fontMapped.MapSentence(sentence, false, width, ref desc);
 
             Assert.AreEqual(sampleSize * 4, (int)desc.VertexCount);
@@ -191,7 +192,7 @@ I'm the next line";
 
             var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
 
-            var desc = FontMapSentenceDescriptor.Create(5);
+            var desc = FontMapSentenceDescriptor<VertexFont>.Create(5);
 
             font.MapSentence(sentence, false, 1000, ref desc);
 

@@ -1,6 +1,6 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Forward;
-using Engine.BuiltIn.Primitives;
+using Engine.BuiltIn.Format;
 using Engine.Common;
 using SharpDX;
 using System.Collections.Concurrent;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.BuiltIn.Components.Primitives
+namespace Engine.BuiltIn.Components.Geometry
 {
     /// <summary>
     /// Geometry color list drawer

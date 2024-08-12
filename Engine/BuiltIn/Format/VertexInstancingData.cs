@@ -1,9 +1,8 @@
 ﻿using Engine.Common;
 using SharpDX;
-using SharpDX.DXGI;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.Primitives
+namespace Engine.BuiltIn.Format
 {
     /// <summary>
     /// Instancing data
@@ -79,25 +78,23 @@ namespace Engine.BuiltIn.Primitives
         {
             return
             [
-                new (LocalTransformString, 0, Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 1, Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 2, Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 3, Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TintColorString, 0, Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TextureIndexString, 0, Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
-                new (MaterialIndexString, 0, Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetString, 0, Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetBString, 0, Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationInterpolationString, 0, Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 1, SharpDX.DXGI.Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 2, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 3, SharpDX.DXGI.Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TintColorString, 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TextureIndexString, 0, SharpDX.DXGI.Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
+                new (MaterialIndexString, 0, SharpDX.DXGI.Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetString, 0, SharpDX.DXGI.Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetBString, 0, SharpDX.DXGI.Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationInterpolationString, 0, SharpDX.DXGI.Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
             ];
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexInstancingData));
         }
-    };
+    }
 }

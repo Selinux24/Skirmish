@@ -1,6 +1,6 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Modular;
 using Engine.PathFinding;

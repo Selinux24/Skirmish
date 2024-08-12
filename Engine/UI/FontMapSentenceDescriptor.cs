@@ -1,5 +1,4 @@
-﻿using Engine.BuiltIn.Primitives;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 
@@ -8,23 +7,23 @@ namespace Engine.UI
     /// <summary>
     /// Sentence descriptor
     /// </summary>
-    public struct FontMapSentenceDescriptor
+    public struct FontMapSentenceDescriptor<T> where T : struct, IVertexData
     {
         /// <summary>
         /// One character sentence descriptor
         /// </summary>
-        public static readonly FontMapSentenceDescriptor OneCharDescriptor = Create(1);
+        public static readonly FontMapSentenceDescriptor<T> OneCharDescriptor = Create(1);
         /// <summary>
         /// Creates a new sentence descriptor
         /// </summary>
         /// <param name="size">Number of characters</param>
-        public static FontMapSentenceDescriptor Create(int size)
+        public static FontMapSentenceDescriptor<T> Create(int size)
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(size, 0);
 
             return new()
             {
-                Vertices = new VertexFont[size * 4],
+                Vertices = new T[size * 4],
                 VertexCount = 0,
                 Indices = new uint[size * 6],
                 IndexCount = 0,
@@ -46,7 +45,7 @@ namespace Engine.UI
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexFont[] Vertices { get; set; }
+        public T[] Vertices { get; set; }
         /// <summary>
         /// Vertex count
         /// </summary>
@@ -105,9 +104,9 @@ namespace Engine.UI
                     continue;
                 }
 
-                Vertices[VertexCount].Position = vArray[i];
-                Vertices[VertexCount].Texture = uvArray[i];
-                Vertices[VertexCount].Color = color;
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Position, vArray[i]);
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Texture, uvArray[i]);
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Color, color);
 
                 VertexCount++;
             }
@@ -131,7 +130,7 @@ namespace Engine.UI
 
             for (int i = 0; i < VertexCount; i += 4)
             {
-                if (i == 0 || !MathUtil.IsZero(Vertices[i].Position.X))
+                if (i == 0 || !MathUtil.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
                 {
                     //Skip until the first character
                     continue;
@@ -174,8 +173,10 @@ namespace Engine.UI
             //Update all the coordinates
             for (int x = from; x < to; x++)
             {
-                Vertices[x].Position.X += diffX;
-                Vertices[x].Position.Y -= diffY;
+                var position = Vertices[x].GetChannelValue<Vector3>(Common.VertexDataChannels.Position);
+                position.X += diffX;
+                position.Y -= diffY;
+                Vertices[x].SetChannelValue(Common.VertexDataChannels.Position, position);
             }
         }
         /// <summary>
@@ -257,7 +258,7 @@ namespace Engine.UI
 
             for (int i = from; i < to; i++)
             {
-                var p = Vertices[i].Position;
+                var p = Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position);
 
                 maxX = MathF.Max(maxX, p.X);
                 maxY = MathF.Max(maxY, -p.Y);

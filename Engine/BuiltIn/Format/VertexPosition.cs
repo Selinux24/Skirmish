@@ -1,0 +1,110 @@
+﻿using Engine.Common;
+using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+
+namespace Engine.BuiltIn.Format
+{
+    /// <summary>
+    /// Position vertex format
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPosition : IVertexData
+    {
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
+        public static EngineInputElement[] Input(int slot)
+        {
+            return
+            [
+                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+            ];
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="uvs">Uv texture coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPosition> Generate(IEnumerable<Vector3> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new List<VertexPosition>();
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res.Add(new VertexPosition() { Position = vArray[i] });
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Converts a vertex data list to a vertex array
+        /// </summary>
+        /// <param name="vertices">Vertices list</param>
+        public static async Task<IEnumerable<VertexPosition>> Convert(IEnumerable<VertexData> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new VertexPosition[vArray.Length];
+
+            Parallel.For(0, vArray.Length, (index) =>
+            {
+                var v = vArray[index];
+
+                res[index] = new VertexPosition
+                {
+                    Position = v.Position ?? Vector3.Zero,
+                };
+            });
+
+            return await Task.FromResult(res);
+        }
+
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+
+        /// <inheritdoc/>
+        public readonly bool HasChannel(VertexDataChannels channel)
+        {
+            if (channel == VertexDataChannels.Position) return true;
+            else return false;
+        }
+        /// <inheritdoc/>
+        public readonly T GetChannelValue<T>(VertexDataChannels channel)
+        {
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else throw new EngineException($"Channel data not found: {channel}");
+        }
+        /// <inheritdoc/>
+        public void SetChannelValue<T>(VertexDataChannels channel, T value)
+        {
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
+        }
+
+        /// <inheritdoc/>
+        public readonly int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexPosition));
+        }
+        /// <inheritdoc/>
+        public readonly EngineInputElement[] GetInput(int slot)
+        {
+            return Input(slot);
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return $"Position: {Position};";
+        }
+    }
+}

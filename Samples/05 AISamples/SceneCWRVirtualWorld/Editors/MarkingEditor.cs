@@ -2,8 +2,8 @@
 using AISamples.Common.Markings;
 using AISamples.Common.Primitives;
 using Engine;
-using Engine.BuiltIn.Components.Primitives;
-using Engine.BuiltIn.Primitives;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Format;
 using Engine.Content;
 using SharpDX;
 using System.Threading.Tasks;

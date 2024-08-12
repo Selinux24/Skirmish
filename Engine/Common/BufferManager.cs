@@ -1,5 +1,4 @@
-﻿using Engine.BuiltIn.Primitives;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -223,7 +222,7 @@ namespace Engine.Common
 
             for (int i = 0; i < reservedSlots; i++)
             {
-                BufferManagerVertices<VertexPositionTexture> descriptor = new(true)
+                BufferManagerVertices<ReservedDataFormat> descriptor = new(true)
                 {
                     BufferIndex = vertexBuffers.Count,
                     BufferBindingIndex = vertexBufferBindings.Count

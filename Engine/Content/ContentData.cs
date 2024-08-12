@@ -1,5 +1,4 @@
 ﻿using Engine.Animation;
-using Engine.BuiltIn.Primitives;
 using Engine.Common;
 using Engine.Content.Persistence;
 using SharpDX;
@@ -953,7 +952,7 @@ namespace Engine.Content
                 var geometry = subMesh.Value;
                 var meshMaterial = materials.FirstOrDefault(m => m.Name == subMesh.Key).Content;
 
-                var meshInfo = await VertexTypesHelper.CreateMesh(meshName, geometry, loadNormalMaps, meshMaterial, skinningInfo, constraint);
+                var meshInfo = await MeshInfo.CreateMesh(meshName, geometry, loadNormalMaps, meshMaterial, skinningInfo, constraint);
                 if (meshInfo == null)
                 {
                     continue;
@@ -1597,38 +1596,5 @@ namespace Engine.Content
         {
             animationDefinition = animation;
         }
-    }
-
-    /// <summary>
-    /// Skinning information
-    /// </summary>
-    public struct SkinningInfo
-    {
-        /// <summary>
-        /// Bind shape matrix
-        /// </summary>
-        public Matrix BindShapeMatrix { get; set; }
-        /// <summary>
-        /// Weight list
-        /// </summary>
-        public IEnumerable<Weight> Weights { get; set; }
-        /// <summary>
-        /// Bone names
-        /// </summary>
-        public IEnumerable<string> BoneNames { get; set; }
-    }
-    /// <summary>
-    /// Mesh information
-    /// </summary>
-    public struct MeshInfo
-    {
-        /// <summary>
-        /// Created mesh
-        /// </summary>
-        public IMesh Mesh { get; set; }
-        /// <summary>
-        /// Material name
-        /// </summary>
-        public string MaterialName { get; set; }
     }
 }

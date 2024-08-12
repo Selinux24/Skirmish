@@ -2,18 +2,18 @@
 using SharpDX;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.Primitives
+namespace Engine.BuiltIn.Format
 {
     /// <summary>
     /// Particle data buffer
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexCpuParticle : IVertexData
+    public struct VertexGpuParticle : IVertexData
     {
         /// <summary>
         /// Defined input colection
         /// </summary>
-        /// <param name="slot">Slot</param>
+        /// <returns>Returns input elements</returns>
         public static EngineInputElement[] Input(int slot)
         {
             return
@@ -22,15 +22,18 @@ namespace Engine.BuiltIn.Primitives
                 new ("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
                 new ("RANDOM", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
                 new ("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, slot, EngineInputClassification.PerVertexData, 0),
+
+                new ("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 44, slot, EngineInputClassification.PerVertexData, 0),
+                new ("EMISSION_TIME", 0, SharpDX.DXGI.Format.R32_Float, 48, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 
         /// <summary>
-        /// Initial position
+        /// Position
         /// </summary>
         public Vector3 Position;
         /// <summary>
-        /// Initial velocity
+        /// Velocity
         /// </summary>
         public Vector3 Velocity;
         /// <summary>
@@ -41,52 +44,40 @@ namespace Engine.BuiltIn.Primitives
         /// Particle maximum age
         /// </summary>
         public float MaxAge;
-
         /// <summary>
-        /// Gets if structure contains data for the specified channel
+        /// Particle type
         /// </summary>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns true if structure contains data for the specified channel</returns>
+        public uint Type;
+        /// <summary>
+        /// Total emission time
+        /// </summary>
+        public float EmissionTime;
+
+        /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
             else return false;
         }
-        /// <summary>
-        /// Gets data channel value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns data for the specified channel</returns>
+        /// <inheritdoc/>
         public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else throw new EngineException($"Channel data not found: {channel}");
         }
-        /// <summary>
-        /// Sets the channer value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Channel</param>
-        /// <param name="value">Value</param>
+        /// <inheritdoc/>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexCpuParticle));
+            return Marshal.SizeOf(typeof(VertexGpuParticle));
         }
-        /// <summary>
-        /// Get input elements
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <returns>Returns input elements</returns>
+        /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)
         {
             return Input(slot);

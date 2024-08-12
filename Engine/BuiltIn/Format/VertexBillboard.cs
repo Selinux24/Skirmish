@@ -2,7 +2,7 @@
 using SharpDX;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.Primitives
+namespace Engine.BuiltIn.Format
 {
     /// <summary>
     /// Billboard vertex format
@@ -33,35 +33,21 @@ namespace Engine.BuiltIn.Primitives
         /// </summary>
         public Vector2 Size;
 
-        /// <summary>
-        /// Gets if structure contains data for the specified channel
-        /// </summary>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns true if structure contains data for the specified channel</returns>
+        /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Size) return true;
             else return false;
         }
-        /// <summary>
-        /// Gets data channel value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Data channel</param>
-        /// <returns>Returns data for the specified channel</returns>
+        /// <inheritdoc/>
         public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else if (channel == VertexDataChannels.Size) return (T)(object)Size;
             else throw new EngineException($"Channel data not found: {channel};");
         }
-        /// <summary>
-        /// Sets the channer value
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="channel">Channel</param>
-        /// <param name="value">Value</param>
+        /// <inheritdoc/>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
@@ -69,18 +55,12 @@ namespace Engine.BuiltIn.Primitives
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexBillboard));
         }
-        /// <summary>
-        /// Get input elements
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <returns>Returns input elements</returns>
+        /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)
         {
             return Input(slot);
@@ -91,5 +71,5 @@ namespace Engine.BuiltIn.Primitives
         {
             return $"Position: {Position}; Size: {Size};";
         }
-    };
+    }
 }

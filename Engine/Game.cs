@@ -420,8 +420,7 @@ namespace Engine
                 }
 
                 BuiltIn.Drawers.BuiltInShaders.DisposeResources();
-
-                FontMapCache.Clear();
+                FontMapCache<BuiltIn.Format.VertexFont>.Clear();
 
                 Input?.Dispose();
                 Input = null;

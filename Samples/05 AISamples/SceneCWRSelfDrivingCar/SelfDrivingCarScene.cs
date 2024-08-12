@@ -2,8 +2,8 @@
 using AISamples.Common.Agents;
 using AISamples.Common.Primitives;
 using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
@@ -251,7 +251,7 @@ ESC - EXIT";
             };
             carModels = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
                 nameof(carModels),
-                nameof(carModels), 
+                nameof(carModels),
                 cDesc);
 
             var tDesc = new ModelInstancedDescription()

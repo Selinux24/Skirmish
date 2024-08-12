@@ -1,6 +1,5 @@
 ﻿using Engine.Common;
 using SharpDX;
-using SharpDX.DXGI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,7 +88,7 @@ namespace Engine.BuiltIn.UI
 
             var rt = Game.Graphics.CreateRenderTargetTexture(
                 $"RenderTexture_{Name}",
-                Format.R8G8B8A8_UNorm,
+                SharpDX.DXGI.Format.R8G8B8A8_UNorm,
                 Description.Width, Description.Height, false);
 
             renderTarget = rt.RenderTarget;

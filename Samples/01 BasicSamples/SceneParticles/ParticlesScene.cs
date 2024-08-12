@@ -1,12 +1,11 @@
 ﻿using BasicSamples.SceneStart;
 using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.UI;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;

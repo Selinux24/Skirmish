@@ -44,18 +44,6 @@ namespace Engine.Common
         /// Color
         /// </summary>
         public Color4? Color { get; set; }
-        /// <summary>
-        /// Sprite size
-        /// </summary>
-        public Vector2? Size { get; set; }
-        /// <summary>
-        /// Vertex weights
-        /// </summary>
-        public float[] Weights { get; set; }
-        /// <summary>
-        /// Bone weights
-        /// </summary>
-        public byte[] BoneIndices { get; set; }
 
         /// <summary>
         /// Apply weighted transforms to the vertext data
@@ -290,12 +278,27 @@ namespace Engine.Common
             return Topology.PointList;
         }
 
+        /// <summary>
+        /// Evaluates the vertex data content
+        /// </summary>
+        public readonly int Evaluate()
+        {
+            int index = 0;
+
+            if (Position.HasValue) index |= 1 << 0;
+            if (Normal.HasValue) index |= 1 << 1;
+            if (Tangent.HasValue) index |= 1 << 2;
+            if (BiNormal.HasValue) index |= 1 << 3;
+            if (Texture.HasValue) index |= 1 << 4;
+            if (Color.HasValue) index |= 1 << 5;
+
+            return index;
+        }
+
         /// <inheritdoc/>
         public override readonly string ToString()
         {
             string text = null;
-
-            if (Weights != null && Weights.Length > 0) text += "Skinned; ";
 
             text += string.Format("FaceIndex: {0}; ", FaceIndex);
             text += string.Format("VertexIndex: {0}; ", VertexIndex);
@@ -306,9 +309,6 @@ namespace Engine.Common
             if (BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", BiNormal);
             if (Texture.HasValue) text += string.Format("Texture: {0}; ", Texture);
             if (Color.HasValue) text += string.Format("Color: {0}; ", Color);
-            if (Size.HasValue) text += string.Format("Size: {0}; ", Size);
-            if (Weights != null && Weights.Length > 0) text += string.Format("Weights: {0}; ", Weights.Length);
-            if (BoneIndices != null && BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", BoneIndices.Length);
 
             return text;
         }
