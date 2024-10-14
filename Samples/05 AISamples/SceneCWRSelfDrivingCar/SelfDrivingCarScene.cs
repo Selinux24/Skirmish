@@ -46,16 +46,22 @@ namespace AISamples.SceneCWRSelfDrivingCar
         private ModelInstanced carModels = null;
         private ModelInstanced trafficModels = null;
 
+        private const string fontFamily = "Gill Sans MT, Arial";
         private const string titleText = "SELF-DRIVING CAR";
         private const string infoText = "PRESS F1 FOR HELP";
         private const string helpText = @"F1 - HELP
-F - TOGGLE FOLLOW CAR
-E - START SIMULATION
-R - RESET SIMULATION
+ 
+F5 - SAVE BEST CAR
+F6 - DELETE BEST CAR
+E - START SIMULATION & MUTATE BEST CAR
+R - RESET SIMULATION WITHOUT MUTATION
+ 
 WASD - MOVE CAMERA
 SPACE - MOVE CAMERA UP
 C - MOVE CAMERA DOWN
 MOUSE - ROTATE CAMERA
+F - TOGGLE FOLLOW CAR
+ 
 ESC - EXIT";
         private bool showHelp = false;
 
@@ -122,7 +128,7 @@ ESC - EXIT";
         }
         private async Task InitializeTitle()
         {
-            var defaultFont18 = FontDescription.FromFamily("Gill Sans MT, Arial", 18);
+            var defaultFont18 = FontDescription.FromFamily(fontFamily, 18);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = titleText;
@@ -132,7 +138,7 @@ ESC - EXIT";
         }
         private async Task InitializeTexts()
         {
-            var defaultFont11 = FontDescription.FromFamily("Gill Sans MT, Arial", 11);
+            var defaultFont11 = FontDescription.FromFamily(fontFamily, 11);
 
             runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
             info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });

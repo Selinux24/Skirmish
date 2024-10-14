@@ -153,10 +153,12 @@ namespace AISamples.Common.Agents
                 angle += rot * MathF.Sign(speed);
             }
 
-            direction = new Vector2(MathF.Sin(angle), MathF.Cos(angle)) * speed;
-            x += direction.X;
-            y += direction.Y;
-            FittnessValue += direction.LengthSquared();
+            direction = new Vector2(MathF.Sin(angle), MathF.Cos(angle));
+
+            var dir = direction * speed;
+            x += dir.X;
+            y += dir.Y;
+            FittnessValue += dir.LengthSquared();
 
             if (Forward == Reverse)
             {
