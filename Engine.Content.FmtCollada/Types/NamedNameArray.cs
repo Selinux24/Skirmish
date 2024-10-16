@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Collada.Types
+namespace Engine.Content.FmtCollada.Types
 {
     [Serializable]
     public class NamedNameArray : NamedArray

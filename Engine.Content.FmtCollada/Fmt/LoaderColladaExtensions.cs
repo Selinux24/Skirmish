@@ -3,10 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.Content.FmtCollada
+namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Collada;
-    using Engine.Collada.Types;
+    using Engine.Content.FmtCollada.Types;
     using Engine.Common;
 
     /// <summary>

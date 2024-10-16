@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Collada.FX
+namespace Engine.Content.FmtCollada.FX
 {
     [Serializable]
     public class TechniqueFX

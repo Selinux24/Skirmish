@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Collada.Types
+namespace Engine.Content.FmtCollada.Types
 {
     [Serializable]
     public class BasicFloat4X4 : BasicFloatArray

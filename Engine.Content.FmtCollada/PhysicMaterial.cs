@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
     [Serializable]
     public class PhysicMaterial

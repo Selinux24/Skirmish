@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.Audio;
-using Engine.Content.FmtCollada;
+using Engine.Content.FmtCollada.Fmt;
 using Engine.Windows;
 using System;
 

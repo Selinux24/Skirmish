@@ -7,8 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine.Content.FmtObj
+namespace Engine.Content.FmtObj.Fmt
 {
+    using Engine;
+    using Engine.Content;
     using Engine.Content.Persistence;
 
     /// <summary>

@@ -5,12 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.Content.FmtCollada
+namespace Engine.Content.FmtCollada.Fmt
 {
     using Engine.Animation;
-    using Engine.Collada;
-    using Engine.Collada.FX;
-    using Engine.Collada.Types;
+    using Engine.Content.FmtCollada.FX;
+    using Engine.Content.FmtCollada.Types;
     using Engine.Common;
     using Engine.Content.Persistence;
 
@@ -477,7 +476,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="mesh">Mesh</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Collada.Mesh mesh, bool isHull)
+        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Content.FmtCollada.Mesh mesh, bool isHull)
         {
             //Procesar por topología
             if ((mesh.Lines?.Length ?? 0) != 0)

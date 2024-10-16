@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
-    using Engine.Collada.Types;
+    using Engine.Content.FmtCollada.Types;
 
     [Serializable]
     public class Orthographic

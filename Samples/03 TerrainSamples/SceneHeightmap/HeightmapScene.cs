@@ -10,7 +10,7 @@ using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.Content.FmtObj;
+using Engine.Content.FmtObj.Fmt;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.Tween;

@@ -2,9 +2,9 @@
 using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
-using Engine.Collada;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtCollada;
 using Engine.InputMapping;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;

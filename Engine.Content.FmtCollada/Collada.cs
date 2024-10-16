@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
-    using Engine.Collada.Types;
+    using Engine.Content.FmtCollada.Types;
 
     [Serializable]
     [XmlRoot("COLLADA")]

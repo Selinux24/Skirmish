@@ -320,7 +320,7 @@ ESC - EXIT";
                 Game.SetScene<SceneStart.StartScene>();
             }
 
-            UpdateCamera(gameTime);
+            UpdateCamera();
 
             if (!gameReady)
             {
@@ -391,7 +391,7 @@ ESC - EXIT";
             }
         }
 
-        private void UpdateCamera(IGameTime gameTime)
+        private void UpdateCamera()
         {
             if (!followCar)
             {

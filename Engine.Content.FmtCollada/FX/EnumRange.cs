@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Collada.FX
+namespace Engine.Content.FmtCollada.FX
 {
     [Serializable]
     public enum EnumRange

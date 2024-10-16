@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Engine.Audio;
-using Engine.Content.FmtCollada;
-using Engine.Content.FmtObj;
+using Engine.Content.FmtCollada.Fmt;
+using Engine.Content.FmtObj.Fmt;
 using Engine.Windows;
 using System;
 

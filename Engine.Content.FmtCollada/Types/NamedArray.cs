@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Engine.Collada.Types
+namespace Engine.Content.FmtCollada.Types
 {
     public class NamedArray : NamedNode
     {

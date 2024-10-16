@@ -6,7 +6,7 @@ using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.Content.FmtObj;
+using Engine.Content.FmtObj.Fmt;
 using Engine.Content.OnePageDungeon;
 using Engine.Content.Persistence;
 using Engine.Modular;

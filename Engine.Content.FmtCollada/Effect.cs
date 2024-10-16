@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
-    using Engine.Collada.Types;
-    using Engine.Collada.FX;
+    using Engine.Content.FmtCollada.Types;
+    using Engine.Content.FmtCollada.FX;
 
     [Serializable]
     public class Effect : NamedNode

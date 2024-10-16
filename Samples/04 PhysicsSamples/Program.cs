@@ -1,5 +1,5 @@
 ﻿using Engine;
-using Engine.Content.FmtCollada;
+using Engine.Content.FmtCollada.Fmt;
 using Engine.Windows;
 using System;
 

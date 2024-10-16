@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
     [Serializable]
     public class Contributor

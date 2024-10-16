@@ -6,7 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace Engine.Content.FmtObj
+namespace Engine.Content.FmtObj.Fmt
 {
     static class Reader
     {

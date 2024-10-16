@@ -1,7 +1,5 @@
 ﻿using Engine.BuiltIn.Components.Models;
-using Engine.Content;
-using Engine.Content.FmtCollada;
-using Engine.Content.FmtColladaTests;
+using Engine.Content.FmtCollada.Fmt;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpDX;
@@ -11,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.ModularSceneryTests
+namespace Engine.Content.FmtColladaTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
