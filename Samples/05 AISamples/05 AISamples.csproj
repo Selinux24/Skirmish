@@ -11,20 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\Resources\dirt002.dds" />
-    <None Remove="Common\Resources\Markings.png" />
-    <None Remove="Common\Resources\normal001.dds" />
-    <None Remove="Common\Resources\Traffic\taxi.json" />
-    <None Remove="Common\Resources\Traffic\taxi.mtl" />
-    <None Remove="Common\Resources\Traffic\taxi.obj" />
-    <None Remove="Common\Resources\Tree\Tree1.dae" />
-    <None Remove="Common\Resources\Tree\tree1.json" />
-    <None Remove="SceneCWRSelfDrivingCar\Resources\dirt002.dds" />
-    <None Remove="SceneCWRSelfDrivingCar\Resources\normal001.dds" />
-    <None Remove="SceneStart\pointer.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
   </ItemGroup>
 
@@ -55,6 +41,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Common\Resources\Tree\tree1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneCWRVirtualWorld\Worlds\sample_car.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneCWRVirtualWorld\Worlds\sample_world.world">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneCWRSelfDrivingCar\Resources\dirt002.dds">

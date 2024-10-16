@@ -39,7 +39,7 @@ namespace AISamples.Common.Agents
         public AgentControlTypes ControlType { get; }
         public Sensor Sensor { get; }
         public NeuralNetwork Brain { get; }
-        public bool Damaged { get; private set; } = false;
+        public bool Damaged { get; set; } = false;
         public bool Stucked { get; private set; } = false;
         public float FittnessValue { get; set; } = 0;
 

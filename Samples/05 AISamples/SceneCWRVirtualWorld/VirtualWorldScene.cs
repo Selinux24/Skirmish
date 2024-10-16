@@ -11,6 +11,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,6 +33,8 @@ namespace AISamples.SceneCWRVirtualWorld
         private const float spaceSize = 150000f;
         private const string resourcesFolder = "SceneCWRVirtualWorld";
         private const string bestCarFileName = "bestCar.json";
+        private const string sampleCarFileName = "SceneCWRVirtualWorld/worlds/sample_car.json";
+        private const string sampleWorldFileName = "SceneCWRVirtualWorld/worlds/sample_world.world";
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -163,8 +166,8 @@ ESC - EXIT";
             List<UIButton> buttons = [];
 
             buttons.Add(await InitializeButton("editorLoadOSMButton", "LOAD OSM", editorButtonDesc, LoadFromOpenStreetMap));
-            buttons.Add(await InitializeButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorld));
-            buttons.Add(await InitializeButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorld));
+            buttons.Add(await InitializeButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorldFromFile));
+            buttons.Add(await InitializeButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorldToFile));
             buttons.Add(null);
             foreach (var mode in tools.GetModes())
             {
@@ -252,19 +255,21 @@ ESC - EXIT";
             Camera.FarPlaneDistance = far;
             Camera.MovementDelta = sp * 0.2f;
             Camera.SlowMovementDelta = Camera.MovementDelta / 20f;
+            MoveCameraTo(Vector3.Zero);
 
             GameEnvironment.ShadowDistanceHigh = far * 0.1f;
             GameEnvironment.ShadowDistanceMedium = far * 0.2f;
             GameEnvironment.ShadowDistanceLow = far * 0.9f;
 
-            MoveCameraTo(Vector3.Zero);
-
             Lights.EnableFog(sp, Camera.FarPlaneDistance, GameEnvironment.Background);
+
+            LoadWorld(sampleWorldFileName);
 
             gameReady = true;
             toolsReady = true;
 
             terrain.Visible = true;
+            world.Visible = true;
 
             ToggleTools();
         }
@@ -466,7 +471,9 @@ ESC - EXIT";
                 return;
             }
 
-            world.CreateCar(AgentControlTypes.AI, bestCarFileName, mutate);
+            string carFileName = File.Exists(bestCarFileName) ? bestCarFileName : sampleCarFileName;
+
+            world.CreateCar(AgentControlTypes.AI, carFileName, mutate);
         }
         private void ToggleFollow()
         {
@@ -521,7 +528,7 @@ ESC - EXIT";
             UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, editorButtons.Length);
         }
 
-        private void LoadWorld()
+        private void LoadWorldFromFile()
         {
             using System.Windows.Forms.OpenFileDialog dlg = new()
             {
@@ -532,13 +539,10 @@ ESC - EXIT";
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                var worldFile = SerializationHelper.DeserializeJsonFromFile<WorldFile>(dlg.FileName);
-                world.LoadFromWorldFile(worldFile);
-                var (start, _) = world.GetStart();
-                MoveCameraTo(new Vector3(start.X, 0, start.Y));
+                LoadWorld(dlg.FileName);
             }
         }
-        private void SaveWorld()
+        private void SaveWorldToFile()
         {
             using System.Windows.Forms.SaveFileDialog dlg = new()
             {
@@ -550,8 +554,7 @@ ESC - EXIT";
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                var worldFile = World.FromWorld(world);
-                SerializationHelper.SerializeJsonToFile(worldFile, dlg.FileName);
+                SaveWorld(dlg.FileName);
             }
         }
         private void LoadFromOpenStreetMap()
@@ -570,6 +573,19 @@ ESC - EXIT";
                 var (start, _) = world.GetStart();
                 MoveCameraTo(new Vector3(start.X, 0, start.Y));
             }
+        }
+
+        private void LoadWorld(string fileName)
+        {
+            var worldFile = SerializationHelper.DeserializeJsonFromFile<WorldFile>(fileName);
+            world.LoadFromWorldFile(worldFile);
+            var (start, _) = world.GetStart();
+            MoveCameraTo(new Vector3(start.X, 0, start.Y));
+        }
+        private void SaveWorld(string fileName)
+        {
+            var worldFile = World.FromWorld(world);
+            SerializationHelper.SerializeJsonToFile(worldFile, fileName);
         }
     }
 }

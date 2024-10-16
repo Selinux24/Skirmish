@@ -28,7 +28,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
     /// </remarks>
     class SelfDrivingCarScene : Scene
     {
-        private const float spaceSize = 1000f;
+        private const float spaceSize = 500f;
         private const string resourceTerrainDiffuse = "SceneCWRSelfDrivingCar/resources/dirt002.dds";
         private const string resourceTerrainNormal = "SceneCWRSelfDrivingCar/resources/normal001.dds";
         private const string bestCarFileName = "bestCar.json";
@@ -320,6 +320,8 @@ ESC - EXIT";
                 Game.SetScene<SceneStart.StartScene>();
             }
 
+            UpdateCamera(gameTime);
+
             if (!gameReady)
             {
                 return;
@@ -351,7 +353,7 @@ ESC - EXIT";
                 ResetSimulation();
             }
 
-            UpdateInputCamera(gameTime);
+            UpdateInputCameraManual(gameTime);
             UpdateInputCar(bestCar);
 
             BeginDrawSensor();
@@ -389,13 +391,11 @@ ESC - EXIT";
             }
         }
 
-        private void UpdateInputCamera(IGameTime gameTime)
+        private void UpdateCamera(IGameTime gameTime)
         {
             if (!followCar)
             {
                 Camera.Following = null;
-
-                UpdateInputCameraManual(gameTime);
 
                 return;
             }
@@ -407,6 +407,11 @@ ESC - EXIT";
         }
         private void UpdateInputCameraManual(IGameTime gameTime)
         {
+            if (followCar)
+            {
+                return;
+            }
+
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
@@ -506,9 +511,27 @@ ESC - EXIT";
         }
         private void UpdateTraffic(IGameTime gameTime)
         {
+            float worldPosition = bestCar.GetPosition().Y;
+            float worldMaxPosition = worldPosition - (spaceSize * 0.25f);
+
+            float spawnDelta = worldPosition + (spaceSize * 0.4f) - (carLength * 3);
+
             for (int i = 0; i < traffic.Length; i++)
             {
                 UpdateCar(gameTime, traffic[i], trafficModels[i], [], false, carTrafficColor);
+
+                if (traffic[i].GetPosition().Y >= worldMaxPosition && !traffic[i].Damaged)
+                {
+                    continue;
+                }
+
+                var lanePos = road.GetLaneCenter(Helper.RandomGenerator.Next(0, road.LaneCount));
+                lanePos.Y = spawnDelta;
+
+                trafficPositions[i] = lanePos;
+
+                traffic[i].SetPosition(trafficPositions[i]);
+                traffic[i].Damaged = false;
             }
         }
 
@@ -684,13 +707,15 @@ ESC - EXIT";
             bestCar = cars[0];
             carFollower.Car = () => bestCar;
 
+            int[] laneYPos = GenerateLaneYPos(traffic.Length);
+
             for (int i = 0; i < traffic.Length; i++)
             {
                 traffic[i] = new(carWidth, carHeight, carLength, AgentControlTypes.Dummy, 0.5f, 0.25f);
                 traffic[i].SetScale(carScale);
 
-                var lanePos = road.GetLaneCenter(i % traffic.Length);
-                lanePos.Y = Helper.RandomGenerator.NextFloat(0, 3) * -(carLength * 3);
+                var lanePos = road.GetLaneCenter(i % road.LaneCount);
+                lanePos.Y = laneYPos[i] * -(carLength * 3);
 
                 trafficPositions[i] = lanePos;
             }
@@ -725,6 +750,23 @@ ESC - EXIT";
             {
                 traffic[i].SetPosition(trafficPositions[i]);
             }
+        }
+
+        private static int[] GenerateLaneYPos(int count)
+        {
+            int[] lanes = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                lanes[i] = Helper.RandomGenerator.Next(0, count);
+            }
+
+            while (lanes.Distinct().Count() == 1)
+            {
+                int index = Helper.RandomGenerator.Next(0, count);
+                lanes[index] = Helper.RandomGenerator.Next(0, count);
+            }
+
+            return lanes;
         }
     }
 }

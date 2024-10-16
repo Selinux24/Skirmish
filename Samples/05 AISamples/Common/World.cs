@@ -29,6 +29,7 @@ namespace AISamples.Common
         private Graph graph = graph;
         private Guid graphVersion = graph.Version;
         private bool worldChanged = false;
+        private bool visible = false;
 
         private readonly List<Envelope> envelopes = [];
 
@@ -79,6 +80,8 @@ namespace AISamples.Common
         public Guid Version { get; private set; } = Guid.NewGuid();
         public float RoadWidth { get; } = 30f;
         public bool Populated { get => graph.GetSegments().Length > 0; }
+
+        public bool Visible { get => visible; set => SetVisible(value); }
 
         public static WorldFile FromWorld(World world)
         {
@@ -337,6 +340,7 @@ namespace AISamples.Common
                 BlendMode = BlendModes.Opaque,
                 Topology = Topology.TriangleList,
                 CastShadow = ShadowCastingAlgorihtms.All,
+                StartsVisible = false,
             };
 
             roadDrawer = await scene.AddComponentEffect<GeometryDrawer<VertexPositionNormalColor>, GeometryDrawerDescription<VertexPositionNormalColor>>(
@@ -390,6 +394,7 @@ namespace AISamples.Common
                 Images = images,
                 Material = materialB,
                 TintColor = Color.White,
+                StartsVisible = false,
             };
 
             buildingDrawer = await scene.AddComponentGround<GeometryDrawer<VertexPositionNormalTexture>, GeometryDrawerDescription<VertexPositionNormalTexture>>(
@@ -418,6 +423,7 @@ namespace AISamples.Common
                 Images = images,
                 Material = material2d,
                 TintColor = roadMarksColor,
+                StartsVisible = false,
             };
 
             markingsDrawer2d = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
@@ -440,6 +446,7 @@ namespace AISamples.Common
                 Images = images,
                 Material = material3d,
                 TintColor = Color4.White,
+                StartsVisible = false,
             };
 
             markingsDrawer3d = await scene.AddComponentEffect<GeometryDrawer<VertexPositionTexture>, GeometryDrawerDescription<VertexPositionTexture>>(
@@ -697,8 +704,6 @@ namespace AISamples.Common
                 drawer[i].Manipulator.SetTransform(transform);
                 drawer[i].Visible = true;
             }
-
-            drawer.Visible = trees.Any();
         }
         private static void DrawBuilding(Building building, float height, GeometryDrawer<VertexPositionNormalTexture> drawer)
         {
@@ -826,6 +831,26 @@ namespace AISamples.Common
             cars.Clear();
 
             bestCar = null;
+        }
+
+        private void SetVisible(bool value)
+        {
+            if(visible == value)
+            {
+                return;
+            }
+
+            roadDrawer.Visible = value;
+            roadMarksDrawer.Visible = value;
+            buildingDrawer.Visible = value;
+            treesDrawer.Visible = value;
+            markingsDrawer2d.Visible = value;
+            markingsDrawer3d.Visible = value;
+            carDrawer.Visible = value;
+            carSensorDrawer.Visible = value;
+            roadDrawer.Visible = value;
+
+            visible = value;
         }
     }
 }
