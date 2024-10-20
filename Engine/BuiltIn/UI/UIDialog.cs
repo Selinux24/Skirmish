@@ -24,6 +24,10 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         private UIButton butAccept;
         /// <summary>
+        /// Back panel
+        /// </summary>
+        private UIPanel backPanel;
+        /// <summary>
         /// Dialog text
         /// </summary>
         private UITextArea dialogText;
@@ -55,8 +59,8 @@ namespace Engine.BuiltIn.UI
         {
             await base.ReadAssets(description);
 
-            var backPanel = await CreateBackpanel();
-            AddChild(backPanel, true);
+            backPanel = await CreateBackpanel();
+            AddChild(backPanel);
 
             dialogText = await CreateDialogText();
             backPanel.AddChild(dialogText, true);
@@ -150,24 +154,31 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         private void UpdateLayout()
         {
-            dialogText.Top = 0;
-            dialogText.Left = 0;
-            dialogText.Width = Width;
+            backPanel.Top = 0;
+            backPanel.Left = 0;
+            backPanel.Width = Width;
+            backPanel.Height = Height;
+
+            dialogText.Top = Padding.Top;
+            dialogText.Left = Padding.Left;
+            dialogText.Width = Width - Padding.Horizontal;
             dialogText.Height = Height - buttonAreaHeight;
 
-            float buttonsSpace = 10;
-
-            if (butAccept != null)
-            {
-                butAccept.Top = dialogText.AbsoluteRectangle.Bottom + 5;
-                butAccept.Left = buttonsSpace;
-                buttonsSpace += butAccept.AbsoluteRectangle.Right + 5;
-            }
+            var renderArea = GetRenderArea(false);
+            float buttonsSpace = 0;
+            int buttonPadding = Math.Max(5, (int)Padding.Left);
 
             if (butClose != null)
             {
-                butClose.Top = dialogText.AbsoluteRectangle.Bottom + 5;
-                butClose.Left = buttonsSpace;
+                butClose.Top = renderArea.Height - butClose.Height - Padding.Top;
+                butClose.Left = renderArea.Width - butClose.Width - Padding.Left;
+                buttonsSpace += butClose.Width;
+            }
+
+            if (butAccept != null)
+            {
+                butAccept.Top = renderArea.Height - butAccept.Height - Padding.Top;
+                butAccept.Left = renderArea.Width - butAccept.Width - Padding.Left - (buttonsSpace + buttonPadding);
             }
         }
 

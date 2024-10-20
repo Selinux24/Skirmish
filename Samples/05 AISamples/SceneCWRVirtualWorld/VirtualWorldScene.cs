@@ -33,8 +33,14 @@ namespace AISamples.SceneCWRVirtualWorld
         private const float spaceSize = 150000f;
         private const string resourcesFolder = "SceneCWRVirtualWorld";
         private const string bestCarFileName = "bestCar.json";
-        private const string sampleCarFileName = "SceneCWRVirtualWorld/worlds/sample_car.json";
-        private const string sampleWorldFileName = "SceneCWRVirtualWorld/worlds/sample_world.world";
+        private const string samplesFolder = "SceneCWRVirtualWorld/worlds";
+        private const string sampleCarFileName = $"{samplesFolder}/sample_car.json";
+        private const string sampleWorldFileName = $"{samplesFolder}/sample_world.world";
+        private const int fileDialogWidth = 600;
+        private const int fileDialogHeight = 350;
+        private const int fileButtonsCount = 10;
+        private const string worldSearchPattern = "*.world";
+        private const string osmSearchPattern = "*.osm";
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -43,11 +49,20 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private UIButton[] editorButtons;
 
+        private UIDialog fileDialog = null;
+        private UIButton[] fileButtons;
+        private UITextArea fileSelectedText = null;
+        private UITextArea fileFolderText = null;
+        private UIButton filePageUpButton = null;
+        private UIButton filePageDownButton = null;
+        private MapFileTypes fileType = MapFileTypes.None;
+
         private Model terrain = null;
 
         private const string editorFont = "Consolas";
         private const int editorButtonWidth = 100;
         private const int editorButtonHeight = 25;
+        private readonly Color editorBackgroundColor = Color.WhiteSmoke;
         private readonly Color editorButtonColor = Color.LightGray;
         private readonly Color editorButtonTextColor = Color.Black;
 
@@ -73,6 +88,7 @@ ESC - EXIT";
         private bool gameReady = false;
         private bool toolsReady = false;
         private bool toolsVisible = false;
+        private bool fileDlgVisible = false;
 
         private readonly Graph graph = new([], []);
         private readonly World world;
@@ -120,6 +136,7 @@ ESC - EXIT";
                     InitializeTitle,
                     InitializeTexts,
                     InitializeToolsButtons,
+                    InitializeFileDialog,
                     InitializeTerrain,
                     InitializeWorld,
                     InitializeTools,
@@ -132,21 +149,42 @@ ESC - EXIT";
         {
             var defaultFont18 = FontDescription.FromFamily("Gill Sans MT, Arial", 18);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            title.Text = titleText;
+            var titleDesc = new UITextAreaDescription
+            {
+                Font = defaultFont18,
+                TextForeColor = Color.White,
+                Text = titleText,
+                StartsVisible = false,
+            };
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
+            spDesc.StartsVisible = false;
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
         }
         private async Task InitializeTexts()
         {
             var defaultFont11 = FontDescription.FromFamily("Gill Sans MT, Arial", 11);
 
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            var runtimeTextDesc = new UITextAreaDescription
+            {
+                Font = defaultFont11,
+                TextForeColor = Color.Yellow,
+                MaxTextLength = 256,
+                Text = string.Empty,
+                StartsVisible = false,
+            };
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", runtimeTextDesc);
 
-            runtimeText.Text = "";
-            info.Text = infoText;
+            var infoDesc = new UITextAreaDescription
+            {
+                Font = defaultFont11,
+                TextForeColor = Color.Yellow,
+                MaxTextLength = 256,
+                Text = infoText,
+                StartsVisible = false,
+            };
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", infoDesc);
         }
         private async Task InitializeToolsButtons()
         {
@@ -162,25 +200,27 @@ ESC - EXIT";
             editorButtonDesc.TextForeColor = editorButtonTextColor;
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            editorButtonDesc.StartsVisible = false;
 
             List<UIButton> buttons = [];
-
-            buttons.Add(await InitializeButton("editorLoadOSMButton", "LOAD OSM", editorButtonDesc, LoadFromOpenStreetMap));
-            buttons.Add(await InitializeButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorldFromFile));
-            buttons.Add(await InitializeButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorldToFile));
+            buttons.Add(await InitializeToolButton("editorLoadOSMButton", "LOAD OSM", editorButtonDesc, LoadFromOpenStreetMap));
+            buttons.Add(await InitializeToolButton("editorLoadButton", "LOAD WORLD", editorButtonDesc, LoadWorldFromFile));
+            buttons.Add(await InitializeToolButton("editorSaveButton", "SAVE WORLD", editorButtonDesc, SaveWorldToFile));
             buttons.Add(null);
             foreach (var mode in tools.GetModes())
             {
-                buttons.Add(await InitializeButton($"editor{mode}", $"{mode.ToString().ToUpper()} EDITOR", editorButtonDesc, () => tools.SetEditor(mode)));
+                buttons.Add(await InitializeToolButton($"editor{mode}", $"{mode.ToString().ToUpper()} EDITOR", editorButtonDesc, () => tools.SetEditor(mode)));
             }
             buttons.Add(null);
-            buttons.Add(await InitializeButton("editorClearButton", "CLEAR", editorButtonDesc, world.Clear));
+            buttons.Add(await InitializeToolButton("editorClearButton", "CLEAR", editorButtonDesc, world.Clear));
 
             editorButtons = [.. buttons];
         }
-        private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc, Action callback)
+        private async Task<UIButton> InitializeToolButton(string name, string caption, UIButtonDescription desc, Action callback)
         {
             var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, layerHUD);
+
+            button.Caption.Text = caption;
             button.MouseClick += (sender, e) =>
             {
                 if (!toolsReady)
@@ -195,7 +235,138 @@ ESC - EXIT";
 
                 callback?.Invoke();
             };
+
+            return button;
+        }
+        private async Task InitializeFileDialog()
+        {
+            var textFont = FontDescription.FromFamily(editorFont, 16);
+            textFont.ContentPath = resourcesFolder;
+
+            var fileTextDesc = UITextAreaDescription.Default(textFont);
+            fileTextDesc.TextForeColor = editorButtonTextColor;
+            fileTextDesc.StartsVisible = false;
+            fileSelectedText = await AddComponentUI<UITextArea, UITextAreaDescription>(nameof(fileSelectedText), nameof(fileSelectedText), fileTextDesc);
+            fileFolderText = await AddComponentUI<UITextArea, UITextAreaDescription>(nameof(fileFolderText), nameof(fileFolderText), fileTextDesc);
+
+            var dlgButtonsFont = FontDescription.FromFamily(editorFont, 18);
+            dlgButtonsFont.ContentPath = resourcesFolder;
+
+            var fileDlgButtonDesc = UIButtonDescription.DefaultTwoStateButton(dlgButtonsFont);
+            fileDlgButtonDesc.ContentPath = resourcesFolder;
+            fileDlgButtonDesc.Width = 150;
+            fileDlgButtonDesc.Height = 20;
+            fileDlgButtonDesc.ColorReleased = editorButtonColor;
+            fileDlgButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 1f);
+            fileDlgButtonDesc.TextForeColor = editorButtonTextColor;
+            fileDlgButtonDesc.StartsVisible = false;
+
+            var fileDialogDesc = UIDialogDescription.Default(fileDialogWidth, fileDialogHeight);
+            fileDialogDesc.Padding = 10;
+            fileDialogDesc.TextArea = fileTextDesc;
+            fileDialogDesc.Buttons = fileDlgButtonDesc;
+            fileDialogDesc.Background = UIPanelDescription.Default(editorBackgroundColor);
+            fileDialogDesc.StartsVisible = false;
+
+            fileDialog = await AddComponentUI<UIDialog, UIDialogDescription>(nameof(fileDialog), nameof(fileDialog), fileDialogDesc, layerHUD);
+            fileDialog.OnAcceptHandler += OnDialogAccept;
+            fileDialog.OnCancelHandler += OnDialogCancel;
+
+            var buttonsFont = FontDescription.FromFamily(editorFont, 14);
+            buttonsFont.ContentPath = resourcesFolder;
+
+            var fileButtonDesc = UIButtonDescription.Default(buttonsFont);
+            fileButtonDesc.ContentPath = resourcesFolder;
+            fileButtonDesc.Width = fileDialogWidth * 0.8f;
+            fileButtonDesc.Height = 20;
+            fileButtonDesc.ColorReleased = editorButtonColor;
+            fileButtonDesc.TextForeColor = editorButtonTextColor;
+            fileButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Left;
+            fileButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            fileButtonDesc.StartsVisible = false;
+
+            List<UIButton> buttons = [];
+            for (int i = 0; i < fileButtonsCount; i++)
+            {
+                buttons.Add(await InitializeFileButton($"file_{i}", string.Empty, fileButtonDesc));
+            }
+
+            fileButtons = [.. buttons];
+
+            var filePageButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
+            filePageButtonDesc.ContentPath = resourcesFolder;
+            filePageButtonDesc.ColorReleased = editorButtonColor;
+            filePageButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 1f);
+            filePageButtonDesc.TextForeColor = editorButtonTextColor;
+            filePageButtonDesc.StartsVisible = false;
+
+            filePageUpButton = await AddComponentUI<UIButton, UIButtonDescription>(nameof(filePageUpButton), nameof(filePageUpButton), filePageButtonDesc, layerHUD + 1);
+            filePageUpButton.Caption.Text = "U";
+            filePageUpButton.MouseClick += (sender, e) =>
+            {
+                if (!e.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                if (FolderNavigator.PageUp())
+                {
+                    LoadFolder(fileFolderText.TooltipText, worldSearchPattern);
+                }
+            };
+
+            filePageDownButton = await AddComponentUI<UIButton, UIButtonDescription>(nameof(filePageDownButton), nameof(filePageDownButton), filePageButtonDesc, layerHUD + 1);
+            filePageDownButton.Caption.Text = "D";
+            filePageDownButton.MouseClick += (sender, e) =>
+            {
+                if (!e.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                if (FolderNavigator.PageDown())
+                {
+                    LoadFolder(fileFolderText.TooltipText, worldSearchPattern);
+                }
+            };
+        }
+        private async Task<UIButton> InitializeFileButton(string name, string caption, UIButtonDescription desc)
+        {
+            var button = await AddComponentUI<UIButton, UIButtonDescription>(name, name, desc, layerHUD + 1);
+
             button.Caption.Text = caption;
+            button.MouseClick += (sender, e) =>
+            {
+                if (!e.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                if (sender is not UIButton button)
+                {
+                    return;
+                }
+
+                string fileName = button.Caption.Text;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+
+                string path = button.TooltipText;
+
+                if (FolderNavigatorPath.FileNameIsPrevFolder(fileName) || FolderNavigatorPath.FileNameIsFolder(fileName))
+                {
+                    FolderNavigator.PageIndex = 0;
+
+                    LoadFolder(path, worldSearchPattern);
+                }
+                else
+                {
+                    fileSelectedText.Text = fileName;
+                    fileSelectedText.TooltipText = path;
+                }
+            };
 
             return button;
         }
@@ -268,6 +439,10 @@ ESC - EXIT";
             gameReady = true;
             toolsReady = true;
 
+            title.Visible = true;
+            panel.Visible = true;
+            info.Visible = true;
+            runtimeText.Visible = true;
             terrain.Visible = true;
             world.Visible = true;
 
@@ -291,6 +466,11 @@ ESC - EXIT";
             }
 
             if (!gameReady)
+            {
+                return;
+            }
+
+            if (fileDlgVisible)
             {
                 return;
             }
@@ -528,53 +708,172 @@ ESC - EXIT";
             UIControlExtensions.LocateButtons(Game.Form, editorButtons, editorButtonWidth, editorButtonHeight, editorButtons.Length);
         }
 
+        private void LoadFromOpenStreetMap()
+        {
+            fileDialog.ShowDialog("Load World from Open Street Map data", () =>
+            {
+                FolderNavigator.PageIndex = 0;
+                FolderNavigator.ItemsPerPage = fileButtonsCount;
+
+                fileType = MapFileTypes.OSM;
+
+                LoadFolder(samplesFolder, osmSearchPattern);
+
+                ShowDialog();
+            });
+        }
         private void LoadWorldFromFile()
         {
-            using System.Windows.Forms.OpenFileDialog dlg = new()
+            fileDialog.ShowDialog("Load World from file", () =>
             {
-                Filter = "World files (*.world)|*.world",
-                FilterIndex = 1,
-                RestoreDirectory = true,
-            };
+                FolderNavigator.PageIndex = 0;
+                FolderNavigator.ItemsPerPage = fileButtonsCount;
 
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                LoadWorld(dlg.FileName);
-            }
+                fileType = MapFileTypes.World;
+
+                LoadFolder(samplesFolder, worldSearchPattern);
+
+                ShowDialog();
+            });
         }
         private void SaveWorldToFile()
         {
-            using System.Windows.Forms.SaveFileDialog dlg = new()
-            {
-                FileName = "newworld.world",
-                Filter = "World files (*.world)|*.world",
-                FilterIndex = 1,
-                RestoreDirectory = true,
-            };
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                SaveWorld(dlg.FileName);
-            }
+            SaveWorld("newworld.world");
         }
-        private void LoadFromOpenStreetMap()
+
+        private bool LoadFolder(string folder, string searchPattern)
         {
-            using System.Windows.Forms.OpenFileDialog dlg = new()
+            if (!FolderNavigator.LoadFolder(folder, searchPattern, out var paths))
             {
-                Filter = "Open Street Map data (*.json)|*.json",
-                FilterIndex = 1,
-                RestoreDirectory = true,
-            };
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                var osmGraph = Osm.ParseRoads(dlg.FileName, 10f);
-                world.GenerateFromGraph(osmGraph);
-                var (start, _) = world.GetStart();
-                MoveCameraTo(new Vector3(start.X, 0, start.Y));
+                return false;
             }
+
+            fileFolderText.Text = FormatFolderName(FolderNavigator.SelectedFolder.Path, 40);
+            fileFolderText.TooltipText = FolderNavigator.SelectedFolder.Path;
+
+            fileSelectedText.Text = null;
+            fileSelectedText.TooltipText = null;
+
+            for (int i = 0; i < fileButtons.Length; i++)
+            {
+                if (i >= paths.Length)
+                {
+                    fileButtons[i].TooltipText = string.Empty;
+                    fileButtons[i].Caption.Text = string.Empty;
+
+                    continue;
+                }
+
+                var data = paths[i];
+
+                fileButtons[i].TooltipText = data.Path;
+                fileButtons[i].Caption.Text = data.GetFileName();
+            }
+
+            return true;
+        }
+        private static string FormatFolderName(string folderName, int length)
+        {
+            if (folderName?.Length <= length)
+            {
+                return folderName;
+            }
+
+            return $"...{folderName.Substring(folderName.Length - length, length)}";
+        }
+        private void ShowDialog()
+        {
+            ToggleTools();
+
+            fileDlgVisible = fileDialog.Visible = true;
+
+            var first = fileButtons[0];
+            var last = fileButtons[^1];
+            var renderArea = fileDialog.GetRenderArea(true);
+            var buttonWidth = renderArea.Width - first.Height;
+            var buttonHeight = first.Height;
+            float x = renderArea.Left;
+            float y = renderArea.Top + buttonHeight + 5;
+
+            fileFolderText.SetPosition(x, y);
+            fileFolderText.Width = buttonWidth;
+            fileFolderText.Visible = true;
+            y += fileFolderText.Height + 1;
+
+            foreach (var button in fileButtons)
+            {
+                button.SetPosition(x, y);
+                button.Width = buttonWidth;
+                button.Visible = true;
+                y += button.Height + 1;
+            }
+
+            filePageUpButton.SetPosition(first.Left + first.Width + 1, first.Top);
+            filePageUpButton.Width = first.Height;
+            filePageUpButton.Height = first.Height;
+            filePageUpButton.Visible = true;
+
+            filePageDownButton.SetPosition(last.Left + last.Width + 1, last.Top);
+            filePageDownButton.Width = last.Height;
+            filePageDownButton.Height = last.Height;
+            filePageDownButton.Visible = true;
+
+            fileSelectedText.SetPosition(x, y);
+            fileSelectedText.Visible = true;
+        }
+        private void HideDialog()
+        {
+            ToggleTools();
+
+            fileDlgVisible = fileDialog.Visible = false;
+            fileFolderText.Visible = false;
+            foreach (var button in fileButtons)
+            {
+                button.Caption.Text = string.Empty;
+                button.TooltipText = string.Empty;
+                button.Visible = false;
+            }
+            fileSelectedText.Visible = false;
+            filePageUpButton.Visible = false;
+            filePageDownButton.Visible = false;
         }
 
+        private void OnDialogAccept(object sender, EventArgs e)
+        {
+            string fileName = fileSelectedText.TooltipText;
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            if (fileType == MapFileTypes.World)
+            {
+                LoadWorld(fileName);
+            }
+            else if (fileType == MapFileTypes.OSM)
+            {
+                LoadOSM(fileName);
+            }
+
+            fileType = MapFileTypes.None;
+
+            fileDialog.CloseDialog(HideDialog);
+        }
+        private void OnDialogCancel(object sender, EventArgs e)
+        {
+            fileType = MapFileTypes.None;
+
+            fileDialog.CloseDialog(HideDialog);
+        }
+
+        private void LoadOSM(string fileName)
+        {
+            var osmGraph = Osm.ParseRoads(fileName, 10f);
+            world.GenerateFromGraph(osmGraph);
+            var (start, _) = world.GetStart();
+            MoveCameraTo(new Vector3(start.X, 0, start.Y));
+        }
         private void LoadWorld(string fileName)
         {
             var worldFile = SerializationHelper.DeserializeJsonFromFile<WorldFile>(fileName);

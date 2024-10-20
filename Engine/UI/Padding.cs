@@ -35,6 +35,14 @@ namespace Engine.UI
         /// Padding right
         /// </summary>
         public float Right { get; set; }
+        /// <summary>
+        /// Horizontal padding size
+        /// </summary>
+        public readonly float Horizontal { get => Left + Right; }
+        /// <summary>
+        /// Vertical padding size
+        /// </summary>
+        public readonly float Vertical { get => Top + Bottom; }
 
         /// <summary>
         /// Constructor

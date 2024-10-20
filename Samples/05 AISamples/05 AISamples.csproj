@@ -43,6 +43,9 @@
     <Content Include="Common\Resources\Tree\tree1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneCWRVirtualWorld\Worlds\large.osm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneCWRVirtualWorld\Worlds\sample_car.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -415,7 +415,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
