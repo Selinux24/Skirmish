@@ -11,12 +11,20 @@ namespace AISamples.SceneCWRVirtualWorld
 
         public readonly string GetFileName()
         {
-            bool isPrevFolder = PathType == FolderNavigatorPathTypes.PrevFolder;
-            bool isFolder = PathType == FolderNavigatorPathTypes.Folder;
+            if (PathType == FolderNavigatorPathTypes.PrevFolder)
+            {
+                return PrevFolderString;
+            }
+
             string path = Path;
             string fileName = System.IO.Path.GetFileName(path);
 
-            return isPrevFolder ? PrevFolderString : isFolder ? $"{FolderString}{fileName}" : fileName;
+            if (PathType == FolderNavigatorPathTypes.Folder)
+            {
+                return $"{FolderString}{fileName}";
+            }
+
+            return fileName;
         }
 
         public static bool FileNameIsPrevFolder(string fileName)

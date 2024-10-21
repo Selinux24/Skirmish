@@ -741,11 +741,11 @@ ESC - EXIT";
             SaveWorld("newworld.world");
         }
 
-        private bool LoadFolder(string folder, string searchPattern)
+        private void LoadFolder(string folder, string searchPattern)
         {
             if (!FolderNavigator.LoadFolder(folder, searchPattern, out var paths))
             {
-                return false;
+                return;
             }
 
             fileFolderText.Text = FormatFolderName(FolderNavigator.SelectedFolder.Path, 40);
@@ -769,12 +769,15 @@ ESC - EXIT";
                 fileButtons[i].TooltipText = data.Path;
                 fileButtons[i].Caption.Text = data.GetFileName();
             }
-
-            return true;
         }
         private static string FormatFolderName(string folderName, int length)
         {
-            if (folderName?.Length <= length)
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                return null;
+            }
+
+            if (folderName.Length <= length)
             {
                 return folderName;
             }
