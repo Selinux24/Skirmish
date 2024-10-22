@@ -1,20 +1,42 @@
 ﻿using System.IO;
 using System.Linq;
 
-namespace AISamples.SceneCWRVirtualWorld
+namespace Engine.Helpers
 {
     /// <summary>
     /// Folder navigator
     /// </summary>
-    static class FolderNavigator
+    public static class FolderNavigator
     {
+        /// <summary>
+        /// Page index
+        /// </summary>
         public static int PageIndex { get; set; }
+        /// <summary>
+        /// Items per page
+        /// </summary>
         public static int ItemsPerPage { get; set; }
+        /// <summary>
+        /// Total items
+        /// </summary>
         public static int TotalCount { get; set; }
 
+        /// <summary>
+        /// Gets the selected file
+        /// </summary>
         public static FolderNavigatorPath SelectedFile { get; private set; }
+        /// <summary>
+        /// Gets the selected folder
+        /// </summary>
         public static FolderNavigatorPath SelectedFolder { get; private set; }
 
+        /// <summary>
+        /// Loads the folder
+        /// </summary>
+        /// <param name="folder">Folder</param>
+        /// <param name="searchPattern">Search pattern for the files in the folder</param>
+        /// <param name="result">Returns de path list</param>
+        /// <returns>Returns true if the folder exists</returns>
         public static bool LoadFolder(string folder, string searchPattern, out FolderNavigatorPath[] result)
         {
             if (!Directory.Exists(folder))
@@ -61,6 +83,9 @@ namespace AISamples.SceneCWRVirtualWorld
             return true;
         }
 
+        /// <summary>
+        /// Moves the page index up
+        /// </summary>
         public static bool PageUp()
         {
             if (PageIndex > 0)
@@ -72,6 +97,9 @@ namespace AISamples.SceneCWRVirtualWorld
 
             return false;
         }
+        /// <summary>
+        /// Moves the page index down
+        /// </summary>
         public static bool PageDown()
         {
             if (PageIndex < TotalCount - ItemsPerPage)
