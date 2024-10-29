@@ -5,17 +5,18 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Dialogs
 {
-    class UIOpenFileDialog(Scene scene, float width, float height, int pageCount, int layer)
+    class UISaveFileDialog(Scene scene, float width, float height, int pageCount, int layer)
     {
-        private const string dlgName = nameof(UIOpenFileDialog);
+        private const string dlgName = nameof(UISaveFileDialog);
         private readonly Scene scene = scene;
         private UIDialog dialog = null;
         private UIButton[] buttons;
-        private UITextArea selectedText = null;
+        private UITextBox selectedText = null;
         private UITextArea folderText = null;
         private UIButton pageUpButton = null;
         private UIButton pageDownButton = null;
@@ -32,7 +33,7 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
         {
             get
             {
-                return selectedText.TooltipText;
+                return $"{FolderNavigator.SelectedFolder.Path}/{selectedText.Text}";
             }
         }
 
@@ -44,11 +45,15 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             var textFont = FontDescription.FromFamily(editorFont, 16);
             textFont.ContentPath = resourcesFolder;
 
-            var fileTextDesc = UITextAreaDescription.Default(textFont);
-            fileTextDesc.TextForeColor = ButtonTextColor;
-            fileTextDesc.StartsVisible = false;
-            selectedText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(dlgName + nameof(selectedText), dlgName + nameof(selectedText), fileTextDesc);
-            folderText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(dlgName + nameof(folderText), dlgName + nameof(folderText), fileTextDesc);
+            var selectedTextDesc = UITextBoxDescription.Default(textFont);
+            selectedTextDesc.TextForeColor = ButtonTextColor;
+            selectedTextDesc.StartsVisible = false;
+            selectedText = await scene.AddComponentUI<UITextBox, UITextBoxDescription>(dlgName + nameof(selectedText), dlgName + nameof(selectedText), selectedTextDesc);
+
+            var folderTextDesc = UITextAreaDescription.Default(textFont);
+            folderTextDesc.TextForeColor = ButtonTextColor;
+            folderTextDesc.StartsVisible = false;
+            folderText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(dlgName + nameof(folderText), dlgName + nameof(folderText), folderTextDesc);
 
             var dlgButtonsFont = FontDescription.FromFamily(editorFont, 18);
             dlgButtonsFont.ContentPath = resourcesFolder;
@@ -64,7 +69,7 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
 
             var fileDialogDesc = UIDialogDescription.Default(Width, Height);
             fileDialogDesc.Padding = 10;
-            fileDialogDesc.TextArea = fileTextDesc;
+            fileDialogDesc.TextArea = folderTextDesc;
             fileDialogDesc.Buttons = fileDlgButtonDesc;
             fileDialogDesc.Background = UIPanelDescription.Default(BackgroundColor);
             fileDialogDesc.StartsVisible = false;
@@ -226,8 +231,10 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             return $"...{folderName.Substring(folderName.Length - length, length)}";
         }
 
-        public void ShowDialog(string caption, string folder, string searchPattern)
+        public void ShowDialog(string caption, string fileName, string searchPattern)
         {
+            string folder = Path.GetDirectoryName(fileName);
+
             LoadFolder(folder, searchPattern);
 
             dialog.Visible = true;
@@ -265,7 +272,9 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             pageDownButton.Visible = true;
 
             selectedText.SetPosition(x, y);
+            selectedText.Text = Path.GetFileName(fileName);
             selectedText.Visible = true;
+            selectedText.SetFocusControl();
         }
         public void HideDialog()
         {

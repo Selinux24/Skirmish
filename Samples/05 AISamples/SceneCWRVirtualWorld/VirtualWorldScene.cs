@@ -43,6 +43,9 @@ namespace AISamples.SceneCWRVirtualWorld
         private const int loadFileDialogWidth = 600;
         private const int loadFileDialogHeight = 350;
         private const int loadFileButtonsCount = 10;
+        private const int saveFileDialogWidth = 600;
+        private const int saveFileDialogHeight = 350;
+        private const int saveFileButtonsCount = 10;
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -53,6 +56,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
         private UIOpenFileDialog loadFileDialog = null;
         private MapFileTypes loadFileType = MapFileTypes.None;
+        private UISaveFileDialog saveFileDialog = null;
 
         private Model terrain = null;
 
@@ -134,6 +138,7 @@ ESC - EXIT";
                     InitializeTexts,
                     InitializeToolsButtons,
                     InitializeLoadFileDialog,
+                    InitializeSaveFileDialog,
                     InitializeTerrain,
                     InitializeWorld,
                     InitializeTools,
@@ -248,6 +253,20 @@ ESC - EXIT";
             loadFileDialog.OnCancelHandler += OnLoadDialogCancel;
 
             await loadFileDialog.Initialize(resourcesFolder, editorFont);
+        }
+        private async Task InitializeSaveFileDialog()
+        {
+            saveFileDialog = new(this, saveFileDialogWidth, saveFileDialogHeight, saveFileButtonsCount, layerHUD)
+            {
+                ButtonColor = editorButtonColor,
+                ButtonTextColor = editorButtonTextColor,
+                BackgroundColor = editorBackgroundColor,
+            };
+
+            saveFileDialog.OnAcceptHandler += OnSaveDialogAccept;
+            saveFileDialog.OnCancelHandler += OnSaveDialogCancel;
+
+            await saveFileDialog.Initialize(resourcesFolder, editorFont);
         }
         private async Task InitializeTerrain()
         {
@@ -657,12 +676,32 @@ ESC - EXIT";
 
         private void SaveWorldToFile()
         {
-            SaveWorld("newworld.world");
+            string fileName = Path.Combine(samplesFolder, "myWorld.world");
+
+            saveFileDialog.ShowDialog("Save World to file", fileName, worldSearchPattern);
+
+            ToggleTools();
+            fileDlgVisible = true;
         }
-        private void SaveWorld(string fileName)
+        private void OnSaveDialogAccept(object sender, EventArgs e)
         {
+            string fileName = saveFileDialog.SelectedFileName;
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
             var worldFile = World.FromWorld(world);
             SerializationHelper.SerializeJsonToFile(worldFile, fileName);
+
+            ToggleTools();
+            fileDlgVisible = false;
+        }
+        private void OnSaveDialogCancel(object sender, EventArgs e)
+        {
+            ToggleTools();
+            fileDlgVisible = false;
         }
     }
 }

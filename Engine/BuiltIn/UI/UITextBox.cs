@@ -24,6 +24,14 @@ namespace Engine.BuiltIn.UI
         /// Text area
         /// </summary>
         private UITextArea textArea = null;
+        /// <summary>
+        /// Text string
+        /// </summary>
+        private string text = string.Empty;
+        /// <summary>
+        /// Text string change flag
+        /// </summary>
+        private bool textChanged = false;
 
         /// <summary>
         /// Cursor character
@@ -41,12 +49,33 @@ namespace Engine.BuiltIn.UI
         /// Enables multi line text
         /// </summary>
         public bool MultiLine { get; set; }
+        /// <summary>
+        /// Gets or sets the box text
+        /// </summary>
+        public string Text
+        {
+            get
+            {
+                return text;
+            }
+            set
+            {
+                if (text == value)
+                {
+                    return;
+                }
+
+                text = value;
+                textChanged = true;
+            }
+        }
 
         /// <inheritdoc/>
         public override async Task ReadAssets(UITextBoxDescription description)
         {
             await base.ReadAssets(description);
 
+            text = Description.Text;
             Cursor = Description.Cursor;
             TabSpaces = Description.TabSpaces;
             Size = Description.Size;
@@ -58,12 +87,12 @@ namespace Engine.BuiltIn.UI
                 AddChild(background, true);
 
                 textArea = await CreateText();
-                background.AddChild(textArea, true);
+                background.AddChild(textArea, false);
             }
             else
             {
                 textArea = await CreateText();
-                AddChild(textArea, true);
+                AddChild(textArea, false);
             }
         }
         private async Task<Sprite> CreateBackground()
@@ -91,71 +120,44 @@ namespace Engine.BuiltIn.UI
         {
             base.Update(context);
 
-            if (!hasFocus)
-            {
-                if (textArea.Text?.EndsWith(Cursor.ToString()) == true)
-                {
-                    textArea.Text = textArea.Text.Remove(textArea.Text.Length - 1);
-                }
-
-                return;
-            }
-
-            if (textArea.Text?.EndsWith(Cursor.ToString()) == false)
-            {
-                textArea.Text += Cursor.ToString();
-            }
+            string copy = text;
+            bool changed = textChanged;
 
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 SetFocusLost();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.Back))
+            {
+                changed = DoBack(ref copy) || changed;
+            }
+            else if (Game.Input.KeyJustReleased(Keys.Enter))
+            {
+                changed = DoEnter(ref copy, MultiLine) || changed;
+            }
+            else if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                changed = DoTab(ref copy, TabSpaces) || changed;
+            }
+            else
+            {
+                changed = SetText(ref copy, Game.Input.GetStrokes()) || changed;
+            }
 
+            if (!changed)
+            {
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.Back))
-            {
-                DoBack();
-
-                return;
-            }
-
-            if (!EvaluateSize())
+            if (!EvaluateSize(ref copy, Size))
             {
                 return;
             }
 
-            if (Game.Input.KeyJustReleased(Keys.Enter))
-            {
-                DoEnter();
+            text = copy;
+            textChanged = changed;
 
-                return;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.Tab))
-            {
-                DoTab();
-
-                return;
-            }
-
-            SetText(Game.Input.GetStrokes());
-        }
-        /// <summary>
-        /// Evaluates the size limit
-        /// </summary>
-        /// <returns>Returns true until the size limit is reached</returns>
-        private bool EvaluateSize()
-        {
-            if (Size <= 0)
-            {
-                //No size limit
-                return true;
-            }
-
-            int textSize = (textArea.Text?.Length ?? 0) - 1;
-
-            return textSize < Size;
+            SetTextValue();
         }
 
         /// <summary>
@@ -163,77 +165,122 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="currText">Current text</param>
         /// <param name="newText">Text to add</param>
-        /// <returns>Returns the updated text</returns>
-        private void SetText(string newText)
+        /// <returns>Returns true if the text changes</returns>
+        private static bool SetText(ref string currText, string newText)
         {
-            string currText = textArea.Text;
+            if (string.IsNullOrEmpty(newText))
+            {
+                return false;
+            }
 
             if (string.IsNullOrEmpty(currText))
             {
-                textArea.Text = newText;
+                currText = newText;
 
-                return;
+                return true;
             }
 
-            textArea.Text = currText.Insert(currText.Length - 1, newText);
+            currText += newText;
+
+            return true;
         }
         /// <summary>
         /// Does the back operation. Removes the last character
         /// </summary>
         /// <param name="currText">Current text</param>
-        /// <param name="cursor">Cursor text</param>
-        /// <returns>Returns the updated text</returns>
-        private void DoBack()
+        /// <returns>Returns true if the text changes</returns>
+        private static bool DoBack(ref string currText)
         {
-            string currText = textArea.Text;
-            string cursor = Cursor.ToString();
-
             if (string.IsNullOrEmpty(currText))
             {
                 //No text
-                return;
+                return false;
             }
 
-            if (currText == cursor)
-            {
-                //Cursor only
-                return;
-            }
-
-            if (currText.EndsWith(Environment.NewLine + cursor))
+            if (currText.EndsWith(Environment.NewLine))
             {
                 //Removes the new line string
-                textArea.Text = currText.Remove(currText.Length - 3, 2);
+                int nl = Environment.NewLine.Length;
+                currText = currText.Remove(currText.Length - nl, nl);
 
-                return;
+                return true;
             }
 
             //Removes the last character
-            textArea.Text = currText.Remove(currText.Length - 2, 1);
+            currText = currText.Remove(currText.Length - 1, 1);
+
+            return true;
         }
         /// <summary>
         /// Does the enter operation. Adds a new line
         /// </summary>
         /// <param name="currText">Current text</param>
-        /// <returns>Returns the updated text</returns>
-        private void DoEnter()
+        /// <param name="multiLine">Multi-line</param>
+        /// <returns>Returns true if the text changes</returns>
+        private static bool DoEnter(ref string currText, bool multiLine)
         {
-            if (!MultiLine)
+            if (!multiLine)
             {
-                return;
+                return false;
             }
 
-            SetText(Environment.NewLine);
+            currText += Environment.NewLine;
+
+            return true;
         }
         /// <summary>
         /// Does the tab operation. Adds a number of white spaces
         /// </summary>
         /// <param name="currText">Current text</param>
         /// <param name="tabSpaces">Tab spaces</param>
-        /// <returns>Returns the updated text</returns>
-        private void DoTab()
+        /// <returns>Returns true if the text changes</returns>
+        private static bool DoTab(ref string currText, int tabSpaces)
         {
-            SetText(string.Empty.PadRight(Math.Max(1, TabSpaces)));
+            if (tabSpaces <= 0)
+            {
+                return false;
+            }
+
+            currText += string.Empty.PadRight(Math.Max(1, tabSpaces));
+
+            return true;
+        }
+        /// <summary>
+        /// Evaluates the size limit
+        /// </summary>
+        /// <param name="currText">Current text</param>
+        /// <param name="size">Maximum size</param>
+        /// <returns>Returns true if the text changes</returns>
+        private static bool EvaluateSize(ref string currText, int size)
+        {
+            if (size <= 0)
+            {
+                //No size limit
+                return true;
+            }
+
+            return (currText?.Length ?? 0) < size;
+        }
+        /// <summary>
+        /// Sets the text value to the text area
+        /// </summary>
+        private void SetTextValue()
+        {
+            if (!textChanged)
+            {
+                return;
+            }
+
+            textChanged = false;
+
+            if (!hasFocus)
+            {
+                textArea.Text = text;
+
+                return;
+            }
+
+            textArea.Text = text + Cursor.ToString();
         }
 
         /// <inheritdoc/>

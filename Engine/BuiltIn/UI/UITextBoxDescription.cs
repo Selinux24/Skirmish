@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="text">Text</param>
-        public static new UITextBoxDescription Default(Engine.UI.FontDescription font, string text = null)
+        public static new UITextBoxDescription Default(FontDescription font, string text = null)
         {
             return new()
             {
