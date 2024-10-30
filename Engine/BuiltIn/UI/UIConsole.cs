@@ -158,7 +158,7 @@ namespace Engine.BuiltIn.UI
         /// Log filter
         /// </summary>
         /// <param name="logEntry">Log entry</param>
-        private bool FilterLog(LogEntry logEntry)
+        private static bool FilterLog(LogEntry logEntry)
         {
             return logEntry != null;
         }

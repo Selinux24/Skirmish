@@ -104,15 +104,15 @@ namespace Engine.BuiltIn.UI
         }
         private async Task<UITextArea> CreateText()
         {
-            var text = await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+            var textArea = await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
                 $"{Id}.Text",
                 $"{Name}.Text",
                 Description);
 
-            text.EventsEnabled = true;
-            text.GrowControlWithText = false;
+            textArea.EventsEnabled = true;
+            textArea.GrowControlWithText = false;
 
-            return text;
+            return textArea;
         }
 
         /// <inheritdoc/>

@@ -4,7 +4,6 @@ using Engine.Helpers;
 using Engine.UI;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Dialogs
@@ -94,13 +93,11 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             fileButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             fileButtonDesc.StartsVisible = false;
 
-            List<UIButton> buttons = [];
+            buttons = new UIButton[PageCount];
             for (int i = 0; i < PageCount; i++)
             {
-                buttons.Add(await InitializeFileButton($"file_{i}", string.Empty, fileButtonDesc));
+                buttons[i] = await InitializeFileButton($"file_{i}", string.Empty, fileButtonDesc);
             }
-
-            this.buttons = [.. buttons];
 
             var filePageButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
             filePageButtonDesc.ContentPath = resourcesFolder;

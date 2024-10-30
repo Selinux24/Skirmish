@@ -125,6 +125,7 @@ namespace AISamples.Common
             Version = file.Version;
             graphVersion = graph.Version;
 
+            ClearDrawers();
             DrawMarkings();
             DrawGraph();
             worldChanged = false;
@@ -710,6 +711,16 @@ namespace AISamples.Common
             var vlist = building.DrawBuilding(height);
 
             drawer.AddPrimitives(vlist);
+        }
+
+        private void ClearDrawers()
+        {
+            roadDrawer.Clear();
+            roadMarksDrawer.Clear();
+            buildingDrawer.Clear();
+            markingsDrawer2d.Clear();
+            markingsDrawer3d.Clear();
+            carSensorDrawer.Clear();
         }
 
         public Segment2[] GetLaneGuides()
