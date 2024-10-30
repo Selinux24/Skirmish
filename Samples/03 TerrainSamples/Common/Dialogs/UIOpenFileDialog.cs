@@ -6,9 +6,9 @@ using SharpDX;
 using System;
 using System.Threading.Tasks;
 
-namespace AISamples.SceneCWRVirtualWorld.Dialogs
+namespace TerrainSamples.Common.Dialogs
 {
-    class UIOpenFileDialog(Scene scene, float width, float height, int pageCount, int layer)
+    class UIOpenFileDialog(Scene scene, string name, float width, float height, int itemsPerPage, int layer = Scene.LayerUI)
     {
         private const string dlgName = nameof(UIOpenFileDialog);
         private readonly Scene scene = scene;
@@ -19,11 +19,17 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
         private UIButton pageUpButton = null;
         private UIButton pageDownButton = null;
         private string searchPattern = null;
+        private readonly FolderNavigator folderNavigator = new()
+        {
+            PageIndex = 0,
+            ItemsPerPage = itemsPerPage
+        };
 
+        public string Name { get; private set; } = name;
         public float Width { get; private set; } = width;
         public float Height { get; private set; } = height;
         public int Layer { get; private set; } = layer;
-        public int PageCount { get; private set; } = pageCount;
+        public int ItemsPerPage { get; private set; } = itemsPerPage;
         public Color4 ButtonColor { get; set; }
         public Color4 ButtonTextColor { get; set; }
         public Color4 BackgroundColor { get; set; }
@@ -46,8 +52,10 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             var fileTextDesc = UITextAreaDescription.Default(textFont);
             fileTextDesc.TextForeColor = ButtonTextColor;
             fileTextDesc.StartsVisible = false;
-            selectedText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(dlgName + nameof(selectedText), dlgName + nameof(selectedText), fileTextDesc);
-            folderText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(dlgName + nameof(folderText), dlgName + nameof(folderText), fileTextDesc);
+            string selectedTextName = FormatControlName(nameof(selectedText));
+            selectedText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(selectedTextName, selectedTextName, fileTextDesc, Layer + 1);
+            string folderTextName = FormatControlName(nameof(folderText));
+            folderText = await scene.AddComponentUI<UITextArea, UITextAreaDescription>(folderTextName, folderTextName, fileTextDesc, Layer + 1);
 
             var dlgButtonsFont = FontDescription.FromFamily(editorFont, 18);
             dlgButtonsFont.ContentPath = resourcesFolder;
@@ -68,7 +76,8 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             fileDialogDesc.Background = UIPanelDescription.Default(BackgroundColor);
             fileDialogDesc.StartsVisible = false;
 
-            dialog = await scene.AddComponentUI<UIDialog, UIDialogDescription>(dlgName + nameof(dialog), dlgName + nameof(dialog), fileDialogDesc, Layer);
+            string dialogName = FormatControlName(nameof(dialog));
+            dialog = await scene.AddComponentUI<UIDialog, UIDialogDescription>(dialogName, dialogName, fileDialogDesc, Layer);
             dialog.OnAcceptHandler += (sender, args) =>
             {
                 OnAcceptHandler?.Invoke(sender, args);
@@ -93,10 +102,10 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             fileButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             fileButtonDesc.StartsVisible = false;
 
-            buttons = new UIButton[PageCount];
-            for (int i = 0; i < PageCount; i++)
+            buttons = new UIButton[ItemsPerPage];
+            for (int i = 0; i < ItemsPerPage; i++)
             {
-                buttons[i] = await InitializeFileButton($"file_{i}", string.Empty, fileButtonDesc);
+                buttons[i] = await InitializeFileButton($"file_{i}", string.Empty, fileButtonDesc, Layer + 1);
             }
 
             var filePageButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
@@ -106,7 +115,8 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
             filePageButtonDesc.TextForeColor = ButtonTextColor;
             filePageButtonDesc.StartsVisible = false;
 
-            pageUpButton = await scene.AddComponentUI<UIButton, UIButtonDescription>(dlgName + nameof(pageUpButton), dlgName + nameof(pageUpButton), filePageButtonDesc, Layer + 1);
+            string pageUpButtonName = FormatControlName(nameof(pageUpButton));
+            pageUpButton = await scene.AddComponentUI<UIButton, UIButtonDescription>(pageUpButtonName, pageUpButtonName, filePageButtonDesc, Layer + 1);
             pageUpButton.Caption.Text = "U";
             pageUpButton.MouseClick += (sender, e) =>
             {
@@ -115,13 +125,14 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
                     return;
                 }
 
-                if (FolderNavigator.PageUp())
+                if (folderNavigator.PageUp())
                 {
                     LoadFolder(folderText.TooltipText, searchPattern);
                 }
             };
 
-            pageDownButton = await scene.AddComponentUI<UIButton, UIButtonDescription>(dlgName + nameof(pageDownButton), dlgName + nameof(pageDownButton), filePageButtonDesc, Layer + 1);
+            string pageDownButtonName = FormatControlName(nameof(pageDownButton));
+            pageDownButton = await scene.AddComponentUI<UIButton, UIButtonDescription>(pageDownButtonName, pageDownButtonName, filePageButtonDesc, Layer + 1);
             pageDownButton.Caption.Text = "D";
             pageDownButton.MouseClick += (sender, e) =>
             {
@@ -130,15 +141,16 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
                     return;
                 }
 
-                if (FolderNavigator.PageDown())
+                if (folderNavigator.PageDown())
                 {
                     LoadFolder(folderText.TooltipText, searchPattern);
                 }
             };
         }
-        private async Task<UIButton> InitializeFileButton(string name, string caption, UIButtonDescription desc)
+        private async Task<UIButton> InitializeFileButton(string name, string caption, UIButtonDescription desc, int layer)
         {
-            var button = await scene.AddComponentUI<UIButton, UIButtonDescription>(dlgName + name, dlgName + name, desc, Layer + 1);
+            string buttonName = FormatControlName(name);
+            var button = await scene.AddComponentUI<UIButton, UIButtonDescription>(buttonName, buttonName, desc, layer);
 
             button.Caption.Text = caption;
             button.MouseClick += (sender, e) =>
@@ -163,7 +175,7 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
 
                 if (FolderNavigatorPath.FileNameIsPrevFolder(fileName) || FolderNavigatorPath.FileNameIsFolder(fileName))
                 {
-                    FolderNavigator.PageIndex = 0;
+                    folderNavigator.PageIndex = 0;
 
                     LoadFolder(path, searchPattern);
                 }
@@ -176,18 +188,22 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
 
             return button;
         }
+        private string FormatControlName(string controlName)
+        {
+            return $"{dlgName}.{Name}.{controlName}";
+        }
 
         private void LoadFolder(string folder, string searchPattern)
         {
-            if (!FolderNavigator.LoadFolder(folder, searchPattern, out var paths))
+            if (!folderNavigator.LoadFolder(folder, searchPattern, out var paths))
             {
                 return;
             }
 
             this.searchPattern = searchPattern;
 
-            folderText.Text = FormatFolderName(FolderNavigator.SelectedFolder.Path, 40);
-            folderText.TooltipText = FolderNavigator.SelectedFolder.Path;
+            folderText.Text = FormatFolderName(folderNavigator.SelectedFolder.Path, 40);
+            folderText.TooltipText = folderNavigator.SelectedFolder.Path;
 
             selectedText.Text = null;
             selectedText.TooltipText = null;
@@ -225,6 +241,8 @@ namespace AISamples.SceneCWRVirtualWorld.Dialogs
 
         public void ShowDialog(string caption, string folder, string searchPattern)
         {
+            folderNavigator.PageIndex = 0;
+
             LoadFolder(folder, searchPattern);
 
             dialog.Visible = true;

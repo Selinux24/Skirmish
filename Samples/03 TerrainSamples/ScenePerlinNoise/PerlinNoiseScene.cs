@@ -4,16 +4,24 @@ using Engine.Common;
 using Engine.UI;
 using SharpDX;
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 using TerrainSamples.SceneStart;
-using DialogResult = System.Windows.Forms.DialogResult;
-using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
     class PerlinNoiseScene : Scene
     {
-        readonly string fontFamily = "Microsoft Sans Serif";
+        const string fontFamily = "Microsoft Sans Serif";
+        static readonly Color4 pBackground = Color.RosyBrown;
+        static readonly Color4 bColor1 = Color.Brown;
+        static readonly Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
+        static readonly Color4 pColor = Color.DeepSkyBlue;
+
+        const int dialogWidth = 600;
+        const int dialogHeight = 350;
+        const int dialogItemsPerPage = 10;
 
         UIPanel backGround;
         UIButton btnExit;
@@ -32,6 +40,12 @@ namespace TerrainSamples.ScenePerlinNoise
         UITextArea txtSeed;
 
         UIButton btnSave;
+        bool dialogVisible = false;
+        string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        readonly Color4 dialogButtonColor = Color4.AdjustSaturation(bColor1, 1.5f);
+        readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
+        readonly Color4 dialogBackgroundColor = bColor1;
+        UISaveFileDialog saveFileDialog = null;
 
         UITextureRenderer perlinRenderer;
         EngineShaderResourceView texture;
@@ -111,7 +125,7 @@ namespace TerrainSamples.ScenePerlinNoise
             base.Initialize();
 
             var group = LoadResourceGroup.FromTasks(
-                InitializeUI,
+                [InitializeUI, InitializeUIDialogs],
                 (res) =>
                 {
                     res.ThrowExceptions();
@@ -131,13 +145,8 @@ namespace TerrainSamples.ScenePerlinNoise
 
             LoadResources(textureGroup);
         }
-        public async Task InitializeUI()
+        private async Task InitializeUI()
         {
-            Color4 pBackground = Color.RosyBrown;
-            Color4 bColor1 = Color.Brown;
-            Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
-            Color4 pColor = Color.DeepSkyBlue;
-
             var defaultFont16 = FontDescription.FromFamily(fontFamily, 16);
             var defaultFont14 = FontDescription.FromFamily(fontFamily, 14);
             var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
@@ -212,6 +221,35 @@ namespace TerrainSamples.ScenePerlinNoise
 
             btnSave.MouseClick += BtnSaveClick;
         }
+        private async Task InitializeUIDialogs()
+        {
+            saveFileDialog = new(this, nameof(saveFileDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI + 1)
+            {
+                ButtonColor = dialogButtonColor,
+                ButtonTextColor = dialogButtonTextColor,
+                BackgroundColor = dialogBackgroundColor,
+            };
+
+            saveFileDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = saveFileDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                noiseMap.SaveMapToFile(fileName);
+            };
+            saveFileDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await saveFileDialog.Initialize(dialogFolder, fontFamily);
+        }
         public async Task InitializeTextureRenderer()
         {
             texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
@@ -255,6 +293,11 @@ namespace TerrainSamples.ScenePerlinNoise
         }
         private bool UpdateInput(IGameTime gameTime)
         {
+            if (dialogVisible)
+            {
+                return false;
+            }
+
             bool updateMap = false;
 
             float delta = gameTime.ElapsedSeconds;
@@ -472,14 +515,10 @@ namespace TerrainSamples.ScenePerlinNoise
 
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                using var dlg = new SaveFileDialog();
-                dlg.DefaultExt = ".png";
-                dlg.FileName = "Noisemap.png";
+                string fileName = Path.Combine(dialogFolder, "Noisemap.png");
 
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    noiseMap.SaveMapToFile(dlg.FileName);
-                }
+                saveFileDialog.ShowDialog("Save Graph to file", fileName, "*.png");
+                dialogVisible = true;
             }
         }
         private void BtnExitClick(IUIControl sender, MouseEventArgs e)

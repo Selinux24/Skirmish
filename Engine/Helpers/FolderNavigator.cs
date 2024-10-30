@@ -6,29 +6,29 @@ namespace Engine.Helpers
     /// <summary>
     /// Folder navigator
     /// </summary>
-    public static class FolderNavigator
+    public class FolderNavigator
     {
         /// <summary>
         /// Page index
         /// </summary>
-        public static int PageIndex { get; set; }
+        public int PageIndex { get; set; } = 0;
         /// <summary>
         /// Items per page
         /// </summary>
-        public static int ItemsPerPage { get; set; }
+        public int ItemsPerPage { get; set; } = 10;
         /// <summary>
         /// Total items
         /// </summary>
-        public static int TotalCount { get; set; }
+        public int TotalCount { get; set; } = 0;
 
         /// <summary>
         /// Gets the selected file
         /// </summary>
-        public static FolderNavigatorPath SelectedFile { get; private set; }
+        public FolderNavigatorPath SelectedFile { get; private set; }
         /// <summary>
         /// Gets the selected folder
         /// </summary>
-        public static FolderNavigatorPath SelectedFolder { get; private set; }
+        public FolderNavigatorPath SelectedFolder { get; private set; }
 
         /// <summary>
         /// Loads the folder
@@ -37,7 +37,7 @@ namespace Engine.Helpers
         /// <param name="searchPattern">Search pattern for the files in the folder</param>
         /// <param name="result">Returns de path list</param>
         /// <returns>Returns true if the folder exists</returns>
-        public static bool LoadFolder(string folder, string searchPattern, out FolderNavigatorPath[] result)
+        public bool LoadFolder(string folder, string searchPattern, out FolderNavigatorPath[] result)
         {
             if (!Directory.Exists(folder))
             {
@@ -86,7 +86,7 @@ namespace Engine.Helpers
         /// <summary>
         /// Moves the page index up
         /// </summary>
-        public static bool PageUp()
+        public bool PageUp()
         {
             if (PageIndex > 0)
             {
@@ -100,7 +100,7 @@ namespace Engine.Helpers
         /// <summary>
         /// Moves the page index down
         /// </summary>
-        public static bool PageDown()
+        public bool PageDown()
         {
             if (PageIndex < TotalCount - ItemsPerPage)
             {

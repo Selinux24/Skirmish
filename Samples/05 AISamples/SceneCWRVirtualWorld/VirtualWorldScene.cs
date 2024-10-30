@@ -1,14 +1,13 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Agents;
+using AISamples.Common.Dialogs;
 using AISamples.Common.Persistence;
-using AISamples.SceneCWRVirtualWorld.Dialogs;
 using AISamples.SceneCWRVirtualWorld.Editors;
 using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.Helpers;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -242,7 +241,7 @@ ESC - EXIT";
         }
         private async Task InitializeLoadFileDialog()
         {
-            loadFileDialog = new(this, loadFileDialogWidth, loadFileDialogHeight, loadFileButtonsCount, layerHUD)
+            loadFileDialog = new(this, nameof(loadFileDialog), loadFileDialogWidth, loadFileDialogHeight, loadFileButtonsCount, layerHUD)
             {
                 ButtonColor = editorButtonColor,
                 ButtonTextColor = editorButtonTextColor,
@@ -256,7 +255,7 @@ ESC - EXIT";
         }
         private async Task InitializeSaveFileDialog()
         {
-            saveFileDialog = new(this, saveFileDialogWidth, saveFileDialogHeight, saveFileButtonsCount, layerHUD)
+            saveFileDialog = new(this, nameof(saveFileDialog), saveFileDialogWidth, saveFileDialogHeight, saveFileButtonsCount, layerHUD)
             {
                 ButtonColor = editorButtonColor,
                 ButtonTextColor = editorButtonTextColor,
@@ -608,8 +607,6 @@ ESC - EXIT";
 
         private void LoadFromOpenStreetMap()
         {
-            FolderNavigator.PageIndex = 0;
-            FolderNavigator.ItemsPerPage = loadFileButtonsCount;
             loadFileType = MapFileTypes.OSM;
 
             loadFileDialog.ShowDialog("Load World from Open Street Map data", samplesFolder, osmSearchPattern);
@@ -619,8 +616,6 @@ ESC - EXIT";
         }
         private void LoadWorldFromFile()
         {
-            FolderNavigator.PageIndex = 0;
-            FolderNavigator.ItemsPerPage = loadFileButtonsCount;
             loadFileType = MapFileTypes.World;
 
             loadFileDialog.ShowDialog("Load World from file", samplesFolder, worldSearchPattern);
@@ -631,6 +626,9 @@ ESC - EXIT";
 
         private void OnLoadDialogAccept(object sender, EventArgs e)
         {
+            ToggleTools();
+            fileDlgVisible = false;
+
             string fileName = loadFileDialog.SelectedFileName;
 
             if (string.IsNullOrWhiteSpace(fileName))
@@ -648,9 +646,6 @@ ESC - EXIT";
             }
 
             loadFileType = MapFileTypes.None;
-
-            ToggleTools();
-            fileDlgVisible = false;
         }
         private void LoadOSM(string fileName)
         {

@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -36,6 +37,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private const string agentFileName = "agentState.json";
         private const string buildSettingsFileName = "buildSettingsState.json";
         private const string groupSettingsFileName = "groupSettingsState.json";
+        private const int dialogWidth = 600;
+        private const int dialogHeight = 350;
+        private const int dialogItemsPerPage = 10;
 
         private readonly InputMapper inputMapper;
 
@@ -66,6 +70,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private UIPanel debugPanel = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color sceneButtonTextColor = Color.WhiteSmoke;
+        private readonly Color sceneBackgroundColor = Color.CornflowerBlue;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
         private GeometryColorDrawer<Triangle> triangleDrawer = null;
@@ -127,6 +133,15 @@ namespace TerrainSamples.SceneNavMeshTest
         private string mapFileName;
         private Stopwatch swUpdateGraph = Stopwatch.StartNew();
 
+        private bool dialogVisible = false;
+        private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private UIOpenFileDialog loadMapDialog = null;
+        private UIOpenFileDialog loadGraphDialog = null;
+        private UISaveFileDialog saveGraphDialog = null;
+        private const string mapFilesSearchPattern = "*.obj";
+        private const string graphFilesSearchPattern = "*.grf";
+        private const string graphDefaultFile = "test.grf";
+
         private readonly AgentEditor agentEditor;
         private readonly BuildSettingsEditor navMeshEditor;
         private readonly GroupEditor groupEditor;
@@ -162,6 +177,9 @@ namespace TerrainSamples.SceneNavMeshTest
                     InitializeAgentEditor,
                     InitializeNavMeshEditor,
                     InitializeGroupEditor,
+                    InitializeLoadMapDialog,
+                    InitializeLoadGraphDialog,
+                    InitializeSaveGraphDialog,
                     InitializeDebugDrawers,
                 ],
                 InitializeComponentsCompleted);
@@ -473,6 +491,104 @@ namespace TerrainSamples.SceneNavMeshTest
 
             await groupEditor.Initialize(defaultFont18, defaultFont12);
         }
+        private async Task InitializeLoadMapDialog()
+        {
+            loadMapDialog = new(this, nameof(loadMapDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            loadMapDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = loadMapDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                if (debugGeometry != null)
+                {
+                    debugGeometry.Active = false;
+                    debugGeometry.Visible = false;
+                }
+
+                mapSelected = false;
+                mapResourcesFolder = dialogFolder;
+                mapFileName = Path.GetFileName(fileName);
+                mapSelected = true;
+
+                InitializeMapData();
+            };
+            loadMapDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await loadMapDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
+        private async Task InitializeLoadGraphDialog()
+        {
+            loadGraphDialog = new(this, nameof(loadGraphDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            loadGraphDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = loadMapDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                LoadNavigationGraphFromFile(fileName);
+            };
+            loadGraphDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await loadGraphDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
+        private async Task InitializeSaveGraphDialog()
+        {
+            saveGraphDialog = new(this, nameof(saveGraphDialog), dialogWidth, dialogHeight, dialogItemsPerPage)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            saveGraphDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = saveGraphDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                PathFinderDescription.Save(fileName, NavigationGraph);
+            };
+            saveGraphDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await saveGraphDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
         private async Task InitializeDebugDrawers()
         {
             var markDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
@@ -596,30 +712,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void SelectMap()
         {
-            System.Windows.Forms.OpenFileDialog dlg = new()
-            {
-                Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
-                FilterIndex = 1,
-                RestoreDirectory = true
-            };
-
-            if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            if (dialogVisible)
             {
                 return;
             }
 
-            if (debugGeometry != null)
-            {
-                debugGeometry.Active = false;
-                debugGeometry.Visible = false;
-            }
-
-            mapSelected = false;
-            mapResourcesFolder = Path.GetDirectoryName(dlg.FileName);
-            mapFileName = Path.GetFileName(dlg.FileName);
-            mapSelected = true;
-
-            InitializeMapData();
+            loadMapDialog.ShowDialog("Please select a model to continue", dialogFolder, mapFilesSearchPattern);
+            dialogVisible = true;
         }
         private void InitializeMapData()
         {
@@ -1874,13 +1973,10 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            using var dlg = new System.Windows.Forms.SaveFileDialog();
-            dlg.FileName = @"test.grf";
+            string fileName = Path.Combine(dialogFolder, graphDefaultFile);
 
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                PathFinderDescription.Save(dlg.FileName, NavigationGraph);
-            }
+            saveGraphDialog.ShowDialog("Save Graph to file", fileName, graphFilesSearchPattern);
+            dialogVisible = true;
         }
         private void LoadNavmeshFromFile()
         {
@@ -1891,13 +1987,13 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            using var dlg = new System.Windows.Forms.OpenFileDialog();
-            dlg.FileName = @"test.grf";
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (dialogVisible)
             {
-                LoadNavigationGraphFromFile(dlg.FileName);
+                return;
             }
+
+            loadGraphDialog.ShowDialog("Please select a graph to continue", dialogFolder, graphFilesSearchPattern);
+            dialogVisible = true;
         }
 
         private void ShowMessage(string text, long duration = 5000)

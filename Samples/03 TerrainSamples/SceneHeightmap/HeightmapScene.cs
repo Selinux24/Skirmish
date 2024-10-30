@@ -19,8 +19,10 @@ using Engine.UI.Tween;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 
 namespace TerrainSamples.SceneHeightmap
 {
@@ -85,6 +87,11 @@ namespace TerrainSamples.SceneHeightmap
         private const float fogStart = 500f;
         private const float fogRange = 500f;
 
+        private const string uiFontFamily = "Tahoma";
+        private const int dialogWidth = 600;
+        private const int dialogHeight = 350;
+        private const int dialogItemsPerPage = 10;
+
         private float time = 0.23f;
 
         private UIControlTweener uiTweener;
@@ -98,12 +105,20 @@ namespace TerrainSamples.SceneHeightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
+        private UICursor cursor;
         private UIPanel fadePanel;
         private Sprite panel;
         private UITextArea title = null;
         private UITextArea stats = null;
         private UITextArea help = null;
         private UITextArea help2 = null;
+
+        private bool dialogVisible = false;
+        private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private readonly Color dialogButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color dialogButtonTextColor = Color.WhiteSmoke;
+        private readonly Color dialogBackgroundColor = Color.CornflowerBlue;
+        private UISaveFileDialog saveFileDialog = null;
 
         private GeometryColorDrawer<Triangle> bboxesTriDrawer = null;
         private GeometryColorDrawer<Line3D> bboxesDrawer = null;
@@ -224,6 +239,7 @@ namespace TerrainSamples.SceneHeightmap
                     InitializeUICursor,
                     InitializeUIFadePanel,
                     InitializeUIAssets,
+                    InitializeUIDialogs,
                     InitializeDebug,
                 ],
                 LoadingTaskUICompleted);
@@ -239,7 +255,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             var desc = UICursorDescription.Default(resourceCursor, 20, 20, true, Color.Red);
 
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
+            cursor = await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
         }
         private async Task InitializeUIFadePanel()
         {
@@ -250,8 +266,8 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeUIAssets()
         {
-            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
-            var defaultFont11 = FontDescription.FromFamily("Tahoma", 11);
+            var defaultFont18 = FontDescription.FromFamily(uiFontFamily, 18);
+            var defaultFont11 = FontDescription.FromFamily(uiFontFamily, 11);
             defaultFont18.LineAdjust = true;
             defaultFont11.LineAdjust = true;
 
@@ -268,6 +284,45 @@ namespace TerrainSamples.SceneHeightmap
             var desc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
 
             panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, LayerUI - 1);
+        }
+        private async Task InitializeUIDialogs()
+        {
+            saveFileDialog = new(this, nameof(saveFileDialog), dialogWidth, dialogHeight, dialogItemsPerPage)
+            {
+                ButtonColor = dialogButtonColor,
+                ButtonTextColor = dialogButtonTextColor,
+                BackgroundColor = dialogBackgroundColor,
+            };
+
+            saveFileDialog.OnAcceptHandler += (sender, args) =>
+            {
+                try
+                {
+                    string fileName = saveFileDialog.SelectedFileName;
+                    if (string.IsNullOrWhiteSpace(fileName))
+                    {
+                        return;
+                    }
+                    dialogFolder = Path.GetDirectoryName(fileName);
+
+                    //Save navigation triangles
+                    LoaderObj.Save(GetTrianglesForNavigationGraph(), fileName);
+                }
+                finally
+                {
+                    cursor.Visible = true;
+                    SetMouse(false);
+                    dialogVisible = false;
+                }
+            };
+            saveFileDialog.OnCancelHandler += (sender, args) =>
+            {
+                cursor.Visible = true;
+                SetMouse(false);
+                dialogVisible = false;
+            };
+
+            await saveFileDialog.Initialize(dialogFolder, uiFontFamily);
         }
         private async Task InitializeDebug()
         {
@@ -1177,6 +1232,11 @@ namespace TerrainSamples.SceneHeightmap
 
         private void UpdateInput(IGameTime gameTime)
         {
+            if (dialogVisible)
+            {
+                return;
+            }
+
             if (Game.Input.KeyJustReleased(Keys.R))
             {
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
@@ -1449,27 +1509,13 @@ namespace TerrainSamples.SceneHeightmap
 
             if (Game.Input.KeyJustReleased(Keys.F8))
             {
-                //Save navigation triangles
+                cursor.Visible = false;
                 SetMouse(true);
 
-                try
-                {
-                    System.Windows.Forms.SaveFileDialog dlg = new()
-                    {
-                        Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
-                        FilterIndex = 1,
-                        RestoreDirectory = true
-                    };
+                string fileName = Path.Combine(dialogFolder, "terrain.obj");
 
-                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        LoaderObj.Save(GetTrianglesForNavigationGraph(), dlg.FileName);
-                    }
-                }
-                finally
-                {
-                    SetMouse(false);
-                }
+                saveFileDialog.ShowDialog("Save terrain to file", fileName, "*.obj");
+                dialogVisible = true;
             }
         }
         private void UpdateInputLights()
