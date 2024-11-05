@@ -1,4 +1,5 @@
 using Engine;
+using Engine.Collections;
 using Engine.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
@@ -68,7 +69,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestConstructor()
         {
-            QuadTree<int> q = new(new(), [], 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(new(), [], options);
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -91,7 +93,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestParent()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -128,7 +131,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeaf()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -165,7 +169,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestIds()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -202,7 +207,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLevels()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -221,7 +227,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestBoundaries()
         {
-            QuadTree<int> q = new(tenBox, [], 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(tenBox, [], options);
 
             Assert.AreEqual(tenBox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
@@ -239,15 +246,16 @@ namespace EngineTests.Collections.Generic
             Assert.IsTrue(children[0].BoundingBox.Contains(children[3].BoundingBox) != ContainmentType.Contains);
 
             Assert.AreEqual(topLeft, q.Root.TopLeftChild.BoundingBox.Center);
-            Assert.AreEqual(topRight, q.Root.TopRightChild.BoundingBox.Center);
-            Assert.AreEqual(bottomLeft, q.Root.BottomLeftChild.BoundingBox.Center);
+            Assert.AreEqual(topRight, q.Root.BottomLeftChild.BoundingBox.Center);
+            Assert.AreEqual(bottomLeft, q.Root.TopRightChild.BoundingBox.Center);
             Assert.AreEqual(bottomRight, q.Root.BottomRightChild.BoundingBox.Center);
         }
 
         [TestMethod]
         public void TestNeighbors()
         {
-            QuadTree<int> q = new(tenBox, [], 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(tenBox, [], options);
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -289,7 +297,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestGetBoundingBoxes()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             var boxes = q.GetBoundingBoxes();
             Assert.AreEqual(16, boxes.Count());
 
@@ -306,7 +315,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeafNodes()
         {
-            QuadTree<int> q = new(new(), [], 2);
+            QuadTreeOptions options = new(2);
+            QuadTree<int> q = new(new(), [], options);
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(16, nodes.Length);
 
@@ -324,7 +334,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestTraversePosition()
         {
-            QuadTree<int> q = new(tenBox, [], 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(tenBox, [], options);
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
@@ -339,14 +350,24 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
 
-            cn = q.FindClosestNode(new(1, 0, -1));
+            cn = q.FindClosestNode(new(-1, 0, 1));
             Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+            cn = q.FindClosestNode(new(-10, 0, 10));
+            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+            cn = q.FindClosestNode(new(-100, 0, 100));
+            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+
+            cn = q.FindClosestNode(new(1, 0, -1));
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
             cn = q.FindClosestNode(new(10, 0, -10));
-            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
             cn = q.FindClosestNode(new(100, 0, -100));
-            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
 
             cn = q.FindClosestNode(new(1, 0, 1));
@@ -358,22 +379,13 @@ namespace EngineTests.Collections.Generic
             cn = q.FindClosestNode(new(100, 0, 100));
             Assert.AreEqual(cn, q.Root.BottomRightChild);
             Assert.IsTrue(cn.IsLeaf);
-
-            cn = q.FindClosestNode(new(-1, 0, 1));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
-            cn = q.FindClosestNode(new(-10, 0, 10));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
-            cn = q.FindClosestNode(new(-100, 0, 100));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
         }
 
         [TestMethod]
         public void TestTraverseVolume()
         {
-            QuadTree<int> q = new(tenBox, [], 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(tenBox, [], options);
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
@@ -385,11 +397,11 @@ namespace EngineTests.Collections.Generic
 
             volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.TopRightChild }, ln.ToArray());
+            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.BottomLeftChild }, ln.ToArray());
 
             volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.BottomLeftChild }, ln.ToArray());
+            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.TopRightChild }, ln.ToArray());
 
             volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
@@ -403,7 +415,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestItems()
         {
-            QuadTree<int> q = new(tenBox, items, 1);
+            QuadTreeOptions options = new(1);
+            QuadTree<int> q = new(tenBox, items, options);
 
             var nodes = q.GetLeafNodes().ToArray();
             Assert.AreEqual(4, nodes.Length);

@@ -718,11 +718,11 @@ namespace Engine
 
             //-1-1   +0+0 - Top Left
             yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X - subAxis, M.Y, c.Z - subAxis));
-            //+0-1   +1+0 - Top Right
-            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis));
-
-            //-1+0   +0+1 - Bottom Left
+            //-1+0   +0+1 - Top Right
             yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z + addAxis), new Vector3(c.X - subAxis, M.Y, M.Z));
+
+            //+0-1   +1+0 - Bottom Left
+            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis));
             //+0+0   +1+1 - Bottom Right
             yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, c.Z + addAxis), new Vector3(M.X, M.Y, M.Z));
         }

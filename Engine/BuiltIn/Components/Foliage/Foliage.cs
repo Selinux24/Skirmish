@@ -270,8 +270,7 @@ namespace Engine.BuiltIn.Components.Foliage
             float sizeParts = MathF.Max(gbbox.Width, gbbox.Depth) / Description.NodeSize;
 
             int levels = Math.Max(1, (int)MathF.Log(sizeParts, 2));
-
-            foliageQuadtree = new(gbbox, levels);
+            foliageQuadtree = new(gbbox, new(levels));
 
             //Creates the foliage patch structure
             int channelCount = foliageMapChannels.Count;

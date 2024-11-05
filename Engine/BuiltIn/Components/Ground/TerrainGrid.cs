@@ -142,7 +142,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var bbox = SharpDXExtensions.BoundingBoxFromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
             var items = vertices.Select(v => (SharpDXExtensions.BoundingBoxFromPoints(v.GetVertices().ToArray()), v));
-            res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, LODLevels);
+            res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, new(LODLevels, false, 0));
 
             //Populate nodes dictionary
             var nodes = res.drawingQuadTree.GetLeafNodes();

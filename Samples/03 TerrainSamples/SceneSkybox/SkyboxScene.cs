@@ -323,7 +323,7 @@ namespace TerrainSamples.SceneSkybox
         private async Task InitializeRuins()
         {
             var ruinsDesc = SceneryDescription.FromFile(resourceRuinsFolder, resourceRuinsFile);
-            ruinsDesc.Quadtree.MaximumDepth = 1;
+            ruinsDesc.Quadtree = new(1);
             ruinsDesc.StartsVisible = false;
 
             ruins = await AddComponentGround<Scenery, SceneryDescription>("Ruins", "Ruins", ruinsDesc);

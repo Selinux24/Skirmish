@@ -1,4 +1,5 @@
-﻿using Engine.Collections.Generic;
+﻿using Engine.Collections;
+using Engine.Collections.Generic;
 using Engine.Content;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription Quadtree { get; set; } = QuadtreeDescription.Default(4);
+        public QuadTreeOptions? Quadtree { get; set; } = new(4);
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
@@ -77,7 +78,7 @@ namespace Engine
         {
             if (Quadtree != null)
             {
-                return new(items, Quadtree.MaximumDepth);
+                return new(items, Quadtree.Value);
             }
 
             return null;

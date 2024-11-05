@@ -20,9 +20,10 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="items">Partitioning items</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, int maxDepth)
+        /// <param name="options">Options</param>
+        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, QuadTreeOptions options)
         {
             BoundingBox = bbox;
 
@@ -30,7 +31,7 @@ namespace Engine.Collections.Generic
             Root = QuadTreeNode<T>.CreatePartitions(
                 null,
                 bbox, items,
-                maxDepth,
+                options,
                 0,
                 ref nodeCount);
         }
