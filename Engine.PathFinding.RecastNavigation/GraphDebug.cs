@@ -348,7 +348,7 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> lines = [];
 
             bool empty = true;
-            foreach (var (i, c) in cset.IterateContours())
+            foreach (var (_, c) in cset.IterateContours())
             {
                 if (!c.HasVertices())
                 {
@@ -388,11 +388,11 @@ namespace Engine.PathFinding.RecastNavigation
             List<Vector3> lines = [];
 
             // Draw centers
-            foreach (var (i, cont1) in cset.IterateContours())
+            foreach (var (_, cont1) in cset.IterateContours())
             {
                 var pos1 = cont1.GetContourCenter(orig, cs, ch);
 
-                foreach (var (j, v) in cont1.IterateVertices())
+                foreach (var (_, v) in cont1.IterateVertices())
                 {
                     var r = (int)(uint)v.Flag;
 
@@ -889,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation
             Dictionary<Color4, List<Vector3>> lines = [];
 
             bool empty = true;
-            foreach (var (i, c) in cset.IterateContours())
+            foreach (var (_, c) in cset.IterateContours())
             {
                 if (!c.HasVertices())
                 {
@@ -929,11 +929,11 @@ namespace Engine.PathFinding.RecastNavigation
             List<Vector3> lines = [];
 
             // Draw centers
-            foreach (var (i, cont1) in cset.IterateContours())
+            foreach (var (_, cont1) in cset.IterateContours())
             {
                 var pos1 = cont1.GetContourCenter(orig, cs, ch);
 
-                foreach (var (j, v) in cont1.IterateVertices())
+                foreach (var (_, v) in cont1.IterateVertices())
                 {
                     var r = (int)(uint)v.Flag;
 

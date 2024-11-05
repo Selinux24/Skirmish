@@ -222,7 +222,7 @@ namespace Engine.Collections.Helpers
 
             foreach (var child in node.Children)
             {
-                var inBox = Intersection.RayIntersectsBox(ray, child.BoundingBox, out float d);
+                var inBox = Intersection.RayIntersectsBox(ray, child.BoundingBox, out _);
                 if (!inBox)
                 {
                     continue;

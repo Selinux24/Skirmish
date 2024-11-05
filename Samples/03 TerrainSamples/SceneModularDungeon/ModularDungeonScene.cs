@@ -904,7 +904,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(i => Camera.Frustum.Contains(i.Instance.GetBoundingBox()) != ContainmentType.Disjoint)
                 .Where(i =>
                 {
-                    if (i.Instance.PickNearest(ray, out var res))
+                    if (i.Instance.PickNearest(ray, out _))
                     {
                         return true;
                     }

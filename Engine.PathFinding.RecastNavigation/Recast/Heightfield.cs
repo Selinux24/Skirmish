@@ -138,7 +138,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             int spanCount = 0;
 
-            foreach (var (x, y, s) in IterateSpansWithNexts())
+            foreach (var (_, _, s) in IterateSpansWithNexts())
             {
                 // Skip non walkable spans.
                 if (s.Area == AreaTypes.RC_NULL_AREA)

@@ -211,7 +211,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, NULL_IDX);
 
-            foreach (var (i, cont) in cset.IterateContours())
+            foreach (var (_, cont) in cset.IterateContours())
             {
                 // Skip null contours.
                 int nverts = cont.GetVertexCount();
