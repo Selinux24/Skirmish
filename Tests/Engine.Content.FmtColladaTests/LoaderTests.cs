@@ -15,7 +15,7 @@ namespace Engine.Content.FmtColladaTests
     [TestClass()]
     public class LoaderTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         private const float tolerance = MathUtil.ZeroTolerance;
 
@@ -37,14 +37,12 @@ namespace Engine.Content.FmtColladaTests
         public static void ClassInitialize(TestContext context)
         {
             GameResourceManager.RegisterLoader<LoaderCollada>();
-
-            _testContext = context;
         }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         public struct LoadWithPartsParams
@@ -121,7 +119,7 @@ namespace Engine.Content.FmtColladaTests
             var points1 = res[treeMeshName][treeBarkName].GetPoints();
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = [.. points1, .. points2];
-            var bounds = BoundingSphere.FromPoints(points.Distinct().ToArray());
+            var bounds = BoundingSphere.FromPoints([.. points.Distinct()]);
             bounds = bounds.SetTransform(Matrix.Scaling(2) * Matrix.RotationYawPitchRoll(1, 0, 0) * Matrix.Translation(10, 10, 10));
             Assert.AreEqual(sph, bounds);
         }

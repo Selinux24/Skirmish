@@ -44,9 +44,9 @@ namespace EngineTests.UI
             Assert.IsTrue(spacing1 == spacing2);
             Assert.IsTrue(spacing1 != spacing3);
             Assert.IsTrue(spacing1.Equals(spacing2));
-            Assert.IsTrue(!spacing1.Equals(spacing3));
+            Assert.IsFalse(spacing1.Equals(spacing3));
             Assert.IsTrue(spacing1.Equals(obj2));
-            Assert.IsTrue(!spacing1.Equals(obj3));
+            Assert.IsFalse(spacing1.Equals(obj3));
         }
 
         [TestMethod]

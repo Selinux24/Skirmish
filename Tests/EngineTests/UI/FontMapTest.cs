@@ -13,7 +13,7 @@ namespace EngineTests.UI
     [TestClass()]
     public class FontMapTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         const string p1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed elementum massa, ac porta nibh. Nullam bibendum id orci ut sollicitudin. Maecenas at augue venenatis, sollicitudin dui ac, pulvinar lacus. Fusce quis metus vitae lorem feugiat porttitor. Aliquam finibus nunc vel facilisis placerat. Duis molestie dignissim condimentum. Integer suscipit finibus dolor ac volutpat. Donec iaculis arcu ac erat tincidunt, non venenatis ligula pulvinar.";
         const string p2 = "Phasellus vulputate, ligula vel congue feugiat, risus mi maximus elit, nec elementum ligula est ac felis. Sed bibendum vel sem sed lobortis. Etiam magna tortor, sollicitudin non nisi sollicitudin, condimentum gravida ligula. Sed et massa ac libero gravida porta vitae a risus. Nulla facilisi. Phasellus nec bibendum odio, pulvinar consectetur est. Curabitur in dolor vitae risus laoreet mattis. Phasellus malesuada eget nulla sit amet maximus. Fusce egestas nulla nunc, ut volutpat quam auctor varius. Nullam ultrices ultrices feugiat.";
@@ -34,16 +34,10 @@ namespace EngineTests.UI
         const string fontMapResource = "Font.txt";
         static FontMap<VertexFont> fontMapped;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             WindowsExtensions.Startup();
 
@@ -168,7 +162,7 @@ I'm the next line";
             Assert.AreEqual(0, desc.Vertices[index].Position.X);
 
             var size = desc.GetSize();
-            Assert.IsTrue(size.X <= 500 + font.GetSpaceSize().X);
+            Assert.IsLessThanOrEqualTo(500 + font.GetSpaceSize().X, size.X);
         }
         [TestMethod()]
         public void MapSentenceMappedInRectTest()

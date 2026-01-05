@@ -12,7 +12,7 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class ContactDetectorHalfSpaceAndSphereTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
@@ -35,16 +35,10 @@ namespace Engine.PhysicsTests
             return sphere;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         public struct HalfSpaceAndSphereData

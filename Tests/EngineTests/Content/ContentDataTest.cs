@@ -14,7 +14,7 @@ namespace EngineTests.Content
     [TestClass()]
     public class ContentDataTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoundingBox cubeBig;
         static BoundingBox cubeMedium;
@@ -23,8 +23,6 @@ namespace EngineTests.Content
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             Vector3 vBig = Vector3.One * 2f;
             Vector3 vMedium = Vector3.One;
             Vector3 vSmall = Vector3.One * 0.5f;
@@ -36,7 +34,7 @@ namespace EngineTests.Content
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -56,7 +54,7 @@ namespace EngineTests.Content
 
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points = res["default"].First().Value.GetPoints();
-            var bounds = BoundingBox.FromPoints(points.ToArray());
+            var bounds = BoundingBox.FromPoints([.. points]);
 
             Assert.AreEqual(cubeMedium, bounds);
         }
@@ -89,8 +87,8 @@ namespace EngineTests.Content
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points1 = res["default"]["defaultMat1"].GetPoints();
             var points2 = res["default"]["defaultMat2"].GetPoints();
-            var bounds1 = BoundingBox.FromPoints(points1.ToArray());
-            var bounds2 = BoundingBox.FromPoints(points2.ToArray());
+            var bounds1 = BoundingBox.FromPoints([.. points1]);
+            var bounds2 = BoundingBox.FromPoints([.. points2]);
 
             Assert.AreEqual(cubeBig, bounds1);
             Assert.AreEqual(cubeSmall, bounds2);
@@ -99,7 +97,7 @@ namespace EngineTests.Content
             Assert.IsNotNull(dd);
 
             var points = dd.GetPoints();
-            var bounds = BoundingBox.FromPoints(points.ToArray());
+            var bounds = BoundingBox.FromPoints([.. points]);
             Assert.AreEqual(cubeBig, bounds);
         }
     }

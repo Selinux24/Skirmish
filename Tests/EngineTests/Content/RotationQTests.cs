@@ -11,7 +11,7 @@ namespace EngineTests.Content
     [TestClass()]
     public class RotationQTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static RotationQ rotarion0 = RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(0));
         static RotationQ rotarion33 = RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(33));
@@ -19,15 +19,10 @@ namespace EngineTests.Content
 
         static readonly string rotationString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", 0.1f, 0.2f, 0.3f, 0.4f);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -68,10 +63,10 @@ namespace EngineTests.Content
         [TestMethod()]
         public void RotationBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new RotationQ(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3, 4, 5]));
+            Assert.Throws<ArgumentNullException>(() => new RotationQ(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void RotationComponentsTest()

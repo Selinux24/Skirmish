@@ -12,7 +12,7 @@ namespace EngineTests.Common
     [TestClass()]
     public class IntersectionTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoundingSphere sph1;
         static BoundingSphere sph2;
@@ -92,8 +92,6 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             sph1 = new BoundingSphere(Vector3.Zero, 1f);
             sph2 = new BoundingSphere(Vector3.Zero, 30f);
             sph3 = new BoundingSphere(Vector3.Zero, 0.5f);
@@ -183,7 +181,7 @@ namespace EngineTests.Common
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -2748,7 +2746,7 @@ namespace EngineTests.Common
             Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
-        [DataTestMethod()]
+        [TestMethod()]
         [DataRow(0f, 1f, false)]
         [DataRow(0f, 0.5f, false)]
         [DataRow(0f, 0f, true)]

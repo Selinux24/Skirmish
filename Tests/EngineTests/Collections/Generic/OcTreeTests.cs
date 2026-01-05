@@ -12,18 +12,12 @@ namespace EngineTests.Collections.Generic
     [TestClass]
     public class OcTreeTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         private static (ICullingVolume Box, Vector3 Obj) GenerateItem(Vector3 position, float size)

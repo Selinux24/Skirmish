@@ -11,19 +11,14 @@ namespace EngineTests.Content
     [TestClass()]
     public class Position3Tests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly string positionString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", 0.1f, 0.2f, 0.3f);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -50,9 +45,9 @@ namespace EngineTests.Content
         [TestMethod()]
         public void PositionBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Position3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Position3([1, 2, 3, 4]));
+            Assert.Throws<ArgumentNullException>(() => new Position3(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Position3([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Position3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void PositionComponentsTest()

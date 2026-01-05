@@ -11,7 +11,7 @@ namespace EngineTests
     [TestClass()]
     public class TriangleTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly float third = 1f / 3f;
         static readonly float delta = 0.0001f;
@@ -42,16 +42,10 @@ namespace EngineTests
         static Vector3 c2 = Vector3.Multiply(p1r2 + p2r2 + p3r2, third);
         static readonly float r2 = Vector3.Distance(c2, p1r2);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

@@ -12,7 +12,7 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class GJKTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoxCollider BoxFromExtents(Vector3 extents, Matrix transform)
         {
@@ -40,16 +40,10 @@ namespace Engine.PhysicsTests
             return collider;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

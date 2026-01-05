@@ -13,7 +13,7 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class ContactDetectorBoxAndTriangleSoupTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
@@ -43,16 +43,10 @@ namespace Engine.PhysicsTests
             return ctri;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         public class BoxAndTriangleSoupData

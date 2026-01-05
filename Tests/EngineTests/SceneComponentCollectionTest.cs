@@ -11,7 +11,7 @@ namespace EngineTests
     [TestClass()]
     public class SceneComponentCollectionTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Mock<ISceneObject> obj1;
         static Mock<ISceneObject> obj1b;
@@ -55,8 +55,6 @@ namespace EngineTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             obj1 = Setup("obj1");
             obj1b = Setup("obj1");
             obj2 = Setup("obj2");
@@ -161,7 +159,7 @@ namespace EngineTests
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -208,7 +206,7 @@ namespace EngineTests
         {
             var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
-            Assert.ThrowsException<EngineException>(() => coll.AddComponent(obj1b.Object, SceneObjectUsages.None, 0));
+            Assert.Throws<EngineException>(() => coll.AddComponent(obj1b.Object, SceneObjectUsages.None, 0));
 
             Assert.AreEqual(1, coll.Count);
 
@@ -317,7 +315,7 @@ namespace EngineTests
 
             var components = coll.Get()?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(5, components.Length);
+            Assert.HasCount(5, components);
         }
         [TestMethod()]
         public void SceneComponentCollectionGetUsageTest()
@@ -333,12 +331,12 @@ namespace EngineTests
 
             var components = coll.Get(SceneObjectUsages.Ground)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(1, components.Length);
+            Assert.HasCount(1, components);
             Assert.AreEqual(objUsageGround.Object, components[0]);
 
             components = coll.Get(SceneObjectUsages.None)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(5, components.Length);
+            Assert.HasCount(5, components);
         }
         [TestMethod()]
         public void SceneComponentCollectionGetPredicateTest()
@@ -354,9 +352,9 @@ namespace EngineTests
 
             var components = coll.Get(c => c.Id != "objUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(4, components.Length);
+            Assert.HasCount(4, components);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get((Func<ISceneObject, bool>)null));
+            Assert.Throws<ArgumentNullException>(() => coll.Get((Func<ISceneObject, bool>)null));
         }
         [TestMethod()]
         public void SceneComponentCollectionGetUsagePredicateTest()
@@ -372,18 +370,18 @@ namespace EngineTests
 
             var components = coll.Get(SceneObjectUsages.Ground, c => c.Id != "objUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(1, components.Length);
+            Assert.HasCount(1, components);
             Assert.AreEqual(objUsageGround.Object, components[0]);
 
             components = coll.Get(SceneObjectUsages.None, c => c.Id != "objUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(4, components.Length);
+            Assert.HasCount(4, components);
 
             components = coll.Get(SceneObjectUsages.Ground, c => c.Id == "objUsageAgent")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(0, components.Length);
+            Assert.IsEmpty(components);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get(SceneObjectUsages.None, (Func<ISceneObject, bool>)null));
+            Assert.Throws<ArgumentNullException>(() => coll.Get(SceneObjectUsages.None, (Func<ISceneObject, bool>)null));
         }
 
         [TestMethod()]
@@ -438,7 +436,7 @@ namespace EngineTests
             Assert.IsNotNull(component);
             Assert.AreEqual(objUsageAgent.Object, component);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.First(null));
+            Assert.Throws<ArgumentNullException>(() => coll.First(null));
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstUsagePredicateTest()
@@ -463,7 +461,7 @@ namespace EngineTests
             component = coll.First(SceneObjectUsages.Ground, c => c.Id == "objUsageAgent");
             Assert.IsNull(component);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.First(SceneObjectUsages.None, null));
+            Assert.Throws<ArgumentNullException>(() => coll.First(SceneObjectUsages.None, null));
         }
 
         [TestMethod()]
@@ -480,7 +478,7 @@ namespace EngineTests
 
             var components = coll.Get<IMockModel>()?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(5, components.Length);
+            Assert.HasCount(5, components);
         }
         [TestMethod()]
         public void SceneComponentCollectionGetGenericUsageTest()
@@ -496,12 +494,12 @@ namespace EngineTests
 
             var components = coll.Get<IMockModel>(SceneObjectUsages.Ground)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(1, components.Length);
+            Assert.HasCount(1, components);
             Assert.AreEqual(mdlUsageGround.Object, components[0]);
 
             components = coll.Get<IMockModel>(SceneObjectUsages.None)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(5, components.Length);
+            Assert.HasCount(5, components);
         }
         [TestMethod()]
         public void SceneComponentCollectionGetGenericPredicateTest()
@@ -517,9 +515,9 @@ namespace EngineTests
 
             var components = coll.Get<IMockModel>(c => c.Id != "mdlUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(4, components.Length);
+            Assert.HasCount(4, components);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get<IMockModel>(null));
+            Assert.Throws<ArgumentNullException>(() => coll.Get<IMockModel>(null));
         }
         [TestMethod()]
         public void SceneComponentCollectionGetGenericUsagePredicateTest()
@@ -535,18 +533,18 @@ namespace EngineTests
 
             var components = coll.Get<IMockModel>(SceneObjectUsages.Ground, c => c.Id != "mdlUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(1, components.Length);
+            Assert.HasCount(1, components);
             Assert.AreEqual(mdlUsageGround.Object, components[0]);
 
             components = coll.Get<IMockModel>(SceneObjectUsages.None, c => c.Id != "mdlUsageNone")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(4, components.Length);
+            Assert.HasCount(4, components);
 
             components = coll.Get<IMockModel>(SceneObjectUsages.Ground, c => c.Id == "mdlUsageAgent")?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(0, components.Length);
+            Assert.IsEmpty(components);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get<IMockModel>(SceneObjectUsages.None, null));
+            Assert.Throws<ArgumentNullException>(() => coll.Get<IMockModel>(SceneObjectUsages.None, null));
         }
 
         [TestMethod()]
@@ -601,7 +599,7 @@ namespace EngineTests
             Assert.IsNotNull(component);
             Assert.AreEqual(mdlUsageAgent.Object, component);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.First<IMockModel>(null));
+            Assert.Throws<ArgumentNullException>(() => coll.First<IMockModel>(null));
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericUsagePredicateTest()
@@ -626,7 +624,7 @@ namespace EngineTests
             component = coll.First<IMockModel>(SceneObjectUsages.Ground, c => c.Id == "mdlUsageAgent");
             Assert.IsNull(component);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.First<IMockModel>(SceneObjectUsages.None, null));
+            Assert.Throws<ArgumentNullException>(() => coll.First<IMockModel>(SceneObjectUsages.None, null));
         }
 
 
@@ -676,11 +674,11 @@ namespace EngineTests
 
             var components = coll.ByOwner(mdlUsageNone.Object)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(4, components.Length);
+            Assert.HasCount(4, components);
 
             components = coll.ByOwner(null)?.ToArray();
             Assert.IsNotNull(components);
-            Assert.AreEqual(0, components.Length);
+            Assert.IsEmpty(components);
         }
 
         [TestMethod()]

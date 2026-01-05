@@ -13,7 +13,7 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class ContactDetectorBoxAndBoxTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
@@ -33,16 +33,10 @@ namespace Engine.PhysicsTests
             return box;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -68,10 +62,10 @@ namespace Engine.PhysicsTests
             Assert.IsTrue(intersectionWith3);
 
             var contactsWith2 = data2.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith2.Length != 0);
+            Assert.IsNotEmpty(contactsWith2);
 
             var contactsWith3 = data3.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith3.Length != 0);
+            Assert.IsNotEmpty(contactsWith3);
 
             var pointInBox2 = Intersection.ClosestPointInBox(contactsWith2[0].Position, box1.OrientedBoundingBox);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);

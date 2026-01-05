@@ -10,19 +10,14 @@ namespace EngineTests.Content
     [TestClass()]
     public class Matrix4x4Tests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly float[] matrixValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -102,9 +97,9 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Matrix4X4(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Matrix4X4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
+            Assert.Throws<ArgumentNullException>(() => new Matrix4X4(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Matrix4X4([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Matrix4X4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
         }
 
         [TestMethod()]

@@ -11,19 +11,14 @@ namespace EngineTests.Content
     [TestClass()]
     public class Direction3Tests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly string directionString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", 0.1f, 0.2f, 0.3f);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -107,9 +102,9 @@ namespace EngineTests.Content
         [TestMethod()]
         public void DirectionBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Direction3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction3([1, 2, 3, 4]));
+            Assert.Throws<ArgumentNullException>(() => new Direction3(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Direction3([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Direction3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void DirectionComponentsTest()

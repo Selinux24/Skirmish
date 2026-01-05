@@ -13,21 +13,19 @@ namespace Engine.ModularSceneryTests
     [TestClass()]
     public class ModularSceneryDescriptionTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
             GameResourceManager.RegisterLoader<LoaderCollada>();
             GameResourceManager.RegisterLoader<LoaderObj>();
-
-            _testContext = context;
         }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

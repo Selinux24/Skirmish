@@ -14,7 +14,7 @@ namespace EngineTests.Common
     [TestClass()]
     public class RayPickingHelperTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Mock<IRayPickable<Triangle>> mockQuad1;
         static Mock<IRayPickable<Triangle>> mockQuad2;
@@ -52,8 +52,6 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             var ray = new Ray(Vector3.Zero, Vector3.ForwardLH);
             var rayReverse = new Ray(Vector3.ForwardLH * 4, Vector3.BackwardLH);
             var rayNoContact = new Ray(Vector3.Zero, Vector3.BackwardLH);
@@ -122,7 +120,7 @@ namespace EngineTests.Common
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

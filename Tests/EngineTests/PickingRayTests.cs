@@ -10,7 +10,7 @@ namespace EngineTests
     [TestClass()]
     public class PickingRayTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Vector3 position;
         static Vector3 direction;
@@ -24,8 +24,6 @@ namespace EngineTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             position = Vector3.One;
             direction = Vector3.Normalize(Vector3.One);
             testRay = new Ray(position, direction);
@@ -41,7 +39,7 @@ namespace EngineTests
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

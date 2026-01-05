@@ -15,7 +15,7 @@ namespace EngineTests.Collections.Generic
     [TestClass]
     public class PickingQuadTreeTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Triangle[] mesh;
 
@@ -32,16 +32,10 @@ namespace EngineTests.Collections.Generic
         static float t1PickingDistance0;
         static float t1PickingDistance1;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
             var tris = Triangle.ComputeTriangleList(geom.Vertices, geom.Indices);
@@ -99,7 +93,7 @@ namespace EngineTests.Collections.Generic
             var children = q.Root.Children.ToArray();
             Assert.IsNotNull(children);
 
-            Assert.AreEqual(4, children.Length);
+            Assert.HasCount(4, children);
             Assert.IsNotNull(children[0]);
             Assert.IsNotNull(children[1]);
             Assert.IsNotNull(children[2]);
@@ -266,14 +260,14 @@ namespace EngineTests.Collections.Generic
 
             var children = q.Root.Children.ToArray();
 
-            Assert.IsTrue(bbox.Contains(children[0].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[1].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[2].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[3].BoundingBox) == ContainmentType.Contains);
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[0].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[1].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[2].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[3].BoundingBox));
 
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[1].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[2].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[3].BoundingBox) != ContainmentType.Contains);
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[1].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[2].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[3].BoundingBox));
 
             Assert.AreEqual(topLeft, q.Root.TopLeftChild.BoundingBox.Center);
             Assert.AreEqual(topRight, q.Root.TopRightChild.BoundingBox.Center);
@@ -348,7 +342,7 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(2);
             PickingQuadTree<Triangle> q = new([], options);
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(16, nodes.Length);
+            Assert.HasCount(16, nodes);
 
             PickingQuadTreeNode<Triangle>[] lNodes =
             [
@@ -449,7 +443,7 @@ namespace EngineTests.Collections.Generic
             PickingQuadTree<Triangle> q = new(mesh, options);
 
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(4, nodes.Length);
+            Assert.HasCount(4, nodes);
 
             Assert.AreEqual(18, nodes[0].Items.Count());
             Assert.AreEqual(12, nodes[1].Items.Count());

@@ -15,7 +15,7 @@ namespace Engine.PathFindingTests
     [TestClass()]
     public class PathFinderDescriptionTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static GraphAgentType agentDefault;
         static GraphAgentType agentInclined;
@@ -33,8 +33,6 @@ namespace Engine.PathFindingTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             float hZero = 0;
             float hOne = 5;
             float hTwo = 10;
@@ -65,7 +63,7 @@ namespace Engine.PathFindingTests
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]

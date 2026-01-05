@@ -10,18 +10,12 @@ namespace EngineTests.UI
     [TestClass]
     public class FontMapParserTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod]
@@ -37,9 +31,9 @@ namespace EngineTests.UI
 
             // Assert
             Assert.AreEqual(string.Empty, result.Text);
-            Assert.AreEqual(0, result.Parts.Length);
-            Assert.AreEqual(0, result.Colors.Length);
-            Assert.AreEqual(0, result.ShadowColors.Length);
+            Assert.IsEmpty(result.Parts);
+            Assert.IsEmpty(result.Colors);
+            Assert.IsEmpty(result.ShadowColors);
         }
         [TestMethod]
         public void ParseSentenceTest()
@@ -54,9 +48,9 @@ namespace EngineTests.UI
 
             // Assert
             Assert.AreEqual(text, result.Text);
-            Assert.AreEqual(7, result.Parts.Length);
-            Assert.AreEqual(7, result.Colors.Length);
-            Assert.AreEqual(7, result.ShadowColors.Length);
+            Assert.HasCount(7, result.Parts);
+            Assert.HasCount(7, result.Colors);
+            Assert.HasCount(7, result.ShadowColors);
             Assert.AreEqual("Hello", result.GetPart(0).Text);
             Assert.AreEqual(" ", result.GetPart(1).Text);
             Assert.AreEqual("I'm", result.GetPart(2).Text);
@@ -78,13 +72,13 @@ namespace EngineTests.UI
 
             // Assert
             Assert.AreEqual("Hello", result.Text);
-            Assert.AreEqual(1, result.Parts.Length);
+            Assert.HasCount(1, result.Parts);
 
-            Assert.AreEqual(1, result.Colors.Length);
-            Assert.AreEqual(5, result.Colors[0].Length);
+            Assert.HasCount(1, result.Colors);
+            Assert.HasCount(5, result.Colors[0]);
             CollectionAssert.AreEquivalent(new Color4[] { Color.Red, Color.White, Color.White, Color.White, Color.White }, result.Colors[0]);
-            Assert.AreEqual(1, result.ShadowColors.Length);
-            Assert.AreEqual(5, result.ShadowColors[0].Length);
+            Assert.HasCount(1, result.ShadowColors);
+            Assert.HasCount(5, result.ShadowColors[0]);
             CollectionAssert.AreEquivalent(new Color4[] { Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent }, result.ShadowColors[0]);
 
             var part = result.GetPart(0);

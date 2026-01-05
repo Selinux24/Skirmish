@@ -10,18 +10,12 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class ContactResolverTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -30,8 +24,8 @@ namespace Engine.PhysicsTests
             var settings = new ContactResolverSettings();
             var resolver = new ContactResolver(settings);
 
-            Assert.IsTrue(resolver.ContactCount == 0);
-            Assert.IsTrue(resolver.ContactsLeft > 0);
+            Assert.AreEqual(0, resolver.ContactCount);
+            Assert.IsGreaterThan(0, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
         }
 
@@ -46,8 +40,8 @@ namespace Engine.PhysicsTests
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
             resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
-            Assert.IsTrue(resolver.ContactCount == count + 1);
-            Assert.IsTrue(resolver.ContactsLeft == left - 1);
+            Assert.AreEqual(count + 1, resolver.ContactCount);
+            Assert.AreEqual(left - 1, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
         }
 
@@ -62,13 +56,13 @@ namespace Engine.PhysicsTests
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
             resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
-            Assert.IsTrue(resolver.ContactCount == count + 1);
-            Assert.IsTrue(resolver.ContactsLeft == left - 1);
+            Assert.AreEqual(count + 1, resolver.ContactCount);
+            Assert.AreEqual(left - 1, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
 
             resolver.Reset();
-            Assert.IsTrue(resolver.ContactCount == 0);
-            Assert.IsTrue(resolver.ContactsLeft > 0);
+            Assert.AreEqual(0, resolver.ContactCount);
+            Assert.IsGreaterThan(0, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
         }
 
@@ -85,13 +79,13 @@ namespace Engine.PhysicsTests
             {
                 resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
             }
-            Assert.IsTrue(resolver.ContactCount == left);
-            Assert.IsTrue(resolver.ContactsLeft == 0);
+            Assert.AreEqual(left, resolver.ContactCount);
+            Assert.AreEqual(0, resolver.ContactsLeft);
             Assert.IsFalse(resolver.HasFreeContacts());
 
             resolver.Reset();
-            Assert.IsTrue(resolver.ContactCount == 0);
-            Assert.IsTrue(resolver.ContactsLeft > 0);
+            Assert.AreEqual(0, resolver.ContactCount);
+            Assert.IsGreaterThan(0, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
         }
 
@@ -137,8 +131,8 @@ namespace Engine.PhysicsTests
             resolver.AddContact(r1, r2, pos, norm, pen);
             resolver.Resolve(time);
 
-            Assert.IsTrue(r1.Position.Y < 0);
-            Assert.IsTrue(r2.Position.Y > 1);
+            Assert.IsLessThan(0, r1.Position.Y);
+            Assert.IsGreaterThan(1, r2.Position.Y);
         }
     }
 }

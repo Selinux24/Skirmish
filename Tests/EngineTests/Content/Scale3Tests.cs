@@ -11,7 +11,7 @@ namespace EngineTests.Content
     [TestClass()]
     public class Scale3Tests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly float scale1by5 = 1f / 5f;
         static readonly float scale1by4 = 1f / 4f;
@@ -20,15 +20,10 @@ namespace EngineTests.Content
 
         static readonly string scaleString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", 0.1f, 0.2f, 0.3f);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -62,9 +57,9 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ScaleBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Scale3(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Scale3([1, 2, 3, 4]));
+            Assert.Throws<ArgumentNullException>(() => new Scale3(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Scale3([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Scale3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void ScaleComponentsTest()

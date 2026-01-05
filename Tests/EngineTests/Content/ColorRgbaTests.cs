@@ -11,20 +11,15 @@ namespace EngineTests.Content
     [TestClass()]
     public class ColorRgbaTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly string colorString3 = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", 0.1f, 0.2f, 0.3f);
         static readonly string colorString4 = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", 0.1f, 0.2f, 0.3f, 0.4f);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -65,10 +60,10 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ColorBadArrayTest()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new ColorRgba(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3]));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3, 4, 5]));
+            Assert.Throws<ArgumentNullException>(() => new ColorRgba(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ColorRgba([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ColorRgba([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void ColorComponentsTest()

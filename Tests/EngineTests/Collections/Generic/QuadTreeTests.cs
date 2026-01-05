@@ -13,7 +13,7 @@ namespace EngineTests.Collections.Generic
     [TestClass]
     public class QuadTreeTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoundingBox tenBox;
         static (BoundingBox, int)[] items;
@@ -26,16 +26,10 @@ namespace EngineTests.Collections.Generic
         static Vector3 bottomLeft;
         static Vector3 bottomRight;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             Vector3 min = new(-10, -10, -10);
             Vector3 max = new(10, 10, 10);
@@ -78,7 +72,7 @@ namespace EngineTests.Collections.Generic
             var children = q.Root.Children.ToArray();
             Assert.IsNotNull(children);
 
-            Assert.AreEqual(4, children.Length);
+            Assert.HasCount(4, children);
             Assert.IsNotNull(children[0]);
             Assert.IsNotNull(children[1]);
             Assert.IsNotNull(children[2]);
@@ -236,14 +230,14 @@ namespace EngineTests.Collections.Generic
 
             var children = q.Root.Children.ToArray();
 
-            Assert.IsTrue(tenBox.Contains(children[0].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(tenBox.Contains(children[1].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(tenBox.Contains(children[2].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(tenBox.Contains(children[3].BoundingBox) == ContainmentType.Contains);
+            Assert.AreEqual(ContainmentType.Contains, tenBox.Contains(children[0].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, tenBox.Contains(children[1].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, tenBox.Contains(children[2].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, tenBox.Contains(children[3].BoundingBox));
 
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[1].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[2].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[3].BoundingBox) != ContainmentType.Contains);
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[1].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[2].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[3].BoundingBox));
 
             Assert.AreEqual(topLeft, q.Root.TopLeftChild.BoundingBox.Center);
             Assert.AreEqual(topRight, q.Root.BottomLeftChild.BoundingBox.Center);
@@ -318,7 +312,7 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(2);
             QuadTree<int> q = new(new(), [], options);
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(16, nodes.Length);
+            Assert.HasCount(16, nodes);
 
             QuadTreeNode<int>[] lNodes =
             [
@@ -419,7 +413,7 @@ namespace EngineTests.Collections.Generic
             QuadTree<int> q = new(tenBox, items, options);
 
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(4, nodes.Length);
+            Assert.HasCount(4, nodes);
 
             Assert.AreEqual(2, nodes[0].Items.Count());
             Assert.AreEqual(2, nodes[1].Items.Count());

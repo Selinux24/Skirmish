@@ -12,18 +12,12 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class CollisionPrimitiveTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -75,8 +69,8 @@ namespace Engine.PhysicsTests
         {
             var extents = Vector3.Up;
             var sourceBox = new BoundingBox(-extents, extents);
-            var sphere = SharpDXExtensions.BoundingSphereFromPoints(sourceBox.GetVertices().ToArray());
-            var obb = new OrientedBoundingBox(sourceBox.GetVertices().ToArray());
+            var sphere = SharpDXExtensions.BoundingSphereFromPoints([.. sourceBox.GetVertices()]);
+            var obb = new OrientedBoundingBox([.. sourceBox.GetVertices()]);
 
             var box = new BoxCollider(extents);
             Assert.AreEqual(box.Extents, extents);
@@ -109,7 +103,7 @@ namespace Engine.PhysicsTests
             float radius = 1f;
             var sourceSphere = new BoundingSphere(Vector3.Zero, radius);
             var box = BoundingBox.FromSphere(sourceSphere);
-            var obb = new OrientedBoundingBox(box.GetVertices().ToArray());
+            var obb = new OrientedBoundingBox([.. box.GetVertices()]);
 
             var sphere = new SphereCollider(radius);
             Assert.AreEqual(sphere.Radius, radius);
@@ -144,9 +138,9 @@ namespace Engine.PhysicsTests
             var t3 = new Triangle(Vector3.UnitX, -Vector3.UnitY, -Vector3.UnitZ);
             var t4 = new Triangle(Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ);
             Triangle[] allTris = [t1, t2, t3, t4];
-            Triangle[] distinctTris = allTris.Distinct().ToArray();
-            Vector3[] allPoints = allTris.SelectMany(t => t.GetVertices()).ToArray();
-            Vector3[] distinctPoints = allPoints.Distinct().ToArray();
+            Triangle[] distinctTris = [.. allTris.Distinct()];
+            Vector3[] allPoints = [.. allTris.SelectMany(t => t.GetVertices())];
+            Vector3[] distinctPoints = [.. allPoints.Distinct()];
             var sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
             var box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
             var obb = new OrientedBoundingBox(distinctPoints);
@@ -168,10 +162,10 @@ namespace Engine.PhysicsTests
 
             var trn = Matrix.Translation(Vector3.One);
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
-            allTris = allTris.Select(t => Triangle.Transform(t, trn)).ToArray();
-            distinctTris = allTris.Distinct().ToArray();
-            allPoints = allTris.SelectMany(t => t.GetVertices()).ToArray();
-            distinctPoints = allPoints.Distinct().ToArray();
+            allTris = [.. allTris.Select(t => Triangle.Transform(t, trn))];
+            distinctTris = [.. allTris.Distinct()];
+            allPoints = [.. allTris.SelectMany(t => t.GetVertices())];
+            distinctPoints = [.. allPoints.Distinct()];
             sphere = sphere.SetTransform(trn);
             box = box.SetTransform(trn);
             obb = obb.SetTransform(trn);
@@ -182,8 +176,8 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ConvexMeshCollider([]));
         }
 
         [TestMethod()]
@@ -195,7 +189,7 @@ namespace Engine.PhysicsTests
             box.Attach(body);
             Assert.AreEqual(box.RigidBody, body);
 
-            Assert.ThrowsException<ArgumentNullException>(() => box.Attach(null));
+            Assert.Throws<ArgumentNullException>(() => box.Attach(null));
         }
     }
 }

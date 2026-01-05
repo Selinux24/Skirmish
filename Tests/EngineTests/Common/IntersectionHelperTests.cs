@@ -13,7 +13,7 @@ namespace EngineTests.Common
     [TestClass()]
     public class IntersectionHelperTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoundingSphere bsph1;
         static BoundingSphere bsph2;
@@ -69,8 +69,6 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             bsph1 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 1f);
             bsph2 = new BoundingSphere(new Vector3(+1.0f, 0f, 0f), 1f);
             bsph3 = new BoundingSphere(new Vector3(+3.0f, 0f, 0f), 1f);
@@ -97,11 +95,11 @@ namespace EngineTests.Common
             box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Minimum, bbox5.Maximum);
 
 
-            tmesh1 = Triangle.ComputeTriangleList(box1).ToArray();
-            tmesh2 = Triangle.ComputeTriangleList(box2).ToArray();
-            tmesh3 = Triangle.ComputeTriangleList(box3).ToArray();
-            tmesh4 = Triangle.ComputeTriangleList(box4).ToArray();
-            tmesh5 = Triangle.ComputeTriangleList(box5).ToArray();
+            tmesh1 = [.. Triangle.ComputeTriangleList(box1)];
+            tmesh2 = [.. Triangle.ComputeTriangleList(box2)];
+            tmesh3 = [.. Triangle.ComputeTriangleList(box3)];
+            tmesh4 = [.. Triangle.ComputeTriangleList(box4)];
+            tmesh5 = [.. Triangle.ComputeTriangleList(box5)];
 
             mesh1 = new IntersectionVolumeMesh(tmesh1);
             mesh2 = new IntersectionVolumeMesh(tmesh2);
@@ -155,7 +153,7 @@ namespace EngineTests.Common
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -390,7 +388,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh([]); });
+            Assert.Throws<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh([]); });
         }
 
         [TestMethod()]
