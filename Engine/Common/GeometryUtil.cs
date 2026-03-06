@@ -28,16 +28,6 @@ namespace Engine.Common
         /// <summary>
         /// Generates a index for a triangle soup quad with the specified shape
         /// </summary>
-        /// <param name="bufferShape">Buffer shape</param>
-        /// <param name="triangles">Triangle count</param>
-        /// <returns>Returns the generated index list</returns>
-        public static IEnumerable<uint> GenerateIndices(IndexBufferShapes bufferShape, int triangles)
-        {
-            return GenerateIndices(LevelOfDetail.High, bufferShape, triangles);
-        }
-        /// <summary>
-        /// Generates a index for a triangle soup quad with the specified shape
-        /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
@@ -296,7 +286,36 @@ namespace Engine.Common
                 Vector3.Zero, rotation,
                 position);
         }
+        /// <summary>
+        /// Generate normals for a triangle list topology geometry
+        /// </summary>
+        /// <param name="positions">Positions</param>
+        /// <param name="indices">Triangle list indices</param>
+        public static Vector3[] GenerateNormals(Vector3[] positions, uint[] indices)
+        {
+            Vector3[] normals = new Vector3[positions.Length];
 
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                uint i0 = indices[i + 0];
+                uint i1 = indices[i + 1];
+                uint i2 = indices[i + 2];
+                var v0 = positions[i0];
+                var v1 = positions[i1];
+                var v2 = positions[i2];
+                var normal = Vector3.Normalize(Vector3.Cross(v1 - v0, v2 - v0));
+                normals[i0] += normal;
+                normals[i1] += normal;
+                normals[i2] += normal;
+            }
+
+            for (int i = 0; i < normals.Length; i++)
+            {
+                normals[i] = Vector3.Normalize(normals[i]);
+            }
+
+            return normals;
+        }
         /// <summary>
         /// Creates a new UV map from parameters
         /// </summary>
@@ -345,15 +364,6 @@ namespace Engine.Common
             return CreatePolygon(topology, corners, false);
         }
 
-        /// <summary>
-        /// Creates a screen
-        /// </summary>
-        /// <param name="form">Form</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(IEngineForm form)
-        {
-            return CreateScreen(form.RenderWidth, form.RenderHeight);
-        }
         /// <summary>
         /// Creates a screen
         /// </summary>
@@ -1197,9 +1207,12 @@ namespace Engine.Common
                 23,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1322,9 +1335,12 @@ namespace Engine.Common
                 indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
             }
 
+            var normals = GenerateNormals(vertices, [.. indexList]);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indexList,
             };
         }
@@ -1394,11 +1410,11 @@ namespace Engine.Common
 
             uint[] indices =
             [
-                0,1,2,
-                0,2,3,
+                0,2,1,
+                0,3,2,
 
-                4,6,5,
-                4,7,6,
+                4,5,6,
+                4,6,7,
 
                 3,6,2,
                 3,7,6,
@@ -1406,16 +1422,19 @@ namespace Engine.Common
                 0,1,5,
                 0,5,4,
 
-                2,1,5,
-                2,5,6,
+                2,5,1,
+                2,6,5,
 
-                0,3,7,
-                0,7,4,
+                0,7,3,
+                0,4,7,
             ];
+
+            var normals = GenerateNormals(vertices, indices);
 
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1513,9 +1532,12 @@ namespace Engine.Common
                 0, 3, 1,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1615,9 +1637,12 @@ namespace Engine.Common
                 5, 1, 4,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1751,9 +1776,12 @@ namespace Engine.Common
                 10,8,11,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1955,9 +1983,12 @@ namespace Engine.Common
                 19,11,17,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -2096,9 +2127,12 @@ namespace Engine.Common
                 3, 1, 4,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -2620,9 +2654,12 @@ namespace Engine.Common
                 indexList.Add((uint)i - 1);
             }
 
+            var normals = GenerateNormals(verts, [.. indexList]);
+
             return new GeometryDescriptor()
             {
                 Vertices = verts,
+                Normals = normals,
                 Indices = indexList,
             };
         }
@@ -2693,10 +2730,14 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw = true)
         {
+            var indices = CreateIndexesForTriangleList(vertices.Count(), ccw);
+            var normals = GenerateNormals([.. vertices], indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = CreateIndexesForTriangleList(vertices.Count(), ccw),
+                Normals = normals,
+                Indices = indices,
             };
         }
         /// <summary>
@@ -3057,11 +3098,13 @@ namespace Engine.Common
         /// <returns>Returns a normal descriptor</returns>
         public static NormalDescriptor ComputeNormal(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            var p = new Plane(p1, p2, p3);
+            var edge1 = p2 - p1;
+            var edge2 = p3 - p1;
+            var normal = Vector3.Normalize(Vector3.Cross(edge1, edge2));
 
             return new NormalDescriptor()
             {
-                Normal = p.Normal,
+                Normal = normal,
             };
         }
         /// <summary>

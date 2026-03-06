@@ -215,6 +215,26 @@ namespace Engine
 
             return CreateFromVertices(geometry);
         }
+        public static IEnumerable<Line3D> CreateTetrahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateTetrahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateOctahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateOctahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateIcosahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateIcosahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateDodecahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateDodecahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
         public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
             List<Line3D> lines = [];

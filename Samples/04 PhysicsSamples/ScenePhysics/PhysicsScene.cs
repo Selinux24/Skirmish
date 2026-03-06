@@ -10,6 +10,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -57,16 +58,27 @@ namespace PhysicsSamples.ScenePhysics
 
         private void InitializeComponents()
         {
+            Func<Task>[] tasks =
+            [
+                InitializeSpheres,
+                InitializeBoxes,
+                InitializeCones,
+                InitializeFrustums,
+                InitializeTetrahedrons,
+                InitializeOctahedrons,
+                InitializeIcosahedrons,
+                InitializeDodecaedrons,
+                InitializeCylinders,
+                InitializePyramids,
+                InitializeCapsules,
+            ];
+
             var group = LoadResourceGroup.FromTasks(
                 [
                     InitializeTexts,
                     InitializeLineDrawer,
                     InitializeTerrain,
-                    InitializeSpheres,
-                    InitializeBoxes,
-                    InitializeCylinders,
-                    InitializePyramids,
-                    InitializeCapsules,
+                    ..tasks,
                     InitializeJoint,
                     InitializeRod,
                 ],
@@ -115,237 +127,6 @@ namespace PhysicsSamples.ScenePhysics
             var pTerrain = new PhysicsTerrain(new RigidBody(rbState), terrain);
 
             simulator.AddPhysicsObject(pTerrain);
-        }
-        private async Task InitializeSpheres()
-        {
-            var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
-
-            int slices = 16;
-            int stacks = 16;
-            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 2f, slices, stacks);
-
-            var desc = new ModelDescription()
-            {
-                Content = ContentDescription.FromContentData(sphere, mat),
-                ColliderType = ColliderTypes.Spheric,
-            };
-
-            var sphere1Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
-            var sphere2Model = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
-
-            sphere1Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
-            sphere2Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
-
-            var rbState1 = new RigidBodyState
-            {
-                Mass = 20,
-                InitialTransform = Matrix.Translation(Vector3.Up * 10f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-            var rbState2 = new RigidBodyState
-            {
-                Mass = 10,
-                InitialTransform = Matrix.Translation(Vector3.Up * 15f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-
-            ColliderData sphere1 = new(rbState1, sphere1Model);
-            ColliderData sphere2 = new(rbState2, sphere2Model);
-
-            var wiredSphere = Line3D.CreateSphere(Vector3.Zero, 2f, slices * 2, stacks * 2);
-            sphere1.Lines = [.. wiredSphere];
-            sphere2.Lines = [.. wiredSphere];
-
-            colliders.Add(sphere1);
-            colliders.Add(sphere2);
-        }
-        private async Task InitializeBoxes()
-        {
-            var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
-
-            var box = GeometryUtil.CreateBox(Topology.TriangleList, 2f, 2f, 2f);
-
-            var desc = new ModelDescription()
-            {
-                Content = ContentDescription.FromContentData(box, mat),
-                ColliderType = ColliderTypes.Box,
-            };
-
-            var box1Model = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
-            var box2Model = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
-
-            box1Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
-            box2Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
-
-            var rbState1 = new RigidBodyState
-            {
-                Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * 20f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-            var rbState2 = new RigidBodyState
-            {
-                Mass = 10,
-                InitialTransform = Matrix.Translation(Vector3.Up * 25f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-
-            ColliderData box1 = new(rbState1, box1Model);
-            ColliderData box2 = new(rbState2, box2Model);
-
-            var wiredBox = Line3D.CreateBox(Vector3.Zero, 2f, 2f, 2f);
-            box1.Lines = [.. wiredBox];
-            box2.Lines = [.. wiredBox];
-
-            colliders.Add(box1);
-            colliders.Add(box2);
-        }
-        private async Task InitializeCylinders()
-        {
-            var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
-
-            float radius = 2f;
-            float height = 4f;
-            Vector3 center = Vector3.Zero;
-            int sliceCount = 16;
-            var cylinder = GeometryUtil.CreateCylinder(Topology.TriangleList, center, radius, height, sliceCount);
-
-            var desc = new ModelDescription()
-            {
-                Content = ContentDescription.FromContentData(cylinder, mat),
-                ColliderType = ColliderTypes.Cylinder,
-            };
-
-            var cylinder1Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
-            var cylinder2Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
-
-            cylinder1Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
-            cylinder2Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
-
-            var rbState1 = new RigidBodyState
-            {
-                Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * 30f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-            var rbState2 = new RigidBodyState
-            {
-                Mass = 10,
-                InitialTransform = Matrix.Translation(Vector3.Up * 35f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-
-            ColliderData cylinder1 = new(rbState1, cylinder1Model);
-            ColliderData cylinder2 = new(rbState2, cylinder2Model);
-
-            var wiredCylinder = Line3D.CreateCylinder(center, radius, height, sliceCount);
-            cylinder1.Lines = [.. wiredCylinder];
-            cylinder2.Lines = [.. wiredCylinder];
-
-            colliders.Add(cylinder1);
-            colliders.Add(cylinder2);
-        }
-        private async Task InitializeCapsules()
-        {
-            var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
-
-            float radius = 2f;
-            float height = 8f;
-            Vector3 center = Vector3.Zero;
-            int sliceCount = 16;
-            int stackCount = 8;
-            var capsule = GeometryUtil.CreateCapsule(Topology.TriangleList, center, radius, height, sliceCount, stackCount);
-
-            var desc = new ModelDescription()
-            {
-                Content = ContentDescription.FromContentData(capsule, mat),
-                ColliderType = ColliderTypes.Capsule,
-            };
-
-            var capsule1Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
-            var capsule2Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
-
-            capsule1Model.TintColor = Color4.AdjustSaturation(Color.Gray, 20f);
-            capsule2Model.TintColor = Color.SandyBrown;
-
-            var rbState1 = new RigidBodyState
-            {
-                Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * 40f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-            var rbState2 = new RigidBodyState
-            {
-                Mass = 10,
-                InitialTransform = Matrix.Translation(Vector3.Up * 45f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-
-            ColliderData capsule1 = new(rbState1, capsule1Model);
-            ColliderData capsule2 = new(rbState2, capsule2Model);
-
-            var wiredCapsule = Line3D.CreateCapsule(center, radius, height, sliceCount, stackCount);
-            capsule1.Lines = [.. wiredCapsule];
-            capsule2.Lines = [.. wiredCapsule];
-
-            colliders.Add(capsule1);
-            colliders.Add(capsule2);
-        }
-        private async Task InitializePyramids()
-        {
-            var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
-
-            var pyramid3d = GeometryUtil.CreatePyramid(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
-
-            var desc = new ModelDescription()
-            {
-                Content = ContentDescription.FromContentData(pyramid3d, mat),
-                ColliderType = ColliderTypes.Mesh,
-            };
-
-            var pyramid1Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
-            var pyramid2Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
-
-            pyramid1Model.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
-            pyramid2Model.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
-
-            var rbState1 = new RigidBodyState
-            {
-                Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * 40f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-            var rbState2 = new RigidBodyState
-            {
-                Mass = 10,
-                InitialTransform = Matrix.Translation(Vector3.Up * 45f),
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
-
-            ColliderData pyramid1 = new(rbState1, pyramid1Model);
-            ColliderData pyramid2 = new(rbState2, pyramid2Model);
-
-            var pyramid2d = Line3D.CreatePyramid(Vector3.Zero, 2f, 2f, 2f);
-            pyramid1.Lines = [.. pyramid2d];
-            pyramid2.Lines = [.. pyramid2d];
-
-            colliders.Add(pyramid1);
-            colliders.Add(pyramid2);
         }
         private async Task InitializeJoint()
         {
@@ -453,6 +234,141 @@ namespace PhysicsSamples.ScenePhysics
 
             contactGenerators.Add(rod);
         }
+
+        private async Task CreateCollider(string componentName, int index, ColliderTypes colliderType, GeometryDescriptor geo, IEnumerable<Line3D> wired)
+        {
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(geo, mat),
+                ColliderType = colliderType,
+            };
+
+            var model = await AddComponent<Model, ModelDescription>(componentName, componentName, desc);
+            model.TintColor = Helper.IntToCol(index * 10, 255);
+
+            var rbState = new RigidBodyState
+            {
+                Mass = 15,
+                InitialTransform = Matrix.Translation(Vector3.Up * (10f + (index * 2f))),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData collider = new(rbState, model)
+            {
+                Lines = wired
+            };
+
+            colliders.Add(collider);
+        }
+        private async Task InitializeSpheres()
+        {
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            int slices = 16;
+            int stacks = 16;
+            var geo = GeometryUtil.CreateSphere(Topology.TriangleList, 2f, slices, stacks);
+            var wired = Line3D.CreateSphere(Vector3.Zero, 2f, slices * 2, stacks * 2);
+
+            await CreateCollider("sphere1", 0, ColliderTypes.Spheric, geo, wired);
+            await CreateCollider("sphere2", 1, ColliderTypes.Spheric, geo, wired);
+        }
+        private async Task InitializeBoxes()
+        {
+            var geo = GeometryUtil.CreateBox(Topology.TriangleList, 2f, 2f, 2f);
+            var wired = Line3D.CreateBox(Vector3.Zero, 2f, 2f, 2f);
+
+            await CreateCollider("box1", 2, ColliderTypes.Box, geo, wired);
+            await CreateCollider("box2", 3, ColliderTypes.Box, geo, wired);
+        }
+        private async Task InitializeCones()
+        {
+            int slices = 16;
+            var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 1f, 2f, slices);
+            var wired = Line3D.CreateConeBaseRadius(1f, 2f, slices);
+
+            await CreateCollider("cone1", 4, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("cone2", 5, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeFrustums()
+        {
+            var bFrustum = BoundingFrustum.FromCamera(Vector3.Zero, Vector3.Down, Vector3.ForwardLH, MathUtil.PiOverFour, 2, 4, 1);
+            var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);
+            var wired = Line3D.CreateFrustum(bFrustum);
+
+            await CreateCollider("frustum1", 6, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("frustum2", 7, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeTetrahedrons()
+        {
+            var geo = GeometryUtil.CreateTetrahedron(Topology.TriangleList, Vector3.Zero, 2, 2, 2);
+            var wired = Line3D.CreateTetrahedron(Vector3.Zero, 2, 2, 2);
+
+            await CreateCollider("tetrahedron1", 8, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("tetrahedron2", 9, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeOctahedrons()
+        {
+            var geo = GeometryUtil.CreateOctahedron(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
+            var wired = Line3D.CreateOctahedron(Vector3.Zero, 2f, 2f, 2f);
+
+            await CreateCollider("octahedron1", 18, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("octahedron2", 19, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeIcosahedrons()
+        {
+            var geo = GeometryUtil.CreateIcosahedron(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
+            var wired = Line3D.CreateIcosahedron(Vector3.Zero, 2f, 2f, 2f);
+
+            await CreateCollider("icosahedron1", 20, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("icosahedron2", 21, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeDodecaedrons()
+        {
+            var geo = GeometryUtil.CreateDodecahedron(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
+            var wired = Line3D.CreateDodecahedron(Vector3.Zero, 2f, 2f, 2f);
+
+            await CreateCollider("dodecahedron1", 16, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("dodecahedron2", 17, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializePyramids()
+        {
+            var geo = GeometryUtil.CreatePyramid(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
+            var wired = Line3D.CreatePyramid(Vector3.Zero, 2f, 2f, 2f);
+
+            await CreateCollider("pyramid1", 14, ColliderTypes.Mesh, geo, wired);
+            await CreateCollider("pyramid2", 15, ColliderTypes.Mesh, geo, wired);
+        }
+        private async Task InitializeCylinders()
+        {
+            float radius = 2f;
+            float height = 4f;
+            Vector3 center = Vector3.Zero;
+            int sliceCount = 16;
+            var geo = GeometryUtil.CreateCylinder(Topology.TriangleList, center, radius, height, sliceCount);
+            var wired = Line3D.CreateCylinder(center, radius, height, sliceCount);
+
+            await CreateCollider("cylinder1", 10, ColliderTypes.Cylinder, geo, wired);
+            await CreateCollider("cylinder2", 11, ColliderTypes.Cylinder, geo, wired);
+        }
+        private async Task InitializeCapsules()
+        {
+            float radius = 2f;
+            float height = 8f;
+            Vector3 center = Vector3.Zero;
+            int sliceCount = 16;
+            int stackCount = 8;
+            var geo = GeometryUtil.CreateCapsule(Topology.TriangleList, center, radius, height, sliceCount, stackCount);
+            var wired = Line3D.CreateCapsule(center, radius, height, sliceCount, stackCount);
+
+            await CreateCollider("capsule1", 12, ColliderTypes.Capsule, geo, wired);
+            await CreateCollider("capsule2", 13, ColliderTypes.Capsule, geo, wired);
+        }
+
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
