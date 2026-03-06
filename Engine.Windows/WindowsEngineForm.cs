@@ -109,6 +109,7 @@ namespace Engine.Windows
         /// for <c>false</c> - <see cref="FormBorderStyle.FixedSingle"/>.
         /// </remarks>
         /// <value><c>true</c> if this form can be resized by the user (by default); otherwise, <c>false</c>.</value>
+        [DefaultValue(true)]
         public bool AllowUserResizing
         {
             get
@@ -132,6 +133,7 @@ namespace Engine.Windows
         /// If Toolkit is used, this property is set automatically,
         /// otherwise user should maintain it himself as it affects the behavior of <see cref="AllowUserResizing"/> property.
         /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsFullscreen { get; set; }
 
         /// <summary>
