@@ -68,9 +68,9 @@ namespace Engine.PathFinding.AStar
             float total = bbox.Size.X * bbox.Size.X / grid.Settings.NodeSize;
             int curr = 0;
 
-            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
+            for (float x = bbox.Minimum.X; x <= bbox.Maximum.X; x += grid.Settings.NodeSize)
             {
-                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.Settings.NodeSize)
+                for (float z = bbox.Minimum.Z; z <= bbox.Maximum.Z; z += grid.Settings.NodeSize)
                 {
                     GridCollisionInfo[] info;
 
