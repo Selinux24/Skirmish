@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Engine
 {
@@ -9,6 +8,11 @@ namespace Engine
     /// </summary>
     public class GameStatus
     {
+        /// <summary>
+        /// Status buffer
+        /// </summary>
+        private readonly List<string> readBuffer = new(32);
+
         /// <summary>
         /// Internal status dictionary
         /// </summary>
@@ -76,9 +80,14 @@ namespace Engine
         /// Reads the complete status into a string collection
         /// </summary>
         /// <returns>Returns a string collection with the complete status</returns>
-        public IEnumerable<string> ReadStatus()
+        public IReadOnlyList<string> ReadStatus()
         {
-            return status.Select((i) => $"{i.Key}: {i.Value:0.00}");
+            readBuffer.Clear();
+            foreach (var kvp in status)
+            {
+                readBuffer.Add($"{kvp.Key}: {kvp.Value:0.00}");
+            }
+            return readBuffer;
         }
         /// <summary>
         /// Copies the current game status

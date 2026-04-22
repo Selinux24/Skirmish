@@ -129,10 +129,16 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public void End()
+        public Task End()
         {
             actionCallback?.Invoke(taskResult);
-            funcCallback?.Invoke(taskResult);
+
+            if (funcCallback != null)
+            {
+                return funcCallback.Invoke(taskResult);
+            }
+
+            return Task.CompletedTask;
         }
     }
 
@@ -264,10 +270,16 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public void End()
+        public Task End()
         {
             actionCallback?.Invoke(taskResult);
-            funcCallback?.Invoke(taskResult);
+
+            if (funcCallback != null)
+            {
+                return funcCallback.Invoke(taskResult);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

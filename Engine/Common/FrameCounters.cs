@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Engine.Common
@@ -33,6 +32,18 @@ namespace Engine.Common
         /// Summary string builder
         /// </summary>
         private static readonly StringBuilder sb = new();
+        /// <summary>
+        /// Sorted counters list
+        /// </summary>
+        private static readonly List<PassCounters> sortedCounters = [];
+        /// <summary>
+        /// The size of the buffer, in bytes, used for data operations.
+        /// </summary>
+        private static long bufferBytes = 0;
+        /// <summary>
+        /// The number of elements allocated for the buffer.
+        /// </summary>
+        private static int bufferElements = 0;
 
         /// <summary>
         /// Counters summary
@@ -65,27 +76,15 @@ namespace Engine.Common
         /// Active buffers
         /// </summary>
         public static int Buffers { get; set; } = 0;
+        /// <summary>
+        /// Size of the buffer, in bytes, used for data operations.
+        /// </summary>
+        public static long BufferBytes { get; } = bufferBytes;
+        /// <summary>
+        /// Number of elements allocated for the buffer.
+        /// </summary>
+        public static int BufferElements { get; } = bufferElements;
 
-        /// <summary>
-        /// Total buffer bytes
-        /// </summary>
-        public static long BufferBytes
-        {
-            get
-            {
-                return gData.Values.OfType<ResourceStatus>().Sum(item => item.Size);
-            }
-        }
-        /// <summary>
-        /// Total buffer elements
-        /// </summary>
-        public static int BufferElements
-        {
-            get
-            {
-                return gData.Values.OfType<ResourceStatus>().Sum(item => item.Elements);
-            }
-        }
         /// <summary>
         /// Statistics keys
         /// </summary>
@@ -147,9 +146,15 @@ namespace Engine.Common
         public static void ClearAll()
         {
             Buffers = 0;
+            bufferBytes = 0;
+            bufferElements = 0;
+
             Textures = 0;
 
-            counters.ToList().ForEach(v => v.Value.Reset());
+            foreach (var v in counters.Values)
+            {
+                v.Reset();
+            }
 
             PickCounters.Reset();
 
@@ -164,7 +169,10 @@ namespace Engine.Common
         {
             SetSummary();
 
-            counters.ToList().ForEach(v => v.Value.Reset());
+            foreach (var v in counters.Values)
+            {
+                v.Reset();
+            }
 
             PickCounters.Reset();
 
@@ -172,6 +180,7 @@ namespace Engine.Common
             {
                 gData.TryRemove(key, out _);
             }
+
             gFrameDataKeys.Clear();
         }
 
@@ -250,6 +259,9 @@ namespace Engine.Common
             }
 
             c.Add(name, usage, binding, sizeInBytes, length);
+
+            bufferBytes += sizeInBytes;
+            bufferElements += length;
         }
         /// <summary>
         /// Buffer registration
@@ -273,6 +285,9 @@ namespace Engine.Common
             }
 
             c.Add(name, usage, binding, sizeInBytes, length);
+
+            bufferBytes += sizeInBytes;
+            bufferElements += length;
         }
 
         /// <summary>
@@ -281,10 +296,18 @@ namespace Engine.Common
         /// <returns></returns>
         private static void SetSummary()
         {
-            var counterList = counters.Select(c => c.Value).OrderBy(c => c.PassIndex).ToList();
+            sortedCounters.Clear();
+            foreach (var c in counters.Values)
+            {
+                sortedCounters.Add(c);
+            }
+            sortedCounters.Sort((a, b) => a.PassIndex.CompareTo(b.PassIndex));
 
             sb.Clear();
-            counterList.ForEach(c => sb.AppendLine(c.ToString()));
+            foreach (var c in sortedCounters)
+            {
+                sb.AppendLine(c.ToString());
+            }
             Summary = sb.ToString();
         }
     }

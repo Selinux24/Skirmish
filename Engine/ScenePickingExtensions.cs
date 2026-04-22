@@ -413,9 +413,9 @@ namespace Engine
         /// <param name="rayList">Picking ray list</param>
         /// <param name="usage">Component usage</param>
         /// <param name="callback">Result callback</param>
-        public static void PickFirstAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
+        public static Task PickFirstAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 var query = rayList
                     .AsParallel()
@@ -429,7 +429,7 @@ namespace Engine
 
                 callback(query.ToArray());
 
-            }).ConfigureAwait(false);
+            });
         }
         /// <summary>
         /// Gets all picking positions of the given ray list
@@ -439,9 +439,9 @@ namespace Engine
         /// <param name="rayList">Picking ray list</param>
         /// <param name="usage">Component usage</param>
         /// <param name="callback">Result callback</param>
-        public static void PickAllAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, IEnumerable<ScenePickingResultMultiple<T>>)>> callback) where T : IRayIntersectable
+        public static Task PickAllAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, IEnumerable<ScenePickingResultMultiple<T>>)>> callback) where T : IRayIntersectable
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 var query = rayList
                     .AsParallel()
@@ -454,8 +454,7 @@ namespace Engine
                     });
 
                 callback(query.ToArray());
-
-            }).ConfigureAwait(false);
+            });
         }
         /// <summary>
         /// Gets nearest picking position of the given ray list
@@ -465,9 +464,9 @@ namespace Engine
         /// <param name="rayList">Picking ray list</param>
         /// <param name="usage">Component usage</param>
         /// <param name="callback">Result callback</param>
-        public static void PickNearestAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
+        public static Task PickNearestAsync<T>(this Scene scene, IEnumerable<PickingRay> rayList, SceneObjectUsages usage, Action<IEnumerable<(bool, ScenePickingResult<T>)>> callback) where T : IRayIntersectable
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 var query = rayList
                     .AsParallel()
@@ -481,7 +480,7 @@ namespace Engine
 
                 callback(query.ToArray());
 
-            }).ConfigureAwait(false);
+            });
         }
     }
 }

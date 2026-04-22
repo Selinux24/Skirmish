@@ -514,11 +514,11 @@ namespace Engine.BuiltIn.Components.Foliage
                 .Where(p => !p.ReadyForDrawing && !p.Planting && !p.Planted)
                 .ToArray();
 
-            Parallel.For(0, toPlant.Length, (i) =>
+            Parallel.For(0, toPlant.Length, async (i) =>
             {
                 var p = toPlant[i];
 
-                p.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
+                await p.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
                 {
                     //Enqueue
                     callback?.Invoke(p);

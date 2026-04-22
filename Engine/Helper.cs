@@ -7,7 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Engine
 {
@@ -212,7 +212,7 @@ namespace Engine
                     retryCount--;
                 }
 
-                Task.Delay(delay).Wait();
+                Thread.Sleep(delay);
             }
             while (retryCount > 0);
 
@@ -260,7 +260,7 @@ namespace Engine
                     retryCount--;
                 }
 
-                Task.Delay(delay).Wait();
+                Thread.Sleep(delay);
             }
             while (retryCount > 0);
 
@@ -295,7 +295,7 @@ namespace Engine
                 res = func();
                 retry--;
 
-                Task.Delay(delay).Wait();
+                Thread.Sleep(delay);
             }
             while (retry > 0 && !res);
 

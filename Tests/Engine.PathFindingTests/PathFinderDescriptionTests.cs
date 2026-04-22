@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.PathFindingTests
 {
@@ -79,17 +80,15 @@ namespace Engine.PathFindingTests
         }
 
         [TestMethod()]
-        public void BuildAsyncTest()
+        public async Task BuildAsyncTest()
         {
             var mockSettings = new Mock<PathFinderSettings>();
-
             var mockInput = new Mock<PathFinderInput>([() => { return zeroPlaneTris; }]);
-
             var mockGraph = new Mock<IGraph>();
             mockInput.Setup(i => i.CreateGraphAsync(It.IsAny<PathFinderSettings>(), It.IsAny<AgentType[]>(), null)).ReturnsAsync(mockGraph.Object);
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object, [agentDefault]);
-            var res = pfDesc.BuildAsync().GetAwaiter().GetResult();
+            var res = await pfDesc.BuildAsync();
 
             Assert.IsNotNull(res);
         }

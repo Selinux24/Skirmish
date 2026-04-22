@@ -103,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxNodes">Maximum number of search nodes.</param>
         public NavMeshQuery(NavMesh nav, int maxNodes)
         {
-            ArgumentNullException.ThrowIfNull(nameof(nav));
+            ArgumentNullException.ThrowIfNull(nav);
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(maxNodes, 0);
 
             m_nav = nav;

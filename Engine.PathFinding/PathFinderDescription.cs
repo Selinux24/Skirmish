@@ -131,9 +131,9 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the generated graph</returns>
-        public async Task<IGraph> BuildAsync(Action<float> progressCallback = null)
+        public Task<IGraph> BuildAsync(Action<float> progressCallback = null)
         {
-            return await input.CreateGraphAsync(settings, agents, progressCallback);
+            return input.CreateGraphAsync(settings, agents, progressCallback);
         }
         /// <summary>
         /// Builds a graph from this settings
@@ -147,9 +147,9 @@ namespace Engine.PathFinding
         /// <summary>
         /// Refresh the graph input geometry
         /// </summary>
-        public async Task RefreshAsync()
+        public Task RefreshAsync()
         {
-            await input.RefreshAsync(settings);
+            return input.RefreshAsync(settings);
         }
         /// <summary>
         /// Refresh the graph input geometry
@@ -163,9 +163,9 @@ namespace Engine.PathFinding
         /// Gets the path finder hash
         /// </summary>
         /// <returns>Returns the path finder hash</returns>
-        public async Task<string> GetHashAsync()
+        public Task<string> GetHashAsync()
         {
-            return await input.GetHashAsync(settings);
+            return input.GetHashAsync(settings);
         }
         /// <summary>
         /// Gets the path finder hash
@@ -181,9 +181,9 @@ namespace Engine.PathFinding
         /// <param name="fileName">File name</param>
         /// <param name="hash">Source hash</param>
         /// <returns>Returns the loaded graph</returns>
-        public async Task<IGraph> LoadAsync(string fileName, string hash = null)
+        public Task<IGraph> LoadAsync(string fileName, string hash = null)
         {
-            return await input.LoadAsync(fileName, hash);
+            return input.LoadAsync(fileName, hash);
         }
         /// <summary>
         /// Loads the graph from a file

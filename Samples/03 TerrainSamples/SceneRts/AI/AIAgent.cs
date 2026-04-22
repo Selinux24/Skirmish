@@ -521,16 +521,23 @@ namespace TerrainSamples.SceneRts.AI
 
             var refineDelta = refine ? MathF.Max(speed * 0.1f, 0.25f) : 0f;
 
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
-
-                var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
-                if (path != null)
+                try
                 {
-                    path.RefinePath(refineDelta);
+                    Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
 
-                    FollowPath(path, speed);
+                    var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
+                    if (path != null)
+                    {
+                        path.RefinePath(refineDelta);
+
+                        FollowPath(path, speed);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"FindPathAsync failed: {ex.Message}");
                 }
             });
         }

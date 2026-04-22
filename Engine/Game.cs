@@ -58,6 +58,39 @@ namespace Engine
         }
 
         /// <summary>
+        /// Frame performance stopwatch
+        /// </summary>
+        private readonly Stopwatch frameSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to input operations.
+        /// </summary>
+        private readonly Stopwatch inputSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to update operations.
+        /// </summary>
+        private readonly Stopwatch updateSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to draw operations.
+        /// </summary>
+        private readonly Stopwatch drawSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to present operations.
+        /// </summary>
+        private readonly Stopwatch presentSW = new();
+        /// <summary>
+        /// Integrates the resource groups in the resource queue
+        /// </summary>
+        /// <returns>Returns the integrated resource groups</returns>
+        private readonly List<ILoadResourceGroup> integratedGroups = [];
+        /// <summary>
+        /// Resource request queue
+        /// </summary>
+        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
+        /// <summary>
+        /// Status collected event arguments
+        /// </summary>
+        private readonly GameStatusCollectedEventArgs statusArgs = new();
+        /// <summary>
         /// Scene list
         /// </summary>
         private readonly List<Scene> scenes = [];
@@ -73,10 +106,6 @@ namespace Engine
         /// Game paused
         /// </summary>
         private bool paused = false;
-        /// <summary>
-        /// Resource request queue
-        /// </summary>
-        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
         /// <summary>
         /// Resource integration running flag
         /// </summary>
@@ -131,7 +160,12 @@ namespace Engine
         {
             get
             {
-                return scenes.FindAll(s => s.Active).Count;
+                int count = 0;
+                for (int i = 0; i < scenes.Count; i++)
+                {
+                    if (scenes[i].Active) count++;
+                }
+                return count;
             }
         }
         /// <summary>
@@ -189,7 +223,7 @@ namespace Engine
         /// <summary>
         /// Game status
         /// </summary>
-        public readonly GameStatus GameStatus = new();
+        public GameStatus GameStatus { get; set; } = new();
 
         /// <summary>
         /// Game status collected event
@@ -611,7 +645,11 @@ namespace Engine
         /// </summary>
         public Scene GetActiveScene()
         {
-            return scenes.Find(s => s.Active);
+            for (int i = 0; i < scenes.Count; i++)
+            {
+                if (scenes[i].Active) return scenes[i];
+            }
+            return null;
         }
 
         /// <summary>
@@ -653,13 +691,9 @@ namespace Engine
                 gr.End();
             }
         }
-        /// <summary>
-        /// Integrates the resource groups in the resource queue
-        /// </summary>
-        /// <returns>Returns the integrated resource groups</returns>
-        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
+        private async Task<List<ILoadResourceGroup>> IntegrateResourcesAsync()
         {
-            List<ILoadResourceGroup> res = [];
+            integratedGroups.Clear();
 
             try
             {
@@ -677,7 +711,7 @@ namespace Engine
                     ResourceManager.CreateResources(loadResourceGroup.Id);
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
 
-                    res.Add(loadResourceGroup);
+                    integratedGroups.Add(loadResourceGroup);
                 }
             }
             finally
@@ -685,7 +719,7 @@ namespace Engine
                 integratingResources = false;
             }
 
-            return [.. res];
+            return integratedGroups;
         }
 
         /// <summary>
@@ -738,8 +772,7 @@ namespace Engine
 
             Logger.WriteInformation(this, $"##### Frame {FrameCounters.FrameCount} Start ####");
 
-            Stopwatch gSW = new();
-            gSW.Start();
+            frameSW.Restart();
 
             FrameInput();
 
@@ -749,13 +782,16 @@ namespace Engine
 
             FramePresent();
 
-            gSW.Stop();
-            GameStatus.Add("TOTAL", gSW);
+            frameSW.Stop();
+            GameStatus.Add("TOTAL", frameSW);
 
-            LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
-            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+            LogLevel level = EvaluateTime(frameSW.ElapsedMilliseconds);
+            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {frameSW.ElapsedMilliseconds} milliseconds ####");
 
-            Task.Run(IntegrateResources).ConfigureAwait(false);
+            if (!integratingResources && (!resourceRequests.IsEmpty || ResourceManager.HasRequests))
+            {
+                Task.Run(IntegrateResources).ConfigureAwait(false);
+            }
 
             if (ResourceManager.HasRequests)
             {
@@ -786,10 +822,10 @@ namespace Engine
         /// </summary>
         private void FrameInput()
         {
-            var iSW = Stopwatch.StartNew();
+            inputSW.Restart();
             Input.Update(GameTime);
-            iSW.Stop();
-            GameStatus.Add(nameof(FrameInput), iSW);
+            inputSW.Stop();
+            GameStatus.Add(nameof(FrameInput), inputSW);
         }
         /// <summary>
         /// Update scene state
@@ -797,10 +833,10 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            var uSW = Stopwatch.StartNew();
+            updateSW.Restart();
             scene.Update(GameTime);
-            uSW.Stop();
-            GameStatus.Add(nameof(FrameSceneUpdate), uSW);
+            updateSW.Stop();
+            GameStatus.Add(nameof(FrameSceneUpdate), updateSW);
         }
         /// <summary>
         /// Draw scene
@@ -808,20 +844,20 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            var dSW = Stopwatch.StartNew();
+            drawSW.Restart();
             scene.Draw(GameTime);
-            dSW.Stop();
-            GameStatus.Add(nameof(FrameSceneDraw), dSW);
+            drawSW.Stop();
+            GameStatus.Add(nameof(FrameSceneDraw), drawSW);
         }
         /// <summary>
         /// Present frame
         /// </summary>
         private void FramePresent()
         {
-            var pSW = Stopwatch.StartNew();
+            presentSW.Restart();
             Graphics.Present();
-            pSW.Stop();
-            GameStatus.Add(nameof(FramePresent), pSW);
+            presentSW.Stop();
+            GameStatus.Add(nameof(FramePresent), presentSW);
         }
         /// <summary>
         /// Refreshes frame counters
@@ -841,11 +877,8 @@ namespace Engine
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            GameStatusCollected?.Invoke(this, new()
-            {
-                Trace = GameStatus.Copy(),
-            });
-
+            statusArgs.Trace = GameStatus.Copy();
+            GameStatusCollected?.Invoke(this, statusArgs);
             CollectGameStatus = false;
         }
 

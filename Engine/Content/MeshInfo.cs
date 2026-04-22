@@ -36,11 +36,12 @@ namespace Engine.Content
             }
 
             //Process the vertex data
-            bool preferTextured = geometry.Textured;
             bool useNormals = loadNormalMaps && meshMaterial?.NormalMapTexture != null;
-            var vertexData = await geometry.ProcessVertexData(useNormals, constraint);
-            var vertices = vertexData.vertices;
-            var indices = vertexData.indices;
+            var (vertices, indices) = await geometry.ProcessVertexData(useNormals, constraint);
+            if (vertices?.Any() != true)
+            {
+                return null;
+            }
 
             IEnumerable<Weight> weights = [];
             IEnumerable<string> bones = [];
@@ -66,7 +67,7 @@ namespace Engine.Content
                 bones,
                 indices);
 
-            var nMesh = await TryCreateMesh(cMesh, preferTextured, useNormals, useSkinning);
+            var nMesh = await TryCreateMesh(cMesh, geometry.Textured, useNormals, useSkinning);
 
             //Material name
             string materialName = string.IsNullOrEmpty(geometry.Material) ? ContentData.NoMaterial : geometry.Material;
