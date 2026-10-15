@@ -51,7 +51,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"selinux24-github" /o:"selinux24-github" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"Selinux24_Skirmish" /o:"selinux24-github" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
           vstest.console.exe /Platform:x64 /Enablecodecoverage /Collect:"Code Coverage;Format=Xml" /ResultsDirectory:".\TestResults" .\Tests\EngineTests\bin\Release\net8.0-windows\EngineTests.dll .\Tests\Engine.PathFindingTests\bin\Release\net8.0\Engine.PathFindingTests.dll .\Tests\Engine.PhysicsTests\bin\Release\net8.0\Engine.PhysicsTests.dll .\Tests\Engine.ModularSceneryTests\bin\Release\net8.0\Engine.ModularSceneryTests.dll .\Tests\Engine.Content.FmtColladaTests\bin\Release\net8.0\Engine.Content.FmtColladaTests.dll
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
