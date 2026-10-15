@@ -102,31 +102,27 @@ namespace Engine
         /// <inheritdoc/>
         public async Task Process()
         {
-            List<LoadTaskResult> loadResult = [];
+            var taskArray = tasks as IReadOnlyList<Func<Task>> ?? tasks.ToList();
+            int totalTasks = taskArray.Count;
 
-            List<Task> taskList = new(tasks.Select(fnc => fnc.Invoke()));
+            List<LoadTaskResult> loadResult = new(totalTasks);
+            List<Task> taskList = new(totalTasks);
+            foreach (var fnc in taskArray)
+                taskList.Add(fnc.Invoke());
 
-            int totalTasks = taskList.Count;
             int currentTask = 0;
-            while (taskList.Count != 0)
+            // .NET 9+: elimina el bucle con WhenAny y la lista mutable
+            await foreach (var t in Task.WhenEach(taskList))
             {
-                var t = await Task.WhenAny(taskList);
-
-                taskList.Remove(t);
-
-                loadResult.Add(new()
+                loadResult.Add(new LoadTaskResult
                 {
                     Completed = t.Status == TaskStatus.RanToCompletion,
-                    Exception = t.Exception, // Store the excetion
+                    Exception = t.Exception,
                 });
-
-                progressCallback?.Invoke(new() { Id = Id, Progress = ++currentTask / (float)totalTasks });
+                progressCallback?.Invoke(new LoadResourceProgress { Id = Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            taskResult = new()
-            {
-                Results = loadResult,
-            };
+            taskResult = new LoadResourcesResult { Results = loadResult };
         }
         /// <inheritdoc/>
         public Task End()

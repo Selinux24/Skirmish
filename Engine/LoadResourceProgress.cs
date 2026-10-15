@@ -1,10 +1,9 @@
-﻿
-namespace Engine
+﻿namespace Engine
 {
     /// <summary>
     /// Load resource progress class
     /// </summary>
-    public class LoadResourceProgress
+    public struct LoadResourceProgress
     {
         /// <summary>
         /// Load identifier
