@@ -17,7 +17,7 @@ jobs:
         with:
           java-version: 21
           distribution: 'zulu' # Alternative distribution options are available.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Cache SonarQube Cloud packages
@@ -40,9 +40,9 @@ jobs:
           New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
       - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@ede762b2d0b5e2e987c6999a385f0ef35f0b6e68 # v1.0.0
       - name: Setup VSTest Path
-        uses: darenm/Setup-VSTest@v1
+        uses: darenm/Setup-VSTest@fbb574e0d74bc48f3fb4fe0900b953d5398d5c48 # v1.0.0
       - name: Restore NuGet packages
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: dotnet restore ${{env.SOLUTION_FILE_PATH}}
