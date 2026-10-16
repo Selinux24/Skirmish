@@ -1,7 +1,7 @@
-name: Build dev branch
+name: Build
 on:
   push:
-    branches: [ dev ]
+    branches: [ master, dev ]
 env:
   SOLUTION_FILE_PATH: .
   BUILD_CONFIGURATION: Release
