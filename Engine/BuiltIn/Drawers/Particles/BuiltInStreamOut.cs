@@ -72,7 +72,7 @@ namespace Engine.BuiltIn.Drawers.Particles
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerStreamOut));
+                return Marshal.SizeOf<PerStreamOut>();
             }
         }
 

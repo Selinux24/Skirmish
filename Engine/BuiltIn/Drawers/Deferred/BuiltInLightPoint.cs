@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Drawers.Deferred
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerLight));
+                return Marshal.SizeOf<PerLight>();
             }
         }
 

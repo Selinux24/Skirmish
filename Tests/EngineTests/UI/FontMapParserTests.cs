@@ -8,6 +8,7 @@ namespace EngineTests.UI
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class FontMapParserTests
     {
         public TestContext TestContext { get; set; }
@@ -76,15 +77,15 @@ namespace EngineTests.UI
 
             Assert.HasCount(1, result.Colors);
             Assert.HasCount(5, result.Colors[0]);
-            CollectionAssert.AreEquivalent(new Color4[] { Color.Red, Color.White, Color.White, Color.White, Color.White }, result.Colors[0]);
+            Assert.AreSequenceEqual([Color.Red, Color.White, Color.White, Color.White, Color.White], result.Colors[0], SequenceOrder.InAnyOrder);
             Assert.HasCount(1, result.ShadowColors);
             Assert.HasCount(5, result.ShadowColors[0]);
-            CollectionAssert.AreEquivalent(new Color4[] { Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent }, result.ShadowColors[0]);
+            Assert.AreSequenceEqual([Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent], result.ShadowColors[0], SequenceOrder.InAnyOrder);
 
             var part = result.GetPart(0);
             Assert.AreEqual("Hello", part.Text);
-            CollectionAssert.AreEquivalent(new Color4[] { Color.Red, Color.White, Color.White, Color.White, Color.White }, part.Colors);
-            CollectionAssert.AreEquivalent(new Color4[] { Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent }, part.ShadowColors);
+            Assert.AreSequenceEqual([Color.Red, Color.White, Color.White, Color.White, Color.White], part.Colors, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent], part.ShadowColors, SequenceOrder.InAnyOrder);
         }
     }
 }

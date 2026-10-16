@@ -8,6 +8,7 @@ namespace EngineTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class PickingRayTests
     {
         public TestContext TestContext { get; set; }

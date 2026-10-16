@@ -9,6 +9,7 @@ namespace EngineTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class TriangleTest
     {
         public TestContext TestContext { get; set; }

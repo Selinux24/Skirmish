@@ -33,7 +33,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(ReservedDataFormat));
+            return Marshal.SizeOf<ReservedDataFormat>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

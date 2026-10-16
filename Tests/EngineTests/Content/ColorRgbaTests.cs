@@ -9,6 +9,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class ColorRgbaTests
     {
         public TestContext TestContext { get; set; }

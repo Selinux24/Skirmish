@@ -10,6 +10,7 @@ namespace EngineTests.Common
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class IntersectionTests
     {
         public TestContext TestContext { get; set; }
@@ -281,8 +282,8 @@ namespace EngineTests.Common
 
             // A mesh is not a volume, box 1 is into the box 2, but no mesh 2 triangle intersects mesh 1 triangle
             Assert.IsFalse(res);
-            Assert.IsFalse(tris.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsEmpty(tris);
+            Assert.IsEmpty(segments);
         }
         [TestMethod()]
         public void MeshIntersectsMeshContainedTest()
@@ -294,8 +295,8 @@ namespace EngineTests.Common
 
             // A mesh is not a volume, box 1 contains box 3, but no mesh 3 triangle intersects mesh 1 triangle
             Assert.IsFalse(res);
-            Assert.IsFalse(tris.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsEmpty(tris);
+            Assert.IsEmpty(segments);
         }
         [TestMethod()]
         public void MeshIntersectsMeshIntersectedPerfectFaceTest()
@@ -307,8 +308,8 @@ namespace EngineTests.Common
 
             // It's a perfect face intersection between box 1 and box 4 meshes
             Assert.IsTrue(res);
-            Assert.IsTrue(tris.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsNotEmpty(tris);
+            Assert.IsEmpty(segments);
         }
         [TestMethod()]
         public void MeshIntersectsMeshNotIntersectedTest()
@@ -319,8 +320,8 @@ namespace EngineTests.Common
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
             Assert.IsFalse(res);
-            Assert.IsFalse(tris.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsEmpty(tris);
+            Assert.IsEmpty(segments);
         }
         [TestMethod()]
         public void MeshIntersectsMeshIntersectedTest()
@@ -331,8 +332,8 @@ namespace EngineTests.Common
             var res = Intersection.MeshIntersectsMesh(mesh1, mesh2, out var tris, out var segments);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(tris.Any());
-            Assert.IsTrue(segments.Any());
+            Assert.IsNotEmpty(tris);
+            Assert.IsNotEmpty(segments);
         }
 
         [TestMethod()]
@@ -504,9 +505,9 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(p.Any());
-            Assert.IsFalse(p.Any(r => r.Distance == float.MaxValue));
-            Assert.IsFalse(p.Any(r => r.Position == Vector3.Zero));
+            Assert.IsNotEmpty(p);
+            Assert.DoesNotContain(r => r.Distance == float.MaxValue, p);
+            Assert.DoesNotContain(r => r.Position == Vector3.Zero, p);
         }
         [TestMethod()]
         public void SphereIntersectsMeshAllContainedTest()
@@ -516,9 +517,9 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(p.Any());
-            Assert.IsFalse(p.Any(r => r.Distance == float.MaxValue));
-            Assert.IsFalse(p.Any(r => r.Position == Vector3.Zero));
+            Assert.IsNotEmpty(p);
+            Assert.DoesNotContain(r => r.Distance == float.MaxValue, p);
+            Assert.DoesNotContain(r => r.Position == Vector3.Zero, p);
         }
         [TestMethod()]
         public void SphereIntersectsMeshAllIntersectedTest()
@@ -528,9 +529,9 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(p.Any());
-            Assert.IsFalse(p.Any(r => r.Distance == float.MaxValue));
-            Assert.IsFalse(p.Any(r => r.Position == Vector3.Zero));
+            Assert.IsNotEmpty(p);
+            Assert.DoesNotContain(r => r.Distance == float.MaxValue, p);
+            Assert.DoesNotContain(r => r.Position == Vector3.Zero, p);
         }
         [TestMethod()]
         public void SphereIntersectsMeshAllNotIntersectedTest()
@@ -540,7 +541,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsMeshAll(sph1, mesh, out var p);
 
             Assert.IsFalse(res);
-            Assert.IsFalse(p.Any());
+            Assert.IsEmpty(p);
         }
 
         [TestMethod()]
@@ -1531,7 +1532,7 @@ namespace EngineTests.Common
 
             // A mesh is not a volume. Tri 1 is into the box 2, but not intersections were possible
             Assert.IsFalse(res);
-            Assert.IsFalse(triangles.Any());
+            Assert.IsEmpty(triangles);
         }
         [TestMethod()]
         public void TriangleIntersectsMeshIntersectedTest()
@@ -1541,7 +1542,7 @@ namespace EngineTests.Common
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(triangles.Any());
+            Assert.IsNotEmpty(triangles);
         }
         [TestMethod()]
         public void TriangleIntersectsMeshNotIntersectedTest()
@@ -1551,7 +1552,7 @@ namespace EngineTests.Common
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles);
 
             Assert.IsFalse(res);
-            Assert.IsFalse(triangles.Any());
+            Assert.IsEmpty(triangles);
         }
 
         [TestMethod()]
@@ -1563,8 +1564,8 @@ namespace EngineTests.Common
 
             // A mesh is not a volume. Tri 1 is into the box 2, but not intersections were possible
             Assert.IsFalse(res);
-            Assert.IsFalse(triangles.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsEmpty(triangles);
+            Assert.IsEmpty(segments);
         }
         [TestMethod()]
         public void TriangleIntersectsMeshResultIntersectedTest()
@@ -1574,8 +1575,8 @@ namespace EngineTests.Common
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(triangles.Any());
-            Assert.IsTrue(segments.Any());
+            Assert.IsNotEmpty(triangles);
+            Assert.IsNotEmpty(segments);
         }
         [TestMethod()]
         public void TriangleIntersectsMeshResultNotIntersectedTest()
@@ -1585,8 +1586,8 @@ namespace EngineTests.Common
             var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
 
             Assert.IsFalse(res);
-            Assert.IsFalse(triangles.Any());
-            Assert.IsFalse(segments.Any());
+            Assert.IsEmpty(triangles);
+            Assert.IsEmpty(segments);
         }
 
         [TestMethod()]

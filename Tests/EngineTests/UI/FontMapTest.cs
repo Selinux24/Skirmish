@@ -11,6 +11,7 @@ namespace EngineTests.UI
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class FontMapTest
     {
         public TestContext TestContext { get; set; }

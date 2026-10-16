@@ -33,7 +33,7 @@ namespace Engine.BuiltIn.Drawers.Cubemap
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerCube));
+                return Marshal.SizeOf<PerCube>();
             }
         }
 

@@ -126,7 +126,7 @@ namespace Engine
         public EngineBuffer CreateConstantBuffer<T>(string name)
             where T : struct, IBufferData
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T));
+            int sizeInBytes = Marshal.SizeOf<T>();
             sizeInBytes = sizeInBytes / 16 * 16;
 
             ResourceUsage usage = ResourceUsage.Default;
@@ -189,7 +189,7 @@ namespace Engine
         /// <returns>Returns created buffer</returns>
         public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+            int sizeInBytes = Marshal.SizeOf<T>() * length;
             if (sizeInBytes == 0)
             {
                 return null;
@@ -229,7 +229,7 @@ namespace Engine
                 return null;
             }
 
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+            int sizeInBytes = Marshal.SizeOf<T>() * length;
 
             FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 

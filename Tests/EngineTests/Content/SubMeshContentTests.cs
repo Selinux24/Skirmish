@@ -11,6 +11,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class SubMeshContentTests
     {
         public TestContext TestContext { get; set; }

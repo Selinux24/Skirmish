@@ -43,9 +43,7 @@ namespace Engine.BuiltIn.Format
 
             if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
 
-            return vertices
-                .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = color })
-                .ToArray();
+            return [.. vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = color })];
         }
         /// <summary>
         /// Generates a vertex array from specified components
@@ -64,9 +62,7 @@ namespace Engine.BuiltIn.Format
             if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
-            return vertices
-                .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = colors.ElementAt(index) })
-                .ToArray();
+            return [.. vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = colors.ElementAt(index) })];
         }
 
         /// <summary>
@@ -110,7 +106,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexFont));
+            return Marshal.SizeOf<VertexFont>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

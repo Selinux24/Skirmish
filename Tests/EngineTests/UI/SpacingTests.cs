@@ -6,6 +6,7 @@ namespace EngineTests.UI
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class SpacingTests
     {
         [TestMethod]

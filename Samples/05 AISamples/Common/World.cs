@@ -90,13 +90,13 @@ namespace AISamples.Common
                 Graph = Graph.FromGraph(world.graph),
                 Height = world.height,
 
-                Envelopes = world.envelopes.Select(Envelope.FromEnvelope).ToArray(),
-                RoadEnvelopes = world.roadEnvelopes.Select(Envelope.FromEnvelope).ToArray(),
-                RoadBorders = world.roadBorders.Select(Segment2.FromSegment).ToArray(),
-                Buildings = world.buildings.Select(Building.FromBuilding).ToArray(),
-                Trees = world.trees.Select(Tree.FromTree).ToArray(),
-                LaneGuides = world.GetLaneGuides().Select(Segment2.FromSegment).ToArray(),
-                Markings = world.markings.Select(m => m.FromMarking()).ToArray(),
+                Envelopes = [.. world.envelopes.Select(Envelope.FromEnvelope)],
+                RoadEnvelopes = [.. world.roadEnvelopes.Select(Envelope.FromEnvelope)],
+                RoadBorders = [.. world.roadBorders.Select(Segment2.FromSegment)],
+                Buildings = [.. world.buildings.Select(Building.FromBuilding)],
+                Trees = [.. world.trees.Select(Tree.FromTree)],
+                LaneGuides = [.. world.GetLaneGuides().Select(Segment2.FromSegment)],
+                Markings = [.. world.markings.Select(m => m.FromMarking())],
 
                 Version = world.Version,
             };
@@ -163,7 +163,7 @@ namespace AISamples.Common
             roadEnvelopes.AddRange(envelopes.Select(e => e.Scale(1.2f)));
 
             roadBorders.Clear();
-            roadBorders.AddRange(Polygon.Union(envelopes.Select(e => e.GetPolygon()).ToArray()));
+            roadBorders.AddRange(Polygon.Union([.. envelopes.Select(e => e.GetPolygon())]));
         }
         private void GenerateBuildings(Segment2[] segments)
         {
@@ -175,7 +175,7 @@ namespace AISamples.Common
             }
 
             List<Segment2> buildingGuides = [];
-            buildingGuides.AddRange(Polygon.Union(buildingEnvelopes.Select(e => e.GetPolygon()).ToArray()));
+            buildingGuides.AddRange(Polygon.Union([.. buildingEnvelopes.Select(e => e.GetPolygon())]));
             buildingGuides.RemoveAll(e => e.Length < buildingMinLenth);
 
             List<Segment2> buildingSupports = [];
@@ -254,15 +254,7 @@ namespace AISamples.Common
                 var y = rnd.NextFloat(areaSize.Top, areaSize.Bottom);
                 var p = new Vector2(x, y);
 
-                bool keep = true;
-                foreach (var poly in illegalPolys)
-                {
-                    if (poly.ContainsPoint(p) || poly.DistanceToPoint(p) < treeRadius)
-                    {
-                        keep = false;
-                        break;
-                    }
-                }
+                bool keep = illegalPolys.Any(poly => poly.ContainsPoint(p) || poly.DistanceToPoint(p) < treeRadius);
 
                 if (keep)
                 {
@@ -297,7 +289,7 @@ namespace AISamples.Common
                 tmpEnvelopes[i] = new(segments[i], RoadWidth * 0.5f, roadRoundness);
             }
 
-            laneGuides.AddRange(Polygon.Union(tmpEnvelopes.Select(e => e.GetPolygon()).ToArray()));
+            laneGuides.AddRange(Polygon.Union([.. tmpEnvelopes.Select(e => e.GetPolygon())]));
         }
         private RectangleF GetWorldSize()
         {

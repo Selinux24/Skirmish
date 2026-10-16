@@ -38,7 +38,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private GeometryColorDrawer<Triangle> itemTris = null;
         private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.25f);
 
-        private IControllerPath soldierPath;
+        private SegmentPath soldierPath;
         private readonly float soldierPathArrival = 5.333f;
         private float soldierPathStartTime;
         private float globalTimeDelta = 1f;

@@ -13,6 +13,7 @@ namespace EngineTests.Collections.Generic
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class PickingQuadTreeTests
     {
         public TestContext TestContext { get; set; }
@@ -99,10 +100,10 @@ namespace EngineTests.Collections.Generic
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[3].Children.ToArray());
+            Assert.AreSequenceEqual([], children[0].Children.ToArray());
+            Assert.AreSequenceEqual([], children[1].Children.ToArray());
+            Assert.AreSequenceEqual([], children[2].Children.ToArray());
+            Assert.AreSequenceEqual([], children[3].Children.ToArray());
         }
 
         [TestMethod]
@@ -324,16 +325,16 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(2);
             PickingQuadTree<Triangle> q = new([], options);
             var boxes = q.GetBoundingBoxes();
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(1);
-            Assert.AreEqual(4, boxes.Count());
+            Assert.HasCount(4, boxes);
 
             boxes = q.GetBoundingBoxes(2);
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(-1);
-            Assert.AreEqual(0, boxes.Count());
+            Assert.IsEmpty(boxes);
         }
 
         [TestMethod]
@@ -352,7 +353,7 @@ namespace EngineTests.Collections.Generic
                 .. q.Root.Children.ToArray()[3].Children
             ];
 
-            CollectionAssert.AreEquivalent(lNodes, nodes);
+            Assert.AreSequenceEqual(lNodes, nodes, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -413,27 +414,27 @@ namespace EngineTests.Collections.Generic
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(Array.Empty<PickingQuadTreeNode<Triangle>>(), ln.ToArray());
+            Assert.AreSequenceEqual([], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+            Assert.AreSequenceEqual([.. q.GetLeafNodes()], [.. ln], SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -445,10 +446,10 @@ namespace EngineTests.Collections.Generic
             var nodes = q.GetLeafNodes().ToArray();
             Assert.HasCount(4, nodes);
 
-            Assert.AreEqual(18, nodes[0].Items.Count());
-            Assert.AreEqual(12, nodes[1].Items.Count());
-            Assert.AreEqual(12, nodes[2].Items.Count());
-            Assert.AreEqual(8, nodes[3].Items.Count());
+            Assert.HasCount(18, nodes[0].Items);
+            Assert.HasCount(12, nodes[1].Items);
+            Assert.HasCount(12, nodes[2].Items);
+            Assert.HasCount(8, nodes[3].Items);
 
             Triangle[] expected0 =
             [
@@ -474,10 +475,10 @@ namespace EngineTests.Collections.Generic
                 ..mesh.Skip(24).Take(8)
             ];
 
-            CollectionAssert.AreEquivalent(expected0, nodes[0].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected1, nodes[1].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected2, nodes[2].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected3, nodes[3].Items.ToArray());
+            Assert.AreSequenceEqual(expected0, [.. nodes[0].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected1, [.. nodes[1].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected2, [.. nodes[2].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected3, [.. nodes[3].Items], SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -528,7 +529,7 @@ namespace EngineTests.Collections.Generic
 
             bool picked = q.PickAll(t1PickingRay, out IEnumerable<PickingResult<Triangle>> tlist);
             Assert.IsTrue(picked);
-            Assert.AreEqual(2, tlist.Count());
+            Assert.HasCount(2, tlist);
 
             var t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
@@ -544,12 +545,12 @@ namespace EngineTests.Collections.Generic
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
             picked = q.PickAll(t1Short, out tlist);
             Assert.IsFalse(picked);
-            CollectionAssert.AreEquivalent(Array.Empty<IEnumerable<PickingResult<Triangle>>>(), tlist.ToArray());
+            Assert.AreSequenceEqual([], tlist.ToArray(), SequenceOrder.InAnyOrder);
 
             //Middle pick
             t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance1 * 0.5f);
             picked = q.PickAll(t1Short, out tlist);
-            Assert.AreEqual(1, tlist.Count());
+            Assert.HasCount(1, tlist);
             Assert.IsTrue(picked);
 
             t0 = tlist.ElementAt(0);

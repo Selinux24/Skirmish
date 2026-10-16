@@ -12,6 +12,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class ContentDataTest
     {
         public TestContext TestContext { get; set; }

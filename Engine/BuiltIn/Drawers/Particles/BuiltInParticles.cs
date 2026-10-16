@@ -115,7 +115,7 @@ namespace Engine.BuiltIn.Drawers.Particles
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerEmitter));
+                return Marshal.SizeOf<PerEmitter>();
             }
         }
 

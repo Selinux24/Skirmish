@@ -9,6 +9,7 @@ namespace EngineTests.Common
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class SharpDXExtensionsTests
     {
         public TestContext TestContext { get; set; }
@@ -28,12 +29,12 @@ namespace EngineTests.Common
             var aabbCorners = aabb.GetVertices().ToArray();
             var obbCorners = obb.GetVertices().ToArray();
 
-            CollectionAssert.AreEqual(aabbCorners, obbCorners);
+            Assert.AreSequenceEqual(aabbCorners, obbCorners);
 
             var aabbFaces = aabb.GetFaces().ToArray();
             var obbFaces = obb.GetFaces().ToArray();
 
-            CollectionAssert.AreEqual(aabbFaces, obbFaces);
+            Assert.AreSequenceEqual(aabbFaces, obbFaces);
         }
     }
 }

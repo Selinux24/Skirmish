@@ -9,6 +9,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class RotationQTests
     {
         public TestContext TestContext { get; set; }

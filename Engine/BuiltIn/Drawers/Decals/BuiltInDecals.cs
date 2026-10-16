@@ -47,7 +47,7 @@ namespace Engine.BuiltIn.Drawers.Decals
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerDecal));
+                return Marshal.SizeOf<PerDecal>();
             }
         }
 

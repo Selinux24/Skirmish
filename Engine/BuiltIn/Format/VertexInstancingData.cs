@@ -94,7 +94,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexInstancingData));
+            return Marshal.SizeOf<VertexInstancingData>();
         }
     }
 }

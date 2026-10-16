@@ -10,6 +10,7 @@ namespace EngineTests.Collections
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class QuadTreeTests
     {
         public TestContext TestContext { get; set; }
@@ -40,10 +41,10 @@ namespace EngineTests.Collections
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode>(), children[3].Children.ToArray());
+            Assert.AreSequenceEqual([], children[0].Children.ToArray());
+            Assert.AreSequenceEqual([], children[1].Children.ToArray());
+            Assert.AreSequenceEqual([], children[2].Children.ToArray());
+            Assert.AreSequenceEqual([], children[3].Children.ToArray());
         }
 
         [TestMethod]
@@ -278,16 +279,16 @@ namespace EngineTests.Collections
 
             QuadTree q = new(bbox, options);
             var boxes = q.GetBoundingBoxes();
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(1);
-            Assert.AreEqual(4, boxes.Count());
+            Assert.HasCount(4, boxes);
 
             boxes = q.GetBoundingBoxes(2);
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(-1);
-            Assert.AreEqual(0, boxes.Count());
+            Assert.IsEmpty(boxes);
         }
 
         [TestMethod]
@@ -308,7 +309,7 @@ namespace EngineTests.Collections
                 .. q.Root.Children.ToArray()[3].Children
             ];
 
-            CollectionAssert.AreEquivalent(lNodes, nodes);
+            Assert.AreSequenceEqual(lNodes, nodes, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -377,27 +378,27 @@ namespace EngineTests.Collections
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(Array.Empty<QuadTreeNode>(), ln.ToArray());
+            Assert.AreSequenceEqual([], ln.ToArray(), SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.TopLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.BottomLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.TopRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode[] { q.Root.BottomRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+            Assert.AreSequenceEqual([.. q.GetLeafNodes()], [.. ln], SequenceOrder.InAnyOrder);
         }
     }
 }

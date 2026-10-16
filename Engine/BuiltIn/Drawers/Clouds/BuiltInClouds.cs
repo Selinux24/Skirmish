@@ -78,7 +78,7 @@ namespace Engine.BuiltIn.Drawers.Clouds
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerCloud));
+                return Marshal.SizeOf<PerCloud>();
             }
         }
 

@@ -290,7 +290,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T vs = vertexShaders.OfType<T>().FirstOrDefault();
@@ -299,7 +299,7 @@ namespace Engine.BuiltIn.Drawers
                 return vs;
             }
 
-            vs = (T)Activator.CreateInstance(typeof(T));
+            vs = Activator.CreateInstance<T>();
             vertexShaders.Add(vs);
 
             return vs;
@@ -313,7 +313,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T hs = hullShaders.OfType<T>().FirstOrDefault();
@@ -322,7 +322,7 @@ namespace Engine.BuiltIn.Drawers
                 return hs;
             }
 
-            hs = (T)Activator.CreateInstance(typeof(T));
+            hs = Activator.CreateInstance<T>();
             hullShaders.Add(hs);
 
             return hs;
@@ -336,7 +336,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T ds = domainShaders.OfType<T>().FirstOrDefault();
@@ -345,7 +345,7 @@ namespace Engine.BuiltIn.Drawers
                 return ds;
             }
 
-            ds = (T)Activator.CreateInstance(typeof(T));
+            ds = Activator.CreateInstance<T>();
             domainShaders.Add(ds);
 
             return ds;
@@ -359,7 +359,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T gs = geometryShaders.OfType<T>().FirstOrDefault();
@@ -368,7 +368,7 @@ namespace Engine.BuiltIn.Drawers
                 return gs;
             }
 
-            gs = (T)Activator.CreateInstance(typeof(T));
+            gs = Activator.CreateInstance<T>();
             geometryShaders.Add(gs);
 
             return gs;
@@ -382,7 +382,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T ps = pixelShaders.OfType<T>().FirstOrDefault();
@@ -391,7 +391,7 @@ namespace Engine.BuiltIn.Drawers
                 return ps;
             }
 
-            ps = (T)Activator.CreateInstance(typeof(T));
+            ps = Activator.CreateInstance<T>();
             pixelShaders.Add(ps);
 
             return ps;
@@ -405,7 +405,7 @@ namespace Engine.BuiltIn.Drawers
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T));
+                return Activator.CreateInstance<T>();
             }
 
             T cs = computeShaders.OfType<T>().FirstOrDefault();
@@ -414,7 +414,7 @@ namespace Engine.BuiltIn.Drawers
                 return cs;
             }
 
-            cs = (T)Activator.CreateInstance(typeof(T));
+            cs = Activator.CreateInstance<T>();
             computeShaders.Add(cs);
 
             return cs;

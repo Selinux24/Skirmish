@@ -478,10 +478,7 @@ ESC - EXIT";
 
             foreach (var button in editorButtons)
             {
-                if (button != null)
-                {
-                    button.Visible = toolsVisible;
-                }
+                button?.Visible = toolsVisible;
             }
 
             UpdateToolsLayout();

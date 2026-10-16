@@ -79,11 +79,11 @@ namespace Engine.Common
         public readonly int GetStride()
         {
 #if DEBUG
-            int size = Marshal.SizeOf(typeof(BufferMaterials));
+            int size = Marshal.SizeOf<BufferMaterials>();
             if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf(typeof(BufferMaterials));
+            return Marshal.SizeOf<BufferMaterials>();
 #endif
         }
     };

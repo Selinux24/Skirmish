@@ -8,6 +8,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class Matrix4x4Tests
     {
         public TestContext TestContext { get; set; }

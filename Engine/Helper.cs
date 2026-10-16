@@ -71,9 +71,9 @@ namespace Engine
         /// <returns>Gets the generated struct</returns>
         public static T ToStructure<T>(this byte[] bytes, int start, int count) where T : struct
         {
-            byte[] temp = bytes.Skip(start).Take(count).ToArray();
+            byte[] temp = [.. bytes.Skip(start).Take(count)];
             GCHandle handle = GCHandle.Alloc(temp, GCHandleType.Pinned);
-            T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+            T stuff = Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
             handle.Free();
             return stuff;
         }
@@ -653,7 +653,7 @@ namespace Engine
                 return [.. array];
             }
 
-            return array.Take(count).ToArray();
+            return [.. array.Take(count)];
         }
 
         #endregion

@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Data stride
         /// </summary>
-        private readonly int stride = Marshal.SizeOf(typeof(uint));
+        private readonly int stride = Marshal.SizeOf<uint>();
         /// <summary>
         /// Descriptor list
         /// </summary>

@@ -59,7 +59,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerCastingLight));
+            return Marshal.SizeOf<PerCastingLight>();
         }
     }
 
@@ -86,7 +86,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSingle));
+            return Marshal.SizeOf<PerMeshSingle>();
         }
     }
 
@@ -132,7 +132,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSkinned));
+            return Marshal.SizeOf<PerMeshSkinned>();
         }
     }
 
@@ -159,7 +159,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMaterialTexture));
+            return Marshal.SizeOf<PerMaterialTexture>();
         }
     }
 }

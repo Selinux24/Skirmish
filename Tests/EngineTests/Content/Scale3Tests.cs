@@ -9,6 +9,7 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class Scale3Tests
     {
         public TestContext TestContext { get; set; }

@@ -11,6 +11,7 @@ namespace EngineTests.Collections.Generic
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class QuadTreeTests
     {
         public TestContext TestContext { get; set; }
@@ -78,10 +79,10 @@ namespace EngineTests.Collections.Generic
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<QuadTreeNode<int>>(), children[3].Children.ToArray());
+            Assert.AreSequenceEqual([], children[0].Children.ToArray(), SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([], children[1].Children.ToArray(), SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([], children[2].Children.ToArray(), SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([], children[3].Children.ToArray(), SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -294,16 +295,16 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(2);
             QuadTree<int> q = new(new(), [], options);
             var boxes = q.GetBoundingBoxes();
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(1);
-            Assert.AreEqual(4, boxes.Count());
+            Assert.HasCount(4, boxes);
 
             boxes = q.GetBoundingBoxes(2);
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(-1);
-            Assert.AreEqual(0, boxes.Count());
+            Assert.IsEmpty(boxes);
         }
 
         [TestMethod]
@@ -322,7 +323,7 @@ namespace EngineTests.Collections.Generic
                 .. q.Root.Children.ToArray()[3].Children
             ];
 
-            CollectionAssert.AreEquivalent(lNodes, nodes);
+            Assert.AreSequenceEqual(lNodes, nodes, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -383,27 +384,27 @@ namespace EngineTests.Collections.Generic
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(Array.Empty<QuadTreeNode<int>>(), ln.ToArray());
+            Assert.AreSequenceEqual([], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.TopLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.BottomLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.TopRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new QuadTreeNode<int>[] { q.Root.BottomRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+            Assert.AreSequenceEqual([.. q.GetLeafNodes()], [.. ln], SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
@@ -415,15 +416,15 @@ namespace EngineTests.Collections.Generic
             var nodes = q.GetLeafNodes().ToArray();
             Assert.HasCount(4, nodes);
 
-            Assert.AreEqual(2, nodes[0].Items.Count());
-            Assert.AreEqual(2, nodes[1].Items.Count());
-            Assert.AreEqual(2, nodes[2].Items.Count());
-            Assert.AreEqual(2, nodes[3].Items.Count());
+            Assert.HasCount(2, nodes[0].Items);
+            Assert.HasCount(2, nodes[1].Items);
+            Assert.HasCount(2, nodes[2].Items);
+            Assert.HasCount(2, nodes[3].Items);
 
-            CollectionAssert.AreEquivalent(expectedArray0, nodes[0].Items.ToArray());
-            CollectionAssert.AreEquivalent(expectedArray1, nodes[1].Items.ToArray());
-            CollectionAssert.AreEquivalent(expectedArray2, nodes[2].Items.ToArray());
-            CollectionAssert.AreEquivalent(expectedArray3, nodes[3].Items.ToArray());
+            Assert.AreSequenceEqual(expectedArray0, [.. nodes[0].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expectedArray1, [.. nodes[1].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expectedArray2, [.. nodes[2].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expectedArray3, [.. nodes[3].Items], SequenceOrder.InAnyOrder);
         }
     }
 }

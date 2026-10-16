@@ -69,7 +69,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexDecal));
+            return Marshal.SizeOf<VertexDecal>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

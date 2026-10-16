@@ -92,7 +92,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerObject));
+                return Marshal.SizeOf<PerObject>();
             }
         }
 

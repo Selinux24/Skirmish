@@ -58,15 +58,7 @@ namespace AISamples.Common
         }
         public bool ContainsPoint(Vector2 point)
         {
-            foreach (var p in points)
-            {
-                if (p == point)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return points.Contains(point);
         }
 
         public int GetPointCount() => points.Count;
@@ -101,15 +93,7 @@ namespace AISamples.Common
         }
         public bool ContainsSegment(Segment2 segment)
         {
-            foreach (var s in segments)
-            {
-                if (s == segment)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return segments.Contains(segment);
         }
 
         public int GetSegmentCount() => segments.Count;

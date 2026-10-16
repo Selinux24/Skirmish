@@ -10,6 +10,7 @@ namespace EngineTests.Collections.Generic
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class OcTreeTests
     {
         public TestContext TestContext { get; set; }
@@ -84,34 +85,34 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(3, count);
 
             var res = q.Query((IntersectionVolumeAxisAlignedBox)bbox);
-            Assert.AreEqual(3, res.Count());
+            Assert.HasCount(3, res);
 
             res = q.Query(b1);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p1, res.ElementAt(0));
 
             res = q.Query(b2);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p2, res.ElementAt(0));
 
             res = q.Query(b3);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p3, res.ElementAt(0));
 
             var d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p2]);
             res = q.Query(d);
-            Assert.AreEqual(2, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p2 }, res.ToArray());
+            Assert.HasCount(2, res);
+            Assert.AreSequenceEqual([p1, p2], res, SequenceOrder.InAnyOrder);
 
             d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p3]);
             res = q.Query(d);
-            Assert.AreEqual(2, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p3 }, res.ToArray());
+            Assert.HasCount(2, res);
+            Assert.AreSequenceEqual([p1, p3], res, SequenceOrder.InAnyOrder);
 
             d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p2, p3]);
             res = q.Query(d);
-            Assert.AreEqual(3, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p2, p3 }, res.ToArray());
+            Assert.HasCount(3, res);
+            Assert.AreSequenceEqual([p1, p2, p3], res, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]

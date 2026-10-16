@@ -5,12 +5,12 @@ using Moq;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace EngineTests.Common
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class IntersectionHelperTests
     {
         public TestContext TestContext { get; set; }
@@ -335,10 +335,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectableMeshComparerTest()
         {
-            CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh1);
-            CollectionAssert.AreEqual((Triangle[])mesh1, tmesh1);
-            CollectionAssert.AreNotEqual(tmesh1, (Triangle[])mesh2);
-            CollectionAssert.AreNotEqual((Triangle[])mesh1, tmesh2);
+            Assert.AreSequenceEqual(tmesh1, (Triangle[])mesh1);
+            Assert.AreSequenceEqual((Triangle[])mesh1, tmesh1);
+            Assert.AreNotSequenceEqual(tmesh1, (Triangle[])mesh2);
+            Assert.AreNotSequenceEqual((Triangle[])mesh1, tmesh2);
 
             Assert.AreEqual((IntersectionVolumeMesh)tmesh1, mesh1);
             Assert.AreEqual(mesh1, (IntersectionVolumeMesh)tmesh1);
@@ -383,7 +383,7 @@ namespace EngineTests.Common
         {
             var mesh = new IntersectionVolumeMesh(tmesh1);
 
-            CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh);
+            Assert.AreSequenceEqual(tmesh1, (Triangle[])mesh);
         }
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()

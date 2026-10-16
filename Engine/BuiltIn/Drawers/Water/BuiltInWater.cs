@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.Drawers.Water
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerWater));
+                return Marshal.SizeOf<PerWater>();
             }
         }
 

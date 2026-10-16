@@ -58,7 +58,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexBillboard));
+            return Marshal.SizeOf<VertexBillboard>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

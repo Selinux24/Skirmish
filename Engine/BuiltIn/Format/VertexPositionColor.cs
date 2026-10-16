@@ -126,7 +126,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexPositionColor));
+            return Marshal.SizeOf<VertexPositionColor>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

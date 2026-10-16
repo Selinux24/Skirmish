@@ -137,7 +137,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexPositionNormalTextureTangent));
+            return Marshal.SizeOf<VertexPositionNormalTextureTangent>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

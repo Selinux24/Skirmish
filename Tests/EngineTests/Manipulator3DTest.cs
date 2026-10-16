@@ -9,6 +9,7 @@ namespace EngineTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class Manipulator3DTest
     {
         public TestContext TestContext { get; set; }

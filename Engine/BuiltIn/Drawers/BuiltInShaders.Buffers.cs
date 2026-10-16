@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(Global));
+                return Marshal.SizeOf<Global>();
             }
         }
 
@@ -145,7 +145,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerFrame));
+                return Marshal.SizeOf<PerFrame>();
             }
         }
 
@@ -185,7 +185,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightHemispheric));
+                return Marshal.SizeOf<BufferLightHemispheric>();
             }
         }
         /// <summary>
@@ -217,7 +217,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSHemispheric));
+                return Marshal.SizeOf<PSHemispheric>();
             }
         }
 
@@ -331,7 +331,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightDirectional));
+                return Marshal.SizeOf<BufferLightDirectional>();
             }
         }
         /// <summary>
@@ -374,7 +374,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSDirectional));
+                return Marshal.SizeOf<PSDirectional>();
             }
         }
 
@@ -506,7 +506,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightSpot));
+                return Marshal.SizeOf<BufferLightSpot>();
             }
         }
         /// <summary>
@@ -549,7 +549,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSSpots));
+                return Marshal.SizeOf<PSSpots>();
             }
         }
 
@@ -665,7 +665,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightPoint));
+                return Marshal.SizeOf<BufferLightPoint>();
             }
         }
         /// <summary>
@@ -708,7 +708,7 @@ namespace Engine.BuiltIn.Drawers
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSPoints));
+                return Marshal.SizeOf<PSPoints>();
             }
         }
     }

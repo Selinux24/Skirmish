@@ -60,7 +60,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerFont));
+                return Marshal.SizeOf<PerFont>();
             }
         }
         /// <summary>
@@ -86,7 +86,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerText));
+                return Marshal.SizeOf<PerText>();
             }
         }
 

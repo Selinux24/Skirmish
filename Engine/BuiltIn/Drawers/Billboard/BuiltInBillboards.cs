@@ -68,7 +68,7 @@ namespace Engine.BuiltIn.Drawers.Billboard
             /// <inheritdoc/>
             public readonly int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerBillboard));
+                return Marshal.SizeOf<PerBillboard>();
             }
         }
 

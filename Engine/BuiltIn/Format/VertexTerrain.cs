@@ -111,7 +111,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexTerrain));
+            return Marshal.SizeOf<VertexTerrain>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

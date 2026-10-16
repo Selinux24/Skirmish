@@ -150,7 +150,7 @@ namespace Engine.BuiltIn.Format
         /// <inheritdoc/>
         public readonly int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexSkinnedPosition));
+            return Marshal.SizeOf<VertexSkinnedPosition>();
         }
         /// <inheritdoc/>
         public readonly EngineInputElement[] GetInput(int slot)

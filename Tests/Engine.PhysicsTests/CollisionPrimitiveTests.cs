@@ -146,16 +146,16 @@ namespace Engine.PhysicsTests
             var obb = new OrientedBoundingBox(distinctPoints);
 
             var soup = new ConvexMeshCollider(allTris);
-            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
+            Assert.AreSequenceEqual([.. soup.GetTriangles(true)], distinctTris, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([.. soup.GetVertices(true)], distinctPoints, SequenceOrder.InAnyOrder);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             soup.Attach(rbody);
-            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
+            Assert.AreSequenceEqual([.. soup.GetTriangles(true)], distinctTris, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([.. soup.GetVertices(true)], distinctPoints, SequenceOrder.InAnyOrder);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
@@ -170,8 +170,8 @@ namespace Engine.PhysicsTests
             box = box.SetTransform(trn);
             obb = obb.SetTransform(trn);
             soup.Attach(rbody);
-            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
+            Assert.AreSequenceEqual([.. soup.GetTriangles(true)], distinctTris, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([.. soup.GetVertices(true)], distinctPoints, SequenceOrder.InAnyOrder);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
